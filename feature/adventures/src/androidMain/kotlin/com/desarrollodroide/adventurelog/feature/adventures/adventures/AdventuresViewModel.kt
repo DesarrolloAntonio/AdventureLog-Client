@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.login.login
+package com.desarrollodroide.adventurelog.feature.adventures.adventures
 
 import androidx.lifecycle.ViewModel
 

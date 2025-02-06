@@ -17,7 +17,12 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
+        }
+        androidMain.dependencies {
             implementation(libs.coil.compose)
         }
     }
+}
+dependencies {
+    debugImplementation(libs.androidx.ui.tooling)
 }

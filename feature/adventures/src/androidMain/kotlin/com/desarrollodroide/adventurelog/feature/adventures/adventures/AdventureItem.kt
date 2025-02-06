@@ -1,0 +1,239 @@
+package com.desarrollodroide.adventurelog.feature.adventures.adventures
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.rememberAsyncImagePainter
+import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.AdventureImage
+import com.desarrollodroide.adventurelog.core.model.Category
+
+@Composable
+fun AdventureItem(
+    adventure: Adventure,
+    onOpenDetails: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onRemoveFromCollection: () -> Unit = {},
+    onDelete: () -> Unit = {}
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Box {
+            // Image
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = adventure.images.firstOrNull()?.image ?: ""
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            // Overlay with text and tags
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .background(Color(0xFF1E1E1E).copy(alpha = 0.8f))
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = adventure.name,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = adventure.location,
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+
+                Row(
+                    modifier = Modifier.padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Category tag
+                    adventure.category?.let { category ->
+                        Surface(
+                            modifier = Modifier.height(24.dp),
+                            color = Color(0xFF6B4EFF),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${category.displayName} ${category.icon}",
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+
+                    // Collection tag if present
+                    if (adventure.collection.isNotEmpty()) {
+                        Surface(
+                            modifier = Modifier.height(24.dp),
+                            color = Color(0xFF4CAF50),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = adventure.collection,
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+
+                    // Private tag
+                    if (!adventure.isPublic) {
+                        Surface(
+                            modifier = Modifier.height(24.dp),
+                            color = Color(0xFFE91E63),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Private",
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Menu button
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
+                IconButton(
+                    onClick = { showMenu = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options",
+                        tint = Color.White
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Open Details") },
+                        onClick = {
+                            onOpenDetails()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Edit Adventure") },
+                        onClick = {
+                            onEdit()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Remove from collection") },
+                        onClick = {
+                            onRemoveFromCollection()
+                            showMenu = false
+                        }
+                    )
+                    Divider()
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                "Delete",
+                                color = Color(0xFFFF3B30)
+                            )
+                        },
+                        onClick = {
+                            onDelete()
+                            showMenu = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun AdventureItemPreview() {
+    val previewAdventure = Adventure(
+        id = "1",
+        userId = 1,
+        name = "Lake District Mountain Resort (Pending)",
+        description = "Beautiful mountain resort with scenic views",
+        rating = 4.5,
+        activityTypes = listOf("Hiking", "Swimming"),
+        location = "4h 28min (445 km)",
+        isPublic = false,
+        collection = "Planned",
+        createdAt = "2024-02-06",
+        updatedAt = "2024-02-06",
+        images = listOf(
+            AdventureImage(
+                id = "1",
+                image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
+                adventure = "1",
+                isPrimary = true,
+                userId = 1
+            )
+        ),
+        link = "",
+        longitude = "-2.3522",
+        latitude = "48.8566",
+        visits = listOf(),
+        isVisited = "false",
+        category = Category(
+            id = "1",
+            name = "hotel",
+            displayName = "Hotel",
+            icon = "🏨",
+            numAdventures = "5"
+        ),
+        attachments = listOf()
+    )
+
+    AdventureItem(adventure = previewAdventure)
+}
