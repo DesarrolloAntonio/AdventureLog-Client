@@ -18,8 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.AdventureImage
-import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 
 @Composable
 fun AdventureItem(
@@ -199,41 +198,17 @@ fun AdventureItem(
 @Preview
 @Composable
 fun AdventureItemPreview() {
-    val previewAdventure = Adventure(
-        id = "1",
-        userId = 1,
-        name = "Lake District Mountain Resort (Pending)",
-        description = "Beautiful mountain resort with scenic views",
-        rating = 4.5,
-        activityTypes = listOf("Hiking", "Swimming"),
-        location = "4h 28min (445 km)",
-        isPublic = false,
-        collection = "Planned",
-        createdAt = "2024-02-06",
-        updatedAt = "2024-02-06",
-        images = listOf(
-            AdventureImage(
-                id = "1",
-                image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
-                adventure = "1",
-                isPrimary = true,
-                userId = 1
-            )
-        ),
-        link = "",
-        longitude = "-2.3522",
-        latitude = "48.8566",
-        visits = listOf(),
-        isVisited = "false",
-        category = Category(
-            id = "1",
-            name = "hotel",
-            displayName = "Hotel",
-            icon = "🏨",
-            numAdventures = "5"
-        ),
-        attachments = listOf()
-    )
+    AdventureItem(adventure = PreviewData.adventures[0])
+}
 
-    AdventureItem(adventure = previewAdventure)
+@Preview
+@Composable
+fun AdventureItemPublicPreview() {
+    AdventureItem(adventure = PreviewData.adventures[1])
+}
+
+@Preview
+@Composable
+fun AdventureItemNoCollectionPreview() {
+    AdventureItem(adventure = PreviewData.adventures[2])
 }
