@@ -85,5 +85,5 @@ buildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig
 composeHotReload = { id = "org.jetbrains.compose-hot-reload", version.ref = "compose-hot-reload" }
 
 # Plugins defined by this project
-rijksmuseum-composeMultiplatform = { id = "com.tewelde.rijksmuseum.composeMultiplatform", version = "unspecified" }
-rijksmuseum-kotlinMultiplatform = { id = "com.tewelde.rijksmuseum.kotlinMultiplatform", version = "unspecified" }
+adventurelog-composeMultiplatform = { id = "com.desarrollodroide.adventurelog.composeMultiplatform", version = "unspecified" }
+adventurelog-kotlinMultiplatform = { id = "com.desarrollodroide.adventurelog.kotlinMultiplatform", version = "unspecified" }
