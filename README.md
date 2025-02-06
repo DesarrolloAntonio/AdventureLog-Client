@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # AdventureLog-Client
 =======
 This is a Kotlin Multiplatform project targeting Android, iOS.
@@ -19,4 +18,3 @@ Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-mu
 
 If you face any issues, please report them on [GitHub](https://github.com/JetBrains/compose-multiplatform/issues).
 
->>>>>>> 9629b31 (First commit)
