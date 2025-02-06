@@ -42,3 +42,5 @@ include(":core:network")
 include(":core:permissions")
 
 include(":feature:login")
+include(":feature:adventures")
+
