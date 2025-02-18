@@ -30,6 +30,7 @@ compose-hot-reload = "1.0.0-dev.34.1"
 uiTooling = "1.7.7"
 protobuf = "3.21.9"
 datastorePreferences = "1.0.0"
+uiTextGoogleFonts = "1.7.8"
 
 [libraries]
 androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
@@ -76,6 +77,7 @@ zoomimage-compose-coil = { module = "io.github.panpf.zoomimage:zoomimage-compose
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version.ref = "protobuf" }
+androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 [bundles]
 ktor-common = ["ktor-client-core", "ktor-client-json", "ktor-client-logging", "ktor-client-serialization", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
@@ -28,14 +27,5 @@ fun AdventureListScreen(
             AdventureItem(item)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AdventureListScreenPreview() {
-    AdventureListScreen(
-        adventureItems = PreviewData.adventures,
-        modifier = Modifier.background(Color.White)
-    )
 }
 

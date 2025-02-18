@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -7,6 +8,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.composeHotReload)
 }
 
 kotlin {
@@ -23,6 +25,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            optimized = true
         }
     }
     
@@ -89,9 +92,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    dependencies {
+        debugImplementation(compose.uiTooling)
+    }
 }
 
-dependencies {
-    debugImplementation(compose.uiTooling)
+// Hot reload support
+composeCompiler {
+    featureFlags = setOf(
+        ComposeFeatureFlag.StrongSkipping,
+        ComposeFeatureFlag.OptimizeNonSkippingGroups
+    )
 }
-

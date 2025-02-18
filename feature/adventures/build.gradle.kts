@@ -23,6 +23,4 @@ kotlin {
         }
     }
 }
-dependencies {
-    debugImplementation(libs.androidx.ui.tooling)
-}
+

@@ -15,7 +15,7 @@ class LoginViewModel(
 
 ) : ViewModel() {
 
-    private var _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Loading)
+    private var _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Success)
     val uiState: StateFlow<LoginUiState> = _uiState
         .stateIn(
             scope = viewModelScope,
