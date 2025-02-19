@@ -7,18 +7,14 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.desarrollodroide.adventurelog.feature.login.login.ContentViews
-import com.desarrollodroide.adventurelog.feature.login.login.LoginScreen
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
-            AppTheme {
-                LoginScreen()
-            }
+            App()
         }
     }
 }

@@ -25,17 +25,30 @@ import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LoginScreen(
-    navigateToHome: (() -> Unit)? = null
+fun LoginScreenRoute(
+    viewModel: LoginViewModel,
+    onNavigateToCollection: () -> Unit
+) {
+    val loginUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val loginFormState by viewModel.loginFormState.collectAsStateWithLifecycle()
+    LoginScreen(
+        loginUiState = loginUiState,
+        loginFormState = loginFormState,
+        onNavigateToHome = onNavigateToCollection
+    )
+}
+
+@Composable
+internal fun LoginScreen(
+    loginUiState: LoginUiState,
+    loginFormState: LoginFormState,
+    onNavigateToHome:  () -> Unit
 ) {
     val loginViewModel = koinViewModel<LoginViewModel>()
 
-    val loginUiState by loginViewModel.uiState.collectAsStateWithLifecycle()
-    val loginFormState by loginViewModel.loginFormState.collectAsStateWithLifecycle()
-
     LaunchedEffect(loginUiState) {
         if (loginUiState is LoginUiState.Success) {
-            navigateToHome?.invoke()
+           // onNavigateToHome.invoke()
         }
     }
 

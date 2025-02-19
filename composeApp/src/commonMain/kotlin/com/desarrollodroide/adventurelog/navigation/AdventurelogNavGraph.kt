@@ -1,0 +1,31 @@
+package com.desarrollodroide.adventurelog.navigation
+
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.desarrollodroide.adventurelog.feature.login.login.navigation.Login
+import com.desarrollodroide.adventurelog.feature.login.login.navigation.loginGraph
+
+
+@Composable
+fun AdventureLogNavGraph(
+    modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState,
+    startDestination: Any = Login,
+    navController: NavHostController = rememberNavController(),
+) {
+    NavHost(
+        modifier = modifier,
+        startDestination = startDestination,
+        navController = navController,
+    ) {
+        loginGraph(
+            navController = navController,
+            onBackClick = navController::navigateUp,
+        )
+    }
+}
+
