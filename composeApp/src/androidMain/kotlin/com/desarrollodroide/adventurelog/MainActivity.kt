@@ -5,12 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
-import com.desarrollodroide.adventurelog.feature.login.login.LoginContent
+import com.desarrollodroide.adventurelog.feature.login.login.ContentViews
 import com.desarrollodroide.adventurelog.feature.login.login.LoginScreen
-import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
+import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +16,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            //App()
             AppTheme {
                 LoginScreen()
             }
@@ -30,22 +27,25 @@ class MainActivity : ComponentActivity() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
+    val previewLoginFormState = LoginFormState(
+        userName = "User",
+        password = "Pass",
+        serverUrl = "ServerUrl",
+        rememberSession = true,
+        userNameError = false,
+        passwordError = false,
+        urlError = false
+    )
+
     AppTheme {
-        LoginContent(
-            user = remember { mutableStateOf("User") },
-            password = remember { mutableStateOf("Pass") },
-            serverUrl = remember { mutableStateOf("ServerUrl") },
-            checked = remember { mutableStateOf(true) },
-            urlErrorState = remember { mutableStateOf(true) },
-            userErrorState = remember { mutableStateOf(true) },
-            passwordErrorState = remember { mutableStateOf(true) },
-            //onSuccess = {},
-            onClickLoginButton = {},
+        ContentViews(
+            loginFormState = previewLoginFormState,
+            onUserNameChange = {},
+            onPasswordChange = {},
+            onServerUrlChange = {},
             onCheckedRememberSessionChange = {},
-            onClearError = {},
-            loginUiState = LoginUiState.Success,
+            onClickLoginButton = {},
             onClickTestButton = {},
-            resetServerAvailabilityState = {}
         )
     }
 }

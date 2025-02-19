@@ -1,6 +1,8 @@
-
-import platform.Foundation.NSURL
+import platform.Foundation.NSURLComponents
 
 actual fun isValidUrl(url: String): Boolean {
-    return NSURL.URLWithString(url) != null
+    if (url.isBlank()) return false
+
+    val components = NSURLComponents(url) ?: return false
+    return !components.scheme.isNullOrBlank() && !components.host.isNullOrBlank()
 }

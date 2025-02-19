@@ -16,7 +16,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -28,58 +27,56 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun PasswordTextField(
-    password: MutableState<String>,
-    passwordErrorState: MutableState<Boolean>
+    password: String,
+    passwordError: Boolean,
+    onPasswordChange: (String) -> Unit
 ) {
-    Column {
-        val passwordVisibility = remember { mutableStateOf(true) }
-        val colorScheme = MaterialTheme.colorScheme
+    val passwordVisibility = remember { mutableStateOf(false) }
+    val colorScheme = MaterialTheme.colorScheme
 
+    Column {
         OutlinedTextField(
-            value = password.value,
-            leadingIcon = {
-                Icon(
-                    tint = Color.Gray,
-                    imageVector = Icons.Outlined.Lock,
-                    contentDescription = null)
-            },
+            value = password,
+            onValueChange = onPasswordChange,
+            singleLine = true,
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
                     text = "Password",
                     color = Color.Gray
                 )
             },
-            onValueChange = {
-                if (passwordErrorState.value) {
-                    passwordErrorState.value = false
-                }
-                password.value = it
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = null,
+                    tint = Color.Gray
+                )
             },
-            singleLine = true,
-            maxLines = 1,
-            modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
                     passwordVisibility.value = !passwordVisibility.value
                 }) {
                     Icon(
-                        imageVector = if (passwordVisibility.value) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = "visibility",
+                        imageVector = if (passwordVisibility.value) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = "Toggle Password Visibility",
                         tint = Color.Gray
                     )
                 }
             },
+            isError = passwordError,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = colorScheme.surface,
                 focusedContainerColor = colorScheme.surface,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = colorScheme.primary
+                unfocusedBorderColor = if (passwordError) colorScheme.error else Color.Transparent,
+                focusedBorderColor = if (passwordError) colorScheme.error else colorScheme.primary
             ),
             shape = RoundedCornerShape(30.dp),
-            visualTransformation = if (passwordVisibility.value) PasswordVisualTransformation() else VisualTransformation.None
+            visualTransformation = if (passwordVisibility.value) VisualTransformation.None else PasswordVisualTransformation()
         )
         Crossfade(
-            targetState = passwordErrorState.value,
+            targetState = passwordError,
             label = "Error Message"
         ) { isError ->
             Text(

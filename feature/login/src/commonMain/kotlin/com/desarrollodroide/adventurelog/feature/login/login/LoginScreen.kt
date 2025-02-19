@@ -20,106 +20,57 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withLink
 import com.desarrollodroide.adventurelog.feature.login.LoginViewModel
+import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel = LoginViewModel(),
-    //onSuccess: (UserDetails) -> Unit,
+    navigateToHome: (() -> Unit)? = null
 ) {
+    val loginViewModel = koinViewModel<LoginViewModel>()
+
     val loginUiState by loginViewModel.uiState.collectAsStateWithLifecycle()
+    val loginFormState by loginViewModel.loginFormState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(loginUiState) {
+        if (loginUiState is LoginUiState.Success) {
+            navigateToHome?.invoke()
+        }
+    }
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
-        LoginContent(
-            loginUiState = loginUiState,
-            checked = loginViewModel.rememberSession,
-            userErrorState = loginViewModel.userNameError,
-            passwordErrorState = loginViewModel.passwordError,
-            urlErrorState = loginViewModel.urlError,
-            onClickLoginButton = {
-
-            },
-            onCheckedRememberSessionChange = {
-                loginViewModel.rememberSession.value = it
-            },
-//            onSuccess = {
-//                //loginViewModel.clearState()
-//                onSuccess.invoke(it)
-//            },
-            user = loginViewModel.userName,
-            password = loginViewModel.password,
-            serverUrl = loginViewModel.serverUrl,
-            onClearError = {
-                //loginViewModel.clearState()
-            },
-            onClickTestButton = {
-                //loginViewModel.checkServerAvailability()
-            },
-            resetServerAvailabilityState = {
-               //loginViewModel.resetServerAvailabilityUiState()
-            }
+        ContentViews(
+            loginFormState = loginFormState,
+            onUserNameChange = loginViewModel::updateUserName,
+            onPasswordChange = loginViewModel::updatePassword,
+            onServerUrlChange = loginViewModel::updateServerUrl,
+            onCheckedRememberSessionChange = loginViewModel::updateRememberSession,
+            onClickLoginButton = loginViewModel::login,
+            onClickTestButton = { }
         )
-    }
-}
 
-@Composable
-fun LoginContent(
-    user: MutableState<String>,
-    password: MutableState<String>,
-    serverUrl: MutableState<String>,
-    checked: MutableState<Boolean>,
-    urlErrorState: MutableState<Boolean>,
-    userErrorState: MutableState<Boolean>,
-    passwordErrorState: MutableState<Boolean>,
-    //onSuccess: (UserDetails) -> Unit,
-    onClickLoginButton: () -> Unit,
-    onClickTestButton: () -> Unit,
-    onClearError: () -> Unit,
-    onCheckedRememberSessionChange: (Boolean) -> Unit,
-    loginUiState: LoginUiState,
-    resetServerAvailabilityState: () -> Unit
-) {
-    when (loginUiState) {
-        is LoginUiState.Error -> {
-            onClearError.invoke()
-        }
-
-        LoginUiState.Empty -> {
+        if (loginUiState is LoginUiState.Loading) {
 
         }
-        LoginUiState.Loading -> {
-        }
-        LoginUiState.Success -> {
-            ContentViews(
-                serverUrl = serverUrl,
-                urlErrorState = urlErrorState,
-                user = user,
-                userErrorState = userErrorState,
-                password = password,
-                passwordErrorState = passwordErrorState,
-                onClickLoginButton = onClickLoginButton,
-                checked = checked,
-                onCheckedRememberSessionChange = onCheckedRememberSessionChange,
-                onClickTestButton = onClickTestButton,
-            )
+
+        if (loginUiState is LoginUiState.Error) {
+            loginViewModel.clearErrors()
         }
     }
 }
 
 @Composable
-private fun ContentViews(
-    serverUrl: MutableState<String>,
-    urlErrorState: MutableState<Boolean>,
-    user: MutableState<String>,
-    userErrorState: MutableState<Boolean>,
-    password: MutableState<String>,
-    passwordErrorState: MutableState<Boolean>,
-    onClickLoginButton: () -> Unit,
-    onClickTestButton: () -> Unit,
-    checked: MutableState<Boolean>,
+fun ContentViews(
+    loginFormState: LoginFormState,
+    onUserNameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onServerUrlChange: (String) -> Unit,
     onCheckedRememberSessionChange: (Boolean) -> Unit,
+    onClickLoginButton: () -> Unit,
+    onClickTestButton: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val backgroundPrimary = getAdjustedPrimary()
@@ -181,31 +132,29 @@ private fun ContentViews(
                         modifier = Modifier.padding(bottom = 30.dp)
                     )
                     ServerUrlTextField(
-                        serverUrl = serverUrl,
-                        serverErrorState = urlErrorState,
-                        onClick = onClickTestButton,
+                        serverUrl = loginFormState.serverUrl,
+                        serverErrorState = loginFormState.urlError,
+                        onValueChange = onServerUrlChange,
+                        onClick = {  }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     UserTextField(
-                        user = user,
-                        userErrorState = userErrorState
+                        user = loginFormState.userName,
+                        userError = loginFormState.userNameError,
+                        onUserChange = onUserNameChange
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     PasswordTextField(
-                        password = password,
-                        passwordErrorState = passwordErrorState
+                        password = loginFormState.password,
+                        passwordError = loginFormState.passwordError,
+                        onPasswordChange = onPasswordChange
                     )
                     Spacer(Modifier.size(14.dp))
                     LoginButton(
-                        user = user,
-                        userErrorState = userErrorState,
-                        password = password,
-                        passwordErrorState = passwordErrorState,
-                        onClickLoginButton = onClickLoginButton,
-                        serverErrorState = urlErrorState
+                        onClickLoginButton = onClickLoginButton
                     )
                     RememberSessionSection(
-                        checked = checked,
+                        checked = loginFormState.rememberSession,
                         onCheckedChange = onCheckedRememberSessionChange
                     )
                     Box(

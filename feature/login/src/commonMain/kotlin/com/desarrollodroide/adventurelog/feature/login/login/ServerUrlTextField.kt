@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.login.login
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,7 +13,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,21 +26,25 @@ import isValidUrl
 
 @Composable
 fun ServerUrlTextField(
-    serverUrl: MutableState<String>,
-    serverErrorState: MutableState<Boolean>,
-    onClick: () -> Unit,
+    serverUrl: String,
+    serverErrorState: Boolean,
+    onValueChange: (String) -> Unit,
+    onClick: () -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     Column {
         OutlinedTextField(
-            value = serverUrl.value,
+            value = serverUrl,
+            onValueChange = {
+                onValueChange(it)
+            },
             leadingIcon = {
                 Icon(
                     tint = Color.Gray,
                     imageVector = Icons.Filled.Link,
-                    contentDescription = null
+                    contentDescription = "Server URL"
                 )
             },
             placeholder = {
@@ -51,20 +53,17 @@ fun ServerUrlTextField(
                     color = Color.Gray
                 )
             },
-            onValueChange = {
-                serverErrorState.value = !isValidUrl(it)
-                serverUrl.value = it
-            },
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
-                    if (isFocused && !focusState.isFocused && isValidUrl(serverUrl.value)) {
+                    if (isFocused && !focusState.isFocused && isValidUrl(serverUrl)) {
                         onClick()
                     }
                     isFocused = focusState.isFocused
                 },
             singleLine = true,
             maxLines = 1,
+            isError = serverErrorState,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = colorScheme.surface,
                 focusedContainerColor = colorScheme.surface,
@@ -75,7 +74,7 @@ fun ServerUrlTextField(
         )
 
         Crossfade(
-            targetState = serverErrorState.value,
+            targetState = serverErrorState,
             label = "Error Message"
         ) { isError ->
             Text(

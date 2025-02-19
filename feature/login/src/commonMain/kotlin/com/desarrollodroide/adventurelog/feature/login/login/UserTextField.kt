@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.login.login
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +11,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -22,20 +20,16 @@ import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun UserTextField(
-    user: MutableState<String>,
-    userErrorState: MutableState<Boolean>
+    user: String,
+    userError: Boolean,
+    onUserChange: (String) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
     Column {
         OutlinedTextField(
-            value = user.value,
-            onValueChange = {
-                if (userErrorState.value) {
-                    userErrorState.value = false
-                }
-                user.value = it
-            },
+            value = user,
+            onValueChange = onUserChange,
             singleLine = true,
             maxLines = 1,
             modifier = Modifier.fillMaxWidth(),
@@ -52,16 +46,17 @@ fun UserTextField(
                     tint = Color.Gray
                 )
             },
+            isError = userError,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = colorScheme.surface,
                 focusedContainerColor = colorScheme.surface,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = colorScheme.primary
+                unfocusedBorderColor = if (userError) colorScheme.error else Color.Transparent,
+                focusedBorderColor = if (userError) colorScheme.error else colorScheme.primary
             ),
             shape = RoundedCornerShape(30.dp)
         )
         Crossfade(
-            targetState = userErrorState.value,
+            targetState = userError,
             label = "Error Message"
         ) { isError ->
             Text(
