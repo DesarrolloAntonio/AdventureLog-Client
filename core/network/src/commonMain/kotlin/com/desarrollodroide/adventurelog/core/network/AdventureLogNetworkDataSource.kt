@@ -13,4 +13,5 @@ interface AdventureLogNetworkDataSource {
 
     suspend fun getCsrfToken(): Result<String>
 
+    suspend fun getUserDetails(csrfToken: String): UserDetailsDTO
 }

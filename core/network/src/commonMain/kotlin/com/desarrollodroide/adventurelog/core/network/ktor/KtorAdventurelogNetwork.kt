@@ -71,60 +71,16 @@ class KtorAdventurelogNetwork(
     }
 
     override suspend fun sendLogin(username: String, password: String, token: String): UserDetailsDTO {
-        logger.d { "Starting login request with token: $token" }
+        TODO("Not yet implemented")
+    }
 
-        val parameters = Parameters.build {
-            append("login", username)
-            append("password", password)
-        }
-
-        try {
-            logger.d { "Attempting POST request to $LOGIN_ENDPOINT" }
-
-            val loginResponse = adventurelogClient.post("$BASE_URL$LOGIN_ENDPOINT") {
-                contentType(ContentType.Application.FormUrlEncoded)
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-CSRFToken", token)
-                    append(HttpHeaders.Cookie, "csrftoken=$token")
-                    append(HttpHeaders.UserAgent, "Mozilla/5.0 (Android 10; Mobile)")
-                }
-                setBody(FormDataContent(parameters))
+    override suspend fun getUserDetails(csrfToken: String): UserDetailsDTO {
+        return adventurelogClient.get("$BASE_URL$USER_DETAILS_ENDPOINT") {
+            headers {
+                append(HttpHeaders.Accept, "application/json")
+                append("X-CSRFToken", csrfToken)
             }
-
-            logger.d { "POST request completed. Status: ${loginResponse.status}" }
-            logger.d { "Response headers: ${loginResponse.headers.entries()}" }
-
-            if (loginResponse.status != HttpStatusCode.OK) {
-                throw IllegalStateException("Login failed with status: ${loginResponse.status}")
-            }
-
-            val sessionId = loginResponse.headers[HttpHeaders.SetCookie]?.let { cookies ->
-                logger.d { "Processing cookies: $cookies" }
-                cookies.split(";").find { it.startsWith("sessionid=") }?.substringAfter("sessionid=")?.trim()
-            } ?: throw IllegalStateException("No session ID received")
-
-            logger.d { "Session ID extracted: $sessionId" }
-            this.sessionId = sessionId
-
-            logger.d { "Making request to user details endpoint: $USER_DETAILS_ENDPOINT" }
-            val userDetailsResponse = adventurelogClient.get("$BASE_URL$USER_DETAILS_ENDPOINT") {
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append(HttpHeaders.Cookie, "sessionid=$sessionId; csrftoken=$token")
-                }
-            }
-
-            logger.d { "User details response received. Status: ${userDetailsResponse.status}" }
-            val userDetails = userDetailsResponse.body<UserDetailsDTO>()
-            logger.d { "User details parsed successfully: $userDetails" }
-
-            return userDetails
-
-        } catch (e: Exception) {
-            logger.e(e) { "Error during login request: ${e.message}" }
-            throw e
-        }
+        }.body()
     }
 
     override suspend fun getAdventures(page: Int): List<AdventureDTO> {

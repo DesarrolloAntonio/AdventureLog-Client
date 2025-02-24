@@ -30,9 +30,11 @@ fun NavGraphBuilder.loginGraph(
             val viewModel = koinViewModel<LoginViewModel>()
             LoginScreenRoute(viewModel = viewModel) { navController.navigate(HomeScreen) }
         }
-
+        //It should not be here
         composable<HomeScreen> { entry ->
-
+            Text("This is home but should not be here")
+            // TODO remove HomeScreen from this navigation, it will be in other feature, this will be refactor in the future
+            // this is just for development in the beginning
         }
     }
 }

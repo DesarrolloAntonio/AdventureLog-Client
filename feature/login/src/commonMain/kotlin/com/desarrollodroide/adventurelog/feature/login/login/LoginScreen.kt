@@ -51,7 +51,7 @@ internal fun LoginScreen(
 
     LaunchedEffect(loginUiState) {
         if (loginUiState is LoginUiState.Success) {
-           // onNavigateToHome.invoke()
+            onNavigateToHome.invoke()
         }
     }
 
