@@ -1,9 +1,24 @@
 package com.desarrollodroide.adventurelog.core.domain
 
+import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
+import com.desarrollodroide.adventurelog.core.data.LoginRepository
+import com.desarrollodroide.adventurelog.core.model.UserDetails
+
 class LoginUseCase(
-    //private val repository: Repository
+    private val loginRepository: LoginRepository
 ) {
-    suspend operator fun invoke(
-        url: String,
-    ): String = ""
+    suspend operator fun invoke(username: String, password: String): Either<String, UserDetails> =
+        when (val result = loginRepository.sendLogin(username, password)) {
+            is Either.Left -> {
+                when (result.value) {
+                    is ApiResponse.IOException -> Either.Left("Network unavailable")
+                    is ApiResponse.HttpError -> Either.Left("Error getting user credentials, try again later")
+                    ApiResponse.InvalidCredentials -> Either.Left("Invalid username or password")
+                    ApiResponse.InvalidCsrfToken -> Either.Left("Session expired, please try again")
+                }
+            }
+
+            is Either.Right -> Either.Right(result.value)
+        }
 }

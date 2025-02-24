@@ -64,7 +64,7 @@ data class AdventureDTO(
     val attachments: List<AttachmentDTO>? = null
 )
 
-fun AdventureDTO.toDomainModel() = Adventure(
+fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     id = id ?: "",
     userId = userId ?: -1,
     name = name,

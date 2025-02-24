@@ -32,6 +32,8 @@ sealed class Either<out A, out B> {
 sealed interface ApiResponse {
     data object HttpError : ApiResponse
     data object IOException : ApiResponse
+    data object InvalidCredentials : ApiResponse
+    data object InvalidCsrfToken : ApiResponse
 }
 
 /**

@@ -3,13 +3,14 @@ package com.desarrollodroide.adventurelog.core.network.di
 import com.desarrollodroide.adventurelog.BuildConfig
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HAS_IMAGE
-import com.desarrollodroide.adventurelog.core.network.ktor.KtorADVENTURELOGNetwork
 import com.desarrollodroide.adventurelog.core.network.ktor.ADVENTURELOG_HOST
 import com.desarrollodroide.adventurelog.core.network.ktor.ADVENTURELOG_PATH
+import com.desarrollodroide.adventurelog.core.network.ktor.KtorAdventurelogNetwork
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.cookies.HttpCookies
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
@@ -26,9 +27,8 @@ const val KEY = "key"
 
 val networkModule = module {
     single<AdventureLogNetworkDataSource> {
-        KtorADVENTURELOGNetwork(
-            ADVENTURELOGClient = get(named(BuildConfig.APP_NAME)),
-            client = get()
+        KtorAdventurelogNetwork(
+            adventurelogClient = get(named(BuildConfig.APP_NAME)),
         )
     }
 
@@ -43,6 +43,8 @@ val networkModule = module {
 
     single(named(BuildConfig.APP_NAME)) {
         HttpClient {
+            install(HttpCookies)
+
             install(ContentNegotiation) {
                 json(get())
             }
