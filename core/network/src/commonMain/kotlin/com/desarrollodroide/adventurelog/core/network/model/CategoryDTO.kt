@@ -19,7 +19,7 @@ data class CategoryDTO(
     val icon: String,  // Required (*)
 
     @SerialName("num_adventures")
-    val numAdventures: String? = null
+    val numAdventures: Int? = null
 )
 
 
@@ -28,5 +28,5 @@ fun CategoryDTO.toDomainModel() = Category(
     name = name,
     displayName = displayName,
     icon = icon,
-    numAdventures = numAdventures ?: "0"
+    numAdventures = numAdventures ?: 0
 )

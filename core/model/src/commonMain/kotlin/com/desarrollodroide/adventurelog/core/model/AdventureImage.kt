@@ -5,5 +5,5 @@ data class AdventureImage(
     val image: String,
     val adventure: String,
     val isPrimary: Boolean,
-    val userId: Int
+    val userId: String
 )

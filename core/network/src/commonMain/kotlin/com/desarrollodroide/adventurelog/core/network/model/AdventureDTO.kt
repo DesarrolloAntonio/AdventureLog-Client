@@ -10,7 +10,7 @@ data class AdventureDTO(
     val id: String? = null,
 
     @SerialName("user_id")
-    val userId: Int? = null,
+    val userId: String? = null,
 
     @SerialName("name")
     val name: String,  // Required (*)
@@ -55,7 +55,7 @@ data class AdventureDTO(
     val visits: List<VisitDTO>? = null,
 
     @SerialName("is_visited")
-    val isVisited: String? = null,
+    val isVisited: Boolean? = null,
 
     @SerialName("category")
     val category: CategoryDTO? = null,
@@ -66,7 +66,7 @@ data class AdventureDTO(
 
 fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     id = id ?: "",
-    userId = userId ?: -1,
+    userId = userId ?:"",
     name = name,
     description = description ?: "",
     rating = rating ?: 0.0,
@@ -81,7 +81,7 @@ fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     longitude = longitude ?: "",
     latitude = latitude ?: "",
     visits = visits?.map { it.toDomainModel() } ?: emptyList(),
-    isVisited = isVisited ?: "",
+    isVisited = isVisited ?: false,
     category = category?.toDomainModel(),
     attachments = attachments?.map { it.toDomainModel() } ?: emptyList()
 )

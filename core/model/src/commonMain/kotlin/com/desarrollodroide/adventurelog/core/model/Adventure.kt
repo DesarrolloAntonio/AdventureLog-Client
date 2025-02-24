@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.model
 
 data class Adventure(
     val id: String,
-    val userId: Int,
+    val userId: String,
     val name: String,
     val description: String,
     val rating: Double,
@@ -17,7 +17,7 @@ data class Adventure(
     val longitude: String,
     val latitude: String,
     val visits: List<Visit>,
-    val isVisited: String,
+    val isVisited: Boolean,
     val category: Category?,
     val attachments: List<Attachment>
 )
