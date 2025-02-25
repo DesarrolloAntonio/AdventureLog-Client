@@ -12,21 +12,21 @@ object PreviewData {
             name = "hotel",
             displayName = "Hotel",
             icon = "🏨",
-            numAdventures = "5"
+            numAdventures = 5
         ),
         Category(
             id = "2",
             name = "restaurant",
             displayName = "Restaurant",
             icon = "🍽️",
-            numAdventures = "3"
+            numAdventures = 3
         ),
         Category(
             id = "3",
             name = "beach",
             displayName = "Beach",
             icon = "🏖️",
-            numAdventures = "4"
+            numAdventures = 4
         )
     )
 
@@ -36,21 +36,21 @@ object PreviewData {
             image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
             adventure = "1",
             isPrimary = true,
-            userId = 1
+            userId = "1"
         ),
         AdventureImage(
             id = "2",
             image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
             adventure = "2",
             isPrimary = true,
-            userId = 1
+            userId = "2"
         ),
         AdventureImage(
             id = "3",
             image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
             adventure = "3",
             isPrimary = true,
-            userId = 1
+            userId = "3"
         )
     )
 
@@ -72,7 +72,7 @@ object PreviewData {
     val adventures = listOf(
         Adventure(
             id = "1",
-            userId = 1,
+            userId = "1",
             name = "Lake District Mountain Resort (Pending)",
             description = "Beautiful mountain resort with scenic views and spa facilities",
             rating = 4.5,
@@ -87,13 +87,13 @@ object PreviewData {
             longitude = "-2.3522",
             latitude = "48.8566",
             visits = listOf(visits[0]),
-            isVisited = "false",
+            isVisited = false,
             category = categories[0],
             attachments = listOf()
         ),
         Adventure(
             id = "2",
-            userId = 1,
+            userId = "2",
             name = "Coastal Beach Resort & Spa",
             description = "Luxurious beachfront resort with private beach access",
             rating = 4.8,
@@ -108,13 +108,13 @@ object PreviewData {
             longitude = "-3.1234",
             latitude = "47.5678",
             visits = listOf(visits[1]),
-            isVisited = "true",
+            isVisited = true,
             category = categories[2],
             attachments = listOf()
         ),
         Adventure(
             id = "3",
-            userId = 1,
+            userId = "3",
             name = "Mountain View Hotel",
             description = "Cozy mountain hotel with panoramic views",
             rating = 4.2,
@@ -129,7 +129,7 @@ object PreviewData {
             longitude = "-1.9876",
             latitude = "46.4321",
             visits = emptyList(),
-            isVisited = "false",
+            isVisited = false,
             category = categories[0],
             attachments = listOf()
         )

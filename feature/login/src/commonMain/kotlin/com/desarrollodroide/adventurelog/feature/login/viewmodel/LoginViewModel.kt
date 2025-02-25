@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.login
+package com.desarrollodroide.adventurelog.feature.login.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

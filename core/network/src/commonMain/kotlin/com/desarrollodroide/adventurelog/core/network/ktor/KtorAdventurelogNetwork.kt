@@ -71,7 +71,8 @@ class KtorAdventurelogNetwork(
     }
 
     override suspend fun sendLogin(username: String, password: String, token: String): UserDetailsDTO {
-        TODO("Not yet implemented")
+        // TODO Implement login logic
+        return UserDetailsDTO()
     }
 
     override suspend fun getUserDetails(csrfToken: String): UserDetailsDTO {

@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
-import com.desarrollodroide.adventurelog.feature.login.LoginViewModel
+import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import org.koin.compose.viewmodel.koinViewModel
