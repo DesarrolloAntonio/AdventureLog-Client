@@ -42,6 +42,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.feature.login)
             implementation(projects.feature.home)
+            implementation(projects.feature.adventures)
 
             implementation(compose.material3)
             implementation(compose.components.resources)

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.withStyle
 import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -48,10 +49,20 @@ internal fun LoginScreen(
     onNavigateToHome:  () -> Unit
 ) {
     val loginViewModel = koinViewModel<LoginViewModel>()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(loginUiState) {
         if (loginUiState is LoginUiState.Success) {
             onNavigateToHome.invoke()
+        } else if (loginUiState is LoginUiState.Error) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = loginUiState.message,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            loginViewModel.clearErrors()
         }
     }
 

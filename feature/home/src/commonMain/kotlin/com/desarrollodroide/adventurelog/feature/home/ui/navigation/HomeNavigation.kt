@@ -1,10 +1,10 @@
-package com.desarrollodroide.adventurelog.feature.home.home.navigation
+package com.desarrollodroide.adventurelog.feature.home.ui.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.desarrollodroide.adventurelog.feature.home.home.HomeScreenRoute
+import com.desarrollodroide.adventurelog.feature.home.ui.HomeScreenRoute
 
 fun NavGraphBuilder.homeGraph(
     navController: NavHostController,
@@ -16,22 +16,32 @@ fun NavGraphBuilder.homeGraph(
     ) {
         composable<HomeScreen> {
             HomeScreenRoute(
-                onAdventuresClick = { navController.navigate(AdventuresScreen) },
+                onAdventuresClick = { onAdventureClick("") },
                 onCollectionsClick = { navController.navigate(CollectionsScreen) },
                 onTravelClick = { navController.navigate(TravelScreen) },
                 onMapClick = { navController.navigate(MapScreen) },
-                onCalendarClick = { navController.navigate(CalendarScreen) },
-                onUsersClick = { navController.navigate(UsersScreen) }
+                onCalendarClick = { navController.navigate(CalendarScreen) }
             )
         }
 
         composable<AdventuresScreen> {
-            // AdventuresScreenRoute()
+
         }
 
         composable<CollectionsScreen> {
             // CollectionsScreenRoute()
         }
 
+        composable<TravelScreen> {
+            // TravelScreenRoute()
+        }
+
+        composable<MapScreen> {
+            // MapScreenRoute()
+        }
+
+        composable<CalendarScreen> {
+            // CalendarScreenRoute()
+        }
     }
 }
