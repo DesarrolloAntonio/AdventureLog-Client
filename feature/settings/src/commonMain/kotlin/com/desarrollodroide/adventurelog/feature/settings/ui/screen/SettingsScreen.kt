@@ -40,7 +40,7 @@ import com.desarrollodroide.adventurelog.feature.settings.ui.components.AccountS
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.DataSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.DebugSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.FeedSection
-import com.desarrollodroide.adventurelog.feature.settings.ui.components.SettingsViewModel
+import com.desarrollodroide.adventurelog.core.data.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisualSection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

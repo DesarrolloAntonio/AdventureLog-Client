@@ -1,8 +1,14 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.core.model.LoginCredentials
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 class SettingsRepositoryImpl(
@@ -13,7 +19,11 @@ class SettingsRepositoryImpl(
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
-
+    
+    private val _themeMode = MutableStateFlow(getThemeModeFromSettings())
+    private val _useDynamicColors = MutableStateFlow(getUseDynamicColorsFromSettings())
+    private val _compactView = MutableStateFlow(getCompactViewFromSettings())
+    
     override suspend fun saveUserDetails(userDetails: UserDetails) {
         settings.putString(KEY_USER_DETAILS, json.encodeToString(userDetails))
     }
@@ -46,8 +56,45 @@ class SettingsRepositoryImpl(
         settings.clear()
     }
 
+    override suspend fun setThemeMode(themeMode: ThemeMode) {
+        settings.putInt(KEY_THEME_MODE, themeMode.ordinal)
+        _themeMode.value = themeMode
+    }
+    
+    override fun getThemeMode(): StateFlow<ThemeMode> = _themeMode
+    
+    private fun getThemeModeFromSettings(): ThemeMode {
+        val ordinal = settings.getIntOrNull(KEY_THEME_MODE) ?: ThemeMode.AUTO.ordinal
+        return ThemeMode.values().getOrElse(ordinal) { ThemeMode.AUTO }
+    }
+
+    override fun getUseDynamicColors(): StateFlow<Boolean> = _useDynamicColors
+    
+    override suspend fun setUseDynamicColors(useDynamicColors: Boolean) {
+        settings.putBoolean(KEY_USE_DYNAMIC_COLORS, useDynamicColors)
+        _useDynamicColors.value = useDynamicColors
+    }
+    
+    private fun getUseDynamicColorsFromSettings(): Boolean {
+        return settings.getBoolean(KEY_USE_DYNAMIC_COLORS, true)
+    }
+    
+    override fun getCompactView(): StateFlow<Boolean> = _compactView
+    
+    override suspend fun setCompactView(compactView: Boolean) {
+        settings.putBoolean(KEY_COMPACT_VIEW, compactView)
+        _compactView.value = compactView
+    }
+    
+    private fun getCompactViewFromSettings(): Boolean {
+        return settings.getBoolean(KEY_COMPACT_VIEW, false)
+    }
+
     companion object {
         private const val KEY_USER_DETAILS = "user_details"
         private const val KEY_CREDENTIALS = "login_credentials"
+        private const val KEY_THEME_MODE = "theme_mode"
+        private const val KEY_USE_DYNAMIC_COLORS = "use_dynamic_colors"
+        private const val KEY_COMPACT_VIEW = "compact_view"
     }
 }
