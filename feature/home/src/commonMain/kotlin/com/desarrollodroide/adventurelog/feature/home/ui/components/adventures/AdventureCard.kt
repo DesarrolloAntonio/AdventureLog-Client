@@ -30,6 +30,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
  * Card component to display an adventure item
@@ -109,3 +111,10 @@ fun AdventureCard(
         }
     }
 }
+
+@Preview
+@Composable
+fun AdventureCardPreview() {
+    AdventureCard(adventure = PreviewData.adventures.first(), onClick = { })
+}
+

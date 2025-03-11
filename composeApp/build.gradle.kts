@@ -43,6 +43,7 @@ kotlin {
             implementation(projects.feature.login)
             implementation(projects.feature.home)
             implementation(projects.feature.adventures)
+            implementation(projects.feature.settings)
 
             implementation(compose.material3)
             implementation(compose.components.resources)

@@ -48,4 +48,6 @@ include(":core:permissions")
 include(":feature:login")
 include(":feature:adventures")
 include(":feature:home")
+include(":feature:settings")
+
 
