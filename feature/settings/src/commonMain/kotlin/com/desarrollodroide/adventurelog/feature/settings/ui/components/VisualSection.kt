@@ -27,11 +27,14 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.Item
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun VisualSection(
-    themeMode: MutableStateFlow<ThemeMode>,
-    dynamicColors: MutableStateFlow<Boolean>,
+    themeMode: StateFlow<ThemeMode>,
+    dynamicColors: StateFlow<Boolean>,
+    onThemeModeChanged: (ThemeMode) -> Unit = {},
+    onDynamicColorsChanged: (Boolean) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -43,16 +46,16 @@ fun VisualSection(
         Spacer(modifier = Modifier.height(5.dp))
         ThemeOption(
             item = Item("Theme", Icons.Filled.Palette, onClick = {}),
-            initialThemeMode = themeMode
+            themeMode = themeMode,
+            onThemeModeChanged = onThemeModeChanged
         )
-        val dynamicColorItem = Item(
+        
+        val currentDynamicColors by dynamicColors.collectAsState()
+        SwitchOption(
             title = "Use dynamic colors",
             icon = Icons.Filled.FormatColorFill,
-            switchState = dynamicColors
-        )
-        SwitchOption(
-            item = dynamicColorItem,
-            switchState = dynamicColors
+            checked = currentDynamicColors,
+            onCheckedChange = onDynamicColorsChanged
         )
     }
 }
@@ -60,20 +63,21 @@ fun VisualSection(
 @Composable
 fun ThemeOption(
     item: Item,
-    initialThemeMode: MutableStateFlow<ThemeMode>,
+    themeMode: StateFlow<ThemeMode>,
+    onThemeModeChanged: (ThemeMode) -> Unit = {}
 ) {
-    val themeMode by initialThemeMode.collectAsState()
+    val currentThemeMode by themeMode.collectAsState()
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                val newMode = when (themeMode) {
+                val newMode = when (currentThemeMode) {
                     ThemeMode.DARK -> ThemeMode.LIGHT
                     ThemeMode.LIGHT -> ThemeMode.AUTO
                     ThemeMode.AUTO -> ThemeMode.DARK
                 }
-                initialThemeMode.value = newMode
+                onThemeModeChanged(newMode)
                 item.onClick()
             },
         verticalAlignment = Alignment.CenterVertically,
@@ -87,7 +91,7 @@ fun ThemeOption(
                 .padding(vertical = 10.dp)
         )
 
-        val themeIcon = when (themeMode) {
+        val themeIcon = when (currentThemeMode) {
             ThemeMode.DARK -> Icons.Filled.DarkMode
             ThemeMode.LIGHT -> Icons.Filled.LightMode
             ThemeMode.AUTO -> Icons.Filled.HdrAuto

@@ -7,12 +7,5 @@ import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsView
 
 val settingsModule = module {
     includes(dataModule)
-    factory {
-        SettingsViewModel(
-            settingsRepository = get(),
-            imageLoader = get()
-        )
-    }
     viewModelOf(::SettingsViewModel)
-
 }

@@ -6,7 +6,6 @@ import coil3.ImageLoader
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.core.data.SettingsRepository
 import com.desarrollodroide.adventurelog.core.model.UserDetails
-import com.desarrollodroide.adventurelog.feature.settings.model.SettingsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

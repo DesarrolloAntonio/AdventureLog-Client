@@ -6,11 +6,12 @@ import com.desarrollodroide.adventurelog.core.data.LoginRepository
 import com.desarrollodroide.adventurelog.core.data.LoginRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.SettingsRepository
 import com.desarrollodroide.adventurelog.core.data.SettingsRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.UserRepository
+import com.desarrollodroide.adventurelog.core.data.UserRepositoryImpl
 import com.desarrollodroide.adventurelog.core.network.di.networkModule
 import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-
 
 val dataModule = module {
     includes(commonModule, networkModule)
@@ -25,5 +26,8 @@ val dataModule = module {
             adventureLogNetworkDataSource = get(),
             ioDispatcher =  get(named(AdventureLogDispatchers.IO))
         )
+    }
+    single<UserRepository> {
+        UserRepositoryImpl(settings = get())
     }
 }

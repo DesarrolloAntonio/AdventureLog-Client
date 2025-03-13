@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,15 +32,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.constants.ADVENTURELOG_GITHUB_URL
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
-import com.desarrollodroide.adventurelog.feature.settings.model.SettingsUiState
 import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformActionsProvider
 import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformBackHandler
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.AccountSection
-import com.desarrollodroide.adventurelog.feature.settings.ui.components.DataSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.DebugSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.FeedSection
-import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisualSection
+import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -94,6 +91,9 @@ fun SettingsScreenRoute(
                     goToLogin.invoke()
                 },
                 themeMode = settingsViewModel.themeMode,
+                onThemeModeChanged = { newMode ->
+                    settingsViewModel.setThemeMode(newMode)
+                },
                 compactView = compactView,
                 onCompactViewChanged = { isCompact ->
                     settingsViewModel.setCompactView(isCompact)
@@ -104,6 +104,9 @@ fun SettingsScreenRoute(
                 onNavigateToLogs = onNavigateToLogs,
                 onViewLastCrash = onViewLastCrash,
                 useDynamicColors = settingsViewModel.useDynamicColors,
+                onDynamicColorsChanged = { useDynamic ->
+                    settingsViewModel.setUseDynamicColors(useDynamic)
+                },
                 serverUrl = settingsViewModel.getServerUrl()
             )
         }
@@ -121,8 +124,10 @@ fun SettingsContent(
     onNavigateToLogs: () -> Unit,
     onViewLastCrash: () -> Unit,
     themeMode: StateFlow<ThemeMode>,
-    goToLogin: () -> Unit,
+    onThemeModeChanged: (ThemeMode) -> Unit,
     useDynamicColors: StateFlow<Boolean>,
+    onDynamicColorsChanged: (Boolean) -> Unit,
+    goToLogin: () -> Unit,
     serverUrl: String,
     ) {
     val platformActions by PlatformActionsProvider.platformActions.collectAsState()
@@ -152,10 +157,12 @@ fun SettingsContent(
     ) {
         item {
             Spacer(modifier = Modifier.height(8.dp))
-//            VisualSection(
-//                themeMode = themeMode,
-//                dynamicColors = useDynamicColors
-//            )
+            VisualSection(
+                themeMode = themeMode,
+                dynamicColors = useDynamicColors,
+                onThemeModeChanged = onThemeModeChanged,
+                onDynamicColorsChanged = onDynamicColorsChanged
+            )
             CustomHorizontalDivider()
             Spacer(modifier = Modifier.height(18.dp))
             FeedSection(

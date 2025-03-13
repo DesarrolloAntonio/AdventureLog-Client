@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.desarrollodroide.adventurelog.feature.adventures.navigation.adventuresGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.Home
+import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeGraph
 import com.desarrollodroide.adventurelog.feature.login.login.navigation.Login
 import com.desarrollodroide.adventurelog.feature.login.login.navigation.loginGraph
 import com.desarrollodroide.adventurelog.feature.settings.ui.navigation.settingsGraph
@@ -34,6 +35,14 @@ fun AdventureLogNavGraph(
             }
         )
 
+        homeGraph(
+            navController = navController,
+            onBackClick = navController::navigateUp,
+            onAdventureClick = { adventureId ->
+                // Aquí puedes añadir la navegación a la aventura específica si es necesario
+            }
+        )
+
         settingsGraph(
             navController = navController,
             onBackClick = navController::navigateUp,
@@ -50,4 +59,3 @@ fun AdventureLogNavGraph(
         )
     }
 }
-
