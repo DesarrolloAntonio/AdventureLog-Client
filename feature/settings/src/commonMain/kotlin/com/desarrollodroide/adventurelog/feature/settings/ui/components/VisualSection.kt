@@ -24,8 +24,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.Item
-import com.desarrollodroide.data.helpers.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable

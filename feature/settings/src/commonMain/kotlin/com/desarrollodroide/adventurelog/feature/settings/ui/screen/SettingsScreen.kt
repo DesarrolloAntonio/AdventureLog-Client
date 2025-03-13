@@ -40,14 +40,14 @@ import com.desarrollodroide.adventurelog.feature.settings.ui.components.AccountS
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.DataSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.DebugSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.FeedSection
-import com.desarrollodroide.adventurelog.core.data.SettingsViewModel
+import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisualSection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(
+fun SettingsScreenRoute(
     settingsViewModel: SettingsViewModel,
     onNavigateToTermsOfUse: () -> Unit,
     onNavigateToPrivacyPolicy: () -> Unit,
@@ -60,15 +60,8 @@ fun SettingsScreen(
     PlatformBackHandler {
         onBack()
     }
-    
-    val settingsUiState by settingsViewModel.settingsUiState.collectAsStateWithLifecycle()
-    val tagsUiState by settingsViewModel.tagsState.collectAsStateWithLifecycle()
-    val tagToHide by settingsViewModel.tagToHide.collectAsStateWithLifecycle()
+
     val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
-    val makeArchivePublic by settingsViewModel.makeArchivePublic.collectAsStateWithLifecycle()
-    val createEbook by settingsViewModel.createEbook.collectAsStateWithLifecycle()
-    val autoAddBookmark by settingsViewModel.autoAddBookmark.collectAsStateWithLifecycle()
-    val createArchive by settingsViewModel.createArchive.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -95,10 +88,9 @@ fun SettingsScreen(
                 .padding(paddingValues)
         ) {
             SettingsContent(
-                settingsUiState = settingsUiState,
                 onLogout = { settingsViewModel.logout() },
                 goToLogin = {
-                    settingsViewModel.clearImageCache()
+                    //settingsViewModel.clearImageCache()
                     goToLogin.invoke()
                 },
                 themeMode = settingsViewModel.themeMode,
@@ -112,9 +104,6 @@ fun SettingsScreen(
                 onNavigateToLogs = onNavigateToLogs,
                 onViewLastCrash = onViewLastCrash,
                 useDynamicColors = settingsViewModel.useDynamicColors,
-                cacheSize = settingsViewModel.cacheSize,
-                onClearCache = settingsViewModel::clearImageCache,
-                serverVersion = settingsViewModel.getServerVersion(),
                 serverUrl = settingsViewModel.getServerUrl()
             )
         }
@@ -123,7 +112,6 @@ fun SettingsScreen(
 
 @Composable
 fun SettingsContent(
-    settingsUiState: SettingsUiState,
     compactView: Boolean,
     onCompactViewChanged: (Boolean) -> Unit,
     onLogout: () -> Unit,
@@ -132,12 +120,9 @@ fun SettingsContent(
     onNavigateToPrivacyPolicy: () -> Unit,
     onNavigateToLogs: () -> Unit,
     onViewLastCrash: () -> Unit,
-    themeMode: MutableStateFlow<ThemeMode>,
+    themeMode: StateFlow<ThemeMode>,
     goToLogin: () -> Unit,
-    useDynamicColors: MutableStateFlow<Boolean>,
-    cacheSize: StateFlow<String>,
-    onClearCache: () -> Unit,
-    serverVersion: String,
+    useDynamicColors: StateFlow<Boolean>,
     serverUrl: String,
     ) {
     val platformActions by PlatformActionsProvider.platformActions.collectAsState()
@@ -167,10 +152,10 @@ fun SettingsContent(
     ) {
         item {
             Spacer(modifier = Modifier.height(8.dp))
-            VisualSection(
-                themeMode = themeMode,
-                dynamicColors = useDynamicColors
-            )
+//            VisualSection(
+//                themeMode = themeMode,
+//                dynamicColors = useDynamicColors
+//            )
             CustomHorizontalDivider()
             Spacer(modifier = Modifier.height(18.dp))
             FeedSection(
@@ -179,21 +164,12 @@ fun SettingsContent(
             )
             CustomHorizontalDivider()
             Spacer(modifier = Modifier.height(18.dp))
-
-            CustomHorizontalDivider()
-            Spacer(modifier = Modifier.height(18.dp))
-            DataSection(
-                cacheSize = cacheSize,
-                onClearCache = onClearCache
-            )
-            //if (BuildConfig.FLAVOR == "staging") {
             CustomHorizontalDivider()
                 Spacer(modifier = Modifier.height(18.dp))
                 DebugSection (
                     onNavigateToLogs = onNavigateToLogs,
                     onViewLastCrash = onViewLastCrash
                 )
-            //}
             CustomHorizontalDivider()
             Spacer(modifier = Modifier.height(18.dp))
             AccountSection(
@@ -216,25 +192,6 @@ fun SettingsContent(
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (serverVersion.isNotEmpty()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Storage,
-                            contentDescription = "Server version",
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Server v${serverVersion}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End

@@ -6,12 +6,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.desarrollodroide.adventurelog.feature.adventures.navigation.AdventuresRoute
 import com.desarrollodroide.adventurelog.feature.adventures.navigation.adventuresGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.Home
 import com.desarrollodroide.adventurelog.feature.login.login.navigation.Login
 import com.desarrollodroide.adventurelog.feature.login.login.navigation.loginGraph
-import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeGraph
+import com.desarrollodroide.adventurelog.feature.settings.ui.navigation.settingsGraph
 
 @Composable
 fun AdventureLogNavGraph(
@@ -35,11 +34,13 @@ fun AdventureLogNavGraph(
             }
         )
 
-        homeGraph(
+        settingsGraph(
             navController = navController,
             onBackClick = navController::navigateUp,
-            onAdventureClick = { adventureId ->
-                // navController.navigateToAdventureDetail(adventureId)
+            onNavigateToHome = {
+                navController.navigate(Home) {
+                    popUpTo(Login) { inclusive = true }
+                }
             }
         )
         

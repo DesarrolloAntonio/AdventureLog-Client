@@ -7,13 +7,14 @@ import coil3.network.ktor3.asNetworkClient
 import com.desarrollodroide.adventurelog.feature.adventures.di.adventureModule
 import com.desarrollodroide.adventurelog.feature.home.di.homeModule
 import com.desarrollodroide.adventurelog.feature.login.di.loginModule
+import com.desarrollodroide.adventurelog.feature.settings.di.settingsModule
 
 import io.ktor.client.HttpClient
 import org.koin.dsl.module
 
 @OptIn(ExperimentalCoilApi::class)
 val appModule = module {
-    includes(loginModule, homeModule, adventureModule)
+    includes(loginModule, homeModule, adventureModule, settingsModule)
     single {
         NetworkFetcher.Factory(
             networkClient = { get<HttpClient>().asNetworkClient() },

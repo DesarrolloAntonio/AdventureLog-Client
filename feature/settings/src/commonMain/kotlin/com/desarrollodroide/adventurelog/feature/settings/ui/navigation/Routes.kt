@@ -1,24 +1,9 @@
-package com.desarrollodroide.adventurelog.feature.home.ui.navigation
+package com.desarrollodroide.adventurelog.feature.settings.ui.navigation
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object Home
+data object Settings
 
 @Serializable
-internal data object HomeScreen
-
-@Serializable
-internal data object AdventuresScreen
-
-@Serializable
-internal data object CollectionsScreen
-
-@Serializable
-internal data object TravelScreen
-
-@Serializable
-internal data object MapScreen
-
-@Serializable
-internal data object CalendarScreen
+internal data object SettingsScreen
