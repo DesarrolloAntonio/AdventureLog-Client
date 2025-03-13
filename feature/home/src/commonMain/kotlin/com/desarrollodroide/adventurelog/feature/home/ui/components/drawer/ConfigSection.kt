@@ -19,7 +19,10 @@ import androidx.compose.material3.HorizontalDivider
  * Configuration section for the drawer wrapped in a root Column
  */
 @Composable
-fun ConfigSection() {
+fun ConfigSection(
+    onSettingsClick: () -> Unit = {},
+    onHelpClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
@@ -42,12 +45,14 @@ fun ConfigSection() {
             // Configuration options
             ConfigOption(
                 icon = Icons.Outlined.Settings,
-                title = "Settings"
+                title = "Settings",
+                onClick = onSettingsClick
             )
 
             ConfigOption(
                 icon = Icons.Outlined.Help,
-                title = "Help & Support"
+                title = "Help & Support",
+                onClick = onHelpClick
             )
         }
 
@@ -73,13 +78,14 @@ fun ConfigSection() {
 @Composable
 fun ConfigOption(
     icon: ImageVector,
-    title: String
+    title: String,
+    onClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
-            .clickable { /* Configuration action */ }
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

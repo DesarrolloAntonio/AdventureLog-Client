@@ -34,6 +34,7 @@ fun HomeScreenRoute(
     onTravelClick: () -> Unit,
     onMapClick: () -> Unit,
     onCalendarClick: () -> Unit,
+    onSettingsClick: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -44,7 +45,8 @@ fun HomeScreenRoute(
         onCollectionsClick = onCollectionsClick,
         onTravelClick = onTravelClick,
         onMapClick = onMapClick,
-        onCalendarClick = onCalendarClick
+        onCalendarClick = onCalendarClick,
+        onSettingsClick = onSettingsClick
     )
 }
 
@@ -60,7 +62,8 @@ fun HomeScreen(
     onCollectionsClick: () -> Unit,
     onTravelClick: () -> Unit,
     onMapClick: () -> Unit,
-    onCalendarClick: () -> Unit
+    onCalendarClick: () -> Unit,
+    onSettingsClick: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -74,7 +77,8 @@ fun HomeScreen(
         onCollectionsClick = onCollectionsClick,
         onTravelClick = onTravelClick,
         onMapClick = onMapClick,
-        onCalendarClick = onCalendarClick
+        onCalendarClick = onCalendarClick,
+        onSettingsClick = onSettingsClick
     ) {
         // Main scaffold with top bar and content
         Scaffold(

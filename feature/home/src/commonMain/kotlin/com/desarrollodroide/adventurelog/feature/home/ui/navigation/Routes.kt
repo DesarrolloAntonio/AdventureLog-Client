@@ -22,3 +22,6 @@ internal data object MapScreen
 
 @Serializable
 internal data object CalendarScreen
+
+@Serializable
+internal data object SettingsScreen

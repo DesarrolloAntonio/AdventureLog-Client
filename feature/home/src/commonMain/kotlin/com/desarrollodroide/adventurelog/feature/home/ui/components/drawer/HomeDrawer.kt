@@ -32,6 +32,8 @@ fun HomeDrawer(
     onTravelClick: () -> Unit,
     onMapClick: () -> Unit,
     onCalendarClick: () -> Unit,
+    onSettingsClick: () -> Unit = {},
+    onHelpClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     // State to track the selected navigation item
@@ -63,7 +65,16 @@ fun HomeDrawer(
                         scope = scope,
                         onCloseDrawer = { scope.launch { drawerState.close() } }
                     )
-                    ConfigSection()
+                    ConfigSection(
+                        onSettingsClick = {
+                            scope.launch { drawerState.close() }
+                            onSettingsClick()
+                        },
+                        onHelpClick = {
+                            scope.launch { drawerState.close() }
+                            onHelpClick()
+                        }
+                    )
                 }
             }
         },

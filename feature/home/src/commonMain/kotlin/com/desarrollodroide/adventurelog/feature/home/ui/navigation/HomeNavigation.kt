@@ -20,7 +20,8 @@ fun NavGraphBuilder.homeGraph(
                 onCollectionsClick = { navController.navigate(CollectionsScreen) },
                 onTravelClick = { navController.navigate(TravelScreen) },
                 onMapClick = { navController.navigate(MapScreen) },
-                onCalendarClick = { navController.navigate(CalendarScreen) }
+                onCalendarClick = { navController.navigate(CalendarScreen) },
+                onSettingsClick = { navController.navigate(SettingsScreen) }
             )
         }
 

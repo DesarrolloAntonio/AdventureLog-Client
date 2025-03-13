@@ -39,7 +39,7 @@ fun AdventureLogNavGraph(
             navController = navController,
             onBackClick = navController::navigateUp,
             onAdventureClick = { adventureId ->
-                // Aquí puedes añadir la navegación a la aventura específica si es necesario
+
             }
         )
 
