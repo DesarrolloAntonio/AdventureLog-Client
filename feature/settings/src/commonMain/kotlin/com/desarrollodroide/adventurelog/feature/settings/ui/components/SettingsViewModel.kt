@@ -7,7 +7,6 @@ import coil3.annotation.ExperimentalCoilApi
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.core.data.SettingsRepository
 import com.desarrollodroide.adventurelog.core.data.Tag
-import com.desarrollodroide.adventurelog.core.data.ThemeManager
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.settings.model.SettingsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +22,6 @@ class SettingsViewModel(
     private val imageLoader: ImageLoader,
 ) : ViewModel() {
 
-    private val _settingsUiState = MutableStateFlow<SettingsUiState>(SettingsUiState.Idle)
-    val settingsUiState = _settingsUiState.asStateFlow()
 
     private val _cacheSize = MutableStateFlow("Calculating...")
     val cacheSize: StateFlow<String> = _cacheSize.asStateFlow()
@@ -79,12 +76,7 @@ class SettingsViewModel(
                 // Estos son ejemplos, ajusta según la estructura real de tus datos
                 _serverVersion.value = user.serverVersion ?: "1.0.0"
                 _serverUrl.value = user.serverUrl ?: "localhost"
-                
-                // También podrías cargar otras configuraciones específicas del usuario
-                makeArchivePublic.value = user.preferences?.makeArchivePublic ?: false
-                createEbook.value = user.preferences?.createEbook ?: false
-                autoAddBookmark.value = user.preferences?.autoAddBookmark ?: false
-                createArchive.value = user.preferences?.createArchive ?: false
+z
             }
         }
     }

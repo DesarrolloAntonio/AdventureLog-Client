@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.adventurelog.kotlinMultiplatform)
-    id("com.google.protobuf") version "0.9.4"
 }
 
 kotlin {
