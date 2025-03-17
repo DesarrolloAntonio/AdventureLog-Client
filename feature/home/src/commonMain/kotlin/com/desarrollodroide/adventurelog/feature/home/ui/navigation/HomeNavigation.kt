@@ -16,33 +16,17 @@ fun NavGraphBuilder.homeGraph(
     ) {
         composable<HomeScreen> {
             HomeScreenRoute(
-                onAdventuresClick = { onAdventureClick("") },
-                onCollectionsClick = { navController.navigate(CollectionsScreen) },
-                onTravelClick = { navController.navigate(TravelScreen) },
-                onMapClick = { navController.navigate(MapScreen) },
-                onCalendarClick = { navController.navigate(CalendarScreen) },
-                onSettingsClick = { navController.navigate(SettingsScreen) }
+                // Estos callbacks ya no navegan a otra pantalla, sino que cambian el contenido interno
+                onAdventuresClick = { },
+                onCollectionsClick = { },
+                onTravelClick = { },
+                onMapClick = { },
+                onCalendarClick = { },
+                onSettingsClick = { }
             )
         }
 
-        composable<AdventuresScreen> {
-
-        }
-
-        composable<CollectionsScreen> {
-            // CollectionsScreenRoute()
-        }
-
-        composable<TravelScreen> {
-            // TravelScreenRoute()
-        }
-
-        composable<MapScreen> {
-            // MapScreenRoute()
-        }
-
-        composable<CalendarScreen> {
-            // CalendarScreenRoute()
-        }
+        // Estos destinos ya no son necesarios, ya que la navegación es interna
+        // Se pueden eliminar o mantener para compatibilidad con versiones anteriores
     }
 }

@@ -21,11 +21,14 @@ import androidx.compose.ui.text.font.FontWeight
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopBar(onMenuClick: () -> Unit) {
+fun HomeTopBar(
+    onMenuClick: () -> Unit,
+    title: String = "Adventure Log"
+) {
     TopAppBar(
         title = {
             Text(
-                text = "Adventure Log",
+                text = title,
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 )

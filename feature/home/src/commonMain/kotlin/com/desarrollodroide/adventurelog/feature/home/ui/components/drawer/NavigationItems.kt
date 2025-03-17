@@ -11,6 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.home.model.NavigationItem
 import kotlinx.coroutines.CoroutineScope
@@ -79,7 +85,12 @@ fun NavigationItemsList(
         text = "MY ADVENTURES",
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+            .semantics {
+                contentDescription = "Section: My Adventures"
+                heading()
+            }
     )
 
     // Navigation items with animation
@@ -100,20 +111,32 @@ fun NavigationItemsList(
             Modifier
         }
 
+        // Accessibility description
+        val itemState = if (isSelected) "selected" else "not selected"
+        val badgeDescription = if (item.badgeCount > 0) "with ${item.badgeCount} notifications" else ""
+        val accessibilityDescription = "${item.title} navigation item, $itemState $badgeDescription"
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
                 .padding(end = 16.dp)
                 .then(backgroundModifier)
-                .clickable {
-                    onItemSelected(index)
-                    scope.launch {
-                        onCloseDrawer()
-                        item.onClick()
+                .clickable(
+                    onClick = {
+                        // If already selected, do nothing
+                        if (!isSelected) {
+                            onItemSelected(index)
+                            // Call onClick directly to avoid issues with scope
+                            item.onClick()
+                        }
                     }
-                }
-                .padding(start = 16.dp, end = 8.dp),
+                )
+                .padding(start = 16.dp, end = 8.dp)
+                .clearAndSetSemantics {
+                    contentDescription = accessibilityDescription
+                    role = Role.Button
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Selection indicator
@@ -135,7 +158,7 @@ fun NavigationItemsList(
             // Icon
             Icon(
                 imageVector = if (isSelected) item.selectedIcon else item.icon,
-                contentDescription = item.title,
+                contentDescription = null, // Main description already set in Row
                 tint = itemColor,
                 modifier = Modifier.size(24.dp)
             )

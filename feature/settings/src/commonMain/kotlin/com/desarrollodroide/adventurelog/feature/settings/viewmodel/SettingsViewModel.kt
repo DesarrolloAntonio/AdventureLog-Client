@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
-    private val imageLoader: ImageLoader
+//    private val imageLoader: ImageLoader
 ): ViewModel() {
 
     private val _userDetails = MutableStateFlow<UserDetails?>(null)

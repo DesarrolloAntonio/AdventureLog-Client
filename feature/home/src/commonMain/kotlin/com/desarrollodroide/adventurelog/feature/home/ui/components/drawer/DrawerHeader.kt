@@ -13,6 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
@@ -35,6 +39,9 @@ fun DrawerHeader(homeUiState: HomeUiState) {
                     )
                 )
             )
+            .semantics {
+                contentDescription = "User profile header"
+            }
     ) {
         Column(
             modifier = Modifier
@@ -49,11 +56,14 @@ fun DrawerHeader(homeUiState: HomeUiState) {
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
                     .padding(4.dp)
+                    .clearAndSetSemantics {
+                        contentDescription = "User avatar"
+                    }
             ) {
                 // Here you could load the actual profile picture
                 Icon(
                     imageVector = Icons.Default.Person,
-                    contentDescription = null,
+                    contentDescription = null, // Description already set in the Box
                     modifier = Modifier
                         .size(40.dp)
                         .align(Alignment.Center),
@@ -65,24 +75,34 @@ fun DrawerHeader(homeUiState: HomeUiState) {
 
             // User information
             if (homeUiState is HomeUiState.Success) {
-                Text(
-                    text = homeUiState.userName,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
-                )
+                val userName = homeUiState.userName
+                val adventureCount = homeUiState.recentAdventures.size
+                
+                Column(modifier = Modifier.clearAndSetSemantics {
+                    contentDescription = "User $userName with $adventureCount adventures logged"
+                }) {
+                    Text(
+                        text = userName,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
 
-                Text(
-                    text = "${homeUiState.recentAdventures.size} adventures logged",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                )
+                    Text(
+                        text = "$adventureCount adventures logged",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                    )
+                }
             } else {
                 Text(
                     text = "Adventure Log",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clearAndSetSemantics {
+                        contentDescription = "Adventure Log app"
+                    }
                 )
             }
         }

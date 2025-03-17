@@ -12,6 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.HorizontalDivider
 
@@ -39,7 +45,12 @@ fun ConfigSection(
                 text = "SETTINGS",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+                modifier = Modifier
+                    .padding(start = 16.dp, bottom = 8.dp)
+                    .semantics {
+                        contentDescription = "Section: Settings"
+                        heading()
+                    }
             )
 
             // Configuration options
@@ -66,7 +77,10 @@ fun ConfigSection(
             Text(
                 text = "Adventure Log v1.0",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.clearAndSetSemantics {
+                    contentDescription = "Application version: Adventure Log version 1.0"
+                }
             )
         }
     }
@@ -86,12 +100,16 @@ fun ConfigOption(
             .fillMaxWidth()
             .height(50.dp)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .clearAndSetSemantics {
+                contentDescription = "$title option"
+                role = Role.Button
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = title,
+            contentDescription = null, // Description already set in the Row
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
