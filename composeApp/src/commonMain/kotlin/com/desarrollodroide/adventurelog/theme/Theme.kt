@@ -6,7 +6,12 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import com.desarrollodroide.adventurelog.core.constants.ThemeMode
+import com.desarrollodroide.adventurelog.core.data.SettingsRepository
+import org.koin.compose.koinInject
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -252,8 +257,19 @@ val unspecified_scheme = ColorFamily(
 fun AppTheme(
     content: @Composable () -> Unit
 ) {
+    val settingsRepository: SettingsRepository = koinInject()
+    val themeMode by settingsRepository.getThemeMode().collectAsState()
+    val useDynamicColors by settingsRepository.getUseDynamicColors().collectAsState()
+    
+    // Determine if dark mode should be used based on the theme mode
+    val isDarkTheme = when (themeMode) {
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+        ThemeMode.AUTO -> isSystemInDarkTheme()
+    }
+
     MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) darkScheme else lightScheme,
+        colorScheme = if (isDarkTheme) darkScheme else lightScheme,
         typography = getAppTypography(),
         content = content
     )
