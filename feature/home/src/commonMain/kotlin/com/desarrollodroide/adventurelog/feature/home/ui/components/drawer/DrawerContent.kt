@@ -6,16 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Help
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,12 +21,8 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.home.components.drawer.createNavigationItems
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
-import com.desarrollodroide.adventurelog.feature.home.model.NavigationItem
 import com.desarrollodroide.adventurelog.feature.home.ui.CurrentScreen
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * Reusable drawer content between modal and permanent versions
@@ -131,8 +122,24 @@ fun DrawerContent(
                 }
         ) {
             ModalDrawerSheet {
-                // Content with cascading element animations
-                val totalItems = 9 // Header + 5 navigation items + divider + 2 settings items
+                // Get navigation and config items
+                val navigationItems = createNavigationItems(
+                    onAdventuresClick = onAdventuresClick,
+                    onCollectionsClick = onCollectionsClick,
+                    onTravelClick = onTravelClick,
+                    onMapClick = onMapClick,
+                    onCalendarClick = onCalendarClick
+                )
+                
+                val configItems = createConfigItems(
+                    onSettingsClick = onSettingsClick,
+                    onHelpClick = onHelpClick
+                )
+                
+                // Total items count for delay calculations
+                val totalItems = 8 + navigationItems.size + configItems.size 
+                // (Header + 2 section titles + divider + footer + all items)
+                
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
@@ -155,15 +162,6 @@ fun DrawerContent(
                         )
 
                         // Navigation items section
-                        val navigationItems = createNavigationItems(
-                            onAdventuresClick = onAdventuresClick,
-                            onCollectionsClick = onCollectionsClick,
-                            onTravelClick = onTravelClick,
-                            onMapClick = onMapClick,
-                            onCalendarClick = onCalendarClick
-                        )
-
-                        // Use one loop for all navigation items
                         navigationItems.forEachIndexed { index, item ->
                             val itemDelayMillis = calculateDelayMillis(index + 2, totalItems, drawerOpen)
                             
@@ -185,7 +183,7 @@ fun DrawerContent(
                         }
 
                         // Divider with animation
-                        val dividerDelayMillis = calculateDelayMillis(7, totalItems, drawerOpen)
+                        val dividerDelayMillis = calculateDelayMillis(navigationItems.size + 2, totalItems, drawerOpen)
                         AnimatedDivider(
                             visible = visible,
                             delayMillis = dividerDelayMillis
@@ -198,36 +196,35 @@ fun DrawerContent(
                             delayMillis = dividerDelayMillis + 50
                         )
 
-                        // Settings items
-                        DrawerItemAnimated(
-                            title = "Settings",
-                            icon = Icons.Outlined.Settings,
-                            selectedIcon = Icons.Filled.Settings,
-                            isSelected = selectedItem == 5,
-                            onClick = {
-                                if (selectedItem != 5) {
-                                    selectedItem = 5
-                                    onSettingsClick()
-                                }
-                            },
-                            visible = visible,
-                            delayMillis = calculateDelayMillis(8, totalItems, drawerOpen)
-                        )
-
-                        DrawerItemAnimated(
-                            title = "Help & Support",
-                            icon = Icons.Outlined.Help,
-                            isSelected = false,
-                            onClick = onHelpClick,
-                            visible = visible,
-                            delayMillis = calculateDelayMillis(9, totalItems, drawerOpen)
-                        )
+                        // Config items section
+                        configItems.forEachIndexed { index, item ->
+                            val configBaseIndex = navigationItems.size + 4 // Header + adventure title + divider + settings title
+                            val itemDelayMillis = calculateDelayMillis(configBaseIndex + index, totalItems, drawerOpen)
+                            
+                            // Settings is at position 5 in the global index
+                            val isItemSelected = index == 0 && selectedItem == 5
+                            
+                            DrawerItemAnimated(
+                                title = item.title,
+                                icon = item.icon,
+                                selectedIcon = item.selectedIcon,
+                                isSelected = isItemSelected,
+                                onClick = {
+                                    if (index == 0 && selectedItem != 5) { // Settings item
+                                        selectedItem = 5
+                                    }
+                                    item.onClick()
+                                },
+                                visible = visible,
+                                delayMillis = itemDelayMillis
+                            )
+                        }
                     }
 
                     // Footer with version
                     AnimatedFooter(
                         visible = visible,
-                        delayMillis = calculateDelayMillis(10, totalItems, drawerOpen)
+                        delayMillis = calculateDelayMillis(totalItems - 1, totalItems, drawerOpen)
                     )
                 }
             }

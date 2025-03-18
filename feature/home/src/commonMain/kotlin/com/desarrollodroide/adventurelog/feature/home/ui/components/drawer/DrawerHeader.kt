@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components.drawer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -46,7 +47,8 @@ fun DrawerHeader(homeUiState: HomeUiState) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
             // User avatar
