@@ -4,11 +4,14 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.core.data.SettingsRepository
 import org.koin.compose.koinInject
@@ -253,6 +256,9 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+// Flag to check if dynamic colors are supported (will be set at runtime)
+expect val isDynamicColorSupported: Boolean
+
 @Composable
 fun AppTheme(
     content: @Composable () -> Unit
@@ -268,8 +274,23 @@ fun AppTheme(
         ThemeMode.AUTO -> isSystemInDarkTheme()
     }
 
+    val context = LocalContext.current
+    
+    // Determine the color scheme to use
+    val colorScheme = when {
+        useDynamicColors && isDynamicColorSupported -> {
+            if (isDarkTheme) {
+                dynamicDarkColorScheme(context)
+            } else {
+                dynamicLightColorScheme(context)
+            }
+        }
+        isDarkTheme -> darkScheme
+        else -> lightScheme
+    }
+
     MaterialTheme(
-        colorScheme = if (isDarkTheme) darkScheme else lightScheme,
+        colorScheme = colorScheme,
         typography = getAppTypography(),
         content = content
     )
