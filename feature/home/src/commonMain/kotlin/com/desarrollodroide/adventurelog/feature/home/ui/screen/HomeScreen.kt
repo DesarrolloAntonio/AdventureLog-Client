@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.home.ui
+package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +23,6 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.adventures.E
 import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ErrorStateView
 import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeDrawer
 import com.desarrollodroide.adventurelog.feature.home.ui.components.topbar.HomeTopBar
-import com.desarrollodroide.adventurelog.feature.home.ui.screen.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
@@ -55,7 +54,7 @@ fun HomeScreenRoute(
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Maintain the current screen state inside HomeScreen to control content
-    // Initialize with ADVENTURES instead of HOME
+    // Initialize with ADVENTURES
     var currentScreen by rememberSaveable { mutableStateOf(CurrentScreen.ADVENTURES) }
 
     HomeScreenContent(
@@ -78,9 +77,6 @@ fun HomeScreenRoute(
         },
         onSettingsClick = { 
             currentScreen = CurrentScreen.SETTINGS
-        },
-        onBackToHome = {
-            currentScreen = CurrentScreen.HOME
         }
     )
 }
@@ -99,8 +95,7 @@ fun HomeScreenContent(
     onTravelClick: () -> Unit,
     onMapClick: () -> Unit,
     onCalendarClick: () -> Unit,
-    onSettingsClick: () -> Unit = {},
-    onBackToHome: () -> Unit = {}
+    onSettingsClick: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -149,7 +144,8 @@ fun HomeScreenContent(
                     .fillMaxSize()
             ) {
                 when (currentScreen) {
-                    CurrentScreen.HOME -> {
+                    CurrentScreen.HOME, CurrentScreen.ADVENTURES -> {
+                        // Show AdventureListScreen for both HOME and ADVENTURES
                         when (homeUiState) {
                             is HomeUiState.Loading -> {
                                 Box(
@@ -163,41 +159,13 @@ fun HomeScreenContent(
                                 EmptyStateView()
                             }
                             is HomeUiState.Success -> {
-                                HomeContent(
-                                    userName = homeUiState.userName,
-                                    adventures = homeUiState.recentAdventures
+                                AdventureListScreen(
+                                    adventureItems = homeUiState.recentAdventures,
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                             is HomeUiState.Error -> {
                                 ErrorStateView(errorMessage = homeUiState.message)
-                            }
-                        }
-                    }
-                    CurrentScreen.ADVENTURES -> {
-                        // Show AdventureListScreen from feature/adventures
-                        if (homeUiState is HomeUiState.Success) {
-                            AdventureListScreen(
-                                adventureItems = homeUiState.recentAdventures,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            // Show loading or empty state as appropriate
-                            when (homeUiState) {
-                                is HomeUiState.Loading -> {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator()
-                                    }
-                                }
-                                is HomeUiState.Empty -> {
-                                    EmptyStateView()
-                                }
-                                is HomeUiState.Error -> {
-                                    ErrorStateView(errorMessage = homeUiState.message)
-                                }
-                                else -> {}
                             }
                         }
                     }
