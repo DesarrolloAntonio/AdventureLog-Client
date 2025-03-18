@@ -57,7 +57,8 @@ fun HomeDrawer(
                 onSettingsClick = {
                     scope.launch { drawerState.close() }
                     onSettingsClick()
-                }
+                },
+                drawerOpen = drawerState.isOpen
             )
         },
         content = content
