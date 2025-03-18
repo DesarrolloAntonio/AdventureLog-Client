@@ -1,8 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components.drawer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Help
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -27,7 +30,8 @@ import androidx.compose.material3.HorizontalDivider
 @Composable
 fun ConfigSection(
     onSettingsClick: () -> Unit = {},
-    onHelpClick: () -> Unit = {}
+    onHelpClick: () -> Unit = {},
+    isSettingsSelected: Boolean = false
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -55,15 +59,17 @@ fun ConfigSection(
 
             // Configuration options
             ConfigOption(
-                icon = Icons.Outlined.Settings,
+                icon = if (isSettingsSelected) Icons.Filled.Settings else Icons.Outlined.Settings,
                 title = "Settings",
-                onClick = onSettingsClick
+                onClick = onSettingsClick,
+                isSelected = isSettingsSelected
             )
 
             ConfigOption(
                 icon = Icons.Outlined.Help,
                 title = "Help & Support",
-                onClick = onHelpClick
+                onClick = onHelpClick,
+                isSelected = false
             )
         }
 
@@ -93,12 +99,29 @@ fun ConfigSection(
 fun ConfigOption(
     icon: ImageVector,
     title: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    isSelected: Boolean = false
 ) {
+    val itemColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val backgroundModifier = if (isSelected) {
+        Modifier.background(
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
+        )
+    } else {
+        Modifier
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
+            .then(backgroundModifier)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
             .clearAndSetSemantics {
@@ -107,10 +130,26 @@ fun ConfigOption(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Selection indicator
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(24.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+        } else {
+            Spacer(modifier = Modifier.width(16.dp))
+        }
+
         Icon(
             imageVector = icon,
             contentDescription = null, // Description already set in the Row
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = itemColor
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -118,7 +157,7 @@ fun ConfigOption(
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = itemColor
         )
     }
 }

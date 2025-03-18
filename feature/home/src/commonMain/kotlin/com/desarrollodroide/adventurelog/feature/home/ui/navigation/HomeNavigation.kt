@@ -16,7 +16,6 @@ fun NavGraphBuilder.homeGraph(
     ) {
         composable<HomeScreen> {
             HomeScreenRoute(
-                // Estos callbacks ya no navegan a otra pantalla, sino que cambian el contenido interno
                 onAdventuresClick = { },
                 onCollectionsClick = { },
                 onTravelClick = { },
@@ -25,8 +24,5 @@ fun NavGraphBuilder.homeGraph(
                 onSettingsClick = { }
             )
         }
-
-        // Estos destinos ya no son necesarios, ya que la navegación es interna
-        // Se pueden eliminar o mantener para compatibilidad con versiones anteriores
     }
 }

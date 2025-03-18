@@ -45,9 +45,7 @@ fun AdventureLogNavGraph(
                 // Este callback ya no navegará a otra pantalla, sino que se manejará internamente en Home
             }
         )
-        
-        // Ya no es necesario definir settingsGraph aquí, ya que se manejará internamente en Home
-        
+
         adventuresGraph(
             navController = navController,
             onBackClick = navController::navigateUp

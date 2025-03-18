@@ -13,8 +13,8 @@ class IosPlatformActions : PlatformActions {
     }
 
     override fun sendFeedbackEmail() {
-        // Implementación para iOS - puedes usar MFMailComposeViewController o similar
-        // Esta es una implementación simplificada
+        // Implementation for iOS - you can use MFMailComposeViewController or similar
+        // This is a simplified implementation
         val emailUrl = NSURL.URLWithString("mailto:feedback@yourdomain.com")
         if (emailUrl != null) {
             UIApplication.sharedApplication.openURL(emailUrl)

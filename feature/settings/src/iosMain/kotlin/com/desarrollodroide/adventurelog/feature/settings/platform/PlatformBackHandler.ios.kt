@@ -16,10 +16,10 @@ import platform.UIKit.UIViewController
  */
 @Composable
 actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {
-    // En iOS, normalmente se maneja la navegación "hacia atrás" de forma diferente
-    // Esta es una implementación mínima que no hace nada físicamente
-    // En una aplicación real, implementarías esto usando el sistema de navegación de iOS
+    // In iOS, back navigation is typically handled differently
+    // This is a minimal implementation that doesn't do anything physically
+    // In a real app, you would implement this using iOS navigation system
     
-    // No hacemos nada aquí porque la navegación hacia atrás en iOS
-    // se maneja típicamente a través de gestos o botones en la NavigationBar
+    // We do nothing here because back navigation in iOS
+    // is typically handled through gestures or buttons in the NavigationBar
 }
