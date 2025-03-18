@@ -1,40 +1,37 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components.drawer
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Help
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.home.components.drawer.NavigationItemsList
 import com.desarrollodroide.adventurelog.feature.home.components.drawer.createNavigationItems
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
+import com.desarrollodroide.adventurelog.feature.home.model.NavigationItem
 import com.desarrollodroide.adventurelog.feature.home.ui.CurrentScreen
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Reusable drawer content between modal and permanent versions
@@ -49,7 +46,8 @@ fun DrawerContent(
     onMapClick: () -> Unit,
     onCalendarClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    drawerOpen: Boolean // New parameter to control drawer visibility
+    onHelpClick: () -> Unit = {},
+    drawerOpen: Boolean // Parameter to control drawer visibility
 ) {
     // Convert current screen to corresponding navigation index
     val selectedItemIndex = when (currentScreen) {
@@ -59,7 +57,7 @@ fun DrawerContent(
         CurrentScreen.TRAVEL -> 2
         CurrentScreen.MAP -> 3
         CurrentScreen.CALENDAR -> 4
-        CurrentScreen.SETTINGS -> 5  // Settings is now assigned index 5
+        CurrentScreen.SETTINGS -> 5
     }
 
     // Maintain selection state internally, but initialize it from currentScreen
@@ -74,6 +72,37 @@ fun DrawerContent(
         visible = drawerOpen
     }
 
+    // Advanced 3D animations
+    val rotation by animateFloatAsState(
+        targetValue = if (visible) 0f else -25f,
+        animationSpec = spring(
+            dampingRatio = 0.8f,
+            stiffness = 150f
+        ),
+        label = "rotation"
+    )
+    
+    val offsetX by animateDpAsState(
+        targetValue = if (visible) 0.dp else (-320).dp,
+        animationSpec = spring(
+            dampingRatio = 0.7f,
+            stiffness = 200f
+        ),
+        label = "offsetX"
+    )
+    
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.8f,
+        animationSpec = tween(300),
+        label = "scale"
+    )
+    
+    val opacity by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(300),
+        label = "opacity"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -83,51 +112,437 @@ fun DrawerContent(
                 bottom = 20.dp
             )
     ) {
-        key(drawerOpen) {
-            AnimatedVisibility(
-                visible = visible,
-                    enter = slideInHorizontally(
-                        initialOffsetX = { -it },
-                        animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f)
-                    ),
-                    exit = slideOutHorizontally(
-                        targetOffsetX = { -it },
-                        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-                    )
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    shadowElevation = 8.dp,
-                    modifier = Modifier.width(280.dp)
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .width(280.dp)
+                .graphicsLayer {
+                    // Apply 3D transformations
+                    rotationY = rotation
+                    translationX = offsetX.toPx()
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = opacity
+                    // Add perspective effect
+                    cameraDistance = 8f * density
+                    // Transform origin
+                    transformOrigin = TransformOrigin(0f, 0.5f)
+                }
+        ) {
+            ModalDrawerSheet {
+                // Content with cascading element animations
+                val totalItems = 9 // Header + 5 navigation items + divider + 2 settings items
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    ModalDrawerSheet {
-                        DrawerHeader(homeUiState = homeUiState)
+                    Column {
+                        // Header with animation
+                        DrawerHeaderAnimated(
+                            homeUiState = homeUiState,
+                            visible = visible,
+                            delayMillis = calculateDelayMillis(0, totalItems, drawerOpen)
+                        )
+                        
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Column {
-                            val navigationItems = createNavigationItems(
-                                onAdventuresClick = onAdventuresClick,
-                                onCollectionsClick = onCollectionsClick,
-                                onTravelClick = onTravelClick,
-                                onMapClick = onMapClick,
-                                onCalendarClick = onCalendarClick
-                            )
+                        // Animate the Adventures section title
+                        AnimatedSectionTitle(
+                            title = "MY ADVENTURES",
+                            visible = visible,
+                            delayMillis = calculateDelayMillis(1, totalItems, drawerOpen)
+                        )
 
-                            NavigationItemsList(
-                                navigationItems = navigationItems,
-                                selectedItem = if (selectedItem <= 4) selectedItem else -1,
-                                onItemSelected = { selectedItem = it },
-                                scope = scope,
-                                onCloseDrawer = { /* callbacks */ }
-                            )
+                        // Navigation items section
+                        val navigationItems = createNavigationItems(
+                            onAdventuresClick = onAdventuresClick,
+                            onCollectionsClick = onCollectionsClick,
+                            onTravelClick = onTravelClick,
+                            onMapClick = onMapClick,
+                            onCalendarClick = onCalendarClick
+                        )
 
-                            ConfigSection(
-                                onSettingsClick = onSettingsClick,
-                                onHelpClick = { /* TODO: Implement help */ },
-                                isSettingsSelected = selectedItem == 5
+                        // Use one loop for all navigation items
+                        navigationItems.forEachIndexed { index, item ->
+                            val itemDelayMillis = calculateDelayMillis(index + 2, totalItems, drawerOpen)
+                            
+                            DrawerItemAnimated(
+                                title = item.title,
+                                icon = item.icon,
+                                selectedIcon = item.selectedIcon,
+                                isSelected = selectedItem == index,
+                                badgeCount = item.badgeCount,
+                                onClick = {
+                                    if (selectedItem != index) {
+                                        selectedItem = index
+                                        item.onClick()
+                                    }
+                                },
+                                visible = visible,
+                                delayMillis = itemDelayMillis
                             )
                         }
+
+                        // Divider with animation
+                        val dividerDelayMillis = calculateDelayMillis(7, totalItems, drawerOpen)
+                        AnimatedDivider(
+                            visible = visible,
+                            delayMillis = dividerDelayMillis
+                        )
+                        
+                        // Settings section title
+                        AnimatedSectionTitle(
+                            title = "SETTINGS",
+                            visible = visible,
+                            delayMillis = dividerDelayMillis + 50
+                        )
+
+                        // Settings items
+                        DrawerItemAnimated(
+                            title = "Settings",
+                            icon = Icons.Outlined.Settings,
+                            selectedIcon = Icons.Filled.Settings,
+                            isSelected = selectedItem == 5,
+                            onClick = {
+                                if (selectedItem != 5) {
+                                    selectedItem = 5
+                                    onSettingsClick()
+                                }
+                            },
+                            visible = visible,
+                            delayMillis = calculateDelayMillis(8, totalItems, drawerOpen)
+                        )
+
+                        DrawerItemAnimated(
+                            title = "Help & Support",
+                            icon = Icons.Outlined.Help,
+                            isSelected = false,
+                            onClick = onHelpClick,
+                            visible = visible,
+                            delayMillis = calculateDelayMillis(9, totalItems, drawerOpen)
+                        )
                     }
+
+                    // Footer with version
+                    AnimatedFooter(
+                        visible = visible,
+                        delayMillis = calculateDelayMillis(10, totalItems, drawerOpen)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AnimatedSectionTitle(
+    title: String,
+    visible: Boolean,
+    delayMillis: Int
+) {
+    val titleOffsetX by animateDpAsState(
+        targetValue = if (visible) 0.dp else (-30).dp,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis,
+            easing = FastOutSlowInEasing
+        ),
+        label = "titleOffsetX"
+    )
+    
+    val titleAlpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis
+        ),
+        label = "titleAlpha"
+    )
+    
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                translationX = titleOffsetX.toPx()
+                alpha = titleAlpha
+            }
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                .semantics {
+                    contentDescription = "Section: $title"
+                    heading()
+                }
+        )
+    }
+}
+
+@Composable
+fun AnimatedDivider(
+    visible: Boolean,
+    delayMillis: Int
+) {
+    val dividerOffsetY by animateDpAsState(
+        targetValue = if (visible) 0.dp else 20.dp,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis,
+            easing = FastOutSlowInEasing
+        ),
+        label = "dividerOffset"
+    )
+    
+    val dividerAlpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis
+        ),
+        label = "dividerAlpha"
+    )
+    
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                translationY = dividerOffsetY.toPx()
+                alpha = dividerAlpha
+            }
+    ) {
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp, horizontal = 16.dp)
+        )
+    }
+}
+
+@Composable
+fun AnimatedFooter(
+    visible: Boolean,
+    delayMillis: Int
+) {
+    val footerOffsetY by animateDpAsState(
+        targetValue = if (visible) 0.dp else 20.dp,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis,
+            easing = FastOutSlowInEasing
+        ),
+        label = "footerOffsetY"
+    )
+    
+    val footerAlpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis
+        ),
+        label = "footerAlpha"
+    )
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .graphicsLayer {
+                translationY = footerOffsetY.toPx()
+                alpha = footerAlpha
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Adventure Log v1.0",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.clearAndSetSemantics {
+                contentDescription = "Application version: Adventure Log version 1.0"
+            }
+        )
+    }
+}
+
+// Function to calculate animation delay based on order
+private fun calculateDelayMillis(index: Int, totalItems: Int, drawerOpen: Boolean): Int {
+    return if (drawerOpen) {
+        // When opening, elements appear from top to bottom
+        50 * index
+    } else {
+        // When closing, elements disappear from bottom to top
+        50 * (totalItems - index - 1)
+    }
+}
+
+@Composable
+fun DrawerHeaderAnimated(
+    homeUiState: HomeUiState,
+    visible: Boolean,
+    delayMillis: Int
+) {
+    val animatedRotation by animateFloatAsState(
+        targetValue = if (visible) 0f else -10f,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis,
+            easing = FastOutSlowInEasing
+        ),
+        label = "headerRotation"
+    )
+    
+    val animatedOffsetX by animateDpAsState(
+        targetValue = if (visible) 0.dp else (-30).dp,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis,
+            easing = FastOutSlowInEasing
+        ),
+        label = "headerOffsetX"
+    )
+    
+    val animatedAlpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 200,
+            delayMillis = delayMillis
+        ),
+        label = "headerAlpha"
+    )
+    
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                rotationY = animatedRotation
+                translationX = animatedOffsetX.toPx()
+                alpha = animatedAlpha
+            }
+    ) {
+        DrawerHeader(homeUiState = homeUiState)
+    }
+}
+
+/**
+ * Common animated drawer item used for both navigation and settings
+ */
+@Composable
+fun DrawerItemAnimated(
+    title: String,
+    icon: ImageVector,
+    selectedIcon: ImageVector? = null, // Optional for settings items that might not have a selected icon
+    isSelected: Boolean = false,
+    badgeCount: Int = 0,
+    onClick: () -> Unit = {},
+    visible: Boolean,
+    delayMillis: Int
+) {
+    val animatedOffsetX by animateDpAsState(
+        targetValue = if (visible) 0.dp else (-50).dp,
+        animationSpec = tween(
+            durationMillis = 300,
+            delayMillis = delayMillis,
+            easing = FastOutSlowInEasing
+        ),
+        label = "itemOffsetX"
+    )
+    
+    val animatedAlpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 200,
+            delayMillis = delayMillis
+        ),
+        label = "itemAlpha"
+    )
+    
+    // Calculate color based on selection
+    val itemColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+    }
+    
+    // Apply background with rounded shape on the right side if selected
+    val backgroundModifier = if (isSelected) {
+        Modifier.background(
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
+        )
+    } else {
+        Modifier
+    }
+    
+    // Accessibility description
+    val itemState = if (isSelected) "selected" else "not selected"
+    val badgeDescription = if (badgeCount > 0) "with $badgeCount notifications" else ""
+    val accessibilityDescription = "$title item, $itemState $badgeDescription"
+    
+    // Apply animation to the container
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                translationX = animatedOffsetX.toPx()
+                alpha = animatedAlpha
+            }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(end = 16.dp)
+                .then(backgroundModifier)
+                .clickable(onClick = onClick)
+                .padding(start = 16.dp, end = 8.dp)
+                .clearAndSetSemantics {
+                    contentDescription = accessibilityDescription
+                    role = Role.Button
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Selection indicator
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(24.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            } else {
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+            
+            // Icon
+            Icon(
+                imageVector = if (isSelected && selectedIcon != null) selectedIcon else icon,
+                contentDescription = null, // Description already set in Row
+                tint = itemColor,
+                modifier = Modifier.size(24.dp)
+            )
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // Title
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = itemColor,
+                modifier = Modifier.weight(1f)
+            )
+            
+            // Badge for notifications
+            if (badgeCount > 0) {
+                Badge(
+                    containerColor = MaterialTheme.colorScheme.error
+                ) {
+                    Text(
+                        text = badgeCount.toString(),
+                        color = MaterialTheme.colorScheme.onError
+                    )
                 }
             }
         }
