@@ -15,14 +15,7 @@ fun NavGraphBuilder.homeGraph(
         startDestination = HomeScreen
     ) {
         composable<HomeScreen> {
-            HomeScreenRoute(
-                onAdventuresClick = { },
-                onCollectionsClick = { },
-                onTravelClick = { },
-                onMapClick = { },
-                onCalendarClick = { },
-                onSettingsClick = { }
-            )
+            HomeScreenRoute()
         }
     }
 }

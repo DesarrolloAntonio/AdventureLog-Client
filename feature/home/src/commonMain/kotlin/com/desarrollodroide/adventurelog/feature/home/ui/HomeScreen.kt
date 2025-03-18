@@ -27,6 +27,8 @@ import com.desarrollodroide.adventurelog.feature.home.ui.screen.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
+import com.desarrollodroide.adventurelog.feature.adventures.adventures.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.adventures.AdventuresViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -48,20 +50,15 @@ enum class CurrentScreen {
  */
 @Composable
 fun HomeScreenRoute(
-    onAdventuresClick: () -> Unit,
-    onCollectionsClick: () -> Unit,
-    onTravelClick: () -> Unit,
-    onMapClick: () -> Unit,
-    onCalendarClick: () -> Unit,
-    onSettingsClick: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Maintain the current screen state inside HomeScreen to control content
-    var currentScreen by rememberSaveable { mutableStateOf(CurrentScreen.HOME) }
+    // Initialize with ADVENTURES instead of HOME
+    var currentScreen by rememberSaveable { mutableStateOf(CurrentScreen.ADVENTURES) }
 
-    HomeScreen(
+    HomeScreenContent(
         homeUiState = homeUiState,
         currentScreen = currentScreen,
         onAdventuresClick = { 
@@ -93,7 +90,7 @@ fun HomeScreenRoute(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     currentScreen: CurrentScreen,
@@ -108,8 +105,9 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     
-    // ViewModel for Settings
+    // ViewModels
     val settingsViewModel = koinViewModel<SettingsViewModel>()
+    val adventuresViewModel = koinViewModel<AdventuresViewModel>()
 
     // Title based on current screen
     val title = when (currentScreen) {
@@ -176,12 +174,31 @@ fun HomeScreen(
                         }
                     }
                     CurrentScreen.ADVENTURES -> {
-                        // TODO: Implement adventures screen
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Adventures Screen")
+                        // Show AdventureListScreen from feature/adventures
+                        if (homeUiState is HomeUiState.Success) {
+                            AdventureListScreen(
+                                adventureItems = homeUiState.recentAdventures,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            // Show loading or empty state as appropriate
+                            when (homeUiState) {
+                                is HomeUiState.Loading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                                is HomeUiState.Empty -> {
+                                    EmptyStateView()
+                                }
+                                is HomeUiState.Error -> {
+                                    ErrorStateView(errorMessage = homeUiState.message)
+                                }
+                                else -> {}
+                            }
                         }
                     }
                     CurrentScreen.COLLECTIONS -> {

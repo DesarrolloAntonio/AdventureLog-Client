@@ -12,9 +12,9 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeGraph
 import com.desarrollodroide.adventurelog.feature.login.login.navigation.Login
 import com.desarrollodroide.adventurelog.feature.login.login.navigation.loginGraph
 
-/**
- * Gráfico de navegación principal de la aplicación
- * Ahora simplificado: settings y otras pantallas se manejan internamente en el HomeScreen
+/**x
+ * Main navigation graph of the application
+ * Now simplified: settings and other screens are handled internally in the HomeScreen
  */
 @Composable
 fun AdventureLogNavGraph(
@@ -42,7 +42,7 @@ fun AdventureLogNavGraph(
             navController = navController,
             onBackClick = navController::navigateUp,
             onAdventureClick = { adventureId ->
-                // Este callback ya no navegará a otra pantalla, sino que se manejará internamente en Home
+                // This callback will no longer navigate to another screen, but will be handled internally in Home
             }
         )
 
