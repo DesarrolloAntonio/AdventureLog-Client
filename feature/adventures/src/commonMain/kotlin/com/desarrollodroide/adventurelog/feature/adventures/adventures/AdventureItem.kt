@@ -43,7 +43,7 @@ fun AdventureItem(
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .height(250.dp),
                 contentScale = ContentScale.Crop
             )
 
@@ -60,11 +60,6 @@ fun AdventureItem(
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = adventure.location,
-                    color = Color.White,
-                    fontSize = 14.sp
                 )
 
                 Row(
