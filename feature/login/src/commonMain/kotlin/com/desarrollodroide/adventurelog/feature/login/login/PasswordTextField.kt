@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.login.login
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,7 +41,9 @@ fun PasswordTextField(
             onValueChange = onPasswordChange,
             singleLine = true,
             maxLines = 1,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp), // Set a fixed, compact height
             placeholder = {
                 Text(
                     text = "Password",
@@ -82,7 +85,7 @@ fun PasswordTextField(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp),
+                    .padding(top = 2.dp), // Reduced top padding
                 textAlign = TextAlign.End,
                 color = colorScheme.error,
                 text = if (isError) "Required" else ""

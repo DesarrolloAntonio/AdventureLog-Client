@@ -19,5 +19,8 @@ kotlin {
 
             implementation(libs.coil.compose)
         }
+        androidMain.dependencies {
+            implementation(libs.androidx.ui.tooling)
+        }
     }
 }

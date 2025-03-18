@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.login.login
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -55,6 +56,7 @@ fun ServerUrlTextField(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .height(55.dp) // Set a fixed, compact height
                 .onFocusChanged { focusState ->
                     if (isFocused && !focusState.isFocused && isValidUrl(serverUrl)) {
                         onClick()
@@ -80,7 +82,7 @@ fun ServerUrlTextField(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp),
+                    .padding(top = 2.dp), // Reduced top padding
                 textAlign = TextAlign.End,
                 color = colorScheme.error,
                 text = if (isError) "Invalid server url" else ""

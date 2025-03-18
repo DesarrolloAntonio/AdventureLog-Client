@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.login.login
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
@@ -18,6 +19,7 @@ fun RememberSessionSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(40.dp) // Set a fixed, compact height
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

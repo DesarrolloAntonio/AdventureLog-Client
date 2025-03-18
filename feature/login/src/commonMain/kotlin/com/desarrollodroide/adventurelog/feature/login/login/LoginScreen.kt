@@ -38,7 +38,13 @@ fun LoginScreenRoute(
     LoginScreen(
         loginUiState = loginUiState,
         loginFormState = loginFormState,
-        onNavigateToHome = onNavigateToCollection
+        onNavigateToHome = onNavigateToCollection,
+        onUserNameChange = viewModel::updateUserName,
+        onPasswordChange = viewModel::updatePassword,
+        onServerUrlChange = viewModel::updateServerUrl,
+        onCheckedRememberSessionChange = viewModel::updateRememberSession,
+        onClickLoginButton = viewModel::login,
+        clearErrors = viewModel::clearErrors
     )
 }
 
@@ -46,9 +52,14 @@ fun LoginScreenRoute(
 internal fun LoginScreen(
     loginUiState: LoginUiState,
     loginFormState: LoginFormState,
-    onNavigateToHome:  () -> Unit
+    onNavigateToHome: () -> Unit,
+    onUserNameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onServerUrlChange: (String) -> Unit,
+    onCheckedRememberSessionChange: (Boolean) -> Unit,
+    onClickLoginButton: () -> Unit,
+    clearErrors: () -> Unit
 ) {
-    val loginViewModel = koinViewModel<LoginViewModel>()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -62,7 +73,7 @@ internal fun LoginScreen(
                     duration = SnackbarDuration.Short
                 )
             }
-            loginViewModel.clearErrors()
+            clearErrors()
         }
     }
 
@@ -71,20 +82,20 @@ internal fun LoginScreen(
     ) {
         ContentViews(
             loginFormState = loginFormState,
-            onUserNameChange = loginViewModel::updateUserName,
-            onPasswordChange = loginViewModel::updatePassword,
-            onServerUrlChange = loginViewModel::updateServerUrl,
-            onCheckedRememberSessionChange = loginViewModel::updateRememberSession,
-            onClickLoginButton = loginViewModel::login,
+            onUserNameChange = onUserNameChange,
+            onPasswordChange = onPasswordChange,
+            onServerUrlChange = onServerUrlChange,
+            onCheckedRememberSessionChange = onCheckedRememberSessionChange,
+            onClickLoginButton = onClickLoginButton,
             onClickTestButton = { }
         )
 
         if (loginUiState is LoginUiState.Loading) {
-
+            // Aquí podrías mostrar un indicador de carga si lo deseas
         }
 
         if (loginUiState is LoginUiState.Error) {
-            loginViewModel.clearErrors()
+            clearErrors()
         }
     }
 }
@@ -107,7 +118,7 @@ fun ContentViews(
             .fillMaxSize()
             .background(backgroundPrimary)
     ) {
-        BubbleBackground(Modifier.fillMaxWidth(), maxHeightFactor = 0.5f)
+        BubbleBackground(Modifier.fillMaxWidth(), maxHeightFactor = 0.45f)
 
         Column(
             modifier = Modifier
@@ -128,7 +139,7 @@ fun ContentViews(
                 style = MaterialTheme.typography.titleMedium,
                 color = colorScheme.onPrimary,
                 modifier = Modifier
-                    .padding(bottom = 32.dp)
+                    .padding(bottom = 24.dp)
                     .padding(horizontal = 30.dp)
             )
 
@@ -147,7 +158,7 @@ fun ContentViews(
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(24.dp)
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
                         .fillMaxWidth(),
                     verticalArrangement = Arrangement.Bottom,
                 ) {
@@ -156,7 +167,7 @@ fun ContentViews(
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 30.dp)
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
                     ServerUrlTextField(
                         serverUrl = loginFormState.serverUrl,
@@ -164,19 +175,19 @@ fun ContentViews(
                         onValueChange = onServerUrlChange,
                         onClick = {  }
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     UserTextField(
                         user = loginFormState.userName,
                         userError = loginFormState.userNameError,
                         onUserChange = onUserNameChange
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     PasswordTextField(
                         password = loginFormState.password,
                         passwordError = loginFormState.passwordError,
                         onPasswordChange = onPasswordChange
                     )
-                    Spacer(Modifier.size(14.dp))
+                    Spacer(Modifier.size(10.dp))
                     LoginButton(
                         onClickLoginButton = onClickLoginButton
                     )
@@ -187,7 +198,7 @@ fun ContentViews(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 20.dp)
+                            .padding(vertical = 12.dp)
                             .padding(horizontal = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
