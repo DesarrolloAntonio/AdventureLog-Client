@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.adventures
+package com.desarrollodroide.adventurelog.feature.adventures.ui.adventures
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,7 +21,8 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 @Composable
 fun AdventureItem(
     adventure: Adventure,
-    onOpenDetails: () -> Unit = {},
+    onClick: () -> Unit = {},
+    onOpenDetails: () -> Unit = { onClick() }, // Default to onClick for backward compatibility
     onEdit: () -> Unit = {},
     onRemoveFromCollection: () -> Unit = {},
     onDelete: () -> Unit = {}
@@ -32,7 +33,8 @@ fun AdventureItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        onClick = onClick
     ) {
         Box {
             // Image
@@ -87,7 +89,7 @@ fun AdventureItem(
                     }
 
                     // Collection tag if present
-                    if (adventure.collection.isNotEmpty()) {
+                    if (adventure.collection != null && adventure.collection.isNotEmpty()) {
                         Surface(
                             modifier = Modifier.height(24.dp),
                             color = Color(0xFF4CAF50),
@@ -98,7 +100,7 @@ fun AdventureItem(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = adventure.collection,
+                                    text = adventure.collection!!,
                                     color = Color.White,
                                     fontSize = 12.sp
                                 )

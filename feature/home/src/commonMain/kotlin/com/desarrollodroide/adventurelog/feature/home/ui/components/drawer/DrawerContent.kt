@@ -97,11 +97,7 @@ fun DrawerContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                start = 20.dp,
-                top = 30.dp,
-                bottom = 20.dp
-            )
+            .padding(16.dp)
     ) {
         Surface(
             shape = RoundedCornerShape(16.dp),

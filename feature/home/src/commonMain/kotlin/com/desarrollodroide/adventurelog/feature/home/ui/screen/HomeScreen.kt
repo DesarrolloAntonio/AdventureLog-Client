@@ -26,8 +26,8 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.topbar.HomeT
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
-import com.desarrollodroide.adventurelog.feature.adventures.adventures.AdventureListScreen
-import com.desarrollodroide.adventurelog.feature.adventures.adventures.AdventuresViewModel
+import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 

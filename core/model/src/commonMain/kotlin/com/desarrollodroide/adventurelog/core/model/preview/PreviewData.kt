@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.core.model.preview
 
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.AdventureImage
+import com.desarrollodroide.adventurelog.core.model.Attachment
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 
@@ -27,6 +28,13 @@ object PreviewData {
             displayName = "Beach",
             icon = "🏖️",
             numAdventures = 4
+        ),
+        Category(
+            id = "4",
+            name = "ruta",
+            displayName = "Ruta",
+            icon = "🏞️",
+            numAdventures = 2
         )
     )
 
@@ -51,6 +59,20 @@ object PreviewData {
             adventure = "3",
             isPrimary = true,
             userId = "3"
+        ),
+        AdventureImage(
+            id = "4",
+            image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+            adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
+            isPrimary = true,
+            userId = "user123"
+        ),
+        AdventureImage(
+            id = "5",
+            image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+            adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
+            isPrimary = true,
+            userId = "user123"
         )
     )
 
@@ -132,6 +154,6 @@ object PreviewData {
             isVisited = false,
             category = categories[0],
             attachments = listOf()
-        )
+        ),
     )
 }

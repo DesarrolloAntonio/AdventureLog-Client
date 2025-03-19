@@ -44,6 +44,7 @@ kotlin {
             implementation(projects.feature.home)
             implementation(projects.feature.adventures)
             implementation(projects.feature.settings)
+            implementation(projects.feature.detail)
 
             implementation(compose.material3)
             implementation(compose.components.resources)

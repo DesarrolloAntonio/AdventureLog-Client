@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
-import com.desarrollodroide.adventurelog.feature.adventures.adventures.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureListScreen
 
 /**
  * Provides previews for the AdventureListScreen in Android Studio.
@@ -24,7 +24,8 @@ fun AdventureListScreenLightPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = PreviewData.adventures
+                adventureItems = PreviewData.adventures,
+                onOpenDetails = {}
             )
         }
     }
@@ -43,7 +44,8 @@ fun AdventureListScreenDarkPreview() {
     MaterialTheme(colorScheme = darkColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = PreviewData.adventures
+                adventureItems = PreviewData.adventures,
+                onOpenDetails = {}
             )
         }
     }
@@ -62,7 +64,8 @@ fun AdventureListScreenSingleItemPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = listOf(PreviewData.adventures[0])
+                adventureItems = listOf(PreviewData.adventures[0]),
+                onOpenDetails = {}
             )
         }
     }
@@ -81,7 +84,8 @@ fun AdventureListScreenEmptyPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = emptyList()
+                adventureItems = emptyList(),
+                onOpenDetails = {}
             )
         }
     }

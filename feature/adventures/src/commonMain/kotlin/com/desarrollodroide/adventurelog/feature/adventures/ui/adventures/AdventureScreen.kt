@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.adventures
+package com.desarrollodroide.adventurelog.feature.adventures.ui.adventures
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +13,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 @Composable
 fun AdventureListScreen(
     adventureItems: List<Adventure>,
+    onOpenDetails: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -21,8 +22,10 @@ fun AdventureListScreen(
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         items(adventureItems) { item ->
-            AdventureItem(item)
+            AdventureItem(
+                adventure = item,
+                onClick = { onOpenDetails(item.id) }
+            )
         }
     }
 }
-

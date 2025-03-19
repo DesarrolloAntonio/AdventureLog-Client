@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
-import com.desarrollodroide.adventurelog.feature.adventures.adventures.AdventureItem
+import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureItem
 
 /**
  * Provides previews for the AdventureItem in Android Studio.

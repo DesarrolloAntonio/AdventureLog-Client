@@ -6,7 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.desarrollodroide.adventurelog.feature.adventures.navigation.adventuresGraph
+import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.adventuresGraph
+import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.Home
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeGraph
 import com.desarrollodroide.adventurelog.feature.login.login.navigation.Login
@@ -47,6 +48,12 @@ fun AdventureLogNavGraph(
         )
 
         adventuresGraph(
+            navController = navController,
+            onBackClick = navController::navigateUp
+        )
+        
+        // New detail feature graph
+        detailGraph(
             navController = navController,
             onBackClick = navController::navigateUp
         )

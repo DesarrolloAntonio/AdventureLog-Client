@@ -10,11 +10,14 @@ kotlin {
             implementation(projects.core.model)
             api(projects.core.domain)
             implementation(projects.core.designsystem)
-            implementation(projects.feature.detail)
+
             implementation(libs.koin.composeVM)
+
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.navigation.compose)
+
         }
         androidMain.dependencies {
             implementation(libs.coil.compose)
@@ -22,4 +25,3 @@ kotlin {
         }
     }
 }
-
