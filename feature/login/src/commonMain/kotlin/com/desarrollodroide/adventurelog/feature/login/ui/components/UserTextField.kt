@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.login.login
+package com.desarrollodroide.adventurelog.feature.login.ui.components
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column

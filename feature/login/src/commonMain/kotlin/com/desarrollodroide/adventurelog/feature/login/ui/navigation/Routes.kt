@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.login.login.navigation
+package com.desarrollodroide.adventurelog.feature.login.ui.navigation
 
 import kotlinx.serialization.Serializable
 

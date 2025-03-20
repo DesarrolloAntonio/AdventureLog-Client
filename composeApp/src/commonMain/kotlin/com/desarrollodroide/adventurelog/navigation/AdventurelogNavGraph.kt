@@ -10,8 +10,8 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.advent
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.Home
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeGraph
-import com.desarrollodroide.adventurelog.feature.login.login.navigation.Login
-import com.desarrollodroide.adventurelog.feature.login.login.navigation.loginGraph
+import com.desarrollodroide.adventurelog.feature.login.ui.navigation.Login
+import com.desarrollodroide.adventurelog.feature.login.ui.navigation.loginGraph
 
 /**x
  * Main navigation graph of the application

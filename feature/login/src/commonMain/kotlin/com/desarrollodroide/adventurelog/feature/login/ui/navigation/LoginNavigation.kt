@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.login.login.navigation
+package com.desarrollodroide.adventurelog.feature.login.ui.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 import org.koin.compose.viewmodel.koinViewModel
-import com.desarrollodroide.adventurelog.feature.login.login.LoginScreenRoute
+import com.desarrollodroide.adventurelog.feature.login.ui.screen.LoginScreenRoute
 
 fun NavGraphBuilder.loginGraph(
     navController: NavHostController,

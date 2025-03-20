@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.login.login
+package com.desarrollodroide.adventurelog.feature.login.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

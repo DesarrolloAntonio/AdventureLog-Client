@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.login.login
+package com.desarrollodroide.adventurelog.feature.login.ui.screen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,11 +22,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import com.desarrollodroide.adventurelog.feature.login.ui.components.LoginButton
+import com.desarrollodroide.adventurelog.feature.login.ui.components.PasswordTextField
+import com.desarrollodroide.adventurelog.feature.login.ui.components.RememberSessionSection
+import com.desarrollodroide.adventurelog.feature.login.ui.components.ServerUrlTextField
+import com.desarrollodroide.adventurelog.feature.login.ui.components.UserTextField
 import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import kotlinx.coroutines.launch
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreenRoute(

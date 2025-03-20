@@ -11,11 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.login.login.LoginButton
-import com.desarrollodroide.adventurelog.feature.login.login.PasswordTextField
-import com.desarrollodroide.adventurelog.feature.login.login.RememberSessionSection
-import com.desarrollodroide.adventurelog.feature.login.login.ServerUrlTextField
-import com.desarrollodroide.adventurelog.feature.login.login.UserTextField
+import com.desarrollodroide.adventurelog.feature.login.ui.components.LoginButton
+import com.desarrollodroide.adventurelog.feature.login.ui.components.PasswordTextField
+import com.desarrollodroide.adventurelog.feature.login.ui.components.RememberSessionSection
+import com.desarrollodroide.adventurelog.feature.login.ui.components.ServerUrlTextField
+import com.desarrollodroide.adventurelog.feature.login.ui.components.UserTextField
 
 /**
  * Provides previews for individual login components in Android Studio.
