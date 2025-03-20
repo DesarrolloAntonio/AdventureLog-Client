@@ -1,27 +1,27 @@
 package com.desarrollodroide.adventurelog.core.constants
 
 /**
- * Enum que define los modos de tema disponibles en la aplicación.
+ * Enum that defines the theme modes available in the application.
  */
 enum class ThemeMode {
     /**
-     * Modo oscuro
+     * Dark mode
      */
     DARK,
     
     /**
-     * Modo claro
+     * Light mode
      */
     LIGHT,
     
     /**
-     * Modo automático basado en la configuración del sistema
+     * Automatic mode based on system settings
      */
     AUTO
 }
 
 /**
- * Enum que define los tipos de vista para los marcadores.
+ * Enum that defines the view types for bookmarks.
  */
 enum class BookmarkViewType {
     /**
@@ -30,7 +30,7 @@ enum class BookmarkViewType {
     FULL,
     
     /**
-     * Vista compacta con información reducida
+     * Compact view with reduced information
      */
     SMALL
 }

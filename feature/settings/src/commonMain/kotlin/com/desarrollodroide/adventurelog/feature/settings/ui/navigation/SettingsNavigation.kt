@@ -4,39 +4,46 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsScreenRoute
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
-fun NavGraphBuilder.settingsGraph(
-    navController: NavHostController,
-    onBackClick: () -> Unit,
-    onNavigateToHome: () -> Unit
+/**
+ * Settings module navigation graph
+ */
+fun NavGraphBuilder.settingsNavGraph(
+    navController: NavHostController
 ) {
-    navigation<Settings>(
-        startDestination = SettingsScreen
+    navigation(
+        route = Settings.route,
+        startDestination = SettingsScreen.route
     ) {
-        composable<SettingsScreen> { entry ->
+        composable(route = SettingsScreen.route) {
             val viewModel = koinViewModel<SettingsViewModel>()
             SettingsScreenRoute(
                 settingsViewModel = viewModel,
                 onNavigateToTermsOfUse = {
-                    //navController.navigate(TermsOfUse)
+                    // Implement when this route exists
                 },
                 onNavigateToPrivacyPolicy = {
-                    //navController.navigate(PrivacyPolicy)
+                    // Implement when this route exists
                 },
                 onNavigateToSourceCode = {
-                    //navController.navigate(SourceCode)
+                    // Implement when this route exists
                 },
                 onNavigateToLogs = {
-                    //navController.navigate(Logs)
+                    // Implement when this route exists
                 },
                 onViewLastCrash = {
-                    //navController.navigate(LastCrash)
+                    // Implement when this route exists
                 },
-                goToLogin = {  },
-                onBack = {  }
+                goToLogin = {
+                    navController.navigate(NavigationRoutes.Login.route) {
+                        popUpTo(Settings.route) { inclusive = true }
+                    }
+                },
+                onBack = { navController.navigateUp() }
             )
         }
     }

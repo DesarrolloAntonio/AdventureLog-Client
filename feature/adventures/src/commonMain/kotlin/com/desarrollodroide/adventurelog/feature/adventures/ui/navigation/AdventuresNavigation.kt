@@ -4,13 +4,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureListScreen
-import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.AdventureDetailScreen
 
-fun NavGraphBuilder.adventuresGraph(
-    navController: NavHostController,
-    onBackClick: () -> Unit
+/**
+ * Adventures module navigation graph
+ */
+fun NavGraphBuilder.adventuresNavGraph(
+    navController: NavHostController
 ) {
     navigation(
         startDestination = AdventuresScreen.route,
@@ -20,7 +22,7 @@ fun NavGraphBuilder.adventuresGraph(
             AdventureListScreen(
                 adventureItems = PreviewData.adventures,
                 onOpenDetails = { adventureId: String ->
-                    navController.navigate(AdventureDetailScreen.createRoute(adventureId))
+                    navController.navigate(NavigationRoutes.Detail.createDetailRoute(adventureId))
                 }
             )
         }

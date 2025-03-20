@@ -22,7 +22,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
-import com.desarrollodroide.adventurelog.feature.home.ui.screen.CurrentScreen
+import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 
 /**
  * Reusable drawer content between modal and permanent versions

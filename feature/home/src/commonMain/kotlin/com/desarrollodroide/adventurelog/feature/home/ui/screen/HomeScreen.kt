@@ -23,6 +23,7 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.adventures.E
 import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ErrorStateView
 import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeDrawer
 import com.desarrollodroide.adventurelog.feature.home.ui.components.topbar.HomeTopBar
+import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
@@ -32,24 +33,12 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Screen types that can be displayed by the HomeScreen
- */
-enum class CurrentScreen {
-    HOME,
-    ADVENTURES,
-    COLLECTIONS,
-    TRAVEL,
-    MAP,
-    CALENDAR,
-    SETTINGS
-}
-
-/**
  * Entry point composable that integrates with navigation
  */
 @Composable
 fun HomeScreenRoute(
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
+    onAdventureClick: (String) -> Unit = {}
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -60,6 +49,7 @@ fun HomeScreenRoute(
     HomeScreenContent(
         homeUiState = homeUiState,
         currentScreen = currentScreen,
+        onAdventureClick = onAdventureClick,
         onAdventuresClick = { 
             currentScreen = CurrentScreen.ADVENTURES
         },
@@ -90,6 +80,7 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     currentScreen: CurrentScreen,
+    onAdventureClick: (String) -> Unit = {},
     onAdventuresClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onTravelClick: () -> Unit,
@@ -120,7 +111,7 @@ fun HomeScreenContent(
         drawerState = drawerState,
         homeUiState = homeUiState,
         scope = scope,
-        currentScreen = currentScreen,
+        currentScreen = currentScreen,  // Aseguramos que se pasa correctamente
         onAdventuresClick = onAdventuresClick,
         onCollectionsClick = onCollectionsClick,
         onTravelClick = onTravelClick,
@@ -161,6 +152,7 @@ fun HomeScreenContent(
                             is HomeUiState.Success -> {
                                 AdventureListScreen(
                                     adventureItems = homeUiState.recentAdventures,
+                                    onOpenDetails = onAdventureClick,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
