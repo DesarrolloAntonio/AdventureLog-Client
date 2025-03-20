@@ -15,7 +15,31 @@ import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.detail.ui.screen.AdventureDetailScreen
 
 /**
- * Provides previews for the AdventureDetailScreen in Android Studio.
+ * Preview implementation of AdventureDetailScreen that works with direct Adventure objects
+ */
+@Composable
+private fun AdventureDetailScreenPreview(
+    adventure: Adventure,
+    isDarkTheme: Boolean = false
+) {
+    val colorScheme = if (isDarkTheme) darkColorScheme() else lightColorScheme()
+    
+    MaterialTheme(colorScheme = colorScheme) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            // Use the inner AdventureDetailScreen composable directly (not the Route)
+            AdventureDetailScreen(
+                adventure = adventure,
+                onBackClick = {},
+                onEditClick = {},
+                onOpenMap = { _, _ -> },
+                onOpenLink = {}
+            )
+        }
+    }
+}
+
+/**
+ * Provides previews for the AdventureDetailScreen in Android Studio - Light Theme
  */
 @Preview(
     name = "Adventure Detail Screen - Light Theme",
@@ -24,17 +48,7 @@ import com.desarrollodroide.adventurelog.feature.detail.ui.screen.AdventureDetai
 )
 @Composable
 fun AdventureDetailScreenLightPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
-            AdventureDetailScreen(
-                adventure = PreviewData.adventures[0],
-                onBackClick = {},
-                onEditClick = {},
-                onOpenMap = { _, _ -> },
-                onOpenLink = {}
-            )
-        }
-    }
+    AdventureDetailScreenPreview(adventure = PreviewData.adventures[0])
 }
 
 /**
@@ -47,17 +61,10 @@ fun AdventureDetailScreenLightPreview() {
 )
 @Composable
 fun AdventureDetailScreenDarkPreview() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
-            AdventureDetailScreen(
-                adventure = PreviewData.adventures[1],
-                onBackClick = {},
-                onEditClick = {},
-                onOpenMap = { _, _ -> },
-                onOpenLink = {}
-            )
-        }
-    }
+    AdventureDetailScreenPreview(
+        adventure = PreviewData.adventures[1],
+        isDarkTheme = true
+    )
 }
 
 /**
@@ -107,17 +114,7 @@ fun HotelBalnearioDetailPreview() {
         attachments = emptyList()
     )
 
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
-            AdventureDetailScreen(
-                adventure = hotelBalneario,
-                onBackClick = {},
-                onEditClick = {},
-                onOpenMap = { _, _ -> },
-                onOpenLink = {}
-            )
-        }
-    }
+    AdventureDetailScreenPreview(adventure = hotelBalneario)
 }
 
 /**
@@ -167,15 +164,5 @@ fun NavalagamellaDetailPreview() {
         attachments = emptyList()
     )
 
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
-            AdventureDetailScreen(
-                adventure = navalagamella,
-                onBackClick = {},
-                onEditClick = {},
-                onOpenMap = { _, _ -> },
-                onOpenLink = {}
-            )
-        }
-    }
+    AdventureDetailScreenPreview(adventure = navalagamella)
 }

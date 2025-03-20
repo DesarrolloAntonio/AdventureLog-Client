@@ -15,7 +15,15 @@ import org.koin.dsl.module
 
 @OptIn(ExperimentalCoilApi::class)
 val appModule = module {
-    includes(loginModule, homeModule, adventureModule, settingsModule, detailModule)
+    // Include all feature modules explicitly
+    includes(
+        loginModule,
+        homeModule,
+        adventureModule,
+        settingsModule,
+        detailModule
+    )
+    
     single {
         NetworkFetcher.Factory(
             networkClient = { get<HttpClient>().asNetworkClient() },

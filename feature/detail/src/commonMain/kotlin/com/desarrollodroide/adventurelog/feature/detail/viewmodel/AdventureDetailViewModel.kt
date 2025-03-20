@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.detail.viewmodel
 
+import androidx.lifecycle.ViewModel
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,7 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * ViewModel for the Adventure Detail screen
  */
-class AdventureDetailViewModel {
+class AdventureDetailViewModel (
+    // Add Use cases classes here
+): ViewModel() {
+
     // In a real app, this would be loaded asynchronously from a repository
     private val _adventure = MutableStateFlow<Adventure?>(null)
     val adventure: StateFlow<Adventure?> = _adventure.asStateFlow()

@@ -19,10 +19,20 @@ fun NavGraphBuilder.adventuresNavGraph(
         route = AdventuresRoute.route
     ) {
         composable(route = AdventuresScreen.route) {
+            // Add debug info
+            println("AdventuresNavigation: Showing adventure list screen")
+            
             AdventureListScreen(
                 adventureItems = PreviewData.adventures,
                 onOpenDetails = { adventureId: String ->
-                    navController.navigate(NavigationRoutes.Detail.createDetailRoute(adventureId))
+                    // Add debug info
+                    println("AdventuresNavigation: Navigating to detail for adventureId=$adventureId")
+                    
+                    // Make sure we're using the correct route construction
+                    val detailRoute = NavigationRoutes.Detail.createDetailRoute(adventureId)
+                    println("AdventuresNavigation: Detail route = $detailRoute")
+                    
+                    navController.navigate(detailRoute)
                 }
             )
         }

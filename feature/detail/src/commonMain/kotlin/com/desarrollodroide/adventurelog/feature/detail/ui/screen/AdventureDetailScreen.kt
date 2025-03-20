@@ -28,12 +28,22 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AdventureDetailScreenRoute(
     adventureId: String,
-    onBackClick: () -> Unit,
-    viewModel: AdventureDetailViewModel = koinViewModel()
+    onBackClick: () -> Unit
 ) {
+    // Debug message
+    println("AdventureDetailScreenRoute: Getting ViewModel for adventureId=$adventureId")
+    
+    // Use koinViewModel to get the ViewModel instance from Koin
+    val viewModel = koinViewModel<AdventureDetailViewModel>()
+    
+    // Debug message
+    println("AdventureDetailScreenRoute: ViewModel retrieved successfully")
+    
     // In a real app, you would load the adventure based on the ID
-    // For now we're just passing the adventure directly
     val adventure = viewModel.getAdventureById(adventureId)
+    
+    // Debug message
+    println("AdventureDetailScreenRoute: Got adventure with name=${adventure.name}")
     
     AdventureDetailScreen(
         adventure = adventure,
