@@ -39,6 +39,17 @@ fun HomeDrawer(
 ) {
     val isDrawerOpen = drawerState.isOpen
     
+    // Extract only what's needed from HomeUiState
+    val userName = when (homeUiState) {
+        is HomeUiState.Success -> homeUiState.userName
+        else -> ""
+    }
+    
+    val adventureCount = when (homeUiState) {
+        is HomeUiState.Success -> homeUiState.recentAdventures.size
+        else -> 0
+    }
+    
     // Animation for background darkening when drawer opens
     val animatedDimAmount by animateFloatAsState(
         targetValue = if (isDrawerOpen) 0.5f else 0f,
@@ -52,7 +63,8 @@ fun HomeDrawer(
         gesturesEnabled = true,
         drawerContent = {
             DrawerContent(
-                homeUiState = homeUiState,
+                userName = userName,
+                adventureCount = adventureCount,
                 currentScreen = currentScreen,
                 onHomeClick = {
                     onHomeClick()

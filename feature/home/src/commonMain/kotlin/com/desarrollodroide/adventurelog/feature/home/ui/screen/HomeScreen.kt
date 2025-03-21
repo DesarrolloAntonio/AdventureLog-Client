@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.components.adventures.EmptyStateView
@@ -134,10 +136,12 @@ fun HomeScreenContent(
             }
         ) { innerPadding ->
             // Main content based on current screen
+            // Apply light gray background color to all screens
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
+                    .background(Color(0xFFF3F3F3))
             ) {
                 when (currentScreen) {
                     CurrentScreen.HOME -> {

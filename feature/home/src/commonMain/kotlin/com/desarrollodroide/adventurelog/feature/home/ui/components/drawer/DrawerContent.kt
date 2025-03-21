@@ -21,7 +21,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 
 /**
@@ -29,7 +28,8 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScree
  */
 @Composable
 fun DrawerContent(
-    homeUiState: HomeUiState,
+    userName: String,
+    adventureCount: Int,
     currentScreen: CurrentScreen,
     onHomeClick: () -> Unit,
     onAdventuresClick: () -> Unit,
@@ -145,7 +145,8 @@ fun DrawerContent(
                     Column {
                         // Header with animation
                         DrawerHeaderAnimated(
-                            homeUiState = homeUiState,
+                            userName = userName,
+                            adventureCount = adventureCount,
                             visible = visible,
                             delayMillis = calculateDelayMillis(0, totalItems, drawerOpen)
                         )
@@ -264,7 +265,7 @@ fun AnimatedSectionTitle(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
@@ -351,7 +352,8 @@ fun AnimatedFooter(
     ) {
         Text(
             text = "Adventure Log v1.0",
-            style = MaterialTheme.typography.bodySmall,
+            // Mejorado: cambiado a labelLarge, que ya tiene un peso medio definido
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.clearAndSetSemantics {
                 contentDescription = "Application version: Adventure Log version 1.0"
@@ -373,7 +375,8 @@ private fun calculateDelayMillis(index: Int, totalItems: Int, drawerOpen: Boolea
 
 @Composable
 fun DrawerHeaderAnimated(
-    homeUiState: HomeUiState,
+    userName: String,
+    adventureCount: Int,
     visible: Boolean,
     delayMillis: Int
 ) {
@@ -414,7 +417,7 @@ fun DrawerHeaderAnimated(
                 alpha = animatedAlpha
             }
     ) {
-        DrawerHeader(homeUiState = homeUiState)
+        DrawerHeader(userName = userName, adventureCount = adventureCount)
     }
 }
 
@@ -521,10 +524,11 @@ fun DrawerItemAnimated(
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            // Title
+            // Title - Usando estilos predefinidos según la selección
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
+                // Usando los estilos adecuados que ya tienen los pesos definidos
+                style = if (isSelected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
                 color = itemColor,
                 modifier = Modifier.weight(1f)
             )

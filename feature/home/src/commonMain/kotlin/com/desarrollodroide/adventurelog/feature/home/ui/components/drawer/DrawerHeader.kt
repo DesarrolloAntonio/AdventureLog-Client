@@ -18,15 +18,16 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 
 /**
  * Drawer header component with gradient background and user information
  */
 @Composable
-fun DrawerHeader(homeUiState: HomeUiState) {
+fun DrawerHeader(
+    userName: String,
+    adventureCount: Int
+) {
     // Header with gradient background
     Box(
         modifier = Modifier
@@ -76,32 +77,30 @@ fun DrawerHeader(homeUiState: HomeUiState) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // User information
-            if (homeUiState is HomeUiState.Success) {
-                val userName = homeUiState.userName
-                val adventureCount = homeUiState.recentAdventures.size
-                
+            if (userName.isNotEmpty()) {
                 Column(modifier = Modifier.clearAndSetSemantics {
                     contentDescription = "User $userName with $adventureCount adventures logged"
                 }) {
                     Text(
                         text = userName,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
+                        // Usando un estilo que ya tiene trazo más grueso definido
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
 
                     Text(
                         text = "$adventureCount adventures logged",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                        // Usando un estilo que ya tiene peso medio definido
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
                     )
                 }
             } else {
                 Text(
                     text = "Adventure Log",
-                    style = MaterialTheme.typography.titleLarge,
+                    // Usando un estilo que ya tiene trazo más grueso definido
+                    style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.clearAndSetSemantics {
                         contentDescription = "Adventure Log app"
                     }
