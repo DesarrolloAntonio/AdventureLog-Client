@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import kotlinx.coroutines.delay
@@ -165,14 +166,14 @@ private fun CompactStatsCard(
                     ) {
                         CompactStatItem(
                             value = stats.adventureCount,
-                            label = "Aventuras totales",
+                            label = "Total adventures",
                             icon = Icons.Default.AirplanemodeActive,
                             iconColor = Color(0xFFE91E63) // Pink color
                         )
                         
                         CompactStatItem(
                             value = stats.visitedCountryCount,
-                            label = "Países visitados",
+                            label = "Countries visited",
                             icon = Icons.Default.Public,
                             iconColor = Color(0xFF673AB7) // Purple color
                         )
@@ -184,14 +185,14 @@ private fun CompactStatsCard(
                     ) {
                         CompactStatItem(
                             value = stats.visitedRegionCount,
-                            label = "Regiones visitadas",
+                            label = "Regions visited",
                             icon = Icons.Default.Terrain,
                             iconColor = Color(0xFF009688) // Teal color
                         )
                         
                         CompactStatItem(
                             value = stats.visitedCityCount,
-                            label = "Ciudades visitadas",
+                            label = "Cities visited",
                             icon = Icons.Default.LocationCity,
                             iconColor = Color(0xFF03A9F4) // Light Blue color
                         )
@@ -237,24 +238,7 @@ private fun CompactStatItem(
         verticalArrangement = Arrangement.Center,
         modifier = modifier.padding(horizontal = 8.dp)
     ) {
-        // Value with accent color
-        Text(
-            text = "$value",
-            style = MaterialTheme.typography.headlineMedium,
-            color = iconColor,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        
-        // Icon below value
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = iconColor,
-            modifier = Modifier.size(20.dp)
-        )
-        
-        // Label text
+        // Title in English at the top
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
@@ -262,5 +246,30 @@ private fun CompactStatItem(
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center
         )
+        
+        // Row with icon and value
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(top = 4.dp)
+        ) {
+            // Icon first
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(24.dp)
+            )
+            
+            // Value with color
+            Text(
+                text = "$value",
+                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
+                color = iconColor,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
     }
 }
