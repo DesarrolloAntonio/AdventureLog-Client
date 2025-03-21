@@ -57,7 +57,7 @@ fun DrawerContent(
     if (selectedItem != selectedItemIndex) {
         selectedItem = selectedItemIndex
     }
-    val scope = rememberCoroutineScope()
+    
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(drawerOpen) {
@@ -118,115 +118,154 @@ fun DrawerContent(
                     transformOrigin = TransformOrigin(0f, 0.5f)
                 }
         ) {
-            ModalDrawerSheet {
-                // Get navigation and config items
-                val navigationItems = createNavigationItems(
-                    onHomeClick = onHomeClick,
-                    onAdventuresClick = onAdventuresClick,
-                    onCollectionsClick = onCollectionsClick,
-                    onTravelClick = onTravelClick,
-                    onMapClick = onMapClick,
-                    onCalendarClick = onCalendarClick
+            DrawerContentBody(
+                userName = userName,
+                adventureCount = adventureCount,
+                selectedItem = selectedItem,
+                onSelectionChanged = { selectedItem = it },
+                visible = visible,
+                drawerOpen = drawerOpen,
+                onHomeClick = onHomeClick,
+                onAdventuresClick = onAdventuresClick,
+                onCollectionsClick = onCollectionsClick,
+                onTravelClick = onTravelClick,
+                onMapClick = onMapClick,
+                onCalendarClick = onCalendarClick,
+                onSettingsClick = onSettingsClick,
+                onHelpClick = onHelpClick
+            )
+        }
+    }
+}
+
+/**
+ * The actual content of the drawer without animation wrapper
+ * Useful for previews and testing
+ */
+@Composable
+fun DrawerContentBody(
+    userName: String,
+    adventureCount: Int,
+    selectedItem: Int,
+    onSelectionChanged: (Int) -> Unit,
+    visible: Boolean,
+    drawerOpen: Boolean,
+    onHomeClick: () -> Unit,
+    onAdventuresClick: () -> Unit,
+    onCollectionsClick: () -> Unit,
+    onTravelClick: () -> Unit,
+    onMapClick: () -> Unit,
+    onCalendarClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onHelpClick: () -> Unit = {}
+) {
+    ModalDrawerSheet {
+        // Get navigation and config items
+        val navigationItems = createNavigationItems(
+            onHomeClick = onHomeClick,
+            onAdventuresClick = onAdventuresClick,
+            onCollectionsClick = onCollectionsClick,
+            onTravelClick = onTravelClick,
+            onMapClick = onMapClick,
+            onCalendarClick = onCalendarClick
+        )
+        
+        val configItems = createConfigItems(
+            onSettingsClick = onSettingsClick,
+            onHelpClick = onHelpClick
+        )
+        
+        // Total items count for delay calculations
+        val totalItems = 8 + navigationItems.size + configItems.size 
+        // (Header + 2 section titles + divider + footer + all items)
+        
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                // Header with animation
+                DrawerHeaderAnimated(
+                    userName = userName,
+                    adventureCount = adventureCount,
+                    visible = visible,
+                    delayMillis = calculateDelayMillis(0, totalItems, drawerOpen)
                 )
                 
-                val configItems = createConfigItems(
-                    onSettingsClick = onSettingsClick,
-                    onHelpClick = onHelpClick
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Animate the Adventures section title
+                AnimatedSectionTitle(
+                    title = "MY ADVENTURES",
+                    visible = visible,
+                    delayMillis = calculateDelayMillis(1, totalItems, drawerOpen)
                 )
-                
-                // Total items count for delay calculations
-                val totalItems = 8 + navigationItems.size + configItems.size 
-                // (Header + 2 section titles + divider + footer + all items)
-                
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column {
-                        // Header with animation
-                        DrawerHeaderAnimated(
-                            userName = userName,
-                            adventureCount = adventureCount,
-                            visible = visible,
-                            delayMillis = calculateDelayMillis(0, totalItems, drawerOpen)
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
 
-                        // Animate the Adventures section title
-                        AnimatedSectionTitle(
-                            title = "MY ADVENTURES",
-                            visible = visible,
-                            delayMillis = calculateDelayMillis(1, totalItems, drawerOpen)
-                        )
-
-                        // Navigation items section
-                        navigationItems.forEachIndexed { index, item ->
-                            val itemDelayMillis = calculateDelayMillis(index + 2, totalItems, drawerOpen)
-                            
-                            DrawerItemAnimated(
-                                title = item.title,
-                                icon = item.icon,
-                                selectedIcon = item.selectedIcon,
-                                isSelected = selectedItem == index,
-                                badgeCount = item.badgeCount,
-                                onClick = {
-                                    if (selectedItem != index) {
-                                        selectedItem = index
-                                        item.onClick()
-                                    }
-                                },
-                                visible = visible,
-                                delayMillis = itemDelayMillis
-                            )
-                        }
-
-                        // Divider with animation
-                        val dividerDelayMillis = calculateDelayMillis(navigationItems.size + 2, totalItems, drawerOpen)
-                        AnimatedDivider(
-                            visible = visible,
-                            delayMillis = dividerDelayMillis
-                        )
-                        
-                        // Settings section title
-                        AnimatedSectionTitle(
-                            title = "SETTINGS",
-                            visible = visible,
-                            delayMillis = dividerDelayMillis + 50
-                        )
-
-                        // Config items section
-                        configItems.forEachIndexed { index, item ->
-                            val configBaseIndex = navigationItems.size + 4 // Header + adventure title + divider + settings title
-                            val itemDelayMillis = calculateDelayMillis(configBaseIndex + index, totalItems, drawerOpen)
-                            
-                            // Settings is at position 6 in the global index (after adding Home)
-                            val isItemSelected = index == 0 && selectedItem == 6
-                            
-                            DrawerItemAnimated(
-                                title = item.title,
-                                icon = item.icon,
-                                selectedIcon = item.selectedIcon,
-                                isSelected = isItemSelected,
-                                onClick = {
-                                    if (index == 0 && selectedItem != 6) { // Settings item
-                                        selectedItem = 6
-                                    }
-                                    item.onClick()
-                                },
-                                visible = visible,
-                                delayMillis = itemDelayMillis
-                            )
-                        }
-                    }
-
-                    // Footer with version
-                    AnimatedFooter(
+                // Navigation items section
+                navigationItems.forEachIndexed { index, item ->
+                    val itemDelayMillis = calculateDelayMillis(index + 2, totalItems, drawerOpen)
+                    
+                    DrawerItemAnimated(
+                        title = item.title,
+                        icon = item.icon,
+                        selectedIcon = item.selectedIcon,
+                        isSelected = selectedItem == index,
+                        badgeCount = item.badgeCount,
+                        onClick = {
+                            if (selectedItem != index) {
+                                onSelectionChanged(index)
+                                item.onClick()
+                            }
+                        },
                         visible = visible,
-                        delayMillis = calculateDelayMillis(totalItems - 1, totalItems, drawerOpen)
+                        delayMillis = itemDelayMillis
+                    )
+                }
+
+                // Divider with animation
+                val dividerDelayMillis = calculateDelayMillis(navigationItems.size + 2, totalItems, drawerOpen)
+                AnimatedDivider(
+                    visible = visible,
+                    delayMillis = dividerDelayMillis
+                )
+                
+                // Settings section title
+                AnimatedSectionTitle(
+                    title = "SETTINGS",
+                    visible = visible,
+                    delayMillis = dividerDelayMillis + 50
+                )
+
+                // Config items section
+                configItems.forEachIndexed { index, item ->
+                    val configBaseIndex = navigationItems.size + 4 // Header + adventure title + divider + settings title
+                    val itemDelayMillis = calculateDelayMillis(configBaseIndex + index, totalItems, drawerOpen)
+                    
+                    // Settings is at position 6 in the global index (after adding Home)
+                    val isItemSelected = index == 0 && selectedItem == 6
+                    
+                    DrawerItemAnimated(
+                        title = item.title,
+                        icon = item.icon,
+                        selectedIcon = item.selectedIcon,
+                        isSelected = isItemSelected,
+                        onClick = {
+                            if (index == 0 && selectedItem != 6) { // Settings item
+                                onSelectionChanged(6)
+                            }
+                            item.onClick()
+                        },
+                        visible = visible,
+                        delayMillis = itemDelayMillis
                     )
                 }
             }
+
+            // Footer with version
+            AnimatedFooter(
+                visible = visible,
+                delayMillis = calculateDelayMillis(totalItems - 1, totalItems, drawerOpen)
+            )
         }
     }
 }
@@ -352,7 +391,6 @@ fun AnimatedFooter(
     ) {
         Text(
             text = "Adventure Log v1.0",
-            // Mejorado: cambiado a labelLarge, que ya tiene un peso medio definido
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.clearAndSetSemantics {
@@ -524,10 +562,9 @@ fun DrawerItemAnimated(
             
             Spacer(modifier = Modifier.width(16.dp))
             
-            // Title - Usando estilos predefinidos según la selección
+            // Title
             Text(
                 text = title,
-                // Usando los estilos adecuados que ya tienen los pesos definidos
                 style = if (isSelected) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
                 color = itemColor,
                 modifier = Modifier.weight(1f)

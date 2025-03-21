@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components.drawer
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -14,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -83,14 +81,12 @@ fun DrawerHeader(
                 }) {
                     Text(
                         text = userName,
-                        // Usando un estilo que ya tiene trazo más grueso definido
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
 
                     Text(
                         text = "$adventureCount adventures logged",
-                        // Usando un estilo que ya tiene peso medio definido
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
                     )
@@ -98,7 +94,6 @@ fun DrawerHeader(
             } else {
                 Text(
                     text = "Adventure Log",
-                    // Usando un estilo que ya tiene trazo más grueso definido
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.clearAndSetSemantics {
