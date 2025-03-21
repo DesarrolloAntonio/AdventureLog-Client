@@ -24,6 +24,7 @@ import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.components.adventures.EmptyStateView
 import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ErrorStateView
 import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeDrawer
+import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.ui.components.topbar.HomeTopBar
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
@@ -145,13 +146,11 @@ fun HomeScreenContent(
             ) {
                 when (currentScreen) {
                     CurrentScreen.HOME -> {
-                        // Home screen (empty for now)
-                        Box(
+                        // Use our new HomeContent component
+                        HomeContent(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Home Screen")
-                        }
+                            homeUiState = homeUiState
+                        )
                     }
                     CurrentScreen.ADVENTURES -> {
                         // Show Adventures screen
