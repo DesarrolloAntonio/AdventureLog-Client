@@ -43,13 +43,16 @@ fun HomeScreenRoute(
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Maintain the current screen state inside HomeScreen to control content
-    // Initialize with ADVENTURES
-    var currentScreen by rememberSaveable { mutableStateOf(CurrentScreen.ADVENTURES) }
+    // Initialize with HOME
+    var currentScreen by rememberSaveable { mutableStateOf(CurrentScreen.HOME) }
 
     HomeScreenContent(
         homeUiState = homeUiState,
         currentScreen = currentScreen,
         onAdventureClick = onAdventureClick,
+        onHomeClick = {
+            currentScreen = CurrentScreen.HOME
+        },
         onAdventuresClick = { 
             currentScreen = CurrentScreen.ADVENTURES
         },
@@ -81,6 +84,7 @@ fun HomeScreenContent(
     homeUiState: HomeUiState,
     currentScreen: CurrentScreen,
     onAdventureClick: (String) -> Unit = {},
+    onHomeClick: () -> Unit,
     onAdventuresClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onTravelClick: () -> Unit,
@@ -111,7 +115,8 @@ fun HomeScreenContent(
         drawerState = drawerState,
         homeUiState = homeUiState,
         scope = scope,
-        currentScreen = currentScreen,  // Aseguramos que se pasa correctamente
+        currentScreen = currentScreen,
+        onHomeClick = onHomeClick,
         onAdventuresClick = onAdventuresClick,
         onCollectionsClick = onCollectionsClick,
         onTravelClick = onTravelClick,
@@ -135,8 +140,17 @@ fun HomeScreenContent(
                     .fillMaxSize()
             ) {
                 when (currentScreen) {
-                    CurrentScreen.HOME, CurrentScreen.ADVENTURES -> {
-                        // Show AdventureListScreen for both HOME and ADVENTURES
+                    CurrentScreen.HOME -> {
+                        // Home screen (empty for now)
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Home Screen")
+                        }
+                    }
+                    CurrentScreen.ADVENTURES -> {
+                        // Show Adventures screen
                         when (homeUiState) {
                             is HomeUiState.Loading -> {
                                 Box(

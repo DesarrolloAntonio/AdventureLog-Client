@@ -11,6 +11,7 @@ import com.desarrollodroide.adventurelog.feature.home.model.NavigationItem
  */
 @Composable
 fun createNavigationItems(
+    onHomeClick: () -> Unit = {},
     onAdventuresClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onTravelClick: () -> Unit,
@@ -18,6 +19,12 @@ fun createNavigationItems(
     onCalendarClick: () -> Unit
 ): List<NavigationItem> {
     return listOf(
+        NavigationItem(
+            title = "Home",
+            icon = Icons.Outlined.Home,
+            selectedIcon = Icons.Filled.Home,
+            onClick = onHomeClick
+        ),
         NavigationItem(
             title = "Adventures",
             icon = Icons.Outlined.Explore,

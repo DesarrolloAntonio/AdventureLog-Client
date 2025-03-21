@@ -31,6 +31,7 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScree
 fun DrawerContent(
     homeUiState: HomeUiState,
     currentScreen: CurrentScreen,
+    onHomeClick: () -> Unit,
     onAdventuresClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onTravelClick: () -> Unit,
@@ -43,12 +44,12 @@ fun DrawerContent(
     // Convert current screen to corresponding navigation index
     val selectedItemIndex = when (currentScreen) {
         CurrentScreen.HOME -> 0
-        CurrentScreen.ADVENTURES -> 0
-        CurrentScreen.COLLECTIONS -> 1
-        CurrentScreen.TRAVEL -> 2
-        CurrentScreen.MAP -> 3
-        CurrentScreen.CALENDAR -> 4
-        CurrentScreen.SETTINGS -> 5
+        CurrentScreen.ADVENTURES -> 1
+        CurrentScreen.COLLECTIONS -> 2
+        CurrentScreen.TRAVEL -> 3
+        CurrentScreen.MAP -> 4
+        CurrentScreen.CALENDAR -> 5
+        CurrentScreen.SETTINGS -> 6
     }
 
     // Maintain selection state internally, but initialize it from currentScreen
@@ -65,7 +66,7 @@ fun DrawerContent(
 
     // Advanced 3D animations
     val rotation by animateFloatAsState(
-        targetValue = if (visible) 0f else -25f,
+        targetValue = if (visible) 0f else 45f,
         animationSpec = spring(
             dampingRatio = 0.8f,
             stiffness = 150f
@@ -120,6 +121,7 @@ fun DrawerContent(
             ModalDrawerSheet {
                 // Get navigation and config items
                 val navigationItems = createNavigationItems(
+                    onHomeClick = onHomeClick,
                     onAdventuresClick = onAdventuresClick,
                     onCollectionsClick = onCollectionsClick,
                     onTravelClick = onTravelClick,
@@ -197,8 +199,8 @@ fun DrawerContent(
                             val configBaseIndex = navigationItems.size + 4 // Header + adventure title + divider + settings title
                             val itemDelayMillis = calculateDelayMillis(configBaseIndex + index, totalItems, drawerOpen)
                             
-                            // Settings is at position 5 in the global index
-                            val isItemSelected = index == 0 && selectedItem == 5
+                            // Settings is at position 6 in the global index (after adding Home)
+                            val isItemSelected = index == 0 && selectedItem == 6
                             
                             DrawerItemAnimated(
                                 title = item.title,
@@ -206,8 +208,8 @@ fun DrawerContent(
                                 selectedIcon = item.selectedIcon,
                                 isSelected = isItemSelected,
                                 onClick = {
-                                    if (index == 0 && selectedItem != 5) { // Settings item
-                                        selectedItem = 5
+                                    if (index == 0 && selectedItem != 6) { // Settings item
+                                        selectedItem = 6
                                     }
                                     item.onClick()
                                 },

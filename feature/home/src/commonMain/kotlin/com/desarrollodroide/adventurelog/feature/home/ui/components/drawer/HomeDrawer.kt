@@ -27,6 +27,7 @@ fun HomeDrawer(
     homeUiState: HomeUiState,
     scope: CoroutineScope,
     currentScreen: CurrentScreen = CurrentScreen.HOME,
+    onHomeClick: () -> Unit,
     onAdventuresClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onTravelClick: () -> Unit,
@@ -53,6 +54,10 @@ fun HomeDrawer(
             DrawerContent(
                 homeUiState = homeUiState,
                 currentScreen = currentScreen,
+                onHomeClick = {
+                    onHomeClick()
+                    scope.launch { drawerState.close() }
+                },
                 onAdventuresClick = {
                     onAdventuresClick()
                     scope.launch { drawerState.close() }
