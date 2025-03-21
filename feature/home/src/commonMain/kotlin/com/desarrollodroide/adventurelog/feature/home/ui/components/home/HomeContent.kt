@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components.home
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,10 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Home screen main content composable
@@ -108,7 +110,7 @@ private fun HomeContentSuccess(
         )
         
         // Stats Card
-        CompactStatsCard(stats = stats)
+        SwipeableStatsCard(stats = stats)
         
         Spacer(modifier = Modifier.height(24.dp))
         
@@ -123,19 +125,24 @@ private fun HomeContentSuccess(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CompactStatsCard(
+private fun SwipeableStatsCard(
     stats: UserStats,
     modifier: Modifier = Modifier
 ) {
-    // Auto-alternate between two groups of stats - declaring at this level
-    var showFirstGroup by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(pageCount = { 2 })
     
-    // Animate the transition
+    // Auto-alternate between pages
     LaunchedEffect(Unit) {
         while (true) {
-            delay(5000) // Switch every 5 seconds
-            showFirstGroup = !showFirstGroup
+            delay(10000) // Switch every 10 seconds
+            scope.launch {
+                pagerState.animateScrollToPage(
+                    page = (pagerState.currentPage + 1) % 2
+                )
+            }
         }
     }
     
@@ -146,77 +153,84 @@ private fun CompactStatsCard(
             containerColor = Color(0xFF1E2632) // Dark background color like in the image
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Main content area for stats
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp)
-            ) {
-                // Stats display depending on current state
-                if (showFirstGroup) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        CompactStatItem(
-                            value = stats.adventureCount,
-                            label = "Total adventures",
-                            icon = Icons.Default.AirplanemodeActive,
-                            iconColor = Color(0xFFE91E63) // Pink color
-                        )
-                        
-                        CompactStatItem(
-                            value = stats.visitedCountryCount,
-                            label = "Countries visited",
-                            icon = Icons.Default.Public,
-                            iconColor = Color(0xFF673AB7) // Purple color
-                        )
+            // Pager for swipeable stats pages
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth()
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        // First page - Adventures and Countries
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            CompactStatItem(
+                                value = stats.adventureCount,
+                                label = "Total adventures",
+                                icon = Icons.Default.AirplanemodeActive,
+                                iconColor = Color(0xFFE91E63) // Pink color
+                            )
+                            
+                            CompactStatItem(
+                                value = stats.visitedCountryCount,
+                                label = "Countries visited",
+                                icon = Icons.Default.Public,
+                                iconColor = Color(0xFF673AB7) // Purple color
+                            )
+                        }
                     }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        CompactStatItem(
-                            value = stats.visitedRegionCount,
-                            label = "Regions visited",
-                            icon = Icons.Default.Terrain,
-                            iconColor = Color(0xFF009688) // Teal color
-                        )
-                        
-                        CompactStatItem(
-                            value = stats.visitedCityCount,
-                            label = "Cities visited",
-                            icon = Icons.Default.LocationCity,
-                            iconColor = Color(0xFF03A9F4) // Light Blue color
-                        )
+                    1 -> {
+                        // Second page - Regions and Cities
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            CompactStatItem(
+                                value = stats.visitedRegionCount,
+                                label = "Regions visited",
+                                icon = Icons.Default.Terrain,
+                                iconColor = Color(0xFF009688) // Teal color
+                            )
+                            
+                            CompactStatItem(
+                                value = stats.visitedCityCount,
+                                label = "Cities visited",
+                                icon = Icons.Default.LocationCity,
+                                iconColor = Color(0xFF03A9F4) // Light Blue color
+                            )
+                        }
                     }
                 }
             }
             
-            // Vertical indicator dots on the right side
-            Column(
-                modifier = Modifier.padding(end = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Page indicator dots
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                VerticalIndicatorDot(active = showFirstGroup)
-                VerticalIndicatorDot(active = !showFirstGroup)
+                repeat(2) { index ->
+                    val isSelected = pagerState.currentPage == index
+                    IndicatorDot(isSelected = isSelected)
+                    if (index < 1) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun VerticalIndicatorDot(active: Boolean) {
-    val color = if (active) Color.White else Color.White.copy(alpha = 0.3f)
-    val size = if (active) 8.dp else 6.dp
+private fun IndicatorDot(isSelected: Boolean) {
+    val color = if (isSelected) Color.White else Color.White.copy(alpha = 0.3f)
+    val size = if (isSelected) 8.dp else 6.dp
     
     Box(
         modifier = Modifier
