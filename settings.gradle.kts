@@ -50,4 +50,5 @@ include(":feature:adventures")
 include(":feature:home")
 include(":feature:settings")
 include(":feature:detail")
+include(":feature:ui")
 

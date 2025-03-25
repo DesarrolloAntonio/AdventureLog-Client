@@ -11,6 +11,7 @@ kotlin {
             api(projects.core.domain)
             implementation(projects.core.designsystem)
             implementation(projects.feature.detail)
+            implementation(projects.feature.ui)
             implementation(libs.koin.composeVM)
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)

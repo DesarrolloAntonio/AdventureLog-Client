@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.components.adventures.EmptyStateView
@@ -30,7 +28,7 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScree
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
-import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureListScreen
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel

@@ -10,10 +10,7 @@ kotlin {
             implementation(projects.core.model)
             api(projects.core.domain)
             implementation(projects.core.designsystem)
-            implementation(projects.feature.settings)
-            implementation(projects.feature.adventures)
-            implementation(projects.feature.ui)
-            
+
             implementation(libs.koin.composeVM)
 
             implementation(libs.navigation.compose)
@@ -28,3 +25,4 @@ kotlin {
         }
     }
 }
+

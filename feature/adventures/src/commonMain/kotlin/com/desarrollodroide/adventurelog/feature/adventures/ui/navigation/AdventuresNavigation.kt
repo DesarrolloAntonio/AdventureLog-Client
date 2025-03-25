@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureListScreen
 
 /**
  * Adventures module navigation graph

@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.adventures
+package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +20,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 
 @Composable
 fun AdventureItem(
+    modifier: Modifier = Modifier,
     adventure: Adventure,
     onClick: () -> Unit = {},
     onOpenDetails: () -> Unit = { onClick() }, // Default to onClick for backward compatibility
@@ -30,9 +31,8 @@ fun AdventureItem(
     var showMenu by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = modifier
+        .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         onClick = onClick
     ) {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
+import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -52,7 +56,7 @@ import kotlinx.coroutines.launch
 fun HomeContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
-    onAdventureClick: (String) -> Unit = {}
+    onAdventureClick: (Adventure) -> Unit = {}
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -87,7 +91,7 @@ fun HomeContent(
                     userName = homeUiState.userName,
                     stats = homeUiState.userStats,
                     recentAdventures = homeUiState.recentAdventures,
-                    onAdventureClick = onAdventureClick
+                    onOpenDetails = onAdventureClick
                 )
             }
         }
@@ -99,13 +103,13 @@ private fun HomeContentSuccess(
     userName: String,
     stats: UserStats,
     recentAdventures: List<Adventure>,
-    onAdventureClick: (String) -> Unit,
+    onOpenDetails: (Adventure) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         // Welcome header
         Text(
@@ -128,6 +132,18 @@ private fun HomeContentSuccess(
         )
         
         // Recent Adventures content will go here
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(2.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(recentAdventures) { item ->
+                AdventureItem(
+                    adventure = item,
+                    onClick = { onOpenDetails.invoke(item) }
+                )
+            }
+        }
     }
 }
 

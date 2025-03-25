@@ -184,14 +184,6 @@ fun DrawerContentBody(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                // Header with animation
-                DrawerHeaderAnimated(
-                    userName = userName,
-                    adventureCount = adventureCount,
-                    visible = visible,
-                    delayMillis = calculateDelayMillis(0, totalItems, drawerOpen)
-                )
-                
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Animate the Adventures section title
@@ -408,54 +400,6 @@ private fun calculateDelayMillis(index: Int, totalItems: Int, drawerOpen: Boolea
     } else {
         // When closing, elements disappear from bottom to top
         50 * (totalItems - index - 1)
-    }
-}
-
-@Composable
-fun DrawerHeaderAnimated(
-    userName: String,
-    adventureCount: Int,
-    visible: Boolean,
-    delayMillis: Int
-) {
-    val animatedRotation by animateFloatAsState(
-        targetValue = if (visible) 0f else -10f,
-        animationSpec = tween(
-            durationMillis = 300,
-            delayMillis = delayMillis,
-            easing = FastOutSlowInEasing
-        ),
-        label = "headerRotation"
-    )
-    
-    val animatedOffsetX by animateDpAsState(
-        targetValue = if (visible) 0.dp else (-30).dp,
-        animationSpec = tween(
-            durationMillis = 300,
-            delayMillis = delayMillis,
-            easing = FastOutSlowInEasing
-        ),
-        label = "headerOffsetX"
-    )
-    
-    val animatedAlpha by animateFloatAsState(
-        targetValue = if (visible) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 200,
-            delayMillis = delayMillis
-        ),
-        label = "headerAlpha"
-    )
-    
-    Box(
-        modifier = Modifier
-            .graphicsLayer {
-                rotationY = animatedRotation
-                translationX = animatedOffsetX.toPx()
-                alpha = animatedAlpha
-            }
-    ) {
-        DrawerHeader(userName = userName, adventureCount = adventureCount)
     }
 }
 

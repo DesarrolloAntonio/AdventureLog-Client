@@ -1,0 +1,11 @@
+# Build folders
+build/
+.gradle/
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# OS-specific
+.DS_Store
+Thumbs.db

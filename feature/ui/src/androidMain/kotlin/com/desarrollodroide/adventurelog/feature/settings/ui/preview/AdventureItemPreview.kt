@@ -1,17 +1,13 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.preview
+package com.desarrollodroide.adventurelog.feature.settings.ui.preview
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureItem
+import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 
 /**
  * Provides previews for the AdventureItem in Android Studio.

@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.adventures.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureListScreen
 
 /**
  * Provides previews for the AdventureListScreen in Android Studio.
