@@ -142,7 +142,6 @@ fun HomeScreenContent(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .background(Color(0xFFF3F3F3))
             ) {
                 when (currentScreen) {
                     CurrentScreen.HOME -> {

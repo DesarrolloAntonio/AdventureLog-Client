@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import kotlinx.coroutines.delay
@@ -50,7 +51,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeContent(
     modifier: Modifier = Modifier,
-    homeUiState: HomeUiState
+    homeUiState: HomeUiState,
+    onAdventureClick: (String) -> Unit = {}
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -77,13 +79,15 @@ fun HomeContent(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No data available")
+                    Text("No adventures yet")
                 }
             }
             is HomeUiState.Success -> {
                 HomeContentSuccess(
                     userName = homeUiState.userName,
-                    stats = homeUiState.userStats
+                    stats = homeUiState.userStats,
+                    recentAdventures = homeUiState.recentAdventures,
+                    onAdventureClick = onAdventureClick
                 )
             }
         }
@@ -94,6 +98,8 @@ fun HomeContent(
 private fun HomeContentSuccess(
     userName: String,
     stats: UserStats,
+    recentAdventures: List<Adventure>,
+    onAdventureClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -103,20 +109,20 @@ private fun HomeContentSuccess(
     ) {
         // Welcome header
         Text(
-            text = "Bienvenido de nuevo, $userName!",
+            text = "Welcome back, $userName!",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        
+
         // Stats Card
         SwipeableStatsCard(stats = stats)
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         // Recent Adventures section title
         Text(
-            text = "Aventuras recientes",
+            text = "Recent adventures",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
