@@ -3,9 +3,15 @@ package com.desarrollodroide.adventurelog.feature.home.ui.screen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -17,21 +23,29 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.components.adventures.EmptyStateView
 import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ErrorStateView
 import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeDrawer
 import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
-import com.desarrollodroide.adventurelog.feature.home.ui.components.topbar.HomeTopBar
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureListScreen
-import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.font.FontWeight
+import org.jetbrains.compose.resources.painterResource
+import com.desarrollodroide.adventurelog.resources.Res
+import com.desarrollodroide.adventurelog.resources.ic_hamburger_alt
 
 /**
  * Entry point composable that integrates with navigation
@@ -50,26 +64,27 @@ fun HomeScreenRoute(
     HomeScreenContent(
         homeUiState = homeUiState,
         currentScreen = currentScreen,
+        userName = "John Doe", // Assuming userName is a property in HomeViewModel
         onAdventureClick = onAdventureClick,
         onHomeClick = {
             currentScreen = CurrentScreen.HOME
         },
-        onAdventuresClick = { 
+        onAdventuresClick = {
             currentScreen = CurrentScreen.ADVENTURES
         },
-        onCollectionsClick = { 
+        onCollectionsClick = {
             currentScreen = CurrentScreen.COLLECTIONS
         },
-        onTravelClick = { 
+        onTravelClick = {
             currentScreen = CurrentScreen.TRAVEL
         },
-        onMapClick = { 
+        onMapClick = {
             currentScreen = CurrentScreen.MAP
         },
-        onCalendarClick = { 
+        onCalendarClick = {
             currentScreen = CurrentScreen.CALENDAR
         },
-        onSettingsClick = { 
+        onSettingsClick = {
             currentScreen = CurrentScreen.SETTINGS
         }
     )
@@ -84,6 +99,7 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     currentScreen: CurrentScreen,
+    userName: String,
     onAdventureClick: (String) -> Unit = {},
     onHomeClick: () -> Unit,
     onAdventuresClick: () -> Unit,
@@ -95,23 +111,11 @@ fun HomeScreenContent(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    
-    // ViewModels
-    val settingsViewModel = koinViewModel<SettingsViewModel>()
-    val adventuresViewModel = koinViewModel<AdventuresViewModel>()
 
-    // Title based on current screen
-    val title = when (currentScreen) {
-        CurrentScreen.HOME -> "Adventure Log"
-        CurrentScreen.ADVENTURES -> "Adventures"
-        CurrentScreen.COLLECTIONS -> "Collections"
-        CurrentScreen.TRAVEL -> "Travel"
-        CurrentScreen.MAP -> "Map"
-        CurrentScreen.CALENDAR -> "Calendar"
-        CurrentScreen.SETTINGS -> "Settings"
-    }
+    val scrollState = rememberLazyListState()
 
-    // Main drawer with content
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     HomeDrawer(
         drawerState = drawerState,
         homeUiState = homeUiState,
@@ -125,121 +129,110 @@ fun HomeScreenContent(
         onCalendarClick = onCalendarClick,
         onSettingsClick = onSettingsClick
     ) {
-        // Main scaffold with top bar and content
         Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                HomeTopBar(
-                    title = title,
-                    onMenuClick = { scope.launch { drawerState.open() } }
+                LargeTopAppBar(
+                    title = {
+                        Text(
+                            text = "Hi, $userName!",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_hamburger_alt),
+                                contentDescription = "Menu"
+                            )
+                        }
+                    },
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { innerPadding ->
-            // Main content based on current screen
-            // Apply light gray background color to all screens
-            Box(
+            LazyColumn(
+                state = scrollState,
                 modifier = Modifier
-                    .padding(innerPadding)
                     .fillMaxSize()
+                    .padding(innerPadding)
             ) {
-                when (currentScreen) {
-                    CurrentScreen.HOME -> {
-                        // Use our new HomeContent component
-                        HomeContent(
-                            modifier = Modifier.fillMaxSize(),
-                            homeUiState = homeUiState
-                        )
-                    }
-                    CurrentScreen.ADVENTURES -> {
-                        // Show Adventures screen
-                        when (homeUiState) {
-                            is HomeUiState.Loading -> {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                item {
+                    Spacer(Modifier.height(16.dp))
+                }
+
+                item {
+                    when (currentScreen) {
+                        CurrentScreen.HOME -> {
+                            HomeContent(
+                                modifier = Modifier.fillMaxSize(),
+                                homeUiState = homeUiState
+                            )
+                        }
+
+                        CurrentScreen.ADVENTURES -> {
+                            when (homeUiState) {
+                                is HomeUiState.Loading -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
                                 }
-                            }
-                            is HomeUiState.Empty -> {
-                                EmptyStateView()
-                            }
-                            is HomeUiState.Success -> {
-                                AdventureListScreen(
+
+                                is HomeUiState.Empty -> EmptyStateView()
+                                is HomeUiState.Success -> AdventureListScreen(
                                     adventureItems = homeUiState.recentAdventures,
                                     onOpenDetails = onAdventureClick,
                                     modifier = Modifier.fillMaxSize()
                                 )
+
+                                is HomeUiState.Error -> ErrorStateView(homeUiState.message)
                             }
-                            is HomeUiState.Error -> {
-                                ErrorStateView(errorMessage = homeUiState.message)
+                        }
+
+                        CurrentScreen.SETTINGS -> {
+                            val settingsViewModel = koinViewModel<SettingsViewModel>()
+                            val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
+
+                            SettingsContent(
+                                compactView = compactView,
+                                onCompactViewChanged = settingsViewModel::setCompactView,
+                                onLogout = settingsViewModel::logout,
+                                onNavigateToSourceCode = { /* TODO */ },
+                                onNavigateToTermsOfUse = { /* TODO */ },
+                                onNavigateToPrivacyPolicy = { /* TODO */ },
+                                onNavigateToLogs = { /* TODO */ },
+                                onViewLastCrash = { /* TODO */ },
+                                themeMode = settingsViewModel.themeMode,
+                                onThemeModeChanged = settingsViewModel::setThemeMode,
+                                useDynamicColors = settingsViewModel.useDynamicColors,
+                                onDynamicColorsChanged = settingsViewModel::setUseDynamicColors,
+                                goToLogin = { /* TODO */ },
+                                serverUrl = settingsViewModel.getServerUrl()
+                            )
+                        }
+
+                        else -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("${currentScreen.name} Screen")
                             }
                         }
                     }
-                    CurrentScreen.COLLECTIONS -> {
-                        // TODO: Implement collections screen
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Collections Screen")
-                        }
-                    }
-                    CurrentScreen.TRAVEL -> {
-                        // TODO: Implement travel screen
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Travel Screen")
-                        }
-                    }
-                    CurrentScreen.MAP -> {
-                        // TODO: Implement map screen
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Map Screen")
-                        }
-                    }
-                    CurrentScreen.CALENDAR -> {
-                        // TODO: Implement calendar screen
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Calendar Screen")
-                        }
-                    }
-                    CurrentScreen.SETTINGS -> {
-                        // Use SettingsContent directly from the settings module
-                        val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
-                        
-                        SettingsContent(
-                            compactView = compactView,
-                            onCompactViewChanged = { isCompact ->
-                                settingsViewModel.setCompactView(isCompact)
-                            },
-                            onLogout = { 
-                                settingsViewModel.logout() 
-                            },
-                            onNavigateToSourceCode = { /* TODO */ },
-                            onNavigateToTermsOfUse = { /* TODO */ },
-                            onNavigateToPrivacyPolicy = { /* TODO */ },
-                            onNavigateToLogs = { /* TODO */ },
-                            onViewLastCrash = { /* TODO */ },
-                            themeMode = settingsViewModel.themeMode,
-                            onThemeModeChanged = { newMode ->
-                                settingsViewModel.setThemeMode(newMode)
-                            },
-                            useDynamicColors = settingsViewModel.useDynamicColors,
-                            onDynamicColorsChanged = { useDynamic ->
-                                settingsViewModel.setUseDynamicColors(useDynamic)
-                            },
-                            goToLogin = { /* TODO */ },
-                            serverUrl = settingsViewModel.getServerUrl()
-                        )
-                    }
+                }
+
+                item {
+                    Spacer(Modifier.height(64.dp))
                 }
             }
         }
