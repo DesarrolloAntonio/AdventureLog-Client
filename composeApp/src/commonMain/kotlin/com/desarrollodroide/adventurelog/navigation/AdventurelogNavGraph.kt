@@ -4,7 +4,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeNavGraph
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
@@ -13,6 +12,7 @@ import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.DetailNavigator
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.HomeNavigator
+import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedNavHost
 
 /**
  * Main navigation graph of the application
@@ -45,7 +45,8 @@ fun AdventureLogNavGraph(
         }
     }
     
-    NavHost(
+    // Use the enhanced AnimatedNavHost instead of the standard NavHost
+    AnimatedNavHost(
         modifier = modifier,
         startDestination = NavigationRoutes.Login.graph,
         navController = navController

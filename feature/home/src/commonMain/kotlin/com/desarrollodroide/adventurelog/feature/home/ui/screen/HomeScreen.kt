@@ -43,7 +43,11 @@ import androidx.compose.ui.text.font.FontWeight
 import org.jetbrains.compose.resources.painterResource
 import com.desarrollodroide.adventurelog.resources.Res
 import com.desarrollodroide.adventurelog.resources.ic_hamburger_alt
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
+import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 
 /**
  * Entry point composable that integrates with navigation
@@ -174,14 +178,22 @@ fun HomeScreenContent(
                     .padding(innerPadding)
             ) {
                 item {
-                    // NavHost to manage the content on each screen
-                    NavHost(
+                    // NavHost to manage the content on each screen with animations
+                    AnimatedDirectionalNavHost(
                         navController = navController,
                         startDestination = NavigationRoutes.Home.screen,
-                        modifier = Modifier
-                            .fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        // Map routes to indices for directional navigation
+                        routeToIndexMapper = { route -> 
+                            CurrentScreen.fromRoute(route).index 
+                        }
                     ) {
-                        composable(NavigationRoutes.Home.screen) {
+                        composable(
+                            route = NavigationRoutes.Home.screen,
+                            // Individual animations can be overridden for specific routes
+                            enterTransition = NavigationAnimations.enterTransitionFade,
+                            exitTransition = NavigationAnimations.exitTransitionFade
+                        ) {
                             HomeContent(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState
@@ -195,7 +207,12 @@ fun HomeScreenContent(
                             )
                         }
 
-                        composable(NavigationRoutes.Settings.route) {
+                        composable(
+                            route = NavigationRoutes.Settings.route,
+                            // Settings appears from bottom for a distinctive style
+                            enterTransition = NavigationAnimations.enterTransitionVertical,
+                            exitTransition = NavigationAnimations.exitTransitionVertical,
+                        ) {
                             val settingsViewModel = koinViewModel<SettingsViewModel>()
                             val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
                             SettingsContent(

@@ -10,7 +10,8 @@ kotlin {
             implementation(projects.core.model)
             api(projects.core.domain)
             implementation(projects.core.designsystem)
-            implementation(projects.feature.home)  // Añadir dependencia de home
+            implementation(projects.feature.home)
+            implementation(projects.feature.ui)
 
             implementation(libs.koin.composeVM)
 
