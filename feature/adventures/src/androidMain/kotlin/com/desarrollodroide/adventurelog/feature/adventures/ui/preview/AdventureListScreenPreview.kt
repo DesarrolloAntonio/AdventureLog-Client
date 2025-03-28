@@ -24,7 +24,7 @@ fun AdventureListScreenLightPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = PreviewData.adventures,
+                adventures = PreviewData.adventures,
                 onOpenDetails = {}
             )
         }
@@ -44,7 +44,7 @@ fun AdventureListScreenDarkPreview() {
     MaterialTheme(colorScheme = darkColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = PreviewData.adventures,
+                adventures = PreviewData.adventures,
                 onOpenDetails = {}
             )
         }
@@ -64,7 +64,7 @@ fun AdventureListScreenSingleItemPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = listOf(PreviewData.adventures[0]),
+                adventures = listOf(PreviewData.adventures[0]),
                 onOpenDetails = {}
             )
         }
@@ -84,7 +84,7 @@ fun AdventureListScreenEmptyPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureListScreen(
-                adventureItems = emptyList(),
+                adventures = emptyList(),
                 onOpenDetails = {}
             )
         }

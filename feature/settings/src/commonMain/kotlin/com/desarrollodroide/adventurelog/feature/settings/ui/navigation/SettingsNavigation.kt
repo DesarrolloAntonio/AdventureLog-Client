@@ -39,9 +39,9 @@ fun NavGraphBuilder.settingsNavGraph(
                     // Implement when this route exists
                 },
                 goToLogin = {
-                    navController.navigate(NavigationRoutes.Login.route) {
-                        popUpTo(Settings.route) { inclusive = true }
-                    }
+//                    navController.navigate(NavigationRoutes.Login.route) {
+//                        popUpTo(Settings.route) { inclusive = true }
+//                    }
                 },
                 onBack = { navController.navigateUp() }
             )

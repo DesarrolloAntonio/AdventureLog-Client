@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.login.ui.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
@@ -9,25 +8,22 @@ import com.desarrollodroide.adventurelog.feature.login.ui.screen.LoginScreenRout
 import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
-/**
- * Login module navigation graph
- */
+interface LoginNavigator {
+    fun goToHome()
+}
+
 fun NavGraphBuilder.loginNavGraph(
-    navController: NavHostController
+    navigator: LoginNavigator
 ) {
     navigation(
-        route = Login.route,
-        startDestination = LoginScreen.route
+        route = NavigationRoutes.Login.graph,
+        startDestination = NavigationRoutes.Login.screen
     ) {
-        composable(route = LoginScreen.route) {
+        composable(route = NavigationRoutes.Login.screen) {
             val viewModel = koinViewModel<LoginViewModel>()
             LoginScreenRoute(
                 viewModel = viewModel,
-                onNavigateToCollection = {
-                    navController.navigate(NavigationRoutes.Home.route) {
-                        popUpTo(Login.route) { inclusive = true }
-                    }
-                }
+                navigator = navigator
             )
         }
     }

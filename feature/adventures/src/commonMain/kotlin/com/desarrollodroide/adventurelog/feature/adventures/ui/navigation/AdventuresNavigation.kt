@@ -23,7 +23,7 @@ fun NavGraphBuilder.adventuresNavGraph(
             println("AdventuresNavigation: Showing adventure list screen")
             
             AdventureListScreen(
-                adventureItems = PreviewData.adventures,
+                adventures = PreviewData.adventures,
                 onOpenDetails = { adventureId: String ->
                     // Add debug info
                     println("AdventuresNavigation: Navigating to detail for adventureId=$adventureId")

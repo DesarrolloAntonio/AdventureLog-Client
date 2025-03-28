@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.detail.ui.screen.AdventureDetailScreenRoute
 
@@ -21,7 +22,12 @@ fun NavGraphBuilder.detailNavGraph(
     ) {
         composable(
             route = "detail/{adventureId}",
-            arguments = listOf(navArgument("adventureId") { type = NavType.StringType })
+            arguments = listOf(navArgument("adventureId") { type = NavType.StringType }),
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "adventurelog://detail/{adventureId}"
+                }
+            )
         ) { backStackEntry ->
             val adventureId = backStackEntry.arguments?.getString("adventureId") ?: ""
             AdventureDetailScreenRoute(

@@ -6,12 +6,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
-import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.adventuresNavGraph
-import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
+import com.desarrollodroide.adventurelog.core.common.navigation.HomeNavigator
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeNavGraph
+import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.loginNavGraph
-import com.desarrollodroide.adventurelog.feature.settings.ui.navigation.settingsNavGraph
+import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
+import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
 
 /**
  * Main navigation graph of the application
@@ -21,18 +21,27 @@ import com.desarrollodroide.adventurelog.feature.settings.ui.navigation.settings
 fun AdventureLogNavGraph(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState,
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController = rememberNavController()
 ) {
+    val loginNavigator = object : LoginNavigator {
+        override fun goToHome() {
+            navController.navigate(NavigationRoutes.Home.graph) {
+                popUpTo(NavigationRoutes.Login.graph) { inclusive = true }
+            }
+        }
+    }
+    val homeNavigator = object : HomeNavigator {
+        override fun goToDetail(adventureId: String) {
+            navController.navigate(NavigationRoutes.Detail.createDetailRoute(adventureId))
+        }
+    }
     NavHost(
         modifier = modifier,
-        startDestination = NavigationRoutes.Login.route,
-        navController = navController,
+        startDestination = NavigationRoutes.Login.graph,
+        navController = navController
     ) {
-        // Include each feature's navigation graph
-        loginNavGraph(navController)
-        homeNavGraph(navController)
-        adventuresNavGraph(navController)
+        loginNavGraph(navigator = loginNavigator)
+        homeNavGraph(navigator = homeNavigator)
         detailNavGraph(navController)
-        settingsNavGraph(navController)
     }
 }

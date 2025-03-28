@@ -30,19 +30,20 @@ import com.desarrollodroide.adventurelog.feature.login.ui.components.UserTextFie
 import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
+import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreenRoute(
     viewModel: LoginViewModel,
-    onNavigateToCollection: () -> Unit
+    navigator: LoginNavigator
 ) {
     val loginUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loginFormState by viewModel.loginFormState.collectAsStateWithLifecycle()
     LoginScreen(
         loginUiState = loginUiState,
         loginFormState = loginFormState,
-        onNavigateToHome = onNavigateToCollection,
+        onNavigateToHome = { navigator.goToHome() },
         onUserNameChange = viewModel::updateUserName,
         onPasswordChange = viewModel::updatePassword,
         onServerUrlChange = viewModel::updateServerUrl,
@@ -51,7 +52,6 @@ fun LoginScreenRoute(
         clearErrors = viewModel::clearErrors
     )
 }
-
 @Composable
 internal fun LoginScreen(
     loginUiState: LoginUiState,

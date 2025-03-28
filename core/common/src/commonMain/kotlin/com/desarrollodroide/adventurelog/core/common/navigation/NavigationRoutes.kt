@@ -6,11 +6,13 @@ package com.desarrollodroide.adventurelog.core.common.navigation
 object NavigationRoutes {
     // Routes for main features
     object Login {
-        const val route = "login"
+        const val graph = "login_graph"
+        const val screen = "login"
     }
-    
+
     object Home {
-        const val route = "home"
+        const val graph = "home_graph"
+        const val screen = "home"
     }
     
     object Adventures {
@@ -29,4 +31,8 @@ object NavigationRoutes {
             return "detail/$adventureId"
         }
     }
+}
+
+interface HomeNavigator {
+    fun goToDetail(adventureId: String)
 }
