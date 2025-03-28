@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.DrawerContentBody
+import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 
 /**
  * Preview for drawer content using translationX offset to make it visible
@@ -21,8 +22,6 @@ fun DrawerContentPreview() {
         DrawerContentBody(
             userName = "Antonio",
             adventureCount = 42,
-            selectedItem = 0,
-            onSelectionChanged = {},
             visible = true,
             drawerOpen = true,
             onHomeClick = {},
@@ -32,7 +31,8 @@ fun DrawerContentPreview() {
             onMapClick = {},
             onCalendarClick = {},
             onSettingsClick = {},
-            onHelpClick = {}
+            onHelpClick = {},
+            currentScreen = CurrentScreen.HOME
         )
     }
 }

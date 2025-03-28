@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -14,7 +13,7 @@ import com.desarrollodroide.adventurelog.feature.detail.ui.screen.AdventureDetai
  * Detail module navigation graph
  */
 fun NavGraphBuilder.detailNavGraph(
-    navController: NavHostController
+    navigator: DetailNavigator
 ) {
     navigation(
         startDestination = "detail/{adventureId}",
@@ -32,7 +31,7 @@ fun NavGraphBuilder.detailNavGraph(
             val adventureId = backStackEntry.arguments?.getString("adventureId") ?: ""
             AdventureDetailScreenRoute(
                 adventureId = adventureId,
-                onBackClick = { navController.navigateUp() }
+                onBackClick = { navigator.navigateUp() }
             )
         }
     }

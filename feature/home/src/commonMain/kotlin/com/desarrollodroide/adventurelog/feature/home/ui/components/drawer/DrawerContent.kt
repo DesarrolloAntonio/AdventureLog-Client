@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -41,22 +40,8 @@ fun DrawerContent(
     onHelpClick: () -> Unit = {},
     drawerOpen: Boolean // Parameter to control drawer visibility
 ) {
-    // Convert current screen to corresponding navigation index
-    val selectedItemIndex = when (currentScreen) {
-        CurrentScreen.HOME -> 0
-        CurrentScreen.ADVENTURES -> 1
-        CurrentScreen.COLLECTIONS -> 2
-        CurrentScreen.TRAVEL -> 3
-        CurrentScreen.MAP -> 4
-        CurrentScreen.CALENDAR -> 5
-        CurrentScreen.SETTINGS -> 6
-    }
-
-    // Maintain selection state internally, but initialize it from currentScreen
-    var selectedItem by rememberSaveable { mutableStateOf(selectedItemIndex) }
-    if (selectedItem != selectedItemIndex) {
-        selectedItem = selectedItemIndex
-    }
+    // Get the current selected index directly from CurrentScreen
+    val selectedItemIndex = currentScreen.index
     
     var visible by remember { mutableStateOf(false) }
 
@@ -121,8 +106,7 @@ fun DrawerContent(
             DrawerContentBody(
                 userName = userName,
                 adventureCount = adventureCount,
-                selectedItem = selectedItem,
-                onSelectionChanged = { selectedItem = it },
+                currentScreen = currentScreen,
                 visible = visible,
                 drawerOpen = drawerOpen,
                 onHomeClick = onHomeClick,
@@ -146,8 +130,7 @@ fun DrawerContent(
 fun DrawerContentBody(
     userName: String,
     adventureCount: Int,
-    selectedItem: Int,
-    onSelectionChanged: (Int) -> Unit,
+    currentScreen: CurrentScreen,
     visible: Boolean,
     drawerOpen: Boolean,
     onHomeClick: () -> Unit,
@@ -196,19 +179,15 @@ fun DrawerContentBody(
                 // Navigation items section
                 navigationItems.forEachIndexed { index, item ->
                     val itemDelayMillis = calculateDelayMillis(index + 2, totalItems, drawerOpen)
+                    val screenForThisIndex = CurrentScreen.fromIndex(index)
                     
                     DrawerItemAnimated(
                         title = item.title,
                         icon = item.icon,
                         selectedIcon = item.selectedIcon,
-                        isSelected = selectedItem == index,
+                        isSelected = currentScreen == screenForThisIndex,
                         badgeCount = item.badgeCount,
-                        onClick = {
-                            if (selectedItem != index) {
-                                onSelectionChanged(index)
-                                item.onClick()
-                            }
-                        },
+                        onClick = item.onClick,
                         visible = visible,
                         delayMillis = itemDelayMillis
                     )
@@ -233,20 +212,15 @@ fun DrawerContentBody(
                     val configBaseIndex = navigationItems.size + 4 // Header + adventure title + divider + settings title
                     val itemDelayMillis = calculateDelayMillis(configBaseIndex + index, totalItems, drawerOpen)
                     
-                    // Settings is at position 6 in the global index (after adding Home)
-                    val isItemSelected = index == 0 && selectedItem == 6
+                    // Settings is at position 6 in the global index
+                    val isItemSelected = index == 0 && currentScreen == CurrentScreen.SETTINGS
                     
                     DrawerItemAnimated(
                         title = item.title,
                         icon = item.icon,
                         selectedIcon = item.selectedIcon,
                         isSelected = isItemSelected,
-                        onClick = {
-                            if (index == 0 && selectedItem != 6) { // Settings item
-                                onSelectionChanged(6)
-                            }
-                            item.onClick()
-                        },
+                        onClick = item.onClick,
                         visible = visible,
                         delayMillis = itemDelayMillis
                     )

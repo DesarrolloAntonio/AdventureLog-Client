@@ -1,23 +1,23 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
+import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import org.jetbrains.compose.resources.painterResource
 import com.desarrollodroide.adventurelog.resources.Res
 import com.desarrollodroide.adventurelog.resources.ic_hamburger_alt
+import androidx.navigation.compose.*
 
 /**
  * Entry point composable that integrates with navigation
@@ -54,36 +55,10 @@ fun HomeScreenRoute(
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Maintain the current screen state inside HomeScreen to control content
-    // Initialize with HOME
-    var currentScreen by rememberSaveable { mutableStateOf(CurrentScreen.HOME) }
-
     HomeScreenContent(
         homeUiState = homeUiState,
-        currentScreen = currentScreen,
         userName = "John Doe", // Assuming userName is a property in HomeViewModel
         onAdventureClick = onAdventureClick,
-        onHomeClick = {
-            currentScreen = CurrentScreen.HOME
-        },
-        onAdventuresClick = {
-            currentScreen = CurrentScreen.ADVENTURES
-        },
-        onCollectionsClick = {
-            currentScreen = CurrentScreen.COLLECTIONS
-        },
-        onTravelClick = {
-            currentScreen = CurrentScreen.TRAVEL
-        },
-        onMapClick = {
-            currentScreen = CurrentScreen.MAP
-        },
-        onCalendarClick = {
-            currentScreen = CurrentScreen.CALENDAR
-        },
-        onSettingsClick = {
-            currentScreen = CurrentScreen.SETTINGS
-        }
     )
 }
 
@@ -95,36 +70,74 @@ fun HomeScreenRoute(
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
-    currentScreen: CurrentScreen,
     userName: String,
     onAdventureClick: (String) -> Unit = {},
-    onHomeClick: () -> Unit,
-    onAdventuresClick: () -> Unit,
-    onCollectionsClick: () -> Unit,
-    onTravelClick: () -> Unit,
-    onMapClick: () -> Unit,
-    onCalendarClick: () -> Unit,
-    onSettingsClick: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    val scrollState = rememberLazyListState()
-
+    val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    
+    // Track current screen
+    var currentScreen by remember { mutableStateOf(CurrentScreen.HOME) }
 
+    // Observer for navigation changes to keep currentScreen in sync
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    
+    // Update currentScreen when navigation changes
+    LaunchedEffect(currentBackStackEntry) {
+        currentBackStackEntry?.destination?.route?.let { route ->
+            currentScreen = CurrentScreen.fromRoute(route)
+        }
+    }
+    
+    // Navigation actions
+    val navigateTo: (CurrentScreen) -> Unit = { screen ->
+        navController.navigate(screen.route) {
+            // Pop up to the start destination of the graph to
+            // avoid building up a large stack of destinations
+            // on the back stack as users select items
+            popUpTo(NavigationRoutes.Home.screen) {
+                saveState = true
+            }
+            // Avoid multiple copies of the same destination when
+            // reselecting the same item
+            launchSingleTop = true
+            // Restore state when reselecting a previously selected item
+            restoreState = true
+        }
+        
+        // Update current screen
+        currentScreen = screen
+    }
+
+    // Drawer menu with navigation
     HomeDrawer(
         drawerState = drawerState,
         homeUiState = homeUiState,
         scope = scope,
         currentScreen = currentScreen,
-        onHomeClick = onHomeClick,
-        onAdventuresClick = onAdventuresClick,
-        onCollectionsClick = onCollectionsClick,
-        onTravelClick = onTravelClick,
-        onMapClick = onMapClick,
-        onCalendarClick = onCalendarClick,
-        onSettingsClick = onSettingsClick
+        onHomeClick = {
+            navigateTo(CurrentScreen.HOME)
+        },
+        onAdventuresClick = {
+            navigateTo(CurrentScreen.ADVENTURES)
+        },
+        onCollectionsClick = {
+            navigateTo(CurrentScreen.COLLECTIONS)
+        },
+        onTravelClick = {
+            navigateTo(CurrentScreen.TRAVEL)
+        },
+        onMapClick = {
+            navigateTo(CurrentScreen.MAP)
+        },
+        onCalendarClick = {
+            navigateTo(CurrentScreen.CALENDAR)
+        },
+        onSettingsClick = {
+            navigateTo(CurrentScreen.SETTINGS)
+        }
     ) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -155,35 +168,36 @@ fun HomeScreenContent(
             }
         ) { innerPadding ->
             LazyColumn(
-                state = scrollState,
+                state = rememberLazyListState(),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
                 item {
-                    Spacer(Modifier.height(16.dp))
-                }
-
-                item {
-                    when (currentScreen) {
-                        CurrentScreen.HOME -> {
+                    // NavHost to manage the content on each screen
+                    NavHost(
+                        navController = navController,
+                        startDestination = NavigationRoutes.Home.screen,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        composable(NavigationRoutes.Home.screen) {
                             HomeContent(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState
                             )
                         }
 
-                        CurrentScreen.ADVENTURES -> {
+                        composable(NavigationRoutes.Adventures.route) {
                             AdventureListScreen(
                                 onOpenDetails = onAdventureClick,
                                 modifier = Modifier.fillMaxSize()
-                               )
+                            )
                         }
 
-                        CurrentScreen.SETTINGS -> {
+                        composable(NavigationRoutes.Settings.route) {
                             val settingsViewModel = koinViewModel<SettingsViewModel>()
                             val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
-
                             SettingsContent(
                                 compactView = compactView,
                                 onCompactViewChanged = settingsViewModel::setCompactView,
@@ -202,23 +216,36 @@ fun HomeScreenContent(
                             )
                         }
 
-                        else -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("${currentScreen.name} Screen")
-                            }
+                        composable(NavigationRoutes.Collections.route) {
+                            PlaceholderScreen("Collections")
+                        }
+
+                        composable(NavigationRoutes.Travel.route) {
+                            PlaceholderScreen("Travel")
+                        }
+
+                        composable(NavigationRoutes.Map.route) {
+                            PlaceholderScreen("Map")
+                        }
+
+                        composable(NavigationRoutes.Calendar.route) {
+                            PlaceholderScreen("Calendar")
                         }
                     }
                 }
-
-                item {
-                    Spacer(Modifier.height(64.dp))
-                }
             }
         }
+    }
+}
+
+@Composable
+private fun PlaceholderScreen(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("$title Screen")
     }
 }

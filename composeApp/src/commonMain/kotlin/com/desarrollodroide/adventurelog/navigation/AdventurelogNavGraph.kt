@@ -6,12 +6,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.desarrollodroide.adventurelog.core.common.navigation.HomeNavigator
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeNavGraph
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.loginNavGraph
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
+import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.DetailNavigator
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
+import com.desarrollodroide.adventurelog.feature.home.ui.navigation.HomeNavigator
 
 /**
  * Main navigation graph of the application
@@ -23,6 +24,7 @@ fun AdventureLogNavGraph(
     snackbarHostState: SnackbarHostState,
     navController: NavHostController = rememberNavController()
 ) {
+    // Define navigators for each module
     val loginNavigator = object : LoginNavigator {
         override fun goToHome() {
             navController.navigate(NavigationRoutes.Home.graph) {
@@ -30,11 +32,19 @@ fun AdventureLogNavGraph(
             }
         }
     }
+    
     val homeNavigator = object : HomeNavigator {
         override fun goToDetail(adventureId: String) {
             navController.navigate(NavigationRoutes.Detail.createDetailRoute(adventureId))
         }
     }
+    
+    val detailNavigator = object : DetailNavigator {
+        override fun navigateUp() {
+            navController.navigateUp()
+        }
+    }
+    
     NavHost(
         modifier = modifier,
         startDestination = NavigationRoutes.Login.graph,
@@ -42,6 +52,6 @@ fun AdventureLogNavGraph(
     ) {
         loginNavGraph(navigator = loginNavigator)
         homeNavGraph(navigator = homeNavigator)
-        detailNavGraph(navController)
+        detailNavGraph(navigator = detailNavigator)
     }
 }
