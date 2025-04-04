@@ -13,7 +13,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 @Composable
 fun AdventureListScreen(
     adventures: List<Adventure> = PreviewData.adventures,
-    onOpenDetails: (String) -> Unit = {},
+    onAdventureClick: (String) -> Unit = {}, // Cambiado de onOpenDetails a onAdventureClick
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -24,7 +24,7 @@ fun AdventureListScreen(
         adventures.forEach { adventure ->
             AdventureItem(
                 adventure = adventure,
-                onClick = { onOpenDetails(adventure.id) }
+                onClick = { onAdventureClick(adventure.id) } // Cambiado de onOpenDetails a onAdventureClick
             )
         }
     }

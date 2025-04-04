@@ -196,13 +196,14 @@ fun HomeScreenContent(
                         ) {
                             HomeContent(
                                 modifier = Modifier.fillMaxSize(),
-                                homeUiState = homeUiState
+                                homeUiState = homeUiState,
+                                onAdventureClick = onAdventureClick
                             )
                         }
 
                         composable(NavigationRoutes.Adventures.route) {
                             AdventureListScreen(
-                                onOpenDetails = onAdventureClick,
+                                onAdventureClick = onAdventureClick,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }

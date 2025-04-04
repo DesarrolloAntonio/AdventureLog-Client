@@ -53,7 +53,7 @@ import kotlinx.coroutines.launch
 fun HomeContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
-    onAdventureClick: (Adventure) -> Unit = {}
+    onAdventureClick: (String) -> Unit = {}
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -88,7 +88,7 @@ fun HomeContent(
                     userName = homeUiState.userName,
                     stats = homeUiState.userStats,
                     recentAdventures = homeUiState.recentAdventures,
-                    onOpenDetails = onAdventureClick
+                    onAdventureClick = onAdventureClick
                 )
             }
         }
@@ -100,7 +100,7 @@ private fun HomeContentSuccess(
     userName: String,
     stats: UserStats,
     recentAdventures: List<Adventure>,
-    onOpenDetails: (Adventure) -> Unit = {},
+    onAdventureClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -127,7 +127,7 @@ private fun HomeContentSuccess(
             recentAdventures.forEach { item ->
                 AdventureItem(
                     adventure = item,
-                    onClick = { onOpenDetails(item) }
+                    onClick = { onAdventureClick(item.id) }
                 )
             }
         }
