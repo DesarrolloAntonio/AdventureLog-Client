@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,17 +14,18 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.feature.detail.ui.components.ImageCarousel
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.MapView
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -37,20 +39,8 @@ fun AdventureDetailScreenRoute(
     adventureId: String,
     onBackClick: () -> Unit
 ) {
-    // Debug message
-    println("AdventureDetailScreenRoute: Getting ViewModel for adventureId=$adventureId")
-    
-    // Use koinViewModel to get the ViewModel instance from Koin
     val viewModel = koinViewModel<AdventureDetailViewModel>()
-    
-    // Debug message
-    println("AdventureDetailScreenRoute: ViewModel retrieved successfully")
-    
-    // In a real app, you would load the adventure based on the ID
     val adventure = viewModel.getAdventureById(adventureId)
-    
-    // Debug message
-    println("AdventureDetailScreenRoute: Got adventure with name=${adventure.name}")
     
     AdventureDetailScreen(
         adventure = adventure,
@@ -71,41 +61,62 @@ fun AdventureDetailScreen(
     onOpenLink: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scrollState = rememberScrollState()
+    
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        // Main content with scrolling
-        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            // Image Carousel with overlay buttons
+            // Cover image with overlay buttons
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp)
             ) {
-                // Image carousel
+                // Main image (just the first image)
                 if (adventure.images.isNotEmpty()) {
-                    ImageCarousel(
-                        images = adventure.images.map { it.image },
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            model = adventure.images.first().image
+                        ),
+                        contentDescription = "Adventure image",
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
                 
-                // Overlay buttons at the top
+                // Back button overlay
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(40.dp)
+                        .shadow(4.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.8f))
+                        .align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                
+                // Action buttons
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .align(Alignment.TopCenter),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Back button
+                    // Favorite button
                     IconButton(
-                        onClick = onBackClick,
+                        onClick = { /* TODO: Implement favorite */ },
                         modifier = Modifier
                             .size(40.dp)
                             .shadow(4.dp, CircleShape)
@@ -113,52 +124,31 @@ fun AdventureDetailScreen(
                             .background(Color.White.copy(alpha = 0.8f))
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorite",
                             tint = Color.Black
                         )
                     }
                     
-                    // Action buttons
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    // Share button
+                    IconButton(
+                        onClick = { /* TODO: Implement share */ },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .shadow(4.dp, CircleShape)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.8f))
                     ) {
-                        // Share button
-                        IconButton(
-                            onClick = { /* TODO: Implement share */ },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .shadow(4.dp, CircleShape)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.8f))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Share,
-                                contentDescription = "Share",
-                                tint = Color.Black
-                            )
-                        }
-                        
-                        // Favorite button
-                        IconButton(
-                            onClick = onEditClick,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .shadow(4.dp, CircleShape)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.8f))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.FavoriteBorder,
-                                contentDescription = "Edit",
-                                tint = Color.Black
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share",
+                            tint = Color.Black
+                        )
                     }
                 }
             }
             
-            // Content card with rounded top corners (overlapping image)
+            // Content card
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -170,7 +160,7 @@ fun AdventureDetailScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 20.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                        .padding(24.dp)
                 ) {
                     // Title
                     Text(
@@ -181,7 +171,7 @@ fun AdventureDetailScreen(
                     
                     // Location
                     adventure.location?.let { location ->
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -200,9 +190,8 @@ fun AdventureDetailScreen(
                         }
                     }
                     
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    // Tags in FlowRow (category, private indicator, collection)
+                    // Tags section - FlowRow with Tags
+                    Spacer(modifier = Modifier.height(16.dp))
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -240,7 +229,7 @@ fun AdventureDetailScreen(
                             }
                         }
                         
-                        // Collection
+                        // Collection tag if present
                         adventure.collection?.let { collection ->
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
@@ -257,33 +246,31 @@ fun AdventureDetailScreen(
                         }
                     }
                     
-                    Divider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp)
+                    // About section
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "About",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
                     
                     // Description
                     adventure.description?.let { description ->
-                        Text(
-                            text = "Description",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = description,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                     
-                    // Map
+                    // Map section
                     if (adventure.latitude != null && adventure.longitude != null) {
+                        Spacer(modifier = Modifier.height(24.dp))
                         Text(
                             text = "Location",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         
@@ -337,15 +324,6 @@ fun AdventureDetailScreen(
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    adventure.latitude?.let { lat ->
-                                        adventure.longitude?.let { long ->
-                                            Text(
-                                                text = "Lat: $lat, Long: $long",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -353,11 +331,11 @@ fun AdventureDetailScreen(
                     
                     // Link
                     adventure.link?.let { link ->
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                         Text(
                             text = "Link",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         
@@ -379,26 +357,24 @@ fun AdventureDetailScreen(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))
-                                Column {
-                                    Text(
-                                        text = link,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
+                                Text(
+                                    text = link,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }
                     
                     // Visits
                     if (adventure.visits.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                         Text(
                             text = "Visits",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         
