@@ -19,12 +19,14 @@ koin = "4.0.2"
 koinComposeMultiplatform = "4.0.2"
 ktor = "3.0.3"
 lifecycle = "2.8.4"
+mapsCompose = "2.15.0"
 navigationCompose = "2.8.0-alpha12"
 kotlinx_serialization_json = "1.8.0"
 coroutines = "1.10.1"
 modulegraph = "0.10.1"
 buildConfig = "5.5.1"
 kermit = "2.0.5"
+playServicesMaps = "19.1.0"
 zoomimageComposeCoil = "1.1.0"
 compose-hot-reload = "1.0.0-dev.34.1"
 uiTooling = "1.7.7"
@@ -53,6 +55,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastorePreferences" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -73,6 +76,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 kotlinx_serialization_json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx_serialization_json" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 zoomimage-compose-coil = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimageComposeCoil" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
