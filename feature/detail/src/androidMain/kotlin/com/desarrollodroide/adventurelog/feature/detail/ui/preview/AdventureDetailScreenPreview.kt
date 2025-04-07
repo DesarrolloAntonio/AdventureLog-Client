@@ -39,6 +39,56 @@ private fun AdventureDetailScreenPreview(
 }
 
 /**
+ * Creates an adventure with multiple images for testing the carousel
+ */
+private fun createAdventureWithMultipleImages(): Adventure {
+    // Start with the first adventure from preview data
+    val baseAdventure = PreviewData.adventures[0]
+    
+    // Create a list of images for the carousel
+    val images = listOf(
+        AdventureImage(
+            id = "img1",
+            image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
+            adventure = baseAdventure.id,
+            isPrimary = true,
+            userId = baseAdventure.userId
+        ),
+        AdventureImage(
+            id = "img2",
+            image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+            adventure = baseAdventure.id,
+            isPrimary = false,
+            userId = baseAdventure.userId
+        ),
+        AdventureImage(
+            id = "img3",
+            image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+            adventure = baseAdventure.id,
+            isPrimary = false,
+            userId = baseAdventure.userId
+        ),
+        AdventureImage(
+            id = "img4",
+            image = "https://images.unsplash.com/photo-1554995207-c18c203602cb",
+            adventure = baseAdventure.id,
+            isPrimary = false,
+            userId = baseAdventure.userId
+        ),
+        AdventureImage(
+            id = "img5",
+            image = "https://images.unsplash.com/photo-1560624052-449f5ddf0c31",
+            adventure = baseAdventure.id,
+            isPrimary = false,
+            userId = baseAdventure.userId
+        )
+    )
+    
+    // Return the adventure with multiple images
+    return baseAdventure.copy(images = images)
+}
+
+/**
  * Provides previews for the AdventureDetailScreen in Android Studio - Light Theme
  */
 @Preview(
@@ -48,7 +98,7 @@ private fun AdventureDetailScreenPreview(
 )
 @Composable
 fun AdventureDetailScreenLightPreview() {
-    AdventureDetailScreenPreview(adventure = PreviewData.adventures[0])
+    AdventureDetailScreenPreview(adventure = createAdventureWithMultipleImages())
 }
 
 /**
@@ -67,9 +117,6 @@ fun AdventureDetailScreenDarkPreview() {
     )
 }
 
-/**
- * Preview of AdventureDetailScreen with Hotel Balneario (based on PDF example)
- */
 @Preview(
     name = "Hotel Balneario Detail Preview",
     showBackground = true,
@@ -77,7 +124,6 @@ fun AdventureDetailScreenDarkPreview() {
 )
 @Composable
 fun HotelBalnearioDetailPreview() {
-    // Create a custom adventure based on the PDF example
     val hotelBalneario = Adventure(
         id = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
         userId = "user123",
@@ -96,6 +142,27 @@ fun HotelBalnearioDetailPreview() {
                 image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
                 adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
                 isPrimary = true,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img2",
+                image = "https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f",
+                adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
+                isPrimary = false,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img3",
+                image = "https://images.unsplash.com/photo-1584132967334-10e028bd69f7",
+                adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
+                isPrimary = false,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img4",
+                image = "https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f",
+                adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
+                isPrimary = false,
                 userId = "user123"
             )
         ),
@@ -117,9 +184,6 @@ fun HotelBalnearioDetailPreview() {
     AdventureDetailScreenPreview(adventure = hotelBalneario)
 }
 
-/**
- * Preview of AdventureDetailScreen with Navalagamella (based on PDF example)
- */
 @Preview(
     name = "Navalagamella Detail Preview",
     showBackground = true,
@@ -146,6 +210,27 @@ fun NavalagamellaDetailPreview() {
                 image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
                 adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
                 isPrimary = true,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img3",
+                image = "https://images.unsplash.com/photo-1551632811-561732d1e306",
+                adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
+                isPrimary = false,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img4",
+                image = "https://images.unsplash.com/photo-1551849630-3c2969e08b74",
+                adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
+                isPrimary = false,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img5",
+                image = "https://images.unsplash.com/photo-1547125696-1d32a98e3d36",
+                adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
+                isPrimary = false,
                 userId = "user123"
             )
         ),

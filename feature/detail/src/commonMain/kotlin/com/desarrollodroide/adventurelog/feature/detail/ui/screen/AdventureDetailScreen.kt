@@ -30,6 +30,9 @@ import com.desarrollodroide.adventurelog.feature.detail.ui.components.MapView
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
+import com.desarrollodroide.adventurelog.feature.ui.utils.maskClip
 
 /**
  * Entry point composable that integrates with navigation
@@ -41,7 +44,7 @@ fun AdventureDetailScreenRoute(
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
     val adventure = viewModel.getAdventureById(adventureId)
-    
+
     AdventureDetailScreen(
         adventure = adventure,
         onBackClick = onBackClick,
@@ -51,7 +54,7 @@ fun AdventureDetailScreenRoute(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AdventureDetailScreen(
     adventure: Adventure,
@@ -62,7 +65,7 @@ fun AdventureDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
-    
+
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -88,7 +91,7 @@ fun AdventureDetailScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-                
+
                 // Back button overlay
                 IconButton(
                     onClick = onBackClick,
@@ -106,7 +109,7 @@ fun AdventureDetailScreen(
                         tint = Color.Black
                     )
                 }
-                
+
                 // Action buttons
                 Row(
                     modifier = Modifier
@@ -129,7 +132,7 @@ fun AdventureDetailScreen(
                             tint = Color.Black
                         )
                     }
-                    
+
                     // Share button
                     IconButton(
                         onClick = { /* TODO: Implement share */ },
@@ -147,7 +150,7 @@ fun AdventureDetailScreen(
                     }
                 }
             }
-            
+
             // Content card
             Surface(
                 modifier = Modifier
@@ -168,7 +171,7 @@ fun AdventureDetailScreen(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     // Location
                     adventure.location?.let { location ->
                         Spacer(modifier = Modifier.height(8.dp))
@@ -189,7 +192,7 @@ fun AdventureDetailScreen(
                             )
                         }
                     }
-                    
+
                     // Tags section - FlowRow with Tags
                     Spacer(modifier = Modifier.height(16.dp))
                     FlowRow(
@@ -212,7 +215,7 @@ fun AdventureDetailScreen(
                                 )
                             }
                         }
-                        
+
                         // Private indicator
                         if (!adventure.isPublic) {
                             Surface(
@@ -228,7 +231,7 @@ fun AdventureDetailScreen(
                                 )
                             }
                         }
-                        
+
                         // Collection tag if present
                         adventure.collection?.let { collection ->
                             Surface(
@@ -241,6 +244,42 @@ fun AdventureDetailScreen(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    if (adventure.images.size > 1) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "Photos",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Create a state for the carousel
+                        val carouselState = rememberCarouselState { adventure.images.size }
+
+                        HorizontalMultiBrowseCarousel(
+                            state = carouselState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp),
+                            preferredItemWidth = 120.dp,
+                            itemSpacing = 8.dp,
+                            contentPadding = PaddingValues(horizontal = 0.dp)
+                        ) { index ->
+                            val image = adventure.images[index]
+                            
+                            Box(
+                                modifier = Modifier.maskClip(shape = RoundedCornerShape(16.dp))
+                            ) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = image.image),
+                                    contentDescription = "Adventure image ${index + 1}",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             }
                         }
