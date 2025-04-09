@@ -4,6 +4,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.AdventureImage
 import com.desarrollodroide.adventurelog.core.model.Attachment
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Visit
 
 object PreviewData {
@@ -297,5 +298,65 @@ object PreviewData {
             category = categories[0],
             attachments = listOf()
         ),
+    )
+    
+    val collections = listOf(
+        Collection(
+            id = "c1",
+            description = "A collection of summer adventures in Spain",
+            userId = "1",
+            name = "Álava",
+            isPublic = false,
+            adventures = listOf(adventures[0]),
+            createdAt = "2025-01-30T07:21:07.230845Z",
+            startDate = null,
+            endDate = null,
+            transportations = emptyList(),
+            notes = emptyList(),
+            updatedAt = "2025-01-30T07:21:07.230885Z",
+            checklists = emptyList(),
+            isArchived = false,
+            sharedWith = emptyList(),
+            link = "",
+            lodging = emptyList()
+        ),
+        Collection(
+            id = "c2",
+            description = "Winter adventures in the mountains",
+            userId = "1",
+            name = "Albacete",
+            isPublic = false,
+            adventures = listOf(adventures[1], adventures[2]),
+            createdAt = "2025-01-30T15:57:27.605536Z",
+            startDate = null,
+            endDate = null,
+            transportations = emptyList(),
+            notes = emptyList(),
+            updatedAt = "2025-01-30T15:57:27.605575Z",
+            checklists = emptyList(),
+            isArchived = false,
+            sharedWith = emptyList(),
+            link = "",
+            lodging = emptyList()
+        ),
+        Collection(
+            id = "c3",
+            description = "Beach destinations for 2025",
+            userId = "1",
+            name = "Alicante",
+            isPublic = false,
+            adventures = emptyList(),
+            createdAt = "2025-02-09T12:21:01.829885Z",
+            startDate = null,
+            endDate = null,
+            transportations = emptyList(),
+            notes = emptyList(),
+            updatedAt = "2025-02-09T12:21:01.829925Z",
+            checklists = emptyList(),
+            isArchived = false,
+            sharedWith = emptyList(),
+            link = "",
+            lodging = emptyList()
+        )
     )
 }

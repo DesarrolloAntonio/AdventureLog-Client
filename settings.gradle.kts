@@ -47,8 +47,8 @@ include(":core:permissions")
 
 include(":feature:login")
 include(":feature:adventures")
+include(":feature:collections")
 include(":feature:home")
 include(":feature:settings")
 include(":feature:detail")
 include(":feature:ui")
-
