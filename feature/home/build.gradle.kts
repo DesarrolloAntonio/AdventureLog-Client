@@ -13,7 +13,8 @@ kotlin {
             implementation(projects.feature.settings)
             implementation(projects.feature.adventures)
             implementation(projects.feature.ui)
-            
+            implementation(projects.feature.collections)
+
             implementation(libs.koin.composeVM)
 
             implementation(libs.navigation.compose)

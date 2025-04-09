@@ -5,6 +5,7 @@ import coil3.network.CacheStrategy
 import coil3.network.NetworkFetcher
 import coil3.network.ktor3.asNetworkClient
 import com.desarrollodroide.adventurelog.feature.adventures.di.adventureModule
+import com.desarrollodroide.adventurelog.feature.collections.di.collectionsModule
 import com.desarrollodroide.adventurelog.feature.detail.di.detailModule
 import com.desarrollodroide.adventurelog.feature.home.di.homeModule
 import com.desarrollodroide.adventurelog.feature.login.di.loginModule
@@ -21,7 +22,8 @@ val appModule = module {
         homeModule,
         adventureModule,
         settingsModule,
-        detailModule
+        detailModule,
+        collectionsModule
     )
     
     single {

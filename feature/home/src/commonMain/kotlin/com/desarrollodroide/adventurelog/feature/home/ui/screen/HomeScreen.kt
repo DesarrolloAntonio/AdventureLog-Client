@@ -31,6 +31,7 @@ import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.TopAppBarDefaults
@@ -208,6 +209,12 @@ fun HomeScreenContent(
                             )
                         }
 
+                        collectionsScreen(
+                            onCollectionClick = { collectionId ->
+                                println("Clicked on collection: $collectionId")
+                            }
+                        )
+
                         composable(
                             route = NavigationRoutes.Settings.route,
                             // Settings appears from bottom for a distinctive style
@@ -232,10 +239,6 @@ fun HomeScreenContent(
                                 goToLogin = { /* TODO */ },
                                 serverUrl = settingsViewModel.getServerUrl()
                             )
-                        }
-
-                        composable(NavigationRoutes.Collections.route) {
-                            PlaceholderScreen("Collections")
                         }
 
                         composable(NavigationRoutes.Travel.route) {
