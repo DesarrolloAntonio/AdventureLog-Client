@@ -2,10 +2,9 @@ package com.desarrollodroide.adventurelog.feature.home.ui.screen
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +36,9 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -88,15 +91,45 @@ fun HomeScreenContent(
 
     // Observer for navigation changes to keep currentScreen in sync
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route ?: ""
+    
+    // Check if we're in a collection detail screen
+    val isCollectionDetail by remember(currentRoute) {
+        derivedStateOf { currentRoute.startsWith("collection/") }
+    }
+    
+    // If we're in collection detail, extract the collection ID for title or other use
+    val collectionId by remember(currentRoute) {
+        derivedStateOf {
+            if (isCollectionDetail) {
+                currentRoute.substringAfter("collection/")
+            } else {
+                ""
+            }
+        }
+    }
     
     // Update currentScreen when navigation changes
     LaunchedEffect(currentBackStackEntry) {
         currentBackStackEntry?.destination?.route?.let { route ->
-            currentScreen = CurrentScreen.fromRoute(route)
+            if (!route.startsWith("collection/")) {
+                currentScreen = CurrentScreen.fromRoute(route)
+            } else {
+                // We're in a collection detail, still mark as COLLECTIONS for drawer highlight
+                currentScreen = CurrentScreen.COLLECTIONS
+            }
         }
     }
     
     // Navigation actions
+    val navigateToHome = {
+        navController.navigate(NavigationRoutes.Home.screen) {
+            popUpTo(NavigationRoutes.Home.screen) {
+                inclusive = true
+            }
+        }
+    }
+    
     val navigateTo: (CurrentScreen) -> Unit = { screen ->
         navController.navigate(screen.route) {
             // Pop up to the start destination of the graph to
@@ -153,105 +186,143 @@ fun HomeScreenContent(
                             modifier = Modifier.fillMaxHeight(),
                             contentAlignment = Alignment.CenterStart
                         ) {
+                            // Change the title based on the current screen
+                            val topBarTitle = when {
+                                isCollectionDetail -> "Collection Detail"  // This will be replaced with actual collection name
+                                else -> when (currentScreen) {
+                                    CurrentScreen.COLLECTIONS -> "Collections"
+                                    CurrentScreen.ADVENTURES -> "Adventures"
+                                    CurrentScreen.SETTINGS -> "Settings"
+                                    CurrentScreen.TRAVEL -> "Travel"
+                                    CurrentScreen.MAP -> "Map"
+                                    CurrentScreen.CALENDAR -> "Calendar"
+                                    CurrentScreen.HOME -> "Hi, $userName!"
+                                }
+                            }
+                            
                             Text(
-                                text = "Hi, $userName!",
+                                text = topBarTitle,
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_hamburger_alt),
-                                contentDescription = "Menu"
-                            )
+                        if (isCollectionDetail) {
+                            // Show back and home buttons for collection detail
+                            Row {
+                                IconButton(onClick = { navController.navigateUp() }) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowBack,
+                                        contentDescription = "Back"
+                                    )
+                                }
+                                IconButton(onClick = navigateToHome) {
+                                    Icon(
+                                        imageVector = Icons.Default.Home,
+                                        contentDescription = "Home"
+                                    )
+                                }
+                            }
+                        } else {
+                            // Show drawer menu for main screens
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_hamburger_alt),
+                                    contentDescription = "Menu"
+                                )
+                            }
                         }
                     },
                     scrollBehavior = scrollBehavior
                 )
             }
         ) { innerPadding ->
-            LazyColumn(
-                state = rememberLazyListState(),
+            // Importante: Estamos reemplazando LazyColumn por Box para evitar el anidamiento
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                item {
-                    // NavHost to manage the content on each screen with animations
-                    AnimatedDirectionalNavHost(
-                        navController = navController,
-                        startDestination = NavigationRoutes.Home.screen,
-                        modifier = Modifier.fillMaxSize(),
-                        // Map routes to indices for directional navigation
-                        routeToIndexMapper = { route -> 
+                // NavHost to manage the content on each screen with animations
+                AnimatedDirectionalNavHost(
+                    navController = navController,
+                    startDestination = NavigationRoutes.Home.screen,
+                    modifier = Modifier.fillMaxSize(),
+                    // Map routes to indices for directional navigation
+                    routeToIndexMapper = { route -> 
+                        if (route.startsWith("collection/")) {
+                            CurrentScreen.COLLECTIONS.index
+                        } else {
                             CurrentScreen.fromRoute(route).index 
                         }
+                    }
+                ) {
+                    composable(
+                        route = NavigationRoutes.Home.screen,
+                        // Individual animations can be overridden for specific routes
+                        enterTransition = NavigationAnimations.enterTransitionFade,
+                        exitTransition = NavigationAnimations.exitTransitionFade
                     ) {
-                        composable(
-                            route = NavigationRoutes.Home.screen,
-                            // Individual animations can be overridden for specific routes
-                            enterTransition = NavigationAnimations.enterTransitionFade,
-                            exitTransition = NavigationAnimations.exitTransitionFade
-                        ) {
-                            HomeContent(
-                                modifier = Modifier.fillMaxSize(),
-                                homeUiState = homeUiState,
-                                onAdventureClick = onAdventureClick
-                            )
-                        }
-
-                        composable(NavigationRoutes.Adventures.route) {
-                            AdventureListScreen(
-                                onAdventureClick = onAdventureClick,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-
-                        collectionsScreen(
-                            onCollectionClick = { collectionId ->
-                                println("Clicked on collection: $collectionId")
-                            }
+                        HomeContent(
+                            modifier = Modifier.fillMaxSize(),
+                            homeUiState = homeUiState,
+                            onAdventureClick = onAdventureClick
                         )
+                    }
 
-                        composable(
-                            route = NavigationRoutes.Settings.route,
-                            // Settings appears from bottom for a distinctive style
-                            enterTransition = NavigationAnimations.enterTransitionVertical,
-                            exitTransition = NavigationAnimations.exitTransitionVertical,
-                        ) {
-                            val settingsViewModel = koinViewModel<SettingsViewModel>()
-                            val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
-                            SettingsContent(
-                                compactView = compactView,
-                                onCompactViewChanged = settingsViewModel::setCompactView,
-                                onLogout = settingsViewModel::logout,
-                                onNavigateToSourceCode = { /* TODO */ },
-                                onNavigateToTermsOfUse = { /* TODO */ },
-                                onNavigateToPrivacyPolicy = { /* TODO */ },
-                                onNavigateToLogs = { /* TODO */ },
-                                onViewLastCrash = { /* TODO */ },
-                                themeMode = settingsViewModel.themeMode,
-                                onThemeModeChanged = settingsViewModel::setThemeMode,
-                                useDynamicColors = settingsViewModel.useDynamicColors,
-                                onDynamicColorsChanged = settingsViewModel::setUseDynamicColors,
-                                goToLogin = { /* TODO */ },
-                                serverUrl = settingsViewModel.getServerUrl()
-                            )
-                        }
+                    composable(NavigationRoutes.Adventures.route) {
+                        AdventureListScreen(
+                            onAdventureClick = onAdventureClick,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
 
-                        composable(NavigationRoutes.Travel.route) {
-                            PlaceholderScreen("Travel")
-                        }
+                    collectionsScreen(
+                        onCollectionClick = { collectionId ->
+                            navController.navigate("collection/$collectionId")
+                        },
+                        onHomeClick = navigateToHome,
+                        onAdventureClick = onAdventureClick,
+                        navController = navController
+                    )
 
-                        composable(NavigationRoutes.Map.route) {
-                            PlaceholderScreen("Map")
-                        }
+                    composable(
+                        route = NavigationRoutes.Settings.route,
+                        // Settings appears from bottom for a distinctive style
+                        enterTransition = NavigationAnimations.enterTransitionVertical,
+                        exitTransition = NavigationAnimations.exitTransitionVertical,
+                    ) {
+                        val settingsViewModel = koinViewModel<SettingsViewModel>()
+                        val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
+                        SettingsContent(
+                            compactView = compactView,
+                            onCompactViewChanged = settingsViewModel::setCompactView,
+                            onLogout = settingsViewModel::logout,
+                            onNavigateToSourceCode = { /* TODO */ },
+                            onNavigateToTermsOfUse = { /* TODO */ },
+                            onNavigateToPrivacyPolicy = { /* TODO */ },
+                            onNavigateToLogs = { /* TODO */ },
+                            onViewLastCrash = { /* TODO */ },
+                            themeMode = settingsViewModel.themeMode,
+                            onThemeModeChanged = settingsViewModel::setThemeMode,
+                            useDynamicColors = settingsViewModel.useDynamicColors,
+                            onDynamicColorsChanged = settingsViewModel::setUseDynamicColors,
+                            goToLogin = { /* TODO */ },
+                            serverUrl = settingsViewModel.getServerUrl()
+                        )
+                    }
 
-                        composable(NavigationRoutes.Calendar.route) {
-                            PlaceholderScreen("Calendar")
-                        }
+                    composable(NavigationRoutes.Travel.route) {
+                        PlaceholderScreen("Travel")
+                    }
+
+                    composable(NavigationRoutes.Map.route) {
+                        PlaceholderScreen("Map")
+                    }
+
+                    composable(NavigationRoutes.Calendar.route) {
+                        PlaceholderScreen("Calendar")
                     }
                 }
             }

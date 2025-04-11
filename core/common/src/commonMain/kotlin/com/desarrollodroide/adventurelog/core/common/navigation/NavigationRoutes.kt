@@ -25,6 +25,11 @@ object NavigationRoutes {
 
     object Collections {
         const val route = "collections"
+        
+        // Method to create route for a specific collection
+        fun createCollectionDetailRoute(collectionId: String): String {
+            return "collection/$collectionId"
+        }
     }
 
     object Travel {

@@ -1,0 +1,207 @@
+package com.desarrollodroide.adventurelog.feature.collections.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun CollectionDetailScreen(
+    collectionId: String,
+    onBackClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onAdventureClick: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: CollectionDetailViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    
+    // Load the collection when the screen is first composed
+    LaunchedEffect(collectionId) {
+        viewModel.loadCollection(collectionId)
+    }
+    
+    LaunchedEffect(uiState.collection?.name) {
+        // This effect will update the title in parent component if needed
+    }
+    
+    Box(
+        modifier = modifier.fillMaxSize()
+    ) {
+        when {
+            uiState.isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+            uiState.errorMessage != null -> {
+                Text(
+                    text = "Error: ${uiState.errorMessage}",
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+            uiState.collection != null -> {
+                // Importante: Usamos Box como contenedor principal con fillMaxSize
+                // y luego LazyColumn dentro con fillMaxWidth (no fillMaxSize)
+                CollectionDetailContent(
+                    collection = uiState.collection!!,
+                    onAdventureClick = onAdventureClick,
+                    modifier = Modifier.fillMaxSize() // Importante: Usar fillMaxSize aquí
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CollectionDetailContent(
+    collection: Collection,
+    onAdventureClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // LazyColumn con fillMaxWidth en lugar de fillMaxSize
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            CollectionHeader(collection)
+        }
+        
+        item {
+            Text(
+                text = "Adventures",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+        
+        if (collection.adventures.isEmpty()) {
+            item {
+                Text(
+                    text = "No adventures in this collection yet",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            items(collection.adventures) { adventure ->
+                AdventureItem(
+                    adventure = adventure,
+                    onClick = { onAdventureClick(adventure.id) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CollectionHeader(
+    collection: Collection,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Collections",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 4.dp).size(16.dp)
+            )
+            
+            Text(
+                text = collection.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = collection.name,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        
+        if (collection.description.isNotEmpty()) {
+            Text(
+                text = collection.description,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            CollectionStat(
+                label = "Adventures",
+                value = "${collection.adventures.size}"
+            )
+            
+            CollectionStat(
+                label = "Status",
+                value = if (collection.isArchived) "Archived" else "Active"
+            )
+            
+            CollectionStat(
+                label = "Visibility",
+                value = if (collection.isPublic) "Public" else "Private"
+            )
+        }
+    }
+}
+
+@Composable
+fun CollectionStat(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
