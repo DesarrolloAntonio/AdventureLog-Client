@@ -38,6 +38,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.colle
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -74,6 +75,15 @@ fun HomeScreenRoute(
         userName = "John Doe", // Assuming userName is a property in HomeViewModel
         onAdventureClick = onAdventureClick,
     )
+}
+
+/**
+ * Helper function to reset scroll behavior
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun resetScrollBehavior(scrollBehavior: TopAppBarScrollBehavior) {
+    scrollBehavior.state.contentOffset = 0f
+    scrollBehavior.state.heightOffset = 0f
 }
 
 /**
@@ -215,7 +225,13 @@ fun HomeScreenContent(
                                         imageVector = Icons.Default.ChevronLeft,
                                         contentDescription = "Back",
                                         modifier = Modifier
-                                            .clickable { navController.navigateUp() }
+                                            .clickable { 
+                                                // Reset scroll behavior when navigating back from collection detail
+                                                // This fixes the issue where the breadcrumb gets stuck as title
+                                                // when user has scrolled up and then clicks to go back
+                                                resetScrollBehavior(scrollBehavior)
+                                                navController.navigateUp() 
+                                            }
                                             .padding(end = 4.dp)
                                     )
                                     
@@ -224,7 +240,12 @@ fun HomeScreenContent(
                                         imageVector = Icons.Default.Home,
                                         contentDescription = "Home",
                                         modifier = Modifier
-                                            .clickable { navigateToHome() }
+                                            .clickable { 
+                                                // Reset scroll behavior when navigating from collection detail to home
+                                                // This fixes the issue where the breadcrumb gets stuck as title
+                                                resetScrollBehavior(scrollBehavior)
+                                                navigateToHome() 
+                                            }
                                             .padding(end = 4.dp),
                                         tint = MaterialTheme.colorScheme.primary
                                     )
@@ -319,6 +340,7 @@ fun HomeScreenContent(
 
                     collectionsScreen(
                         onCollectionClick = { collectionId ->
+                            // No need to reset scroll when navigating TO a collection
                             navController.navigate("collection/$collectionId")
                         },
                         onHomeClick = navigateToHome,
