@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -103,38 +105,45 @@ private fun HomeContentSuccess(
     onAdventureClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
+            .fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Stats Card
-        SwipeableStatsCard(stats = stats)
+        item {
+            SwipeableStatsCard(stats = stats)
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         // Recent Adventures section title
-        Text(
-            text = "Recent adventures",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        // Recent Adventures content replaced with Column to avoid nested scrolling issues
-        Column(
-            modifier = modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            recentAdventures.forEach { item ->
-                AdventureItem(
-                    adventure = item,
-                    onClick = { onAdventureClick(item.id) }
-                )
-            }
+        item {
+            Text(
+                text = "Recent adventures",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        
+        // Recent Adventures as individual items
+        items(recentAdventures) { adventure ->
+            AdventureItem(
+                adventure = adventure,
+                onClick = { onAdventureClick(adventure.id) }
+            )
+        }
+        
+        // Add some space at the bottom
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SwipeableStatsCard(
     stats: UserStats,

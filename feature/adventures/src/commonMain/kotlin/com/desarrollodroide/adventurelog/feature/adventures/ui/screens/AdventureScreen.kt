@@ -1,8 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,16 +19,20 @@ fun AdventureListScreen(
     onAdventureClick: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .padding(horizontal = 16.dp),
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        adventures.forEach { adventure ->
+        items(adventures) { adventure ->
             AdventureItem(
                 adventure = adventure,
                 onClick = { onAdventureClick(adventure.id) }
             )
+        }
+        
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
