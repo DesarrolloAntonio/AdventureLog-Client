@@ -104,11 +104,12 @@ fun HomeScreenContent(
         derivedStateOf { currentRoute.startsWith("collection/") }
     }
     
-    // If we're in collection detail, extract the collection ID and name
-    val collectionId by remember(currentRoute) {
+    // Extract collection ID from route parameters
+    val collectionId by remember(currentBackStackEntry) {
         derivedStateOf {
             if (isCollectionDetail) {
-                currentRoute.substringAfter("collection/")
+                // Get the actual parameter value from the backstack entry
+                currentBackStackEntry?.arguments?.getString("collectionId") ?: ""
             } else {
                 ""
             }
@@ -119,9 +120,10 @@ fun HomeScreenContent(
     val collectionName by remember(collectionId) {
         derivedStateOf {
             if (collectionId.isNotEmpty()) {
-                PreviewData.collections.find { it.id == collectionId }?.name ?: "Collection Detail"
+                // Look up the collection by ID to get its name
+                PreviewData.collections.find { it.id == collectionId }?.name ?: "Collection $collectionId"
             } else {
-                "Collection Detail"
+                "Collection"
             }
         }
     }
