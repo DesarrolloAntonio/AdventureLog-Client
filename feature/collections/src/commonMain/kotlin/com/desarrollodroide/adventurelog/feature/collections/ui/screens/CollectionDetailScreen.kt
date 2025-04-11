@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,10 +33,6 @@ fun CollectionDetailScreen(
         viewModel.loadCollection(collectionId)
     }
     
-    LaunchedEffect(uiState.collection?.name) {
-        // This effect will update the title in parent component if needed
-    }
-    
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -58,12 +53,10 @@ fun CollectionDetailScreen(
                 )
             }
             uiState.collection != null -> {
-                // Importante: Usamos Box como contenedor principal con fillMaxSize
-                // y luego LazyColumn dentro con fillMaxWidth (no fillMaxSize)
                 CollectionDetailContent(
                     collection = uiState.collection!!,
                     onAdventureClick = onAdventureClick,
-                    modifier = Modifier.fillMaxSize() // Importante: Usar fillMaxSize aquí
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
@@ -76,7 +69,6 @@ fun CollectionDetailContent(
     onAdventureClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // LazyColumn con fillMaxWidth en lugar de fillMaxSize
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
@@ -125,44 +117,10 @@ fun CollectionHeader(
             .padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "Collections",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            
-            Icon(
-                imageVector = Icons.Default.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 4.dp).size(16.dp)
-            )
-            
-            Text(
-                text = collection.name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
         Text(
-            text = collection.name,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            text = collection.description,
+            style = MaterialTheme.typography.bodyLarge
         )
-        
-        if (collection.description.isNotEmpty()) {
-            Text(
-                text = collection.description,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
         
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),

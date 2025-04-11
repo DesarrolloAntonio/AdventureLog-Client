@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -38,7 +40,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +53,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
+import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 
 /**
  * Entry point composable that integrates with navigation
@@ -98,13 +100,24 @@ fun HomeScreenContent(
         derivedStateOf { currentRoute.startsWith("collection/") }
     }
     
-    // If we're in collection detail, extract the collection ID for title or other use
+    // If we're in collection detail, extract the collection ID and name
     val collectionId by remember(currentRoute) {
         derivedStateOf {
             if (isCollectionDetail) {
                 currentRoute.substringAfter("collection/")
             } else {
                 ""
+            }
+        }
+    }
+    
+    // Find collection name for the title
+    val collectionName by remember(collectionId) {
+        derivedStateOf {
+            if (collectionId.isNotEmpty()) {
+                PreviewData.collections.find { it.id == collectionId }?.name ?: "Collection Detail"
+            } else {
+                "Collection Detail"
             }
         }
     }
@@ -186,10 +199,31 @@ fun HomeScreenContent(
                             modifier = Modifier.fillMaxHeight(),
                             contentAlignment = Alignment.CenterStart
                         ) {
-                            // Change the title based on the current screen
-                            val topBarTitle = when {
-                                isCollectionDetail -> "Collection Detail"  // This will be replaced with actual collection name
-                                else -> when (currentScreen) {
+                            // Si estamos en el detalle de una colección, mostramos un layout especial
+                            if (isCollectionDetail) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(
+                                        onClick = { navController.navigateUp() },
+                                        modifier = Modifier.padding(end = 4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowBack,
+                                            contentDescription = "Back",
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                    
+                                    Text(
+                                        text = collectionName,
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            } else {
+                                // Para otras pantallas, mostramos el título normal
+                                val topBarTitle = when (currentScreen) {
                                     CurrentScreen.COLLECTIONS -> "Collections"
                                     CurrentScreen.ADVENTURES -> "Adventures"
                                     CurrentScreen.SETTINGS -> "Settings"
@@ -198,47 +232,28 @@ fun HomeScreenContent(
                                     CurrentScreen.CALENDAR -> "Calendar"
                                     CurrentScreen.HOME -> "Hi, $userName!"
                                 }
+                                
+                                Text(
+                                    text = topBarTitle,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
-                            
-                            Text(
-                                text = topBarTitle,
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold
-                            )
                         }
                     },
                     navigationIcon = {
-                        if (isCollectionDetail) {
-                            // Show back and home buttons for collection detail
-                            Row {
-                                IconButton(onClick = { navController.navigateUp() }) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = "Back"
-                                    )
-                                }
-                                IconButton(onClick = navigateToHome) {
-                                    Icon(
-                                        imageVector = Icons.Default.Home,
-                                        contentDescription = "Home"
-                                    )
-                                }
-                            }
-                        } else {
-                            // Show drawer menu for main screens
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_hamburger_alt),
-                                    contentDescription = "Menu"
-                                )
-                            }
+                        // Siempre mostramos el icono del drawer
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_hamburger_alt),
+                                contentDescription = "Menu"
+                            )
                         }
                     },
                     scrollBehavior = scrollBehavior
                 )
             }
         ) { innerPadding ->
-            // Importante: Estamos reemplazando LazyColumn por Box para evitar el anidamiento
             Box(
                 modifier = Modifier
                     .fillMaxSize()
