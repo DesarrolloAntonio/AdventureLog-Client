@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,12 +40,15 @@ import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.painterResource
 import com.desarrollodroide.adventurelog.resources.Res
 import com.desarrollodroide.adventurelog.resources.ic_hamburger_alt
@@ -199,30 +203,48 @@ fun HomeScreenContent(
                             modifier = Modifier.fillMaxHeight(),
                             contentAlignment = Alignment.CenterStart
                         ) {
-                            // Si estamos en el detalle de una colección, mostramos un layout especial
+                            // If we're in a collection detail, show a simple breadcrumb
                             if (isCollectionDetail) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    IconButton(
-                                        onClick = { navController.navigateUp() },
-                                        modifier = Modifier.padding(end = 4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.ArrowBack,
-                                            contentDescription = "Back",
-                                            tint = MaterialTheme.colorScheme.onSurface
-                                        )
-                                    }
+                                    // Chevron Left icon for going back
+                                    Icon(
+                                        imageVector = Icons.Default.ChevronLeft,
+                                        contentDescription = "Back",
+                                        modifier = Modifier
+                                            .clickable { navController.navigateUp() }
+                                            .padding(end = 4.dp)
+                                    )
                                     
+                                    // Home icon instead of text
+                                    Icon(
+                                        imageVector = Icons.Default.Home,
+                                        contentDescription = "Home",
+                                        modifier = Modifier
+                                            .clickable { navigateToHome() }
+                                            .padding(end = 4.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    
+                                    // Arrow separator
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = null,
+                                        modifier = Modifier.padding(horizontal = 4.dp).width(12.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    
+                                    // Collection name
                                     Text(
                                         text = collectionName,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        fontWeight = FontWeight.Bold
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             } else {
-                                // Para otras pantallas, mostramos el título normal
+                                // For other screens, show the normal title
                                 val topBarTitle = when (currentScreen) {
                                     CurrentScreen.COLLECTIONS -> "Collections"
                                     CurrentScreen.ADVENTURES -> "Adventures"
@@ -242,7 +264,7 @@ fun HomeScreenContent(
                         }
                     },
                     navigationIcon = {
-                        // Siempre mostramos el icono del drawer
+                        // Always show the drawer icon
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_hamburger_alt),
