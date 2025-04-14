@@ -26,7 +26,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
+import com.desarrollodroide.adventurelog.feature.home.model.fullName
 import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeDrawer
 import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
@@ -59,6 +61,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
+import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ProfileAvatar
 
 /**
  * Entry point composable that integrates with navigation
@@ -69,10 +72,11 @@ fun HomeScreenRoute(
     onAdventureClick: (String) -> Unit = {}
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
 
     HomeScreenContent(
         homeUiState = homeUiState,
-        userName = "John Doe", // Assuming userName is a property in HomeViewModel
+        userDetails = userDetails,
         onAdventureClick = onAdventureClick,
     )
 }
@@ -94,13 +98,16 @@ private fun resetScrollBehavior(scrollBehavior: TopAppBarScrollBehavior) {
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
-    userName: String,
+    userDetails: UserDetails? = null,
     onAdventureClick: (String) -> Unit = {},
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    
+    // User name to display
+    val userName = userDetails?.fullName ?: "Usuario"
     
     // Track current screen
     var currentScreen by remember { mutableStateOf(CurrentScreen.HOME) }
@@ -157,6 +164,11 @@ fun HomeScreenContent(
                 inclusive = true
             }
         }
+    }
+
+    val navigateToUserProfile = {
+        // TODO: Navigate to user profile screen
+        // This is where you would navigate to a profile screen when tapping the avatar
     }
     
     val navigateTo: (CurrentScreen) -> Unit = { screen ->
@@ -294,6 +306,14 @@ fun HomeScreenContent(
                                 contentDescription = "Menu"
                             )
                         }
+                    },
+                    actions = {
+                        // Here we add the user avatar with the image URL
+                        ProfileAvatar(
+                            modifier = Modifier.padding(end = 12.dp),
+                            profileImageUrl = userDetails?.profilePic,
+                            onClick = navigateToUserProfile
+                        )
                     },
                     scrollBehavior = scrollBehavior
                 )

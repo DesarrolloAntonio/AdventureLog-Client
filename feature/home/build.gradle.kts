@@ -22,6 +22,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.navigation.compose)
 
+            implementation(libs.coil.compose)
         }
         androidMain.dependencies {
             implementation(libs.coil.compose)

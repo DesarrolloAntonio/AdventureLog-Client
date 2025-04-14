@@ -72,14 +72,14 @@ class LoginViewModel(
         if (!validateForm()) return
 
         viewModelScope.launch {
-            val arts = loginUseCase(
+            val result = loginUseCase(
                 username = loginFormState.value.userName,
                 password = loginFormState.value.password
             )
             _uiState.update {
-                when (arts) {
-                    is Either.Left -> LoginUiState.Error(arts.value)
-                    is Either.Right -> LoginUiState.Success(arts.value)
+                when (result) {
+                    is Either.Left -> LoginUiState.Error(result.value)
+                    is Either.Right -> LoginUiState.Success(result.value)
                 }
             }
         }
