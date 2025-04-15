@@ -10,6 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -21,6 +25,8 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Reusable drawer content between modal and permanent versions
@@ -151,26 +157,77 @@ fun DrawerContentBody(
     onLogout: () -> Unit,
     onHelpClick: () -> Unit = {}
 ) {
-    ModalDrawerSheet {
-        // Get navigation and config items
-        val navigationItems = createNavigationItems(
-            onHomeClick = onHomeClick,
-            onAdventuresClick = onAdventuresClick,
-            onCollectionsClick = onCollectionsClick,
-            onTravelClick = onTravelClick,
-            onMapClick = onMapClick,
-            onCalendarClick = onCalendarClick
-        )
-        
-        val configItems = createConfigItems(
-            onSettingsClick = onSettingsClick,
-            onHelpClick = onHelpClick
-        )
-        
-        // Total items count for delay calculations
-        val totalItems = 8 + navigationItems.size + configItems.size 
-        // (Header + 2 section titles + divider + footer + all items)
-        
+    // Colors for gradient background
+    val darkBgColor = Color(0xFF121212) // Dark base color
+    val accentColor = Color(0xFF1F3D5C) // Dark blue accent for gradient
+    val gradientOverlayColor = Color(0xFF253046) // Pattern color
+
+    // Gradient background
+    val backgroundBrush = Brush.verticalGradient(
+        colors = listOf(darkBgColor, accentColor.copy(alpha = 0.7f), darkBgColor)
+    )
+
+    // Navigation items section
+    val navigationItems = createNavigationItems(
+        onHomeClick = onHomeClick,
+        onAdventuresClick = onAdventuresClick,
+        onCollectionsClick = onCollectionsClick,
+        onTravelClick = onTravelClick,
+        onMapClick = onMapClick,
+        onCalendarClick = onCalendarClick
+    )
+    
+    val configItems = createConfigItems(
+        onSettingsClick = onSettingsClick,
+        onHelpClick = onHelpClick
+    )
+    
+    // Total items count for delay calculations
+    val totalItems = 8 + navigationItems.size + configItems.size 
+    // (Header + 2 section titles + divider + footer + all items)
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(backgroundBrush)
+            .drawBehind {
+                // Subtle diagonal lines pattern
+                val patternColor = gradientOverlayColor.copy(alpha = 0.15f)
+                val lineWidth = 1.5f
+                val spacing = 40f
+                
+                // Draw diagonal lines in background
+                for (i in 0..(size.width + size.height).toInt() step spacing.toInt()) {
+                    val startX = minOf(i.toFloat(), size.width)
+                    val startY = if (i > size.width) i - size.width else 0f
+                    
+                    drawLine(
+                        color = patternColor,
+                        start = Offset(startX, startY),
+                        end = Offset(
+                            if (startY + (size.width - startX) < size.height) 0f else startX - (size.height - startY),
+                            if (startY + (size.width - startX) < size.height) startY + (size.width - startX) else size.height
+                        ),
+                        strokeWidth = lineWidth
+                    )
+                }
+                
+                // Subtle glow effect at the top
+                val glowBrush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF3A6EA5).copy(alpha = 0.15f),
+                        Color.Transparent
+                    ),
+                    center = Offset(size.width / 2, 0f),
+                    radius = size.width * 0.8f
+                )
+                
+                drawRect(
+                    brush = glowBrush,
+                    size = size
+                )
+            }
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
@@ -194,7 +251,6 @@ fun DrawerContentBody(
                     delayMillis = calculateDelayMillis(1, totalItems, drawerOpen)
                 )
 
-                // Navigation items section
                 navigationItems.forEachIndexed { index, item ->
                     val itemDelayMillis = calculateDelayMillis(index + 2, totalItems, drawerOpen)
                     val screenForThisIndex = CurrentScreen.fromIndex(index)
@@ -289,7 +345,7 @@ fun AnimatedSectionTitle(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
+            color = Color(0xFF64B5F6), // Light blue for titles
             modifier = Modifier
                 .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                 .semantics {
@@ -334,7 +390,8 @@ fun AnimatedDivider(
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 16.dp)
+                .padding(vertical = 16.dp, horizontal = 16.dp),
+            color = Color.White.copy(alpha = 0.2f) // Subtle white divider with transparency
         )
     }
 }
@@ -376,7 +433,7 @@ fun AnimatedFooter(
         Text(
             text = "Adventure Log v1.0",
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = Color.White.copy(alpha = 0.6f), // Semi-transparent white text
             modifier = Modifier.clearAndSetSemantics {
                 contentDescription = "Application version: Adventure Log version 1.0"
             }
@@ -430,15 +487,15 @@ fun DrawerItemAnimated(
     
     // Calculate color based on selection
     val itemColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
+        Color(0xFF64B5F6) // Light blue for selected items
     } else {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+        Color.White.copy(alpha = 0.8f) // White for non-selected items
     }
     
     // Apply background with rounded shape on the right side if selected
     val backgroundModifier = if (isSelected) {
         Modifier.background(
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            color = Color(0xFF3A6EA5).copy(alpha = 0.3f), // Semi-transparent dark blue
             shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
         )
     } else {
@@ -479,7 +536,7 @@ fun DrawerItemAnimated(
                         .width(4.dp)
                         .height(24.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = Color(0xFF64B5F6), // Light blue indicator
                             shape = RoundedCornerShape(8.dp)
                         )
                 )
@@ -509,11 +566,11 @@ fun DrawerItemAnimated(
             // Badge for notifications
             if (badgeCount > 0) {
                 Badge(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = Color(0xFFFF5252) // Vibrant red for notifications
                 ) {
                     Text(
                         text = badgeCount.toString(),
-                        color = MaterialTheme.colorScheme.onError
+                        color = Color.White
                     )
                 }
             }

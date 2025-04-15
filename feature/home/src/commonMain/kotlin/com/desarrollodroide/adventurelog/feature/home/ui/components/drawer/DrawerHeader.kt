@@ -12,17 +12,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +67,10 @@ fun DrawerHeader(
         label = "headerAlpha"
     )
     
+    // Header colors
+    val darkBlue = Color(0xFF0A1929)
+    val accentBlue = Color(0xFF1A3E6F)
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -68,7 +78,59 @@ fun DrawerHeader(
                 translationY = headerOffsetY.toPx()
                 alpha = headerAlpha
             }
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clip(RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp))
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(darkBlue, accentBlue),
+                    startY = 0f,
+                    endY = 300f
+                )
+            )
+            .drawBehind {
+                // Create star/dot pattern to simulate night sky
+                val starsColor = Color.White.copy(alpha = 0.3f)
+                
+                // Generate larger stars (less numerous)
+                repeat(15) {
+                    val x = (Math.random() * size.width).toFloat()
+                    val y = (Math.random() * size.height).toFloat()
+                    val starSize = (1f + Math.random() * 2f).toFloat()
+                    
+                    drawCircle(
+                        color = starsColor,
+                        radius = starSize,
+                        center = Offset(x, y)
+                    )
+                }
+                
+                // Generate smaller stars (more numerous)
+                repeat(30) {
+                    val x = (Math.random() * size.width).toFloat()
+                    val y = (Math.random() * size.height).toFloat()
+                    val starSize = (0.5f + Math.random() * 1f).toFloat()
+                    
+                    drawCircle(
+                        color = starsColor.copy(alpha = 0.2f),
+                        radius = starSize,
+                        center = Offset(x, y)
+                    )
+                }
+                
+                // Add blue glow at the top
+                val glowBrush = Brush.radialGradient(
+                    colors = listOf(
+                        Color(0xFF3A6EA5).copy(alpha = 0.3f),
+                        Color.Transparent
+                    ),
+                    center = Offset(size.width / 2, 0f),
+                    radius = size.width * 0.6f
+                )
+                
+                drawRect(
+                    brush = glowBrush,
+                    size = size
+                )
+            }
             .padding(16.dp)
     ) {
         Column(
@@ -76,11 +138,23 @@ fun DrawerHeader(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // User avatar
-            ProfileAvatar(
-                size = 80,
-                profileImageUrl = profileImageUrl
-            )
+            // User avatar with glowing border
+            Box(
+                modifier = Modifier
+                    .drawBehind {
+                        drawCircle(
+                            color = Color(0xFF64B5F6).copy(alpha = 0.2f),
+                            radius = size.width / 1.8f,
+                            center = center
+                        )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                ProfileAvatar(
+                    size = 80,
+                    profileImageUrl = profileImageUrl
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -90,7 +164,7 @@ fun DrawerHeader(
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = Color.White // White text
             )
             
             // Email
@@ -98,7 +172,7 @@ fun DrawerHeader(
                 Text(
                     text = email,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.7f) // Semi-transparent white text
                 )
             }
             
@@ -107,17 +181,22 @@ fun DrawerHeader(
             // Logout button
             TextButton(
                 onClick = onLogout,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .background(
+                        Color(0xFF4F0E0E).copy(alpha = 0.3f),
+                        RoundedCornerShape(8.dp)
+                    )
             ) {
                 Icon(
                     imageVector = Icons.Default.ExitToApp,
                     contentDescription = null,
-                    tint = Color(0xFFE53935)
+                    tint = Color(0xFFFF5252) // Brighter red
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Logout",
-                    color = Color(0xFFE53935),
+                    color = Color(0xFFFF5252),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

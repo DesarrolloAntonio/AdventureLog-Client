@@ -56,7 +56,7 @@ fun HomeDrawer(
     
     // Animation for background darkening when drawer opens
     val animatedDimAmount by animateFloatAsState(
-        targetValue = if (isDrawerOpen) 0.5f else 0f,
+        targetValue = if (isDrawerOpen) 0.6f else 0f,  // Aumentamos el oscurecimiento
         animationSpec = tween(400),
         label = "dim"
     )
@@ -124,9 +124,9 @@ fun HomeDrawer(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
-                            alpha = animatedDimAmount * 0.3f
+                            alpha = animatedDimAmount * 0.4f  // Aumentamos la opacidad del fondo
                         }
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .background(Color.Black.copy(alpha = 0.3f))  // Fondo negro para mayor contraste
                 )
             }
         }
