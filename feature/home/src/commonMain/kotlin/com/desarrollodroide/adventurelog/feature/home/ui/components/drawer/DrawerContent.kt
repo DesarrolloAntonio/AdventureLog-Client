@@ -25,8 +25,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.random.Random
 
 /**
  * Reusable drawer content between modal and permanent versions
@@ -157,14 +156,14 @@ fun DrawerContentBody(
     onLogout: () -> Unit,
     onHelpClick: () -> Unit = {}
 ) {
-    // Colors for gradient background
-    val darkBgColor = Color(0xFF121212) // Dark base color
-    val accentColor = Color(0xFF1F3D5C) // Dark blue accent for gradient
-    val gradientOverlayColor = Color(0xFF253046) // Pattern color
+    // Colors for gradient background - matching website dark theme
+    val darkBgColor = Color(0xFF1E232B) // Slate dark color matching website cards
+    val accentColor = Color(0xFF252B35) // Slightly lighter accent for subtle gradient
+    val gradientOverlayColor = Color(0xFF2C313D) // Pattern color
 
     // Gradient background
     val backgroundBrush = Brush.verticalGradient(
-        colors = listOf(darkBgColor, accentColor.copy(alpha = 0.7f), darkBgColor)
+        colors = listOf(darkBgColor, accentColor, darkBgColor)
     )
 
     // Navigation items section
@@ -215,7 +214,7 @@ fun DrawerContentBody(
                 // Subtle glow effect at the top
                 val glowBrush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF3A6EA5).copy(alpha = 0.15f),
+                        Color(0xFF5038FF).copy(alpha = 0.08f), // Matching the purple from website buttons
                         Color.Transparent
                     ),
                     center = Offset(size.width / 2, 0f),
@@ -345,7 +344,7 @@ fun AnimatedSectionTitle(
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            color = Color(0xFF64B5F6), // Light blue for titles
+            color = Color(0xFF5038FF), // Purple from website buttons
             modifier = Modifier
                 .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                 .semantics {
@@ -487,7 +486,7 @@ fun DrawerItemAnimated(
     
     // Calculate color based on selection
     val itemColor = if (isSelected) {
-        Color(0xFF64B5F6) // Light blue for selected items
+        Color(0xFF5038FF) // Purple from website buttons
     } else {
         Color.White.copy(alpha = 0.8f) // White for non-selected items
     }
@@ -495,7 +494,7 @@ fun DrawerItemAnimated(
     // Apply background with rounded shape on the right side if selected
     val backgroundModifier = if (isSelected) {
         Modifier.background(
-            color = Color(0xFF3A6EA5).copy(alpha = 0.3f), // Semi-transparent dark blue
+            color = Color(0xFF5038FF).copy(alpha = 0.15f), // Semi-transparent purple
             shape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
         )
     } else {
@@ -536,7 +535,7 @@ fun DrawerItemAnimated(
                         .width(4.dp)
                         .height(24.dp)
                         .background(
-                            color = Color(0xFF64B5F6), // Light blue indicator
+                            color = Color(0xFF5038FF), // Purple indicator
                             shape = RoundedCornerShape(8.dp)
                         )
                 )
@@ -566,7 +565,7 @@ fun DrawerItemAnimated(
             // Badge for notifications
             if (badgeCount > 0) {
                 Badge(
-                    containerColor = Color(0xFFFF5252) // Vibrant red for notifications
+                    containerColor = Color(0xFFFF4081) // Pink-purple for notifications (from website color scheme)
                 ) {
                     Text(
                         text = badgeCount.toString(),

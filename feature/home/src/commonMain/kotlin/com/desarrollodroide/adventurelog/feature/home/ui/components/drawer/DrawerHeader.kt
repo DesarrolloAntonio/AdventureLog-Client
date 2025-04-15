@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ProfileAvatar
+import kotlin.random.Random
 
 /**
  * The header component for the drawer showing user profile info
@@ -67,9 +68,9 @@ fun DrawerHeader(
         label = "headerAlpha"
     )
     
-    // Header colors
-    val darkBlue = Color(0xFF0A1929)
-    val accentBlue = Color(0xFF1A3E6F)
+    // Header colors - matching the website dark theme
+    val darkSlate = Color(0xFF1A1E25)  // Darker background matching website
+    val slateAccent = Color(0xFF252A35) // Slightly lighter accent
     
     Box(
         modifier = Modifier
@@ -81,20 +82,20 @@ fun DrawerHeader(
             .clip(RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp))
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(darkBlue, accentBlue),
+                    colors = listOf(darkSlate, slateAccent),
                     startY = 0f,
                     endY = 300f
                 )
             )
             .drawBehind {
                 // Create star/dot pattern to simulate night sky
-                val starsColor = Color.White.copy(alpha = 0.3f)
+                val starsColor = Color.White.copy(alpha = 0.2f)
                 
                 // Generate larger stars (less numerous)
                 repeat(15) {
-                    val x = (Math.random() * size.width).toFloat()
-                    val y = (Math.random() * size.height).toFloat()
-                    val starSize = (1f + Math.random() * 2f).toFloat()
+                    val x = (Random.nextDouble() * size.width).toFloat()
+                    val y = (Random.nextDouble() * size.height).toFloat()
+                    val starSize = (1f + Random.nextDouble() * 2f).toFloat()
                     
                     drawCircle(
                         color = starsColor,
@@ -105,21 +106,21 @@ fun DrawerHeader(
                 
                 // Generate smaller stars (more numerous)
                 repeat(30) {
-                    val x = (Math.random() * size.width).toFloat()
-                    val y = (Math.random() * size.height).toFloat()
-                    val starSize = (0.5f + Math.random() * 1f).toFloat()
+                    val x = (Random.nextDouble() * size.width).toFloat()
+                    val y = (Random.nextDouble() * size.height).toFloat()
+                    val starSize = (0.5f + Random.nextDouble() * 1f).toFloat()
                     
                     drawCircle(
-                        color = starsColor.copy(alpha = 0.2f),
+                        color = starsColor.copy(alpha = 0.1f),
                         radius = starSize,
                         center = Offset(x, y)
                     )
                 }
                 
-                // Add blue glow at the top
+                // Add purple glow at the top - matching website's purple accents
                 val glowBrush = Brush.radialGradient(
                     colors = listOf(
-                        Color(0xFF3A6EA5).copy(alpha = 0.3f),
+                        Color(0xFF5038FF).copy(alpha = 0.15f),
                         Color.Transparent
                     ),
                     center = Offset(size.width / 2, 0f),
@@ -143,7 +144,7 @@ fun DrawerHeader(
                 modifier = Modifier
                     .drawBehind {
                         drawCircle(
-                            color = Color(0xFF64B5F6).copy(alpha = 0.2f),
+                            color = Color(0xFF5038FF).copy(alpha = 0.2f), // Purple glow matching website
                             radius = size.width / 1.8f,
                             center = center
                         )
@@ -191,12 +192,12 @@ fun DrawerHeader(
                 Icon(
                     imageVector = Icons.Default.ExitToApp,
                     contentDescription = null,
-                    tint = Color(0xFFFF5252) // Brighter red
+                    tint = Color(0xFFFF4081) // Pink-purple accent matching website
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Logout",
-                    color = Color(0xFFFF5252),
+                    color = Color(0xFFFF4081), // Pink-purple accent matching website
                     style = MaterialTheme.typography.labelLarge
                 )
             }
