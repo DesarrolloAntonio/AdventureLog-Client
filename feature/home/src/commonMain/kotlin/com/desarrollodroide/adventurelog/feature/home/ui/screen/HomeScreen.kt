@@ -69,6 +69,7 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.common.Profi
 @Composable
 fun HomeScreenRoute(
     viewModel: HomeViewModel = koinViewModel(),
+    settingsViewModel: SettingsViewModel = koinViewModel(),
     onAdventureClick: (String) -> Unit = {}
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,6 +79,7 @@ fun HomeScreenRoute(
         homeUiState = homeUiState,
         userDetails = userDetails,
         onAdventureClick = onAdventureClick,
+        onLogout = settingsViewModel::logout
     )
 }
 
@@ -100,6 +102,7 @@ fun HomeScreenContent(
     homeUiState: HomeUiState,
     userDetails: UserDetails? = null,
     onAdventureClick: (String) -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -165,12 +168,8 @@ fun HomeScreenContent(
             }
         }
     }
-
-    val navigateToUserProfile = {
-        // TODO: Navigate to user profile screen
-        // This is where you would navigate to a profile screen when tapping the avatar
-    }
     
+    // Function to navigate to any screen in the app
     val navigateTo: (CurrentScreen) -> Unit = { screen ->
         navController.navigate(screen.route) {
             // Pop up to the start destination of the graph to
@@ -194,6 +193,7 @@ fun HomeScreenContent(
     HomeDrawer(
         drawerState = drawerState,
         homeUiState = homeUiState,
+        userDetails = userDetails,
         scope = scope,
         currentScreen = currentScreen,
         onHomeClick = {
@@ -216,7 +216,8 @@ fun HomeScreenContent(
         },
         onSettingsClick = {
             navigateTo(CurrentScreen.SETTINGS)
-        }
+        },
+        onLogout = onLogout
     ) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -308,11 +309,11 @@ fun HomeScreenContent(
                         }
                     },
                     actions = {
-                        // Here we add the user avatar with the image URL
+                        // Show the user avatar in the top bar as a visual element only
                         ProfileAvatar(
                             modifier = Modifier.padding(end = 12.dp),
                             profileImageUrl = userDetails?.profilePic,
-                            onClick = navigateToUserProfile
+                            onClick = { scope.launch { drawerState.open() } } // Open drawer when clicked
                         )
                     },
                     scrollBehavior = scrollBehavior
@@ -379,7 +380,7 @@ fun HomeScreenContent(
                         SettingsContent(
                             compactView = compactView,
                             onCompactViewChanged = settingsViewModel::setCompactView,
-                            onLogout = settingsViewModel::logout,
+                            onLogout = onLogout,
                             onNavigateToSourceCode = { /* TODO */ },
                             onNavigateToTermsOfUse = { /* TODO */ },
                             onNavigateToPrivacyPolicy = { /* TODO */ },

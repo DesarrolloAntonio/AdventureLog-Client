@@ -29,6 +29,8 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScree
 fun DrawerContent(
     userName: String,
     adventureCount: Int,
+    userEmail: String? = null,
+    profileImageUrl: String? = null,
     currentScreen: CurrentScreen,
     onHomeClick: () -> Unit,
     onAdventuresClick: () -> Unit,
@@ -37,6 +39,7 @@ fun DrawerContent(
     onMapClick: () -> Unit,
     onCalendarClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onLogout: () -> Unit = {},
     onHelpClick: () -> Unit = {},
     drawerOpen: Boolean // Parameter to control drawer visibility
 ) {
@@ -106,6 +109,8 @@ fun DrawerContent(
             DrawerContentBody(
                 userName = userName,
                 adventureCount = adventureCount,
+                userEmail = userEmail,
+                profileImageUrl = profileImageUrl,
                 currentScreen = currentScreen,
                 visible = visible,
                 drawerOpen = drawerOpen,
@@ -116,6 +121,7 @@ fun DrawerContent(
                 onMapClick = onMapClick,
                 onCalendarClick = onCalendarClick,
                 onSettingsClick = onSettingsClick,
+                onLogout = onLogout,
                 onHelpClick = onHelpClick
             )
         }
@@ -130,6 +136,8 @@ fun DrawerContent(
 fun DrawerContentBody(
     userName: String,
     adventureCount: Int,
+    userEmail: String? = null,
+    profileImageUrl: String? = null,
     currentScreen: CurrentScreen,
     visible: Boolean,
     drawerOpen: Boolean,
@@ -140,6 +148,7 @@ fun DrawerContentBody(
     onMapClick: () -> Unit,
     onCalendarClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onLogout: () -> Unit,
     onHelpClick: () -> Unit = {}
 ) {
     ModalDrawerSheet {
@@ -167,6 +176,15 @@ fun DrawerContentBody(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
+                // User profile header
+                DrawerHeader(
+                    userName = userName,
+                    email = userEmail,
+                    profileImageUrl = profileImageUrl,
+                    visible = visible,
+                    onLogout = onLogout
+                )
+                
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Animate the Adventures section title

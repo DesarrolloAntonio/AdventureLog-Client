@@ -32,7 +32,8 @@ fun DrawerContentPreview() {
             onCalendarClick = {},
             onSettingsClick = {},
             onHelpClick = {},
-            currentScreen = CurrentScreen.HOME
+            currentScreen = CurrentScreen.HOME,
+            onLogout = {}
         )
     }
 }

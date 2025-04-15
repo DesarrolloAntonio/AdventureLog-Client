@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
+import com.desarrollodroide.adventurelog.feature.home.model.fullName
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 fun HomeDrawer(
     drawerState: DrawerState,
     homeUiState: HomeUiState,
+    userDetails: com.desarrollodroide.adventurelog.core.model.UserDetails? = null,
     scope: CoroutineScope,
     currentScreen: CurrentScreen = CurrentScreen.HOME,
     onHomeClick: () -> Unit,
@@ -34,14 +36,16 @@ fun HomeDrawer(
     onMapClick: () -> Unit,
     onCalendarClick: () -> Unit,
     onSettingsClick: () -> Unit = {},
+    onLogout: () -> Unit = {},
     onHelpClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val isDrawerOpen = drawerState.isOpen
     
     // Extract only what's needed from HomeUiState
-    val userName = when (homeUiState) {
-        is HomeUiState.Success -> homeUiState.userName
+    val userName = when {
+        userDetails != null -> userDetails.fullName
+        homeUiState is HomeUiState.Success -> homeUiState.userName
         else -> ""
     }
     
@@ -64,6 +68,8 @@ fun HomeDrawer(
         drawerContent = {
             DrawerContent(
                 userName = userName,
+                userEmail = userDetails?.email,
+                profileImageUrl = userDetails?.profilePic,
                 adventureCount = adventureCount,
                 currentScreen = currentScreen,
                 onHomeClick = {
@@ -92,6 +98,10 @@ fun HomeDrawer(
                 },
                 onSettingsClick = {
                     onSettingsClick()
+                    scope.launch { drawerState.close() }
+                },
+                onLogout = {
+                    onLogout()
                     scope.launch { drawerState.close() }
                 },
                 onHelpClick = {
