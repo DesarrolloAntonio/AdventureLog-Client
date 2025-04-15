@@ -13,7 +13,6 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeCon
 @Preview(
     name = "Home Content - Empty State",
     showBackground = true,
-    backgroundColor = 0xFFF3F3F3
 )
 @Composable
 fun HomeContentEmptyPreview() {
@@ -25,7 +24,6 @@ fun HomeContentEmptyPreview() {
 @Preview(
     name = "Home Content - Loading State",
     showBackground = true,
-    backgroundColor = 0xFFF3F3F3
 )
 @Composable
 fun HomeContentLoadingPreview() {
@@ -37,7 +35,6 @@ fun HomeContentLoadingPreview() {
 @Preview(
     name = "Home Content - Success State",
     showBackground = true,
-    backgroundColor = 0xFFF3F3F3
 )
 @Composable
 fun HomeContentSuccessPreview() {
@@ -68,7 +65,6 @@ fun HomeContentSuccessPreview() {
 @Preview(
     name = "Home Content - Error State",
     showBackground = true,
-    backgroundColor = 0xFFF3F3F3
 )
 @Composable
 fun HomeContentErrorPreview() {

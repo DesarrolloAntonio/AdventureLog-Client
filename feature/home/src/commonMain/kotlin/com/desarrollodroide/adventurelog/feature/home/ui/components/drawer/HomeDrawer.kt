@@ -124,9 +124,9 @@ fun HomeDrawer(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
-                            alpha = animatedDimAmount * 0.4f  // Aumentamos la opacidad del fondo
+                            alpha = animatedDimAmount * 0.4f
                         }
-                        .background(Color.Black.copy(alpha = 0.3f))  // Fondo negro para mayor contraste
+                        .background(Color.Black.copy(alpha = 0.3f))
                 )
             }
         }

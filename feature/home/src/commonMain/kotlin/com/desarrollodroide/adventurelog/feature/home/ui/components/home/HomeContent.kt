@@ -58,7 +58,8 @@ fun HomeContent(
     onAdventureClick: (String) -> Unit = {}
 ) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
     ) {
         when (homeUiState) {
             is HomeUiState.Loading -> {
