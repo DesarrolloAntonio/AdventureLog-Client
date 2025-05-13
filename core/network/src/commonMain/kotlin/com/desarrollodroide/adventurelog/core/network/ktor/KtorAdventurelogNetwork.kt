@@ -64,6 +64,12 @@ class KtorAdventurelogNetwork(
 
     private val logger = Logger.withTag("KtorAdventurelogNetwork")
     
+    // Create Json format once to avoid redundant creation
+    private val json = Json { 
+        ignoreUnknownKeys = true 
+        isLenient = true
+    }
+    
     companion object {
         private const val LOGIN_ENDPOINT = "auth/browser/v1/auth/login"
         private const val ADVENTURES_ENDPOINT = "api/adventures/"
@@ -75,10 +81,7 @@ class KtorAdventurelogNetwork(
     override suspend fun sendLogin(url: String, username: String, password: String): UserDetailsDTO {
         val loginClient = HttpClient {
             install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                })
+                json(json)
             }
             install(Logging) {
                 level = LogLevel.ALL
@@ -100,8 +103,17 @@ class KtorAdventurelogNetwork(
             setBody(LoginRequest(username, password))
         }
         
+        logger.d { "Login response status: ${response.status}" }
+        
         if (response.status.isSuccess()) {
-            val loginResponse = response.body<LoginResponse>()
+            // Log complete response body for debugging
+            val responseBody = response.body<String>()
+            logger.d { "Login response body: $responseBody" }
+            
+            // Parse the response using the shared Json instance
+            val loginResponse = json.decodeFromString<LoginResponse>(responseBody)
+            
+            logger.d { "Login successful for user: ${loginResponse.data.user.username}" }
             
             return UserDetailsDTO(
                 id = loginResponse.data.user.id,
@@ -110,6 +122,14 @@ class KtorAdventurelogNetwork(
                 hasPassword = if (loginResponse.data.user.has_usable_password) "true" else "false"
             )
         } else {
+            // Log error response if available
+            try {
+                val errorBody = response.body<String>()
+                logger.e { "Login failed with status: ${response.status}. Error body: $errorBody" }
+            } catch (e: Exception) {
+                logger.e { "Login failed with status: ${response.status}. Could not read error body." }
+            }
+            
             throw HttpException(response.status.value, "Login failed with status: ${response.status}")
         }
     }
