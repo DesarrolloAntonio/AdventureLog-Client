@@ -5,7 +5,7 @@ import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
 
 interface AdventureLogNetworkDataSource {
 
-    suspend fun getAdventures(page: Int): List<AdventureDTO>
+    suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO>
 
     suspend fun getAdventureDetail(objectId: String): AdventureDTO
 

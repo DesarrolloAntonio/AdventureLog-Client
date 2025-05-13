@@ -70,42 +70,75 @@ class KtorAdventurelogNetwork(
         isLenient = true
     }
     
+    // Store auth tokens for authenticated requests
+    private var sessionToken: String? = null
+    private var csrfToken: String? = null
+    private var baseUrl: String? = null
+    
     companion object {
         private const val LOGIN_ENDPOINT = "auth/browser/v1/auth/login"
         private const val ADVENTURES_ENDPOINT = "api/adventures/"
         private const val USER_DETAILS_ENDPOINT = "api/user/details/"
     }
 
-    override suspend fun getCsrfToken(): Result<String> = Result.success("")
+    override suspend fun getCsrfToken(): Result<String> {
+        return if (csrfToken != null) {
+            logger.d { "Returning stored CSRF token: $csrfToken" }
+            Result.success(csrfToken!!)
+        } else {
+            logger.w { "No CSRF token available" }
+            Result.success("")
+        }
+    }
 
     override suspend fun sendLogin(url: String, username: String, password: String): UserDetailsDTO {
-        val loginClient = HttpClient {
-            install(ContentNegotiation) {
-                json(json)
-            }
-            install(Logging) {
-                level = LogLevel.ALL
-            }
-        }
-        
         // Normalize URL by removing trailing slash
-        val baseUrl = url.trimEnd('/')
+        baseUrl = url.trimEnd('/')
         val loginUrl = "$baseUrl/$LOGIN_ENDPOINT"
         logger.d { "Login URL: $loginUrl" }
         
-        val response = loginClient.post(loginUrl) {
+        val response = adventurelogClient.post(loginUrl) {
             contentType(ContentType.Application.Json)
             headers {
                 append(HttpHeaders.Accept, "application/json")
+                // Simplificamos a solo el header X-Is-Mobile como se mencionó en los correos
                 append("X-Is-Mobile", "true")
-                append("Referer", baseUrl)
+                append("Referer", baseUrl?:"")
             }
             setBody(LoginRequest(username, password))
         }
         
         logger.d { "Login response status: ${response.status}" }
+        logger.d { "Login response headers: ${response.headers.entries()}" }
         
         if (response.status.isSuccess()) {
+            // Extract both sessionid and csrftoken from cookies
+            val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
+            logger.d { "Cookies from login response: $cookies" }
+            
+            // Try to find sessionid and csrftoken cookies
+            for (cookie in cookies) {
+                // Extract sessionid
+                if (cookie.contains("sessionid=")) {
+                    val sessionidPattern = Regex("sessionid=([^;]+)")
+                    val matchResult = sessionidPattern.find(cookie)
+                    sessionToken = matchResult?.groupValues?.get(1)
+                    logger.d { "Extracted sessionId from cookies: $sessionToken" }
+                }
+                
+                // Extract csrftoken
+                if (cookie.contains("csrftoken=")) {
+                    val csrfPattern = Regex("csrftoken=([^;]+)")
+                    val matchResult = csrfPattern.find(cookie)
+                    csrfToken = matchResult?.groupValues?.get(1)
+                    logger.d { "Extracted csrfToken from cookies: $csrfToken" }
+                }
+            }
+            
+            if (sessionToken == null && csrfToken == null) {
+                logger.w { "No authentication tokens found in cookies" }
+            }
+            
             // Log complete response body for debugging
             val responseBody = response.body<String>()
             logger.d { "Login response body: $responseBody" }
@@ -134,18 +167,178 @@ class KtorAdventurelogNetwork(
         }
     }
 
-    override suspend fun getUserDetails(csrfToken: String): UserDetailsDTO {
-        // Implementation
-        TODO("Not implemented yet")
+    override suspend fun getUserDetails(csrfTokenParam: String): UserDetailsDTO {
+        try {
+            if (baseUrl == null) {
+                logger.e { "Base URL is not initialized, login must be called first" }
+                throw IllegalStateException("Base URL is not initialized, login must be called first")
+            }
+            
+            val url = "$baseUrl/$USER_DETAILS_ENDPOINT"
+            logger.d { "Fetching user details from URL: $url" }
+            
+            val response = adventurelogClient.get(url) {
+                headers {
+                    append(HttpHeaders.Accept, "application/json")
+                    append("X-Is-Mobile", "true")
+                    
+                    // Add X-CSRFToken for authentication (from screenshot this is what works)
+                    // First check our stored csrfToken
+                    if (csrfToken != null) {
+                        append("X-CSRFToken", csrfToken!!)
+                        logger.d { "Using stored X-CSRFToken for authentication: $csrfToken" }
+                    } 
+                    // If no stored token but parameter is provided, use that
+                    else if (csrfTokenParam.isNotBlank()) {
+                        append("X-CSRFToken", csrfTokenParam)
+                        logger.d { "Using parameter X-CSRFToken for authentication: $csrfTokenParam" }
+                    }
+                    
+                    // Also try X-Session-Token as backup
+                    sessionToken?.let { token ->
+                        append("X-Session-Token", token)
+                        logger.d { "Using X-Session-Token for authentication: $token" }
+                    }
+                    
+                    if (csrfToken == null && csrfTokenParam.isBlank() && sessionToken == null) {
+                        logger.w { "No authentication tokens available for request" }
+                    }
+                }
+            }
+            
+            logger.d { "User details response status: ${response.status}" }
+            logger.d { "User details response headers: ${response.headers.entries()}" }
+            
+            if (response.status.isSuccess()) {
+                val userDetails = response.body<UserDetailsDTO>()
+                logger.d { "Successfully fetched user details: ${userDetails.username}" }
+                return userDetails
+            } else {
+                logger.e { "Failed to fetch user details with status: ${response.status}" }
+                throw HttpException(response.status.value, "Failed to fetch user details with status: ${response.status}")
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Exception while fetching user details: ${e.message}" }
+            throw e
+        }
     }
 
-    override suspend fun getAdventures(page: Int): List<AdventureDTO> {
-        // Implementation
-        TODO("Not implemented yet")
+    override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
+        try {
+            if (baseUrl == null) {
+                logger.e { "Base URL is not initialized, login must be called first" }
+                throw IllegalStateException("Base URL is not initialized, login must be called first")
+            }
+            
+            val url = "$baseUrl/$ADVENTURES_ENDPOINT"
+            logger.d { "Fetching adventures from URL: $url" }
+            
+            val response = adventurelogClient.get(url) {
+                parameter("page", page)
+                parameter("page_size", pageSize)
+                headers {
+                    append(HttpHeaders.Accept, "application/json")
+                    append("X-Is-Mobile", "true")
+                    
+                    // Add X-CSRFToken for authentication (from screenshot this is what works)
+                    csrfToken?.let { token ->
+                        append("X-CSRFToken", token)
+                        logger.d { "Using X-CSRFToken for authentication: $token" }
+                    }
+                    
+                    // Also try X-Session-Token as backup
+                    sessionToken?.let { token ->
+                        append("X-Session-Token", token)
+                        logger.d { "Using X-Session-Token for authentication: $token" }
+                    }
+                    
+                    if (csrfToken == null && sessionToken == null) {
+                        logger.w { "No authentication tokens available for request" }
+                    }
+                }
+            }
+            
+            logger.d { "Adventures response status: ${response.status}" }
+            logger.d { "Adventures response headers: ${response.headers.entries()}" }
+            
+            if (response.status.isSuccess()) {
+                val responseText = response.body<String>()
+                logger.d { "Adventures raw response: $responseText" }
+                
+                try {
+                    val adventuresResponse = json.decodeFromString<com.desarrollodroide.adventurelog.core.network.model.AdventuresDTO>(responseText)
+                    logger.d { "Parsed adventures: count=${adventuresResponse.count}, results size=${adventuresResponse.results?.size}" }
+                    return adventuresResponse.results ?: emptyList()
+                } catch (e: Exception) {
+                    logger.e(e) { "Error parsing adventures JSON: ${e.message}" }
+                    throw e
+                }
+            } else {
+                logger.e { "Failed to fetch adventures with status: ${response.status}" }
+                throw HttpException(response.status.value, "Failed to fetch adventures with status: ${response.status}")
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Exception while fetching adventures: ${e.message}" }
+            throw e
+        }
     }
 
     override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
-        TODO("Not yet implemented")
+        try {
+            if (baseUrl == null) {
+                logger.e { "Base URL is not initialized, login must be called first" }
+                throw IllegalStateException("Base URL is not initialized, login must be called first")
+            }
+            
+            val url = "$baseUrl/$ADVENTURES_ENDPOINT$objectId/"
+            logger.d { "Fetching adventure detail from URL: $url" }
+            
+            val response = adventurelogClient.get(url) {
+                headers {
+                    append(HttpHeaders.Accept, "application/json")
+                    append("X-Is-Mobile", "true")
+                    
+                    // Add X-CSRFToken for authentication (from screenshot this is what works)
+                    csrfToken?.let { token ->
+                        append("X-CSRFToken", token)
+                        logger.d { "Using X-CSRFToken for authentication: $token" }
+                    }
+                    
+                    // Also try X-Session-Token as backup
+                    sessionToken?.let { token ->
+                        append("X-Session-Token", token)
+                        logger.d { "Using X-Session-Token for authentication: $token" }
+                    }
+                    
+                    if (csrfToken == null && sessionToken == null) {
+                        logger.w { "No authentication tokens available for request" }
+                    }
+                }
+            }
+            
+            logger.d { "Adventure detail response status: ${response.status}" }
+            logger.d { "Adventure detail response headers: ${response.headers.entries()}" }
+            
+            if (response.status.isSuccess()) {
+                val responseText = response.body<String>()
+                logger.d { "Adventure detail raw response: $responseText" }
+                
+                try {
+                    val adventure = json.decodeFromString<AdventureDTO>(responseText)
+                    logger.d { "Successfully fetched adventure: ${adventure.name}" }
+                    return adventure
+                } catch (e: Exception) {
+                    logger.e(e) { "Error parsing adventure detail JSON: ${e.message}" }
+                    throw e
+                }
+            } else {
+                logger.e { "Failed to fetch adventure detail with status: ${response.status}" }
+                throw HttpException(response.status.value, "Failed to fetch adventure detail with status: ${response.status}")
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Exception while fetching adventure detail: ${e.message}" }
+            throw e
+        }
     }
 }
 
