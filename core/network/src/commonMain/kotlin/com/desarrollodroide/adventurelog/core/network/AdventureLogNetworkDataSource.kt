@@ -9,7 +9,7 @@ interface AdventureLogNetworkDataSource {
 
     suspend fun getAdventureDetail(objectId: String): AdventureDTO
 
-    suspend fun sendLogin(username: String, password: String, token: String): UserDetailsDTO
+    suspend fun sendLogin(url: String, username: String, password: String): UserDetailsDTO
 
     suspend fun getCsrfToken(): Result<String>
 

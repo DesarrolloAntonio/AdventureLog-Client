@@ -18,33 +18,25 @@ class LoginRepositoryImpl(
     private val logger = Logger.withTag("LoginRepositoryImpl")
 
     override suspend fun sendLogin(
+        url: String,
         username: String,
         password: String
     ): Either<ApiResponse, UserDetails> =
         withContext(ioDispatcher) {
             try {
-                // Get CSRF token first
-                val token = adventureLogNetworkDataSource.getCsrfToken()
-                    .getOrElse {
-                        logger.e { "Error getting CSRF token: ${it.message}" }
-                        return@withContext Either.Left(ApiResponse.InvalidCsrfToken)
-                    }
-
-                // Then perform login with the token
-                try {
-                    val userDetailsDTO = adventureLogNetworkDataSource.sendLogin(
-                        username = username,
-                        password = password,
-                        token = token
-                    )
-                    Either.Right(userDetailsDTO.toDomainModel())
-                } catch (e: HttpException) {
-                    logger.e { "HTTP Error during login: ${e.code}" }
-                    when (e.code) {
-                        401 -> Either.Left(ApiResponse.InvalidCredentials)
-                        403 -> Either.Left(ApiResponse.InvalidCsrfToken)
-                        else -> Either.Left(ApiResponse.HttpError)
-                    }
+                val userDetailsDTO = adventureLogNetworkDataSource.sendLogin(
+                    url = url,
+                    username = username,
+                    password = password
+                )
+                Either.Right(userDetailsDTO.toDomainModel())
+            } catch (e: HttpException) {
+                logger.e { "HTTP Error during login: ${e.code}" }
+                when (e.code) {
+                    401 -> Either.Left(ApiResponse.InvalidCredentials)
+                    403 -> Either.Left(ApiResponse.InvalidCsrfToken)
+                    404 -> Either.Left(ApiResponse.HttpError)
+                    else -> Either.Left(ApiResponse.HttpError)
                 }
             } catch (e: IOException) {
                 logger.e(e) { "IO Error during login process" }

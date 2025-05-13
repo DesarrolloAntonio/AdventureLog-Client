@@ -8,8 +8,8 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 class LoginUseCase(
     private val loginRepository: LoginRepository
 ) {
-    suspend operator fun invoke(username: String, password: String): Either<String, UserDetails> =
-        when (val result = loginRepository.sendLogin(username, password)) {
+    suspend operator fun invoke(url: String, username: String, password: String): Either<String, UserDetails> =
+        when (val result = loginRepository.sendLogin(url, username, password)) {
             is Either.Left -> {
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("Network unavailable")

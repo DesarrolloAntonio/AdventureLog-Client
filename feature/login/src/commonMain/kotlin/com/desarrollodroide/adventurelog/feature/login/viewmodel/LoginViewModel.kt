@@ -9,24 +9,19 @@ import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 
+    private val logger = co.touchlab.kermit.Logger.withTag("LoginViewModel")
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Loading)
     val uiState: StateFlow<LoginUiState> = _uiState
 
     private val _loginFormState = MutableStateFlow(LoginFormState())
     val loginFormState: StateFlow<LoginFormState> = _loginFormState
-
-    init {
-        viewModelScope.launch {
-
-        }
-    }
 
     fun updateUserName(newUserName: String) {
         _loginFormState.value = _loginFormState.value.copy(
@@ -57,7 +52,7 @@ class LoginViewModel(
         val currentState = _loginFormState.value
         val isValid = currentState.userName.isNotBlank() &&
                 currentState.password.isNotBlank() &&
-                isValidUrl( currentState.serverUrl)
+                isValidUrl(currentState.serverUrl)
 
         _loginFormState.value = currentState.copy(
             userNameError = currentState.userName.isBlank(),
@@ -71,10 +66,17 @@ class LoginViewModel(
     fun login() {
         if (!validateForm()) return
 
+        val url = loginFormState.value.serverUrl
+        val username = loginFormState.value.userName
+        val password = loginFormState.value.password
+        
+        logger.d { "Attempting login with URL: $url" }
+
         viewModelScope.launch {
             val result = loginUseCase(
-                username = loginFormState.value.userName,
-                password = loginFormState.value.password
+                url = url,
+                username = username,
+                password = password
             )
             _uiState.update {
                 when (result) {
