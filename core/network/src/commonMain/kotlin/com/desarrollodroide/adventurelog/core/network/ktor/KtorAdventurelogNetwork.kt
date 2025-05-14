@@ -6,9 +6,6 @@ import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
@@ -16,10 +13,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.append
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -187,11 +182,6 @@ class KtorAdventurelogNetwork(
                     if (csrfToken != null) {
                         append("X-CSRFToken", csrfToken!!)
                         logger.d { "Using stored X-CSRFToken for authentication: $csrfToken" }
-                    } 
-                    // If no stored token but parameter is provided, use that
-                    else if (csrfTokenParam.isNotBlank()) {
-                        append("X-CSRFToken", csrfTokenParam)
-                        logger.d { "Using parameter X-CSRFToken for authentication: $csrfTokenParam" }
                     }
                     
                     // Also try X-Session-Token as backup
@@ -239,13 +229,7 @@ class KtorAdventurelogNetwork(
                 headers {
                     append(HttpHeaders.Accept, "application/json")
                     append("X-Is-Mobile", "true")
-                    
-                    // Add X-CSRFToken for authentication (from screenshot this is what works)
-                    csrfToken?.let { token ->
-                        append("X-CSRFToken", token)
-                        logger.d { "Using X-CSRFToken for authentication: $token" }
-                    }
-                    
+
                     // Also try X-Session-Token as backup
                     sessionToken?.let { token ->
                         append("X-Session-Token", token)
