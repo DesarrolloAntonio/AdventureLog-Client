@@ -60,8 +60,11 @@ class HomeViewModel(
                 // Show loading state
                 _uiState.update { HomeUiState.Loading }
                 
-                // Call our use case
-                when (val result = getAdventuresUseCase(1)) {
+                // Call our use case with pageSize=3 for Recent adventures
+                when (val result = getAdventuresUseCase(
+                    page = 1, 
+                    pageSize = 3
+                )) {
                     is com.desarrollodroide.adventurelog.core.common.Either.Left -> {
                         val errorMessage = result.value
                         _uiState.update { HomeUiState.Error(errorMessage) }

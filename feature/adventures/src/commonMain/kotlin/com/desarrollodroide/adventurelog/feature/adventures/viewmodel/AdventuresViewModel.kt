@@ -25,14 +25,17 @@ class AdventuresViewModel(
     val uiState: StateFlow<AdventuresUiState> = _uiState.asStateFlow()
 
     init {
-        loadAdventures()
+        loadAdventures(
+            page = 1,
+            pageSize = 10
+        )
     }
 
-    fun loadAdventures(page: Int = 1) {
+    fun loadAdventures(page: Int = 1, pageSize: Int) {
         viewModelScope.launch {
             _uiState.update { AdventuresUiState.Loading }
             
-            when (val result = getAdventuresUseCase(page)) {
+            when (val result = getAdventuresUseCase(page, pageSize)) {
                 is Either.Left -> {
                     val errorMessage = result.value
                     _uiState.update { AdventuresUiState.Error(errorMessage) }

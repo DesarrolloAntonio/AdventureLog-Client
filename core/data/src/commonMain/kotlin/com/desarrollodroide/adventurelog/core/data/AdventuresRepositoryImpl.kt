@@ -12,9 +12,9 @@ class AdventuresRepositoryImpl(
     private val networkDataSource: AdventureLogNetworkDataSource
 ) : AdventuresRepository {
 
-    override suspend fun getAdventures(page: Int): Either<ApiResponse, List<Adventure>> {
+    override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>> {
         return try {
-            val adventures = networkDataSource.getAdventures(page,100).map { it.toDomainModel() }
+            val adventures = networkDataSource.getAdventures(page, pageSize).map { it.toDomainModel() }
             Either.Right(adventures)
         } catch (e: HttpException) {
             println("HTTP Error during getAdventures: ${e.code}")

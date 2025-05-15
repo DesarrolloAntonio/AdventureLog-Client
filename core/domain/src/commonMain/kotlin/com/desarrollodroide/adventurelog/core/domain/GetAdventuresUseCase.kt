@@ -8,8 +8,8 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 class GetAdventuresUseCase(
     private val adventuresRepository: AdventuresRepository
 ) {
-    suspend operator fun invoke(page: Int): Either<String, List<Adventure>> =
-        when (val result = adventuresRepository.getAdventures(page)) {
+    suspend operator fun invoke(page: Int, pageSize: Int): Either<String, List<Adventure>> =
+        when (val result = adventuresRepository.getAdventures(page, pageSize)) {
             is Either.Left -> {
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("Network unavailable")

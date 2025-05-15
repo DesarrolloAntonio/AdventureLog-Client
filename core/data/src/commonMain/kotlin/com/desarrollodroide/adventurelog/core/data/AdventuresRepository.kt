@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 
 interface AdventuresRepository {
 
-    suspend fun getAdventures(page: Int): Either<ApiResponse, List<Adventure>>
+    suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>>
     suspend fun getAdventure(objectId: String): Either<ApiResponse, Adventure>
 
 }
