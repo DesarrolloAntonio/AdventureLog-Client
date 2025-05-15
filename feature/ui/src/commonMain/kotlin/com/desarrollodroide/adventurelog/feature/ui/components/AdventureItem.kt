@@ -203,11 +203,13 @@ fun AdventureItem(
 
 
 fun newImageLoader(context: PlatformContext, sessionToken: String): ImageLoader {
+    println("AdventureItem: Creating ImageLoader with sessionToken: '$sessionToken'")
     return ImageLoader.Builder(context)
         .components {
             add(KtorNetworkFetcherFactory(httpClient = {
                 HttpClient {
                     defaultRequest {
+                        println("AdventureItem: Using token for image request: '$sessionToken'")
                         header("X-Session-Token", sessionToken)
                     }
                 }

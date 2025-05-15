@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.core.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class Account(
     val id: Int = -1,
     val userName: String,

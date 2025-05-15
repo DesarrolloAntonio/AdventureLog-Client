@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.core.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class UserDetails(
     val id: Int,
     val profilePic: String?,
