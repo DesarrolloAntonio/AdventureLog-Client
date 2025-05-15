@@ -37,7 +37,10 @@ data class UserDetailsDTO(
     val isStaff: Boolean? = null,
 
     @SerialName("has_password")
-    val hasPassword: String? = null
+    val hasPassword: String? = null,
+    
+    @SerialName("session_token")
+    val sessionToken: String? = null
 )
 
 fun UserDetailsDTO.toDomainModel(): UserDetails = UserDetails(
@@ -51,5 +54,6 @@ fun UserDetailsDTO.toDomainModel(): UserDetails = UserDetails(
     lastName = lastName ?: "",
     dateJoined = dateJoined ?: "",
     isStaff = isStaff ?: false,
-    hasPassword = hasPassword ?: ""
+    hasPassword = hasPassword ?: "",
+    sessionToken = sessionToken?: ""
 )

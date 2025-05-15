@@ -11,5 +11,6 @@ data class UserDetails(
     val lastName: String,
     val dateJoined: String,
     val isStaff: Boolean,
-    val hasPassword: String
+    val hasPassword: String,
+    val sessionToken: String
 )

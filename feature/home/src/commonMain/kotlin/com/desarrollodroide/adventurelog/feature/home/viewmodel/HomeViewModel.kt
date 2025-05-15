@@ -83,7 +83,8 @@ class HomeViewModel(
                 lastName = "Corrales",
                 dateJoined = "2025-01-30T07:15:10.367579Z",
                 isStaff = false,
-                hasPassword = "true"
+                hasPassword = "true",
+                sessionToken = "session_token_value"
             )
         }
     }

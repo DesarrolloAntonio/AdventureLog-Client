@@ -147,7 +147,8 @@ class KtorAdventurelogNetwork(
                 id = loginResponse.data.user.id,
                 username = loginResponse.data.user.username,
                 email = loginResponse.data.user.email,
-                hasPassword = if (loginResponse.data.user.has_usable_password) "true" else "false"
+                hasPassword = if (loginResponse.data.user.has_usable_password) "true" else "false",
+                sessionToken = sessionToken
             )
         } else {
             // Log error response if available

@@ -33,11 +33,12 @@ fun AdventureItem(
     onOpenDetails: () -> Unit = { onClick() },
     onEdit: () -> Unit = {},
     onRemoveFromCollection: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    sessionToken: String = ""
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val platformContext: PlatformContext = LocalPlatformContext.current
-    val adventureItemImageLoader = remember { newImageLoader(platformContext) }
+    val adventureItemImageLoader = remember { newImageLoader(platformContext, sessionToken) }
 
     Card(
         modifier = modifier
@@ -201,13 +202,15 @@ fun AdventureItem(
 }
 
 
-fun newImageLoader(context: PlatformContext): ImageLoader {
+fun newImageLoader(context: PlatformContext, sessionToken: String = ""): ImageLoader {
     return ImageLoader.Builder(context)
         .components {
             add(KtorNetworkFetcherFactory(httpClient = {
                 HttpClient {
-                    defaultRequest { // Provisional static header
-                        header("X-Session-Token", "i6pehlag8y1li3dbhcdc6vpn8jo542mm")
+                    defaultRequest {
+                        // Usar el token proporcionado o el valor predeterminado si está vacío
+                        val token = if (sessionToken.isNotEmpty()) sessionToken else "i6pehlag8y1li3dbhcdc6vpn8jo542mm"
+                        header("X-Session-Token", token)
                     }
                 }
             }))
