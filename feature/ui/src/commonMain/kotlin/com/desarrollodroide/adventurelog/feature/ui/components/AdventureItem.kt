@@ -17,22 +17,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.compose.LocalPlatformContext
+import coil3.network.ktor3.KtorNetworkFetcherFactory
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 
 @Composable
 fun AdventureItem(
     modifier: Modifier = Modifier,
     adventure: Adventure,
     onClick: () -> Unit = {},
-    onOpenDetails: () -> Unit = { onClick() }, // Default to onClick for backward compatibility
+    onOpenDetails: () -> Unit = { onClick() },
     onEdit: () -> Unit = {},
     onRemoveFromCollection: () -> Unit = {},
     onDelete: () -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val platformContext: PlatformContext = LocalPlatformContext.current
+    val adventureItemImageLoader = remember { newImageLoader(platformContext) }
 
     Card(
         modifier = modifier
-        .fillMaxWidth(),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         onClick = onClick
     ) {
@@ -40,7 +49,8 @@ fun AdventureItem(
             // Image
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = adventure.images.firstOrNull()?.image ?: ""
+                    model = adventure.images.firstOrNull()?.image ?: "",
+                    imageLoader = adventureItemImageLoader
                 ),
                 contentDescription = null,
                 modifier = Modifier
@@ -188,4 +198,19 @@ fun AdventureItem(
             }
         }
     }
+}
+
+
+fun newImageLoader(context: PlatformContext): ImageLoader {
+    return ImageLoader.Builder(context)
+        .components {
+            add(KtorNetworkFetcherFactory(httpClient = {
+                HttpClient {
+                    defaultRequest { // Provisional static header
+                        header("X-Session-Token", "i6pehlag8y1li3dbhcdc6vpn8jo542mm")
+                    }
+                }
+            }))
+        }
+        .build()
 }
