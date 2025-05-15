@@ -99,26 +99,6 @@ fun AdventureItem(
                         }
                     }
 
-                    // Collection tag if present
-                    if (adventure.collection != null && adventure.collection.isNotEmpty()) {
-                        Surface(
-                            modifier = Modifier.height(24.dp),
-                            color = Color(0xFF4CAF50),
-                            shape = RoundedCornerShape(4.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = adventure.collection!!,
-                                    color = Color.White,
-                                    fontSize = 12.sp
-                                )
-                            }
-                        }
-                    }
-
                     // Private tag
                     if (!adventure.isPublic) {
                         Surface(
