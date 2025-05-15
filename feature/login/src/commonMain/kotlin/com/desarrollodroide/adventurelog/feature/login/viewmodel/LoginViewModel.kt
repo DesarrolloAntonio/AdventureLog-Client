@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.login.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.LoginUseCase
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val logger = co.touchlab.kermit.Logger.withTag("LoginViewModel")
@@ -69,6 +71,7 @@ class LoginViewModel(
         val url = loginFormState.value.serverUrl
         val username = loginFormState.value.userName
         val password = loginFormState.value.password
+        val rememberSession = loginFormState.value.rememberSession
         
         logger.d { "Attempting login with URL: $url" }
 
@@ -78,10 +81,28 @@ class LoginViewModel(
                 username = username,
                 password = password
             )
-            _uiState.update {
-                when (result) {
-                    is Either.Left -> LoginUiState.Error(result.value)
-                    is Either.Right -> LoginUiState.Success(result.value)
+            
+            when (result) {
+                is Either.Left -> {
+                    _uiState.update { LoginUiState.Error(result.value) }
+                }
+                is Either.Right -> {
+                    val userDetails = result.value
+                    
+                    // Save user session to UserRepository
+                    userRepository.saveUserSession(userDetails)
+                    
+                    // Save login credentials if remember session is checked
+                    if (rememberSession) {
+                        // Save to user repository for Remember Me functionality
+                        userRepository.saveRememberMeCredentials(
+                            url = url,
+                            username = username,
+                            password = password
+                        )
+                    }
+                    
+                    _uiState.update { LoginUiState.Success(userDetails) }
                 }
             }
         }

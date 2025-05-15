@@ -117,7 +117,7 @@ fun HomeScreenContent(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     // User name to display
-    val userName = userDetails?.fullName ?: "Usuario"
+    val userName = userDetails?.fullName ?: "User"
 
     // Track current screen
     var currentScreen by remember { mutableStateOf(CurrentScreen.HOME) }

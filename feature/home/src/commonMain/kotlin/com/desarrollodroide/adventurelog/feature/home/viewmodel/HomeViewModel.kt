@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val getAdventuresUseCase: GetAdventuresUseCase
+    private val getAdventuresUseCase: GetAdventuresUseCase,
+    private val userRepository: com.desarrollodroide.adventurelog.core.data.UserRepository
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -22,8 +23,32 @@ class HomeViewModel(
     val userDetails: StateFlow<UserDetails?> = _userDetails.asStateFlow()
 
     init {
-        loadUserProfile()
+        observeUserSession()
         loadAdventures()
+    }
+    
+    /**
+     * Observe user session changes
+     */
+    private fun observeUserSession() {
+        viewModelScope.launch {
+            userRepository.getUserSession().collect { userDetails ->
+                _userDetails.value = userDetails
+                
+                // Update UI state with the new user name if needed
+                if (_uiState.value is HomeUiState.Success) {
+                    _uiState.update { currentState ->
+                        if (currentState is HomeUiState.Success) {
+                            currentState.copy(
+                                userName = userDetails?.firstName ?: "User"
+                            )
+                        } else {
+                            currentState
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /**
@@ -65,27 +90,5 @@ class HomeViewModel(
         }
     }
 
-    private fun loadUserProfile() {
-        viewModelScope.launch {
-            // Simulate network delay
-            kotlinx.coroutines.delay(500)
-            
-            // Load user profile data
-            // In a real implementation, this would come from a repository or API
-            _userDetails.value = UserDetails(
-                id = 1,
-                profilePic = "http://192.168.1.27:8016/media/profile-pics/1200x655_iStock-2097492658.webp",
-                uuid = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
-                publicProfile = true,
-                username = "memnoch",
-                email = "antonio@test.com",
-                firstName = "Antonio",
-                lastName = "Corrales",
-                dateJoined = "2025-01-30T07:15:10.367579Z",
-                isStaff = false,
-                hasPassword = "true",
-                sessionToken = "i6pehlag8y1li3dbhcdc6vpn8jo542mm"
-            )
-        }
-    }
+
 }
