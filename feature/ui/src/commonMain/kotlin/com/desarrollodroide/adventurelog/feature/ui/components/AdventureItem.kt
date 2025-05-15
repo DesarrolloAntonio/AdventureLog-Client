@@ -202,15 +202,13 @@ fun AdventureItem(
 }
 
 
-fun newImageLoader(context: PlatformContext, sessionToken: String = ""): ImageLoader {
+fun newImageLoader(context: PlatformContext, sessionToken: String): ImageLoader {
     return ImageLoader.Builder(context)
         .components {
             add(KtorNetworkFetcherFactory(httpClient = {
                 HttpClient {
                     defaultRequest {
-                        // Usar el token proporcionado o el valor predeterminado si está vacío
-                        val token = if (sessionToken.isNotEmpty()) sessionToken else "i6pehlag8y1li3dbhcdc6vpn8jo542mm"
-                        header("X-Session-Token", token)
+                        header("X-Session-Token", sessionToken)
                     }
                 }
             }))

@@ -55,7 +55,8 @@ import kotlinx.coroutines.launch
 fun HomeContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
-    onAdventureClick: (String) -> Unit = {}
+    onAdventureClick: (String) -> Unit = {},
+    sessionToken: String = ""
 ) {
     Box(
         modifier = modifier
@@ -91,7 +92,8 @@ fun HomeContent(
                     userName = homeUiState.userName,
                     stats = homeUiState.userStats,
                     recentAdventures = homeUiState.recentAdventures,
-                    onAdventureClick = onAdventureClick
+                    onAdventureClick = onAdventureClick,
+                    sessionToken = sessionToken
                 )
             }
         }
@@ -104,6 +106,7 @@ private fun HomeContentSuccess(
     stats: UserStats,
     recentAdventures: List<Adventure>,
     onAdventureClick: (String) -> Unit = {},
+    sessionToken: String = "",
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -134,7 +137,8 @@ private fun HomeContentSuccess(
         items(recentAdventures) { adventure ->
             AdventureItem(
                 adventure = adventure,
-                onClick = { onAdventureClick(adventure.id) }
+                onClick = { onAdventureClick(adventure.id) },
+                sessionToken = sessionToken
             )
         }
         

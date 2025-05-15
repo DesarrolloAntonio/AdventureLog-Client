@@ -84,7 +84,7 @@ class HomeViewModel(
                 dateJoined = "2025-01-30T07:15:10.367579Z",
                 isStaff = false,
                 hasPassword = "true",
-                sessionToken = "session_token_value"
+                sessionToken = "i6pehlag8y1li3dbhcdc6vpn8jo542mm"
             )
         }
     }

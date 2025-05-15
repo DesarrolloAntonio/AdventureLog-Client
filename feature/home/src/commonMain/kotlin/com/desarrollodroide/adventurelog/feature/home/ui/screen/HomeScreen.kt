@@ -376,7 +376,8 @@ fun HomeScreenContent(
                             HomeContent(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,
-                                onAdventureClick = onAdventureClick
+                                onAdventureClick = onAdventureClick,
+                                sessionToken = userDetails?.sessionToken ?: ""
                             )
                         }
 
