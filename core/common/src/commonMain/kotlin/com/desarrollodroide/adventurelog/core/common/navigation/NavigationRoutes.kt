@@ -1,8 +1,5 @@
 package com.desarrollodroide.adventurelog.core.common.navigation
 
-/**
- * Centralized navigation routes definition to avoid circular dependencies between modules
- */
 object NavigationRoutes {
 
     object Login {
@@ -26,7 +23,6 @@ object NavigationRoutes {
     object Collections {
         const val route = "collections"
         
-        // Method to create route for a specific collection
         fun createCollectionDetailRoute(collectionId: String): String {
             return "collection/$collectionId"
         }
@@ -46,10 +42,5 @@ object NavigationRoutes {
 
     object Detail {
         const val route = "detail"
-        
-        // Method to create route with parameters
-        fun createDetailRoute(adventureId: String): String {
-            return "detail/$adventureId"
-        }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import org.koin.compose.viewmodel.koinViewModel
@@ -22,13 +23,12 @@ fun CollectionDetailScreen(
     collectionId: String,
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
-    onAdventureClick: (String) -> Unit,
+    onAdventureClick: (Adventure) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
-    // Load the collection when the screen is first composed
     LaunchedEffect(collectionId) {
         viewModel.loadCollection(collectionId)
     }
@@ -66,7 +66,7 @@ fun CollectionDetailScreen(
 @Composable
 fun CollectionDetailContent(
     collection: Collection,
-    onAdventureClick: (String) -> Unit,
+    onAdventureClick: (Adventure) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -99,7 +99,7 @@ fun CollectionDetailContent(
             items(collection.adventures) { adventure ->
                 AdventureItem(
                     adventure = adventure,
-                    onClick = { onAdventureClick(adventure.id) }
+                    onClick = { onAdventureClick(adventure) }
                 )
             }
         }

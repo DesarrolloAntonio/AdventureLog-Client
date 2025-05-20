@@ -5,9 +5,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.home.ui.screen.HomeScreenRoute
+import com.desarrollodroide.adventurelog.core.model.Adventure
 
 interface HomeNavigator {
-    fun goToDetail(adventureId: String)
+    fun goToDetail(adventure: Adventure)
 }
 
 /**
@@ -22,8 +23,8 @@ fun NavGraphBuilder.homeNavGraph(
     ) {
         composable(route = NavigationRoutes.Home.screen) {
             HomeScreenRoute(
-                onAdventureClick = {
-                    adventureId -> navigator.goToDetail(adventureId)
+                onAdventureClick = { adventure -> 
+                    navigator.goToDetail(adventure)
                 }
             )
         }

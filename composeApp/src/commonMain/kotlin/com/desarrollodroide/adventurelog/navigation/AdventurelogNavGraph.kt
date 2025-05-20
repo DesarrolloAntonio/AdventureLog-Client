@@ -1,7 +1,7 @@
 package com.desarrollodroide.adventurelog.navigation
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -13,18 +13,22 @@ import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.DetailNavi
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.HomeNavigator
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedNavHost
+import com.desarrollodroide.adventurelog.core.model.Adventure
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 
-/**
- * Main navigation graph of the application
- * Acts as the entry point that connects all feature navigation graphs
- */
 @Composable
 fun AdventureLogNavGraph(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState,
     navController: NavHostController = rememberNavController()
 ) {
-    // Define navigators for each module
+    val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        isLenient = true
+    }
+    
     val loginNavigator = object : LoginNavigator {
         override fun goToHome() {
             navController.navigate(NavigationRoutes.Home.graph) {
@@ -34,8 +38,9 @@ fun AdventureLogNavGraph(
     }
     
     val homeNavigator = object : HomeNavigator {
-        override fun goToDetail(adventureId: String) {
-            navController.navigate(NavigationRoutes.Detail.createDetailRoute(adventureId))
+        override fun goToDetail(adventure: Adventure) {
+            val adventureJson = json.encodeToString(adventure)
+            navController.navigate("detail?adventureJson=$adventureJson")
         }
     }
     
@@ -45,7 +50,6 @@ fun AdventureLogNavGraph(
         }
     }
     
-    // Use the enhanced AnimatedNavHost instead of the standard NavHost
     AnimatedNavHost(
         modifier = modifier,
         startDestination = NavigationRoutes.Login.graph,

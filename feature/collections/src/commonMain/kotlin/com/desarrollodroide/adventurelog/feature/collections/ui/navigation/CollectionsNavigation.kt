@@ -8,6 +8,7 @@ import androidx.navigation.navArgument
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionDetailScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionsScreen
+import com.desarrollodroide.adventurelog.core.model.Adventure
 
 /**
  * Extension function to add collections screen to a navigation graph
@@ -16,7 +17,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.screens.Collecti
 fun NavGraphBuilder.collectionsScreen(
     onCollectionClick: (String) -> Unit,
     onHomeClick: () -> Unit,
-    onAdventureClick: (String) -> Unit,
+    onAdventureClick: (Adventure) -> Unit,
     navController: NavController
 ) {
     // Collections List Screen

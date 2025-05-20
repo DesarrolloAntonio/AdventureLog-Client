@@ -9,34 +9,39 @@ import androidx.navigation.navDeepLink
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.detail.ui.screen.AdventureDetailScreenRoute
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
+import com.desarrollodroide.adventurelog.core.model.Adventure
 
-/**
- * Detail module navigation graph
- */
 fun NavGraphBuilder.detailNavGraph(
     navigator: DetailNavigator
 ) {
+    val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        isLenient = true
+    }
+    
     navigation(
-        startDestination = "detail/{adventureId}",
+        startDestination = "detail?adventureJson={adventureJson}",
         route = NavigationRoutes.Detail.route
     ) {
         composable(
-            route = "detail/{adventureId}",
-            arguments = listOf(navArgument("adventureId") { type = NavType.StringType }),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "adventurelog://detail/{adventureId}"
-                }
+            route = "detail?adventureJson={adventureJson}",
+            arguments = listOf(
+                navArgument("adventureJson") { type = NavType.StringType }
             ),
-            // Custom detail animation (slide up from bottom for a modal-like effect)
             enterTransition = NavigationAnimations.enterTransitionVertical,
             exitTransition = NavigationAnimations.exitTransitionFade,
             popEnterTransition = NavigationAnimations.enterTransitionFade,
             popExitTransition = NavigationAnimations.exitTransitionVertical
         ) { backStackEntry ->
-            val adventureId = backStackEntry.arguments?.getString("adventureId") ?: ""
+            val adventureJson = backStackEntry.arguments?.getString("adventureJson") ?: ""
+            
+            val adventure = json.decodeFromString<Adventure>(adventureJson)
+            
             AdventureDetailScreenRoute(
-                adventureId = adventureId,
+                adventure = adventure,
                 onBackClick = { navigator.navigateUp() }
             )
         }

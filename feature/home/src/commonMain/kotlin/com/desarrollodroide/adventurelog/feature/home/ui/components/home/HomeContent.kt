@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 fun HomeContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
-    onAdventureClick: (String) -> Unit = {},
+    onAdventureClick: (Adventure) -> Unit = { },
     sessionToken: String = ""
 ) {
     Box(
@@ -105,7 +105,7 @@ private fun HomeContentSuccess(
     userName: String,
     stats: UserStats,
     recentAdventures: List<Adventure>,
-    onAdventureClick: (String) -> Unit = {},
+    onAdventureClick: (Adventure) -> Unit = { },
     sessionToken: String = "",
     modifier: Modifier = Modifier
 ) {
@@ -137,7 +137,7 @@ private fun HomeContentSuccess(
         items(recentAdventures) { adventure ->
             AdventureItem(
                 adventure = adventure,
-                onClick = { onAdventureClick(adventure.id) },
+                onClick = { onAdventureClick(adventure) },
                 sessionToken = sessionToken
             )
         }

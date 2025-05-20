@@ -69,6 +69,7 @@ import com.desarrollodroide.adventurelog.resources.background_blur_mint
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.zIndex
+import com.desarrollodroide.adventurelog.core.model.Adventure
 
 /**
  * Entry point composable that integrates with navigation
@@ -77,7 +78,7 @@ import androidx.compose.ui.zIndex
 fun HomeScreenRoute(
     viewModel: HomeViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel(),
-    onAdventureClick: (String) -> Unit = {}
+    onAdventureClick: (Adventure) -> Unit = { }
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
@@ -108,7 +109,7 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     userDetails: UserDetails? = null,
-    onAdventureClick: (String) -> Unit = {},
+    onAdventureClick: (Adventure) -> Unit = { },
     onLogout: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)

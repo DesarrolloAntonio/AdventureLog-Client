@@ -16,7 +16,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 @Composable
 fun AdventureListScreen(
     adventures: List<Adventure> = PreviewData.adventures,
-    onAdventureClick: (String) -> Unit = {},
+    onAdventureClick: (Adventure) -> Unit = { },
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -27,7 +27,7 @@ fun AdventureListScreen(
         items(adventures) { adventure ->
             AdventureItem(
                 adventure = adventure,
-                onClick = { onAdventureClick(adventure.id) }
+                onClick = { onAdventureClick(adventure) }
             )
         }
         

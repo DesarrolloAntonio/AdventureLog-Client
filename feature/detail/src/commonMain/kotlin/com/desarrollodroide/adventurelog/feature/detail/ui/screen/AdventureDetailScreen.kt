@@ -34,21 +34,17 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 
-/**
- * Entry point composable that integrates with navigation
- */
 @Composable
 fun AdventureDetailScreenRoute(
-    adventureId: String,
+    adventure: Adventure,
     onBackClick: () -> Unit
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
-    val adventure = viewModel.getAdventureById(adventureId)
 
     AdventureDetailScreen(
         adventure = adventure,
         onBackClick = onBackClick,
-        onEditClick = { viewModel.editAdventure(adventureId) },
+        onEditClick = { viewModel.editAdventure(adventure.id) },
         onOpenMap = { lat, long -> viewModel.openMap(lat, long) },
         onOpenLink = { url -> viewModel.openLink(url) }
     )
@@ -74,14 +70,12 @@ fun AdventureDetailScreen(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            // Cover image with overlay buttons
             CoverImageWithButtons(
                 imageUrl = adventure.images.firstOrNull()?.image,
                 onBackClick = onBackClick,
                 onShareClick = { /* TODO: Implement share */ }
             )
             
-            // Content card
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,13 +89,11 @@ fun AdventureDetailScreen(
                         .fillMaxWidth()
                         .padding(24.dp)
                 ) {
-                    // Header info - Title and Location
                     HeaderInfo(
                         title = adventure.name,
                         location = adventure.location
                     )
                     
-                    // Tags section
                     Spacer(modifier = Modifier.height(16.dp))
                     CategoryTags(
                         category = adventure.category,
@@ -109,15 +101,12 @@ fun AdventureDetailScreen(
                         collection = adventure.collection
                     )
 
-                    // Photos Carousel
                     if (adventure.images.size > 1) {
                         PhotosCarousel(images = adventure.images)
                     }
                     
-                    // About section
                     AboutSection(description = adventure.description)
                     
-                    // Map section 
                     if (adventure.latitude.isNotEmpty() && adventure.longitude.isNotEmpty()) {
                         MapSection(
                             latitude = adventure.latitude,
@@ -127,19 +116,16 @@ fun AdventureDetailScreen(
                         )
                     }
                     
-                    // Link
                     adventure.link?.let { link ->
                         if (link.isNotEmpty()) {
                             LinkSection(link = link, onOpenLink = onOpenLink)
                         }
                     }
                     
-                    // Visits
                     if (adventure.visits.isNotEmpty()) {
                         VisitsSection(visits = adventure.visits)
                     }
                     
-                    // Creation and update information
                     Spacer(modifier = Modifier.height(16.dp))
                     CreationInfo(
                         createdAt = adventure.createdAt,
@@ -163,7 +149,6 @@ private fun CoverImageWithButtons(
             .fillMaxWidth()
             .height(300.dp)
     ) {
-        // Main image
         imageUrl?.let {
             Image(
                 painter = rememberAsyncImagePainter(model = it),
@@ -173,11 +158,10 @@ private fun CoverImageWithButtons(
             )
         }
 
-        // Back button overlay - posicionado más abajo para evitar la status bar
         IconButton(
             onClick = onBackClick,
             modifier = Modifier
-                .padding(start = 16.dp, top = 40.dp) // Aumentado el padding top
+                .padding(start = 16.dp, top = 40.dp)
                 .size(40.dp)
                 .shadow(4.dp, CircleShape)
                 .clip(CircleShape)
@@ -191,11 +175,10 @@ private fun CoverImageWithButtons(
             )
         }
 
-        // Share button - posicionado más abajo para evitar la status bar
         IconButton(
             onClick = onShareClick,
             modifier = Modifier
-                .padding(end = 16.dp, top = 40.dp) // Aumentado el padding top
+                .padding(end = 16.dp, top = 40.dp)
                 .size(40.dp)
                 .shadow(4.dp, CircleShape)
                 .clip(CircleShape)
@@ -218,14 +201,12 @@ private fun HeaderInfo(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        // Title
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
         
-        // Location
         if (!location.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -261,7 +242,6 @@ private fun CategoryTags(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Category
         category?.let {
             Surface(
                 shape = RoundedCornerShape(4.dp),
@@ -277,7 +257,6 @@ private fun CategoryTags(
             }
         }
         
-        // Private indicator
         if (!isPublic) {
             Surface(
                 shape = RoundedCornerShape(4.dp),
@@ -293,7 +272,6 @@ private fun CategoryTags(
             }
         }
         
-        // Collection tag if present
         if (!collection.isNullOrEmpty()) {
             Surface(
                 shape = RoundedCornerShape(4.dp),
@@ -326,7 +304,6 @@ private fun PhotosCarousel(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Create a state for the carousel
         val carouselState = rememberCarouselState { images.size }
 
         HorizontalMultiBrowseCarousel(
@@ -340,7 +317,6 @@ private fun PhotosCarousel(
         ) { index ->
             val image = images[index]
             
-            // Usar la técnica de maskClip que es más adecuada para carruseles
             Box(
                 modifier = Modifier.maskClip(shape = RoundedCornerShape(16.dp))
             ) {
