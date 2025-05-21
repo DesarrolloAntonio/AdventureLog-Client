@@ -11,7 +11,5 @@ interface AdventureLogNetworkDataSource {
 
     suspend fun sendLogin(url: String, username: String, password: String): UserDetailsDTO
 
-    suspend fun getCsrfToken(): Result<String>
-
     suspend fun getUserDetails(csrfToken: String): UserDetailsDTO
 }

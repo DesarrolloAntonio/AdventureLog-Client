@@ -76,16 +76,6 @@ class KtorAdventurelogNetwork(
         private const val USER_DETAILS_ENDPOINT = "api/user/details/"
     }
 
-    override suspend fun getCsrfToken(): Result<String> {
-        return if (csrfToken != null) {
-            logger.d { "Returning stored CSRF token: $csrfToken" }
-            Result.success(csrfToken!!)
-        } else {
-            logger.w { "No CSRF token available" }
-            Result.success("")
-        }
-    }
-
     override suspend fun sendLogin(url: String, username: String, password: String): UserDetailsDTO {
         // Normalize URL by removing trailing slash
         baseUrl = url.trimEnd('/')
@@ -96,7 +86,6 @@ class KtorAdventurelogNetwork(
             contentType(ContentType.Application.Json)
             headers {
                 append(HttpHeaders.Accept, "application/json")
-                // Simplificamos a solo el header X-Is-Mobile como se mencionó en los correos
                 append("X-Is-Mobile", "true")
                 append("Referer", baseUrl?:"")
             }
