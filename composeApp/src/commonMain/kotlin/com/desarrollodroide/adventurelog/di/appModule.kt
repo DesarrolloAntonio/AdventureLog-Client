@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.feature.detail.di.detailModule
 import com.desarrollodroide.adventurelog.feature.home.di.homeModule
 import com.desarrollodroide.adventurelog.feature.login.di.loginModule
 import com.desarrollodroide.adventurelog.feature.settings.di.settingsModule
+import com.desarrollodroide.adventurelog.feature.ui.di.imageLoaderModule
 
 import io.ktor.client.HttpClient
 import org.koin.dsl.module
@@ -23,7 +24,8 @@ val appModule = module {
         adventureModule,
         settingsModule,
         detailModule,
-        collectionsModule
+        collectionsModule,
+        imageLoaderModule
     )
     
     single {

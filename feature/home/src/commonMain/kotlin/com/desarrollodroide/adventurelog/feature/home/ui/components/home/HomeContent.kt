@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components.home
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,9 +47,6 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/**
- * Home screen main content composable
- */
 @Composable
 fun HomeContent(
     modifier: Modifier = Modifier,
@@ -115,7 +111,6 @@ private fun HomeContentSuccess(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Stats Card
         item {
             SwipeableStatsCard(stats = stats)
         }
@@ -124,7 +119,6 @@ private fun HomeContentSuccess(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        // Recent Adventures section title
         item {
             Text(
                 text = "Recent adventures",
@@ -133,7 +127,6 @@ private fun HomeContentSuccess(
             )
         }
         
-        // Recent Adventures as individual items
         items(recentAdventures) { adventure ->
             AdventureItem(
                 adventure = adventure,
@@ -142,7 +135,6 @@ private fun HomeContentSuccess(
             )
         }
         
-        // Add some space at the bottom
         item {
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -157,7 +149,6 @@ private fun SwipeableStatsCard(
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
     
-    // Auto-alternate between pages
     LaunchedEffect(Unit) {
         while (true) {
             delay(10000) // Switch every 10 seconds
@@ -180,14 +171,12 @@ private fun SwipeableStatsCard(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Pager for swipeable stats pages
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxWidth()
             ) { page ->
                 when (page) {
                     0 -> {
-                        // First page - Adventures and Countries
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
@@ -208,7 +197,6 @@ private fun SwipeableStatsCard(
                         }
                     }
                     1 -> {
-                        // Second page - Regions and Cities
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
@@ -231,7 +219,6 @@ private fun SwipeableStatsCard(
                 }
             }
             
-            // Page indicator dots
             Spacer(modifier = Modifier.height(8.dp))
             
             Row(
@@ -275,7 +262,6 @@ private fun CompactStatItem(
         verticalArrangement = Arrangement.Center,
         modifier = modifier.padding(horizontal = 8.dp)
     ) {
-        // Title in English at the top
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
@@ -284,13 +270,11 @@ private fun CompactStatItem(
             textAlign = TextAlign.Center
         )
         
-        // Row with icon and value
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.padding(top = 4.dp)
         ) {
-            // Icon first
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -298,7 +282,6 @@ private fun CompactStatItem(
                 modifier = Modifier.size(24.dp)
             )
             
-            // Value with color
             Text(
                 text = "$value",
                 style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),

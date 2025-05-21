@@ -17,13 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import coil3.ImageLoader
-import coil3.PlatformContext
-import coil3.compose.LocalPlatformContext
-import coil3.network.ktor3.KtorNetworkFetcherFactory
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalSessionTokenManager
 
 @Composable
 fun AdventureItem(
@@ -37,8 +32,17 @@ fun AdventureItem(
     sessionToken: String = ""
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val platformContext: PlatformContext = LocalPlatformContext.current
-    val adventureItemImageLoader = remember { newImageLoader(platformContext, sessionToken) }
+
+    // Get dependencies from CompositionLocals
+    val imageLoader = LocalImageLoader.current
+    val sessionTokenManager = LocalSessionTokenManager.current
+
+    // Update session token if needed (runs once per composition)
+    LaunchedEffect(sessionToken) {
+        if (sessionToken.isNotEmpty()) {
+            sessionTokenManager.updateSessionToken(sessionToken)
+        }
+    }
 
     Card(
         modifier = modifier
@@ -51,7 +55,7 @@ fun AdventureItem(
             Image(
                 painter = rememberAsyncImagePainter(
                     model = adventure.images.firstOrNull()?.image ?: "",
-                    imageLoader = adventureItemImageLoader
+                    imageLoader = imageLoader
                 ),
                 contentDescription = null,
                 modifier = Modifier
@@ -179,21 +183,4 @@ fun AdventureItem(
             }
         }
     }
-}
-
-
-fun newImageLoader(context: PlatformContext, sessionToken: String): ImageLoader {
-    println("AdventureItem: Creating ImageLoader with sessionToken: '$sessionToken'")
-    return ImageLoader.Builder(context)
-        .components {
-            add(KtorNetworkFetcherFactory(httpClient = {
-                HttpClient {
-                    defaultRequest {
-                        println("AdventureItem: Using token for image request: '$sessionToken'")
-                        header("X-Session-Token", sessionToken)
-                    }
-                }
-            }))
-        }
-        .build()
 }
