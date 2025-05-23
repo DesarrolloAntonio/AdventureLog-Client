@@ -13,13 +13,15 @@ import isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val loginUseCase: LoginUseCase,
     private val initializeSessionUseCase: InitializeSessionUseCase,
     private val saveSessionUseCase: SaveSessionUseCase,
-    private val clearSessionUseCase: ClearSessionUseCase
+    private val clearSessionUseCase: ClearSessionUseCase,
+    private val userRepository: com.desarrollodroide.adventurelog.core.data.UserRepository
 ) : ViewModel() {
 
     private val logger = co.touchlab.kermit.Logger.withTag("LoginViewModel")
@@ -36,7 +38,6 @@ class LoginViewModel(
     private fun initializeViewModel() {
         viewModelScope.launch {
             try {
-                // Use the UseCase to check for existing session and initialize network
                 val existingSession = initializeSessionUseCase()
 
                 if (existingSession != null) {
@@ -45,13 +46,51 @@ class LoginViewModel(
                     return@launch
                 }
 
-                // No valid session found - show clean login form
+                loadRememberMeCredentials()
                 _uiState.update { LoginUiState.Empty }
 
             } catch (e: Exception) {
                 logger.e(e) { "Error during initialization" }
+                _loginFormState.update { LoginFormState() }
                 _uiState.update { LoginUiState.Empty }
             }
+        }
+    }
+
+    private suspend fun loadRememberMeCredentials() {
+        try {
+            val account = userRepository.getRememberMeCredentials().first()
+
+            if (account != null) {
+                logger.d { "Found saved credentials for: ${account.userName}" }
+                _loginFormState.update {
+                    LoginFormState(
+                        userName = account.userName,
+                        password = account.password,
+                        serverUrl = account.serverUrl,
+                        rememberSession = true,
+                        userNameError = false,
+                        passwordError = false,
+                        urlError = false
+                    )
+                }
+            } else {
+                logger.d { "No saved credentials found" }
+                _loginFormState.update {
+                    LoginFormState(
+                        userName = "",
+                        password = "",
+                        serverUrl = "",
+                        rememberSession = false,
+                        userNameError = false,
+                        passwordError = false,
+                        urlError = false
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Error loading remember me credentials" }
+            _loginFormState.update { LoginFormState() }
         }
     }
 
@@ -79,14 +118,13 @@ class LoginViewModel(
     fun updateRememberSession(value: Boolean) {
         _loginFormState.value = _loginFormState.value.copy(rememberSession = value)
 
-        // If user unchecks "Remember me", clear any saved session for next app restart
         if (!value) {
             viewModelScope.launch {
                 try {
-                    clearSessionUseCase()
-                    logger.d { "Cleared saved session because user unchecked remember me" }
+                    userRepository.clearRememberMeCredentials()
+                    logger.d { "Cleared saved credentials because user unchecked remember me" }
                 } catch (e: Exception) {
-                    logger.e(e) { "Error clearing saved session" }
+                    logger.e(e) { "Error clearing saved credentials" }
                 }
             }
         }
@@ -136,14 +174,17 @@ class LoginViewModel(
                         val userDetails = result.value
                         logger.d { "Login successful for user: ${userDetails.username}" }
 
-                        // Save user session - this controls token persistence
                         if (rememberSession) {
-                            // Save session persistently - will auto-login on next app start
                             saveSessionUseCase(userDetails)
-                            logger.d { "Saved persistent session - will auto-login next time" }
+                            userRepository.saveRememberMeCredentials(
+                                url = url,
+                                username = username,
+                                password = password
+                            )
+                            logger.d { "Saved persistent session and credentials - will auto-login next time" }
                         } else {
-                            // Don't save session persistently - user will need to login again
-                            logger.d { "Remember me not checked - won't auto-login next time" }
+                            userRepository.clearRememberMeCredentials()
+                            logger.d { "Remember me not checked - won't save credentials or auto-login next time" }
                         }
 
                         _uiState.update { LoginUiState.Success(userDetails) }

@@ -46,7 +46,6 @@ class UserRepositoryImpl(
     }
 
     private fun loadInitialData() {
-        // Load remember me credentials if they exist
         if (hasKey(Keys.REMEMBER_USERNAME)) {
             rememberMeFlow.value = Account(
                 id = settings.getInt(Keys.REMEMBER_USER_ID, -1),
@@ -62,14 +61,11 @@ class UserRepositoryImpl(
             if (userSessionJson != null) {
                 val userDetails = json.decodeFromString<UserDetails>(userSessionJson)
 
-                // Handle backward compatibility for sessions without serverUrl
                 if (userDetails.serverUrl.isBlank()) {
-                    // Try to get server URL from remember me credentials as fallback
                     val rememberUrl = settings.getStringOrNull(Keys.REMEMBER_URL) ?: ""
                     if (rememberUrl.isNotBlank()) {
                         val updatedUserDetails = userDetails.copy(serverUrl = rememberUrl)
                         userSessionFlow.value = updatedUserDetails
-                        // Save updated session synchronously using settings directly
                         val updatedJson = json.encodeToString(updatedUserDetails)
                         settings.putString(Keys.USER_SESSION, updatedJson)
                     } else {
@@ -81,7 +77,6 @@ class UserRepositoryImpl(
             }
         } catch (e: Exception) {
             println("Error deserializing user session: ${e.message}")
-            // Clear corrupted session data
             settings.remove(Keys.USER_SESSION)
         }
     }
@@ -102,16 +97,13 @@ class UserRepositoryImpl(
         username: String,
         password: String
     ) {
-        // Generate an ID if needed (or use existing)
         val id = settings.getInt(Keys.REMEMBER_USER_ID, 1)
 
-        // Save to settings
         settings.putInt(Keys.REMEMBER_USER_ID, id)
         settings.putString(Keys.REMEMBER_USERNAME, username)
         settings.putString(Keys.REMEMBER_PASSWORD, password)
         settings.putString(Keys.REMEMBER_URL, url)
 
-        // Update flow
         rememberMeFlow.value = Account(
             id = id,
             userName = username,
@@ -135,11 +127,8 @@ class UserRepositoryImpl(
 
     override suspend fun saveUserSession(userDetails: UserDetails) {
         try {
-            // Serialize the entire UserDetails object to JSON
             val userSessionJson = json.encodeToString(userDetails)
             settings.putString(Keys.USER_SESSION, userSessionJson)
-
-            // Update flow
             userSessionFlow.value = userDetails
         } catch (e: Exception) {
             println("Error saving user session: ${e.message}")

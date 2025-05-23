@@ -12,7 +12,8 @@ val loginModule = module {
             loginUseCase = get(),
             initializeSessionUseCase = get(),
             saveSessionUseCase = get(),
-            clearSessionUseCase = get()
+            clearSessionUseCase = get(),
+            userRepository = get()
         )
     }
 }
