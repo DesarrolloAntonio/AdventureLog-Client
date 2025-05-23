@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Terrain
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,6 +43,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
+import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -60,12 +60,10 @@ fun HomeContent(
     ) {
         when (homeUiState) {
             is HomeUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                LoadingDialog(
+                    isLoading = true,
+                    message = "Loading your adventures..."
+                )
             }
             is HomeUiState.Error -> {
                 Box(
