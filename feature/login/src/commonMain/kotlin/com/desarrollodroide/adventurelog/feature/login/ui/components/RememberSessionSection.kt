@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun RememberSessionSection(
@@ -27,5 +28,27 @@ fun RememberSessionSection(
             text = "Remember me",
             modifier = Modifier.padding(horizontal = 10.dp)
         )
+    }
+}
+
+@Preview
+@Composable
+private fun RememberSessionSectionPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                RememberSessionSection(
+                    checked = false,
+                    onCheckedChange = {}
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                RememberSessionSection(
+                    checked = true,
+                    onCheckedChange = {}
+                )
+            }
+        }
     }
 }

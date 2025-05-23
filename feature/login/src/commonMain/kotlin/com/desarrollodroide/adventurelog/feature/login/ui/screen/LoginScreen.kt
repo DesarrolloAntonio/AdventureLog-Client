@@ -31,6 +31,7 @@ import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
+import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.coroutines.launch
 
 @Composable
@@ -96,30 +97,11 @@ internal fun LoginScreen(
             onClickTestButton = { }
         )
 
-        if (loginUiState is LoginUiState.Loading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Logging in...",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-        }
+        // Use the reusable LoadingDialog component
+        LoadingDialog(
+            isLoading = loginUiState is LoginUiState.Loading,
+            message = "Logging in..."
+        )
 
         if (loginUiState is LoginUiState.Error) {
             clearErrors()
@@ -314,5 +296,118 @@ fun BubbleBackground(
             radius = width * 0.22f,
             center = Offset(x = width * 0.5f, y = height * 0.35f)
         )
+    }
+}
+
+// Previews
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun LoginScreenLightPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            LoginScreen(
+                loginUiState = LoginUiState.Empty,
+                loginFormState = LoginFormState(
+                    userName = "user@example.com",
+                    password = "password123",
+                    serverUrl = "https://example-server.com",
+                    rememberSession = false,
+                    userNameError = false,
+                    passwordError = false,
+                    urlError = false
+                ),
+                onNavigateToHome = {},
+                onUserNameChange = {},
+                onPasswordChange = {},
+                onServerUrlChange = {},
+                onCheckedRememberSessionChange = {},
+                onClickLoginButton = {},
+                clearErrors = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun LoginScreenDarkPreview() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            LoginScreen(
+                loginUiState = LoginUiState.Empty,
+                loginFormState = LoginFormState(
+                    userName = "user@example.com",
+                    password = "password123",
+                    serverUrl = "https://example-server.com",
+                    rememberSession = true,
+                    userNameError = false,
+                    passwordError = false,
+                    urlError = false
+                ),
+                onNavigateToHome = {},
+                onUserNameChange = {},
+                onPasswordChange = {},
+                onServerUrlChange = {},
+                onCheckedRememberSessionChange = {},
+                onClickLoginButton = {},
+                clearErrors = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun LoginScreenWithErrorsPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            LoginScreen(
+                loginUiState = LoginUiState.Error("Invalid credentials"),
+                loginFormState = LoginFormState(
+                    userName = "invalid",
+                    password = "",
+                    serverUrl = "invalid-url",
+                    rememberSession = false,
+                    userNameError = true,
+                    passwordError = true,
+                    urlError = true
+                ),
+                onNavigateToHome = {},
+                onUserNameChange = {},
+                onPasswordChange = {},
+                onServerUrlChange = {},
+                onCheckedRememberSessionChange = {},
+                onClickLoginButton = {},
+                clearErrors = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun LoginScreenLoadingPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            LoginScreen(
+                loginUiState = LoginUiState.Loading,
+                loginFormState = LoginFormState(
+                    userName = "user@example.com",
+                    password = "password123",
+                    serverUrl = "https://example-server.com",
+                    rememberSession = false,
+                    userNameError = false,
+                    passwordError = false,
+                    urlError = false
+                ),
+                onNavigateToHome = {},
+                onUserNameChange = {},
+                onPasswordChange = {},
+                onServerUrlChange = {},
+                onCheckedRememberSessionChange = {},
+                onClickLoginButton = {},
+                clearErrors = {}
+            )
+        }
     }
 }

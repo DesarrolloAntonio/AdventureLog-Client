@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.login.ui.components
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,7 +13,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import isValidUrl
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ServerUrlTextField(
@@ -87,6 +91,32 @@ fun ServerUrlTextField(
                 color = colorScheme.error,
                 text = if (isError) "Invalid server url" else ""
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun ServerUrlTextFieldPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ServerUrlTextField(
+                    serverUrl = "https://example-server.com",
+                    serverErrorState = false,
+                    onValueChange = {},
+                    onClick = {}
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                ServerUrlTextField(
+                    serverUrl = "invalid-url",
+                    serverErrorState = true,
+                    onValueChange = {},
+                    onClick = {}
+                )
+            }
         }
     }
 }
