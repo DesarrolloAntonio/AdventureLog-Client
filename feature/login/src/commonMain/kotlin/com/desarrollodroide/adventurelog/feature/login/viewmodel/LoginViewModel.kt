@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.LoginUseCase
 import com.desarrollodroide.adventurelog.core.domain.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.SaveSessionUseCase
-import com.desarrollodroide.adventurelog.core.domain.ClearSessionUseCase
+import com.desarrollodroide.adventurelog.core.domain.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import isValidUrl
@@ -20,8 +20,7 @@ class LoginViewModel(
     private val loginUseCase: LoginUseCase,
     private val initializeSessionUseCase: InitializeSessionUseCase,
     private val saveSessionUseCase: SaveSessionUseCase,
-    private val clearSessionUseCase: ClearSessionUseCase,
-    private val userRepository: com.desarrollodroide.adventurelog.core.data.UserRepository
+    private val rememberMeCredentialsUseCase: RememberMeCredentialsUseCase
 ) : ViewModel() {
 
     private val logger = co.touchlab.kermit.Logger.withTag("LoginViewModel")
@@ -59,7 +58,7 @@ class LoginViewModel(
 
     private suspend fun loadRememberMeCredentials() {
         try {
-            val account = userRepository.getRememberMeCredentials().first()
+            val account = rememberMeCredentialsUseCase.get().first()
 
             if (account != null) {
                 logger.d { "Found saved credentials for: ${account.userName}" }
@@ -121,7 +120,7 @@ class LoginViewModel(
         if (!value) {
             viewModelScope.launch {
                 try {
-                    userRepository.clearRememberMeCredentials()
+                    rememberMeCredentialsUseCase.clear()
                     logger.d { "Cleared saved credentials because user unchecked remember me" }
                 } catch (e: Exception) {
                     logger.e(e) { "Error clearing saved credentials" }
@@ -176,14 +175,14 @@ class LoginViewModel(
 
                         if (rememberSession) {
                             saveSessionUseCase(userDetails)
-                            userRepository.saveRememberMeCredentials(
+                            rememberMeCredentialsUseCase.save(
                                 url = url,
                                 username = username,
                                 password = password
                             )
                             logger.d { "Saved persistent session and credentials - will auto-login next time" }
                         } else {
-                            userRepository.clearRememberMeCredentials()
+                            rememberMeCredentialsUseCase.clear()
                             logger.d { "Remember me not checked - won't save credentials or auto-login next time" }
                         }
 
