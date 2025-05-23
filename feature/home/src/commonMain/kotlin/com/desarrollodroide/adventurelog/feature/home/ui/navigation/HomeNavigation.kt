@@ -9,6 +9,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 
 interface HomeNavigator {
     fun goToDetail(adventure: Adventure)
+    fun goToLogin()
 }
 
 /**
@@ -25,6 +26,9 @@ fun NavGraphBuilder.homeNavGraph(
             HomeScreenRoute(
                 onAdventureClick = { adventure -> 
                     navigator.goToDetail(adventure)
+                },
+                onNavigateToLogin = {
+                    navigator.goToLogin()
                 }
             )
         }

@@ -185,19 +185,19 @@ fun DrawerHeader(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .background(
-                        Color(0xFF4F0E0E).copy(alpha = 0.3f),
+                        Color(0xFFDC2626).copy(alpha = 0.15f), // Red background with transparency
                         RoundedCornerShape(8.dp)
                     )
             ) {
                 Icon(
                     imageVector = Icons.Default.ExitToApp,
                     contentDescription = null,
-                    tint = Color(0xFFFF4081) // Pink-purple accent matching website
+                    tint = Color(0xFFDC2626) // Red color for logout
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Logout",
-                    color = Color(0xFFFF4081), // Pink-purple accent matching website
+                    color = Color(0xFFDC2626), // Red color for logout
                     style = MaterialTheme.typography.labelLarge
                 )
             }

@@ -26,9 +26,6 @@ class LogoutUseCase(
             // Reset network configuration to clear any cached tokens/headers
             networkDataSource.clearSession()
 
-            // TODO: If server supports logout endpoint, call it here to invalidate token
-            // networkDataSource.logout()
-
         } catch (e: Exception) {
             // Even if there's an error, we still want to clear local data
             // Log the error but don't throw it

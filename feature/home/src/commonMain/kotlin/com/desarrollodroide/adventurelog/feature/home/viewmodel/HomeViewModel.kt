@@ -104,11 +104,9 @@ class HomeViewModel(
         viewModelScope.launch {
             try {
                 logoutUseCase()
-                println("Logout completed successfully")
+                println("HomeViewModel: Logout completed successfully")
             } catch (e: Exception) {
-                println("Error during logout: ${e.message}")
-                // Even if logout fails, we should still clear local data
-                // The UseCase handles this, but we log it here for debugging
+                println("HomeViewModel: Error during logout: ${e.message}")
             }
         }
     }

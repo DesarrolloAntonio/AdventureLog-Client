@@ -78,7 +78,8 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 fun HomeScreenRoute(
     viewModel: HomeViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel(),
-    onAdventureClick: (Adventure) -> Unit = { }
+    onAdventureClick: (Adventure) -> Unit = { },
+    onNavigateToLogin: () -> Unit = { }
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
@@ -87,7 +88,10 @@ fun HomeScreenRoute(
         homeUiState = homeUiState,
         userDetails = userDetails,
         onAdventureClick = onAdventureClick,
-        onLogout = settingsViewModel::logout
+        onLogout = { 
+            viewModel.logout()
+            onNavigateToLogin()
+        }
     )
 }
 

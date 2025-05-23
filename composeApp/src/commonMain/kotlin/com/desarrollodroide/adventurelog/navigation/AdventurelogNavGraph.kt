@@ -42,6 +42,12 @@ fun AdventureLogNavGraph(
             val adventureJson = json.encodeToString(adventure)
             navController.navigate("detail?adventureJson=$adventureJson")
         }
+        
+        override fun goToLogin() {
+            navController.navigate(NavigationRoutes.Login.graph) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
     }
     
     val detailNavigator = object : DetailNavigator {
