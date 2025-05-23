@@ -15,5 +15,6 @@ data class UserDetails(
     val dateJoined: String,
     val isStaff: Boolean,
     val hasPassword: String,
-    val sessionToken: String
+    val sessionToken: String,
+    val serverUrl: String // Added server URL to maintain session context
 )

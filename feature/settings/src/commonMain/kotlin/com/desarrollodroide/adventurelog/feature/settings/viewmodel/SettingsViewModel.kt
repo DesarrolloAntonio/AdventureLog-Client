@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import coil3.ImageLoader
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.core.data.SettingsRepository
+import com.desarrollodroide.adventurelog.core.domain.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,11 +16,12 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
+    private val logoutUseCase: LogoutUseCase
 //    private val imageLoader: ImageLoader
-): ViewModel() {
+) : ViewModel() {
 
     private val _userDetails = MutableStateFlow<UserDetails?>(null)
-    
+
     val themeMode = settingsRepository.getThemeMode()
         .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.AUTO)
 
@@ -28,7 +30,7 @@ class SettingsViewModel(
 
     val compactView = settingsRepository.getCompactView()
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-    
+
 
     private val _serverUrl = MutableStateFlow("")
 
@@ -38,13 +40,15 @@ class SettingsViewModel(
 
     fun logout() {
         viewModelScope.launch {
-//            try {
-//                // Limpiar credenciales y cerrar sesión
-//                settingsRepository.clearLoginCredentials()
-//                _uiState.value = SettingsUiState.Success
-//            } catch (e: Exception) {
-//                _uiState.value = SettingsUiState.Error(e.message ?: "Error during logout")
-//            }
+            try {
+                logoutUseCase()
+                println("Logout completed successfully")
+                // Note: Navigation back to login will be handled by the main navigation
+                // observing the user session state
+            } catch (e: Exception) {
+                println("Error during logout: ${e.message}")
+                // Even if logout fails, local data should be cleared by the UseCase
+            }
         }
     }
 

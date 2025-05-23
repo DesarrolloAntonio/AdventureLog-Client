@@ -7,5 +7,12 @@ import com.desarrollodroide.adventurelog.feature.login.viewmodel.LoginViewModel
 
 val loginModule = module {
     includes(domainModule)
-    factoryOf(::LoginViewModel)
+    factory {
+        LoginViewModel(
+            loginUseCase = get(),
+            initializeSessionUseCase = get(),
+            saveSessionUseCase = get(),
+            clearSessionUseCase = get()
+        )
+    }
 }

@@ -29,12 +29,12 @@ class LoginRepositoryImpl(
                     username = username,
                     password = password
                 )
-                Either.Right(userDetailsDTO.toDomainModel())
+                Either.Right(userDetailsDTO.toDomainModel(url))
             } catch (e: HttpException) {
                 logger.e { "HTTP Error during login: ${e.code}" }
                 when (e.code) {
                     401 -> Either.Left(ApiResponse.InvalidCredentials)
-                    403 -> Either.Left(ApiResponse.InvalidCsrfToken)
+                    403 -> Either.Left(ApiResponse.InvalidCredentials)
                     404 -> Either.Left(ApiResponse.HttpError)
                     else -> Either.Left(ApiResponse.HttpError)
                 }

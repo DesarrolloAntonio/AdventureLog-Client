@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.home.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,12 +14,13 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val getAdventuresUseCase: GetAdventuresUseCase,
+    private val logoutUseCase: LogoutUseCase,
     private val userRepository: com.desarrollodroide.adventurelog.core.data.UserRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-    
+
     private val _userDetails = MutableStateFlow<UserDetails?>(null)
     val userDetails: StateFlow<UserDetails?> = _userDetails.asStateFlow()
 
@@ -26,7 +28,7 @@ class HomeViewModel(
         observeUserSession()
         loadAdventures()
     }
-    
+
     /**
      * Observe user session changes
      */
@@ -34,7 +36,7 @@ class HomeViewModel(
         viewModelScope.launch {
             userRepository.getUserSession().collect { userDetails ->
                 _userDetails.value = userDetails
-                
+
                 // Update UI state with the new user name if needed
                 if (_uiState.value is HomeUiState.Success) {
                     _uiState.update { currentState ->
@@ -50,7 +52,7 @@ class HomeViewModel(
             }
         }
     }
-    
+
     /**
      * Load adventures from the API
      */
@@ -59,10 +61,10 @@ class HomeViewModel(
             try {
                 // Show loading state
                 _uiState.update { HomeUiState.Loading }
-                
+
                 // Call our use case with pageSize=3 for Recent adventures
                 when (val result = getAdventuresUseCase(
-                    page = 1, 
+                    page = 1,
                     pageSize = 3
                 )) {
                     is com.desarrollodroide.adventurelog.core.common.Either.Left -> {
@@ -70,16 +72,17 @@ class HomeViewModel(
                         _uiState.update { HomeUiState.Error(errorMessage) }
                         println("ERROR LOADING ADVENTURES: $errorMessage")
                     }
+
                     is com.desarrollodroide.adventurelog.core.common.Either.Right -> {
                         val adventures = result.value
-                        _uiState.update { 
+                        _uiState.update {
                             HomeUiState.Success(
                                 userName = _userDetails.value?.firstName ?: "User",
                                 recentAdventures = adventures
                             )
                         }
                         println("LOADED ADVENTURES SUCCESSFULLY: ${adventures.size} items")
-                        adventures.forEach { 
+                        adventures.forEach {
                             println("Adventure: ${it.id} - ${it.name}")
                         }
                     }
@@ -93,5 +96,20 @@ class HomeViewModel(
         }
     }
 
-
+    /**
+     * Performs user logout
+     * Clears all session data and navigates back to login
+     */
+    fun logout() {
+        viewModelScope.launch {
+            try {
+                logoutUseCase()
+                println("Logout completed successfully")
+            } catch (e: Exception) {
+                println("Error during logout: ${e.message}")
+                // Even if logout fails, we should still clear local data
+                // The UseCase handles this, but we log it here for debugging
+            }
+        }
+    }
 }

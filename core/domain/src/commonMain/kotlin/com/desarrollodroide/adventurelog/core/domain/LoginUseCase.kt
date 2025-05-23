@@ -15,7 +15,6 @@ class LoginUseCase(
                     is ApiResponse.IOException -> Either.Left("Network unavailable")
                     is ApiResponse.HttpError -> Either.Left("Error getting user credentials, try again later")
                     ApiResponse.InvalidCredentials -> Either.Left("Invalid username or password")
-                    ApiResponse.InvalidCsrfToken -> Either.Left("Session expired, please try again")
                 }
             }
 

@@ -40,6 +40,7 @@ fun LoginScreenRoute(
 ) {
     val loginUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loginFormState by viewModel.loginFormState.collectAsStateWithLifecycle()
+
     LoginScreen(
         loginUiState = loginUiState,
         loginFormState = loginFormState,
@@ -52,6 +53,7 @@ fun LoginScreenRoute(
         clearErrors = viewModel::clearErrors
     )
 }
+
 @Composable
 internal fun LoginScreen(
     loginUiState: LoginUiState,
@@ -95,12 +97,39 @@ internal fun LoginScreen(
         )
 
         if (loginUiState is LoginUiState.Loading) {
-            // Aquí podrías mostrar un indicador de carga si lo deseas
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Logging in...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
         }
 
         if (loginUiState is LoginUiState.Error) {
             clearErrors()
         }
+
+        // SnackbarHost positioned at the bottom
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
@@ -177,7 +206,7 @@ fun ContentViews(
                         serverUrl = loginFormState.serverUrl,
                         serverErrorState = loginFormState.urlError,
                         onValueChange = onServerUrlChange,
-                        onClick = {  }
+                        onClick = { }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     UserTextField(

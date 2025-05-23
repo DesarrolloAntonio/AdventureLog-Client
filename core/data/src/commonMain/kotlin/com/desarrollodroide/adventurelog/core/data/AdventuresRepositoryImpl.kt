@@ -20,7 +20,7 @@ class AdventuresRepositoryImpl(
             println("HTTP Error during getAdventures: ${e.code}")
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCsrfToken)
+                403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -40,7 +40,7 @@ class AdventuresRepositoryImpl(
             println("HTTP Error during getAdventure: ${e.code}")
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCsrfToken)
+                403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {

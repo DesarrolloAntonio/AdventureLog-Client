@@ -15,7 +15,6 @@ class GetAdventuresUseCase(
                     is ApiResponse.IOException -> Either.Left("Network unavailable")
                     is ApiResponse.HttpError -> Either.Left("Error getting adventures, try again later")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired, please log in again")
-                    is ApiResponse.InvalidCsrfToken -> Either.Left("Session expired, please try again")
                 }
             }
             is Either.Right -> Either.Right(result.value)

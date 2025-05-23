@@ -43,7 +43,7 @@ data class UserDetailsDTO(
     val sessionToken: String? = null
 )
 
-fun UserDetailsDTO.toDomainModel(): UserDetails = UserDetails(
+fun UserDetailsDTO.toDomainModel(serverUrl: String = ""): UserDetails = UserDetails(
     id = id ?: -1,
     profilePic = profilePic,
     uuid = uuid ?: "",
@@ -55,5 +55,6 @@ fun UserDetailsDTO.toDomainModel(): UserDetails = UserDetails(
     dateJoined = dateJoined ?: "",
     isStaff = isStaff ?: false,
     hasPassword = hasPassword ?: "",
-    sessionToken = sessionToken?: ""
+    sessionToken = sessionToken?: "",
+    serverUrl = serverUrl
 )
