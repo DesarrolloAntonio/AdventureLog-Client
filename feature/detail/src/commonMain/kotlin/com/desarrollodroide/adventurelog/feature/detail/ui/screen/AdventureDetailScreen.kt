@@ -519,3 +519,238 @@ private fun CreationInfo(
         )
     }
 }
+
+// Previews
+/**
+ * Creates an adventure with multiple images for testing the carousel
+ */
+private fun createAdventureWithMultipleImages(): Adventure {
+    // Create a list of images for the carousel
+    val images = listOf(
+        AdventureImage(
+            id = "img1",
+            image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
+            adventure = "adv1",
+            isPrimary = true,
+            userId = "user123"
+        ),
+        AdventureImage(
+            id = "img2",
+            image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+            adventure = "adv1",
+            isPrimary = false,
+            userId = "user123"
+        ),
+        AdventureImage(
+            id = "img3",
+            image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+            adventure = "adv1",
+            isPrimary = false,
+            userId = "user123"
+        ),
+        AdventureImage(
+            id = "img4",
+            image = "https://images.unsplash.com/photo-1554995207-c18c203602cb",
+            adventure = "adv1",
+            isPrimary = false,
+            userId = "user123"
+        ),
+        AdventureImage(
+            id = "img5",
+            image = "https://images.unsplash.com/photo-1560624052-449f5ddf0c31",
+            adventure = "adv1",
+            isPrimary = false,
+            userId = "user123"
+        )
+    )
+    
+    return Adventure(
+        id = "adv1",
+        userId = "user123",
+        name = "Mountain Adventure",
+        description = "An amazing mountain adventure with breathtaking views and challenging trails. Perfect for hiking enthusiasts looking for their next great outdoor experience.",
+        rating = 4.5,
+        activityTypes = listOf("Hiking", "Nature", "Photography"),
+        location = "Rocky Mountains, Colorado",
+        isPublic = true,
+        collection = "Summer Adventures",
+        createdAt = "2025-01-15T10:00:00.000Z",
+        updatedAt = "2025-01-20T14:30:00.000Z",
+        images = images,
+        link = "https://example.com/mountain-adventure",
+        longitude = "-105.643240",
+        latitude = "39.739236",
+        visits = listOf(
+            Visit(
+                id = "visit1",
+                startDate = "2025-01-15",
+                endDate = "2025-01-17",
+                notes = "Great weather, saw amazing wildlife!"
+            )
+        ),
+        isVisited = true,
+        category = com.desarrollodroide.adventurelog.core.model.Category(
+            id = "cat1",
+            name = "hiking",
+            displayName = "Hiking",
+            icon = "🥾",
+            numAdventures = 10
+        ),
+        attachments = emptyList()
+    )
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureDetailScreenLightPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            AdventureDetailScreen(
+                adventure = createAdventureWithMultipleImages(),
+                onBackClick = {},
+                onEditClick = {},
+                onOpenMap = { _, _ -> },
+                onOpenLink = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureDetailScreenDarkPreview() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            AdventureDetailScreen(
+                adventure = createAdventureWithMultipleImages().copy(
+                    name = "Night Sky Photography Tour",
+                    description = "Experience the wonders of astrophotography in one of the darkest skies in North America.",
+                    activityTypes = listOf("Photography", "Astronomy", "Night Tour"),
+                    isPublic = false
+                ),
+                onBackClick = {},
+                onEditClick = {},
+                onOpenMap = { _, _ -> },
+                onOpenLink = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun HotelBalnearioDetailPreview() {
+    val hotelBalneario = Adventure(
+        id = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
+        userId = "user123",
+        name = "Gran Hotel Balneario De Puente Viesgo (Pendiente) - 4 h 28 min (445 km)",
+        description = "Spa termal en Cantabria con aguas termales y tratamientos de bienestar",
+        rating = 3.4,
+        activityTypes = listOf("Spa", "Relax", "Turismo"),
+        location = "4h 28min (445 km)",
+        isPublic = false,
+        collection = "Santander",
+        createdAt = "2025-03-01T10:00:00.000Z",
+        updatedAt = "2025-03-15T14:30:00.000Z",
+        images = listOf(
+            AdventureImage(
+                id = "img1",
+                image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
+                adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
+                isPrimary = true,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img2",
+                image = "https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f",
+                adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
+                isPrimary = false,
+                userId = "user123"
+            )
+        ),
+        link = "https://www.booking.com/hotel/es/gran-balneario-de-puente-viesgo.es.html",
+        longitude = "-3.965588",
+        latitude = "43.299242",
+        visits = emptyList(),
+        isVisited = false,
+        category = com.desarrollodroide.adventurelog.core.model.Category(
+            id = "cat1",
+            name = "hotel",
+            displayName = "Hotel",
+            icon = "🏨",
+            numAdventures = 5
+        ),
+        attachments = emptyList()
+    )
+
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            AdventureDetailScreen(
+                adventure = hotelBalneario,
+                onBackClick = {},
+                onEditClick = {},
+                onOpenMap = { _, _ -> },
+                onOpenLink = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun NavalagamellaDetailPreview() {
+    val navalagamella = Adventure(
+        id = "2ac911dd-8742-45e6-b105-5c04779e8bea",
+        userId = "user123",
+        name = "Navalagamella",
+        description = "Ruta de los molinos con paisajes naturales y arroyos",
+        rating = 2.2,
+        activityTypes = listOf("Senderismo", "Naturaleza"),
+        location = "",
+        isPublic = false,
+        collection = "Madrid",
+        createdAt = "2025-02-20T09:15:00.000Z",
+        updatedAt = "2025-03-10T11:45:00.000Z",
+        images = listOf(
+            AdventureImage(
+                id = "img2",
+                image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
+                adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
+                isPrimary = true,
+                userId = "user123"
+            ),
+            AdventureImage(
+                id = "img3",
+                image = "https://images.unsplash.com/photo-1551632811-561732d1e306",
+                adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
+                isPrimary = false,
+                userId = "user123"
+            )
+        ),
+        link = "https://sendasdeviaje.com/navalagamella-ruta-molinos/",
+        longitude = "-4.122708",
+        latitude = "40.469059",
+        visits = emptyList(),
+        isVisited = false,
+        category = com.desarrollodroide.adventurelog.core.model.Category(
+            id = "cat2",
+            name = "ruta",
+            displayName = "Ruta",
+            icon = "🏞️",
+            numAdventures = 3
+        ),
+        attachments = emptyList()
+    )
+
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            AdventureDetailScreen(
+                adventure = navalagamella,
+                onBackClick = {},
+                onEditClick = {},
+                onOpenMap = { _, _ -> },
+                onOpenLink = {}
+            )
+        }
+    }
+}

@@ -184,3 +184,68 @@ fun AdventureItem(
         }
     }
 }
+
+// Previews
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureItemLightPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AdventureItem(
+                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[0],
+                onOpenDetails = {},
+                onEdit = {},
+                onRemoveFromCollection = {},
+                onDelete = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureItemDarkPreview() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AdventureItem(
+                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[1],
+                onOpenDetails = {},
+                onEdit = {},
+                onRemoveFromCollection = {},
+                onDelete = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureItemPrivatePreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AdventureItem(
+                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[0], // This one is marked as private
+                onOpenDetails = {},
+                onEdit = {},
+                onRemoveFromCollection = {},
+                onDelete = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureItemWithCollectionPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AdventureItem(
+                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[1], // This one has a collection
+                onOpenDetails = {},
+                onEdit = {},
+                onRemoveFromCollection = {},
+                onDelete = {}
+            )
+        }
+    }
+}

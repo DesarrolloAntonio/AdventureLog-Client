@@ -458,3 +458,77 @@ private fun PlaceholderScreen(title: String) {
         Text("$title Screen")
     }
 }
+
+// Previews
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun HomeScreenEmptyPreview() {
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Empty,
+            userDetails = null
+        )
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun HomeScreenLoadingPreview() {
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Loading,
+            userDetails = null
+        )
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun HomeScreenSuccessPreview() {
+    val sampleStats = com.desarrollodroide.adventurelog.core.model.UserStats(
+        adventureCount = 12,
+        tripsCount = 5,
+        visitedCityCount = 0,
+        totalCities = 15020,
+        visitedRegionCount = 1,
+        totalRegions = 5062,
+        visitedCountryCount = 1,
+        totalCountries = 250
+    )
+    
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Success(
+                userName = "Antonio",
+                recentAdventures = emptyList(),
+                userStats = sampleStats
+            ),
+            userDetails = UserDetails(
+                id = 123,
+                username = "antonio",
+                firstName = "Antonio",
+                lastName = "García",
+                email = "antonio@example.com",
+                profilePic = null,
+                isStaff = false,
+                dateJoined = "2024-01-01",
+                sessionToken = "token123",
+                uuid = "user-uuid-123",
+                publicProfile = true,
+                hasPassword = "true",
+                serverUrl = "https://example-server.com"
+            )
+        )
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun HomeScreenErrorPreview() {
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Error("Failed to load adventures"),
+            userDetails = null
+        )
+    }
+}
