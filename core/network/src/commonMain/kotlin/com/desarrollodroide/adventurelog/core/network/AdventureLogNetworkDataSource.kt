@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network
 
 import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
 
 interface AdventureLogNetworkDataSource {
@@ -14,6 +15,16 @@ interface AdventureLogNetworkDataSource {
      * Get adventure details by ID
      */
     suspend fun getAdventureDetail(objectId: String): AdventureDTO
+
+    /**
+     * Get paginated list of collections
+     */
+    suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO>
+
+    /**
+     * Get collection details by ID
+     */
+    suspend fun getCollectionDetail(collectionId: String): CollectionDTO
 
     /**
      * Send login request and return user details

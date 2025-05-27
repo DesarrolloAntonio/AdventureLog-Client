@@ -35,11 +35,9 @@ fun AdventureItem(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    // Get dependencies from CompositionLocals
     val imageLoader = LocalImageLoader.current
     val sessionTokenManager = LocalSessionTokenManager.current
 
-    // Update session token if needed (runs once per composition)
     LaunchedEffect(sessionToken) {
         if (sessionToken.isNotEmpty()) {
             sessionTokenManager.updateSessionToken(sessionToken)
@@ -53,7 +51,6 @@ fun AdventureItem(
         onClick = onClick
     ) {
         Box {
-            // Image
             Image(
                 painter = rememberAsyncImagePainter(
                     model = adventure.images.firstOrNull()?.image ?: "",
@@ -231,7 +228,7 @@ private fun AdventureItemPrivatePreview() {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background) {
                 AdventureItem(
-                    adventure = PreviewData.adventures[0], // This one is marked as private
+                    adventure = PreviewData.adventures[0],
                     onOpenDetails = {},
                     onEdit = {},
                     onRemoveFromCollection = {},
@@ -249,7 +246,7 @@ private fun AdventureItemWithCollectionPreview() {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background) {
                 AdventureItem(
-                    adventure = PreviewData.adventures[1], // This one has a collection
+                    adventure = PreviewData.adventures[1],
                     onOpenDetails = {},
                     onEdit = {},
                     onRemoveFromCollection = {},

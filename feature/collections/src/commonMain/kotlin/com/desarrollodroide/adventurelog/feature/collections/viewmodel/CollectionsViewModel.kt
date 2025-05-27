@@ -2,8 +2,9 @@ package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,9 @@ data class CollectionsUiState(
     val errorMessage: String? = null
 )
 
-class CollectionsViewModel : ViewModel() {
+class CollectionsViewModel(
+    private val getCollectionsUseCase: GetCollectionsUseCase
+) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CollectionsUiState(isLoading = true))
     val uiState: StateFlow<CollectionsUiState> = _uiState.asStateFlow()
@@ -27,23 +30,24 @@ class CollectionsViewModel : ViewModel() {
     
     private fun loadCollections() {
         viewModelScope.launch {
-            try {
-                // In a real implementation, this would come from a repository
-                val collections = PreviewData.collections
-                
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        collections = collections,
-                        isLoading = false,
-                        errorMessage = null
-                    )
+            // TODO: Implement pagination
+            when (val result = getCollectionsUseCase(page = 1, pageSize = 20)) {
+                is Either.Left -> {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            errorMessage = result.value
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        errorMessage = e.message ?: "Failed to load collections"
-                    )
+                is Either.Right -> {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            collections = result.value,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
                 }
             }
         }

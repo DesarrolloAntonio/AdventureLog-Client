@@ -2,8 +2,9 @@ package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,9 @@ data class CollectionDetailUiState(
     val errorMessage: String? = null
 )
 
-class CollectionDetailViewModel : ViewModel() {
+class CollectionDetailViewModel(
+    private val getCollectionDetailUseCase: GetCollectionDetailUseCase
+) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
     val uiState: StateFlow<CollectionDetailUiState> = _uiState.asStateFlow()
@@ -25,33 +28,23 @@ class CollectionDetailViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
-            try {
-                // In a real implementation, this would come from a repository
-                // For now, we'll simulate by finding the collection in our preview data
-                val collection = PreviewData.collections.find { it.id == collectionId }
-                
-                if (collection != null) {
+            when (val result = getCollectionDetailUseCase(collectionId)) {
+                is Either.Left -> {
                     _uiState.update { currentState ->
                         currentState.copy(
-                            collection = collection,
+                            isLoading = false,
+                            errorMessage = result.value
+                        )
+                    }
+                }
+                is Either.Right -> {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            collection = result.value,
                             isLoading = false,
                             errorMessage = null
                         )
                     }
-                } else {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            isLoading = false,
-                            errorMessage = "Collection not found"
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isLoading = false,
-                        errorMessage = e.message ?: "Failed to load collection"
-                    )
                 }
             }
         }

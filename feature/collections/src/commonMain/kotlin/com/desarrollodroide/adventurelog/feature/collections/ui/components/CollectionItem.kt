@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun CollectionItem(
@@ -47,6 +52,7 @@ fun CollectionItem(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val imageLoader = LocalImageLoader.current
     
     Card(
         modifier = modifier
@@ -62,7 +68,8 @@ fun CollectionItem(
                 
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = primaryImage.image
+                        model = primaryImage.image,
+                        imageLoader = imageLoader
                     ),
                     contentDescription = null,
                     modifier = Modifier
@@ -147,7 +154,10 @@ fun CollectionItem(
                                     .width(24.dp)
                             ) {
                                 Image(
-                                    painter = rememberAsyncImagePainter(model = image),
+                                    painter = rememberAsyncImagePainter(
+                                        model = image,
+                                        imageLoader = imageLoader
+                                    ),
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxWidth()
@@ -216,6 +226,77 @@ fun CollectionItem(
                         }
                     )
                 }
+            }
+        }
+    }
+}
+
+
+/**
+ * Provides previews for the CollectionItem component.
+ */
+@Preview
+@Composable
+fun CollectionItemWithAdventuresPreview() {
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = lightColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                CollectionItem(
+                    collection = PreviewData.collections[1],
+                    onClick = {},
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Preview of CollectionItem without adventures
+ */
+@Preview
+@Composable
+fun CollectionItemEmptyPreview() {
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = lightColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                CollectionItem(
+                    collection = PreviewData.collections[2],
+                    onClick = {},
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun CollectionItemAlbacetePreview() {
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = lightColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                CollectionItem(
+                    collection = PreviewData.spainRegionsCollections[1], // Albacete
+                    onClick = {},
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun CollectionItemTeruelPreview() {
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = lightColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                CollectionItem(
+                    collection = PreviewData.spainRegionsCollections[3], // Teruel
+                    onClick = {},
+                    modifier = Modifier.padding(16.dp)
+                )
             }
         }
     }

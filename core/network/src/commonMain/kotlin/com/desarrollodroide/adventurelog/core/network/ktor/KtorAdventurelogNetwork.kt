@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network.ktor
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -70,6 +71,7 @@ class KtorAdventurelogNetwork(
     companion object {
         private const val LOGIN_ENDPOINT = "auth/browser/v1/auth/login"
         private const val ADVENTURES_ENDPOINT = "api/adventures/"
+        private const val COLLECTIONS_ENDPOINT = "api/collections/"
         private const val USER_DETAILS_ENDPOINT = "api/user/details/"
     }
 
@@ -314,6 +316,119 @@ class KtorAdventurelogNetwork(
             }
         } catch (e: Exception) {
             logger.e(e) { "Exception while fetching adventure detail: ${e.message}" }
+            throw e
+        }
+    }
+
+    override suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO> {
+        try {
+            if (baseUrl == null) {
+                logger.e { "Base URL is not initialized, login must be called first" }
+                throw IllegalStateException("Base URL is not initialized, login must be called first")
+            }
+
+            val url = "$baseUrl/$COLLECTIONS_ENDPOINT"
+            logger.d { "Fetching collections from URL: $url" }
+
+            val response = adventurelogClient.get(url) {
+                parameter("page", page)
+                parameter("page_size", pageSize)
+                headers {
+                    append(HttpHeaders.Accept, "application/json")
+                    append("X-Is-Mobile", "true")
+
+                    sessionToken?.let { token ->
+                        append("X-Session-Token", token)
+                        logger.d { "Using X-Session-Token for authentication: $token" }
+                    }
+
+                    if (sessionToken == null) {
+                        logger.w { "No authentication token available for request" }
+                    }
+                }
+            }
+
+            logger.d { "Collections response status: ${response.status}" }
+            logger.d { "Collections response headers: ${response.headers.entries()}" }
+
+            if (response.status.isSuccess()) {
+                val responseText = response.body<String>()
+                logger.d { "Collections raw response: $responseText" }
+
+                try {
+                    val collectionsResponse =
+                        json.decodeFromString<com.desarrollodroide.adventurelog.core.network.model.CollectionsDTO>(
+                            responseText
+                        )
+                    logger.d { "Parsed collections: count=${collectionsResponse.count}, results size=${collectionsResponse.results?.size}" }
+                    return collectionsResponse.results ?: emptyList()
+                } catch (e: Exception) {
+                    logger.e(e) { "Error parsing collections JSON: ${e.message}" }
+                    throw e
+                }
+            } else {
+                logger.e { "Failed to fetch collections with status: ${response.status}" }
+                throw HttpException(
+                    response.status.value,
+                    "Failed to fetch collections with status: ${response.status}"
+                )
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Exception while fetching collections: ${e.message}" }
+            throw e
+        }
+    }
+
+    override suspend fun getCollectionDetail(collectionId: String): CollectionDTO {
+        try {
+            if (baseUrl == null) {
+                logger.e { "Base URL is not initialized, login must be called first" }
+                throw IllegalStateException("Base URL is not initialized, login must be called first")
+            }
+
+            val url = "$baseUrl/$COLLECTIONS_ENDPOINT$collectionId/"
+            logger.d { "Fetching collection detail from URL: $url" }
+
+            val response = adventurelogClient.get(url) {
+                headers {
+                    append(HttpHeaders.Accept, "application/json")
+                    append("X-Is-Mobile", "true")
+
+                    sessionToken?.let { token ->
+                        append("X-Session-Token", token)
+                        logger.d { "Using X-Session-Token for authentication: $token" }
+                    }
+
+                    if (sessionToken == null) {
+                        logger.w { "No authentication token available for request" }
+                    }
+                }
+            }
+
+            logger.d { "Collection detail response status: ${response.status}" }
+            logger.d { "Collection detail response headers: ${response.headers.entries()}" }
+
+            if (response.status.isSuccess()) {
+                val responseText = response.body<String>()
+                logger.d { "Collection detail raw response: $responseText" }
+
+                try {
+                    val collection = json.decodeFromString<CollectionDTO>(responseText)
+                    logger.d { "Successfully fetched collection: ${collection.name}" }
+                    return collection
+                } catch (e: Exception) {
+                    logger.e(e) { "Error parsing collection detail JSON: ${e.message}" }
+                    throw e
+                }
+            } else {
+                logger.e { "Failed to fetch collection detail with status: ${response.status}" }
+                throw HttpException(
+                    response.status.value,
+                    "Failed to fetch collection detail with status: ${response.status}"
+                )
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Exception while fetching collection detail: ${e.message}" }
             throw e
         }
     }

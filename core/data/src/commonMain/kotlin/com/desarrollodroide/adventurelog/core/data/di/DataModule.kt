@@ -4,6 +4,8 @@ import com.desarrollodroide.adventurelog.core.common.di.AdventureLogDispatchers
 import com.desarrollodroide.adventurelog.core.common.di.commonModule
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.CollectionsRepository
+import com.desarrollodroide.adventurelog.core.data.CollectionsRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.LoginRepository
 import com.desarrollodroide.adventurelog.core.data.LoginRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.SettingsRepository
@@ -34,5 +36,8 @@ val dataModule = module {
     }
     single<AdventuresRepository> {
         AdventuresRepositoryImpl(networkDataSource = get())
+    }
+    single<CollectionsRepository> {
+        CollectionsRepositoryImpl(networkDataSource = get())
     }
 }
