@@ -17,8 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalSessionTokenManager
+import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 
 @Composable
 fun AdventureItem(
@@ -189,15 +191,17 @@ fun AdventureItem(
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun AdventureItemLightPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            AdventureItem(
-                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[0],
-                onOpenDetails = {},
-                onEdit = {},
-                onRemoveFromCollection = {},
-                onDelete = {}
-            )
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = lightColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                AdventureItem(
+                    adventure = PreviewData.adventures[0],
+                    onOpenDetails = {},
+                    onEdit = {},
+                    onRemoveFromCollection = {},
+                    onDelete = {}
+                )
+            }
         }
     }
 }
@@ -205,15 +209,17 @@ private fun AdventureItemLightPreview() {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun AdventureItemDarkPreview() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            AdventureItem(
-                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[1],
-                onOpenDetails = {},
-                onEdit = {},
-                onRemoveFromCollection = {},
-                onDelete = {}
-            )
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = darkColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                AdventureItem(
+                    adventure = PreviewData.adventures[1],
+                    onOpenDetails = {},
+                    onEdit = {},
+                    onRemoveFromCollection = {},
+                    onDelete = {}
+                )
+            }
         }
     }
 }
@@ -221,15 +227,17 @@ private fun AdventureItemDarkPreview() {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun AdventureItemPrivatePreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            AdventureItem(
-                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[0], // This one is marked as private
-                onOpenDetails = {},
-                onEdit = {},
-                onRemoveFromCollection = {},
-                onDelete = {}
-            )
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = lightColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                AdventureItem(
+                    adventure = PreviewData.adventures[0], // This one is marked as private
+                    onOpenDetails = {},
+                    onEdit = {},
+                    onRemoveFromCollection = {},
+                    onDelete = {}
+                )
+            }
         }
     }
 }
@@ -237,15 +245,17 @@ private fun AdventureItemPrivatePreview() {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun AdventureItemWithCollectionPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            AdventureItem(
-                adventure = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.adventures[1], // This one has a collection
-                onOpenDetails = {},
-                onEdit = {},
-                onRemoveFromCollection = {},
-                onDelete = {}
-            )
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = lightColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                AdventureItem(
+                    adventure = PreviewData.adventures[1], // This one has a collection
+                    onOpenDetails = {},
+                    onEdit = {},
+                    onRemoveFromCollection = {},
+                    onDelete = {}
+                )
+            }
         }
     }
 }

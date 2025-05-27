@@ -35,7 +35,7 @@ import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.Adventures
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
-import com.desarrollodroide.adventurelog.feature.ui.preview.ProvidePreviewDependencies
+import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -194,7 +194,7 @@ private fun AdventureListScreenSuccessPreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            ProvidePreviewDependencies {
+            PreviewImageDependencies {
                 AdventureListContent(
                     uiState = AdventuresUiState.Success(PreviewData.adventures),
                     onAdventureClick = {}
@@ -212,7 +212,7 @@ private fun AdventureListScreenDarkThemePreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            ProvidePreviewDependencies {
+            PreviewImageDependencies {
                 AdventureListContent(
                     uiState = AdventuresUiState.Success(PreviewData.adventures),
                     onAdventureClick = {}
@@ -278,7 +278,7 @@ private fun AdventureListScreenSingleItemPreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            ProvidePreviewDependencies {
+            PreviewImageDependencies {
                 AdventureListContent(
                     uiState = AdventuresUiState.Success(listOf(PreviewData.adventures.first())),
                     onAdventureClick = {}

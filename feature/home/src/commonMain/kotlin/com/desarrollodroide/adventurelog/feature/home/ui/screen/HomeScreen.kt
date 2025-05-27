@@ -70,6 +70,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.zIndex
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 
 /**
  * Entry point composable that integrates with navigation
@@ -463,22 +464,26 @@ private fun PlaceholderScreen(title: String) {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HomeScreenEmptyPreview() {
-    MaterialTheme {
-        HomeScreenContent(
-            homeUiState = HomeUiState.Empty,
-            userDetails = null
-        )
+    PreviewImageDependencies {
+        MaterialTheme {
+            HomeScreenContent(
+                homeUiState = HomeUiState.Empty,
+                userDetails = null
+            )
+        }
     }
 }
 
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HomeScreenLoadingPreview() {
-    MaterialTheme {
-        HomeScreenContent(
-            homeUiState = HomeUiState.Loading,
-            userDetails = null
-        )
+    PreviewImageDependencies {
+        MaterialTheme {
+            HomeScreenContent(
+                homeUiState = HomeUiState.Loading,
+                userDetails = null
+            )
+        }
     }
 }
 
@@ -496,39 +501,43 @@ private fun HomeScreenSuccessPreview() {
         totalCountries = 250
     )
     
-    MaterialTheme {
-        HomeScreenContent(
-            homeUiState = HomeUiState.Success(
-                userName = "Antonio",
-                recentAdventures = emptyList(),
-                userStats = sampleStats
-            ),
-            userDetails = UserDetails(
-                id = 123,
-                username = "antonio",
-                firstName = "Antonio",
-                lastName = "García",
-                email = "antonio@example.com",
-                profilePic = null,
-                isStaff = false,
-                dateJoined = "2024-01-01",
-                sessionToken = "token123",
-                uuid = "user-uuid-123",
-                publicProfile = true,
-                hasPassword = "true",
-                serverUrl = "https://example-server.com"
+    PreviewImageDependencies {
+        MaterialTheme {
+            HomeScreenContent(
+                homeUiState = HomeUiState.Success(
+                    userName = "Antonio",
+                    recentAdventures = emptyList(),
+                    userStats = sampleStats
+                ),
+                userDetails = UserDetails(
+                    id = 123,
+                    username = "antonio",
+                    firstName = "Antonio",
+                    lastName = "García",
+                    email = "antonio@example.com",
+                    profilePic = null,
+                    isStaff = false,
+                    dateJoined = "2024-01-01",
+                    sessionToken = "token123",
+                    uuid = "user-uuid-123",
+                    publicProfile = true,
+                    hasPassword = "true",
+                    serverUrl = "https://example-server.com"
+                )
             )
-        )
+        }
     }
 }
 
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HomeScreenErrorPreview() {
-    MaterialTheme {
-        HomeScreenContent(
-            homeUiState = HomeUiState.Error("Failed to load adventures"),
-            userDetails = null
-        )
+    PreviewImageDependencies {
+        MaterialTheme {
+            HomeScreenContent(
+                homeUiState = HomeUiState.Error("Failed to load adventures"),
+                userDetails = null
+            )
+        }
     }
 }

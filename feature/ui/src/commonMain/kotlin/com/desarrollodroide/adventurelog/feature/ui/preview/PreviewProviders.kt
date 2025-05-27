@@ -2,31 +2,33 @@ package com.desarrollodroide.adventurelog.feature.ui.preview
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import coil3.ImageLoader
 import coil3.compose.LocalPlatformContext
+import coil3.request.crossfade
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalSessionTokenManager
 import com.desarrollodroide.adventurelog.feature.ui.di.SessionTokenManager
 
 /**
- * Provides mock dependencies for previews
- * This is a simplified version that doesn't require network configuration
+ * Provides mock dependencies for compose previews
  */
 @Composable
-fun ProvidePreviewDependencies(
+fun PreviewImageDependencies(
     content: @Composable () -> Unit
 ) {
     val platformContext = LocalPlatformContext.current
-    
-    val mockSessionTokenManager = remember { SessionTokenManager() }
-    val mockImageLoader = remember(platformContext) {
-        ImageLoader.Builder(platformContext).build()
-    }
-    
+
+    // Create a simple ImageLoader for preview without network capabilities
+    val previewImageLoader = ImageLoader.Builder(platformContext)
+        .crossfade(false) // Disable animations in preview
+        .build()
+
+    // Create a mock SessionTokenManager
+    val previewSessionTokenManager = SessionTokenManager()
+
     CompositionLocalProvider(
-        LocalImageLoader provides mockImageLoader,
-        LocalSessionTokenManager provides mockSessionTokenManager,
+        LocalImageLoader provides previewImageLoader,
+        LocalSessionTokenManager provides previewSessionTokenManager,
         content = content
     )
 }
