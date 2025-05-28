@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
@@ -26,7 +27,7 @@ import kotlinx.coroutines.launch
 fun HomeDrawer(
     drawerState: DrawerState,
     homeUiState: HomeUiState,
-    userDetails: com.desarrollodroide.adventurelog.core.model.UserDetails? = null,
+    userDetails: UserDetails? = null,
     scope: CoroutineScope,
     currentScreen: CurrentScreen = CurrentScreen.HOME,
     onHomeClick: () -> Unit,

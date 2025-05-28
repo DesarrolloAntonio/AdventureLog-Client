@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.AdventureImage
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.MapView
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
@@ -232,7 +233,7 @@ private fun HeaderInfo(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CategoryTags(
-    category: com.desarrollodroide.adventurelog.core.model.Category?,
+    category: Category?,
     isPublic: Boolean,
     collection: String?,
     modifier: Modifier = Modifier
@@ -589,7 +590,7 @@ private fun createAdventureWithMultipleImages(): Adventure {
             )
         ),
         isVisited = true,
-        category = com.desarrollodroide.adventurelog.core.model.Category(
+        category = Category(
             id = "cat1",
             name = "hiking",
             displayName = "Hiking",
@@ -673,7 +674,7 @@ private fun HotelBalnearioDetailPreview() {
         latitude = "43.299242",
         visits = emptyList(),
         isVisited = false,
-        category = com.desarrollodroide.adventurelog.core.model.Category(
+        category = Category(
             id = "cat1",
             name = "hotel",
             displayName = "Hotel",
@@ -732,7 +733,7 @@ private fun NavalagamellaDetailPreview() {
         latitude = "40.469059",
         visits = emptyList(),
         isVisited = false,
-        category = com.desarrollodroide.adventurelog.core.model.Category(
+        category = Category(
             id = "cat2",
             name = "ruta",
             displayName = "Ruta",

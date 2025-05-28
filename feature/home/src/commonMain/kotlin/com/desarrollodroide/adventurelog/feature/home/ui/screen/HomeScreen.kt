@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
 import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeDrawer
@@ -488,7 +489,7 @@ private fun HomeScreenLoadingPreview() {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HomeScreenSuccessPreview() {
-    val sampleStats = com.desarrollodroide.adventurelog.core.model.UserStats(
+    val sampleStats = UserStats(
         adventureCount = 12,
         tripsCount = 5,
         visitedCityCount = 0,

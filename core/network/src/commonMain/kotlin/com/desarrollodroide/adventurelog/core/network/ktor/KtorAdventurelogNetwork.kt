@@ -3,7 +3,9 @@ package com.desarrollodroide.adventurelog.core.network.ktor
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.AdventuresDTO
 import com.desarrollodroide.adventurelog.core.network.model.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.CollectionsDTO
 import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -244,7 +246,7 @@ class KtorAdventurelogNetwork(
 
                 try {
                     val adventuresResponse =
-                        json.decodeFromString<com.desarrollodroide.adventurelog.core.network.model.AdventuresDTO>(
+                        json.decodeFromString<AdventuresDTO>(
                             responseText
                         )
                     logger.d { "Parsed adventures: count=${adventuresResponse.count}, results size=${adventuresResponse.results?.size}" }
@@ -357,7 +359,7 @@ class KtorAdventurelogNetwork(
 
                 try {
                     val collectionsResponse =
-                        json.decodeFromString<com.desarrollodroide.adventurelog.core.network.model.CollectionsDTO>(
+                        json.decodeFromString<CollectionsDTO>(
                             responseText
                         )
                     logger.d { "Parsed collections: count=${collectionsResponse.count}, results size=${collectionsResponse.results?.size}" }
