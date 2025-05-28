@@ -31,7 +31,7 @@ class CollectionsViewModel(
     private fun loadCollections() {
         viewModelScope.launch {
             // TODO: Implement pagination
-            when (val result = getCollectionsUseCase(page = 1, pageSize = 20)) {
+            when (val result = getCollectionsUseCase(page = 1, pageSize = 1000)) {
                 is Either.Left -> {
                     _uiState.update { currentState ->
                         currentState.copy(

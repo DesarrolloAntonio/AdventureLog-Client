@@ -2,6 +2,8 @@ package com.desarrollodroide.adventurelog.feature.home.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
 import com.desarrollodroide.adventurelog.core.domain.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.UserDetails
@@ -15,7 +17,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val getAdventuresUseCase: GetAdventuresUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val userRepository: com.desarrollodroide.adventurelog.core.data.UserRepository
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -67,13 +69,13 @@ class HomeViewModel(
                     page = 1,
                     pageSize = 3
                 )) {
-                    is com.desarrollodroide.adventurelog.core.common.Either.Left -> {
+                    is Either.Left -> {
                         val errorMessage = result.value
                         _uiState.update { HomeUiState.Error(errorMessage) }
                         println("ERROR LOADING ADVENTURES: $errorMessage")
                     }
 
-                    is com.desarrollodroide.adventurelog.core.common.Either.Right -> {
+                    is Either.Right -> {
                         val adventures = result.value
                         _uiState.update {
                             HomeUiState.Success(

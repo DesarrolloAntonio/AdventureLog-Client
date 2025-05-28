@@ -63,7 +63,6 @@ import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
-import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ProfileAvatar
 import com.desarrollodroide.adventurelog.resources.background_blur_mint
 import androidx.compose.ui.draw.alpha
@@ -137,7 +136,7 @@ fun HomeScreenContent(
         derivedStateOf { currentRoute.startsWith("collection/") }
     }
 
-    // Extract collection ID from route parameters
+    // Extract collection ID and name from route parameters
     val collectionId by remember(currentBackStackEntry) {
         derivedStateOf {
             if (isCollectionDetail) {
@@ -149,13 +148,12 @@ fun HomeScreenContent(
         }
     }
 
-    // Find collection name for the title
-    val collectionName by remember(collectionId) {
+    // Extract collection name from route parameters
+    val collectionName by remember(currentBackStackEntry) {
         derivedStateOf {
-            if (collectionId.isNotEmpty()) {
-                // Look up the collection by ID to get its name
-                PreviewData.collections.find { it.id == collectionId }?.name
-                    ?: "Collection $collectionId"
+            if (isCollectionDetail) {
+                // Get the collection name from the backstack entry
+                currentBackStackEntry?.arguments?.getString("collectionName") ?: "Collection"
             } else {
                 "Collection"
             }
@@ -395,9 +393,9 @@ fun HomeScreenContent(
                         }
 
                         collectionsScreen(
-                            onCollectionClick = { collectionId ->
+                            onCollectionClick = { collectionId, collectionName ->
                                 // No need to reset scroll when navigating TO a collection
-                                navController.navigate("collection/$collectionId")
+                                navController.navigate("collection/$collectionId/$collectionName")
                             },
                             onHomeClick = navigateToHome,
                             onAdventureClick = onAdventureClick,

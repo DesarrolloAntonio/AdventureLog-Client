@@ -2,9 +2,10 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,7 +28,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun CollectionsScreen(
-    onCollectionClick: (String) -> Unit = {},
+    onCollectionClick: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
@@ -63,18 +64,19 @@ fun CollectionsScreen(
 @Composable
 fun CollectionList(
     collections: List<Collection>,
-    onCollectionClick: (String) -> Unit,
+    onCollectionClick: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
+            .fillMaxSize()
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        collections.forEach { collection ->
+        items(collections) { collection ->
             CollectionItem(
                 collection = collection,
-                onClick = { onCollectionClick(collection.id) }
+                onClick = { onCollectionClick(collection.id, collection.name) }
             )
         }
     }
@@ -89,7 +91,7 @@ private fun CollectionsScreenLightPreview() {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                 CollectionList(
                     collections = PreviewData.collections,
-                    onCollectionClick = {}
+                    onCollectionClick = { _, _ -> }
                 )
             }
         }
@@ -104,7 +106,7 @@ private fun CollectionsScreenDarkPreview() {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                 CollectionList(
                     collections = PreviewData.collections,
-                    onCollectionClick = {}
+                    onCollectionClick = { _, _ -> }
                 )
             }
         }
@@ -119,7 +121,7 @@ private fun CollectionsScreenSpainRegionsPreview() {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                 CollectionList(
                     collections = PreviewData.spainRegionsCollections,
-                    onCollectionClick = {}
+                    onCollectionClick = { _, _ -> }
                 )
             }
         }

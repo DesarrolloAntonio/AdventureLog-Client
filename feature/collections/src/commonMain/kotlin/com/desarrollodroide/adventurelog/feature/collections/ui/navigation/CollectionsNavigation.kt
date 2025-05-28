@@ -15,7 +15,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
  * Meant to be used internally by the Home feature
  */
 fun NavGraphBuilder.collectionsScreen(
-    onCollectionClick: (String) -> Unit,
+    onCollectionClick: (String, String) -> Unit, // Now passes both ID and name
     onHomeClick: () -> Unit,
     onAdventureClick: (Adventure) -> Unit,
     navController: NavController
@@ -29,9 +29,12 @@ fun NavGraphBuilder.collectionsScreen(
     
     // Collection Detail Screen
     composable(
-        route = "collection/{collectionId}",
+        route = "collection/{collectionId}/{collectionName}",
         arguments = listOf(
             navArgument("collectionId") {
+                type = NavType.StringType
+            },
+            navArgument("collectionName") {
                 type = NavType.StringType
             }
         )

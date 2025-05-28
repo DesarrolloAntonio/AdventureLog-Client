@@ -27,7 +27,7 @@ class AdventuresViewModel(
     init {
         loadAdventures(
             page = 1,
-            pageSize = 100 // Load all adventures (up to 100)
+            pageSize = 1000 // TODO - Implement pagination
         )
     }
 

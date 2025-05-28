@@ -2,7 +2,6 @@ package com.desarrollodroide.adventurelog.feature.detail.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,24 +13,8 @@ class AdventureDetailViewModel (
     // Add Use cases classes here
 ): ViewModel() {
 
-    // In a real app, this would be loaded asynchronously from a repository
     private val _adventure = MutableStateFlow<Adventure?>(null)
     val adventure: StateFlow<Adventure?> = _adventure.asStateFlow()
-
-    /**
-     * Get adventure by ID
-     * This is a simplified implementation that uses preview data
-     */
-    fun getAdventureById(adventureId: String): Adventure {
-        // Find adventure by ID or return first one as fallback
-        val foundAdventure = PreviewData.adventures.find { it.id == adventureId } 
-                         ?: PreviewData.adventures.first()
-        
-        // Update the state flow
-        _adventure.value = foundAdventure
-        
-        return foundAdventure
-    }
     
     /**
      * Handle edit adventure action
