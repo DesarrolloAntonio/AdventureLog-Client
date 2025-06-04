@@ -272,21 +272,6 @@ private fun CategoryTags(
                 )
             }
         }
-        
-        if (!collection.isNullOrEmpty()) {
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                modifier = Modifier.wrapContentSize()
-            ) {
-                Text(
-                    text = "Collection: $collection",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        }
     }
 }
 
