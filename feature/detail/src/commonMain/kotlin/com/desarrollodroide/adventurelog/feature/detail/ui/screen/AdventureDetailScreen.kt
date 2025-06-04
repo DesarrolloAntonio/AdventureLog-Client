@@ -30,6 +30,7 @@ import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.MapView
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
@@ -102,7 +103,7 @@ fun AdventureDetailScreen(
                         collection = adventure.collection
                     )
 
-                    if (adventure.images.size > 1) {
+                    if (adventure.images.isNotEmpty()) {
                         PhotosCarousel(images = adventure.images)
                     }
                     
@@ -145,6 +146,8 @@ private fun CoverImageWithButtons(
     onShareClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val imageLoader = LocalImageLoader.current
+    
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -152,7 +155,10 @@ private fun CoverImageWithButtons(
     ) {
         imageUrl?.let {
             Image(
-                painter = rememberAsyncImagePainter(model = it),
+                painter = rememberAsyncImagePainter(
+                    model = it,
+                    imageLoader = imageLoader
+                ),
                 contentDescription = "Adventure image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -281,6 +287,8 @@ private fun PhotosCarousel(
     images: List<AdventureImage>,
     modifier: Modifier = Modifier
 ) {
+    val imageLoader = LocalImageLoader.current
+    
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(24.dp))
         Text(
@@ -307,7 +315,10 @@ private fun PhotosCarousel(
                 modifier = Modifier.maskClip(shape = RoundedCornerShape(16.dp))
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(model = image.image),
+                    painter = rememberAsyncImagePainter(
+                        model = image.image,
+                        imageLoader = imageLoader
+                    ),
                     contentDescription = "Adventure image ${index + 1}",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
