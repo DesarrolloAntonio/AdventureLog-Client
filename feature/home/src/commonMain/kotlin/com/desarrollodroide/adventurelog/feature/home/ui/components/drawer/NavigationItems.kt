@@ -38,25 +38,28 @@ fun createNavigationItems(
             selectedIcon = Icons.Filled.Collections,
             onClick = onCollectionsClick
         ),
-        NavigationItem(
+        // TODO: Implement Travel feature
+        /*NavigationItem(
             title = "Travels",
             icon = Icons.Outlined.FlightTakeoff,
             selectedIcon = Icons.Filled.Flight,
             onClick = onTravelClick
-        ),
-        NavigationItem(
+        ),*/
+        // TODO: Implement Map feature
+        /*NavigationItem(
             title = "Map",
             icon = Icons.Outlined.Map,
             selectedIcon = Icons.Filled.Map,
             badgeCount = 1,
             onClick = onMapClick
-        ),
-        NavigationItem(
+        ),*/
+        // TODO: Implement Calendar feature
+        /*NavigationItem(
             title = "Calendar",
             icon = Icons.Outlined.CalendarMonth,
             selectedIcon = Icons.Filled.DateRange,
             onClick = onCalendarClick
-        )
+        )*/
     )
 }
 
@@ -75,11 +78,12 @@ fun createConfigItems(
             selectedIcon = Icons.Filled.Settings,
             onClick = onSettingsClick
         ),
-        NavigationItem(
+        // TODO: Implement Help & Support feature
+        /*NavigationItem(
             title = "Help & Support",
             icon = Icons.Outlined.Help,
             selectedIcon = Icons.Outlined.Help, // No filled version available
             onClick = onHelpClick
-        )
+        )*/
     )
 }

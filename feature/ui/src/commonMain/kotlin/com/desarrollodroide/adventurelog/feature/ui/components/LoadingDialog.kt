@@ -41,7 +41,7 @@ fun LoadingDialog(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)), // Semi-transparent overlay
+                .background(Color.White.copy(alpha = 0.7f)), // Semi-transparent white overlay
             contentAlignment = Alignment.Center
         ) {
             Card(
@@ -92,7 +92,7 @@ fun LoadingCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
+                .background(Color.White.copy(alpha = 0.7f)),
             contentAlignment = Alignment.Center
         ) {
             LoadingCardContent(message, modifier)
