@@ -29,12 +29,11 @@ import com.desarrollodroide.adventurelog.core.model.AdventureImage
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.MapView
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.AdventurePhotosCarousel
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 
 @Composable
 fun AdventureDetailScreenRoute(
@@ -104,7 +103,13 @@ fun AdventureDetailScreen(
                     )
 
                     if (adventure.images.isNotEmpty()) {
-                        PhotosCarousel(images = adventure.images)
+                        Spacer(modifier = Modifier.height(24.dp))
+                        AdventurePhotosCarousel(
+                            images = adventure.images,
+                            // Enable these when edit functionality is implemented
+                            // onAddPhoto = { /* TODO: Implement add photo */ },
+                            // onDeletePhoto = { image -> /* TODO: Implement delete photo */ }
+                        )
                     }
                     
                     AboutSection(description = adventure.description)
@@ -275,53 +280,6 @@ private fun CategoryTags(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PhotosCarousel(
-    images: List<AdventureImage>,
-    modifier: Modifier = Modifier
-) {
-    val imageLoader = LocalImageLoader.current
-    
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Photos",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val carouselState = rememberCarouselState { images.size }
-
-        HorizontalMultiBrowseCarousel(
-            state = carouselState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            preferredItemWidth = 120.dp,
-            itemSpacing = 8.dp,
-            contentPadding = PaddingValues(horizontal = 0.dp)
-        ) { index ->
-            val image = images[index]
-            
-            Box(
-                modifier = Modifier.maskClip(shape = RoundedCornerShape(16.dp))
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = image.image,
-                        imageLoader = imageLoader
-                    ),
-                    contentDescription = "Adventure image ${index + 1}",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
