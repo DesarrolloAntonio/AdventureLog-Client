@@ -59,14 +59,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.painterResource
 import com.desarrollodroide.adventurelog.resources.Res
 import com.desarrollodroide.adventurelog.resources.ic_hamburger_alt
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
-import com.desarrollodroide.adventurelog.feature.home.ui.components.common.ProfileAvatar
 import com.desarrollodroide.adventurelog.resources.background_blur_mint
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.zIndex
 import com.desarrollodroide.adventurelog.core.model.Adventure
@@ -334,14 +331,6 @@ fun HomeScreenContent(
                                     contentDescription = "Menu"
                                 )
                             }
-                        },
-                        actions = {
-                            // Show the user avatar in the top bar as a visual element only
-                            ProfileAvatar(
-                                modifier = Modifier.padding(end = 12.dp),
-                                profileImageUrl = userDetails?.profilePic,
-                                onClick = { scope.launch { drawerState.open() } } // Open drawer when clicked
-                            )
                         },
                         scrollBehavior = scrollBehavior,
                         colors = TopAppBarDefaults.mediumTopAppBarColors(
