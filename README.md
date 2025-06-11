@@ -1,5 +1,6 @@
 # 🏕️ Adventure Log
 
+![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=develop)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.5.1-green.svg)
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-orange.svg)
