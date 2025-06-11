@@ -9,10 +9,6 @@
 
 Adventure Log is a cross-platform travel journal application built with Kotlin Multiplatform Mobile (KMM) and Compose Multiplatform. The app allows users to document their journeys, organize adventures by collections, and explore their memories through rich visual interfaces.
 
-<p align="center">
-<img width="800" alt="Adventure Log Banner" src="https://github.com/DesarrolloDroide/AdventureLog/assets/48767827/4e63d2d2-bfa3-4e8c-87ae-b71cf4fcf7f0">
-</p>
-
 ## 🌟 Features
 
 - **Cross-Platform Experience**: Share code between Android & iOS with Kotlin Multiplatform
@@ -25,21 +21,20 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/login_screen.png" width="200" alt="Login Screen"/>
-  <img src="docs/screenshots/home_screen.png" width="200" alt="Home Screen"/>
-  <img src="docs/screenshots/detail_screen.png" width="200" alt="Detail Screen"/>
-  <img src="docs/screenshots/settings_screen.png" width="200" alt="Settings Screen"/>
+  <img src="docs/screenshots/login_screen.png" width="250" alt="Login Screen"/>
+  <img src="docs/screenshots/drawer_screen.png" width="250" alt="Navigation Drawer"/>
+  <img src="docs/screenshots/home_screen.png" width="250" alt="Home Screen"/>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/collections_screen.png" width="250" alt="Collections Screen"/>
+  <img src="docs/screenshots/collections_detail_screen.png" width="250" alt="Collection Detail"/>
+  <img src="docs/screenshots/detail_adventure_screen.png" width="250" alt="Adventure Detail"/>
 </p>
 
 ## 🏗️ Architecture
 
 Adventure Log implements a **Clean Architecture** approach combined with **modular design principles**, creating a codebase that is maintainable, testable, and scalable.
-
-### Architecture Diagram
-
-<p align="center">
-  <img src="docs/architecture/architecture_diagram.png" width="600" alt="Architecture Diagram"/>
-</p>
 
 ### Core Principles
 
@@ -91,10 +86,6 @@ AdventureLog/
 ## 💻 Technology Stack
 
 ### Kotlin Multiplatform Mobile
-
-<p align="center">
-  <img src="docs/architecture/kmm_diagram.png" width="500" alt="KMM Architecture"/>
-</p>
 
 - **Code Sharing Strategy**:
   - **shared**: Business logic, data management, view models
