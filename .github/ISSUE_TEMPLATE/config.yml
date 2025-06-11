@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/desarrollodroide/AdventureLog/discussions
+    about: For general questions and discussions about AdventureLog
+  - name: 📚 Documentation
+    url: https://github.com/desarrollodroide/AdventureLog/wiki
+    about: Check out our documentation for guides and FAQs
