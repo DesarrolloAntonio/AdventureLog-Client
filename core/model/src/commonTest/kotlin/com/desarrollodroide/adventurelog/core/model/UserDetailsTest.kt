@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.model
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -189,7 +190,7 @@ class UserDetailsTest {
         
         // Then
         assertEquals(user1, user2)
-        assert(user1 != user3)
+        assertNotEquals(user1, user3)
         assertEquals(user1.hashCode(), user2.hashCode())
     }
 }
