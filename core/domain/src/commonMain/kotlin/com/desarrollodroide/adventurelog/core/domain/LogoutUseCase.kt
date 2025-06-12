@@ -18,11 +18,29 @@ class LogoutUseCase(
      * - Resets network configuration
      */
     suspend operator fun invoke() {
+        var userRepositoryError: Exception? = null
+        var networkDataSourceError: Exception? = null
+
+        // Try to clear user session
         try {
             userRepository.clearUserSession()
+        } catch (e: Exception) {
+            userRepositoryError = e
+        }
+
+        // Try to clear network session regardless of user repository result
+        try {
             networkDataSource.clearSession()
         } catch (e: Exception) {
-            println("Warning: Error during logout, but local data was cleared: ${e.message}")
+            networkDataSourceError = e
+        }
+
+        // Log warnings if any errors occurred
+        userRepositoryError?.let {
+            println("Warning: Error during logout, but local data was cleared: ${it.message}")
+        }
+        networkDataSourceError?.let {
+            println("Warning: Error during logout, but local data was cleared: ${it.message}")
         }
     }
 }
