@@ -1,10 +1,11 @@
-name: CI
+name: CI/CD
 
 on:
   push:
-    branches: [ main, develop, 'feature/**' ]
+    branches: [ main ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch: # Permite ejecución manual
 
 env:
   GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx8g -XX:+UseParallelGC"
@@ -69,3 +70,41 @@ jobs:
         with:
           name: debug-apk
           path: composeApp/build/outputs/apk/debug/*.apk
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: debug-apk
+          path: ./apk
+          
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "date=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: dev-${{ steps.commit.outputs.date }}
+          name: Dev Build - ${{ steps.commit.outputs.date }}
+          files: ./apk/*.apk
+          generate_release_notes: true
+          prerelease: true
+          body: |
+            🚀 Automatic development build from main branch
+            
+            **Commit:** ${{ steps.commit.outputs.sha_short }}
+            **Date:** ${{ steps.commit.outputs.date }}
+            
+            This is an automated build for testing purposes.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
