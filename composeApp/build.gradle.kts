@@ -91,7 +91,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1-alpha"
 
         // Set the Maps API Key as a BuildConfig field
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
@@ -103,6 +103,11 @@ android {
         }
     }
     buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+            resValue("string", "app_name", "AdventureLog (Dev)")
+        }
         getByName("release") {
             isMinifyEnabled = false
         }
