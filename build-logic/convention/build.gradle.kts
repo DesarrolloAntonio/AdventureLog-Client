@@ -1,5 +1,8 @@
 plugins {
     `kotlin-dsl`
+    // Required to resolve version conflicts between kotlin-dsl's embedded Kotlin version
+    // and the project's Kotlin version. Without this, build-logic compilation may fail.
+    kotlin("jvm") version libs.versions.kotlin.get()
 }
 
 group = "com.desarrollodroide.adventurelog.buildlogic"
