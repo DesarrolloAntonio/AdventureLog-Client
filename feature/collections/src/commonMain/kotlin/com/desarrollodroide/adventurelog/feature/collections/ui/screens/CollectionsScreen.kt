@@ -2,12 +2,19 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
@@ -22,6 +29,7 @@ import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionItem
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsUiState
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -34,29 +42,69 @@ fun CollectionsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
-    when {
-        uiState.isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+    CollectionsContent(
+        uiState = uiState,
+        onCollectionClick = onCollectionClick,
+        onAddCollectionClick = {
+            // TODO: Navigate to add collection screen
+            println("Add collection clicked")
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun CollectionsContent(
+    uiState: CollectionsUiState,
+    onCollectionClick: (String, String) -> Unit,
+    onAddCollectionClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddCollectionClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                CircularProgressIndicator()
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add collection"
+                )
             }
-        }
-        uiState.errorMessage != null -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Error: ${uiState.errorMessage}")
+        },
+        containerColor = androidx.compose.ui.graphics.Color.Transparent
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                uiState.isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                uiState.errorMessage != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Error: ${uiState.errorMessage}")
+                    }
+                }
+                else -> {
+                    CollectionList(
+                        collections = uiState.collections,
+                        onCollectionClick = onCollectionClick
+                    )
+                }
             }
-        }
-        else -> {
-            CollectionList(
-                collections = uiState.collections,
-                onCollectionClick = onCollectionClick,
-                modifier = modifier
-            )
         }
     }
 }
@@ -79,6 +127,11 @@ fun CollectionList(
                 onClick = { onCollectionClick(collection.id, collection.name) }
             )
         }
+        
+        // Add extra space at the bottom to ensure FAB doesn't cover the last item
+        item {
+            Spacer(modifier = Modifier.height(72.dp))
+        }
     }
 }
 
@@ -89,9 +142,10 @@ private fun CollectionsScreenLightPreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
-                CollectionList(
-                    collections = PreviewData.collections,
-                    onCollectionClick = { _, _ -> }
+                CollectionsContent(
+                    uiState = CollectionsUiState(collections = PreviewData.collections),
+                    onCollectionClick = { _, _ -> },
+                    onAddCollectionClick = {}
                 )
             }
         }
@@ -104,9 +158,10 @@ private fun CollectionsScreenDarkPreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = darkColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
-                CollectionList(
-                    collections = PreviewData.collections,
-                    onCollectionClick = { _, _ -> }
+                CollectionsContent(
+                    uiState = CollectionsUiState(collections = PreviewData.collections),
+                    onCollectionClick = { _, _ -> },
+                    onAddCollectionClick = {}
                 )
             }
         }
@@ -119,9 +174,10 @@ private fun CollectionsScreenSpainRegionsPreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
-                CollectionList(
-                    collections = PreviewData.spainRegionsCollections,
-                    onCollectionClick = { _, _ -> }
+                CollectionsContent(
+                    uiState = CollectionsUiState(collections = PreviewData.spainRegionsCollections),
+                    onCollectionClick = { _, _ -> },
+                    onAddCollectionClick = {}
                 )
             }
         }

@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.SentimentDissatisfied
 import androidx.compose.material3.Button
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
@@ -50,6 +53,10 @@ fun AdventureListScreen(
     AdventureListContent(
         uiState = uiState,
         onAdventureClick = onAdventureClick,
+        onAddAdventureClick = {
+            // TODO: Navigate to add adventure screen
+            println("Add adventure clicked")
+        },
         modifier = modifier
     )
 }
@@ -58,32 +65,52 @@ fun AdventureListScreen(
 private fun AdventureListContent(
     uiState: AdventuresUiState,
     onAdventureClick: (Adventure) -> Unit,
+    onAddAdventureClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        when (uiState) {
-            is AdventuresUiState.Loading -> {
-                LoadingDialog(
-                    isLoading = true,
-                    message = "Loading adventures..."
+    Scaffold(
+        modifier = modifier,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddAdventureClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add adventure"
                 )
             }
-            is AdventuresUiState.Error -> {
-                ErrorState(
-                    message = uiState.message,
-                    onRetry = { /* TODO: Add retry functionality */ }
-                )
-            }
-            is AdventuresUiState.Success -> {
-                if (uiState.adventures.isEmpty()) {
-                    EmptyState()
-                } else {
-                    AdventuresList(
-                        adventures = uiState.adventures,
-                        onAdventureClick = onAdventureClick
+        },
+        containerColor = androidx.compose.ui.graphics.Color.Transparent
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when (uiState) {
+                is AdventuresUiState.Loading -> {
+                    LoadingDialog(
+                        isLoading = true,
+                        message = "Loading adventures..."
                     )
+                }
+                is AdventuresUiState.Error -> {
+                    ErrorState(
+                        message = uiState.message,
+                        onRetry = { /* TODO: Add retry functionality */ }
+                    )
+                }
+                is AdventuresUiState.Success -> {
+                    if (uiState.adventures.isEmpty()) {
+                        EmptyState()
+                    } else {
+                        AdventuresList(
+                            adventures = uiState.adventures,
+                            onAdventureClick = onAdventureClick
+                        )
+                    }
                 }
             }
         }
@@ -105,6 +132,11 @@ private fun AdventuresList(
                 adventure = adventure,
                 onClick = { onAdventureClick(adventure) }
             )
+        }
+        
+        // Add extra space at the bottom to ensure FAB doesn't cover the last item
+        item {
+            Spacer(modifier = Modifier.height(72.dp))
         }
     }
 }
@@ -197,7 +229,8 @@ private fun AdventureListScreenSuccessPreview() {
             PreviewImageDependencies {
                 AdventureListContent(
                     uiState = AdventuresUiState.Success(PreviewData.adventures),
-                    onAdventureClick = {}
+                    onAdventureClick = {},
+                    onAddAdventureClick = {}
                 )
             }
         }
@@ -215,7 +248,8 @@ private fun AdventureListScreenDarkThemePreview() {
             PreviewImageDependencies {
                 AdventureListContent(
                     uiState = AdventuresUiState.Success(PreviewData.adventures),
-                    onAdventureClick = {}
+                    onAdventureClick = {},
+                    onAddAdventureClick = {}
                 )
             }
         }
@@ -232,7 +266,8 @@ private fun AdventureListScreenEmptyPreview() {
         ) {
             AdventureListContent(
                 uiState = AdventuresUiState.Success(emptyList()),
-                onAdventureClick = {}
+                onAdventureClick = {},
+                onAddAdventureClick = {}
             )
         }
     }
@@ -248,7 +283,8 @@ private fun AdventureListScreenLoadingPreview() {
         ) {
             AdventureListContent(
                 uiState = AdventuresUiState.Loading,
-                onAdventureClick = {}
+                onAdventureClick = {},
+                onAddAdventureClick = {}
             )
         }
     }
@@ -264,7 +300,8 @@ private fun AdventureListScreenErrorPreview() {
         ) {
             AdventureListContent(
                 uiState = AdventuresUiState.Error("Failed to load adventures. Please check your connection and try again."),
-                onAdventureClick = {}
+                onAdventureClick = {},
+                onAddAdventureClick = {}
             )
         }
     }
@@ -281,7 +318,8 @@ private fun AdventureListScreenSingleItemPreview() {
             PreviewImageDependencies {
                 AdventureListContent(
                     uiState = AdventuresUiState.Success(listOf(PreviewData.adventures.first())),
-                    onAdventureClick = {}
+                    onAdventureClick = {},
+                    onAddAdventureClick = {}
                 )
             }
         }
