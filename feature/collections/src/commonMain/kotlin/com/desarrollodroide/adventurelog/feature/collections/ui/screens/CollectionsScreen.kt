@@ -2,15 +2,18 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,13 +27,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionItem
+import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsUiState
+import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.NoSearchResultsState
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -48,6 +56,8 @@ fun CollectionsScreen(
         uiState = uiState,
         onCollectionClick = onCollectionClick,
         onAddCollectionClick = onAddCollectionClick,
+        onSearchQueryChange = viewModel::onSearchQueryChange,
+        onSearchSubmit = viewModel::onSearchSubmit,
         modifier = modifier
     )
 }
@@ -57,10 +67,21 @@ private fun CollectionsContent(
     uiState: CollectionsUiState,
     onCollectionClick: (String, String) -> Unit,
     onAddCollectionClick: () -> Unit,
+    onSearchQueryChange: (String) -> Unit = {},
+    onSearchSubmit: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
+        topBar = {
+            SimpleSearchBar(
+                searchQuery = uiState.searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
+                onSearchSubmit = onSearchSubmit,
+                enabled = !uiState.isLoading,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddCollectionClick,
@@ -73,7 +94,7 @@ private fun CollectionsContent(
                 )
             }
         },
-        containerColor = androidx.compose.ui.graphics.Color.Transparent
+        containerColor = Color.Transparent
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -88,16 +109,17 @@ private fun CollectionsContent(
                     )
                 }
                 uiState.errorMessage != null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Error: ${uiState.errorMessage}")
-                    }
+                    CollectionErrorState(message = uiState.errorMessage)
+                }
+                uiState.filteredCollections.isEmpty() && uiState.searchQuery.isNotEmpty() -> {
+                    CollectionNoSearchResultsState(searchQuery = uiState.searchQuery)
+                }
+                uiState.collections.isEmpty() -> {
+                    EmptyState()
                 }
                 else -> {
                     CollectionList(
-                        collections = uiState.collections,
+                        collections = uiState.filteredCollections,
                         onCollectionClick = onCollectionClick
                     )
                 }
@@ -118,7 +140,10 @@ fun CollectionList(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(collections) { collection ->
+        items(
+            items = collections,
+            key = { it.id }
+        ) { collection ->
             CollectionItem(
                 collection = collection,
                 onClick = { onCollectionClick(collection.id, collection.name) }
@@ -132,6 +157,52 @@ fun CollectionList(
     }
 }
 
+@Composable
+private fun EmptyState() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Folder,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "No collections yet",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Create your first collection to organize your adventures!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun CollectionNoSearchResultsState(searchQuery: String) {
+    NoSearchResultsState(searchQuery = searchQuery)
+}
+
+@Composable
+private fun CollectionErrorState(message: String) {
+    ErrorState(
+        message = message,
+        onRetry = null // Collections no tiene retry functionality
+    )
+}
+
 // Previews
 @Preview
 @Composable
@@ -140,7 +211,10 @@ private fun CollectionsScreenLightPreview() {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                 CollectionsContent(
-                    uiState = CollectionsUiState(collections = PreviewData.collections),
+                    uiState = CollectionsUiState(
+                        collections = PreviewData.collections,
+                        filteredCollections = PreviewData.collections
+                    ),
                     onCollectionClick = { _, _ -> },
                     onAddCollectionClick = {}
                 )
@@ -156,7 +230,10 @@ private fun CollectionsScreenDarkPreview() {
         MaterialTheme(colorScheme = darkColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                 CollectionsContent(
-                    uiState = CollectionsUiState(collections = PreviewData.collections),
+                    uiState = CollectionsUiState(
+                        collections = PreviewData.collections,
+                        filteredCollections = PreviewData.collections
+                    ),
                     onCollectionClick = { _, _ -> },
                     onAddCollectionClick = {}
                 )
@@ -167,16 +244,66 @@ private fun CollectionsScreenDarkPreview() {
 
 @Preview
 @Composable
-private fun CollectionsScreenSpainRegionsPreview() {
+private fun CollectionsScreenEmptyPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            CollectionsContent(
+                uiState = CollectionsUiState(),
+                onCollectionClick = { _, _ -> },
+                onAddCollectionClick = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CollectionsScreenLoadingPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            CollectionsContent(
+                uiState = CollectionsUiState(isLoading = true),
+                onCollectionClick = { _, _ -> },
+                onAddCollectionClick = {}
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CollectionsScreenSearchPreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
                 CollectionsContent(
-                    uiState = CollectionsUiState(collections = PreviewData.spainRegionsCollections),
+                    uiState = CollectionsUiState(
+                        collections = PreviewData.collections,
+                        filteredCollections = PreviewData.collections.take(1),
+                        searchQuery = "Spain"
+                    ),
                     onCollectionClick = { _, _ -> },
                     onAddCollectionClick = {}
                 )
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CollectionsScreenNoResultsPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            CollectionsContent(
+                uiState = CollectionsUiState(
+                    collections = PreviewData.collections,
+                    filteredCollections = emptyList(),
+                    searchQuery = "Antarctica"
+                ),
+                onCollectionClick = { _, _ -> },
+                onAddCollectionClick = {}
+            )
         }
     }
 }
