@@ -30,6 +30,7 @@ import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionItem
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsUiState
+import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -81,12 +82,10 @@ private fun CollectionsContent(
         ) {
             when {
                 uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    LoadingDialog(
+                        isLoading = true,
+                        showMessage = false
+                    )
                 }
                 uiState.errorMessage != null -> {
                     Box(

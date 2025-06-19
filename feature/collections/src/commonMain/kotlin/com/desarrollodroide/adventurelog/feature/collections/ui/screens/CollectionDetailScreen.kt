@@ -16,6 +16,7 @@ import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
+import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -38,8 +39,9 @@ fun CollectionDetailScreen(
     ) {
         when {
             uiState.isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+                LoadingDialog(
+                    isLoading = true,
+                    showMessage = false
                 )
             }
             uiState.errorMessage != null -> {
