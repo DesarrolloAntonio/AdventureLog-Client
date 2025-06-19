@@ -9,6 +9,7 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AddEditAd
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureListScreen
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,7 +40,9 @@ fun NavGraphBuilder.adventuresScreen(
     
     // Add Adventure Screen
     composable(route = "add_adventure") {
-        val viewModel = koinViewModel<AddEditAdventureViewModel>()
+        val viewModel = koinViewModel<AddEditAdventureViewModel> { 
+            parametersOf(null) // null for new adventure
+        }
         val uiState by viewModel.uiState.collectAsState()
         val snackbarHostState = remember { SnackbarHostState() }
         
