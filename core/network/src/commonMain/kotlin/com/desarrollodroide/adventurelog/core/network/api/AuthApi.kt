@@ -1,8 +1,8 @@
-package com.desarrollodroide.adventurelog.core.network.datasource
+package com.desarrollodroide.adventurelog.core.network.api
 
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 
-interface AuthNetworkDataSource {
+interface AuthApi {
     /**
      * Send login request and return user details
      */

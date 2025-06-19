@@ -3,7 +3,6 @@ package com.desarrollodroide.adventurelog.core.network.ktor
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateCollectionRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
@@ -18,16 +17,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import kotlinx.serialization.json.Json
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
-import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
-
-
+import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAdventureNetworkDataSource
 
 class KtorAdventurelogNetwork(
     private val adventurelogClient: HttpClient
@@ -35,17 +30,21 @@ class KtorAdventurelogNetwork(
 
     private val logger = Logger.withTag("KtorAdventurelogNetwork")
 
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-    }
+    private val json = defaultJson
 
     private var sessionToken: String? = null
     private var baseUrl: String? = null
+    
+    private val adventureDataSource: AdventureApi by lazy {
+        KtorAdventureNetworkDataSource(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            json = json
+        )
+    }
 
     companion object {
         private const val LOGIN_ENDPOINT = "auth/browser/v1/auth/login"
-        private const val ADVENTURES_ENDPOINT = "api/adventures/"
         private const val COLLECTIONS_ENDPOINT = "api/collections/"
         private const val USER_DETAILS_ENDPOINT = "api/user/details/"
     }
@@ -183,116 +182,13 @@ class KtorAdventurelogNetwork(
     }
 
     override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
-        try {
-            if (baseUrl == null) {
-                logger.e { "Base URL is not initialized, login must be called first" }
-                throw IllegalStateException("Base URL is not initialized, login must be called first")
-            }
-
-            val url = "$baseUrl/$ADVENTURES_ENDPOINT"
-            logger.d { "Fetching adventures from URL: $url" }
-
-            val response = adventurelogClient.get(url) {
-                parameter("page", page)
-                parameter("page_size", pageSize)
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-Is-Mobile", "true")
-
-                    sessionToken?.let { token ->
-                        append("X-Session-Token", token)
-                        logger.d { "Using X-Session-Token for authentication: $token" }
-                    }
-
-                    if (sessionToken == null) {
-                        logger.w { "No authentication token available for request" }
-                    }
-                }
-            }
-
-            logger.d { "Adventures response status: ${response.status}" }
-            logger.d { "Adventures response headers: ${response.headers.entries()}" }
-
-            if (response.status.isSuccess()) {
-                val responseText = response.body<String>()
-                logger.d { "Adventures raw response: $responseText" }
-
-                try {
-                    val adventuresResponse =
-                        json.decodeFromString<AdventuresDTO>(
-                            responseText
-                        )
-                    logger.d { "Parsed adventures: count=${adventuresResponse.count}, results size=${adventuresResponse.results?.size}" }
-                    return adventuresResponse.results ?: emptyList()
-                } catch (e: Exception) {
-                    logger.e(e) { "Error parsing adventures JSON: ${e.message}" }
-                    throw e
-                }
-            } else {
-                logger.e { "Failed to fetch adventures with status: ${response.status}" }
-                throw HttpException(
-                    response.status.value,
-                    "Failed to fetch adventures with status: ${response.status}"
-                )
-            }
-        } catch (e: Exception) {
-            logger.e(e) { "Exception while fetching adventures: ${e.message}" }
-            throw e
-        }
+        ensureInitialized()
+        return adventureDataSource.getAdventures(page, pageSize)
     }
 
     override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
-        try {
-            if (baseUrl == null) {
-                logger.e { "Base URL is not initialized, login must be called first" }
-                throw IllegalStateException("Base URL is not initialized, login must be called first")
-            }
-
-            val url = "$baseUrl/$ADVENTURES_ENDPOINT$objectId/"
-            logger.d { "Fetching adventure detail from URL: $url" }
-
-            val response = adventurelogClient.get(url) {
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-Is-Mobile", "true")
-
-                    sessionToken?.let { token ->
-                        append("X-Session-Token", token)
-                        logger.d { "Using X-Session-Token for authentication: $token" }
-                    }
-
-                    if (sessionToken == null) {
-                        logger.w { "No authentication token available for request" }
-                    }
-                }
-            }
-
-            logger.d { "Adventure detail response status: ${response.status}" }
-            logger.d { "Adventure detail response headers: ${response.headers.entries()}" }
-
-            if (response.status.isSuccess()) {
-                val responseText = response.body<String>()
-                logger.d { "Adventure detail raw response: $responseText" }
-
-                try {
-                    val adventure = json.decodeFromString<AdventureDTO>(responseText)
-                    logger.d { "Successfully fetched adventure: ${adventure.name}" }
-                    return adventure
-                } catch (e: Exception) {
-                    logger.e(e) { "Error parsing adventure detail JSON: ${e.message}" }
-                    throw e
-                }
-            } else {
-                logger.e { "Failed to fetch adventure detail with status: ${response.status}" }
-                throw HttpException(
-                    response.status.value,
-                    "Failed to fetch adventure detail with status: ${response.status}"
-                )
-            }
-        } catch (e: Exception) {
-            logger.e(e) { "Exception while fetching adventure detail: ${e.message}" }
-            throw e
-        }
+        ensureInitialized()
+        return adventureDataSource.getAdventureDetail(objectId)
     }
 
     override suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO> {
@@ -420,104 +316,17 @@ class KtorAdventurelogNetwork(
         isPublic: Boolean,
         visitDates: Visit?
     ): AdventureDTO {
-        try {
-            if (baseUrl == null) {
-                logger.e { "Base URL is not initialized, login must be called first" }
-                throw IllegalStateException("Base URL is not initialized, login must be called first")
-            }
-
-            val url = "$baseUrl/$ADVENTURES_ENDPOINT"
-            logger.d { "Creating adventure at URL: $url" }
-
-            // Get category details - for now we'll map the categoryId to predefined categories
-            val (categoryName, displayName, icon) = when (categoryId) {
-                "1" -> Triple("restaurant", "Restaurant", "🍽️")
-                "2" -> Triple("hotel", "Hotel", "🏨")
-                "3" -> Triple("museum", "Museum", "🏛️")
-                "4" -> Triple("park", "Park", "🌳")
-                "5" -> Triple("beach", "Beach", "🏖️")
-                else -> Triple("outdoor", "Outdoor", "🏕️")
-            }
-
-            val visits = visitDates?.let {
-                listOf(
-                    VisitRequest(
-                        startDate = it.startDate,
-                        endDate = it.endDate,
-                        timezone = "America/Denver", // Default timezone since Visit doesn't have it
-                        notes = it.notes
-                    )
-                )
-            }
-
-            val requestBody = CreateAdventureRequest(
-                name = name,
-                description = description,
-                rating = rating,
-                location = location,
-                isPublic = isPublic,
-                longitude = longitude,
-                latitude = latitude,
-                visits = visits,
-                category = CategoryRequest(
-                    name = categoryName,
-                    displayName = displayName,
-                    icon = icon
-                ),
-                notes = null,
-                link = link.takeIf { it.isNotBlank() }
-            )
-
-            logger.d { "Creating adventure with body: $requestBody" }
-
-            val response = adventurelogClient.post(url) {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-Is-Mobile", "true")
-
-                    sessionToken?.let { token ->
-                        append("X-Session-Token", token)
-                        logger.d { "Using X-Session-Token for authentication: $token" }
-                    }
-
-                    if (sessionToken == null) {
-                        logger.w { "No authentication token available for request" }
-                    }
-                }
-                setBody(requestBody)
-            }
-
-            logger.d { "Create adventure response status: ${response.status}" }
-            logger.d { "Create adventure response headers: ${response.headers.entries()}" }
-
-            if (response.status.isSuccess()) {
-                val responseText = response.body<String>()
-                logger.d { "Create adventure raw response: $responseText" }
-
-                try {
-                    val adventure = json.decodeFromString<AdventureDTO>(responseText)
-                    logger.d { "Successfully created adventure: ${adventure.name}" }
-                    return adventure
-                } catch (e: Exception) {
-                    logger.e(e) { "Error parsing created adventure JSON: ${e.message}" }
-                    throw e
-                }
-            } else {
-                val errorBody = try {
-                    response.body<String>()
-                } catch (e: Exception) {
-                    "Could not read error body"
-                }
-                logger.e { "Failed to create adventure with status: ${response.status}. Error: $errorBody" }
-                throw HttpException(
-                    response.status.value,
-                    "Failed to create adventure with status: ${response.status}"
-                )
-            }
-        } catch (e: Exception) {
-            logger.e(e) { "Exception while creating adventure: ${e.message}" }
-            throw e
+        ensureInitialized()
+        return adventureDataSource.createAdventure(
+            name, description, categoryId, rating, link, location,
+            latitude, longitude, isPublic, visitDates
+        )
+    }
+    
+    private fun ensureInitialized() {
+        if (baseUrl == null) {
+            logger.e { "Base URL is not initialized, login must be called first" }
+            throw IllegalStateException("Base URL is not initialized, login must be called first")
         }
     }
 
