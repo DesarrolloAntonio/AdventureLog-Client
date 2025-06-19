@@ -91,7 +91,7 @@ private fun AdventureListContent(
                 is AdventuresUiState.Loading -> {
                     LoadingDialog(
                         isLoading = true,
-                        message = "Loading adventures..."
+                        showMessage = false
                     )
                 }
                 is AdventuresUiState.Error -> {

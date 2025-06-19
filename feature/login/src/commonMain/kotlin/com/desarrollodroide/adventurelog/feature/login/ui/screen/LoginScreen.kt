@@ -100,7 +100,7 @@ internal fun LoginScreen(
         // Use the reusable LoadingDialog component
         LoadingDialog(
             isLoading = loginUiState is LoginUiState.Loading,
-            message = "Logging in..."
+            showMessage = false
         )
 
         if (loginUiState is LoginUiState.Error) {

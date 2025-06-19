@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,20 +29,22 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
  * with an optional message text.
  *
  * @param isLoading Whether to show the loading dialog
- * @param message The message to display below the progress indicator
+ * @param message The message to display below the progress indicator (optional)
+ * @param showMessage Whether to show the message text
  * @param modifier Modifier for the root Box
  */
 @Composable
 fun LoadingDialog(
     isLoading: Boolean,
     message: String = "Loading...",
+    showMessage: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     if (isLoading) {
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(Color.White.copy(alpha = 0.7f)), // Semi-transparent white overlay
+                .background(Color.Black.copy(alpha = 0.5f)), // Semi-transparent black overlay
             contentAlignment = Alignment.Center
         ) {
             Card(
@@ -56,19 +59,23 @@ fun LoadingDialog(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(32.dp),
+                    modifier = Modifier.padding(if (showMessage) 32.dp else 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.size(48.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 4.dp
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = message,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
-                    )
+                    if (showMessage) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
@@ -92,7 +99,7 @@ fun LoadingCard(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White.copy(alpha = 0.7f)),
+                .background(Color.Black.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             LoadingCardContent(message, modifier)
@@ -146,7 +153,7 @@ private fun LoadingDialogPreview() {
         ) {
             LoadingDialog(
                 isLoading = true,
-                message = "Loading your data..."
+                showMessage = false
             )
         }
     }
@@ -162,7 +169,7 @@ private fun LoadingDialogCustomMessagePreview() {
         ) {
             LoadingDialog(
                 isLoading = true,
-                message = "Please wait while we\nprocess your request"
+                showMessage = false
             )
         }
     }

@@ -62,7 +62,7 @@ fun HomeContent(
             is HomeUiState.Loading -> {
                 LoadingDialog(
                     isLoading = true,
-                    message = "Loading your adventures..."
+                    showMessage = false
                 )
             }
             is HomeUiState.Error -> {
