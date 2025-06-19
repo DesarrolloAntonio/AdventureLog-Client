@@ -37,6 +37,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun CollectionsScreen(
     onCollectionClick: (String, String) -> Unit = { _, _ -> },
+    onAddCollectionClick: () -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
@@ -45,10 +46,7 @@ fun CollectionsScreen(
     CollectionsContent(
         uiState = uiState,
         onCollectionClick = onCollectionClick,
-        onAddCollectionClick = {
-            // TODO: Navigate to add collection screen
-            println("Add collection clicked")
-        },
+        onAddCollectionClick = onAddCollectionClick,
         modifier = modifier
     )
 }

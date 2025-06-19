@@ -45,6 +45,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AdventureListScreen(
     onAdventureClick: (Adventure) -> Unit = { },
+    onAddAdventureClick: () -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: AdventuresViewModel = koinViewModel()
 ) {
@@ -53,10 +54,7 @@ fun AdventureListScreen(
     AdventureListContent(
         uiState = uiState,
         onAdventureClick = onAdventureClick,
-        onAddAdventureClick = {
-            // TODO: Navigate to add adventure screen
-            println("Add adventure clicked")
-        },
+        onAddAdventureClick = onAddAdventureClick,
         modifier = modifier
     )
 }

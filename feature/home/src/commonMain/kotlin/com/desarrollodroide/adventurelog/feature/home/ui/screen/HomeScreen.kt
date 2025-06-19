@@ -38,7 +38,7 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScree
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.adventuresScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
@@ -375,12 +375,13 @@ fun HomeScreenContent(
                             )
                         }
 
-                        composable(NavigationRoutes.Adventures.route) {
-                            AdventureListScreen(
-                                onAdventureClick = onAdventureClick,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
+                        adventuresScreen(
+                            onAdventureClick = onAdventureClick,
+                            onAddAdventureClick = {
+                                navController.navigate("add_adventure")
+                            },
+                            navController = navController
+                        )
 
                         collectionsScreen(
                             onCollectionClick = { collectionId, collectionName ->
@@ -389,6 +390,9 @@ fun HomeScreenContent(
                             },
                             onHomeClick = navigateToHome,
                             onAdventureClick = onAdventureClick,
+                            onAddCollectionClick = {
+                                navController.navigate("add_collection")
+                            },
                             navController = navController
                         )
 

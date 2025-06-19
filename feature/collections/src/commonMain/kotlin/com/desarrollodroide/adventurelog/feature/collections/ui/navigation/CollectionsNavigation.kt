@@ -18,12 +18,14 @@ fun NavGraphBuilder.collectionsScreen(
     onCollectionClick: (String, String) -> Unit, // Now passes both ID and name
     onHomeClick: () -> Unit,
     onAdventureClick: (Adventure) -> Unit,
+    onAddCollectionClick: () -> Unit,
     navController: NavController
 ) {
     // Collections List Screen
     composable(route = NavigationRoutes.Collections.route) {
         CollectionsScreen(
-            onCollectionClick = onCollectionClick
+            onCollectionClick = onCollectionClick,
+            onAddCollectionClick = onAddCollectionClick
         )
     }
     
@@ -48,6 +50,20 @@ fun NavGraphBuilder.collectionsScreen(
             },
             onHomeClick = onHomeClick,
             onAdventureClick = onAdventureClick
+        )
+    }
+    
+    // Add Collection Screen
+    composable(route = "add_collection") {
+        com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen(
+            onNavigateBack = {
+                navController.navigateUp()
+            },
+            onSave = { formData ->
+                // TODO: Handle save and navigate back
+                println("Saving collection: $formData")
+                navController.navigateUp()
+            }
         )
     }
 }
