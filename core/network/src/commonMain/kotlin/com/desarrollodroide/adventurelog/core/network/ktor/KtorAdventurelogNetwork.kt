@@ -1,16 +1,13 @@
 package com.desarrollodroide.adventurelog.core.network.ktor
 
 import co.touchlab.kermit.Logger
-import com.desarrollodroide.adventurelog.core.network.model.request.CreateCollectionRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
-import com.desarrollodroide.adventurelog.core.network.model.response.CollectionsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
-import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -22,7 +19,9 @@ import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSou
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
+import com.desarrollodroide.adventurelog.core.network.api.CollectionApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAdventureNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCollectionApi
 
 class KtorAdventurelogNetwork(
     private val adventurelogClient: HttpClient
@@ -42,10 +41,17 @@ class KtorAdventurelogNetwork(
             json = json
         )
     }
+    
+    private val collectionDataSource: CollectionApi by lazy {
+        KtorCollectionApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            json = json
+        )
+    }
 
     companion object {
         private const val LOGIN_ENDPOINT = "auth/browser/v1/auth/login"
-        private const val COLLECTIONS_ENDPOINT = "api/collections/"
         private const val USER_DETAILS_ENDPOINT = "api/user/details/"
     }
 
@@ -192,116 +198,13 @@ class KtorAdventurelogNetwork(
     }
 
     override suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO> {
-        try {
-            if (baseUrl == null) {
-                logger.e { "Base URL is not initialized, login must be called first" }
-                throw IllegalStateException("Base URL is not initialized, login must be called first")
-            }
-
-            val url = "$baseUrl/$COLLECTIONS_ENDPOINT"
-            logger.d { "Fetching collections from URL: $url" }
-
-            val response = adventurelogClient.get(url) {
-                parameter("page", page)
-                parameter("page_size", pageSize)
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-Is-Mobile", "true")
-
-                    sessionToken?.let { token ->
-                        append("X-Session-Token", token)
-                        logger.d { "Using X-Session-Token for authentication: $token" }
-                    }
-
-                    if (sessionToken == null) {
-                        logger.w { "No authentication token available for request" }
-                    }
-                }
-            }
-
-            logger.d { "Collections response status: ${response.status}" }
-            logger.d { "Collections response headers: ${response.headers.entries()}" }
-
-            if (response.status.isSuccess()) {
-                val responseText = response.body<String>()
-                logger.d { "Collections raw response: $responseText" }
-
-                try {
-                    val collectionsResponse =
-                        json.decodeFromString<CollectionsDTO>(
-                            responseText
-                        )
-                    logger.d { "Parsed collections: count=${collectionsResponse.count}, results size=${collectionsResponse.results?.size}" }
-                    return collectionsResponse.results ?: emptyList()
-                } catch (e: Exception) {
-                    logger.e(e) { "Error parsing collections JSON: ${e.message}" }
-                    throw e
-                }
-            } else {
-                logger.e { "Failed to fetch collections with status: ${response.status}" }
-                throw HttpException(
-                    response.status.value,
-                    "Failed to fetch collections with status: ${response.status}"
-                )
-            }
-        } catch (e: Exception) {
-            logger.e(e) { "Exception while fetching collections: ${e.message}" }
-            throw e
-        }
+        ensureInitialized()
+        return collectionDataSource.getCollections(page, pageSize)
     }
 
     override suspend fun getCollectionDetail(collectionId: String): CollectionDTO {
-        try {
-            if (baseUrl == null) {
-                logger.e { "Base URL is not initialized, login must be called first" }
-                throw IllegalStateException("Base URL is not initialized, login must be called first")
-            }
-
-            val url = "$baseUrl/$COLLECTIONS_ENDPOINT$collectionId/"
-            logger.d { "Fetching collection detail from URL: $url" }
-
-            val response = adventurelogClient.get(url) {
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-Is-Mobile", "true")
-
-                    sessionToken?.let { token ->
-                        append("X-Session-Token", token)
-                        logger.d { "Using X-Session-Token for authentication: $token" }
-                    }
-
-                    if (sessionToken == null) {
-                        logger.w { "No authentication token available for request" }
-                    }
-                }
-            }
-
-            logger.d { "Collection detail response status: ${response.status}" }
-            logger.d { "Collection detail response headers: ${response.headers.entries()}" }
-
-            if (response.status.isSuccess()) {
-                val responseText = response.body<String>()
-                logger.d { "Collection detail raw response: $responseText" }
-
-                try {
-                    val collection = json.decodeFromString<CollectionDTO>(responseText)
-                    logger.d { "Successfully fetched collection: ${collection.name}" }
-                    return collection
-                } catch (e: Exception) {
-                    logger.e(e) { "Error parsing collection detail JSON: ${e.message}" }
-                    throw e
-                }
-            } else {
-                logger.e { "Failed to fetch collection detail with status: ${response.status}" }
-                throw HttpException(
-                    response.status.value,
-                    "Failed to fetch collection detail with status: ${response.status}"
-                )
-            }
-        } catch (e: Exception) {
-            logger.e(e) { "Exception while fetching collection detail: ${e.message}" }
-            throw e
-        }
+        ensureInitialized()
+        return collectionDataSource.getCollectionDetail(collectionId)
     }
 
     override suspend fun createAdventure(
@@ -337,75 +240,7 @@ class KtorAdventurelogNetwork(
         startDate: String?,
         endDate: String?
     ): CollectionDTO {
-        try {
-            if (baseUrl == null) {
-                logger.e { "Base URL is not initialized, login must be called first" }
-                throw IllegalStateException("Base URL is not initialized, login must be called first")
-            }
-
-            val url = "$baseUrl/$COLLECTIONS_ENDPOINT"
-            logger.d { "Creating collection at URL: $url" }
-
-            val requestBody = CreateCollectionRequest(
-                name = name,
-                description = description,
-                isPublic = isPublic,
-                startDate = startDate,
-                endDate = endDate
-            )
-
-            logger.d { "Creating collection with body: $requestBody" }
-
-            val response = adventurelogClient.post(url) {
-                contentType(ContentType.Application.Json)
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-Is-Mobile", "true")
-
-                    sessionToken?.let { token ->
-                        append("X-Session-Token", token)
-                        logger.d { "Using X-Session-Token for authentication: $token" }
-                    }
-
-                    if (sessionToken == null) {
-                        logger.w { "No authentication token available for request" }
-                    }
-                }
-                setBody(requestBody)
-            }
-
-            logger.d { "Create collection response status: ${response.status}" }
-            logger.d { "Create collection response headers: ${response.headers.entries()}" }
-
-            if (response.status.isSuccess()) {
-                val responseText = response.body<String>()
-                logger.d { "Create collection raw response: $responseText" }
-
-                try {
-                    val collection = json.decodeFromString<CollectionDTO>(responseText)
-                    logger.d { "Successfully created collection: ${collection.name}" }
-                    return collection
-                } catch (e: Exception) {
-                    logger.e(e) { "Error parsing created collection JSON: ${e.message}" }
-                    throw e
-                }
-            } else {
-                val errorBody = try {
-                    response.body<String>()
-                } catch (e: Exception) {
-                    "Could not read error body"
-                }
-                logger.e { "Failed to create collection with status: ${response.status}. Error: $errorBody" }
-                throw HttpException(
-                    response.status.value,
-                    "Failed to create collection with status: ${response.status}"
-                )
-            }
-        } catch (e: Exception) {
-            logger.e(e) { "Exception while creating collection: ${e.message}" }
-            throw e
-        }
+        ensureInitialized()
+        return collectionDataSource.createCollection(name, description, isPublic, startDate, endDate)
     }
 }
-
-class HttpException(val code: Int, override val message: String) : Exception(message)
