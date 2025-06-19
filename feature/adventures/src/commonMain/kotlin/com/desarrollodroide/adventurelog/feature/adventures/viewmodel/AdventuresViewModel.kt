@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,15 +15,24 @@ import kotlinx.coroutines.launch
 sealed class AdventuresUiState {
     data object Loading : AdventuresUiState()
     data class Error(val message: String) : AdventuresUiState()
-    data class Success(val adventures: List<Adventure>) : AdventuresUiState()
+    data class Success(
+        val adventures: List<Adventure>,
+        val filteredAdventures: List<Adventure> = adventures,
+        val searchQuery: String = ""
+    ) : AdventuresUiState()
 }
 
 class AdventuresViewModel(
     private val getAdventuresUseCase: GetAdventuresUseCase
-): ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AdventuresUiState>(AdventuresUiState.Loading)
     val uiState: StateFlow<AdventuresUiState> = _uiState.asStateFlow()
+
+    private val searchDebounceTime = 300L
+
+    // Cache for all adventures
+    private var allAdventures: List<Adventure> = emptyList()
 
     init {
         loadAdventures(
@@ -43,10 +53,54 @@ class AdventuresViewModel(
                 }
                 is Either.Right -> {
                     val adventures = result.value
-                    _uiState.update { AdventuresUiState.Success(adventures) }
+                    allAdventures = adventures
+                    
+                    _uiState.update { 
+                        AdventuresUiState.Success(
+                            adventures = adventures,
+                            filteredAdventures = adventures
+                        )
+                    }
                     println("AdventuresViewModel: Successfully loaded ${adventures.size} adventures")
                 }
             }
+        }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        val currentState = _uiState.value as? AdventuresUiState.Success ?: return
+        
+        // Update query immediately
+        _uiState.update {
+            currentState.copy(searchQuery = query)
+        }
+
+        // Debounce search
+        viewModelScope.launch {
+            delay(searchDebounceTime)
+            performSearch(query)
+        }
+    }
+
+    fun onSearchSubmit() {
+        val currentState = _uiState.value as? AdventuresUiState.Success ?: return
+        performSearch(currentState.searchQuery)
+    }
+
+    private fun performSearch(query: String) {
+        val trimmedQuery = query.trim().lowercase()
+        
+        val filteredAdventures = if (trimmedQuery.isEmpty()) {
+            allAdventures
+        } else {
+            allAdventures.filter { adventure ->
+                adventure.name.lowercase().contains(trimmedQuery)
+            }
+        }
+        
+        val currentState = _uiState.value as? AdventuresUiState.Success ?: return
+        _uiState.update {
+            currentState.copy(filteredAdventures = filteredAdventures)
         }
     }
 }
