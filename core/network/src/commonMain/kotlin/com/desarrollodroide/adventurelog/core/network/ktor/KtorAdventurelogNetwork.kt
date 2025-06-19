@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.ktor
 
 import co.touchlab.kermit.Logger
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateCollectionRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
@@ -19,49 +18,16 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
 
-@Serializable
-data class LoginRequest(val username: String, val password: String)
 
-@Serializable
-data class LoginResponse(
-    val status: Int,
-    val data: LoginData,
-    val meta: LoginMeta
-)
-
-@Serializable
-data class LoginData(
-    val user: LoginUserData,
-    val methods: List<LoginMethod>
-)
-
-@Serializable
-data class LoginUserData(
-    val id: Int,
-    val display: String,
-    val has_usable_password: Boolean,
-    val email: String,
-    val username: String
-)
-
-@Serializable
-data class LoginMethod(
-    val method: String,
-    val at: Double,
-    val username: String
-)
-
-@Serializable
-data class LoginMeta(val is_authenticated: Boolean)
 
 class KtorAdventurelogNetwork(
     private val adventurelogClient: HttpClient
@@ -152,7 +118,7 @@ class KtorAdventurelogNetwork(
                 id = loginResponse.data.user.id,
                 username = loginResponse.data.user.username,
                 email = loginResponse.data.user.email,
-                hasPassword = if (loginResponse.data.user.has_usable_password) "true" else "false",
+                hasPassword = if (loginResponse.data.user.hasUsablePassword) "true" else "false",
                 sessionToken = sessionToken
             )
         } else {
@@ -476,8 +442,8 @@ class KtorAdventurelogNetwork(
             val visits = visitDates?.let {
                 listOf(
                     VisitRequest(
-                        start_date = it.startDate,
-                        end_date = it.endDate,
+                        startDate = it.startDate,
+                        endDate = it.endDate,
                         timezone = "America/Denver", // Default timezone since Visit doesn't have it
                         notes = it.notes
                     )
@@ -489,13 +455,13 @@ class KtorAdventurelogNetwork(
                 description = description,
                 rating = rating,
                 location = location,
-                is_public = isPublic,
+                isPublic = isPublic,
                 longitude = longitude,
                 latitude = latitude,
                 visits = visits,
                 category = CategoryRequest(
                     name = categoryName,
-                    display_name = displayName,
+                    displayName = displayName,
                     icon = icon
                 ),
                 notes = null,
@@ -574,9 +540,9 @@ class KtorAdventurelogNetwork(
             val requestBody = CreateCollectionRequest(
                 name = name,
                 description = description,
-                is_public = isPublic,
-                start_date = startDate,
-                end_date = endDate
+                isPublic = isPublic,
+                startDate = startDate,
+                endDate = endDate
             )
 
             logger.d { "Creating collection with body: $requestBody" }

@@ -1,10 +1,11 @@
 package com.desarrollodroide.adventurelog.core.network.model.request
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class LoginRequest(
-    val username: String, 
+    val username: String,
     val password: String
 )
 
@@ -25,7 +26,8 @@ data class LoginData(
 data class LoginUserData(
     val id: Int,
     val display: String,
-    val has_usable_password: Boolean,
+    @SerialName("has_usable_password")
+    val hasUsablePassword: Boolean,
     val email: String,
     val username: String
 )
@@ -39,5 +41,6 @@ data class LoginMethod(
 
 @Serializable
 data class LoginMeta(
-    val is_authenticated: Boolean
+    @SerialName("is_authenticated")
+    val isAuthenticated: Boolean
 )

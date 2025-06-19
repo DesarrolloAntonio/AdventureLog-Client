@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.model.request
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -8,7 +9,8 @@ data class CreateAdventureRequest(
     val description: String,
     val rating: Double,
     val location: String,
-    val is_public: Boolean,
+    @SerialName("is_public")
+    val isPublic: Boolean,
     val longitude: Double? = null,
     val latitude: Double? = null,
     val visits: List<VisitRequest>? = null,
@@ -23,7 +25,8 @@ data class UpdateAdventureRequest(
     val description: String? = null,
     val rating: Double? = null,
     val location: String? = null,
-    val is_public: Boolean? = null,
+    @SerialName("is_public")
+    val isPublic: Boolean? = null,
     val longitude: Double? = null,
     val latitude: Double? = null,
     val visits: List<VisitRequest>? = null,
@@ -34,8 +37,10 @@ data class UpdateAdventureRequest(
 
 @Serializable
 data class VisitRequest(
-    val start_date: String,
-    val end_date: String,
+    @SerialName("start_date")
+    val startDate: String,
+    @SerialName("end_date")
+    val endDate: String,
     val timezone: String,
     val notes: String
 )
@@ -43,6 +48,7 @@ data class VisitRequest(
 @Serializable
 data class CategoryRequest(
     val name: String,
-    val display_name: String,
+    @SerialName("display_name")
+    val displayName: String,
     val icon: String
 )

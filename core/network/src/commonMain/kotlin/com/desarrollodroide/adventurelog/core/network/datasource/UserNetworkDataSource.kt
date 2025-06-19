@@ -1,0 +1,32 @@
+package com.desarrollodroide.adventurelog.core.network.datasource
+
+import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
+
+interface UserNetworkDataSource {
+    /**
+     * Get current user details
+     */
+    suspend fun getUserDetails(): UserDetailsDTO
+    
+    /**
+     * Update user profile
+     */
+    suspend fun updateUserProfile(
+        username: String? = null,
+        email: String? = null,
+        displayName: String? = null
+    ): UserDetailsDTO
+    
+    /**
+     * Change user password
+     */
+    suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String
+    ): Boolean
+    
+    /**
+     * Upload user avatar
+     */
+    suspend fun uploadAvatar(imageData: ByteArray): String
+}
