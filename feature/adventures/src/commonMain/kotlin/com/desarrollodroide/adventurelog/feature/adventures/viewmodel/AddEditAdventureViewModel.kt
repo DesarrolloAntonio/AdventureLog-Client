@@ -74,6 +74,8 @@ class AddEditAdventureViewModel(
                         isLoading = false,
                         isSaved = true
                     )
+                    // The adventure was created successfully
+                    // We can access result.value if we need the created adventure
                 }
             }
         }

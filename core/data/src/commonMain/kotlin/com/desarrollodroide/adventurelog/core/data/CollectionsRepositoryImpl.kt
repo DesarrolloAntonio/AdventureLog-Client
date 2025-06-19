@@ -51,4 +51,32 @@ override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiRespons
             Either.Left(ApiResponse.HttpError)
         }
     }
+    
+    override suspend fun createCollection(
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        startDate: String?,
+        endDate: String?
+    ): Either<String, Collection> {
+        return try {
+            val collection = networkDataSource.createCollection(
+                name = name,
+                description = description,
+                isPublic = isPublic,
+                startDate = startDate,
+                endDate = endDate
+            ).toDomainModel()
+            Either.Right(collection)
+        } catch (e: HttpException) {
+            println("HTTP Error during createCollection: ${e.code}")
+            Either.Left("Failed to create collection: HTTP ${e.code}")
+        } catch (e: IOException) {
+            println("IO Error during createCollection: ${e.message}")
+            Either.Left("Network error: ${e.message}")
+        } catch (e: Exception) {
+            println("Unexpected error during createCollection: ${e.message}")
+            Either.Left("Unexpected error: ${e.message}")
+        }
+    }
 }

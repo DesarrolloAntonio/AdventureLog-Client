@@ -9,6 +9,15 @@ import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionDetailScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionsScreen
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 
 /**
  * Extension function to add collections screen to a navigation graph
@@ -55,15 +64,39 @@ fun NavGraphBuilder.collectionsScreen(
     
     // Add Collection Screen
     composable(route = "add_collection") {
-        com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen(
-            onNavigateBack = {
+        val viewModel = koinViewModel<com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel>()
+        val uiState by viewModel.uiState.collectAsState()
+        val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
+        
+        // Handle navigation when save is successful
+        LaunchedEffect(uiState.isSaved) {
+            if (uiState.isSaved) {
                 navController.navigateUp()
-            },
-            onSave = { formData ->
-                // TODO: Handle save and navigate back
-                println("Saving collection: $formData")
-                navController.navigateUp()
+                viewModel.clearSavedState()
             }
-        )
+        }
+        
+        // Show error if any
+        LaunchedEffect(uiState.errorMessage) {
+            uiState.errorMessage?.let { message ->
+                snackbarHostState.showSnackbar(message)
+            }
+        }
+        
+        Box(modifier = Modifier.fillMaxSize()) {
+            com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onSave = { formData ->
+                    viewModel.saveCollection(formData)
+                }
+            )
+            
+            androidx.compose.material3.SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }

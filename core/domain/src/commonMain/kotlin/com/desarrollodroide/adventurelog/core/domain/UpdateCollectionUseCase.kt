@@ -11,7 +11,9 @@ class UpdateCollectionUseCase(
         collectionId: String,
         name: String,
         description: String,
-        isPublic: Boolean
+        isPublic: Boolean,
+        startDate: String? = null,
+        endDate: String? = null
     ): Either<String, Collection> {
         // TODO: Implement collection update logic
         return Either.Left("Not implemented yet")

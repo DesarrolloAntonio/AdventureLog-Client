@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network
 import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
+import com.desarrollodroide.adventurelog.core.model.Visit
 
 interface AdventureLogNetworkDataSource {
 
@@ -46,4 +47,31 @@ interface AdventureLogNetworkDataSource {
      * Used during logout to reset network state
      */
     fun clearSession()
+    
+    /**
+     * Create a new adventure
+     */
+    suspend fun createAdventure(
+        name: String,
+        description: String,
+        categoryId: String,
+        rating: Double,
+        link: String,
+        location: String,
+        latitude: Double?,
+        longitude: Double?,
+        isPublic: Boolean,
+        visitDates: Visit?
+    ): AdventureDTO
+    
+    /**
+     * Create a new collection
+     */
+    suspend fun createCollection(
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        startDate: String?,
+        endDate: String?
+    ): CollectionDTO
 }

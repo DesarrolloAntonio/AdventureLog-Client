@@ -10,9 +10,22 @@ class CreateCollectionUseCase(
     suspend operator fun invoke(
         name: String,
         description: String,
-        isPublic: Boolean
+        isPublic: Boolean,
+        startDate: String? = null,
+        endDate: String? = null
     ): Either<String, Collection> {
-        // TODO: Implement collection creation logic
-        return Either.Left("Not implemented yet")
+        // Validate required fields
+        if (name.isBlank()) {
+            return Either.Left("Collection name is required")
+        }
+        
+        // Create the collection
+        return collectionsRepository.createCollection(
+            name = name,
+            description = description,
+            isPublic = isPublic,
+            startDate = startDate,
+            endDate = endDate
+        )
     }
 }

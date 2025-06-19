@@ -39,7 +39,9 @@ import androidx.compose.ui.unit.dp
 data class CollectionFormData(
     val name: String = "",
     val description: String = "",
-    val isPublic: Boolean = false
+    val isPublic: Boolean = false,
+    val startDate: String = "",
+    val endDate: String = ""
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,6 +142,35 @@ fun AddEditCollectionScreen(
                     }
                 )
             }
+            
+            // Date fields
+            OutlinedTextField(
+                value = formData.startDate,
+                onValueChange = { 
+                    formData = formData.copy(startDate = it)
+                },
+                label = { Text("Start date") },
+                placeholder = { Text("YYYY-MM-DD") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                )
+            )
+            
+            OutlinedTextField(
+                value = formData.endDate,
+                onValueChange = { 
+                    formData = formData.copy(endDate = it)
+                },
+                label = { Text("End date") },
+                placeholder = { Text("YYYY-MM-DD") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                )
+            )
             
             Spacer(modifier = Modifier.weight(1f))
             
