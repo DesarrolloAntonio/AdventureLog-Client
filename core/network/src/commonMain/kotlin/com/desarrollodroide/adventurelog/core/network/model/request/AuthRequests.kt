@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.core.network.ktor.request
+package com.desarrollodroide.adventurelog.core.network.model.request
 
 import kotlinx.serialization.Serializable
 

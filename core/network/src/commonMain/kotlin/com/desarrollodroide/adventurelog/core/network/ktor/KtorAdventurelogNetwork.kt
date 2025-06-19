@@ -2,11 +2,12 @@ package com.desarrollodroide.adventurelog.core.network.ktor
 
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
-import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
-import com.desarrollodroide.adventurelog.core.network.model.AdventuresDTO
-import com.desarrollodroide.adventurelog.core.network.model.CollectionDTO
-import com.desarrollodroide.adventurelog.core.network.model.CollectionsDTO
-import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
+import com.desarrollodroide.adventurelog.core.network.model.request.CreateCollectionRequest
+import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -20,6 +21,12 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
+import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
 
 @Serializable
 data class LoginRequest(val username: String, val password: String)
@@ -431,6 +438,196 @@ class KtorAdventurelogNetwork(
             }
         } catch (e: Exception) {
             logger.e(e) { "Exception while fetching collection detail: ${e.message}" }
+            throw e
+        }
+    }
+
+    override suspend fun createAdventure(
+        name: String,
+        description: String,
+        categoryId: String,
+        rating: Double,
+        link: String,
+        location: String,
+        latitude: Double?,
+        longitude: Double?,
+        isPublic: Boolean,
+        visitDates: Visit?
+    ): AdventureDTO {
+        try {
+            if (baseUrl == null) {
+                logger.e { "Base URL is not initialized, login must be called first" }
+                throw IllegalStateException("Base URL is not initialized, login must be called first")
+            }
+
+            val url = "$baseUrl/$ADVENTURES_ENDPOINT"
+            logger.d { "Creating adventure at URL: $url" }
+
+            // Get category details - for now we'll map the categoryId to predefined categories
+            val (categoryName, displayName, icon) = when (categoryId) {
+                "1" -> Triple("restaurant", "Restaurant", "🍽️")
+                "2" -> Triple("hotel", "Hotel", "🏨")
+                "3" -> Triple("museum", "Museum", "🏛️")
+                "4" -> Triple("park", "Park", "🌳")
+                "5" -> Triple("beach", "Beach", "🏖️")
+                else -> Triple("outdoor", "Outdoor", "🏕️")
+            }
+
+            val visits = visitDates?.let {
+                listOf(
+                    VisitRequest(
+                        start_date = it.startDate,
+                        end_date = it.endDate,
+                        timezone = "America/Denver", // Default timezone since Visit doesn't have it
+                        notes = it.notes
+                    )
+                )
+            }
+
+            val requestBody = CreateAdventureRequest(
+                name = name,
+                description = description,
+                rating = rating,
+                location = location,
+                is_public = isPublic,
+                longitude = longitude,
+                latitude = latitude,
+                visits = visits,
+                category = CategoryRequest(
+                    name = categoryName,
+                    display_name = displayName,
+                    icon = icon
+                ),
+                notes = null,
+                link = link.takeIf { it.isNotBlank() }
+            )
+
+            logger.d { "Creating adventure with body: $requestBody" }
+
+            val response = adventurelogClient.post(url) {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Accept, "application/json")
+                    append("X-Is-Mobile", "true")
+
+                    sessionToken?.let { token ->
+                        append("X-Session-Token", token)
+                        logger.d { "Using X-Session-Token for authentication: $token" }
+                    }
+
+                    if (sessionToken == null) {
+                        logger.w { "No authentication token available for request" }
+                    }
+                }
+                setBody(requestBody)
+            }
+
+            logger.d { "Create adventure response status: ${response.status}" }
+            logger.d { "Create adventure response headers: ${response.headers.entries()}" }
+
+            if (response.status.isSuccess()) {
+                val responseText = response.body<String>()
+                logger.d { "Create adventure raw response: $responseText" }
+
+                try {
+                    val adventure = json.decodeFromString<AdventureDTO>(responseText)
+                    logger.d { "Successfully created adventure: ${adventure.name}" }
+                    return adventure
+                } catch (e: Exception) {
+                    logger.e(e) { "Error parsing created adventure JSON: ${e.message}" }
+                    throw e
+                }
+            } else {
+                val errorBody = try {
+                    response.body<String>()
+                } catch (e: Exception) {
+                    "Could not read error body"
+                }
+                logger.e { "Failed to create adventure with status: ${response.status}. Error: $errorBody" }
+                throw HttpException(
+                    response.status.value,
+                    "Failed to create adventure with status: ${response.status}"
+                )
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Exception while creating adventure: ${e.message}" }
+            throw e
+        }
+    }
+
+    override suspend fun createCollection(
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        startDate: String?,
+        endDate: String?
+    ): CollectionDTO {
+        try {
+            if (baseUrl == null) {
+                logger.e { "Base URL is not initialized, login must be called first" }
+                throw IllegalStateException("Base URL is not initialized, login must be called first")
+            }
+
+            val url = "$baseUrl/$COLLECTIONS_ENDPOINT"
+            logger.d { "Creating collection at URL: $url" }
+
+            val requestBody = CreateCollectionRequest(
+                name = name,
+                description = description,
+                is_public = isPublic,
+                start_date = startDate,
+                end_date = endDate
+            )
+
+            logger.d { "Creating collection with body: $requestBody" }
+
+            val response = adventurelogClient.post(url) {
+                contentType(ContentType.Application.Json)
+                headers {
+                    append(HttpHeaders.Accept, "application/json")
+                    append("X-Is-Mobile", "true")
+
+                    sessionToken?.let { token ->
+                        append("X-Session-Token", token)
+                        logger.d { "Using X-Session-Token for authentication: $token" }
+                    }
+
+                    if (sessionToken == null) {
+                        logger.w { "No authentication token available for request" }
+                    }
+                }
+                setBody(requestBody)
+            }
+
+            logger.d { "Create collection response status: ${response.status}" }
+            logger.d { "Create collection response headers: ${response.headers.entries()}" }
+
+            if (response.status.isSuccess()) {
+                val responseText = response.body<String>()
+                logger.d { "Create collection raw response: $responseText" }
+
+                try {
+                    val collection = json.decodeFromString<CollectionDTO>(responseText)
+                    logger.d { "Successfully created collection: ${collection.name}" }
+                    return collection
+                } catch (e: Exception) {
+                    logger.e(e) { "Error parsing created collection JSON: ${e.message}" }
+                    throw e
+                }
+            } else {
+                val errorBody = try {
+                    response.body<String>()
+                } catch (e: Exception) {
+                    "Could not read error body"
+                }
+                logger.e { "Failed to create collection with status: ${response.status}. Error: $errorBody" }
+                throw HttpException(
+                    response.status.value,
+                    "Failed to create collection with status: ${response.status}"
+                )
+            }
+        } catch (e: Exception) {
+            logger.e(e) { "Exception while creating collection: ${e.message}" }
             throw e
         }
     }

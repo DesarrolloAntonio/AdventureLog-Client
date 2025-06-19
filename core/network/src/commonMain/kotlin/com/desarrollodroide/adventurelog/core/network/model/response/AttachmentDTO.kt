@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.core.network.model
+package com.desarrollodroide.adventurelog.core.network.model.response
 
 import com.desarrollodroide.adventurelog.core.model.Attachment
 import kotlinx.serialization.SerialName

@@ -5,7 +5,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
-import com.desarrollodroide.adventurelog.core.network.model.toDomainModel
+import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import kotlinx.io.IOException
 
 class CollectionsRepositoryImpl(

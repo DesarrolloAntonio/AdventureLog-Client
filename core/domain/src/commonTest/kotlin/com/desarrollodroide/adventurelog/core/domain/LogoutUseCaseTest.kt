@@ -4,11 +4,10 @@ import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
-import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
-import com.desarrollodroide.adventurelog.core.network.model.CollectionDTO
-import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertTrue

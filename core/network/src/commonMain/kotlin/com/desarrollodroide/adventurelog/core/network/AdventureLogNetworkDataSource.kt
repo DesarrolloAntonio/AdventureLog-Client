@@ -1,8 +1,8 @@
 package com.desarrollodroide.adventurelog.core.network
 
-import com.desarrollodroide.adventurelog.core.network.model.AdventureDTO
-import com.desarrollodroide.adventurelog.core.network.model.CollectionDTO
-import com.desarrollodroide.adventurelog.core.network.model.UserDetailsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.model.Visit
 
 interface AdventureLogNetworkDataSource {

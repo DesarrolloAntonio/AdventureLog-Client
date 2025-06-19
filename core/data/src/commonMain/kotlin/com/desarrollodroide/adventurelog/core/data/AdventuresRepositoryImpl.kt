@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
-import com.desarrollodroide.adventurelog.core.network.model.toDomainModel
+import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import kotlinx.io.IOException
 
 class AdventuresRepositoryImpl(
