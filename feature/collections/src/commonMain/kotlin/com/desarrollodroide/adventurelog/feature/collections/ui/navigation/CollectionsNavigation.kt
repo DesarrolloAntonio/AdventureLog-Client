@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.screens.Collecti
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionsScreen
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel
 
 /**
  * Extension function to add collections screen to a navigation graph
@@ -64,7 +67,9 @@ fun NavGraphBuilder.collectionsScreen(
     
     // Add Collection Screen
     composable(route = "add_collection") {
-        val viewModel = koinViewModel<com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel>()
+        val viewModel = koinViewModel<AddEditCollectionViewModel> {
+            parametersOf(null) // null for new collection
+        }
         val uiState by viewModel.uiState.collectAsState()
         val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
         
@@ -84,7 +89,7 @@ fun NavGraphBuilder.collectionsScreen(
         }
         
         Box(modifier = Modifier.fillMaxSize()) {
-            com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen(
+            AddEditCollectionScreen(
                 onNavigateBack = {
                     navController.navigateUp()
                 },
