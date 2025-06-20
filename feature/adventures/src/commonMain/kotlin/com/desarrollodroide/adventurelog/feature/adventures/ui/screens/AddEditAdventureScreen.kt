@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.adventures.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,34 +17,47 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Category
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.Tag
+import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,13 +66,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Category
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditAdventureScreen(
     onNavigateBack: () -> Unit,
@@ -71,42 +88,24 @@ fun AddEditAdventureScreen(
     }
     
     Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        text = if (initialData != null) "Edit adventure" else "New adventure",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        },
-        containerColor = Color.Transparent
+        modifier = modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
+            // Add top spacing
+            Spacer(modifier = Modifier.height(16.dp))
+            
             // Basic information section
             BasicInfoSection(
                 formData = formData,
-                onFormDataChange = { formData = it }
+                onFormDataChange = { formData = it },
+                onNavigateBack = onNavigateBack
             )
             
             // Location information section
@@ -128,22 +127,37 @@ fun AddEditAdventureScreen(
             )
             
             // Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Button(
                     onClick = { onSave(formData) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
-                    Text("Save and Next")
+                    Text(
+                        text = if (initialData != null) "Update Adventure" else "Create Adventure",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
                 
-                OutlinedButton(
+                TextButton(
                     onClick = onNavigateBack,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Close")
+                    Text(
+                        text = "Cancel",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             
@@ -153,37 +167,60 @@ fun AddEditAdventureScreen(
 }
 
 @Composable
-private fun BasicInfoSection(
-    formData: AdventureFormData,
-    onFormDataChange: (AdventureFormData) -> Unit
+private fun SectionCard(
+    title: String,
+    icon: ImageVector,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    content: @Composable () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(true) }
-    
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
         )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(20.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded },
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onExpandedChange(!expanded) }
+                    .padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Basic information",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (expanded) "Collapse" else "Expand"
+                    contentDescription = if (expanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -196,15 +233,154 @@ private fun BasicInfoSection(
                     modifier = Modifier.padding(top = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                // Name
-                    OutlinedTextField(
+                    content()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StyledTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    isError: Boolean = false,
+    errorMessage: String = ""
+) {
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { 
+                Text(
+                    text = label,
+                    color = Color.Gray
+                ) 
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp),
+            singleLine = singleLine,
+            maxLines = 1,
+            keyboardOptions = keyboardOptions,
+            leadingIcon = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.Gray
+                )
+            },
+            isError = isError,
+            shape = RoundedCornerShape(30.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                focusedBorderColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = if (isError) MaterialTheme.colorScheme.error else Color.Transparent
+            )
+        )
+        if (isError && errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun BasicInfoSection(
+    formData: AdventureFormData,
+    onFormDataChange: (AdventureFormData) -> Unit,
+    onNavigateBack: () -> Unit = {}
+) {
+    var expanded by remember { mutableStateOf(true) }
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { expanded = !expanded }
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Go back",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Outlined.Description,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Basic Information",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (expanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Column(
+                    modifier = Modifier.padding(top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Name
+                    StyledTextField(
                         value = formData.name,
                         onValueChange = { 
                             onFormDataChange(formData.copy(name = it))
                         },
-                        label = { Text("Name*") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
+                        label = "Adventure Name",
+                        icon = Icons.Outlined.Title,
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Next
                         )
@@ -227,14 +403,13 @@ private fun BasicInfoSection(
                     )
                     
                     // Link
-                    OutlinedTextField(
+                    StyledTextField(
                         value = formData.link,
                         onValueChange = { 
                             onFormDataChange(formData.copy(link = it))
                         },
-                        label = { Text("Link") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
+                        label = "Website Link",
+                        icon = Icons.Outlined.Link,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
                             imeAction = ImeAction.Next
@@ -250,26 +425,66 @@ private fun BasicInfoSection(
                     )
                     
                     // Generate description button
-                    TextButton(
+                    OutlinedButton(
                         onClick = { /* TODO: Implement AI description generation */ },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
                     ) {
-                        Text("Generate description")
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Generate AI Description")
                     }
                     
                     // Public adventure switch
-                    Row(
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+                        ),
+                        border = CardDefaults.outlinedCardBorder()
                     ) {
-                        Text("Public adventure")
-                        Switch(
-                            checked = formData.isPublic,
-                            onCheckedChange = {
-                                onFormDataChange(formData.copy(isPublic = it))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Public,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = "Public Adventure",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
                             }
-                        )
+                            Switch(
+                                checked = formData.isPublic,
+                                onCheckedChange = {
+                                    onFormDataChange(formData.copy(isPublic = it))
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -295,23 +510,47 @@ private fun CategoryDropdown(
     
     Box {
         OutlinedTextField(
-            value = selectedCategory?.displayName ?: "",
+            value = selectedCategory?.let { "${it.icon} ${it.displayName}" } ?: "",
             onValueChange = { },
-            label = { Text("Category*") },
-            modifier = Modifier.fillMaxWidth(),
+            placeholder = { 
+                Text(
+                    text = "Category",
+                    color = Color.Gray
+                ) 
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp),
             readOnly = true,
+            singleLine = true,
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Select category"
+                    contentDescription = "Select category",
+                    tint = Color.Gray
                 )
-            }
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Category,
+                    contentDescription = null,
+                    tint = Color.Gray
+                )
+            },
+            shape = RoundedCornerShape(30.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = Color.Transparent
+            )
         )
         
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(55.dp)
+                .clip(RoundedCornerShape(30.dp))
                 .clickable { expanded = true }
         )
         
@@ -324,11 +563,17 @@ private fun CategoryDropdown(
                 DropdownMenuItem(
                     text = { 
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(category.icon)
-                            Text(category.displayName)
+                            Text(
+                                text = category.icon,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                text = category.displayName,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     },
                     onClick = {
@@ -348,24 +593,40 @@ private fun RatingBar(
     maxRating: Int = 5
 ) {
     Column {
-        Text(
-            text = "Rating",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = "Rating",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
         Row(
             modifier = Modifier.padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             for (i in 1..maxRating) {
                 IconButton(
                     onClick = { onRatingChanged(i) },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(48.dp)
                 ) {
                     Icon(
                         imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.StarBorder,
                         contentDescription = "Rating $i",
-                        tint = if (i <= rating) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (i <= rating) 
+                            MaterialTheme.colorScheme.primary 
+                        else 
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
@@ -381,54 +642,85 @@ private fun DescriptionField(
     var selectedTab by remember { mutableStateOf(0) }
     
     Column {
-        TabRow(
-            selectedTabIndex = selectedTab,
-            containerColor = Color.Transparent
-        ) {
-            Tab(
-                selected = selectedTab == 0,
-                onClick = { selectedTab = 0 },
-                text = { Text("Edit") }
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 1.dp
             )
-            Tab(
-                selected = selectedTab == 1,
-                onClick = { selectedTab = 1 },
-                text = { Text("Preview") }
-            )
-        }
-        
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .padding(top = 8.dp)
         ) {
-            if (selectedTab == 0) {
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = onDescriptionChange,
-                    label = { Text("Description") },
-                    placeholder = { Text("Write here with markdown...") },
-                    modifier = Modifier.fillMaxSize(),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Default
-                    )
-                )
-            } else {
-                Card(
-                    modifier = Modifier.fillMaxSize(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                    )
+            Column {
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = Color.Transparent,
+                    modifier = Modifier.padding(4.dp)
                 ) {
-                    Text(
-                        text = if (description.isBlank()) "Markdown preview..." else description,
-                        modifier = Modifier.padding(16.dp),
-                        color = if (description.isBlank()) 
-                            MaterialTheme.colorScheme.onSurfaceVariant 
-                        else 
-                            MaterialTheme.colorScheme.onSurface
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        text = { Text("Edit") }
                     )
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        text = { Text("Preview") }
+                    )
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                ) {
+                    if (selectedTab == 0) {
+                        OutlinedTextField(
+                            value = description,
+                            onValueChange = onDescriptionChange,
+                            placeholder = { 
+                                Text(
+                                    text = "Write your adventure description...",
+                                    color = Color.Gray
+                                ) 
+                            },
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Default
+                            ),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = Color.Transparent
+                            )
+                        )
+                    } else {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.background
+                            )
+                        ) {
+                            Text(
+                                text = if (description.isBlank()) 
+                                    "Preview will appear here..." 
+                                else 
+                                    description,
+                                modifier = Modifier.padding(16.dp),
+                                color = if (description.isBlank()) 
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                else 
+                                    MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -442,80 +734,65 @@ private fun LocationSection(
 ) {
     var expanded by remember { mutableStateOf(false) }
     
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+    SectionCard(
+        title = "Location Information",
+        icon = Icons.Outlined.LocationOn,
+        expanded = expanded,
+        onExpandedChange = { expanded = it }
     ) {
+        StyledTextField(
+            value = formData.location,
+            onValueChange = { 
+                onFormDataChange(formData.copy(location = it))
+            },
+            label = "Location Name",
+            icon = Icons.Default.LocationOn
+        )
+        
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded }
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Location information",
-                style = MaterialTheme.typography.titleMedium
+            StyledTextField(
+                value = formData.latitude,
+                onValueChange = { 
+                    onFormDataChange(formData.copy(latitude = it))
+                },
+                label = "Latitude",
+                icon = Icons.Default.MyLocation,
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                )
             )
-            Icon(
-                imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = if (expanded) "Collapse" else "Expand"
+            
+            StyledTextField(
+                value = formData.longitude,
+                onValueChange = { 
+                    onFormDataChange(formData.copy(longitude = it))
+                },
+                label = "Longitude",
+                icon = Icons.Default.MyLocation,
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                )
             )
         }
         
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
+        // Add map button
+        OutlinedButton(
+            onClick = { /* TODO: Open map picker */ },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedTextField(
-                    value = formData.location,
-                    onValueChange = { 
-                        onFormDataChange(formData.copy(location = it))
-                    },
-                    label = { Text("Location") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    OutlinedTextField(
-                        value = formData.latitude,
-                        onValueChange = { 
-                            onFormDataChange(formData.copy(latitude = it))
-                        },
-                        label = { Text("Latitude") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number
-                        )
-                    )
-                    
-                    OutlinedTextField(
-                        value = formData.longitude,
-                        onValueChange = { 
-                            onFormDataChange(formData.copy(longitude = it))
-                        },
-                        label = { Text("Longitude") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number
-                        )
-                    )
-                }
-            }
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Pick Location on Map")
         }
     }
 }
@@ -527,44 +804,46 @@ private fun TagsSection(
 ) {
     var expanded by remember { mutableStateOf(false) }
     
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+    SectionCard(
+        title = "Tags (${formData.tags.size})",
+        icon = Icons.Outlined.Tag,
+        expanded = expanded,
+        onExpandedChange = { expanded = it }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded }
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Tags (${formData.tags.size})",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Icon(
-                imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = if (expanded) "Collapse" else "Expand"
-            )
-        }
-        
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+            ),
+            border = CardDefaults.outlinedCardBorder()
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // TODO: Implement tags input
-                Text(
-                    text = "Tags functionality to be implemented",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "🏷️",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Column {
+                        Text(
+                            text = "Tag functionality coming soon!",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "Add custom tags to categorize your adventures",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
@@ -577,44 +856,46 @@ private fun DateSection(
 ) {
     var expanded by remember { mutableStateOf(false) }
     
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+    SectionCard(
+        title = "Date Information",
+        icon = Icons.Outlined.CalendarToday,
+        expanded = expanded,
+        onExpandedChange = { expanded = it }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded }
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Date information",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Icon(
-                imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = if (expanded) "Collapse" else "Expand"
-            )
-        }
-        
-        AnimatedVisibility(
-            visible = expanded,
-            enter = expandVertically(),
-            exit = shrinkVertically()
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f)
+            ),
+            border = CardDefaults.outlinedCardBorder()
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // TODO: Implement date picker
-                Text(
-                    text = "Date picker to be implemented",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "📅",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Column {
+                        Text(
+                            text = "Date picker coming soon!",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "Set when you visited this adventure",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
@@ -652,11 +933,11 @@ private fun AddEditAdventureScreenPreview() {
     }
 }
 
-@org.jetbrains.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun AddEditAdventureScreenWithDataPreview() {
     MaterialTheme {
-        androidx.compose.material3.Surface(
+        Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
@@ -681,7 +962,7 @@ private fun AddEditAdventureScreenWithDataPreview() {
     }
 }
 
-@org.jetbrains.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 private fun AddEditAdventureScreenDarkPreview() {
     MaterialTheme(
