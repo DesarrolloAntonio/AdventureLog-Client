@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,18 +45,13 @@ fun AddEditAdventureScreen(
         mutableStateOf(initialData ?: AdventureFormData())
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
 
             BasicInfoSection(
                 formData = formData,
@@ -115,7 +109,6 @@ fun AddEditAdventureScreen(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-        }
     }
 }
 
