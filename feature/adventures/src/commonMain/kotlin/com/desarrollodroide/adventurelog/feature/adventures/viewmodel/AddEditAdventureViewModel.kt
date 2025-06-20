@@ -5,8 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.CreateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateAdventureUseCase
-import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
