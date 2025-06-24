@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.data
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
@@ -56,7 +57,7 @@ class AdventuresRepositoryImpl(
     override suspend fun createAdventure(
         name: String,
         description: String,
-        categoryId: String,
+        category: Category,
         rating: Double,
         link: String,
         location: String,
@@ -69,7 +70,7 @@ class AdventuresRepositoryImpl(
             val adventure = networkDataSource.createAdventure(
                 name = name,
                 description = description,
-                categoryId = categoryId,
+                category = category,
                 rating = rating,
                 link = link,
                 location = location,
