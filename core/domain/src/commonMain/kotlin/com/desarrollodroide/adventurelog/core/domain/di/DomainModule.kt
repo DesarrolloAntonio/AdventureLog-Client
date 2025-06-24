@@ -15,6 +15,7 @@ import com.desarrollodroide.adventurelog.core.domain.CreateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.CreateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
 
 val domainModule = module {
     includes(dataModule)
@@ -31,4 +32,5 @@ val domainModule = module {
     factoryOf(::UpdateAdventureUseCase)
     factoryOf(::CreateCollectionUseCase)
     factoryOf(::UpdateCollectionUseCase)
+    factoryOf(::GetCategoriesUseCase)
 }

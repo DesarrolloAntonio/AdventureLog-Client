@@ -12,6 +12,8 @@ import com.desarrollodroide.adventurelog.core.data.SettingsRepository
 import com.desarrollodroide.adventurelog.core.data.SettingsRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.data.UserRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.CategoriesRepository
+import com.desarrollodroide.adventurelog.core.data.CategoriesRepositoryImpl
 import com.desarrollodroide.adventurelog.core.network.di.networkModule
 import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named
@@ -39,5 +41,8 @@ val dataModule = module {
     }
     single<CollectionsRepository> {
         CollectionsRepositoryImpl(networkDataSource = get())
+    }
+    single<CategoriesRepository> {
+        CategoriesRepositoryImpl(networkDataSource = get())
     }
 }
