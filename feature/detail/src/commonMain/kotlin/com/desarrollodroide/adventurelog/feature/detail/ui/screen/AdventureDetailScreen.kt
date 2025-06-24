@@ -31,6 +31,7 @@ import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.MapView
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.AdventurePhotosCarousel
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.TagChip
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.foundation.layout.FlowRow
@@ -255,48 +256,27 @@ private fun CategoryTags(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         category?.let {
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.wrapContentSize()
-            ) {
-                Text(
-                    text = "${it.icon} ${it.displayName}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
+            TagChip(
+                text = "${it.icon} ${it.displayName}",
+                backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
         
         if (!isPublic) {
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = MaterialTheme.colorScheme.errorContainer,
-                modifier = Modifier.wrapContentSize()
-            ) {
-                Text(
-                    text = "Private",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
+            TagChip(
+                text = "🔒 Private",
+                backgroundColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            )
         }
         
         collections.forEach { collectionName ->
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                modifier = Modifier.wrapContentSize()
-            ) {
-                Text(
-                    text = "📁 $collectionName",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
+            TagChip(
+                text = "📁 $collectionName",
+                backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
         }
     }
 }
