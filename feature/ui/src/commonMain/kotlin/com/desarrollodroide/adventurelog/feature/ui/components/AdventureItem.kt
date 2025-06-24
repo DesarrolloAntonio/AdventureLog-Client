@@ -19,11 +19,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalSessionTokenManager
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
+import org.jetbrains.compose.resources.painterResource
+import com.desarrollodroide.adventurelog.resources.Res
+import com.desarrollodroide.adventurelog.resources.adventureitem_placeholder
 
 @Composable
 fun AdventureItem(
@@ -55,17 +59,30 @@ fun AdventureItem(
         onClick = onClick
     ) {
         Box {
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = adventure.images.firstOrNull()?.image ?: "",
-                    imageLoader = imageLoader
-                ),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp),
-                contentScale = ContentScale.Crop
-            )
+            val hasImage = adventure.images.firstOrNull()?.image?.isNotEmpty() == true
+            
+            if (hasImage) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = adventure.images.first().image,
+                        imageLoader = imageLoader
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(Res.drawable.adventureitem_placeholder),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -196,7 +213,7 @@ fun AdventureItem(
                             showMenu = false
                         }
                     )
-                    Divider()
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -275,18 +292,74 @@ private fun AdventureItemPrivatePreview() {
 
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
-private fun AdventureItemWithCollectionPreview() {
+private fun AdventureItemNoImagePreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background) {
                 AdventureItem(
-                    adventure = PreviewData.adventures[1],
+                    adventure = PreviewData.adventures[0].copy(
+                        images = emptyList(), // No images
+                        category = Category(
+                            id = "cat1",
+                            name = "hiking",
+                            displayName = "Hiking",
+                            icon = "🥾",
+                            numAdventures = "10"
+                        )
+                    ),
                     collections = PreviewData.collections,
                     onOpenDetails = {},
                     onEdit = {},
                     onRemoveFromCollection = {},
                     onDelete = {}
                 )
+            }
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureItemNoImageMountainPreview() {
+    PreviewImageDependencies {
+        MaterialTheme(colorScheme = darkColorScheme()) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    AdventureItem(
+                        adventure = PreviewData.adventures[0].copy(
+                            images = emptyList(),
+                            name = "Epic Mountain Trail",
+                            category = Category(
+                                id = "cat1",
+                                name = "mountain",
+                                displayName = "Mountain",
+                                icon = "⛰️",
+                                numAdventures = "10"
+                            )
+                        ),
+                        collections = PreviewData.collections
+                    )
+                    
+                    AdventureItem(
+                        adventure = PreviewData.adventures[0].copy(
+                            images = emptyList(),
+                            name = "Beach Paradise Getaway",
+                            category = Category(
+                                id = "cat2",
+                                name = "beach",
+                                displayName = "Beach",
+                                icon = "🏖️",
+                                numAdventures = "10"
+                            ),
+                            isPublic = false,
+                            collections = listOf("1", "2", "3") // Multiple collections
+                        ),
+                        collections = PreviewData.collections
+                    )
+                }
             }
         }
     }
