@@ -7,5 +7,6 @@ data class Visit(
     val id: String,
     val startDate: String,
     val endDate: String,
-    val notes: String
+    val notes: String,
+    val timezone: String
 )

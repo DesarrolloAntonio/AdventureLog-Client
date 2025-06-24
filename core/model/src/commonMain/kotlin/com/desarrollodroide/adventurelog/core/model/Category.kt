@@ -8,5 +8,5 @@ data class Category(
     val name: String,
     val displayName: String,
     val icon: String,
-    val numAdventures: Int
+    val numAdventures: String
 )

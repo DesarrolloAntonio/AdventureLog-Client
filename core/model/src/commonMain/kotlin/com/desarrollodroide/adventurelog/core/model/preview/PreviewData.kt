@@ -2,7 +2,6 @@ package com.desarrollodroide.adventurelog.core.model.preview
 
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.AdventureImage
-import com.desarrollodroide.adventurelog.core.model.Attachment
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Visit
@@ -14,28 +13,28 @@ object PreviewData {
             name = "hotel",
             displayName = "Hotel",
             icon = "🏨",
-            numAdventures = 5
+            numAdventures = "5"
         ),
         Category(
             id = "2",
             name = "restaurant",
             displayName = "Restaurant",
             icon = "🍽️",
-            numAdventures = 3
+            numAdventures = "3"
         ),
         Category(
             id = "3",
             name = "beach",
             displayName = "Beach",
             icon = "🏖️",
-            numAdventures = 4
+            numAdventures = "4"
         ),
         Category(
             id = "4",
             name = "ruta",
             displayName = "Ruta",
             icon = "🏞️",
-            numAdventures = 2
+            numAdventures = "2"
         )
     )
 
@@ -224,13 +223,15 @@ object PreviewData {
             id = "1",
             startDate = "2024-01-15",
             endDate = "2024-01-20",
-            notes = "Amazing experience"
+            notes = "Amazing experience",
+            timezone = "Europe/Madrid"
         ),
         Visit(
             id = "2",
             startDate = "2024-02-01",
             endDate = "2024-02-05",
-            notes = "Great weekend getaway"
+            notes = "Great weekend getaway",
+            timezone = "UTC"
         )
     )
 
