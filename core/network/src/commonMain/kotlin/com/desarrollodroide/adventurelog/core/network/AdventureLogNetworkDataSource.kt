@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 
@@ -72,12 +73,12 @@ interface AdventureLogNetworkDataSource {
     suspend fun createAdventure(
         name: String,
         description: String,
-        categoryId: String,
+        category: Category,
         rating: Double,
         link: String,
         location: String,
-        latitude: Double?,
-        longitude: Double?,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean,
         visitDates: Visit?
     ): AdventureDTO

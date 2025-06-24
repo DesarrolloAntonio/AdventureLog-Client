@@ -20,4 +20,6 @@ internal fun HeadersBuilder.commonHeaders(sessionToken: String?) {
 internal val defaultJson = Json {
     ignoreUnknownKeys = true
     isLenient = true
+    encodeDefaults = true  // Include fields with default values
+    explicitNulls = true   // Include null values in JSON
 }

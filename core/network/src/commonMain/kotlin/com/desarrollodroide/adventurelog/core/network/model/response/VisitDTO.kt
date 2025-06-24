@@ -23,5 +23,6 @@ fun VisitDTO.toDomainModel() = Visit(
     id = id ?: "",
     startDate = startDate ?: "",
     endDate = endDate ?: "",
-    notes = notes ?: ""
+    notes = notes ?: "",
+    timezone = ""
 )

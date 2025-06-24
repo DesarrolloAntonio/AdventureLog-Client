@@ -1,18 +1,24 @@
 package com.desarrollodroide.adventurelog.core.network.api
 
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 
 interface AdventureApi {
     /**
      * Get paginated list of adventures
      */
-    suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO>
+    suspend fun getAdventures(
+        page: Int,
+        pageSize: Int
+    ): List<AdventureDTO>
 
     /**
      * Get adventure details by ID
      */
-    suspend fun getAdventureDetail(objectId: String): AdventureDTO
+    suspend fun getAdventureDetail(
+        objectId: String
+    ): AdventureDTO
     
     /**
      * Create a new adventure
@@ -20,12 +26,12 @@ interface AdventureApi {
     suspend fun createAdventure(
         name: String,
         description: String,
-        categoryId: String,
+        category: Category,
         rating: Double,
         link: String,
         location: String,
-        latitude: Double?,
-        longitude: Double?,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean,
         visitDates: Visit?
     ): AdventureDTO

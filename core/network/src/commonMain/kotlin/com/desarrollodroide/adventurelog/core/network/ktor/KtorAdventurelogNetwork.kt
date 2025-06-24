@@ -14,6 +14,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
@@ -22,6 +23,9 @@ import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
 import com.desarrollodroide.adventurelog.core.network.api.CollectionApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAdventureNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCollectionApi
+import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
+import com.desarrollodroide.adventurelog.core.network.api.CategoryApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCategoryNetworkDataSource
 
 class KtorAdventurelogNetwork(
     private val adventurelogClient: HttpClient
@@ -49,13 +53,24 @@ class KtorAdventurelogNetwork(
             json = json
         )
     }
+    
+    private val categoryDataSource: CategoryApi by lazy {
+        KtorCategoryNetworkDataSource(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            json = json
+        )
+    }
 
     companion object {
         private const val LOGIN_ENDPOINT = "auth/browser/v1/auth/login"
         private const val USER_DETAILS_ENDPOINT = "api/user/details/"
     }
 
-    override fun initializeFromSession(serverUrl: String, sessionToken: String?) {
+    override fun initializeFromSession(
+        serverUrl: String,
+        sessionToken: String?
+    ) {
         this.baseUrl = serverUrl.trimEnd('/')
         this.sessionToken = sessionToken
         logger.d {
@@ -89,7 +104,10 @@ class KtorAdventurelogNetwork(
                 append("X-Is-Mobile", "true")
                 append("Referer", baseUrl ?: "")
             }
-            setBody(LoginRequest(username, password))
+            setBody(LoginRequest(
+                username = username,
+                password = password
+            ))
         }
 
         logger.d { "Login response status: ${response.status}" }
@@ -187,22 +205,32 @@ class KtorAdventurelogNetwork(
         }
     }
 
-    override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
+    override suspend fun getAdventures(
+        page: Int,
+        pageSize: Int
+    ): List<AdventureDTO> {
         ensureInitialized()
         return adventureDataSource.getAdventures(page, pageSize)
     }
 
-    override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
+    override suspend fun getAdventureDetail(
+        objectId: String
+    ): AdventureDTO {
         ensureInitialized()
         return adventureDataSource.getAdventureDetail(objectId)
     }
 
-    override suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO> {
+    override suspend fun getCollections(
+        page: Int,
+        pageSize: Int
+    ): List<CollectionDTO> {
         ensureInitialized()
         return collectionDataSource.getCollections(page, pageSize)
     }
 
-    override suspend fun getCollectionDetail(collectionId: String): CollectionDTO {
+    override suspend fun getCollectionDetail(
+        collectionId: String
+    ): CollectionDTO {
         ensureInitialized()
         return collectionDataSource.getCollectionDetail(collectionId)
     }
@@ -210,19 +238,27 @@ class KtorAdventurelogNetwork(
     override suspend fun createAdventure(
         name: String,
         description: String,
-        categoryId: String,
+        category: Category,
         rating: Double,
         link: String,
         location: String,
-        latitude: Double?,
-        longitude: Double?,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean,
         visitDates: Visit?
     ): AdventureDTO {
         ensureInitialized()
         return adventureDataSource.createAdventure(
-            name, description, categoryId, rating, link, location,
-            latitude, longitude, isPublic, visitDates
+            name = name,
+            description = description,
+            category = category,
+            rating = rating,
+            link = link,
+            location = location,
+            latitude = latitude,
+            longitude = longitude,
+            isPublic = isPublic,
+            visitDates = visitDates
         )
     }
     
@@ -241,6 +277,17 @@ class KtorAdventurelogNetwork(
         endDate: String?
     ): CollectionDTO {
         ensureInitialized()
-        return collectionDataSource.createCollection(name, description, isPublic, startDate, endDate)
+        return collectionDataSource.createCollection(
+            name = name,
+            description = description,
+            isPublic = isPublic,
+            startDate = startDate,
+            endDate = endDate
+        )
+    }
+
+    override suspend fun getCategories(): List<CategoryDTO> {
+        ensureInitialized()
+        return categoryDataSource.getCategories()
     }
 }

@@ -10,21 +10,47 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
+import com.desarrollodroide.adventurelog.core.model.Visit
 
 data class AddEditAdventureUiState(
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val categories: List<Category> = emptyList()
 )
 
 class AddEditAdventureViewModel(
     private val createAdventureUseCase: CreateAdventureUseCase,
     private val updateAdventureUseCase: UpdateAdventureUseCase,
+    private val getCategoriesUseCase: GetCategoriesUseCase,
     private val adventureId: String? = null
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddEditAdventureUiState())
     val uiState: StateFlow<AddEditAdventureUiState> = _uiState.asStateFlow()
+    
+    init {
+        loadCategories()
+    }
+    
+    private fun loadCategories() {
+        viewModelScope.launch {
+            when (val result = getCategoriesUseCase()) {
+                is Either.Left -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = result.value
+                    )
+                }
+                is Either.Right -> {
+                    _uiState.value = _uiState.value.copy(
+                        categories = result.value
+                    )
+                }
+            }
+        }
+    }
     
     fun saveAdventure(formData: AdventureFormData) {
         viewModelScope.launch {
@@ -36,7 +62,7 @@ class AddEditAdventureViewModel(
                     adventureId = adventureId,
                     name = formData.name,
                     description = formData.description,
-                    categoryId = formData.category?.id,
+                    categoryName = formData.category?.id?:"",
                     rating = formData.rating.toDouble(),
                     link = formData.link,
                     location = formData.location,
@@ -47,17 +73,35 @@ class AddEditAdventureViewModel(
                 )
             } else {
                 // Create new adventure
+                val category = formData.category
+                if (category == null) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Please select a category"
+                    )
+                    return@launch
+                }
+                
                 createAdventureUseCase(
                     name = formData.name,
                     description = formData.description,
-                    categoryId = formData.category?.id,
+                    category = category,
                     rating = formData.rating.toDouble(),
                     link = formData.link,
                     location = formData.location,
                     latitude = formData.latitude,
                     longitude = formData.longitude,
                     isPublic = formData.isPublic,
-                    tags = formData.tags
+                    tags = formData.tags,
+                    visitDates = formData.date?.let {
+                        Visit(
+                            id = "",
+                            startDate = it,
+                            endDate = it,
+                            timezone = "",
+                            notes = "",
+                        )
+                    }
                 )
             }
             

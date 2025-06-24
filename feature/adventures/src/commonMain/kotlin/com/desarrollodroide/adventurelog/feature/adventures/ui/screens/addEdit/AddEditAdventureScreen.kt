@@ -36,13 +36,18 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AddEditAdventureScreen(
+    categories: List<Category>,
     onNavigateBack: () -> Unit,
     onSave: (adventureData: AdventureFormData) -> Unit,
     modifier: Modifier = Modifier,
     initialData: AdventureFormData? = null
 ) {
     var formData by remember {
-        mutableStateOf(initialData ?: AdventureFormData())
+        mutableStateOf(
+            initialData ?: AdventureFormData(
+                category = categories.firstOrNull()
+            )
+        )
     }
 
     Column(
@@ -55,6 +60,7 @@ fun AddEditAdventureScreen(
 
             BasicInfoSection(
                 formData = formData,
+                categories = categories,
                 onFormDataChange = { formData = it },
                 onNavigateBack = onNavigateBack
             )
@@ -121,6 +127,11 @@ private fun AddEditAdventureScreenPreview() {
             modifier = Modifier.fillMaxSize()
         ) {
             AddEditAdventureScreen(
+                categories = listOf(
+                    Category("1", "general", "General", "🌍", "0"),
+                    Category("2", "hotel", "Hotel", "🏨", "0"),
+                    Category("3", "museum", "Museum", "🏛️", "0")
+                ),
                 onNavigateBack = {},
                 onSave = {}
             )
@@ -137,12 +148,17 @@ private fun AddEditAdventureScreenWithDataPreview() {
             modifier = Modifier.fillMaxSize()
         ) {
             AddEditAdventureScreen(
+                categories = listOf(
+                    Category("1", "general", "General", "🌍", "0"),
+                    Category("2", "hotel", "Hotel", "🏨", "0"),
+                    Category("3", "museum", "Museum", "🏛️", "0")
+                ),
                 onNavigateBack = {},
                 onSave = {},
                 initialData = AdventureFormData(
                     name = "Visit to Prado Museum",
                     description = "An incredible experience visiting one of the most important art galleries in the world.",
-                    category = Category("3", "museum", "Museum", "🏛️", 0),
+                    category = Category("3", "museum", "Museum", "🏛️", "0"),
                     rating = 5,
                     link = "https://www.museodelprado.es",
                     location = "Madrid, Spain",
@@ -168,6 +184,11 @@ private fun AddEditAdventureScreenDarkPreview() {
             modifier = Modifier.fillMaxSize()
         ) {
             AddEditAdventureScreen(
+                categories = listOf(
+                    Category("1", "general", "General", "🌍", "0"),
+                    Category("2", "hotel", "Hotel", "🏨", "0"),
+                    Category("3", "museum", "Museum", "🏛️", "0")
+                ),
                 onNavigateBack = {},
                 onSave = {}
             )

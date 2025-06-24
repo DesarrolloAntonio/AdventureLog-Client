@@ -1,15 +1,15 @@
 package com.desarrollodroide.adventurelog.core.network.ktor.api
 
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
-import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
+import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
 import io.ktor.client.HttpClient
@@ -84,43 +84,32 @@ internal class KtorAdventureNetworkDataSource(
     override suspend fun createAdventure(
         name: String,
         description: String,
-        categoryId: String,
+        category: Category,
         rating: Double,
         link: String,
         location: String,
-        latitude: Double?,
-        longitude: Double?,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean,
         visitDates: Visit?
     ): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/"
         
-        val category = mapCategory(categoryId)
-        val visits = visitDates?.let { visit ->
-            listOf(
-                VisitRequest(
-                    startDate = visit.startDate,
-                    endDate = visit.endDate,
-                    timezone = "America/Denver",
-                    notes = visit.notes
-                )
-            )
-        }
-
-        val requestBody = CreateAdventureRequest(
+        val requestBody = createAdventureRequest(
             name = name,
             description = description,
-            rating = rating,
-            location = location,
-            isPublic = isPublic,
-            longitude = longitude,
-            latitude = latitude,
-            visits = visits,
             category = category,
-            notes = null,
-            link = link.takeIf { it.isNotBlank() }
+            rating = rating,
+            link = link,
+            location = location,
+            latitude = latitude,
+            longitude = longitude,
+            isPublic = isPublic,
+            visitDates = visitDates
         )
+
+        logger.d { "Creating adventure with request: name=$name, categoryId=${category.id}, isPublic=$isPublic" }
 
         val response = httpClient.post(url) {
             contentType(ContentType.Application.Json)
@@ -131,9 +120,15 @@ internal class KtorAdventureNetworkDataSource(
         }
 
         if (!response.status.isSuccess()) {
+            val errorBody = try {
+                response.body<String>()
+            } catch (e: Exception) {
+                "Unable to read error body"
+            }
+            logger.e { "Failed to create adventure. Status: ${response.status}, Error: $errorBody" }
             throw HttpException(
                 response.status.value,
-                "Failed to create adventure with status: ${response.status}"
+                "Failed to create adventure with status: ${response.status}. Error: $errorBody"
             )
         }
 
@@ -160,7 +155,12 @@ internal class KtorAdventureNetworkDataSource(
         val updates = buildMap {
             name?.let { put("name", it) }
             description?.let { put("description", it) }
-            categoryId?.let { put("category", mapCategory(it)) }
+            categoryId?.let { 
+                if (it.isNotBlank()) {
+                    // For now, skip category updates until we understand the format
+                    logger.d { "Category updates not implemented yet" }
+                }
+            }
             rating?.let { put("rating", it) }
             link?.let { put("link", it) }
             location?.let { put("location", it) }
@@ -206,14 +206,5 @@ internal class KtorAdventureNetworkDataSource(
         }
     }
 
-    private fun mapCategory(categoryId: String): CategoryRequest {
-        return when (categoryId) {
-            "1" -> CategoryRequest("restaurant", "Restaurant", "🍽️")
-            "2" -> CategoryRequest("hotel", "Hotel", "🏨")
-            "3" -> CategoryRequest("museum", "Museum", "🏛️")
-            "4" -> CategoryRequest("park", "Park", "🌳")
-            "5" -> CategoryRequest("beach", "Beach", "🏖️")
-            else -> CategoryRequest("outdoor", "Outdoor", "🏕️")
-        }
-    }
+
 }
