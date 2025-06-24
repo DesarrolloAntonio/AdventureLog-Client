@@ -8,8 +8,14 @@ import com.desarrollodroide.adventurelog.core.model.Visit
 
 interface AdventuresRepository {
 
-    suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>>
-    suspend fun getAdventure(objectId: String): Either<ApiResponse, Adventure>
+    suspend fun getAdventures(
+        page: Int, pageSize: Int
+    ): Either<ApiResponse, List<Adventure>>
+
+    suspend fun getAdventure(
+        objectId: String
+    ): Either<ApiResponse, Adventure>
+
     suspend fun createAdventure(
         name: String,
         description: String,
@@ -17,8 +23,8 @@ interface AdventuresRepository {
         rating: Double,
         link: String,
         location: String,
-        latitude: Double?,
-        longitude: Double?,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean,
         visitDates: Visit?
     ): Either<String, Adventure>

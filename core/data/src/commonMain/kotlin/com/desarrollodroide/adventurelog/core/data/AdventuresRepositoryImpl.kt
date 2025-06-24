@@ -61,8 +61,8 @@ class AdventuresRepositoryImpl(
         rating: Double,
         link: String,
         location: String,
-        latitude: Double?,
-        longitude: Double?,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean,
         visitDates: Visit?
     ): Either<String, Adventure> {
