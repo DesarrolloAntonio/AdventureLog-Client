@@ -63,6 +63,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 
 /**
@@ -77,10 +78,12 @@ fun HomeScreenRoute(
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
+    val collections by viewModel.collections.collectAsStateWithLifecycle()
 
     HomeScreenContent(
         homeUiState = homeUiState,
         userDetails = userDetails,
+        collections = collections,
         onAdventureClick = onAdventureClick,
         onLogout = { 
             viewModel.logout()
@@ -107,6 +110,7 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     userDetails: UserDetails? = null,
+    collections: List<Collection> = emptyList(),
     onAdventureClick: (Adventure) -> Unit = { },
     onLogout: () -> Unit = {}
 ) {
@@ -362,11 +366,18 @@ fun HomeScreenContent(
                         }
 
                         adventuresScreen(
-                            onAdventureClick = onAdventureClick,
+                            onAdventureClick = { adventure, adventureCollections ->
+                                val adventureWithCollectionNames = adventure.copy(
+                                    collections = adventureCollections.map { it.name }
+                                )
+                                
+                                onAdventureClick(adventureWithCollectionNames)
+                            },
                             onAddAdventureClick = {
                                 navController.navigate("add_adventure")
                             },
-                            navController = navController
+                            navController = navController,
+                            collections = collections
                         )
 
                         collectionsScreen(

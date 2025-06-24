@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresUiState
@@ -45,8 +46,9 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AdventureListScreen(
-    onAdventureClick: (Adventure) -> Unit = { },
+    onAdventureClick: (Adventure, List<Collection>) -> Unit = { _, _ -> },
     onAddAdventureClick: () -> Unit = { },
+    collections: List<Collection> = emptyList(),
     modifier: Modifier = Modifier,
     viewModel: AdventuresViewModel = koinViewModel()
 ) {
@@ -54,6 +56,7 @@ fun AdventureListScreen(
     
     AdventureListContent(
         uiState = uiState,
+        collections = collections,
         onAdventureClick = onAdventureClick,
         onAddAdventureClick = onAddAdventureClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
@@ -65,7 +68,8 @@ fun AdventureListScreen(
 @Composable
 private fun AdventureListContent(
     uiState: AdventuresUiState,
-    onAdventureClick: (Adventure) -> Unit,
+    collections: List<Collection>,
+    onAdventureClick: (Adventure, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit = {},
     onSearchSubmit: () -> Unit = {},
@@ -137,7 +141,13 @@ private fun AdventureListContent(
                         else -> {
                             AdventuresList(
                                 adventures = uiState.filteredAdventures,
-                                onAdventureClick = onAdventureClick
+                                collections = collections,
+                                onAdventureClick = { adventure ->
+                                    val adventureCollections = adventure.collections.mapNotNull { id ->
+                                        collections.find { it.id == id }
+                                    }
+                                    onAdventureClick(adventure, adventureCollections)
+                                }
                             )
                         }
                     }
@@ -150,6 +160,7 @@ private fun AdventureListContent(
 @Composable
 private fun AdventuresList(
     adventures: List<Adventure>,
+    collections: List<Collection>,
     onAdventureClick: (Adventure) -> Unit
 ) {
     LazyColumn(
@@ -163,6 +174,7 @@ private fun AdventuresList(
         ) { adventure ->
             AdventureItem(
                 adventure = adventure,
+                collections = collections,
                 onClick = { onAdventureClick(adventure) }
             )
         }
@@ -221,7 +233,8 @@ private fun AdventureListScreenSuccessPreview() {
                         adventures = PreviewData.adventures,
                         filteredAdventures = PreviewData.adventures
                     ),
-                    onAdventureClick = {},
+                    collections = PreviewData.collections,
+                    onAdventureClick = { _, _ -> },
                     onAddAdventureClick = {}
                 )
             }
@@ -239,7 +252,8 @@ private fun AdventureListScreenEmptyPreview() {
         ) {
             AdventureListContent(
                 uiState = AdventuresUiState.Success(emptyList()),
-                onAdventureClick = {},
+                collections = emptyList(),
+                onAdventureClick = { _, _ -> },
                 onAddAdventureClick = {}
             )
         }
@@ -256,7 +270,8 @@ private fun AdventureListScreenLoadingPreview() {
         ) {
             AdventureListContent(
                 uiState = AdventuresUiState.Loading,
-                onAdventureClick = {},
+                collections = emptyList(),
+                onAdventureClick = { _, _ -> },
                 onAddAdventureClick = {}
             )
         }
@@ -273,7 +288,8 @@ private fun AdventureListScreenErrorPreview() {
         ) {
             AdventureListContent(
                 uiState = AdventuresUiState.Error("Failed to load adventures"),
-                onAdventureClick = {},
+                collections = emptyList(),
+                onAdventureClick = { _, _ -> },
                 onAddAdventureClick = {}
             )
         }
@@ -295,7 +311,8 @@ private fun AdventureListScreenSearchPreview() {
                         filteredAdventures = PreviewData.adventures.take(1),
                         searchQuery = "Mountain"
                     ),
-                    onAdventureClick = {},
+                    collections = PreviewData.collections,
+                    onAdventureClick = { _, _ -> },
                     onAddAdventureClick = {}
                 )
             }
@@ -317,7 +334,8 @@ private fun AdventureListScreenNoResultsPreview() {
                     filteredAdventures = emptyList(),
                     searchQuery = "Antarctica"
                 ),
-                onAdventureClick = {},
+                collections = PreviewData.collections,
+                onAdventureClick = { _, _ -> },
                 onAddAdventureClick = {}
             )
         }

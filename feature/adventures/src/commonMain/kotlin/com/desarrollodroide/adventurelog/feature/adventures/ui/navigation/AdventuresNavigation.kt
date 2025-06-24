@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditAdventureScreen
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.adventuresList.AdventureListScreen
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
@@ -25,15 +26,17 @@ import androidx.compose.ui.Alignment
  * Extension function to add adventures screens to a navigation graph
  */
 fun NavGraphBuilder.adventuresScreen(
-    onAdventureClick: (Adventure) -> Unit,
+    onAdventureClick: (Adventure, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    collections: List<Collection> = emptyList()
 ) {
     // Adventures List Screen
     composable(route = NavigationRoutes.Adventures.route) {
         AdventureListScreen(
             onAdventureClick = onAdventureClick,
-            onAddAdventureClick = onAddAdventureClick
+            onAddAdventureClick = onAddAdventureClick,
+            collections = collections
         )
     }
     

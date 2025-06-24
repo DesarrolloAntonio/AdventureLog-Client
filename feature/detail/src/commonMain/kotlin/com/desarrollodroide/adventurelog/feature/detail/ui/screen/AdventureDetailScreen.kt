@@ -284,15 +284,14 @@ private fun CategoryTags(
             }
         }
         
-        // Mostrar todas las colecciones
-        collections.forEach { collection ->
+        collections.forEach { collectionName ->
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier.wrapContentSize()
             ) {
                 Text(
-                    text = "📁 $collection",
+                    text = "📁 $collectionName",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

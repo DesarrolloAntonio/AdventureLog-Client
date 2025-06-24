@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalSessionTokenManager
@@ -26,6 +27,7 @@ import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependen
 fun AdventureItem(
     modifier: Modifier = Modifier,
     adventure: Adventure,
+    collections: List<Collection> = emptyList(),
     onClick: () -> Unit = {},
     onOpenDetails: () -> Unit = { onClick() },
     onEdit: () -> Unit = {},
@@ -121,6 +123,29 @@ fun AdventureItem(
                             }
                         }
                     }
+                    
+                    // Collection tags
+                    val collectionNames = adventure.collections.mapNotNull { id ->
+                        collections.find { it.id == id }?.name
+                    }
+                    collectionNames.forEach { collectionName ->
+                        Surface(
+                            modifier = Modifier.height(24.dp),
+                            color = Color(0xFF4CAF50),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "📁 $collectionName",
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -193,6 +218,7 @@ private fun AdventureItemLightPreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 AdventureItem(
                     adventure = PreviewData.adventures[0],
+                    collections = PreviewData.collections,
                     onOpenDetails = {},
                     onEdit = {},
                     onRemoveFromCollection = {},
@@ -211,6 +237,7 @@ private fun AdventureItemDarkPreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 AdventureItem(
                     adventure = PreviewData.adventures[1],
+                    collections = PreviewData.collections,
                     onOpenDetails = {},
                     onEdit = {},
                     onRemoveFromCollection = {},
@@ -229,6 +256,7 @@ private fun AdventureItemPrivatePreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 AdventureItem(
                     adventure = PreviewData.adventures[0],
+                    collections = PreviewData.collections,
                     onOpenDetails = {},
                     onEdit = {},
                     onRemoveFromCollection = {},
@@ -247,6 +275,7 @@ private fun AdventureItemWithCollectionPreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 AdventureItem(
                     adventure = PreviewData.adventures[1],
+                    collections = PreviewData.collections,
                     onOpenDetails = {},
                     onEdit = {},
                     onRemoveFromCollection = {},
