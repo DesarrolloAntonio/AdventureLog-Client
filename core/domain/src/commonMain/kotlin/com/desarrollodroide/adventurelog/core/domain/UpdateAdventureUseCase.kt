@@ -11,7 +11,7 @@ class UpdateAdventureUseCase(
         adventureId: String,
         name: String,
         description: String,
-        categoryId: String?,
+        categoryName: String?,
         rating: Double,
         link: String,
         location: String,

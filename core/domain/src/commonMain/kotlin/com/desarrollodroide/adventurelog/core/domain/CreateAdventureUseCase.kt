@@ -11,7 +11,7 @@ class CreateAdventureUseCase(
     suspend operator fun invoke(
         name: String,
         description: String,
-        categoryId: String?,
+        categoryId: String,
         rating: Double,
         link: String,
         location: String,
@@ -24,10 +24,6 @@ class CreateAdventureUseCase(
         // Validate required fields
         if (name.isBlank()) {
             return Either.Left("Adventure name is required")
-        }
-        
-        if (categoryId.isNullOrBlank()) {
-            return Either.Left("Category is required")
         }
         
         // Parse coordinates
