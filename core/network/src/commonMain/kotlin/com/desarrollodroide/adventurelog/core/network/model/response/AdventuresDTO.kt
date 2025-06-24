@@ -22,14 +22,14 @@ data class AdventuresDTO(
             results = listOf(
                 AdventureDTO(
                     id = "da55cb2e-d2cf-4ff0-b243-86da0a5e5a2f",
-                    userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
+                    userId = 123,
                     name = "Teruel",
                     description = "Albarracín\nMorada de Rubielos\nRubielos de Mora\nLinares de Mora\nMosqueruela\nCatavieja",
                     rating = null,
                     activityTypes = emptyList(),
                     location = null,
                     isPublic = false,
-                    collection = "239c3a34-3b6c-46f8-b06e-764f0b5dac53",
+                    collections = listOf("239c3a34-3b6c-46f8-b06e-764f0b5dac53"),
                     createdAt = "2025-02-15T12:40:34.618987Z",
                     updatedAt = "2025-02-15T12:45:50.495445Z",
                     images = listOf(
@@ -38,7 +38,8 @@ data class AdventuresDTO(
                             image = "http://192.168.1.27:8016/media/images/3860e7f5-0064-4bda-8136-7210a57417a7.webp",
                             adventure = "da55cb2e-d2cf-4ff0-b243-86da0a5e5a2f",
                             isPrimary = true,
-                            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353"
+                            userId = 123,
+                            immichId = null
                         )
                     ),
                     link = "https://www.tiktok.com/@pasaportealatierra/video/7468289726114450720",
@@ -57,14 +58,14 @@ data class AdventuresDTO(
                 ),
                 AdventureDTO(
                     id = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-                    userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
+                    userId = 123,
                     name = "Navalagamella",
                     description = "https://sendasdeviaje.com/navalagamella-ruta-molinos/",
                     rating = null,
                     activityTypes = emptyList(),
                     location = null,
                     isPublic = false,
-                    collection = "02dca32b-b707-42a0-8065-6a494d6e44c4",
+                    collections = listOf("02dca32b-b707-42a0-8065-6a494d6e44c4"),
                     createdAt = "2025-02-15T12:26:12.551383Z",
                     updatedAt = "2025-02-15T12:29:34.376775Z",
                     images = listOf(
@@ -73,7 +74,8 @@ data class AdventuresDTO(
                             image = "http://192.168.1.27:8016/media/images/079332e0-3099-4b62-b13a-dddb6b04dda3.webp",
                             adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
                             isPrimary = true,
-                            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353"
+                            userId = 123,
+                            immichId = null
                         )
                     ),
                     link = "https://maps.app.goo.gl/8NkEZekZQUSHqUAt7",

@@ -10,7 +10,7 @@ data class AdventureDTO(
     val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String? = null,
+    val userId: Int? = null,
 
     @SerialName("name")
     val name: String,  // Required (*)
@@ -30,8 +30,8 @@ data class AdventureDTO(
     @SerialName("is_public")
     val isPublic: Boolean = false,
 
-    @SerialName("collection")
-    val collection: String? = null,
+    @SerialName("collections")
+    val collections: List<String>? = null,
 
     @SerialName("created_at")
     val createdAt: String? = null,
@@ -66,14 +66,14 @@ data class AdventureDTO(
 
 fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     id = id ?: "",
-    userId = userId ?:"",
+    userId = userId ?: 0,
     name = name,
     description = description ?: "",
     rating = rating ?: 0.0,
     activityTypes = activityTypes ?: emptyList(),
     location = location ?: "",
     isPublic = isPublic,
-    collection = collection ?: "",
+    collections = collections ?: emptyList(),
     createdAt = createdAt ?: "",
     updatedAt = updatedAt ?: "",
     images = images?.map { it.toDomainModel() } ?: emptyList(),

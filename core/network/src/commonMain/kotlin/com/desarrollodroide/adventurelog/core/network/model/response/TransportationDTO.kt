@@ -9,7 +9,7 @@ data class TransportationDTO(
     val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String? = null,
+    val userId: Int? = null,
 
     @SerialName("type")
     val type: String,

@@ -13,7 +13,7 @@ data class CollectionDTO(
     val description: String? = null,
 
     @SerialName("user_id")
-    val userId: String? = null,
+    val userId: Int? = null,
 
     @SerialName("name")
     val name: String,
@@ -49,7 +49,7 @@ data class CollectionDTO(
     val isArchived: Boolean = false,
 
     @SerialName("shared_with")
-    val sharedWith: List<String>? = null,
+    val sharedWith: List<Int>? = null,
 
     @SerialName("link")
     val link: String? = null,
@@ -61,7 +61,7 @@ data class CollectionDTO(
 fun CollectionDTO.toDomainModel(): Collection = Collection(
     id = id ?: "",
     description = description ?: "",
-    userId = userId ?: "",
+    userId = userId ?: 0,
     name = name,
     isPublic = isPublic,
     adventures = adventures?.map { it.toDomainModel() } ?: emptyList(),

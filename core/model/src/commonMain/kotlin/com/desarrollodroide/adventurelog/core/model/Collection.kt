@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.model
 data class Collection(
     val id: String,
     val description: String,
-    val userId: String,
+    val userId: Int,
     val name: String,
     val isPublic: Boolean,
     val adventures: List<Adventure>,
@@ -15,7 +15,7 @@ data class Collection(
     val updatedAt: String,
     val checklists: List<String>,
     val isArchived: Boolean,
-    val sharedWith: List<String>,
+    val sharedWith: List<Int>,
     val link: String,
     val lodging: List<String>
 )

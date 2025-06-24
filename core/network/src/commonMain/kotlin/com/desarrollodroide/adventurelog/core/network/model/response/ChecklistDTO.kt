@@ -9,7 +9,7 @@ data class ChecklistDTO(
     val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String? = null,
+    val userId: Int? = null,
 
     @SerialName("name")
     val name: String,
@@ -39,7 +39,7 @@ data class ChecklistItemDTO(
     val id: String? = null,
 
     @SerialName("user_id")
-    val userId: String? = null,
+    val userId: Int? = null,
 
     @SerialName("name")
     val name: String,

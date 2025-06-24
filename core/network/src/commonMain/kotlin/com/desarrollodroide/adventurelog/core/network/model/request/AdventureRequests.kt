@@ -29,8 +29,8 @@ data class UpdateAdventureRequest(
     val location: String? = null,
     @SerialName("is_public")
     val isPublic: Boolean? = null,
-    val longitude: Double? = null,
-    val latitude: Double? = null,
+    val longitude: String? = null,
+    val latitude: String? = null,
     val visits: List<VisitRequest>? = null,
     val category: CategoryRequest? = null,
     val notes: String? = null,
