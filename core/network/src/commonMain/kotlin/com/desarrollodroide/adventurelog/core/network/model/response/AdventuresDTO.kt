@@ -51,7 +51,7 @@ data class AdventuresDTO(
                         name = "tour",
                         displayName = "Tour",
                         icon = "🚗",
-                        numAdventures = 1
+                        numAdventures = "1"
                     ),
                     attachments = emptyList()
                 ),
@@ -86,7 +86,7 @@ data class AdventuresDTO(
                         name = "ruta",
                         displayName = "Ruta",
                         icon = "🏞️",
-                        numAdventures = 1
+                        numAdventures = "1"
                     ),
                     attachments = emptyList()
                 )

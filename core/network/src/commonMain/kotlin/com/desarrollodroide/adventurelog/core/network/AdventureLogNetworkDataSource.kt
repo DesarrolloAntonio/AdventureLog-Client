@@ -4,33 +4,48 @@ import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDT
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 
 interface AdventureLogNetworkDataSource {
 
     /**
      * Get paginated list of adventures
      */
-    suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO>
+    suspend fun getAdventures(
+        page: Int,
+        pageSize: Int
+    ): List<AdventureDTO>
 
     /**
      * Get adventure details by ID
      */
-    suspend fun getAdventureDetail(objectId: String): AdventureDTO
+    suspend fun getAdventureDetail(
+        objectId: String
+    ): AdventureDTO
 
     /**
      * Get paginated list of collections
      */
-    suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO>
+    suspend fun getCollections(
+        page: Int,
+        pageSize: Int
+    ): List<CollectionDTO>
 
     /**
      * Get collection details by ID
      */
-    suspend fun getCollectionDetail(collectionId: String): CollectionDTO
+    suspend fun getCollectionDetail(
+        collectionId: String
+    ): CollectionDTO
 
     /**
      * Send login request and return user details
      */
-    suspend fun sendLogin(url: String, username: String, password: String): UserDetailsDTO
+    suspend fun sendLogin(
+        url: String,
+        username: String,
+        password: String
+    ): UserDetailsDTO
 
     /**
      * Get current user details
@@ -40,7 +55,10 @@ interface AdventureLogNetworkDataSource {
     /**
      * Initialize network client with server URL and tokens from existing session
      */
-    fun initializeFromSession(serverUrl: String, sessionToken: String?)
+    fun initializeFromSession(
+        serverUrl: String,
+        sessionToken: String?
+    )
 
     /**
      * Clear session data from network client (tokens, base URL)
@@ -63,10 +81,11 @@ interface AdventureLogNetworkDataSource {
         isPublic: Boolean,
         visitDates: Visit?
     ): AdventureDTO
-    
+
     /**
      * Create a new collection
      */
+
     suspend fun createCollection(
         name: String,
         description: String,
@@ -74,4 +93,9 @@ interface AdventureLogNetworkDataSource {
         startDate: String?,
         endDate: String?
     ): CollectionDTO
+    
+    /**
+     * Get all available categories
+     */
+    suspend fun getCategories(): List<CategoryDTO>
 }

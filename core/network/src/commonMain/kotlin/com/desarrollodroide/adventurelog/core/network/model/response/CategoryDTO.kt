@@ -6,27 +6,20 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CategoryDTO(
-    @SerialName("id")
-    val id: String? = null,
-
-    @SerialName("name")
-    val name: String,  // Required (*)
-
+    val id: String,
+    val name: String,
     @SerialName("display_name")
-    val displayName: String,  // Required (*)
-
-    @SerialName("icon")
-    val icon: String,  // Required (*)
-
+    val displayName: String,
+    val icon: String? = null,
     @SerialName("num_adventures")
-    val numAdventures: Int? = null
+    val numAdventures: String? = null
 )
 
 
 fun CategoryDTO.toDomainModel() = Category(
-    id = id ?: "",
+    id = id,
     name = name,
     displayName = displayName,
-    icon = icon,
-    numAdventures = numAdventures ?: 0
+    icon = icon?: "",
+    numAdventures = numAdventures ?: ""
 )
