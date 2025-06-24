@@ -9,7 +9,7 @@ data class NoteDTO(
     val id: String? = null,
 
     @SerialName("user_id")
-    val userId: Int? = null,
+    val userId: String? = null,
 
     @SerialName("name")
     val name: String,

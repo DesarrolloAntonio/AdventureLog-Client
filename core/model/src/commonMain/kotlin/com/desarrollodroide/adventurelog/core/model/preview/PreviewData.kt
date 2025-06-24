@@ -45,35 +45,35 @@ object PreviewData {
             image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
             adventure = "1",
             isPrimary = true,
-            userId = 1
+            userId = "user1"
         ),
         AdventureImage(
             id = "1-2",
             image = "https://images.unsplash.com/photo-1554995207-c18c203602cb",
             adventure = "1",
             isPrimary = false,
-            userId = 1
+            userId = "user1"
         ),
         AdventureImage(
             id = "1-3",
             image = "https://images.unsplash.com/photo-1551632811-561732d1e306",
             adventure = "1",
             isPrimary = false,
-            userId = 1
+            userId = "user1"
         ),
         AdventureImage(
             id = "1-4",
             image = "https://images.unsplash.com/photo-1560624052-449f5ddf0c31",
             adventure = "1",
             isPrimary = false,
-            userId = 1
+            userId = "user1"
         ),
         AdventureImage(
             id = "1-5",
             image = "https://images.unsplash.com/photo-1568084680786-a84f91d1153c",
             adventure = "1",
             isPrimary = false,
-            userId = 1
+            userId = "user1"
         ),
     )
 
@@ -84,28 +84,28 @@ object PreviewData {
             image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
             adventure = "2",
             isPrimary = true,
-            userId = 2
+            userId = "user2"
         ),
         AdventureImage(
             id = "2-2",
             image = "https://images.unsplash.com/photo-1573790387438-4da905039392",
             adventure = "2",
             isPrimary = false,
-            userId = 2
+            userId = "user2"
         ),
         AdventureImage(
             id = "2-3",
             image = "https://images.unsplash.com/photo-1540541338287-41700207dee6",
             adventure = "2",
             isPrimary = false,
-            userId = 2
+            userId = "user2"
         ),
         AdventureImage(
             id = "2-4",
             image = "https://images.unsplash.com/photo-1533760881669-80db4d7b4c15",
             adventure = "2",
             isPrimary = false,
-            userId = 2
+            userId = "user2"
         ),
     )
 
@@ -116,42 +116,42 @@ object PreviewData {
             image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
             adventure = "3",
             isPrimary = true,
-            userId = 3
+            userId = "user3"
         ),
         AdventureImage(
             id = "3-2",
             image = "https://images.unsplash.com/photo-1519944518895-f08a12d6dfd5",
             adventure = "3",
             isPrimary = false,
-            userId = 3
+            userId = "user3"
         ),
         AdventureImage(
             id = "3-3",
             image = "https://images.unsplash.com/photo-1548704606-c65a61e6afe7",
             adventure = "3",
             isPrimary = false,
-            userId = 3
+            userId = "user3"
         ),
         AdventureImage(
             id = "3-4",
             image = "https://images.unsplash.com/photo-1443385434562-3aded81268b4",
             adventure = "3",
             isPrimary = false,
-            userId = 3
+            userId = "user3"
         ),
         AdventureImage(
             id = "3-5",
             image = "https://images.unsplash.com/photo-1509023464722-18d996393ca8",
             adventure = "3",
             isPrimary = false,
-            userId = 3
+            userId = "user3"
         ),
         AdventureImage(
             id = "3-6",
             image = "https://images.unsplash.com/photo-1483777979751-03fa468d266c",
             adventure = "3",
             isPrimary = false,
-            userId = 3
+            userId = "user3"
         ),
     )
 
@@ -162,28 +162,28 @@ object PreviewData {
             image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
             adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
             isPrimary = true,
-            userId = 123
+            userId = "user123"
         ),
         AdventureImage(
             id = "b-2",
             image = "https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f",
             adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
             isPrimary = false,
-            userId = 123
+            userId = "user123"
         ),
         AdventureImage(
             id = "b-3",
             image = "https://images.unsplash.com/photo-1584132967334-10e028bd69f7",
             adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
             isPrimary = false,
-            userId = 123
+            userId = "user123"
         ),
         AdventureImage(
             id = "b-4",
             image = "https://images.unsplash.com/photo-1519449556851-5720b33024e7",
             adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
             isPrimary = false,
-            userId = 123
+            userId = "user123"
         ),
     )
 
@@ -193,28 +193,28 @@ object PreviewData {
             image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
             adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
             isPrimary = true,
-            userId = 123
+            userId = "user123"
         ),
         AdventureImage(
             id = "n-2",
             image = "https://images.unsplash.com/photo-1551632811-561732d1e306",
             adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
             isPrimary = false,
-            userId = 123
+            userId = "user123"
         ),
         AdventureImage(
             id = "n-3",
             image = "https://images.unsplash.com/photo-1551849630-3c2969e08b74",
             adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
             isPrimary = false,
-            userId = 123
+            userId = "user123"
         ),
         AdventureImage(
             id = "n-4",
             image = "https://images.unsplash.com/photo-1547125696-1d32a98e3d36",
             adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
             isPrimary = false,
-            userId = 123
+            userId = "user123"
         ),
     )
 
@@ -238,7 +238,7 @@ object PreviewData {
     val adventures = listOf(
         Adventure(
             id = "1",
-            userId = 1,
+            userId = "user1",
             name = "Lake District Mountain Resort (Pending)",
             description = "Beautiful mountain resort with scenic views and spa facilities",
             rating = 4.5,
@@ -259,7 +259,7 @@ object PreviewData {
         ),
         Adventure(
             id = "2",
-            userId = 2,
+            userId = "user2",
             name = "Coastal Beach Resort & Spa",
             description = "Luxurious beachfront resort with private beach access",
             rating = 4.8,
@@ -280,7 +280,7 @@ object PreviewData {
         ),
         Adventure(
             id = "3",
-            userId = 3,
+            userId = "user3",
             name = "Mountain View Hotel",
             description = "Cozy mountain hotel with panoramic views",
             rating = 4.2,
@@ -305,7 +305,7 @@ object PreviewData {
         Collection(
             id = "c1",
             description = "A collection of summer adventures in Spain",
-            userId = 1,
+            userId = "user1",
             name = "Summer Adventures",
             isPublic = false,
             adventures = listOf(adventures[0]),
@@ -324,7 +324,7 @@ object PreviewData {
         Collection(
             id = "c2",
             description = "Winter adventures in the mountains",
-            userId = 1,
+            userId = "user1",
             name = "Winter Mountains",
             isPublic = false,
             adventures = listOf(adventures[1], adventures[2]),
@@ -343,7 +343,7 @@ object PreviewData {
         Collection(
             id = "c3",
             description = "Beach destinations for 2025",
-            userId = 1,
+            userId = "user1",
             name = "Beach Destinations",
             isPublic = false,
             adventures = emptyList(),
@@ -365,7 +365,7 @@ object PreviewData {
         Collection(
             id = "cdcd3ecc-215f-4fdf-a748-94b95e8956a4",
             description = "Rutas y lugares de interés en Álava",
-            userId = 123,
+            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Álava",
             isPublic = false,
             adventures = adventures.take(2),
@@ -384,7 +384,7 @@ object PreviewData {
         Collection(
             id = "1fa47722-b98b-4c58-ae45-a0a10f78e162",
             description = "Destinos populares en la sierra del Segura",
-            userId = 123,
+            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Albacete",
             isPublic = false,
             adventures = adventures.take(3),
@@ -403,7 +403,7 @@ object PreviewData {
         Collection(
             id = "d64ccfe8-918a-4e3c-8199-82ede3ec3e57",
             description = "Playas y destinos costeros",
-            userId = 123,
+            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Alicante",
             isPublic = false,
             adventures = emptyList(),
@@ -422,7 +422,7 @@ object PreviewData {
         Collection(
             id = "239c3a34-3b6c-46f8-b06e-764f0b5dac53",
             description = "Pueblos pintorescos de Teruel",
-            userId = 123,
+            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Teruel",
             isPublic = false,
             adventures = adventures.take(1),

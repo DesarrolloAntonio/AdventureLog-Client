@@ -99,7 +99,7 @@ fun AdventureDetailScreen(
                     CategoryTags(
                         category = adventure.category,
                         isPublic = adventure.isPublic,
-                        collection = adventure.collection
+                        collections = adventure.collections
                     )
 
                     if (adventure.images.isNotEmpty()) {
@@ -246,7 +246,7 @@ private fun HeaderInfo(
 private fun CategoryTags(
     category: Category?,
     isPublic: Boolean,
-    collection: String?,
+    collections: List<String>,
     modifier: Modifier = Modifier
 ) {
     FlowRow(
@@ -279,6 +279,22 @@ private fun CategoryTags(
                     text = "Private",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+        
+        // Mostrar todas las colecciones
+        collections.forEach { collection ->
+            Surface(
+                shape = RoundedCornerShape(4.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.wrapContentSize()
+            ) {
+                Text(
+                    text = "📁 $collection",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
@@ -528,7 +544,7 @@ private fun createAdventureWithMultipleImages(): Adventure {
         activityTypes = listOf("Hiking", "Nature", "Photography"),
         location = "Rocky Mountains, Colorado",
         isPublic = true,
-        collection = "Summer Adventures",
+        collections = listOf("Summer Adventures"),
         createdAt = "2025-01-15T10:00:00.000Z",
         updatedAt = "2025-01-20T14:30:00.000Z",
         images = images,
@@ -605,7 +621,7 @@ private fun HotelBalnearioDetailPreview() {
         activityTypes = listOf("Spa", "Relax", "Turismo"),
         location = "4h 28min (445 km)",
         isPublic = false,
-        collection = "Santander",
+        collections = listOf("Santander"),
         createdAt = "2025-03-01T10:00:00.000Z",
         updatedAt = "2025-03-15T14:30:00.000Z",
         images = listOf(
@@ -664,7 +680,7 @@ private fun NavalagamellaDetailPreview() {
         activityTypes = listOf("Senderismo", "Naturaleza"),
         location = "",
         isPublic = false,
-        collection = "Madrid",
+        collections = listOf("Madrid"),
         createdAt = "2025-02-20T09:15:00.000Z",
         updatedAt = "2025-03-10T11:45:00.000Z",
         images = listOf(

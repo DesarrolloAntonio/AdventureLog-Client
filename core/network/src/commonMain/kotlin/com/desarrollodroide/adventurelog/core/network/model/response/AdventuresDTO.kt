@@ -22,7 +22,7 @@ data class AdventuresDTO(
             results = listOf(
                 AdventureDTO(
                     id = "da55cb2e-d2cf-4ff0-b243-86da0a5e5a2f",
-                    userId = 123,
+                    userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
                     name = "Teruel",
                     description = "Albarracín\nMorada de Rubielos\nRubielos de Mora\nLinares de Mora\nMosqueruela\nCatavieja",
                     rating = null,
@@ -38,7 +38,7 @@ data class AdventuresDTO(
                             image = "http://192.168.1.27:8016/media/images/3860e7f5-0064-4bda-8136-7210a57417a7.webp",
                             adventure = "da55cb2e-d2cf-4ff0-b243-86da0a5e5a2f",
                             isPrimary = true,
-                            userId = 123,
+                            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
                             immichId = null
                         )
                     ),
@@ -58,7 +58,7 @@ data class AdventuresDTO(
                 ),
                 AdventureDTO(
                     id = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-                    userId = 123,
+                    userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
                     name = "Navalagamella",
                     description = "https://sendasdeviaje.com/navalagamella-ruta-molinos/",
                     rating = null,
@@ -74,7 +74,7 @@ data class AdventuresDTO(
                             image = "http://192.168.1.27:8016/media/images/079332e0-3099-4b62-b13a-dddb6b04dda3.webp",
                             adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
                             isPrimary = true,
-                            userId = 123,
+                            userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
                             immichId = null
                         )
                     ),

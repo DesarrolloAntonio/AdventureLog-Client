@@ -10,7 +10,7 @@ data class AdventureDTO(
     val id: String? = null,
 
     @SerialName("user_id")
-    val userId: Int? = null,
+    val userId: String? = null,
 
     @SerialName("name")
     val name: String,  // Required (*)
@@ -66,7 +66,7 @@ data class AdventureDTO(
 
 fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     id = id ?: "",
-    userId = userId ?: 0,
+    userId = userId ?: "",
     name = name,
     description = description ?: "",
     rating = rating ?: 0.0,
