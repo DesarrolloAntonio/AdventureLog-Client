@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 
 class CreateAdventureUseCase(
@@ -11,7 +12,7 @@ class CreateAdventureUseCase(
     suspend operator fun invoke(
         name: String,
         description: String,
-        categoryId: String,
+        category: Category,
         rating: Double,
         link: String,
         location: String,
@@ -26,20 +27,16 @@ class CreateAdventureUseCase(
             return Either.Left("Adventure name is required")
         }
         
-        // Parse coordinates
-        val lat = latitude.toDoubleOrNull()
-        val lon = longitude.toDoubleOrNull()
-        
         // Create the adventure
         return adventuresRepository.createAdventure(
             name = name,
             description = description,
-            categoryId = categoryId,
+            category = category,
             rating = rating,
             link = link,
             location = location,
-            latitude = lat,
-            longitude = lon,
+            latitude = latitude,
+            longitude = longitude,
             isPublic = isPublic,
             visitDates = visitDates
         )
