@@ -46,10 +46,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.core.model.Category
 
 @Composable
 fun BasicInfoSection(
     formData: AdventureFormData,
+    categories: List<Category>,
     onFormDataChange: (AdventureFormData) -> Unit,
     onNavigateBack: () -> Unit = {}
 ) {
@@ -138,6 +140,7 @@ fun BasicInfoSection(
                     )
                     
                     CategoryDropdown(
+                        categories = categories,
                         selectedCategory = formData.category,
                         onCategorySelected = {
                             onFormDataChange(formData.copy(category = it))

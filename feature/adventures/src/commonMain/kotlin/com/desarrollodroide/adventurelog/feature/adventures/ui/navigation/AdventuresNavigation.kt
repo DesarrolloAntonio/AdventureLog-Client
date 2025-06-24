@@ -62,6 +62,7 @@ fun NavGraphBuilder.adventuresScreen(
         
         Box(modifier = Modifier.fillMaxSize()) {
             AddEditAdventureScreen(
+                categories = uiState.categories,
                 onNavigateBack = {
                     navController.navigateUp()
                 },

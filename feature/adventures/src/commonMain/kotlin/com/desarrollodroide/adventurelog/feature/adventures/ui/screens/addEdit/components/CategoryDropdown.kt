@@ -31,19 +31,11 @@ import com.desarrollodroide.adventurelog.core.model.Category
 
 @Composable
 fun CategoryDropdown(
+    categories: List<Category>,
     selectedCategory: Category?,
     onCategorySelected: (Category?) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    
-    // TODO: Get categories from API
-    val categories = listOf(
-        Category("1", "restaurant", "Restaurant", "🍽️", 0),
-        Category("2", "hotel", "Hotel", "🏨", 0),
-        Category("3", "museum", "Museum", "🏛️", 0),
-        Category("4", "park", "Park", "🌳", 0),
-        Category("5", "beach", "Beach", "🏖️", 0)
-    )
     
     Box {
         OutlinedTextField(

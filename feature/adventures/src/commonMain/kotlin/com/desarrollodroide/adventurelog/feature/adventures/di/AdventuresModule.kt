@@ -19,6 +19,7 @@ val adventureModule = module {
         AddEditAdventureViewModel(
             createAdventureUseCase = get(),
             updateAdventureUseCase = get(),
+            getCategoriesUseCase = get(),
             adventureId = params.getOrNull()
         )
     }
