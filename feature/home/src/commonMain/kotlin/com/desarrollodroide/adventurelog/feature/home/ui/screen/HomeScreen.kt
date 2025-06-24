@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,9 +62,6 @@ import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
-import com.desarrollodroide.adventurelog.resources.background_blur_mint
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.zIndex
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 
@@ -200,17 +196,7 @@ fun HomeScreenContent(
     }
     
     Box(modifier = modifier.fillMaxSize()) {
-        // LAYER 1: Background image covering the entire screen
-        Image(
-            painter = painterResource(Res.drawable.background_blur_mint),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .zIndex(0f),
-            contentScale = ContentScale.FillBounds
-        )
-        
-        // LAYER 2: Drawer and content
+
         HomeDrawer(
             drawerState = drawerState,
             homeUiState = homeUiState,
