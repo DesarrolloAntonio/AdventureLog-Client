@@ -540,7 +540,8 @@ private fun createAdventureWithMultipleImages(): Adventure {
                 id = "visit1",
                 startDate = "2025-01-15",
                 endDate = "2025-01-17",
-                notes = "Great weather, saw amazing wildlife!"
+                notes = "Great weather, saw amazing wildlife!",
+                timezone = "America/Denver"
             )
         ),
         isVisited = true,
@@ -549,7 +550,7 @@ private fun createAdventureWithMultipleImages(): Adventure {
             name = "hiking",
             displayName = "Hiking",
             icon = "🥾",
-            numAdventures = 10
+            numAdventures = "10"
         ),
         attachments = emptyList()
     )
@@ -633,7 +634,7 @@ private fun HotelBalnearioDetailPreview() {
             name = "hotel",
             displayName = "Hotel",
             icon = "🏨",
-            numAdventures = 5
+            numAdventures = "5"
         ),
         attachments = emptyList()
     )
@@ -692,7 +693,7 @@ private fun NavalagamellaDetailPreview() {
             name = "ruta",
             displayName = "Ruta",
             icon = "🏞️",
-            numAdventures = 3
+            numAdventures = "3"
         ),
         attachments = emptyList()
     )
