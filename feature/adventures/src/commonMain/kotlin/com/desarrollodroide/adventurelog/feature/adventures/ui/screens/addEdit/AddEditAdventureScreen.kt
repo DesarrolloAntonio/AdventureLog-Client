@@ -54,7 +54,6 @@ fun AddEditAdventureScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
