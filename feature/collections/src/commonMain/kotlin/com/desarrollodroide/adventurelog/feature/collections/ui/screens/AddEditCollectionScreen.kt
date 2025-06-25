@@ -2,49 +2,31 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components.BasicInfoSection
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components.DateSection
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
 
-data class CollectionFormData(
-    val name: String = "",
-    val description: String = "",
-    val isPublic: Boolean = false,
-    val startDate: String = "",
-    val endDate: String = ""
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditCollectionScreen(
     onNavigateBack: () -> Unit,
@@ -52,154 +34,63 @@ fun AddEditCollectionScreen(
     modifier: Modifier = Modifier,
     initialData: CollectionFormData? = null
 ) {
-    var formData by remember { 
-        mutableStateOf(initialData ?: CollectionFormData()) 
+    var formData by remember {
+        mutableStateOf(initialData ?: CollectionFormData())
     }
-    
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        text = if (initialData != null) "Edit collection" else "New collection",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        },
-        containerColor = Color.Transparent
-    ) { paddingValues ->
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        BasicInfoSection(
+            formData = formData,
+            onFormDataChange = { formData = it },
+            onNavigateBack = onNavigateBack
+        )
+
+        DateSection(
+            formData = formData,
+            onFormDataChange = { formData = it }
+        )
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Name
-            OutlinedTextField(
-                value = formData.name,
-                onValueChange = { 
-                    formData = formData.copy(name = it)
-                },
-                label = { Text("Collection name*") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                )
-            )
-            
-            // Description
-            OutlinedTextField(
-                value = formData.description,
-                onValueChange = { 
-                    formData = formData.copy(description = it)
-                },
-                label = { Text("Description") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
-                maxLines = 5,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Done
-                )
-            )
-            
-            // Public collection switch
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Button(
+                onClick = { onSave(formData) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                enabled = formData.name.isNotBlank()
             ) {
-                Column {
-                    Text(
-                        text = "Public collection",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = "Other users will be able to see this collection",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Switch(
-                    checked = formData.isPublic,
-                    onCheckedChange = {
-                        formData = formData.copy(isPublic = it)
-                    }
+                Text(
+                    text = if (initialData != null) "Update Collection" else "Create Collection",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
                 )
             }
-            
-            // Date fields
-            OutlinedTextField(
-                value = formData.startDate,
-                onValueChange = { 
-                    formData = formData.copy(startDate = it)
-                },
-                label = { Text("Start date") },
-                placeholder = { Text("YYYY-MM-DD") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                )
-            )
-            
-            OutlinedTextField(
-                value = formData.endDate,
-                onValueChange = { 
-                    formData = formData.copy(endDate = it)
-                },
-                label = { Text("End date") },
-                placeholder = { Text("YYYY-MM-DD") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Done
-                )
-            )
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            // Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+
+            TextButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Button(
-                    onClick = { 
-                        if (formData.name.isNotBlank()) {
-                            onSave(formData)
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    enabled = formData.name.isNotBlank()
-                ) {
-                    Text("Save")
-                }
-                
-                OutlinedButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Cancel")
-                }
+                Text(
+                    text = "Cancel",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            
-            Spacer(modifier = Modifier.height(32.dp))
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }

@@ -6,14 +6,18 @@ import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
  * Enumeration of screen types that can be displayed in the HomeScreen
  * Enhanced with navigation route mapping and utility methods
  */
-enum class CurrentScreen(val route: String, val index: Int) {
-    HOME(NavigationRoutes.Home.screen, 0),
-    ADVENTURES(NavigationRoutes.Adventures.route, 1),
-    COLLECTIONS(NavigationRoutes.Collections.route, 2),
-    TRAVEL(NavigationRoutes.Travel.route, 3),
-    MAP(NavigationRoutes.Map.route, 4),
-    CALENDAR(NavigationRoutes.Calendar.route, 5),
-    SETTINGS(NavigationRoutes.Settings.route, 6);
+enum class CurrentScreen(val route: String, val index: Int, val title: String) {
+    HOME(NavigationRoutes.Home.screen, 0, "Home"), // Title will be customized in getTitle()
+    ADVENTURES(NavigationRoutes.Adventures.route, 1, "Adventures"),
+    COLLECTIONS(NavigationRoutes.Collections.route, 2, "Collections"),
+    TRAVEL(NavigationRoutes.Travel.route, 3, "Travel"),
+    MAP(NavigationRoutes.Map.route, 4, "Map"),
+    CALENDAR(NavigationRoutes.Calendar.route, 5, "Calendar"),
+    SETTINGS(NavigationRoutes.Settings.route, 6, "Settings"),
+    ADD_ADVENTURE("add_adventure", 7, "New Adventure"),
+    ADD_COLLECTION("add_collection", 8, "New Collection"),
+    EDIT_ADVENTURE("edit_adventure", 9, "Edit Adventure"),
+    EDIT_COLLECTION("edit_collection", 10, "Edit Collection");
 
     companion object {
         /**
@@ -22,7 +26,11 @@ enum class CurrentScreen(val route: String, val index: Int) {
          * @return The corresponding CurrentScreen, or HOME if not found
          */
         fun fromRoute(route: String): CurrentScreen {
-            return values().find { it.route == route } ?: HOME
+            // Handle collection detail routes specially
+            if (route.startsWith("collection/")) {
+                return COLLECTIONS
+            }
+            return entries.find { it.route == route } ?: HOME
         }
 
         /**
@@ -31,7 +39,19 @@ enum class CurrentScreen(val route: String, val index: Int) {
          * @return The corresponding CurrentScreen, or HOME if index is invalid
          */
         fun fromIndex(index: Int): CurrentScreen {
-            return values().find { it.index == index } ?: HOME
+            return entries.find { it.index == index } ?: HOME
+        }
+    }
+    
+    /**
+     * Get the formatted title for this screen
+     * @param userName The user's name to use for HOME screen
+     * @return The formatted title
+     */
+    fun getTitle(userName: String = ""): String {
+        return when (this) {
+            HOME -> "Hi, $userName!"
+            else -> title
         }
     }
 }

@@ -163,12 +163,7 @@ fun HomeScreenContent(
     // Update currentScreen when navigation changes
     LaunchedEffect(currentBackStackEntry) {
         currentBackStackEntry?.destination?.route?.let { route ->
-            if (!route.startsWith("collection/")) {
-                currentScreen = CurrentScreen.fromRoute(route)
-            } else {
-                // We're in a collection detail, still mark as COLLECTIONS for drawer highlight
-                currentScreen = CurrentScreen.COLLECTIONS
-            }
+            currentScreen = CurrentScreen.fromRoute(route)
         }
     }
 
@@ -304,15 +299,7 @@ fun HomeScreenContent(
                                     }
                                 } else {
                                     // For other screens, show the normal title
-                                    val topBarTitle = when (currentScreen) {
-                                        CurrentScreen.COLLECTIONS -> "Collections"
-                                        CurrentScreen.ADVENTURES -> "Adventures"
-                                        CurrentScreen.SETTINGS -> "Settings"
-                                        CurrentScreen.TRAVEL -> "Travel"
-                                        CurrentScreen.MAP -> "Map"
-                                        CurrentScreen.CALENDAR -> "Calendar"
-                                        CurrentScreen.HOME -> "Hi, $userName!"
-                                    }
+                                    val topBarTitle = CurrentScreen.fromRoute(currentRoute).getTitle(userName)
 
                                     Text(
                                         text = topBarTitle,

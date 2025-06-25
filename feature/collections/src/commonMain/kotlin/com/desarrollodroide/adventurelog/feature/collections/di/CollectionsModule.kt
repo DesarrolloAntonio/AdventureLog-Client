@@ -24,9 +24,8 @@ val collectionsModule = module {
     
     viewModel { params -> 
         AddEditCollectionViewModel(
-            createCollectionUseCase = get(),
-            updateCollectionUseCase = get(),
-            collectionId = params.getOrNull()
+            collectionId = params.getOrNull(),
+            collectionsRepository = get()
         )
     }
 }
