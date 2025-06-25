@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -110,7 +112,8 @@ private fun AdventureListContent(
                 )
             }
         },
-        containerColor = Color.Transparent
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets.systemBars
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -165,7 +168,10 @@ private fun AdventuresList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+        contentPadding = PaddingValues(
+            horizontal = 16.dp,
+            vertical = 16.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(
@@ -177,10 +183,6 @@ private fun AdventuresList(
                 collections = collections,
                 onClick = { onAdventureClick(adventure) }
             )
-        }
-        
-        item {
-            Spacer(modifier = Modifier.height(72.dp))
         }
     }
 }

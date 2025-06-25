@@ -55,8 +55,11 @@ fun AdventureItem(
     Card(
         modifier = modifier
             .fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        onClick = onClick
+        shape = RoundedCornerShape(26.dp),
+        onClick = onClick,
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
     ) {
         Box {
             val hasImage = adventure.images.firstOrNull()?.image?.isNotEmpty() == true
@@ -239,14 +242,16 @@ private fun AdventureItemLightPreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background) {
-                AdventureItem(
-                    adventure = PreviewData.adventures[0],
-                    collections = PreviewData.collections,
-                    onOpenDetails = {},
-                    onEdit = {},
-                    onRemoveFromCollection = {},
-                    onDelete = {}
-                )
+                Box(modifier = Modifier.padding(16.dp)) {
+                    AdventureItem(
+                        adventure = PreviewData.adventures[0],
+                        collections = PreviewData.collections,
+                        onOpenDetails = {},
+                        onEdit = {},
+                        onRemoveFromCollection = {},
+                        onDelete = {}
+                    )
+                }
             }
         }
     }
@@ -258,14 +263,16 @@ private fun AdventureItemDarkPreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = darkColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background) {
-                AdventureItem(
-                    adventure = PreviewData.adventures[1],
-                    collections = PreviewData.collections,
-                    onOpenDetails = {},
-                    onEdit = {},
-                    onRemoveFromCollection = {},
-                    onDelete = {}
-                )
+                Box(modifier = Modifier.padding(16.dp)) {
+                    AdventureItem(
+                        adventure = PreviewData.adventures[1],
+                        collections = PreviewData.collections,
+                        onOpenDetails = {},
+                        onEdit = {},
+                        onRemoveFromCollection = {},
+                        onDelete = {}
+                    )
+                }
             }
         }
     }
@@ -277,14 +284,16 @@ private fun AdventureItemPrivatePreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background) {
-                AdventureItem(
-                    adventure = PreviewData.adventures[0],
-                    collections = PreviewData.collections,
-                    onOpenDetails = {},
-                    onEdit = {},
-                    onRemoveFromCollection = {},
-                    onDelete = {}
-                )
+                Box(modifier = Modifier.padding(16.dp)) {
+                    AdventureItem(
+                        adventure = PreviewData.adventures[0],
+                        collections = PreviewData.collections,
+                        onOpenDetails = {},
+                        onEdit = {},
+                        onRemoveFromCollection = {},
+                        onDelete = {}
+                    )
+                }
             }
         }
     }
@@ -296,23 +305,25 @@ private fun AdventureItemNoImagePreview() {
     PreviewImageDependencies {
         MaterialTheme(colorScheme = lightColorScheme()) {
             Surface(color = MaterialTheme.colorScheme.background) {
-                AdventureItem(
-                    adventure = PreviewData.adventures[0].copy(
-                        images = emptyList(), // No images
-                        category = Category(
-                            id = "cat1",
-                            name = "hiking",
-                            displayName = "Hiking",
-                            icon = "🥾",
-                            numAdventures = "10"
-                        )
-                    ),
-                    collections = PreviewData.collections,
-                    onOpenDetails = {},
-                    onEdit = {},
-                    onRemoveFromCollection = {},
-                    onDelete = {}
-                )
+                Box(modifier = Modifier.padding(16.dp)) {
+                    AdventureItem(
+                        adventure = PreviewData.adventures[0].copy(
+                            images = emptyList(), // No images
+                            category = Category(
+                                id = "cat1",
+                                name = "hiking",
+                                displayName = "Hiking",
+                                icon = "🥾",
+                                numAdventures = "10"
+                            )
+                        ),
+                        collections = PreviewData.collections,
+                        onOpenDetails = {},
+                        onEdit = {},
+                        onRemoveFromCollection = {},
+                        onDelete = {}
+                    )
+                }
             }
         }
     }

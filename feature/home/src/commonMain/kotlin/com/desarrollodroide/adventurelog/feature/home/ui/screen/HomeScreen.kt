@@ -65,6 +65,8 @@ import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirection
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
+import androidx.compose.ui.layout.ContentScale
+import com.desarrollodroide.adventurelog.resources.main_background7
 
 /**
  * Entry point composable that integrates with navigation
@@ -200,6 +202,13 @@ fun HomeScreenContent(
     }
     
     Box(modifier = modifier.fillMaxSize()) {
+        // Background image that covers the entire screen
+        Image(
+            painter = painterResource(Res.drawable.main_background7),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
         HomeDrawer(
             drawerState = drawerState,
