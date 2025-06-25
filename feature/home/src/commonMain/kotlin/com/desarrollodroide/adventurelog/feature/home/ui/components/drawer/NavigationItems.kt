@@ -29,7 +29,6 @@ fun createNavigationItems(
             title = "Adventures",
             icon = Icons.Outlined.Explore,
             selectedIcon = Icons.Filled.Explore,
-            badgeCount = 3,
             onClick = onAdventuresClick
         ),
         NavigationItem(
