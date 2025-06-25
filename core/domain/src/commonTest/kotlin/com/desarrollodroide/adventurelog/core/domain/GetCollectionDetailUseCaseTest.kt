@@ -23,6 +23,16 @@ class GetCollectionDetailUseCaseTest {
             lastCollectionIdParam = collectionId
             return getCollectionResult
         }
+
+        override suspend fun createCollection(
+            name: String,
+            description: String,
+            isPublic: Boolean,
+            startDate: String?,
+            endDate: String?
+        ): Either<String, Collection> {
+            throw NotImplementedError()
+        }
     }
 
     private val fakeRepository = FakeCollectionsRepository()

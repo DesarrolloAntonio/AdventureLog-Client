@@ -4,6 +4,8 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.Visit
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,6 +27,21 @@ class GetAdventuresUseCaseTest {
         }
 
         override suspend fun getAdventure(objectId: String): Either<ApiResponse, Adventure> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun createAdventure(
+            name: String,
+            description: String,
+            category: Category,
+            rating: Double,
+            link: String,
+            location: String,
+            latitude: String?,
+            longitude: String?,
+            isPublic: Boolean,
+            visitDates: Visit?
+        ): Either<String, Adventure> {
             throw NotImplementedError()
         }
     }
@@ -111,7 +128,7 @@ class GetAdventuresUseCaseTest {
             activityTypes = listOf("Hiking", "Outdoor"),
             location = "Test Location",
             isPublic = true,
-            collection = "test-collection",
+            collections = listOf("test-collection"),
             createdAt = "2024-01-01T00:00:00Z",
             updatedAt = "2024-01-01T00:00:00Z",
             images = emptyList(),

@@ -27,6 +27,16 @@ class GetCollectionsUseCaseTest {
         override suspend fun getCollection(collectionId: String): Either<ApiResponse, Collection> {
             throw NotImplementedError()
         }
+
+        override suspend fun createCollection(
+            name: String,
+            description: String,
+            isPublic: Boolean,
+            startDate: String?,
+            endDate: String?
+        ): Either<String, Collection> {
+            throw NotImplementedError()
+        }
     }
 
     private val fakeRepository = FakeCollectionsRepository()

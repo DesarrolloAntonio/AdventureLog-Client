@@ -2,9 +2,12 @@ package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.model.Account
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import kotlinx.coroutines.flow.Flow
@@ -86,6 +89,35 @@ class LogoutUseCaseTest {
         }
 
         override suspend fun getUserDetails(): UserDetailsDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun createAdventure(
+            name: String,
+            description: String,
+            category: Category,
+            rating: Double,
+            link: String,
+            location: String,
+            latitude: String?,
+            longitude: String?,
+            isPublic: Boolean,
+            visitDates: Visit?
+        ): AdventureDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun createCollection(
+            name: String,
+            description: String,
+            isPublic: Boolean,
+            startDate: String?,
+            endDate: String?
+        ): CollectionDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getCategories(): List<CategoryDTO> {
             throw NotImplementedError()
         }
     }

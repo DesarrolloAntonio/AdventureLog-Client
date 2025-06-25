@@ -20,16 +20,24 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 
 ## 📱 Screenshots
 
+### Main Navigation
 <p align="center">
-  <img src="docs/screenshots/login_screen.png" width="250" alt="Login Screen"/>
-  <img src="docs/screenshots/drawer_screen.png" width="250" alt="Navigation Drawer"/>
-  <img src="docs/screenshots/home_screen.png" width="250" alt="Home Screen"/>
+  <img src="docs/screenshots/login_screen.png" width="230" alt="Login Screen"/>
+  <img src="docs/screenshots/drawer_screen.png" width="230" alt="Navigation Drawer"/>
+  <img src="docs/screenshots/home_screen.png" width="230" alt="Home Screen"/>
 </p>
 
+### Collections Management
 <p align="center">
-  <img src="docs/screenshots/collections_screen.png" width="250" alt="Collections Screen"/>
-  <img src="docs/screenshots/collections_detail_screen.png" width="250" alt="Collection Detail"/>
-  <img src="docs/screenshots/detail_adventure_screen.png" width="250" alt="Adventure Detail"/>
+  <img src="docs/screenshots/collections_screen.png" width="230" alt="Collections Screen"/>
+  <img src="docs/screenshots/collections_detail_screen.png" width="230" alt="Collection Detail"/>
+  <img src="docs/screenshots/add_collection_screen.png" width="230" alt="Add Collection"/>
+</p>
+
+### Adventure Features
+<p align="center">
+  <img src="docs/screenshots/detail_adventure_screen.png" width="230" alt="Adventure Detail"/>
+  <img src="docs/screenshots/add_adventure_screen.png" width="230" alt="Add Adventure"/>
 </p>
 
 ## 🏗️ Architecture
@@ -60,10 +68,12 @@ AdventureLog/
 │
 └── feature/              # Feature modules
     ├── adventures/       # Adventure listing and management
+    ├── collections/      # Collections management and organization
     ├── detail/           # Adventure details
     ├── home/             # Home screen and dashboard
     ├── login/            # Authentication
-    └── settings/         # Application settings
+    ├── settings/         # Application settings
+    └── ui/               # Shared UI components and utilities
 ```
 
 ### Clean Architecture Layers
@@ -160,8 +170,8 @@ The app uses sealed classes to represent different UI states, providing type-saf
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/DesarrolloDroide/AdventureLog.git
-   cd AdventureLog
+   git clone https://github.com/DesarrolloAntonio/AdventureLog-Client.git
+   cd AdventureLog-Client
    ```
 
 2. Open in Android Studio and sync the project
@@ -211,6 +221,10 @@ The project uses a typical KMM setup with Gradle, supporting:
 - **Platform-Specific Adapters**: Native functionality wrapped in platform modules
 - **Expect/Actual Pattern**: For platform-specific implementations
 
+## 🗺️ Roadmap
+
+Track our development progress and upcoming features on our [GitHub Project Board](https://github.com/users/DesarrolloAntonio/projects/2).
+
 ## 🧪 Testing Strategy
 
 - **Unit Tests**:Test individual components and business logic (Coming)
@@ -236,7 +250,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Contributors
 
-- [DesarrolloDroide](https://github.com/DesarrolloDroide) - Project Lead
+- [DesarrolloAntonio](https://github.com/DesarrolloAntonio) - Project Lead
 - Contributors welcome!
 
 ---
