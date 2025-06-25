@@ -66,7 +66,7 @@ import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import androidx.compose.ui.layout.ContentScale
-import com.desarrollodroide.adventurelog.resources.main_background7
+import com.desarrollodroide.adventurelog.resources.main_background
 
 /**
  * Entry point composable that integrates with navigation
@@ -204,7 +204,7 @@ fun HomeScreenContent(
     Box(modifier = modifier.fillMaxSize()) {
         // Background image that covers the entire screen
         Image(
-            painter = painterResource(Res.drawable.main_background7),
+            painter = painterResource(Res.drawable.main_background),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -334,7 +334,11 @@ fun HomeScreenContent(
                         scrollBehavior = scrollBehavior,
                         colors = TopAppBarDefaults.mediumTopAppBarColors(
                             // Make TopBar transparent to see the background
-                            containerColor = Color.Transparent
+                            containerColor = Color.Transparent,
+                            scrolledContainerColor = Color.Transparent,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface,
+                            actionIconContentColor = MaterialTheme.colorScheme.onSurface
                         )
                     )
                 },
