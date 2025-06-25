@@ -3,8 +3,6 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,7 +71,12 @@ fun CollectionDetailContent(
 ) {
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 80.dp // Extra padding for last item visibility while allowing overscroll
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {

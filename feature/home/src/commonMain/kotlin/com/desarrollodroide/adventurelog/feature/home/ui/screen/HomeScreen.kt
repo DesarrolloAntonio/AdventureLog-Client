@@ -348,7 +348,7 @@ fun HomeScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
+                        .padding(top = innerPadding.calculateTopPadding())
                 ) {
                     // NavHost to manage the content on each screen with animations
                     AnimatedDirectionalNavHost(

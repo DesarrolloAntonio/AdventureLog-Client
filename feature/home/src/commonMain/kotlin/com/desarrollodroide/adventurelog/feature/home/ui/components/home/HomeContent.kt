@@ -106,7 +106,12 @@ private fun HomeContentSuccess(
     LazyColumn(
         modifier = modifier
             .fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 80.dp // Extra padding for last item visibility while allowing overscroll
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
@@ -131,10 +136,6 @@ private fun HomeContentSuccess(
                 onClick = { onAdventureClick(adventure) },
                 sessionToken = sessionToken
             )
-        }
-        
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

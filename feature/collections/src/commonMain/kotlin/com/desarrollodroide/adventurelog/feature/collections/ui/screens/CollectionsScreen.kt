@@ -99,7 +99,7 @@ private fun CollectionsContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             when {
                 uiState.isLoading -> {
@@ -136,8 +136,13 @@ fun CollectionList(
 ) {
     LazyColumn(
         modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
+            .fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 80.dp // Extra padding for last item visibility while allowing overscroll
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(
@@ -148,11 +153,6 @@ fun CollectionList(
                 collection = collection,
                 onClick = { onCollectionClick(collection.id, collection.name) }
             )
-        }
-        
-        // Add extra space at the bottom to ensure FAB doesn't cover the last item
-        item {
-            Spacer(modifier = Modifier.height(72.dp))
         }
     }
 }

@@ -118,7 +118,7 @@ private fun AdventureListContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             when (uiState) {
                 is AdventuresUiState.Loading -> {
@@ -169,8 +169,10 @@ private fun AdventuresList(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
-            horizontal = 16.dp,
-            vertical = 16.dp
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 80.dp // Extra padding for last item visibility while allowing overscroll
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
