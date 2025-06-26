@@ -22,7 +22,8 @@ class VisitTest {
             id = "visit-123",
             startDate = "2024-06-01",
             endDate = "2024-06-07",
-            notes = "Amazing week-long vacation with family"
+            notes = "Amazing week-long vacation with family",
+            timezone = "UTC"
         )
         
         // Then
@@ -57,7 +58,8 @@ class VisitTest {
             id = "v-456",
             startDate = "2024-12-24",
             endDate = "2024-12-26",
-            notes = "Christmas holidays"
+            notes = "Christmas holidays",
+            timezone = "UTC"
         )
         
         // When
@@ -78,7 +80,8 @@ class VisitTest {
                 "id": "visit-789",
                 "startDate": "2024-07-01",
                 "endDate": "2024-07-15",
-                "notes": "Summer vacation in Europe"
+                "notes": "Summer vacation in Europe",
+                "timezone": "UTC"
             }
         """.trimIndent()
         
@@ -99,7 +102,8 @@ class VisitTest {
             id = "1",
             startDate = "2024-03-01",
             endDate = "2024-03-03",
-            notes = "Weekend trip"
+            notes = "Weekend trip",
+            timezone = "UTC"
         )
         
         val visit2 = visit1.copy()
@@ -120,7 +124,8 @@ class VisitTest {
             id = "same-day",
             startDate = "2024-05-15",
             endDate = "2024-05-15",
-            notes = "Day trip to the mountains"
+            notes = "Day trip to the mountains",
+            timezone = "UTC"
         )
         
         // Then
@@ -134,7 +139,8 @@ class VisitTest {
             id = "no-notes",
             startDate = "2024-08-01",
             endDate = "2024-08-05",
-            notes = ""
+            notes = "",
+            timezone = "UTC"
         )
         
         // Then
@@ -146,9 +152,9 @@ class VisitTest {
     fun `should handle various date formats`() {
         // Given - Different date format patterns that might be used
         val visits = listOf(
-            Visit("1", "2024-01-01", "2024-01-02", "ISO format"),
-            Visit("2", "2024-12-31", "2025-01-01", "Year transition"),
-            Visit("3", "2024-02-29", "2024-03-01", "Leap year")
+            Visit("1", "2024-01-01", "2024-01-02", "ISO format", "UTC"),
+            Visit("2", "2024-12-31", "2025-01-01", "Year transition", "UTC"),
+            Visit("3", "2024-02-29", "2024-03-01", "Leap year", "UTC")
         )
         
         // Then
@@ -170,7 +176,8 @@ class VisitTest {
             id = "long-notes",
             startDate = "2024-09-01",
             endDate = "2024-09-14",
-            notes = longNotes
+            notes = longNotes,
+            timezone = "UTC"
         )
         
         // Then

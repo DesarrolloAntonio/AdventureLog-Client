@@ -66,7 +66,7 @@ class AdventureTest {
             name = "Hiking",
             displayName = "Hiking",
             icon = "🥾",
-            numAdventures = 10
+            numAdventures = "10"
         )
         
         val image = AdventureImage(
@@ -81,7 +81,8 @@ class AdventureTest {
             id = "visit-1",
             startDate = "2024-01-15",
             endDate = "2024-01-20",
-            notes = "Great experience"
+            notes = "Great experience",
+            timezone = "UTC"
         )
         
         val attachment = Attachment(
@@ -102,7 +103,7 @@ class AdventureTest {
             activityTypes = listOf("hiking", "nature"),
             location = "Rocky Mountains",
             isPublic = true,
-            collection = "Summer Adventures",
+            collections = listOf("Summer Adventures"),
             createdAt = "2024-01-01T10:00:00Z",
             updatedAt = "2024-01-02T15:30:00Z",
             images = listOf(image),
@@ -142,7 +143,7 @@ class AdventureTest {
             activityTypes = listOf("hiking"),
             location = "Test Location",
             isPublic = false,
-            collection = "Test Collection",
+            collections = listOf("Test Collection"),
             createdAt = "2024-01-01",
             updatedAt = "2024-01-02",
             images = emptyList(),
@@ -179,7 +180,7 @@ class AdventureTest {
                 "activityTypes": ["trekking", "camping"],
                 "location": "Sahara Desert",
                 "isPublic": true,
-                "collection": "Desert Adventures",
+                "collections": ["Desert Adventures"],
                 "createdAt": "2024-03-01T08:00:00Z",
                 "updatedAt": "2024-03-02T10:00:00Z",
                 "images": [],
@@ -221,7 +222,7 @@ class AdventureTest {
                 "activityTypes": ["hiking"],
                 "location": "Complex Location",
                 "isPublic": true,
-                "collection": "Complex Collection",
+                "collections": ["Complex Collection"],
                 "createdAt": "2024-01-01",
                 "updatedAt": "2024-01-02",
                 "images": [
@@ -241,7 +242,8 @@ class AdventureTest {
                         "id": "visit-1",
                         "startDate": "2024-01-15",
                         "endDate": "2024-01-20",
-                        "notes": "Great visit"
+                        "notes": "Great visit",
+                        "timezone": "UTC"
                     }
                 ],
                 "isVisited": true,
@@ -250,7 +252,7 @@ class AdventureTest {
                     "name": "Hiking",
                     "displayName": "Hiking",
                     "icon": "🥾",
-                    "numAdventures": 5
+                    "numAdventures": "5"
                 },
                 "attachments": [
                     {
@@ -294,7 +296,7 @@ class AdventureTest {
             activityTypes = listOf("hiking"),
             location = "Location 1",
             isPublic = true,
-            collection = "Collection 1",
+            collections = listOf("Collection 1"),
             createdAt = "2024-01-01",
             updatedAt = "2024-01-02",
             images = emptyList(),
@@ -330,7 +332,7 @@ class AdventureTest {
             activityTypes = emptyList(),
             location = "Empty Location",
             isPublic = false,
-            collection = "Empty Collection",
+            collections = listOf("Empty Collection"),
             createdAt = "2024-01-01",
             updatedAt = "2024-01-01",
             images = emptyList(),

@@ -23,7 +23,7 @@ class CategoryTest {
             name = "hiking",
             displayName = "Hiking",
             icon = "🥾",
-            numAdventures = 25
+            numAdventures = "25"
         )
         
         // Then
@@ -31,7 +31,7 @@ class CategoryTest {
         assertEquals("hiking", category.name)
         assertEquals("Hiking", category.displayName)
         assertEquals("🥾", category.icon)
-        assertEquals(25, category.numAdventures)
+        assertEquals("25", category.numAdventures)
     }
     
     @Test
@@ -45,19 +45,19 @@ class CategoryTest {
         // Then
         assertEquals("hotel", hotelCategory.name)
         assertEquals("🏨", hotelCategory.icon)
-        assertEquals(5, hotelCategory.numAdventures)
+        assertEquals("5", hotelCategory.numAdventures)
         
         assertEquals("restaurant", restaurantCategory.name)
         assertEquals("🍽️", restaurantCategory.icon)
-        assertEquals(3, restaurantCategory.numAdventures)
+        assertEquals("3", restaurantCategory.numAdventures)
         
         assertEquals("beach", beachCategory.name)
         assertEquals("🏖️", beachCategory.icon)
-        assertEquals(4, beachCategory.numAdventures)
+        assertEquals("4", beachCategory.numAdventures)
         
         assertEquals("ruta", rutaCategory.name)
         assertEquals("🏞️", rutaCategory.icon)
-        assertEquals(2, rutaCategory.numAdventures)
+        assertEquals("2", rutaCategory.numAdventures)
     }
     
     @Test
@@ -68,7 +68,7 @@ class CategoryTest {
             name = "restaurant",
             displayName = "Restaurant",
             icon = "🍽️",
-            numAdventures = 10
+            numAdventures = "10"
         )
         
         // When
@@ -79,7 +79,7 @@ class CategoryTest {
         assertTrue(jsonString.contains("\"name\":\"restaurant\""))
         assertTrue(jsonString.contains("\"displayName\":\"Restaurant\""))
         assertTrue(jsonString.contains("\"icon\":\"🍽️\""))
-        assertTrue(jsonString.contains("\"numAdventures\":10"))
+        assertTrue(jsonString.contains("\"numAdventures\":\"10\""))
     }
     
     @Test
@@ -91,7 +91,7 @@ class CategoryTest {
                 "name": "museum",
                 "displayName": "Museum",
                 "icon": "🏛️",
-                "numAdventures": 15
+                "numAdventures": "15"
             }
         """.trimIndent()
         
@@ -103,7 +103,7 @@ class CategoryTest {
         assertEquals("museum", category.name)
         assertEquals("Museum", category.displayName)
         assertEquals("🏛️", category.icon)
-        assertEquals(15, category.numAdventures)
+        assertEquals("15", category.numAdventures)
     }
     
     @Test
@@ -114,12 +114,12 @@ class CategoryTest {
             name = "park",
             displayName = "Park",
             icon = "🌳",
-            numAdventures = 8
+            numAdventures = "8"
         )
         
         val category2 = category1.copy()
         val category3 = category1.copy(id = "2")
-        val category4 = category1.copy(numAdventures = 10)
+        val category4 = category1.copy(numAdventures = "10")
         
         // Then
         assertEquals(category1, category2)
@@ -132,12 +132,12 @@ class CategoryTest {
     fun `should handle various emoji icons`() {
         // Given
         val categories = listOf(
-            Category("1", "hotel", "Hotel", "🏨", 5),
-            Category("2", "restaurant", "Restaurant", "🍽️", 10),
-            Category("3", "beach", "Beach", "🏖️", 7),
-            Category("4", "mountain", "Mountain", "⛰️", 3),
-            Category("5", "shopping", "Shopping", "🛍️", 12),
-            Category("6", "camping", "Camping", "🏕️", 4)
+            Category("1", "hotel", "Hotel", "🏨", "5"),
+            Category("2", "restaurant", "Restaurant", "🍽️", "10"),
+            Category("3", "beach", "Beach", "🏖️", "7"),
+            Category("4", "mountain", "Mountain", "⛰️", "3"),
+            Category("5", "shopping", "Shopping", "🛍️", "12"),
+            Category("6", "camping", "Camping", "🏕️", "4")
         )
         
         // Then
@@ -157,10 +157,10 @@ class CategoryTest {
             name = "new_category",
             displayName = "New Category",
             icon = "✨",
-            numAdventures = 0
+            numAdventures = "0"
         )
         
         // Then
-        assertEquals(0, emptyCategory.numAdventures)
+        assertEquals("0", emptyCategory.numAdventures)
     }
 }

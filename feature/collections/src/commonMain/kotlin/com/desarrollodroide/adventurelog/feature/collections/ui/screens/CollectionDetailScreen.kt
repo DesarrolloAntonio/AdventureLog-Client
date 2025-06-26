@@ -1,8 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -75,30 +78,80 @@ fun CollectionDetailContent(
             start = 16.dp,
             end = 16.dp,
             top = 16.dp,
-            bottom = 80.dp // Extra padding for last item visibility while allowing overscroll
+            bottom = 80.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
             CollectionHeader(collection)
         }
         
         item {
-            Text(
-                text = "Adventures",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Adventures",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = "${collection.adventures.size}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
         
         if (collection.adventures.isEmpty()) {
             item {
-                Text(
-                    text = "No adventures in this collection yet",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Explore,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "No adventures yet",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Start adding adventures to build your collection",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
         } else {
             items(collection.adventures) { adventure ->
@@ -117,54 +170,59 @@ fun CollectionHeader(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = collection.description,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        // Description (only if not blank)
+        if (collection.description.isNotBlank()) {
+            Text(
+                text = collection.description,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         
+        // Stats row - only visibility and status (adventures count is shown in the section header)
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            CollectionStat(
-                label = "Adventures",
-                value = "${collection.adventures.size}"
+            // Visibility chip
+            AssistChip(
+                onClick = { },
+                label = { 
+                    Text(
+                        text = if (collection.isPublic) "Public" else "Private"
+                    ) 
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (collection.isPublic) Icons.Default.Public else Icons.Default.Lock,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
+                modifier = Modifier.padding(end = 8.dp)
             )
             
-            CollectionStat(
-                label = "Status",
-                value = if (collection.isArchived) "Archived" else "Active"
-            )
-            
-            CollectionStat(
-                label = "Visibility",
-                value = if (collection.isPublic) "Public" else "Private"
+            // Status chip
+            AssistChip(
+                onClick = { },
+                label = { 
+                    Text(
+                        text = if (collection.isArchived) "Archived" else "Active"
+                    ) 
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (collection.isArchived) Icons.Default.Archive else Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
             )
         }
     }
 }
 
-@Composable
-fun CollectionStat(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
