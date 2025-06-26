@@ -45,12 +45,12 @@ class AdventureImageTest {
         assertEquals("1-1", lakeMountainImage.id)
         assertEquals("1", lakeMountainImage.adventure)
         assertTrue(lakeMountainImage.isPrimary)
-        assertEquals("1", lakeMountainImage.userId)
+        assertEquals("user1", lakeMountainImage.userId)
         
         assertEquals("2-1", beachResortImage.id)
         assertEquals("2", beachResortImage.adventure)
         assertTrue(beachResortImage.isPrimary)
-        assertEquals("2", beachResortImage.userId)
+        assertEquals("user2", beachResortImage.userId)
     }
     
     @Test
