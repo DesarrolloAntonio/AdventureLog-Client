@@ -38,6 +38,8 @@ internal class KtorAdventureNetworkDataSource(
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/"
         
+        logger.d { "🌐 API Request - GET $url?page=$page&page_size=$pageSize" }
+        
         val response = httpClient.get(url) {
             parameter("page", page)
             parameter("page_size", pageSize)
@@ -56,7 +58,9 @@ internal class KtorAdventureNetworkDataSource(
         val responseText = response.body<String>()
         val adventuresResponse = json.decodeFromString<AdventuresDTO>(responseText)
         
-        logger.d { "Fetched ${adventuresResponse.results?.size ?: 0} adventures" }
+        logger.d { "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} adventures for page $page (requested pageSize: $pageSize)" }
+        logger.d { "   Total count: ${adventuresResponse.count}" }
+
         return adventuresResponse.results ?: emptyList()
     }
 

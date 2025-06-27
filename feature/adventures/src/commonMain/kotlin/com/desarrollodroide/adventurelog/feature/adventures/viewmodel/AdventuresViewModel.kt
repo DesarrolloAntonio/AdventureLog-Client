@@ -2,105 +2,48 @@ package com.desarrollodroide.adventurelog.feature.adventures.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
+import app.cash.paging.PagingData
+import app.cash.paging.cachedIn
+import app.cash.paging.filter
+import com.desarrollodroide.adventurelog.core.domain.GetAdventuresPagingUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
-sealed class AdventuresUiState {
-    data object Loading : AdventuresUiState()
-    data class Error(val message: String) : AdventuresUiState()
-    data class Success(
-        val adventures: List<Adventure>,
-        val filteredAdventures: List<Adventure> = adventures,
-        val searchQuery: String = ""
-    ) : AdventuresUiState()
-}
-
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class AdventuresViewModel(
-    private val getAdventuresUseCase: GetAdventuresUseCase
+    private val getAdventuresPagingUseCase: GetAdventuresPagingUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<AdventuresUiState>(AdventuresUiState.Loading)
-    val uiState: StateFlow<AdventuresUiState> = _uiState.asStateFlow()
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val searchDebounceTime = 300L
-
-    // Cache for all adventures
-    private var allAdventures: List<Adventure> = emptyList()
-
-    init {
-        loadAdventures(
-            page = 1,
-            pageSize = 1000 // TODO - Implement pagination
-        )
-    }
-
-    fun loadAdventures(page: Int = 1, pageSize: Int) {
-        viewModelScope.launch {
-            _uiState.update { AdventuresUiState.Loading }
-            
-            when (val result = getAdventuresUseCase(page, pageSize)) {
-                is Either.Left -> {
-                    val errorMessage = result.value
-                    _uiState.update { AdventuresUiState.Error(errorMessage) }
-                    println("AdventuresViewModel: Error loading adventures - $errorMessage")
-                }
-                is Either.Right -> {
-                    val adventures = result.value
-                    allAdventures = adventures
-                    
-                    _uiState.update { 
-                        AdventuresUiState.Success(
-                            adventures = adventures,
-                            filteredAdventures = adventures
-                        )
+    val adventuresPagingData: Flow<PagingData<Adventure>> = _searchQuery
+        .debounce(300)
+        .distinctUntilChanged()
+        .flatMapLatest { query ->
+            getAdventuresPagingUseCase()
+                .map { pagingData ->
+                    if (query.isEmpty()) {
+                        pagingData
+                    } else {
+                        pagingData.filter { adventure ->
+                            adventure.name.contains(query, ignoreCase = true)
+                        }
                     }
-                    println("AdventuresViewModel: Successfully loaded ${adventures.size} adventures")
                 }
-            }
         }
-    }
+        .cachedIn(viewModelScope)
 
     fun onSearchQueryChange(query: String) {
-        val currentState = _uiState.value as? AdventuresUiState.Success ?: return
-        
-        // Update query immediately
-        _uiState.update {
-            currentState.copy(searchQuery = query)
-        }
-
-        // Debounce search
-        viewModelScope.launch {
-            delay(searchDebounceTime)
-            performSearch(query)
-        }
-    }
-
-    fun onSearchSubmit() {
-        val currentState = _uiState.value as? AdventuresUiState.Success ?: return
-        performSearch(currentState.searchQuery)
-    }
-
-    private fun performSearch(query: String) {
-        val trimmedQuery = query.trim().lowercase()
-        
-        val filteredAdventures = if (trimmedQuery.isEmpty()) {
-            allAdventures
-        } else {
-            allAdventures.filter { adventure ->
-                adventure.name.lowercase().contains(trimmedQuery)
-            }
-        }
-        
-        val currentState = _uiState.value as? AdventuresUiState.Success ?: return
-        _uiState.update {
-            currentState.copy(filteredAdventures = filteredAdventures)
-        }
+        _searchQuery.value = query
     }
 }

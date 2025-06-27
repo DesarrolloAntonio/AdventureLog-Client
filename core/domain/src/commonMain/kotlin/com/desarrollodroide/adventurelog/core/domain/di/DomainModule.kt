@@ -5,6 +5,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import com.desarrollodroide.adventurelog.core.domain.LoginUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.GetAdventuresPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.domain.InitializeSessionUseCase
@@ -22,6 +23,7 @@ val domainModule = module {
 
     factoryOf(::LoginUseCase)
     factoryOf(::GetAdventuresUseCase)
+    factoryOf(::GetAdventuresPagingUseCase)
     factoryOf(::GetCollectionsUseCase)
     factoryOf(::GetCollectionDetailUseCase)
     factoryOf(::InitializeSessionUseCase)

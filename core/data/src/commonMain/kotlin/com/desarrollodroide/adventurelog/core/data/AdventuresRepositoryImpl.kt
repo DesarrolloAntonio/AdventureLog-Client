@@ -1,13 +1,18 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSource
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,23 +24,24 @@ class AdventuresRepositoryImpl(
 
     private val _adventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
     override val adventuresFlow: StateFlow<List<Adventure>> = _adventuresFlow.asStateFlow()
+    
+    override fun getAdventuresPagingData(): Flow<PagingData<Adventure>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 30,
+                enablePlaceholders = false,
+                initialLoadSize = 30,    // Primera carga igual al pageSize
+                prefetchDistance = 10     // Cargar siguiente página cuando falten 10 items
+            ),
+            pagingSourceFactory = { AdventuresPagingSource(networkDataSource, pageSize = 30) }
+        ).flow
+    }
 
     override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>> {
-        // If we already have adventures cached and it's the first page, return from cache
-        if (page == 1 && _adventuresFlow.value.isNotEmpty()) {
-            val cachedAdventures = _adventuresFlow.value
-            val requestedAdventures = if (pageSize >= cachedAdventures.size) {
-                cachedAdventures
-            } else {
-                cachedAdventures.take(pageSize)
-            }
-            return Either.Right(requestedAdventures)
-        }
-
         return try {
             val adventures = networkDataSource.getAdventures(page, pageSize).map { it.toDomainModel() }
             
-            // Update the flow with the new adventures (only for first page)
+            // For page 1, update the flow
             if (page == 1) {
                 _adventuresFlow.value = adventures
             }
@@ -121,7 +127,7 @@ class AdventuresRepositoryImpl(
 
     override suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>> {
         return try {
-            val adventures = networkDataSource.getAdventures(1, 1000).map { it.toDomainModel() }
+            val adventures = networkDataSource.getAdventures(1, 10).map { it.toDomainModel() }
             _adventuresFlow.value = adventures
             Either.Right(adventures)
         } catch (e: HttpException) {

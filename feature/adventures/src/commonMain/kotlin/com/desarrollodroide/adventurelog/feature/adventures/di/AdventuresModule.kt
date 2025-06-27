@@ -11,7 +11,7 @@ val adventureModule = module {
     
     viewModel { 
         AdventuresViewModel(
-            getAdventuresUseCase = get()
+            getAdventuresPagingUseCase = get()
         ) 
     }
     

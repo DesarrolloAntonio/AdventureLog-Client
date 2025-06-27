@@ -10,6 +10,7 @@ kotlin {
             api(projects.core.network)
             implementation("com.russhwolf:multiplatform-settings:1.3.0")
             implementation("com.russhwolf:multiplatform-settings-no-arg:1.3.0")
+            implementation(libs.multiplatform.paging.common)
         }
     }
 }

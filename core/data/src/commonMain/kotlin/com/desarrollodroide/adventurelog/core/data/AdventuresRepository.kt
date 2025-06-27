@@ -1,15 +1,19 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface AdventuresRepository {
 
     val adventuresFlow: StateFlow<List<Adventure>>
+    
+    fun getAdventuresPagingData(): Flow<PagingData<Adventure>>
 
     suspend fun getAdventures(
         page: Int, pageSize: Int

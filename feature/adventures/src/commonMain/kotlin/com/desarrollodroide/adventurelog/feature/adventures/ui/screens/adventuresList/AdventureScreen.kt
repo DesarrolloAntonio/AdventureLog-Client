@@ -4,26 +4,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -32,18 +28,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.cash.paging.LoadStateError
+import app.cash.paging.LoadStateLoading
+import app.cash.paging.LoadStateNotLoading
+import app.cash.paging.compose.LazyPagingItems
+import app.cash.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
-import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
-import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresUiState
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
-import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
-import com.desarrollodroide.adventurelog.feature.ui.components.NoSearchResultsState
-import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -54,51 +50,39 @@ fun AdventureListScreen(
     modifier: Modifier = Modifier,
     viewModel: AdventuresViewModel = koinViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val pagingItems = viewModel.adventuresPagingData.collectAsLazyPagingItems()
     
     AdventureListContent(
-        uiState = uiState,
+        pagingItems = pagingItems,
+        searchQuery = searchQuery,
         collections = collections,
         onAdventureClick = onAdventureClick,
         onAddAdventureClick = onAddAdventureClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
-        onSearchSubmit = viewModel::onSearchSubmit,
         modifier = modifier
     )
 }
 
 @Composable
 private fun AdventureListContent(
-    uiState: AdventuresUiState,
+    pagingItems: LazyPagingItems<Adventure>,
+    searchQuery: String,
     collections: List<Collection>,
     onAdventureClick: (Adventure, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
-    onSearchQueryChange: (String) -> Unit = {},
-    onSearchSubmit: () -> Unit = {},
+    onSearchQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
         topBar = {
-            when (uiState) {
-                is AdventuresUiState.Success -> {
-                    SimpleSearchBar(
-                        searchQuery = uiState.searchQuery,
-                        onSearchQueryChange = onSearchQueryChange,
-                        onSearchSubmit = onSearchSubmit,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                else -> {
-                    SimpleSearchBar(
-                        searchQuery = "",
-                        onSearchQueryChange = {},
-                        onSearchSubmit = {},
-                        enabled = false,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
+            SimpleSearchBar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
+                onSearchSubmit = { },
+                modifier = Modifier.fillMaxWidth()
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -120,30 +104,33 @@ private fun AdventureListContent(
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
-            when (uiState) {
-                is AdventuresUiState.Loading -> {
-                    LoadingDialog(
-                        isLoading = true,
-                        showMessage = false
-                    )
+            when (pagingItems.loadState.refresh) {
+                is LoadStateLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
-                is AdventuresUiState.Error -> {
+                is LoadStateError -> {
+                    val error = pagingItems.loadState.refresh as LoadStateError
                     ErrorState(
-                        message = uiState.message,
-                        onRetry = { /* TODO: Add retry functionality */ }
+                        message = error.error.message ?: "Unknown error",
+                        onRetry = { pagingItems.retry() }
                     )
                 }
-                is AdventuresUiState.Success -> {
+                is LoadStateNotLoading -> {
                     when {
-                        uiState.filteredAdventures.isEmpty() && uiState.searchQuery.isNotEmpty() -> {
-                            NoSearchResultsState(searchQuery = uiState.searchQuery)
-                        }
-                        uiState.adventures.isEmpty() -> {
+                        pagingItems.itemCount == 0 && searchQuery.isEmpty() -> {
                             EmptyState()
                         }
+                        pagingItems.itemCount == 0 && searchQuery.isNotEmpty() -> {
+                            NoSearchResultsState(searchQuery = searchQuery)
+                        }
                         else -> {
-                            AdventuresList(
-                                adventures = uiState.filteredAdventures,
+                            AdventuresPagingList(
+                                pagingItems = pagingItems,
                                 collections = collections,
                                 onAdventureClick = { adventure ->
                                     val adventureCollections = adventure.collections.mapNotNull { id ->
@@ -161,8 +148,8 @@ private fun AdventureListContent(
 }
 
 @Composable
-private fun AdventuresList(
-    adventures: List<Adventure>,
+private fun AdventuresPagingList(
+    pagingItems: LazyPagingItems<Adventure>,
     collections: List<Collection>,
     onAdventureClick: (Adventure) -> Unit
 ) {
@@ -172,19 +159,60 @@ private fun AdventuresList(
             start = 16.dp,
             end = 16.dp,
             top = 16.dp,
-            bottom = 80.dp // Extra padding for last item visibility while allowing overscroll
+            bottom = 80.dp
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(
-            items = adventures,
-            key = { it.id }
-        ) { adventure ->
-            AdventureItem(
-                adventure = adventure,
-                collections = collections,
-                onClick = { onAdventureClick(adventure) }
-            )
+            count = pagingItems.itemCount,
+            key = pagingItems.itemKey { it.id }
+        ) { index ->
+            val adventure = pagingItems[index]
+            if (adventure != null) {
+                AdventureItem(
+                    adventure = adventure,
+                    collections = collections,
+                    onClick = { onAdventureClick(adventure) }
+                )
+            }
+        }
+        
+        // Load state for append (loading more items)
+        when (pagingItems.loadState.append) {
+            is LoadStateLoading -> {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+            is LoadStateError -> {
+                val error = pagingItems.loadState.append as LoadStateError
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Error loading more: ${error.error.message}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+            is LoadStateNotLoading -> {
+                // Do nothing
+            }
         }
     }
 }
@@ -222,125 +250,28 @@ private fun EmptyState() {
     }
 }
 
-// Previews
-@Preview
 @Composable
-private fun AdventureListScreenSuccessPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
+private fun NoSearchResultsState(searchQuery: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            PreviewImageDependencies {
-                AdventureListContent(
-                    uiState = AdventuresUiState.Success(
-                        adventures = PreviewData.adventures,
-                        filteredAdventures = PreviewData.adventures
-                    ),
-                    collections = PreviewData.collections,
-                    onAdventureClick = { _, _ -> },
-                    onAddAdventureClick = {}
-                )
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun AdventureListScreenEmptyPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            AdventureListContent(
-                uiState = AdventuresUiState.Success(emptyList()),
-                collections = emptyList(),
-                onAdventureClick = { _, _ -> },
-                onAddAdventureClick = {}
+            Text(
+                text = "No results for \"$searchQuery\"",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
             )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun AdventureListScreenLoadingPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            AdventureListContent(
-                uiState = AdventuresUiState.Loading,
-                collections = emptyList(),
-                onAdventureClick = { _, _ -> },
-                onAddAdventureClick = {}
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun AdventureListScreenErrorPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            AdventureListContent(
-                uiState = AdventuresUiState.Error("Failed to load adventures"),
-                collections = emptyList(),
-                onAdventureClick = { _, _ -> },
-                onAddAdventureClick = {}
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun AdventureListScreenSearchPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            PreviewImageDependencies {
-                AdventureListContent(
-                    uiState = AdventuresUiState.Success(
-                        adventures = PreviewData.adventures,
-                        filteredAdventures = PreviewData.adventures.take(1),
-                        searchQuery = "Mountain"
-                    ),
-                    collections = PreviewData.collections,
-                    onAdventureClick = { _, _ -> },
-                    onAddAdventureClick = {}
-                )
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun AdventureListScreenNoResultsPreview() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            AdventureListContent(
-                uiState = AdventuresUiState.Success(
-                    adventures = PreviewData.adventures,
-                    filteredAdventures = emptyList(),
-                    searchQuery = "Antarctica"
-                ),
-                collections = PreviewData.collections,
-                onAdventureClick = { _, _ -> },
-                onAddAdventureClick = {}
+            Text(
+                text = "Try searching with different keywords",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
         }
     }

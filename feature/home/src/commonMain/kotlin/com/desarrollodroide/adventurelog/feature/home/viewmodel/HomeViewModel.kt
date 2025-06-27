@@ -60,7 +60,6 @@ class HomeViewModel(
             }
         }
     }
-
     /**
      * Load both adventures and collections
      */
@@ -101,10 +100,10 @@ class HomeViewModel(
                 // Show loading state
                 _uiState.update { HomeUiState.Loading }
 
-                // Load all adventures
+                // Load only 5 adventures for home screen
                 when (val result = getAdventuresUseCase(
                     page = 1,
-                    pageSize = 1000  // Load all adventures
+                    pageSize = 5  // Only load what we need to show
                 )) {
                     is Either.Left -> {
                         val errorMessage = result.value
