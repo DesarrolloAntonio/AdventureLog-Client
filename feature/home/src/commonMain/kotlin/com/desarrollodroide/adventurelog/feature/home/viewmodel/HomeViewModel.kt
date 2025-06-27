@@ -101,10 +101,10 @@ class HomeViewModel(
                 // Show loading state
                 _uiState.update { HomeUiState.Loading }
 
-                // Call our use case with pageSize=3 for Recent adventures
+                // Load all adventures
                 when (val result = getAdventuresUseCase(
                     page = 1,
-                    pageSize = 3
+                    pageSize = 1000  // Load all adventures
                 )) {
                     is Either.Left -> {
                         val errorMessage = result.value
@@ -113,16 +113,19 @@ class HomeViewModel(
                     }
 
                     is Either.Right -> {
-                        val adventures = result.value
+                        val allAdventures = result.value
+                        // Take only the first 3 for recent adventures
+                        val recentAdventures = allAdventures.take(3)
+                        
                         _uiState.update {
                             HomeUiState.Success(
                                 userName = _userDetails.value?.firstName ?: "User",
-                                recentAdventures = adventures
+                                recentAdventures = recentAdventures
                             )
                         }
-                        println("LOADED ADVENTURES SUCCESSFULLY: ${adventures.size} items")
-                        adventures.forEach {
-                            println("Adventure: ${it.id} - ${it.name}")
+                        println("LOADED ADVENTURES SUCCESSFULLY: ${allAdventures.size} total, showing ${recentAdventures.size} recent")
+                        recentAdventures.forEach {
+                            println("Recent Adventure: ${it.id} - ${it.name}")
                         }
                     }
                 }

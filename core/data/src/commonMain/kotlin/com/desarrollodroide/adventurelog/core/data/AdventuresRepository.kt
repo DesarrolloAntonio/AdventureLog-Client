@@ -5,8 +5,11 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
+import kotlinx.coroutines.flow.StateFlow
 
 interface AdventuresRepository {
+
+    val adventuresFlow: StateFlow<List<Adventure>>
 
     suspend fun getAdventures(
         page: Int, pageSize: Int
@@ -28,5 +31,7 @@ interface AdventuresRepository {
         isPublic: Boolean,
         visitDates: Visit?
     ): Either<String, Adventure>
+
+    suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>>
 
 }
