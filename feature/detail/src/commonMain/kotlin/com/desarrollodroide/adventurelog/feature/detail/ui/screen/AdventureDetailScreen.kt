@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,7 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +35,10 @@ import com.desarrollodroide.adventurelog.feature.ui.components.TagChip
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.foundation.layout.FlowRow
+import org.jetbrains.compose.resources.painterResource
+import com.desarrollodroide.adventurelog.resources.Res
+import com.desarrollodroide.adventurelog.resources.adventureitem_placeholder
+import com.desarrollodroide.adventurelog.resources.main_background
 
 @Composable
 fun AdventureDetailScreenRoute(
@@ -78,14 +82,16 @@ fun AdventureDetailScreen(
                 onShareClick = { /* TODO: Implement share */ }
             )
 
-            Surface(
+            // Content container
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .offset(y = (-20).dp),
-                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 4.dp
+                    .offset(y = (-20).dp)
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
+
+                // Content
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -138,6 +144,9 @@ fun AdventureDetailScreen(
                         createdAt = adventure.createdAt,
                         updatedAt = adventure.updatedAt
                     )
+                    
+                    // Extra padding at the bottom to ensure background covers everything
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
@@ -158,49 +167,63 @@ private fun CoverImageWithButtons(
             .fillMaxWidth()
             .height(300.dp)
     ) {
-        imageUrl?.let {
+        // Use adventure placeholder when no image
+        if (imageUrl != null) {
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = it,
+                    model = imageUrl,
                     imageLoader = imageLoader
                 ),
                 contentDescription = "Adventure image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
+        } else {
+            Image(
+                painter = painterResource(Res.drawable.adventureitem_placeholder),
+                contentDescription = "Adventure placeholder",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
         }
 
-        IconButton(
-            onClick = onBackClick,
+        // Back button
+        Box(
             modifier = Modifier
-                .padding(start = 16.dp, top = 40.dp)
+                .padding(16.dp)
+                .padding(top = 24.dp)
                 .size(40.dp)
-                .shadow(4.dp, CircleShape)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.8f))
+                .background(Color.White.copy(alpha = 0.7f))
                 .align(Alignment.TopStart)
+                .clickable { onBackClick() },
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back",
-                tint = Color.Black
+                tint = Color.Black,
+                modifier = Modifier.size(24.dp)
             )
         }
 
-        IconButton(
-            onClick = onShareClick,
+        // Share button
+        Box(
             modifier = Modifier
-                .padding(end = 16.dp, top = 40.dp)
+                .padding(16.dp)
+                .padding(top = 24.dp)
                 .size(40.dp)
-                .shadow(4.dp, CircleShape)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.8f))
+                .background(Color.White.copy(alpha = 0.7f))
                 .align(Alignment.TopEnd)
+                .clickable { onShareClick() },
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Share,
                 contentDescription = "Share",
-                tint = Color.Black
+                tint = Color.Black,
+                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -316,7 +339,10 @@ private fun MapSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+            )
         ) {
             MapView(
                 latitude = latitude,
@@ -346,7 +372,10 @@ private fun LinkSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            onClick = { onOpenLink(link) }
+            onClick = { onOpenLink(link) },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+            )
         ) {
             Row(
                 modifier = Modifier
@@ -401,7 +430,10 @@ private fun VisitItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+        )
     ) {
         Column(
             modifier = Modifier
