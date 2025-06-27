@@ -9,20 +9,20 @@ import org.koin.dsl.module
 
 val collectionsModule = module {
     includes(domainModule)
-    
-    viewModel { 
+
+    viewModel {
         CollectionsViewModel(
-            getCollectionsUseCase = get()
-        ) 
+            getCollectionsPagingUseCase = get()
+        )
     }
-    
-    viewModel { 
+
+    viewModel {
         CollectionDetailViewModel(
             getCollectionDetailUseCase = get()
-        ) 
+        )
     }
-    
-    viewModel { params -> 
+
+    viewModel { params ->
         AddEditCollectionViewModel(
             collectionId = params.getOrNull(),
             collectionsRepository = get()

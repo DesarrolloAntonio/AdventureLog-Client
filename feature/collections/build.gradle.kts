@@ -16,6 +16,7 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.multiplatform.paging.compose)
         }
         androidMain.dependencies {
             implementation(libs.coil.compose)

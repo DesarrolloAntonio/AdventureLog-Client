@@ -1,11 +1,16 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.data.paging.CollectionsPagingSource
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +23,22 @@ class CollectionsRepositoryImpl(
     private val _collectionsFlow = MutableStateFlow<List<Collection>>(emptyList())
     override val collectionsFlow: StateFlow<List<Collection>> = _collectionsFlow.asStateFlow()
 
-    override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<Collection>> {
+    override fun getCollectionsPagingData(): Flow<PagingData<Collection>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 30,
+                enablePlaceholders = false,
+                initialLoadSize = 30,
+                prefetchDistance = 10
+            ),
+            pagingSourceFactory = { CollectionsPagingSource(networkDataSource, pageSize = 30) }
+        ).flow
+    }
+
+    override suspend fun getCollections(
+        page: Int,
+        pageSize: Int
+    ): Either<ApiResponse, List<Collection>> {
         // If we already have collections cached and it's the first page, return from cache
         if (page == 1 && _collectionsFlow.value.isNotEmpty()) {
             val cachedCollections = _collectionsFlow.value
@@ -31,13 +51,14 @@ class CollectionsRepositoryImpl(
         }
 
         return try {
-            val collections = networkDataSource.getCollections(page, pageSize).map { it.toDomainModel() }
-            
+            val collections =
+                networkDataSource.getCollections(page, pageSize).map { it.toDomainModel() }
+
             // Update the flow with the new collections (only for first page)
             if (page == 1) {
                 _collectionsFlow.value = collections
             }
-            
+
             Either.Right(collections)
         } catch (e: HttpException) {
             println("HTTP Error during getCollections: ${e.code}")
@@ -74,7 +95,7 @@ class CollectionsRepositoryImpl(
             Either.Left(ApiResponse.HttpError)
         }
     }
-    
+
     override suspend fun createCollection(
         name: String,
         description: String,
@@ -90,10 +111,10 @@ class CollectionsRepositoryImpl(
                 startDate = startDate,
                 endDate = endDate
             ).toDomainModel()
-            
+
             // Add the new collection to the flow
             _collectionsFlow.value = _collectionsFlow.value + collection
-            
+
             Either.Right(collection)
         } catch (e: HttpException) {
             println("HTTP Error during createCollection: ${e.code}")
