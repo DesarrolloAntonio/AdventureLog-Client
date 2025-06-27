@@ -63,7 +63,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import androidx.compose.ui.layout.ContentScale
 import com.desarrollodroide.adventurelog.resources.main_background
@@ -80,14 +79,12 @@ fun HomeScreenRoute(
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
-    val collections by viewModel.collections.collectAsStateWithLifecycle()
 
     HomeScreenContent(
         homeUiState = homeUiState,
         userDetails = userDetails,
-        collections = collections,
         onAdventureClick = onAdventureClick,
-        onLogout = { 
+        onLogout = {
             viewModel.logout()
             onNavigateToLogin()
         }
@@ -112,7 +109,6 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     userDetails: UserDetails? = null,
-    collections: List<Collection> = emptyList(),
     onAdventureClick: (Adventure) -> Unit = { },
     onLogout: () -> Unit = {}
 ) {
@@ -195,7 +191,7 @@ fun HomeScreenContent(
         // Update current screen
         currentScreen = screen
     }
-    
+
     Box(modifier = modifier.fillMaxSize()) {
         // Background image that covers the entire screen
         Image(
@@ -299,7 +295,8 @@ fun HomeScreenContent(
                                     }
                                 } else {
                                     // For other screens, show the normal title
-                                    val topBarTitle = CurrentScreen.fromRoute(currentRoute).getTitle(userName)
+                                    val topBarTitle =
+                                        CurrentScreen.fromRoute(currentRoute).getTitle(userName)
 
                                     Text(
                                         text = topBarTitle,
@@ -366,18 +363,19 @@ fun HomeScreenContent(
                         }
 
                         adventuresScreen(
-                            onAdventureClick = { adventure, adventureCollections ->
-                                val adventureWithCollectionNames = adventure.copy(
-                                    collections = adventureCollections.map { it.name }
+                            onAdventureClick = { adventure, _ ->
+                                // Temporarily pass empty collections list until backend provides collection names
+                                val adventureWithEmptyCollections = adventure.copy(
+                                    collections = emptyList()
                                 )
-                                
-                                onAdventureClick(adventureWithCollectionNames)
+
+                                onAdventureClick(adventureWithEmptyCollections)
                             },
                             onAddAdventureClick = {
                                 navController.navigate("add_adventure")
                             },
                             navController = navController,
-                            collections = collections
+                            collections = emptyList() // Pass empty list for now
                         )
 
                         collectionsScreen(
@@ -489,7 +487,7 @@ private fun HomeScreenSuccessPreview() {
         visitedCountryCount = 1,
         totalCountries = 250
     )
-    
+
     PreviewImageDependencies {
         MaterialTheme {
             HomeScreenContent(

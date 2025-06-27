@@ -77,7 +77,7 @@ fun AdventureDetailScreen(
                 onBackClick = onBackClick,
                 onShareClick = { /* TODO: Implement share */ }
             )
-            
+
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,12 +95,11 @@ fun AdventureDetailScreen(
                         title = adventure.name,
                         location = adventure.location
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
                     CategoryTags(
                         category = adventure.category,
-                        isPublic = adventure.isPublic,
-                        collections = adventure.collections
+                        isPublic = adventure.isPublic
                     )
 
                     if (adventure.images.isNotEmpty()) {
@@ -112,9 +111,9 @@ fun AdventureDetailScreen(
                             // onDeletePhoto = { image -> /* TODO: Implement delete photo */ }
                         )
                     }
-                    
+
                     AboutSection(description = adventure.description)
-                    
+
                     if (adventure.latitude.isNotEmpty() && adventure.longitude.isNotEmpty()) {
                         MapSection(
                             latitude = adventure.latitude,
@@ -123,17 +122,17 @@ fun AdventureDetailScreen(
                             onOpenMap = onOpenMap
                         )
                     }
-                    
+
                     adventure.link?.let { link ->
                         if (link.isNotEmpty()) {
                             LinkSection(link = link, onOpenLink = onOpenLink)
                         }
                     }
-                    
+
                     if (adventure.visits.isNotEmpty()) {
                         VisitsSection(visits = adventure.visits)
                     }
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
                     CreationInfo(
                         createdAt = adventure.createdAt,
@@ -153,7 +152,7 @@ private fun CoverImageWithButtons(
     modifier: Modifier = Modifier
 ) {
     val imageLoader = LocalImageLoader.current
-    
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -219,7 +218,7 @@ private fun HeaderInfo(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )
-        
+
         if (!location.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -247,7 +246,6 @@ private fun HeaderInfo(
 private fun CategoryTags(
     category: Category?,
     isPublic: Boolean,
-    collections: List<String>,
     modifier: Modifier = Modifier
 ) {
     FlowRow(
@@ -262,20 +260,12 @@ private fun CategoryTags(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
-        
+
         if (!isPublic) {
             TagChip(
                 text = "🔒 Private",
                 backgroundColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
-        }
-        
-        collections.forEach { collectionName ->
-            TagChip(
-                text = "📁 $collectionName",
-                backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }
@@ -293,7 +283,7 @@ private fun AboutSection(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
-        
+
         if (!description.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -321,7 +311,7 @@ private fun MapSection(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -351,7 +341,7 @@ private fun LinkSection(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -395,7 +385,7 @@ private fun VisitsSection(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         visits.forEach { visit ->
             VisitItem(visit = visit)
             Spacer(modifier = Modifier.height(8.dp))
@@ -426,13 +416,13 @@ private fun VisitItem(
                     text = "From: ${visit.startDate}",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                
+
                 Text(
                     text = "To: ${visit.endDate}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            
+
             visit.notes?.let { notes ->
                 if (notes.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -513,7 +503,7 @@ private fun createAdventureWithMultipleImages(): Adventure {
             userId = "user123"
         )
     )
-    
+
     return Adventure(
         id = "adv1",
         userId = "user123",
@@ -523,7 +513,7 @@ private fun createAdventureWithMultipleImages(): Adventure {
         activityTypes = listOf("Hiking", "Nature", "Photography"),
         location = "Rocky Mountains, Colorado",
         isPublic = true,
-        collections = listOf("Summer Adventures"),
+        collections = emptyList(),
         createdAt = "2025-01-15T10:00:00.000Z",
         updatedAt = "2025-01-20T14:30:00.000Z",
         images = images,
@@ -600,7 +590,7 @@ private fun HotelBalnearioDetailPreview() {
         activityTypes = listOf("Spa", "Relax", "Turismo"),
         location = "4h 28min (445 km)",
         isPublic = false,
-        collections = listOf("Santander"),
+        collections = emptyList(),
         createdAt = "2025-03-01T10:00:00.000Z",
         updatedAt = "2025-03-15T14:30:00.000Z",
         images = listOf(
@@ -659,7 +649,7 @@ private fun NavalagamellaDetailPreview() {
         activityTypes = listOf("Senderismo", "Naturaleza"),
         location = "",
         isPublic = false,
-        collections = listOf("Madrid"),
+        collections = emptyList(),
         createdAt = "2025-02-20T09:15:00.000Z",
         updatedAt = "2025-03-10T11:45:00.000Z",
         images = listOf(
