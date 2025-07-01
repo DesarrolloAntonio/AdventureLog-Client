@@ -2,6 +2,8 @@ package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.feature.ui.components.DescriptionSection
 
 @Composable
 fun BasicInfoSection(
@@ -170,38 +173,44 @@ fun BasicInfoSection(
                         )
                     )
                     
-                    DescriptionField(
+                    DescriptionSection(
                         description = formData.description,
                         onDescriptionChange = {
                             onFormDataChange(formData.copy(description = it))
                         }
                     )
                     
-                    OutlinedButton(
-                        onClick = onGenerateDescription,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ),
-                        enabled = !isGeneratingDescription && formData.name.isNotBlank()
+                    AnimatedVisibility(
+                        visible = formData.name.isNotBlank(),
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
                     ) {
-                        if (isGeneratingDescription) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                        OutlinedButton(
+                            onClick = onGenerateDescription,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ),
+                            enabled = !isGeneratingDescription
+                        ) {
+                            if (isGeneratingDescription) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                if (isGeneratingDescription) "Generating..." else "Generate Description from Wikipedia"
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            if (isGeneratingDescription) "Generating..." else "Generate Description from Wikipedia"
-                        )
                     }
                     
                     Card(

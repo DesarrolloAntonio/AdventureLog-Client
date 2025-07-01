@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.DescriptionSection
 
 @Composable
 fun BasicInfoSection(
@@ -131,7 +132,7 @@ fun BasicInfoSection(
                         )
                     )
                     
-                    DescriptionField(
+                    DescriptionSection(
                         description = formData.description,
                         onDescriptionChange = {
                             onFormDataChange(formData.copy(description = it))
