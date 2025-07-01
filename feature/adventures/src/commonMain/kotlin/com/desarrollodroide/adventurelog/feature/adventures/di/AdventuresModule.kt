@@ -20,6 +20,7 @@ val adventureModule = module {
             createAdventureUseCase = get(),
             updateAdventureUseCase = get(),
             getCategoriesUseCase = get(),
+            generateDescriptionUseCase = get(),
             adventureId = params.getOrNull()
         )
     }

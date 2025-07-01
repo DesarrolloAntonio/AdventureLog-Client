@@ -99,4 +99,11 @@ interface AdventureLogNetworkDataSource {
      * Get all available categories
      */
     suspend fun getCategories(): List<CategoryDTO>
+
+    /**
+     * Generate description from Wikipedia
+     */
+    suspend fun generateDescription(
+        name: String
+    ): String
 }

@@ -26,6 +26,7 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCollectionApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.api.CategoryApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCategoryNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.model.response.WikipediaDescriptionResponse
 
 class KtorAdventurelogNetwork(
     private val adventurelogClient: HttpClient
@@ -289,5 +290,29 @@ class KtorAdventurelogNetwork(
     override suspend fun getCategories(): List<CategoryDTO> {
         ensureInitialized()
         return categoryDataSource.getCategories()
+    }
+
+    override suspend fun generateDescription(
+        name: String
+    ): String {
+        ensureInitialized()
+        
+        val url = "$baseUrl/api/generate/desc/"
+        logger.d { "Generating description for: $name" }
+        
+        val response = adventurelogClient.get(url) {
+            headers {
+                append(HttpHeaders.Accept, "application/json")
+                sessionToken?.let { token ->
+                    append("X-Session-Token", token)
+                }
+            }
+            url {
+                parameters.append("name", name)
+            }
+        }
+        
+        val wikipediaResponse = response.body<WikipediaDescriptionResponse>()
+        return wikipediaResponse.extract ?: throw Exception("No description found")
     }
 }

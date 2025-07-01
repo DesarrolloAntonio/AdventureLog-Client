@@ -38,4 +38,7 @@ interface AdventuresRepository {
 
     suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>>
 
+    suspend fun generateDescription(
+        name: String
+    ): Either<String, String>
 }

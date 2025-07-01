@@ -145,4 +145,30 @@ class AdventuresRepositoryImpl(
             Either.Left(ApiResponse.HttpError)
         }
     }
+
+    override suspend fun generateDescription(
+        name: String
+    ): Either<String, String> {
+        return try {
+            val description = networkDataSource.generateDescription(name)
+            if (description.isBlank()) {
+                Either.Left("No description found for $name")
+            } else {
+                Either.Right(description)
+            }
+        } catch (e: HttpException) {
+            println("HTTP Error during generateDescription: ${e.code}")
+            Either.Left("Failed to generate description: HTTP ${e.code}")
+        } catch (e: IOException) {
+            println("IO Error during generateDescription: ${e.message}")
+            Either.Left("Network error: ${e.message}")
+        } catch (e: Exception) {
+            println("Error during generateDescription: ${e.message}")
+            // Handle the "No description found" exception from the network layer
+            when (e.message) {
+                "No description found" -> Either.Left("No Wikipedia description available for \"$name\"")
+                else -> Either.Left("Failed to generate description: ${e.message}")
+            }
+        }
+    }
 }

@@ -32,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,7 +54,9 @@ fun BasicInfoSection(
     formData: AdventureFormData,
     categories: List<Category>,
     onFormDataChange: (AdventureFormData) -> Unit,
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    onGenerateDescription: () -> Unit = {},
+    isGeneratingDescription: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(true) }
     
@@ -175,20 +178,30 @@ fun BasicInfoSection(
                     )
                     
                     OutlinedButton(
-                        onClick = { /* TODO: Implement AI description generation */ },
+                        onClick = onGenerateDescription,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.primary
-                        )
+                        ),
+                        enabled = !isGeneratingDescription && formData.name.isNotBlank()
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        if (isGeneratingDescription) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Generate AI Description")
+                        Text(
+                            if (isGeneratingDescription) "Generating..." else "Generate Description from Wikipedia"
+                        )
                     }
                     
                     Card(

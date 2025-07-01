@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -39,6 +38,8 @@ fun AddEditAdventureScreen(
     categories: List<Category>,
     onNavigateBack: () -> Unit,
     onSave: (adventureData: AdventureFormData) -> Unit,
+    onGenerateDescription: (name: String, onDescriptionGenerated: (String) -> Unit) -> Unit,
+    isGeneratingDescription: Boolean,
     modifier: Modifier = Modifier,
     initialData: AdventureFormData? = null
 ) {
@@ -61,7 +62,13 @@ fun AddEditAdventureScreen(
                 formData = formData,
                 categories = categories,
                 onFormDataChange = { formData = it },
-                onNavigateBack = onNavigateBack
+                onNavigateBack = onNavigateBack,
+                onGenerateDescription = {
+                    onGenerateDescription(formData.name) { generatedDescription ->
+                        formData = formData.copy(description = generatedDescription)
+                    }
+                },
+                isGeneratingDescription = isGeneratingDescription
             )
 
             LocationSection(
@@ -132,7 +139,9 @@ private fun AddEditAdventureScreenPreview() {
                     Category("3", "museum", "Museum", "🏛️", "0")
                 ),
                 onNavigateBack = {},
-                onSave = {}
+                onSave = {},
+                onGenerateDescription = { _, _ -> },
+                isGeneratingDescription = false
             )
         }
     }
@@ -154,6 +163,8 @@ private fun AddEditAdventureScreenWithDataPreview() {
                 ),
                 onNavigateBack = {},
                 onSave = {},
+                onGenerateDescription = { _, _ -> },
+                isGeneratingDescription = false,
                 initialData = AdventureFormData(
                     name = "Visit to Prado Museum",
                     description = "An incredible experience visiting one of the most important art galleries in the world.",
@@ -189,7 +200,9 @@ private fun AddEditAdventureScreenDarkPreview() {
                     Category("3", "museum", "Museum", "🏛️", "0")
                 ),
                 onNavigateBack = {},
-                onSave = {}
+                onSave = {},
+                onGenerateDescription = { _, _ -> },
+                isGeneratingDescription = false
             )
         }
     }

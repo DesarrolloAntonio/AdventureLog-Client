@@ -13,18 +13,21 @@ import kotlinx.coroutines.launch
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.domain.GenerateDescriptionUseCase
 
 data class AddEditAdventureUiState(
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
     val errorMessage: String? = null,
-    val categories: List<Category> = emptyList()
+    val categories: List<Category> = emptyList(),
+    val isGeneratingDescription: Boolean = false
 )
 
 class AddEditAdventureViewModel(
     private val createAdventureUseCase: CreateAdventureUseCase,
     private val updateAdventureUseCase: UpdateAdventureUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val generateDescriptionUseCase: GenerateDescriptionUseCase,
     private val adventureId: String? = null
 ) : ViewModel() {
     
@@ -126,5 +129,36 @@ class AddEditAdventureViewModel(
     
     fun clearSavedState() {
         _uiState.value = _uiState.value.copy(isSaved = false)
+    }
+    
+    fun generateDescription(name: String, onDescriptionGenerated: (String) -> Unit) {
+        if (name.isBlank()) {
+            _uiState.value = _uiState.value.copy(
+                errorMessage = "Please enter an adventure name first"
+            )
+            return
+        }
+        
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isGeneratingDescription = true,
+                errorMessage = null
+            )
+            
+            when (val result = generateDescriptionUseCase(name)) {
+                is Either.Left -> {
+                    _uiState.value = _uiState.value.copy(
+                        isGeneratingDescription = false,
+                        errorMessage = "Failed to generate description: ${result.value}"
+                    )
+                }
+                is Either.Right -> {
+                    _uiState.value = _uiState.value.copy(
+                        isGeneratingDescription = false
+                    )
+                    onDescriptionGenerated(result.value)
+                }
+            }
+        }
     }
 }

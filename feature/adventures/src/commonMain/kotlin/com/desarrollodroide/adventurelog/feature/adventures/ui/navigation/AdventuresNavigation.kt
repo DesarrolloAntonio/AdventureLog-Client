@@ -71,9 +71,13 @@ fun NavGraphBuilder.adventuresScreen(
                 },
                 onSave = { formData ->
                     viewModel.saveAdventure(formData)
-                }
+                },
+                onGenerateDescription = { name, onDescriptionGenerated ->
+                    viewModel.generateDescription(name, onDescriptionGenerated)
+                },
+                isGeneratingDescription = uiState.isGeneratingDescription
             )
-            
+
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.align(Alignment.BottomCenter)
