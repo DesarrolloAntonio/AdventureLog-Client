@@ -15,12 +15,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +43,7 @@ import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
+import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -52,28 +57,45 @@ fun AdventureListScreen(
 ) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pagingItems = viewModel.adventuresPagingData.collectAsLazyPagingItems()
-    
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+
     AdventureListContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
         collections = collections,
+        isRefreshing = isRefreshing,
         onAdventureClick = onAdventureClick,
         onAddAdventureClick = onAddAdventureClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
+        onRefresh = {
+            viewModel.refresh()
+            pagingItems.refresh()
+        },
         modifier = modifier
     )
+
+    LaunchedEffect(pagingItems.loadState.refresh) {
+        if (pagingItems.loadState.refresh is LoadStateNotLoading) {
+            viewModel.onRefreshComplete()
+        }
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AdventureListContent(
     pagingItems: LazyPagingItems<Adventure>,
     searchQuery: String,
     collections: List<Collection>,
+    isRefreshing: Boolean,
     onAdventureClick: (Adventure, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val pullToRefreshState = rememberPullToRefreshState()
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -99,43 +121,68 @@ private fun AdventureListContent(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.systemBars
     ) { paddingValues ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
+            state = pullToRefreshState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
-            when (pagingItems.loadState.refresh) {
-                is LoadStateLoading -> {
+            when {
+                // Show existing content during pull to refresh
+                isRefreshing && pagingItems.itemCount > 0 -> {
+                    AdventuresPagingList(
+                        pagingItems = pagingItems,
+                        collections = collections,
+                        onAdventureClick = { adventure ->
+                            val adventureCollections = adventure.collections.mapNotNull { id ->
+                                collections.find { it.id == id }
+                            }
+                            onAdventureClick(adventure, adventureCollections)
+                        }
+                    )
+                }
+                
+                pagingItems.loadState.refresh is LoadStateLoading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        LoadingCard(
+                            message = "Loading adventures...",
+                            showOverlay = false
+                        )
                     }
                 }
-                is LoadStateError -> {
+
+                pagingItems.loadState.refresh is LoadStateError -> {
                     val error = pagingItems.loadState.refresh as LoadStateError
                     ErrorState(
                         message = error.error.message ?: "Unknown error",
                         onRetry = { pagingItems.retry() }
                     )
                 }
-                is LoadStateNotLoading -> {
+
+                pagingItems.loadState.refresh is LoadStateNotLoading -> {
                     when {
                         pagingItems.itemCount == 0 && searchQuery.isEmpty() -> {
                             EmptyState()
                         }
+
                         pagingItems.itemCount == 0 && searchQuery.isNotEmpty() -> {
                             NoSearchResultsState(searchQuery = searchQuery)
                         }
+
                         else -> {
                             AdventuresPagingList(
                                 pagingItems = pagingItems,
                                 collections = collections,
                                 onAdventureClick = { adventure ->
-                                    val adventureCollections = adventure.collections.mapNotNull { id ->
-                                        collections.find { it.id == id }
-                                    }
+                                    val adventureCollections =
+                                        adventure.collections.mapNotNull { id ->
+                                            collections.find { it.id == id }
+                                        }
                                     onAdventureClick(adventure, adventureCollections)
                                 }
                             )
@@ -176,7 +223,7 @@ private fun AdventuresPagingList(
                 )
             }
         }
-        
+
         // Load state for append (loading more items)
         when (pagingItems.loadState.append) {
             is LoadStateLoading -> {
@@ -193,6 +240,7 @@ private fun AdventuresPagingList(
                     }
                 }
             }
+
             is LoadStateError -> {
                 val error = pagingItems.loadState.append as LoadStateError
                 item {
@@ -210,6 +258,7 @@ private fun AdventuresPagingList(
                     }
                 }
             }
+
             is LoadStateNotLoading -> {
                 // Do nothing
             }
