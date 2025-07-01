@@ -26,6 +26,9 @@ class CollectionsViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     val collectionsPagingData: Flow<PagingData<Collection>> = _searchQuery
         .debounce(300)
         .distinctUntilChanged()
@@ -45,5 +48,13 @@ class CollectionsViewModel(
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
+    }
+
+    fun refresh() {
+        _isRefreshing.value = true
+    }
+
+    fun onRefreshComplete() {
+        _isRefreshing.value = false
     }
 }
