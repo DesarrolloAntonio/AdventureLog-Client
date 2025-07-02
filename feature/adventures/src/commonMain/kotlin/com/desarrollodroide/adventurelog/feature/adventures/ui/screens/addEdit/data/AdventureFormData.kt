@@ -9,8 +9,8 @@ data class AdventureFormData(
     val rating: Int = 0,
     val link: String = "",
     val location: String = "",
-    val latitude: String = "",
-    val longitude: String = "",
+    val latitude: String? = null,
+    val longitude: String? = null,
     val isPublic: Boolean = false,
     val tags: List<String> = emptyList(),
     val date: String? = null

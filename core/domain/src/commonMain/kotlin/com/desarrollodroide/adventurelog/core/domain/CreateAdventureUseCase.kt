@@ -16,8 +16,8 @@ class CreateAdventureUseCase(
         rating: Double,
         link: String,
         location: String,
-        latitude: String,
-        longitude: String,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
         visitDates: Visit? = null

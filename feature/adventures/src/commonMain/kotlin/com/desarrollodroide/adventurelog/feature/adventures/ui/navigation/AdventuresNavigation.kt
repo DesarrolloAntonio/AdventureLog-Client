@@ -75,7 +75,19 @@ fun NavGraphBuilder.adventuresScreen(
                 onGenerateDescription = { name, onDescriptionGenerated ->
                     viewModel.generateDescription(name, onDescriptionGenerated)
                 },
-                isGeneratingDescription = uiState.isGeneratingDescription
+                isGeneratingDescription = uiState.isGeneratingDescription,
+                locationSearchResults = uiState.locationSearchResults,
+                isSearchingLocation = uiState.isSearchingLocation,
+                onSearchLocation = { query ->
+                    viewModel.searchLocations(query)
+                },
+                onClearLocationSearch = {
+                    viewModel.clearLocationSearch()
+                },
+                onReverseGeocode = { lat, lon ->
+                    viewModel.reverseGeocode(lat, lon)
+                },
+                reverseGeocodeResult = uiState.reverseGeocodeResult
             )
 
             SnackbarHost(

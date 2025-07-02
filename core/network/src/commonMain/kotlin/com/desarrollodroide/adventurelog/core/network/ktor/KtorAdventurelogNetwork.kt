@@ -27,6 +27,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.api.CategoryApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCategoryNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.WikipediaDescriptionResponse
+import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 
 class KtorAdventurelogNetwork(
     private val adventurelogClient: HttpClient
@@ -314,5 +316,66 @@ class KtorAdventurelogNetwork(
         
         val wikipediaResponse = response.body<WikipediaDescriptionResponse>()
         return wikipediaResponse.extract ?: throw Exception("No description found")
+    }
+    
+    override suspend fun searchLocations(
+        query: String
+    ): List<GeocodeSearchResultDTO> {
+        ensureInitialized()
+        
+        val url = "$baseUrl/api/reverse-geocode/search/"
+        logger.d { "Searching locations for query: $query" }
+        
+        val response = adventurelogClient.get(url) {
+            headers {
+                append(HttpHeaders.Accept, "application/json")
+                sessionToken?.let { token ->
+                    append("X-Session-Token", token)
+                }
+            }
+            url {
+                parameters.append("query", query)
+            }
+        }
+        
+        if (response.status.isSuccess()) {
+            return response.body<List<GeocodeSearchResultDTO>>()
+        } else {
+            logger.e { "Failed to search locations with status: ${response.status}" }
+            return emptyList()
+        }
+    }
+    
+    override suspend fun reverseGeocode(
+        latitude: Double,
+        longitude: Double
+    ): ReverseGeocodeResultDTO {
+        ensureInitialized()
+        
+        val url = "$baseUrl/api/reverse-geocode/reverse_geocode/"
+        logger.d { "Reverse geocoding for lat: $latitude, lon: $longitude" }
+        
+        val response = adventurelogClient.get(url) {
+            headers {
+                append(HttpHeaders.Accept, "application/json")
+                sessionToken?.let { token ->
+                    append("X-Session-Token", token)
+                }
+            }
+            url {
+                parameters.append("lat", latitude.toString())
+                parameters.append("lon", longitude.toString())
+            }
+        }
+        
+        if (response.status.isSuccess()) {
+            return response.body<ReverseGeocodeResultDTO>()
+        } else {
+            logger.e { "Failed to reverse geocode with status: ${response.status}" }
+            throw HttpException(
+                response.status.value,
+                "Failed to reverse geocode with status: ${response.status}"
+            )
+        }
     }
 }

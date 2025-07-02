@@ -6,6 +6,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserDetails
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 
 interface AdventureLogNetworkDataSource {
 
@@ -106,4 +108,19 @@ interface AdventureLogNetworkDataSource {
     suspend fun generateDescription(
         name: String
     ): String
+    
+    /**
+     * Search for locations by query
+     */
+    suspend fun searchLocations(
+        query: String
+    ): List<GeocodeSearchResultDTO>
+    
+    /**
+     * Reverse geocode coordinates to get location details
+     */
+    suspend fun reverseGeocode(
+        latitude: Double,
+        longitude: Double
+    ): ReverseGeocodeResultDTO
 }

@@ -14,13 +14,20 @@ import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.domain.GenerateDescriptionUseCase
+import com.desarrollodroide.adventurelog.core.domain.SearchLocationsUseCase
+import com.desarrollodroide.adventurelog.core.domain.ReverseGeocodeUseCase
+import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
+import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 
 data class AddEditAdventureUiState(
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
     val errorMessage: String? = null,
     val categories: List<Category> = emptyList(),
-    val isGeneratingDescription: Boolean = false
+    val isGeneratingDescription: Boolean = false,
+    val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
+    val isSearchingLocation: Boolean = false,
+    val reverseGeocodeResult: ReverseGeocodeResult? = null
 )
 
 class AddEditAdventureViewModel(
@@ -28,6 +35,8 @@ class AddEditAdventureViewModel(
     private val updateAdventureUseCase: UpdateAdventureUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val generateDescriptionUseCase: GenerateDescriptionUseCase,
+    private val searchLocationsUseCase: SearchLocationsUseCase,
+    private val reverseGeocodeUseCase: ReverseGeocodeUseCase,
     private val adventureId: String? = null
 ) : ViewModel() {
     
@@ -55,9 +64,19 @@ class AddEditAdventureViewModel(
         }
     }
     
+    private fun String?.formatCoordinate(): String? {
+        return this?.toDoubleOrNull()?.let { value ->
+            "%.6f".format(value)
+        }
+    }
+    
     fun saveAdventure(formData: AdventureFormData) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            
+            // Format coordinates to 6 decimal places
+            val formattedLatitude = formData.latitude.formatCoordinate()
+            val formattedLongitude = formData.longitude.formatCoordinate()
             
             val result = if (adventureId != null) {
                 // Update existing adventure
@@ -69,8 +88,8 @@ class AddEditAdventureViewModel(
                     rating = formData.rating.toDouble(),
                     link = formData.link,
                     location = formData.location,
-                    latitude = formData.latitude,
-                    longitude = formData.longitude,
+                    latitude = formattedLatitude,
+                    longitude = formattedLongitude,
                     isPublic = formData.isPublic,
                     tags = formData.tags
                 )
@@ -92,8 +111,8 @@ class AddEditAdventureViewModel(
                     rating = formData.rating.toDouble(),
                     link = formData.link,
                     location = formData.location,
-                    latitude = formData.latitude,
-                    longitude = formData.longitude,
+                    latitude = formattedLatitude,
+                    longitude = formattedLongitude,
                     isPublic = formData.isPublic,
                     tags = formData.tags,
                     visitDates = formData.date?.let {
@@ -157,6 +176,63 @@ class AddEditAdventureViewModel(
                         isGeneratingDescription = false
                     )
                     onDescriptionGenerated(result.value)
+                }
+            }
+        }
+    }
+    
+    fun searchLocations(query: String) {
+        if (query.isBlank()) {
+            _uiState.value = _uiState.value.copy(
+                locationSearchResults = emptyList()
+            )
+            return
+        }
+        
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isSearchingLocation = true,
+                errorMessage = null
+            )
+            
+            when (val result = searchLocationsUseCase(query)) {
+                is Either.Left -> {
+                    _uiState.value = _uiState.value.copy(
+                        isSearchingLocation = false,
+                        locationSearchResults = emptyList(),
+                        errorMessage = result.value
+                    )
+                }
+                is Either.Right -> {
+                    _uiState.value = _uiState.value.copy(
+                        isSearchingLocation = false,
+                        locationSearchResults = result.value
+                    )
+                }
+            }
+        }
+    }
+    
+    fun clearLocationSearch() {
+        _uiState.value = _uiState.value.copy(
+            locationSearchResults = emptyList()
+        )
+    }
+    
+    fun reverseGeocode(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            when (val result = reverseGeocodeUseCase(latitude, longitude)) {
+                is Either.Left -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = result.value
+                    )
+                }
+                is Either.Right -> {
+                    _uiState.value = _uiState.value.copy(
+                        reverseGeocodeResult = result.value
+                    )
+                    // If we got a display name from reverse geocoding, we can update the location
+                    // This would need to be handled in the UI layer
                 }
             }
         }

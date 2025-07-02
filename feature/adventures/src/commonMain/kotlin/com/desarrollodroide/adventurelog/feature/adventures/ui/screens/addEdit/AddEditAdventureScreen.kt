@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
+import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.BasicInfoSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.DateSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
@@ -40,6 +42,12 @@ fun AddEditAdventureScreen(
     onSave: (adventureData: AdventureFormData) -> Unit,
     onGenerateDescription: (name: String, onDescriptionGenerated: (String) -> Unit) -> Unit,
     isGeneratingDescription: Boolean,
+    locationSearchResults: List<GeocodeSearchResult> = emptyList(),
+    isSearchingLocation: Boolean = false,
+    onSearchLocation: (String) -> Unit = {},
+    onClearLocationSearch: () -> Unit = {},
+    onReverseGeocode: (Double, Double) -> Unit = { _, _ -> },
+    reverseGeocodeResult: ReverseGeocodeResult? = null,
     modifier: Modifier = Modifier,
     initialData: AdventureFormData? = null
 ) {
@@ -49,6 +57,13 @@ fun AddEditAdventureScreen(
                 category = categories.firstOrNull()
             )
         )
+    }
+    
+    // Update location when reverse geocode completes
+    reverseGeocodeResult?.displayName?.let { displayName ->
+        if (formData.location.isEmpty()) {
+            formData = formData.copy(location = displayName)
+        }
     }
 
     Column(
@@ -73,7 +88,12 @@ fun AddEditAdventureScreen(
 
             LocationSection(
                 formData = formData,
-                onFormDataChange = { formData = it }
+                onFormDataChange = { formData = it },
+                locationSearchResults = locationSearchResults,
+                isSearchingLocation = isSearchingLocation,
+                onSearchLocation = onSearchLocation,
+                onClearLocationSearch = onClearLocationSearch,
+                onReverseGeocode = onReverseGeocode
             )
 
             TagsSection(
@@ -141,7 +161,10 @@ private fun AddEditAdventureScreenPreview() {
                 onNavigateBack = {},
                 onSave = {},
                 onGenerateDescription = { _, _ -> },
-                isGeneratingDescription = false
+                isGeneratingDescription = false,
+                onSearchLocation = {},
+                onClearLocationSearch = {},
+                onReverseGeocode = { _, _ -> }
             )
         }
     }
@@ -165,6 +188,19 @@ private fun AddEditAdventureScreenWithDataPreview() {
                 onSave = {},
                 onGenerateDescription = { _, _ -> },
                 isGeneratingDescription = false,
+                onSearchLocation = {},
+                onClearLocationSearch = {},
+                onReverseGeocode = { _, _ -> },
+                locationSearchResults = listOf(
+                    GeocodeSearchResult(
+                        latitude = "40.4138",
+                        longitude = "-3.6921",
+                        name = "Museo del Prado",
+                        displayName = "Museo del Prado, Madrid, España",
+                        type = "museum",
+                        category = "tourism"
+                    )
+                ),
                 initialData = AdventureFormData(
                     name = "Visit to Prado Museum",
                     description = "An incredible experience visiting one of the most important art galleries in the world.",
@@ -202,7 +238,10 @@ private fun AddEditAdventureScreenDarkPreview() {
                 onNavigateBack = {},
                 onSave = {},
                 onGenerateDescription = { _, _ -> },
-                isGeneratingDescription = false
+                isGeneratingDescription = false,
+                onSearchLocation = {},
+                onClearLocationSearch = {},
+                onReverseGeocode = { _, _ -> }
             )
         }
     }

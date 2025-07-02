@@ -19,6 +19,8 @@ import com.desarrollodroide.adventurelog.core.domain.CreateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.GenerateDescriptionUseCase
+import com.desarrollodroide.adventurelog.core.domain.SearchLocationsUseCase
+import com.desarrollodroide.adventurelog.core.domain.ReverseGeocodeUseCase
 
 val domainModule = module {
     includes(dataModule)
@@ -39,4 +41,6 @@ val domainModule = module {
     factoryOf(::UpdateCollectionUseCase)
     factoryOf(::GetCategoriesUseCase)
     factoryOf(::GenerateDescriptionUseCase)
+    factoryOf(::SearchLocationsUseCase)
+    factoryOf(::ReverseGeocodeUseCase)
 }

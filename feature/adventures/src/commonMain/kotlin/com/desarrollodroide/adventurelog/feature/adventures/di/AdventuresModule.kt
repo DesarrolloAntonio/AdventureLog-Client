@@ -21,6 +21,8 @@ val adventureModule = module {
             updateAdventureUseCase = get(),
             getCategoriesUseCase = get(),
             generateDescriptionUseCase = get(),
+            searchLocationsUseCase = get(),
+            reverseGeocodeUseCase = get(),
             adventureId = params.getOrNull()
         )
     }
