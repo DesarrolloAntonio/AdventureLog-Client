@@ -139,15 +139,11 @@ fun LocationSection(
                         locationSearchResults.forEach { result ->
                             Card(
                                 onClick = {
-                                    // Format coordinates to 6 decimal places
-                                    val formattedLat = result.latitude.toDoubleOrNull()?.let { "%.6f".format(it) } ?: result.latitude
-                                    val formattedLon = result.longitude.toDoubleOrNull()?.let { "%.6f".format(it) } ?: result.longitude
-                                    
                                     onFormDataChange(
                                         formData.copy(
                                             location = result.displayName,
-                                            latitude = formattedLat,
-                                            longitude = formattedLon
+                                            latitude = result.latitude,
+                                            longitude = result.longitude
                                         )
                                     )
                                     searchQuery = ""
@@ -193,13 +189,10 @@ fun LocationSection(
                     latitude = formData.latitude,
                     longitude = formData.longitude,
                     onMapClick = { lat, lon ->
-                        // Format to 6 decimal places
-                        val formattedLat = "%.6f".format(lat)
-                        val formattedLon = "%.6f".format(lon)
                         onFormDataChange(
                             formData.copy(
-                                latitude = formattedLat,
-                                longitude = formattedLon
+                                latitude = lat.toString(),
+                                longitude = lon.toString()
                             )
                         )
                         // Trigger reverse geocoding to get location name

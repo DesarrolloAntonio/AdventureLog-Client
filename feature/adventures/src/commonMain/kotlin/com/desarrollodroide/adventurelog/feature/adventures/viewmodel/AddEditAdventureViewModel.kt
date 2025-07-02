@@ -64,19 +64,9 @@ class AddEditAdventureViewModel(
         }
     }
     
-    private fun String?.formatCoordinate(): String? {
-        return this?.toDoubleOrNull()?.let { value ->
-            "%.6f".format(value)
-        }
-    }
-    
     fun saveAdventure(formData: AdventureFormData) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            
-            // Format coordinates to 6 decimal places
-            val formattedLatitude = formData.latitude.formatCoordinate()
-            val formattedLongitude = formData.longitude.formatCoordinate()
             
             val result = if (adventureId != null) {
                 // Update existing adventure
@@ -88,8 +78,8 @@ class AddEditAdventureViewModel(
                     rating = formData.rating.toDouble(),
                     link = formData.link,
                     location = formData.location,
-                    latitude = formattedLatitude,
-                    longitude = formattedLongitude,
+                    latitude = formData.latitude,
+                    longitude = formData.longitude,
                     isPublic = formData.isPublic,
                     tags = formData.tags
                 )
@@ -111,8 +101,8 @@ class AddEditAdventureViewModel(
                     rating = formData.rating.toDouble(),
                     link = formData.link,
                     location = formData.location,
-                    latitude = formattedLatitude,
-                    longitude = formattedLongitude,
+                    latitude = formData.latitude,
+                    longitude = formData.longitude,
                     isPublic = formData.isPublic,
                     tags = formData.tags,
                     visitDates = formData.date?.let {

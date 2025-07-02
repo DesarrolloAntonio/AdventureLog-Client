@@ -47,8 +47,8 @@ interface AdventureApi {
         rating: Double? = null,
         link: String? = null,
         location: String? = null,
-        latitude: Double? = null,
-        longitude: Double? = null,
+        latitude: String? = null,
+        longitude: String? = null,
         isPublic: Boolean? = null,
         visitDates: Visit? = null
     ): AdventureDTO

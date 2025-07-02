@@ -12,6 +12,7 @@ import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdvent
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
+import com.desarrollodroide.adventurelog.core.network.utils.toCoordinateString
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -148,8 +149,8 @@ internal class KtorAdventureNetworkDataSource(
         rating: Double?,
         link: String?,
         location: String?,
-        latitude: Double?,
-        longitude: Double?,
+        latitude: String?,
+        longitude: String?,
         isPublic: Boolean?,
         visitDates: Visit?
     ): AdventureDTO {
@@ -168,8 +169,8 @@ internal class KtorAdventureNetworkDataSource(
             rating?.let { put("rating", it) }
             link?.let { put("link", it) }
             location?.let { put("location", it) }
-            latitude?.let { put("latitude", it) }
-            longitude?.let { put("longitude", it) }
+            latitude.toCoordinateString()?.let { put("latitude", it) }
+            longitude.toCoordinateString()?.let { put("longitude", it) }
             isPublic?.let { put("is_public", it) }
         }
 
