@@ -9,7 +9,6 @@ sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Success(
         val userName: String = "",
-        val recentAdventures: List<Adventure> = emptyList(),
-        val userStats: UserStats = UserStats()
+        val recentAdventures: List<Adventure> = emptyList()
     ) : HomeUiState
 }

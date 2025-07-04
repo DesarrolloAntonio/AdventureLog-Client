@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.GetUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
+import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,17 +19,22 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val getAdventuresUseCase: GetAdventuresUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val getUserStatsUseCase: GetUserStatsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    
+    private val _statsState = MutableStateFlow<StatsUiState>(StatsUiState.Loading)
+    val statsState: StateFlow<StatsUiState> = _statsState.asStateFlow()
 
     private val _userDetails = MutableStateFlow<UserDetails?>(null)
     val userDetails: StateFlow<UserDetails?> = _userDetails.asStateFlow()
 
     init {
         observeUserSession()
+        // Cargar adventures y stats de forma independiente
         loadAdventures()
     }
 
@@ -50,6 +57,11 @@ class HomeViewModel(
                             currentState
                         }
                     }
+                }
+                
+                // Load user stats when we have user details
+                userDetails?.let {
+                    loadUserStats(it.username)
                 }
             }
         }
@@ -109,6 +121,25 @@ class HomeViewModel(
                 println("HomeViewModel: Logout completed successfully")
             } catch (e: Exception) {
                 println("HomeViewModel: Error during logout: ${e.message}")
+            }
+        }
+    }
+    
+    private fun loadUserStats(username: String) {
+        viewModelScope.launch {
+            // Set loading state for stats
+            _statsState.update { StatsUiState.Loading }
+            
+            when (val result = getUserStatsUseCase(username)) {
+                is Either.Left -> {
+                    println("ERROR LOADING USER STATS: ${result.value}")
+                    _statsState.update { StatsUiState.Error(result.value) }
+                }
+                is Either.Right -> {
+                    val stats = result.value
+                    println("LOADED USER STATS SUCCESSFULLY: $stats")
+                    _statsState.update { StatsUiState.Success(stats) }
+                }
             }
         }
     }

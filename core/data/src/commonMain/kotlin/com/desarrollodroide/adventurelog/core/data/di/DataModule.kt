@@ -36,7 +36,10 @@ val dataModule = module {
         )
     }
     single<UserRepository> {
-        UserRepositoryImpl(settings = get())
+        UserRepositoryImpl(
+            settings = get(),
+            networkDataSource = get()
+        )
     }
     single<AdventuresRepository> {
         AdventuresRepositoryImpl(networkDataSource = get())

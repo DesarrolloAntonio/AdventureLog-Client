@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.core.data
 
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.model.UserStats
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -65,4 +66,11 @@ interface UserRepository {
      * Clears all user data (both session and remember me)
      */
     suspend fun clearAllUserData()
+    
+    /**
+     * Get user statistics
+     * @param username Username to get stats for
+     * @return UserStats with adventure counts, visited places, etc.
+     */
+    suspend fun getUserStats(username: String): UserStats
 }

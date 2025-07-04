@@ -2,20 +2,22 @@ package com.desarrollodroide.adventurelog.core.data
 
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.model.UserStats
+import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.model.mappers.toUserStats
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /**
  * Implementation of UserRepository using MultiPlatform-Settings
  */
 class UserRepositoryImpl(
-    private val settings: Settings
+    private val settings: Settings,
+    private val networkDataSource: AdventureLogNetworkDataSource
 ) : UserRepository {
 
     private val json = Json {
@@ -155,5 +157,16 @@ class UserRepositoryImpl(
     override suspend fun clearAllUserData() {
         clearRememberMeCredentials()
         clearUserSession()
+    }
+    
+    override suspend fun getUserStats(username: String): UserStats {
+        return try {
+            val statsDTO = networkDataSource.getUserStats(username)
+            statsDTO.toUserStats()
+        } catch (e: Exception) {
+            println("Error getting user stats: ${e.message}")
+            // Return default stats on error
+            UserStats()
+        }
     }
 }

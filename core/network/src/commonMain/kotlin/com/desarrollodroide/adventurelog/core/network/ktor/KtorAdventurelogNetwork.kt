@@ -27,6 +27,9 @@ import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.api.CategoryApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCategoryNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.WikipediaDescriptionResponse
+import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
+import com.desarrollodroide.adventurelog.core.network.api.UserApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorUserApi
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 
@@ -59,6 +62,14 @@ class KtorAdventurelogNetwork(
     
     private val categoryDataSource: CategoryApi by lazy {
         KtorCategoryNetworkDataSource(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            json = json
+        )
+    }
+    
+    private val userDataSource: UserApi by lazy {
+        KtorUserApi(
             httpClient = adventurelogClient,
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
             json = json
@@ -377,5 +388,12 @@ class KtorAdventurelogNetwork(
                 "Failed to reverse geocode with status: ${response.status}"
             )
         }
+    }
+    
+    override suspend fun getUserStats(
+        username: String
+    ): UserStatsDTO {
+        ensureInitialized()
+        return userDataSource.getUserStats(username)
     }
 }

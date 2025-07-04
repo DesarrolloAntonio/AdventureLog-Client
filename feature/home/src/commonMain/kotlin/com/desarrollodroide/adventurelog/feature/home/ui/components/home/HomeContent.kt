@@ -27,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,12 +46,14 @@ import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.coroutines.delay
+import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
+    statsState: StatsUiState,
     onAdventureClick: (Adventure) -> Unit = { },
     sessionToken: String = ""
 ) {
@@ -84,7 +87,7 @@ fun HomeContent(
             is HomeUiState.Success -> {
                 HomeContentSuccess(
                     userName = homeUiState.userName,
-                    stats = homeUiState.userStats,
+                    statsState = statsState,
                     recentAdventures = homeUiState.recentAdventures,
                     onAdventureClick = onAdventureClick,
                     sessionToken = sessionToken
@@ -97,7 +100,7 @@ fun HomeContent(
 @Composable
 private fun HomeContentSuccess(
     userName: String,
-    stats: UserStats,
+    statsState: StatsUiState,
     recentAdventures: List<Adventure>,
     onAdventureClick: (Adventure) -> Unit = { },
     sessionToken: String = "",
@@ -115,7 +118,9 @@ private fun HomeContentSuccess(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            SwipeableStatsCard(stats = stats)
+            SwipeableStatsCard(
+                statsState = statsState
+            )
         }
 
         item {
@@ -142,11 +147,18 @@ private fun HomeContentSuccess(
 
 @Composable
 private fun SwipeableStatsCard(
-    stats: UserStats,
+    statsState: StatsUiState,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { 2 })
+    
+    // Extract stats and loading state
+    val stats = when (statsState) {
+        is StatsUiState.Success -> statsState.stats
+        else -> UserStats() // Default values
+    }
+    val isLoading = statsState is StatsUiState.Loading
     
     LaunchedEffect(Unit) {
         while (true) {
@@ -184,14 +196,16 @@ private fun SwipeableStatsCard(
                                 value = stats.adventureCount,
                                 label = "Total adventures",
                                 icon = Icons.Default.AirplanemodeActive,
-                                iconColor = Color(0xFFE91E63) // Pink color
+                                iconColor = Color(0xFFE91E63), // Pink color
+                                isLoading = isLoading
                             )
                             
                             CompactStatItem(
                                 value = stats.visitedCountryCount,
                                 label = "Countries visited",
                                 icon = Icons.Default.Public,
-                                iconColor = Color(0xFF673AB7) // Purple color
+                                iconColor = Color(0xFF673AB7), // Purple color
+                                isLoading = isLoading
                             )
                         }
                     }
@@ -204,14 +218,16 @@ private fun SwipeableStatsCard(
                                 value = stats.visitedRegionCount,
                                 label = "Regions visited",
                                 icon = Icons.Default.Terrain,
-                                iconColor = Color(0xFF009688) // Teal color
+                                iconColor = Color(0xFF009688), // Teal color
+                                isLoading = isLoading
                             )
                             
                             CompactStatItem(
                                 value = stats.visitedCityCount,
                                 label = "Cities visited",
                                 icon = Icons.Default.LocationCity,
-                                iconColor = Color(0xFF03A9F4) // Light Blue color
+                                iconColor = Color(0xFF03A9F4), // Light Blue color
+                                isLoading = isLoading
                             )
                         }
                     }
@@ -254,6 +270,7 @@ private fun CompactStatItem(
     label: String,
     icon: ImageVector,
     iconColor: Color,
+    isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -281,14 +298,24 @@ private fun CompactStatItem(
                 modifier = Modifier.size(24.dp)
             )
             
-            Text(
-                text = "$value",
-                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
-                color = iconColor,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(start = 8.dp)
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = iconColor
+                )
+            } else {
+                Text(
+                    text = "$value",
+                    style = MaterialTheme.typography.headlineMedium.copy(fontSize = 24.sp),
+                    color = iconColor,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
         }
     }
 }

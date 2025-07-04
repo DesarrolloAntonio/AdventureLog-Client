@@ -219,7 +219,8 @@ fun ContentViews(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 12.dp)
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 10.dp)
+                            .padding(bottom = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(buildAnnotatedString {

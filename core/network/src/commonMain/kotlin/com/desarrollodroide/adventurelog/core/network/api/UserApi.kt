@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network.api
 
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 
 interface UserApi {
     /**
@@ -29,4 +30,9 @@ interface UserApi {
      * Upload user avatar
      */
     suspend fun uploadAvatar(imageData: ByteArray): String
+    
+    /**
+     * Get user statistics
+     */
+    suspend fun getUserStats(username: String): UserStatsDTO
 }

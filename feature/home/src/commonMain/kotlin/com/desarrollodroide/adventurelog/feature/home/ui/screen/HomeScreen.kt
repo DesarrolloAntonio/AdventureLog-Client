@@ -63,7 +63,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
+import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import androidx.compose.ui.layout.ContentScale
 import com.desarrollodroide.adventurelog.resources.main_background
 
@@ -78,10 +78,12 @@ fun HomeScreenRoute(
     onNavigateToLogin: () -> Unit = { }
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val statsState by viewModel.statsState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
 
     HomeScreenContent(
         homeUiState = homeUiState,
+        statsState = statsState,
         userDetails = userDetails,
         onAdventureClick = onAdventureClick,
         onLogout = {
@@ -108,6 +110,7 @@ private fun resetScrollBehavior(scrollBehavior: TopAppBarScrollBehavior) {
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
+    statsState: StatsUiState,
     userDetails: UserDetails? = null,
     onAdventureClick: (Adventure) -> Unit = { },
     onLogout: () -> Unit = {}
@@ -357,6 +360,7 @@ fun HomeScreenContent(
                             HomeContent(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,
+                                statsState = statsState,
                                 onAdventureClick = onAdventureClick,
                                 sessionToken = userDetails?.sessionToken ?: ""
                             )
@@ -451,26 +455,24 @@ private fun PlaceholderScreen(title: String) {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HomeScreenEmptyPreview() {
-    PreviewImageDependencies {
-        MaterialTheme {
-            HomeScreenContent(
-                homeUiState = HomeUiState.Empty,
-                userDetails = null
-            )
-        }
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Empty,
+            statsState = StatsUiState.Loading,
+            userDetails = null
+        )
     }
 }
 
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HomeScreenLoadingPreview() {
-    PreviewImageDependencies {
-        MaterialTheme {
-            HomeScreenContent(
-                homeUiState = HomeUiState.Loading,
-                userDetails = null
-            )
-        }
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Loading,
+            statsState = StatsUiState.Loading,
+            userDetails = null
+        )
     }
 }
 
@@ -488,43 +490,40 @@ private fun HomeScreenSuccessPreview() {
         totalCountries = 250
     )
 
-    PreviewImageDependencies {
-        MaterialTheme {
-            HomeScreenContent(
-                homeUiState = HomeUiState.Success(
-                    userName = "Antonio",
-                    recentAdventures = emptyList(),
-                    userStats = sampleStats
-                ),
-                userDetails = UserDetails(
-                    id = 123,
-                    username = "antonio",
-                    firstName = "Antonio",
-                    lastName = "García",
-                    email = "antonio@example.com",
-                    profilePic = null,
-                    isStaff = false,
-                    dateJoined = "2024-01-01",
-                    sessionToken = "token123",
-                    uuid = "user-uuid-123",
-                    publicProfile = true,
-                    hasPassword = "true",
-                    serverUrl = "https://example-server.com"
-                )
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Success(
+                userName = "Antonio",
+                recentAdventures = emptyList()
+            ),
+            statsState = StatsUiState.Success(sampleStats),
+            userDetails = UserDetails(
+                id = 123,
+                username = "antonio",
+                firstName = "Antonio",
+                lastName = "García",
+                email = "antonio@example.com",
+                profilePic = null,
+                isStaff = false,
+                dateJoined = "2024-01-01",
+                sessionToken = "token123",
+                uuid = "user-uuid-123",
+                publicProfile = true,
+                hasPassword = "true",
+                serverUrl = "https://example-server.com"
             )
-        }
+        )
     }
 }
 
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HomeScreenErrorPreview() {
-    PreviewImageDependencies {
-        MaterialTheme {
-            HomeScreenContent(
-                homeUiState = HomeUiState.Error("Failed to load adventures"),
-                userDetails = null
-            )
-        }
+    MaterialTheme {
+        HomeScreenContent(
+            homeUiState = HomeUiState.Error("Failed to load adventures"),
+            statsState = StatsUiState.Error("Failed to load stats"),
+            userDetails = null
+        )
     }
 }

@@ -8,6 +8,7 @@ import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 
 interface AdventureLogNetworkDataSource {
 
@@ -123,4 +124,11 @@ interface AdventureLogNetworkDataSource {
         latitude: Double,
         longitude: Double
     ): ReverseGeocodeResultDTO
+    
+    /**
+     * Get user statistics
+     */
+    suspend fun getUserStats(
+        username: String
+    ): UserStatsDTO
 }
