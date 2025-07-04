@@ -5,12 +5,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.detail.ui.screen.AdventureDetailScreenRoute
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
 import com.desarrollodroide.adventurelog.core.model.Adventure
 
 fun NavGraphBuilder.detailNavGraph(
@@ -36,7 +34,7 @@ fun NavGraphBuilder.detailNavGraph(
             popEnterTransition = NavigationAnimations.enterTransitionFade,
             popExitTransition = NavigationAnimations.exitTransitionVertical
         ) { backStackEntry ->
-            val adventureJson = backStackEntry.arguments?.getString("adventureJson") ?: ""
+            val adventureJson = backStackEntry.savedStateHandle.get<String>("adventureJson") ?: ""
             
             val adventure = json.decodeFromString<Adventure>(adventureJson)
             

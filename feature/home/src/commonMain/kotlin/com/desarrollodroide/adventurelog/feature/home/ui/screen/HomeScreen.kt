@@ -137,7 +137,7 @@ fun HomeScreenContent(
         derivedStateOf {
             if (isCollectionDetail) {
                 // Get the actual parameter value from the backstack entry
-                currentBackStackEntry?.arguments?.getString("collectionId") ?: ""
+                currentBackStackEntry?.savedStateHandle?.get<String>("collectionId") ?: ""
             } else {
                 ""
             }
@@ -149,7 +149,7 @@ fun HomeScreenContent(
         derivedStateOf {
             if (isCollectionDetail) {
                 // Get the collection name from the backstack entry
-                currentBackStackEntry?.arguments?.getString("collectionName") ?: "Collection"
+                currentBackStackEntry?.savedStateHandle?.get<String>("collectionName") ?: "Collection"
             } else {
                 "Collection"
             }

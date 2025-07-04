@@ -53,7 +53,7 @@ fun NavGraphBuilder.collectionsScreen(
             }
         )
     ) { backStackEntry ->
-        val collectionId = backStackEntry.arguments?.getString("collectionId") ?: ""
+        val collectionId = backStackEntry.savedStateHandle.get<String>("collectionId") ?: ""
         CollectionDetailScreen(
             collectionId = collectionId,
             onBackClick = { 
