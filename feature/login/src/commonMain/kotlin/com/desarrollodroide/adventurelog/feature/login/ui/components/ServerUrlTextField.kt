@@ -38,8 +38,7 @@ fun ServerUrlTextField(
     serverUrl: String,
     serverErrorState: Boolean,
     onValueChange: (String) -> Unit,
-    onClick: () -> Unit,
-    onNext: () -> Unit = {}
+    onClick: () -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
@@ -85,9 +84,6 @@ fun ServerUrlTextField(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Uri,
                 imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { onNext() }
             )
         )
 
@@ -117,8 +113,7 @@ private fun ServerUrlTextFieldPreview() {
                     serverUrl = "https://example-server.com",
                     serverErrorState = false,
                     onValueChange = {},
-                    onClick = {},
-                    onNext = {}
+                    onClick = {}
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -127,8 +122,7 @@ private fun ServerUrlTextFieldPreview() {
                     serverUrl = "invalid-url",
                     serverErrorState = true,
                     onValueChange = {},
-                    onClick = {},
-                    onNext = {}
+                    onClick = {}
                 )
             }
         }

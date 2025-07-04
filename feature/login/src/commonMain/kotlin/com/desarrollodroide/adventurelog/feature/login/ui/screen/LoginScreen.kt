@@ -12,12 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -135,8 +132,6 @@ fun ContentViews(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val backgroundPrimary = getAdjustedPrimary()
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(
         modifier = Modifier
@@ -198,28 +193,19 @@ fun ContentViews(
                         serverUrl = loginFormState.serverUrl,
                         serverErrorState = loginFormState.urlError,
                         onValueChange = onServerUrlChange,
-                        onClick = { },
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Down)
-                        }
+                        onClick = { }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     UserTextField(
                         user = loginFormState.userName,
                         userError = loginFormState.userNameError,
-                        onUserChange = onUserNameChange,
-                        onNext = {
-                            focusManager.moveFocus(FocusDirection.Down)
-                        }
+                        onUserChange = onUserNameChange
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     PasswordTextField(
                         password = loginFormState.password,
                         passwordError = loginFormState.passwordError,
-                        onPasswordChange = onPasswordChange,
-                        onDone = {
-                            keyboardController?.hide()
-                        }
+                        onPasswordChange = onPasswordChange
                     )
                     Spacer(Modifier.size(10.dp))
                     LoginButton(

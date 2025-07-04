@@ -31,8 +31,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun UserTextField(
     user: String,
     userError: Boolean,
-    onUserChange: (String) -> Unit,
-    onNext: () -> Unit = {}
+    onUserChange: (String) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -69,9 +68,6 @@ fun UserTextField(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { onNext() }
             )
         )
         Crossfade(
@@ -99,8 +95,7 @@ private fun UserTextFieldPreview() {
                 UserTextField(
                     user = "user@example.com",
                     userError = false,
-                    onUserChange = {},
-                    onNext = {}
+                    onUserChange = {}
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -108,8 +103,7 @@ private fun UserTextFieldPreview() {
                 UserTextField(
                     user = "invalid",
                     userError = true,
-                    onUserChange = {},
-                    onNext = {}
+                    onUserChange = {}
                 )
             }
         }

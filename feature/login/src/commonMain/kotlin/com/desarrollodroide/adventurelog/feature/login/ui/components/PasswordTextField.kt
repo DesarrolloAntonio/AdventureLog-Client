@@ -38,8 +38,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun PasswordTextField(
     password: String,
     passwordError: Boolean,
-    onPasswordChange: (String) -> Unit,
-    onDone: () -> Unit = {}
+    onPasswordChange: (String) -> Unit
 ) {
     val passwordVisibility = remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
@@ -89,9 +88,6 @@ fun PasswordTextField(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { onDone() }
             )
         )
         Crossfade(
@@ -119,8 +115,7 @@ private fun PasswordTextFieldPreview() {
                 PasswordTextField(
                     password = "password123",
                     passwordError = false,
-                    onPasswordChange = {},
-                    onDone = {}
+                    onPasswordChange = {}
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -128,8 +123,7 @@ private fun PasswordTextFieldPreview() {
                 PasswordTextField(
                     password = "",
                     passwordError = true,
-                    onPasswordChange = {},
-                    onDone = {}
+                    onPasswordChange = {}
                 )
             }
         }
