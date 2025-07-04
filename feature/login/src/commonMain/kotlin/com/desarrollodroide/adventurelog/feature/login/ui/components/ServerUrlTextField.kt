@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.Icon
@@ -24,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import isValidUrl
@@ -34,7 +38,8 @@ fun ServerUrlTextField(
     serverUrl: String,
     serverErrorState: Boolean,
     onValueChange: (String) -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onNext: () -> Unit = {}
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
@@ -60,7 +65,7 @@ fun ServerUrlTextField(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(55.dp) // Set a fixed, compact height
+                .height(55.dp)
                 .onFocusChanged { focusState ->
                     if (isFocused && !focusState.isFocused && isValidUrl(serverUrl)) {
                         onClick()
@@ -76,7 +81,14 @@ fun ServerUrlTextField(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = colorScheme.primary
             ),
-            shape = RoundedCornerShape(30.dp)
+            shape = RoundedCornerShape(30.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Uri,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { onNext() }
+            )
         )
 
         Crossfade(
@@ -86,7 +98,7 @@ fun ServerUrlTextField(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp), // Reduced top padding
+                    .padding(top = 2.dp),
                 textAlign = TextAlign.End,
                 color = colorScheme.error,
                 text = if (isError) "Invalid server url" else ""
@@ -105,7 +117,8 @@ private fun ServerUrlTextFieldPreview() {
                     serverUrl = "https://example-server.com",
                     serverErrorState = false,
                     onValueChange = {},
-                    onClick = {}
+                    onClick = {},
+                    onNext = {}
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -114,7 +127,8 @@ private fun ServerUrlTextFieldPreview() {
                     serverUrl = "invalid-url",
                     serverErrorState = true,
                     onValueChange = {},
-                    onClick = {}
+                    onClick = {},
+                    onNext = {}
                 )
             }
         }

@@ -12,9 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -22,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import com.desarrollodroide.adventurelog.feature.login.ui.components.KeyboardDismissible
 import com.desarrollodroide.adventurelog.feature.login.ui.components.LoginButton
 import com.desarrollodroide.adventurelog.feature.login.ui.components.PasswordTextField
 import com.desarrollodroide.adventurelog.feature.login.ui.components.RememberSessionSection
@@ -84,34 +88,38 @@ internal fun LoginScreen(
         }
     }
 
-    Box(
+    KeyboardDismissible(
         modifier = Modifier.fillMaxSize()
     ) {
-        ContentViews(
-            loginFormState = loginFormState,
-            onUserNameChange = onUserNameChange,
-            onPasswordChange = onPasswordChange,
-            onServerUrlChange = onServerUrlChange,
-            onCheckedRememberSessionChange = onCheckedRememberSessionChange,
-            onClickLoginButton = onClickLoginButton,
-            onClickTestButton = { }
-        )
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            ContentViews(
+                loginFormState = loginFormState,
+                onUserNameChange = onUserNameChange,
+                onPasswordChange = onPasswordChange,
+                onServerUrlChange = onServerUrlChange,
+                onCheckedRememberSessionChange = onCheckedRememberSessionChange,
+                onClickLoginButton = onClickLoginButton,
+                onClickTestButton = { }
+            )
 
-        // Use the reusable LoadingDialog component
-        LoadingDialog(
-            isLoading = loginUiState is LoginUiState.Loading,
-            showMessage = false
-        )
+            // Use the reusable LoadingDialog component
+            LoadingDialog(
+                isLoading = loginUiState is LoginUiState.Loading,
+                showMessage = false
+            )
 
-        if (loginUiState is LoginUiState.Error) {
-            clearErrors()
+            if (loginUiState is LoginUiState.Error) {
+                clearErrors()
+            }
+
+            // SnackbarHost positioned at the bottom
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
-
-        // SnackbarHost positioned at the bottom
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
     }
 }
 
@@ -127,6 +135,8 @@ fun ContentViews(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val backgroundPrimary = getAdjustedPrimary()
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Box(
         modifier = Modifier
@@ -188,19 +198,28 @@ fun ContentViews(
                         serverUrl = loginFormState.serverUrl,
                         serverErrorState = loginFormState.urlError,
                         onValueChange = onServerUrlChange,
-                        onClick = { }
+                        onClick = { },
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     UserTextField(
                         user = loginFormState.userName,
                         userError = loginFormState.userNameError,
-                        onUserChange = onUserNameChange
+                        onUserChange = onUserNameChange,
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     PasswordTextField(
                         password = loginFormState.password,
                         passwordError = loginFormState.passwordError,
-                        onPasswordChange = onPasswordChange
+                        onPasswordChange = onPasswordChange,
+                        onDone = {
+                            keyboardController?.hide()
+                        }
                     )
                     Spacer(Modifier.size(10.dp))
                     LoginButton(

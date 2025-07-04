@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -24,6 +26,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -34,7 +38,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun PasswordTextField(
     password: String,
     passwordError: Boolean,
-    onPasswordChange: (String) -> Unit
+    onPasswordChange: (String) -> Unit,
+    onDone: () -> Unit = {}
 ) {
     val passwordVisibility = remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
@@ -47,7 +52,7 @@ fun PasswordTextField(
             maxLines = 1,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(55.dp), // Set a fixed, compact height
+                .height(55.dp),
             placeholder = {
                 Text(
                     text = "Password",
@@ -80,7 +85,14 @@ fun PasswordTextField(
                 focusedBorderColor = if (passwordError) colorScheme.error else colorScheme.primary
             ),
             shape = RoundedCornerShape(30.dp),
-            visualTransformation = if (passwordVisibility.value) VisualTransformation.None else PasswordVisualTransformation()
+            visualTransformation = if (passwordVisibility.value) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { onDone() }
+            )
         )
         Crossfade(
             targetState = passwordError,
@@ -89,7 +101,7 @@ fun PasswordTextField(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp), // Reduced top padding
+                    .padding(top = 2.dp),
                 textAlign = TextAlign.End,
                 color = colorScheme.error,
                 text = if (isError) "Required" else ""
@@ -107,7 +119,8 @@ private fun PasswordTextFieldPreview() {
                 PasswordTextField(
                     password = "password123",
                     passwordError = false,
-                    onPasswordChange = {}
+                    onPasswordChange = {},
+                    onDone = {}
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -115,7 +128,8 @@ private fun PasswordTextFieldPreview() {
                 PasswordTextField(
                     password = "",
                     passwordError = true,
-                    onPasswordChange = {}
+                    onPasswordChange = {},
+                    onDone = {}
                 )
             }
         }

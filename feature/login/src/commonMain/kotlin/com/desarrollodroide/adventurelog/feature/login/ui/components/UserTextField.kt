@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Icon
@@ -20,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -27,7 +31,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun UserTextField(
     user: String,
     userError: Boolean,
-    onUserChange: (String) -> Unit
+    onUserChange: (String) -> Unit,
+    onNext: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -39,7 +44,7 @@ fun UserTextField(
             maxLines = 1,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(55.dp), // Set a fixed, compact height
+                .height(55.dp),
             placeholder = {
                 Text(
                     text = "User",
@@ -60,7 +65,14 @@ fun UserTextField(
                 unfocusedBorderColor = if (userError) colorScheme.error else Color.Transparent,
                 focusedBorderColor = if (userError) colorScheme.error else colorScheme.primary
             ),
-            shape = RoundedCornerShape(30.dp)
+            shape = RoundedCornerShape(30.dp),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { onNext() }
+            )
         )
         Crossfade(
             targetState = userError,
@@ -69,7 +81,7 @@ fun UserTextField(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp), // Reduced top padding
+                    .padding(top = 2.dp),
                 textAlign = TextAlign.End,
                 color = colorScheme.error,
                 text = if (isError) "Invalid username" else ""
@@ -87,7 +99,8 @@ private fun UserTextFieldPreview() {
                 UserTextField(
                     user = "user@example.com",
                     userError = false,
-                    onUserChange = {}
+                    onUserChange = {},
+                    onNext = {}
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -95,7 +108,8 @@ private fun UserTextFieldPreview() {
                 UserTextField(
                     user = "invalid",
                     userError = true,
-                    onUserChange = {}
+                    onUserChange = {},
+                    onNext = {}
                 )
             }
         }
