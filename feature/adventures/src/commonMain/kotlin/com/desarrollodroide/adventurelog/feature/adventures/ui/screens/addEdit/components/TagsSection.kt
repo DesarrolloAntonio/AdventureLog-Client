@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.TagChip
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -45,7 +46,7 @@ fun TagsSection(
     formData: AdventureFormData,
     onFormDataChange: (AdventureFormData) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(true) }
+    var expanded by remember { mutableStateOf(false) }
     var tagInput by remember { mutableStateOf("") }
     
     SectionCard(
@@ -118,7 +119,7 @@ fun TagsSection(
                 ) {
                     formData.tags.forEach { tag ->
                         TagChip(
-                            tag = tag,
+                            text = tag,
                             onRemove = {
                                 onFormDataChange(
                                     formData.copy(
@@ -135,55 +136,6 @@ fun TagsSection(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 8.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TagChip(
-    tag: String,
-    onRemove: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.primaryContainer,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(
-                start = 12.dp,
-                top = 6.dp,
-                end = 4.dp,
-                bottom = 6.dp
-            ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = tag,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontWeight = FontWeight.Medium
-            )
-            
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
-                    .background(
-                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f)
-                    )
-                    .clickable { onRemove() },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Remove tag",
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
         }
