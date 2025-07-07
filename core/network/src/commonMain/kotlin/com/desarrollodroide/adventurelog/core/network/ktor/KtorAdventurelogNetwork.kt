@@ -15,7 +15,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
@@ -259,7 +259,7 @@ class KtorAdventurelogNetwork(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?,
+        visits: List<VisitFormData>,
         activityTypes: List<String>
     ): AdventureDTO {
         ensureInitialized()
@@ -273,7 +273,7 @@ class KtorAdventurelogNetwork(
             latitude = latitude,
             longitude = longitude,
             isPublic = isPublic,
-            visitDates = visitDates,
+            visits = visits,
             activityTypes = activityTypes
         )
     }

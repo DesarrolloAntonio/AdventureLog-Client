@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.core.network.model.mappers
 
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
@@ -25,6 +26,36 @@ fun Visit.toVisitRequest(): VisitRequest {
     )
 }
 
+fun VisitFormData.toVisitRequest(): VisitRequest {
+    // Convert date to ISO format with time and timezone
+    val formattedStartDate = if (startDate.isNotEmpty()) {
+        if (isAllDay) {
+            "${startDate}T00:00:00Z"
+        } else {
+            val time = startTime ?: "12:00"
+            "${startDate}T${time}:00Z"
+        }
+    } else {
+        startDate
+    }
+    
+    val formattedEndDate = endDate?.takeIf { it.isNotEmpty() }?.let {
+        if (isAllDay) {
+            "${it}T23:59:59Z"
+        } else {
+            val time = endTime ?: "12:00"
+            "${it}T${time}:00Z"
+        }
+    } ?: formattedStartDate
+    
+    return VisitRequest(
+        startDate = formattedStartDate,
+        endDate = formattedEndDate,
+        timezone = timezone,
+        notes = notes
+    )
+}
+
 fun createAdventureRequest(
     name: String,
     description: String,
@@ -35,7 +66,7 @@ fun createAdventureRequest(
     latitude: String?,
     longitude: String?,
     isPublic: Boolean,
-    visitDates: Visit?,
+    visits: List<VisitFormData>,
     activityTypes: List<String> = emptyList()
 ): CreateAdventureRequest {
     return CreateAdventureRequest(
@@ -49,7 +80,7 @@ fun createAdventureRequest(
         link = link.takeIf { it.isNotBlank() },
         longitude = longitude.toCoordinateString(),
         latitude = latitude.toCoordinateString(),
-        visits = visitDates?.let { listOf(it.toVisitRequest()) } ?: emptyList(),
+        visits = visits.map { it.toVisitRequest() },
         category = category.toCategoryRequest()
     )
 }

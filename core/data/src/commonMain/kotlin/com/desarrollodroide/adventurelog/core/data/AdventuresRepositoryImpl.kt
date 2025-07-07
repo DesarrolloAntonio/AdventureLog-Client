@@ -8,7 +8,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSource
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
@@ -93,7 +93,7 @@ class AdventuresRepositoryImpl(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?,
+        visits: List<VisitFormData>,
         activityTypes: List<String>
     ): Either<String, Adventure> {
         return try {
@@ -107,7 +107,7 @@ class AdventuresRepositoryImpl(
                 latitude = latitude,
                 longitude = longitude,
                 isPublic = isPublic,
-                visitDates = visitDates,
+                visits = visits,
                 activityTypes = activityTypes
             ).toDomainModel()
             

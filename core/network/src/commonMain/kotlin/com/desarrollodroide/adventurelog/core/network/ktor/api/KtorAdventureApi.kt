@@ -2,17 +2,18 @@ package com.desarrollodroide.adventurelog.core.network.ktor.api
 
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdventureRequest
+import com.desarrollodroide.adventurelog.core.network.model.mappers.toVisitRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
 import com.desarrollodroide.adventurelog.core.network.utils.toCoordinateString
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -96,7 +97,7 @@ internal class KtorAdventureNetworkDataSource(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?,
+        visits: List<VisitFormData>,
         activityTypes: List<String>
     ): AdventureDTO {
         val session = sessionProvider()
@@ -112,11 +113,11 @@ internal class KtorAdventureNetworkDataSource(
             latitude = latitude,
             longitude = longitude,
             isPublic = isPublic,
-            visitDates = visitDates,
+            visits = visits,
             activityTypes = activityTypes
         )
 
-        logger.d { "Creating adventure with request: name=$name, categoryId=${category.id}, isPublic=$isPublic" }
+        logger.d { "Creating adventure with request: name=$name, categoryId=${category.id}, isPublic=$isPublic, visits=${visits.size}" }
 
         val response = httpClient.post(url) {
             contentType(ContentType.Application.Json)
@@ -154,7 +155,7 @@ internal class KtorAdventureNetworkDataSource(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean?,
-        visitDates: Visit?
+        visits: List<VisitFormData>?
     ): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/$adventureId/"
@@ -174,6 +175,11 @@ internal class KtorAdventureNetworkDataSource(
             latitude.toCoordinateString()?.let { put("latitude", it) }
             longitude.toCoordinateString()?.let { put("longitude", it) }
             isPublic?.let { put("is_public", it) }
+            visits?.let { 
+                if (it.isNotEmpty()) {
+                    put("visits", it.map { visit -> visit.toVisitRequest() })
+                }
+            }
         }
 
         val response = httpClient.patch(url) {
@@ -212,6 +218,4 @@ internal class KtorAdventureNetworkDataSource(
             )
         }
     }
-
-
 }

@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.network.api
 
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
 interface AdventureApi {
     /**
@@ -33,7 +33,7 @@ interface AdventureApi {
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?,
+        visits: List<VisitFormData>,
         activityTypes: List<String> = emptyList()
     ): AdventureDTO
     
@@ -51,7 +51,7 @@ interface AdventureApi {
         latitude: String? = null,
         longitude: String? = null,
         isPublic: Boolean? = null,
-        visitDates: Visit? = null
+        visits: List<VisitFormData>? = null
     ): AdventureDTO
     
     /**

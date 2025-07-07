@@ -5,7 +5,7 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -33,7 +33,7 @@ interface AdventuresRepository {
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?,
+        visits: List<VisitFormData>,
         activityTypes: List<String> = emptyList()
     ): Either<String, Adventure>
 

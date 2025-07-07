@@ -1,17 +1,53 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,58 +55,662 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateSection(
     formData: AdventureFormData,
     onFormDataChange: (AdventureFormData) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(true) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
+    var editingVisitIndex by remember { mutableStateOf<Int?>(null) }
+    var tempVisitData by remember { mutableStateOf(VisitFormData()) }
     
     SectionCard(
-        title = "Date Information",
+        title = "Date information",
         icon = Icons.Outlined.CalendarToday,
         expanded = expanded,
         onExpandedChange = { expanded = it }
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f)
-            ),
-            border = CardDefaults.outlinedCardBorder()
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            // Settings section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                ),
+                border = CardDefaults.outlinedCardBorder()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "📅",
-                        style = MaterialTheme.typography.titleLarge
+                        text = "Settings",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
                     )
-                    Column {
+                    
+                    // Timezone dropdown
+                    TimezoneDropdown(
+                        selectedTimezone = tempVisitData.timezone,
+                        onTimezoneSelected = { timezone ->
+                            tempVisitData = tempVisitData.copy(timezone = timezone)
+                        }
+                    )
+                    
+                    // All day switch
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+                        ),
+                        border = CardDefaults.outlinedCardBorder()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "All day",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Switch(
+                                checked = tempVisitData.isAllDay,
+                                onCheckedChange = { isAllDay ->
+                                    tempVisitData = tempVisitData.copy(isAllDay = isAllDay)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Start and end date
+            if (tempVisitData.isAllDay) {
+                // Only start date for all day
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Start date",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    StyledTextField(
+                        value = if (tempVisitData.startDate.isNotEmpty()) {
+                            formatDateForDisplay(tempVisitData.startDate)
+                        } else {
+                            ""
+                        },
+                        onValueChange = { },
+                        label = "dd/mm/yyyy",
+                        icon = Icons.Outlined.CalendarToday,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showStartDatePicker = true },
+                        keyboardOptions = KeyboardOptions.Default
+                    )
+                }
+            } else {
+                // Start and end date with time
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Text(
-                            text = "Date picker coming soon!",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "Set when you visited this adventure",
-                            style = MaterialTheme.typography.bodySmall,
+                            text = "Start date",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        DateTimeField(
+                            date = tempVisitData.startDate,
+                            time = tempVisitData.startTime ?: "",
+                            onDateClick = { showStartDatePicker = true },
+                            onTimeClick = { showStartTimePicker = true }
+                        )
+                    }
+                    
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "End date",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        DateTimeField(
+                            date = tempVisitData.endDate ?: tempVisitData.startDate,
+                            time = tempVisitData.endTime ?: "",
+                            onDateClick = { showEndDatePicker = true },
+                            onTimeClick = { showEndTimePicker = true }
                         )
                     }
                 }
             }
+            
+            // Add notes - using the same style as DescriptionSection
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.EditNote,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Add notes",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                OutlinedTextField(
+                    value = tempVisitData.notes,
+                    onValueChange = { notes ->
+                        tempVisitData = tempVisitData.copy(notes = notes)
+                    },
+                    placeholder = { 
+                        Text(
+                            text = "Add notes about this visit",
+                            color = Color.Gray
+                        ) 
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Default
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.Transparent
+                    )
+                )
+            }
+            
+            // Add/Update button
+            PrimaryButton(
+                onClick = {
+                    if (tempVisitData.startDate.isNotEmpty()) {
+                        val updatedVisits = if (editingVisitIndex != null) {
+                            formData.visits.toMutableList().apply {
+                                set(editingVisitIndex!!, tempVisitData)
+                            }
+                        } else {
+                            formData.visits + tempVisitData
+                        }
+                        onFormDataChange(formData.copy(visits = updatedVisits))
+                        
+                        // Reset form
+                        tempVisitData = VisitFormData()
+                        editingVisitIndex = null
+                    }
+                },
+                text = if (editingVisitIndex != null) "Update" else "Add",
+                enabled = tempVisitData.startDate.isNotEmpty()
+            )
+            
+            // Visits section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Visits",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    
+                    if (formData.visits.isEmpty()) {
+                        Text(
+                            text = "No visits added yet",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        formData.visits.forEachIndexed { index, visit ->
+                            VisitItem(
+                                visit = visit,
+                                onEdit = {
+                                    tempVisitData = visit
+                                    editingVisitIndex = index
+                                },
+                                onDelete = {
+                                    val updatedVisits = formData.visits.toMutableList().apply {
+                                        removeAt(index)
+                                    }
+                                    onFormDataChange(formData.copy(visits = updatedVisits))
+                                }
+                            )
+                        }
+                    }
+                }
+            }
         }
+    }
+    
+    // Date picker dialogs
+    if (showStartDatePicker) {
+        val datePickerState = rememberDatePickerState()
+        
+        DatePickerDialog(
+            onDismissRequest = { showStartDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val instant = Instant.fromEpochMilliseconds(millis)
+                            val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                            tempVisitData = tempVisitData.copy(
+                                startDate = localDate.toString(),
+                                endDate = if (tempVisitData.endDate.isNullOrEmpty()) localDate.toString() else tempVisitData.endDate
+                            )
+                        }
+                        showStartDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+    
+    if (showEndDatePicker) {
+        val datePickerState = rememberDatePickerState()
+        
+        DatePickerDialog(
+            onDismissRequest = { showEndDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val instant = Instant.fromEpochMilliseconds(millis)
+                            val localDate = instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                            tempVisitData = tempVisitData.copy(
+                                endDate = localDate.toString()
+                            )
+                        }
+                        showEndDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+    
+    // Time picker dialogs
+    if (showStartTimePicker) {
+        TimePickerDialog(
+            onDismiss = { showStartTimePicker = false },
+            onConfirm = { hour, minute ->
+                tempVisitData = tempVisitData.copy(
+                    startTime = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                )
+                showStartTimePicker = false
+            }
+        )
+    }
+    
+    if (showEndTimePicker) {
+        TimePickerDialog(
+            onDismiss = { showEndTimePicker = false },
+            onConfirm = { hour, minute ->
+                tempVisitData = tempVisitData.copy(
+                    endTime = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                )
+                showEndTimePicker = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun DateTimeField(
+    date: String,
+    time: String,
+    onDateClick: () -> Unit,
+    onTimeClick: () -> Unit
+) {
+    OutlinedTextField(
+        value = if (date.isNotEmpty()) {
+            val displayDate = formatDateForDisplay(date)
+            if (time.isNotEmpty()) {
+                "$displayDate, $time"
+            } else {
+                "$displayDate, 12:00"
+            }
+        } else {
+            ""
+        },
+        onValueChange = { },
+        placeholder = {
+            Text(
+                text = "dd/mm/yyyy, hh:mm",
+                color = Color.Gray
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(55.dp)
+            .clickable { onDateClick() },
+        enabled = false,
+        trailingIcon = {
+            IconButton(onClick = onDateClick) {
+                Icon(
+                    imageVector = Icons.Outlined.CalendarToday,
+                    contentDescription = "Select date",
+                    tint = Color.Gray
+                )
+            }
+        },
+        shape = RoundedCornerShape(30.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledBorderColor = Color.Transparent,
+            disabledPlaceholderColor = Color.Gray,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimePickerDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (Int, Int) -> Unit
+) {
+    val timePickerState = rememberTimePickerState()
+    
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(timePickerState.hour, timePickerState.minute)
+                }
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        TimePicker(state = timePickerState)
+    }
+}
+
+@Composable
+private fun TimezoneDropdown(
+    selectedTimezone: String,
+    onTimezoneSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    val commonTimezones = listOf(
+        "Europe/Madrid" to "Europe/Madrid",
+        "America/New_York" to "America/New York",
+        "America/Los_Angeles" to "America/Los Angeles",
+        "America/Chicago" to "America/Chicago",
+        "Europe/London" to "Europe/London",
+        "Europe/Paris" to "Europe/Paris",
+        "Europe/Berlin" to "Europe/Berlin",
+        "Asia/Tokyo" to "Asia/Tokyo",
+        "Asia/Shanghai" to "Asia/Shanghai",
+        "Australia/Sydney" to "Australia/Sydney",
+        "UTC" to "UTC"
+    )
+    
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Timezone",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Box {
+            StyledTextField(
+                value = selectedTimezone,
+                onValueChange = { },
+                label = "Select timezone",
+                icon = Icons.Outlined.Schedule,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = true }
+            )
+            
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                commonTimezones.forEach { (value, display) ->
+                    DropdownMenuItem(
+                        text = { Text(display) },
+                        onClick = {
+                            onTimezoneSelected(value)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VisitItem(
+    visit: VisitFormData,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Date and time information
+            Text(
+                text = if (visit.isAllDay) {
+                    formatDateForDisplay(visit.startDate)
+                } else {
+                    val startDisplay = "${formatDateForDisplay(visit.startDate)}, ${visit.startTime ?: "12:00"}"
+                    val endDate = visit.endDate
+                    val endDisplay = if (endDate != null && endDate != visit.startDate) {
+                        "${formatDateForDisplay(endDate)}, ${visit.endTime ?: "12:00"}"
+                    } else {
+                        visit.endTime ?: "12:00"
+                    }
+                    
+                    if (endDate != null && endDate != visit.startDate) {
+                        "$startDisplay - $endDisplay"
+                    } else {
+                        "$startDisplay - $endDisplay"
+                    }
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
+            
+            // Timezone badge
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = visit.timezone,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                if (visit.isAllDay) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "All day",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+            
+            // Notes if present
+            if (visit.notes.isNotEmpty()) {
+                Text(
+                    text = visit.notes,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            // Action buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = onEdit,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Edit")
+                }
+                
+                TextButton(
+                    onClick = onDelete,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Delete")
+                }
+            }
+        }
+    }
+}
+
+private fun formatDateForDisplay(dateString: String): String {
+    return try {
+        if (dateString.isEmpty()) return ""
+        
+        // Parse ISO date string (yyyy-MM-dd) and format to dd/mm/yyyy
+        val parts = dateString.split("-")
+        if (parts.size == 3) {
+            "${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}"
+        } else {
+            dateString
+        }
+    } catch (e: Exception) {
+        dateString
     }
 }

@@ -37,6 +37,7 @@ protobuf = "3.21.9"
 datastorePreferences = "1.1.6"
 uiTextGoogleFonts = "1.8.1"
 multiplatform-paging = "3.3.0-alpha02-0.5.1"
+kotlinx-datetime = "0.6.1"
 
 [libraries]
 androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
@@ -93,6 +94,7 @@ androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activityCompose" }
 multiplatform-paging-common = { module = "app.cash.paging:paging-common", version.ref = "multiplatform-paging" }
 multiplatform-paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "multiplatform-paging" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 [bundles]
 ktor-common = ["ktor-client-core", "ktor-client-json", "ktor-client-logging", "ktor-client-serialization", "ktor-client-content-negotiation", "ktor-serialization-kotlinx-json"]

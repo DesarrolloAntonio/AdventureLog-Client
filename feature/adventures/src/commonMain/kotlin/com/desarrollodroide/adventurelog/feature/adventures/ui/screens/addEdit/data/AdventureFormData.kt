@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data
 
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
 data class AdventureFormData(
     val name: String = "",
@@ -13,5 +14,5 @@ data class AdventureFormData(
     val longitude: String? = null,
     val isPublic: Boolean = false,
     val tags: List<String> = emptyList(),
-    val date: String? = null
+    val visits: List<VisitFormData> = emptyList()
 )

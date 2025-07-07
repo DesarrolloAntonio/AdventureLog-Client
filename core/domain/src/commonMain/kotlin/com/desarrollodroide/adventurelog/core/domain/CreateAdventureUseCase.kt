@@ -4,7 +4,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
 class CreateAdventureUseCase(
     private val adventuresRepository: AdventuresRepository
@@ -20,7 +20,7 @@ class CreateAdventureUseCase(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        visitDates: Visit? = null
+        visits: List<VisitFormData> = emptyList()
     ): Either<String, Adventure> {
         // Validate required fields
         if (name.isBlank()) {
@@ -38,7 +38,7 @@ class CreateAdventureUseCase(
             latitude = latitude,
             longitude = longitude,
             isPublic = isPublic,
-            visitDates = visitDates,
+            visits = visits,
             activityTypes = tags
         )
     }

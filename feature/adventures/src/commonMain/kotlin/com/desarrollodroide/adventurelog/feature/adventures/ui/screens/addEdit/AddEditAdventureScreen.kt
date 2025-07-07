@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.BasicInfoSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.DateSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
@@ -201,7 +202,15 @@ private fun AddEditAdventureScreenWithDataPreview() {
                     longitude = "-3.6921",
                     isPublic = true,
                     tags = listOf("art", "culture", "madrid"),
-                    date = "2024-01-15"
+                    visits = listOf(
+                        VisitFormData(
+                            startDate = "2024-01-15",
+                            endDate = "2024-01-15",
+                            timezone = "Europe/Madrid",
+                            notes = "Amazing collection of Velázquez paintings",
+                            isAllDay = true
+                        )
+                    )
                 )
             )
         }

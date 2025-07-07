@@ -16,7 +16,10 @@ data class VisitDTO(
     val endDate: String? = null,
 
     @SerialName("notes")
-    val notes: String? = null
+    val notes: String? = null,
+    
+    @SerialName("timezone")
+    val timezone: String? = null
 )
 
 fun VisitDTO.toDomainModel() = Visit(
@@ -24,5 +27,5 @@ fun VisitDTO.toDomainModel() = Visit(
     startDate = startDate ?: "",
     endDate = endDate ?: "",
     notes = notes ?: "",
-    timezone = ""
+    timezone = timezone ?: "UTC"
 )

@@ -105,15 +105,7 @@ class AddEditAdventureViewModel(
                     longitude = formData.longitude,
                     isPublic = formData.isPublic,
                     tags = formData.tags,
-                    visitDates = formData.date?.let {
-                        Visit(
-                            id = "",
-                            startDate = it,
-                            endDate = it,
-                            timezone = "",
-                            notes = "",
-                        )
-                    }
+                    visits = formData.visits
                 )
             }
             
