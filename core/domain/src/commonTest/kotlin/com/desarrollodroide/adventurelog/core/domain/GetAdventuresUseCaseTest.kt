@@ -1,11 +1,16 @@
 package com.desarrollodroide.adventurelog.core.domain
 
+import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,6 +23,13 @@ class GetAdventuresUseCaseTest {
         var getAdventuresCallCount = 0
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
+
+        private val _adventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
+        override val adventuresFlow: StateFlow<List<Adventure>> = _adventuresFlow
+
+        override fun getAdventuresPagingData(): Flow<PagingData<Adventure>> {
+            return flowOf(PagingData.empty())
+        }
 
         override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>> {
             getAdventuresCallCount++
@@ -43,6 +55,14 @@ class GetAdventuresUseCaseTest {
             visitDates: Visit?
         ): Either<String, Adventure> {
             throw NotImplementedError()
+        }
+
+        override suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>> {
+            return getAdventuresResult
+        }
+
+        override suspend fun generateDescription(name: String): Either<String, String> {
+            return Either.Right("Generated description for $name")
         }
     }
 

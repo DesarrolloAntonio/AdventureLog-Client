@@ -4,12 +4,16 @@ import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -54,6 +58,10 @@ class LogoutUseCaseTest {
 
         override suspend fun clearAllUserData() {
             throw NotImplementedError()
+        }
+
+        override suspend fun getUserStats(username: String): UserStats {
+            return UserStats()
         }
     }
 
@@ -119,6 +127,22 @@ class LogoutUseCaseTest {
 
         override suspend fun getCategories(): List<CategoryDTO> {
             throw NotImplementedError()
+        }
+
+        override suspend fun generateDescription(name: String): String {
+            return "Generated description for $name"
+        }
+
+        override suspend fun searchLocations(query: String): List<GeocodeSearchResultDTO> {
+            return emptyList()
+        }
+
+        override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResultDTO {
+            return ReverseGeocodeResultDTO()
+        }
+
+        override suspend fun getUserStats(username: String): UserStatsDTO {
+            return UserStatsDTO()
         }
     }
 

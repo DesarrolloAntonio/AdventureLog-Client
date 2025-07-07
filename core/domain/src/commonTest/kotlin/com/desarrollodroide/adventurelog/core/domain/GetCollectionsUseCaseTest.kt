@@ -1,9 +1,14 @@
 package com.desarrollodroide.adventurelog.core.domain
 
+import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.CollectionsRepository
 import com.desarrollodroide.adventurelog.core.model.Collection
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,6 +21,13 @@ class GetCollectionsUseCaseTest {
         var getCollectionsCallCount = 0
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
+        
+        private val _collectionsFlow = MutableStateFlow<List<Collection>>(emptyList())
+        override val collectionsFlow: StateFlow<List<Collection>> = _collectionsFlow
+
+        override fun getCollectionsPagingData(): Flow<PagingData<Collection>> {
+            return flowOf(PagingData.empty())
+        }
 
         override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<Collection>> {
             getCollectionsCallCount++
@@ -36,6 +48,10 @@ class GetCollectionsUseCaseTest {
             endDate: String?
         ): Either<String, Collection> {
             throw NotImplementedError()
+        }
+
+        override suspend fun refreshCollections(): Either<ApiResponse, List<Collection>> {
+            return getCollectionsResult
         }
     }
 
