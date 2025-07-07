@@ -165,20 +165,11 @@ fun BasicInfoSection(
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
                                 )
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(
-                                        text = "Public Collection",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Text(
-                                        text = "Other users will be able to see this collection",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
+                                Text(
+                                    text = "Public Collection",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium
+                                )
                             }
                             Switch(
                                 checked = formData.isPublic,

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components.BasicInfoSection
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components.DateSection
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 
 @Composable
 fun AddEditCollectionScreen(
@@ -62,23 +63,11 @@ fun AddEditCollectionScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
+            PrimaryButton(
                 onClick = { onSave(formData) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
+                text = if (initialData != null) "Update Collection" else "Create Collection",
                 enabled = formData.name.isNotBlank()
-            ) {
-                Text(
-                    text = if (initialData != null) "Update Collection" else "Create Collection",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-            }
+            )
 
             TextButton(
                 onClick = onNavigateBack,

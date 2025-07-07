@@ -259,7 +259,8 @@ class KtorAdventurelogNetwork(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?
+        visitDates: Visit?,
+        activityTypes: List<String>
     ): AdventureDTO {
         ensureInitialized()
         return adventureDataSource.createAdventure(
@@ -272,7 +273,8 @@ class KtorAdventurelogNetwork(
             latitude = latitude,
             longitude = longitude,
             isPublic = isPublic,
-            visitDates = visitDates
+            visitDates = visitDates,
+            activityTypes = activityTypes
         )
     }
     

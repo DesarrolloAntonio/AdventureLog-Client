@@ -18,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.CompactPrimaryButton
 import kotlinx.coroutines.delay
 
 @Composable
@@ -57,64 +58,55 @@ fun LocationSection(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Location display field
-            OutlinedTextField(
+            StyledTextField(
                 value = formData.location,
                 onValueChange = { 
                     onFormDataChange(formData.copy(location = it))
                 },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Location") },
-                placeholder = { Text("Search or click on map") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null
-                    )
-                },
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true,
-                readOnly = true
+                label = "Location",
+                icon = Icons.Default.LocationOn,
+                singleLine = true
             )
             
             // Search field
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { 
-                    searchQuery = it
-                    // Debounced search is handled by LaunchedEffect
-                },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Search location") },
-                placeholder = { Text("Enter location to search") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = null
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    StyledTextField(
+                        value = searchQuery,
+                        onValueChange = { 
+                            searchQuery = it
+                            // Debounced search is handled by LaunchedEffect
+                        },
+                        label = "Search location",
+                        icon = Icons.Default.Search,
+                        singleLine = true
                     )
-                },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        if (isSearchingLocation) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Button(
-                                onClick = {
-                                    onSearchLocation(searchQuery)
-                                    showSearchResults = true
-                                },
-                                modifier = Modifier.padding(end = 8.dp)
-                            ) {
-                                Text("Search")
-                            }
-                        }
+                }
+                
+                if (searchQuery.isNotEmpty()) {
+                    if (isSearchingLocation) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(top = 4.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        CompactPrimaryButton(
+                            onClick = {
+                                onSearchLocation(searchQuery)
+                                showSearchResults = true
+                            },
+                            text = "Search",
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
-                },
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true
-            )
+                }
+            }
             
             // Search results
             if (showSearchResults && locationSearchResults.isNotEmpty()) {

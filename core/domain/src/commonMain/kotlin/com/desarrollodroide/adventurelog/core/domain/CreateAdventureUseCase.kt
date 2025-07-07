@@ -38,7 +38,8 @@ class CreateAdventureUseCase(
             latitude = latitude,
             longitude = longitude,
             isPublic = isPublic,
-            visitDates = visitDates
+            visitDates = visitDates,
+            activityTypes = tags
         )
     }
 }

@@ -33,6 +33,7 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.c
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.TagsSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -112,22 +113,10 @@ fun AddEditAdventureScreen(
                     .padding(horizontal = 16.dp, vertical = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Button(
+                PrimaryButton(
                     onClick = { onSave(formData) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(
-                        text = if (initialData != null) "Update Adventure" else "Create Adventure",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                    text = if (initialData != null) "Update Adventure" else "Create Adventure"
+                )
 
                 TextButton(
                     onClick = onNavigateBack,

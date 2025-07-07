@@ -96,7 +96,8 @@ internal class KtorAdventureNetworkDataSource(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?
+        visitDates: Visit?,
+        activityTypes: List<String>
     ): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/"
@@ -111,7 +112,8 @@ internal class KtorAdventureNetworkDataSource(
             latitude = latitude,
             longitude = longitude,
             isPublic = isPublic,
-            visitDates = visitDates
+            visitDates = visitDates,
+            activityTypes = activityTypes
         )
 
         logger.d { "Creating adventure with request: name=$name, categoryId=${category.id}, isPublic=$isPublic" }

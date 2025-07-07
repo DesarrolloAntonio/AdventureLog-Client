@@ -93,7 +93,8 @@ class AdventuresRepositoryImpl(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?
+        visitDates: Visit?,
+        activityTypes: List<String>
     ): Either<String, Adventure> {
         return try {
             val adventure = networkDataSource.createAdventure(
@@ -106,7 +107,8 @@ class AdventuresRepositoryImpl(
                 latitude = latitude,
                 longitude = longitude,
                 isPublic = isPublic,
-                visitDates = visitDates
+                visitDates = visitDates,
+                activityTypes = activityTypes
             ).toDomainModel()
             
             // Add the new adventure to the beginning of the flow (most recent first)

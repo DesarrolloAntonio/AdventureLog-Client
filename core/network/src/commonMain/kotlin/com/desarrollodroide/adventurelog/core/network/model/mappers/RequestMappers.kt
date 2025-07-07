@@ -35,13 +35,14 @@ fun createAdventureRequest(
     latitude: String?,
     longitude: String?,
     isPublic: Boolean,
-    visitDates: Visit?
+    visitDates: Visit?,
+    activityTypes: List<String> = emptyList()
 ): CreateAdventureRequest {
     return CreateAdventureRequest(
         name = name,
         description = description.takeIf { it.isNotBlank() },
         rating = rating.takeIf { it > 0 },
-        activityTypes = null,
+        activityTypes = activityTypes.takeIf { it.isNotEmpty() },
         location = location.takeIf { it.isNotBlank() },
         isPublic = isPublic,
         collections = emptyList(),

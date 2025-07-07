@@ -33,7 +33,8 @@ interface AdventuresRepository {
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?
+        visitDates: Visit?,
+        activityTypes: List<String> = emptyList()
     ): Either<String, Adventure>
 
     suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>>

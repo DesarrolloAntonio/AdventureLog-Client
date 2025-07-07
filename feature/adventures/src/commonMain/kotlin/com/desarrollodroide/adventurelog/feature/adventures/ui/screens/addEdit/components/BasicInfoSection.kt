@@ -7,10 +7,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,13 +27,13 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Title
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.feature.ui.components.DescriptionSection
+import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 
 @Composable
 fun BasicInfoSection(
@@ -185,31 +188,34 @@ fun BasicInfoSection(
                         enter = fadeIn() + expandVertically(),
                         exit = fadeOut() + shrinkVertically()
                     ) {
-                        OutlinedButton(
-                            onClick = onGenerateDescription,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            ),
-                            enabled = !isGeneratingDescription
-                        ) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                             if (isGeneratingDescription) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(18.dp),
-                                    strokeWidth = 2.dp
-                                )
+                                Button(
+                                    onClick = { },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(50.dp),
+                                    shape = RoundedCornerShape(25.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    ),
+                                    enabled = false
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Generating...")
+                                }
                             } else {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                PrimaryButton(
+                                    onClick = onGenerateDescription,
+                                    text = "Generate Description from Wikipedia",
+                                    enabled = !isGeneratingDescription
                                 )
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                if (isGeneratingDescription) "Generating..." else "Generate Description from Wikipedia"
-                            )
                         }
                     }
                     

@@ -33,7 +33,8 @@ interface AdventureApi {
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?
+        visitDates: Visit?,
+        activityTypes: List<String> = emptyList()
     ): AdventureDTO
     
     /**

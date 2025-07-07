@@ -83,7 +83,8 @@ interface AdventureLogNetworkDataSource {
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        visitDates: Visit?
+        visitDates: Visit?,
+        activityTypes: List<String> = emptyList()
     ): AdventureDTO
 
     /**
