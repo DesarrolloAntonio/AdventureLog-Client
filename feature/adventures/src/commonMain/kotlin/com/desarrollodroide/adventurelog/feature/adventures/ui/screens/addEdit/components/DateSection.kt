@@ -1,71 +1,35 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.CalendarToday
-import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -155,76 +119,40 @@ fun DateSection(
                 }
             }
             
-            // Start and end date
-            if (tempVisitData.isAllDay) {
-                // Only start date for all day
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Start date",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    StyledTextField(
-                        value = if (tempVisitData.startDate.isNotEmpty()) {
-                            formatDateForDisplay(tempVisitData.startDate)
-                        } else {
-                            ""
-                        },
-                        onValueChange = { },
-                        label = "dd/mm/yyyy",
-                        icon = Icons.Outlined.CalendarToday,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showStartDatePicker = true },
-                        keyboardOptions = KeyboardOptions.Default
-                    )
-                }
-            } else {
-                // Start and end date with time
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Start date",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        
-                        DateTimeField(
-                            date = tempVisitData.startDate,
-                            time = tempVisitData.startTime ?: "",
-                            onDateClick = { showStartDatePicker = true },
-                            onTimeClick = { showStartTimePicker = true }
-                        )
-                    }
-                    
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "End date",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        
-                        DateTimeField(
-                            date = tempVisitData.endDate ?: tempVisitData.startDate,
-                            time = tempVisitData.endTime ?: "",
-                            onDateClick = { showEndDatePicker = true },
-                            onTimeClick = { showEndTimePicker = true }
-                        )
-                    }
-                }
+            // Start date
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Start date",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                DateTimeField(
+                    date = tempVisitData.startDate,
+                    time = if (tempVisitData.isAllDay) null else tempVisitData.startTime,
+                    isAllDay = tempVisitData.isAllDay,
+                    onDateClick = { showStartDatePicker = true },
+                    onTimeClick = { showStartTimePicker = true }
+                )
+            }
+            
+            // End date
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "End date",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                DateTimeField(
+                    date = tempVisitData.endDate ?: tempVisitData.startDate,
+                    time = if (tempVisitData.isAllDay) null else tempVisitData.endTime,
+                    isAllDay = tempVisitData.isAllDay,
+                    onDateClick = { showEndDatePicker = true },
+                    onTimeClick = { showEndTimePicker = true }
+                )
             }
             
             // Add notes - using the same style as DescriptionSection
@@ -276,9 +204,12 @@ fun DateSection(
             }
             
             // Add/Update button
+            val isFormValid = tempVisitData.startDate.isNotEmpty() && 
+                (tempVisitData.isAllDay || (!tempVisitData.startTime.isNullOrEmpty() && !tempVisitData.endTime.isNullOrEmpty()))
+            
             PrimaryButton(
                 onClick = {
-                    if (tempVisitData.startDate.isNotEmpty()) {
+                    if (isFormValid) {
                         val updatedVisits = if (editingVisitIndex != null) {
                             formData.visits.toMutableList().apply {
                                 set(editingVisitIndex!!, tempVisitData)
@@ -294,7 +225,7 @@ fun DateSection(
                     }
                 },
                 text = if (editingVisitIndex != null) "Update" else "Add",
-                enabled = tempVisitData.startDate.isNotEmpty()
+                enabled = isFormValid
             )
             
             // Visits section
@@ -437,50 +368,129 @@ fun DateSection(
 @Composable
 private fun DateTimeField(
     date: String,
-    time: String,
+    time: String?,
+    isAllDay: Boolean,
     onDateClick: () -> Unit,
     onTimeClick: () -> Unit
 ) {
-    OutlinedTextField(
-        value = if (date.isNotEmpty()) {
-            val displayDate = formatDateForDisplay(date)
-            if (time.isNotEmpty()) {
-                "$displayDate, $time"
-            } else {
-                "$displayDate, 12:00"
-            }
-        } else {
-            ""
-        },
-        onValueChange = { },
-        placeholder = {
-            Text(
-                text = "dd/mm/yyyy, hh:mm",
-                color = Color.Gray
+    if (isAllDay) {
+        // For all day events, only show date field
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = if (date.isNotEmpty()) formatDateForDisplay(date) else "",
+                onValueChange = { },
+                placeholder = {
+                    Text(
+                        text = "dd/mm/yyyy",
+                        color = Color.Gray
+                    )
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(55.dp),
+                enabled = false,
+                shape = RoundedCornerShape(30.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = Color.Transparent,
+                    disabledPlaceholderColor = Color.Gray,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
             )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(55.dp)
-            .clickable { onDateClick() },
-        enabled = false,
-        trailingIcon = {
-            IconButton(onClick = onDateClick) {
+            
+            // Date button
+            IconButton(
+                onClick = onDateClick,
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+            ) {
                 Icon(
                     imageVector = Icons.Outlined.CalendarToday,
                     contentDescription = "Select date",
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(22.dp)
                 )
             }
-        },
-        shape = RoundedCornerShape(30.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            disabledTextColor = MaterialTheme.colorScheme.onSurface,
-            disabledBorderColor = Color.Transparent,
-            disabledPlaceholderColor = Color.Gray,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        )
-    )
+        }
+    } else {
+        // For timed events, show combined field with two buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = if (date.isNotEmpty()) {
+                    "${formatDateForDisplay(date)}, ${time ?: "--:--"}"
+                } else {
+                    ""
+                },
+                onValueChange = { },
+                placeholder = {
+                    Text(
+                        text = "dd/mm/yyyy, --:--",
+                        color = Color.Gray
+                    )
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(55.dp),
+                enabled = false,
+                shape = RoundedCornerShape(30.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = Color.Transparent,
+                    disabledPlaceholderColor = Color.Gray,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                ),
+                singleLine = true
+            )
+            
+            // Date button
+            IconButton(
+                onClick = onDateClick,
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CalendarToday,
+                    contentDescription = "Select date",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            
+            // Time button
+            IconButton(
+                onClick = onTimeClick,
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Schedule,
+                    contentDescription = "Select time",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -587,32 +597,53 @@ private fun VisitItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Date and time information
-            Text(
-                text = if (visit.isAllDay) {
-                    formatDateForDisplay(visit.startDate)
-                } else {
-                    val startDisplay = "${formatDateForDisplay(visit.startDate)}, ${visit.startTime ?: "12:00"}"
-                    val endDate = visit.endDate
-                    val endDisplay = if (endDate != null && endDate != visit.startDate) {
-                        "${formatDateForDisplay(endDate)}, ${visit.endTime ?: "12:00"}"
+            // Start date and time
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Start",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = if (visit.isAllDay) {
+                        formatDateForDisplay(visit.startDate)
                     } else {
-                        visit.endTime ?: "12:00"
-                    }
-                    
-                    if (endDate != null && endDate != visit.startDate) {
-                        "$startDisplay - $endDisplay"
-                    } else {
-                        "$startDisplay - $endDisplay"
-                    }
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
+                        "${formatDateForDisplay(visit.startDate)}, ${visit.startTime ?: "00:00"}"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
             
-            // Timezone badge
+            // End date and time
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Stop,
+                    contentDescription = "End",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = if (visit.isAllDay) {
+                        formatDateForDisplay(visit.endDate ?: visit.startDate)
+                    } else {
+                        "${formatDateForDisplay(visit.endDate ?: visit.startDate)}, ${visit.endTime ?: "00:00"}"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // Timezone and all day badges
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
