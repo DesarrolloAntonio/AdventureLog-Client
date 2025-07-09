@@ -14,5 +14,18 @@ data class AdventureFormData(
     val longitude: String? = null,
     val isPublic: Boolean = false,
     val tags: List<String> = emptyList(),
-    val visits: List<VisitFormData> = emptyList()
+    val visits: List<VisitFormData> = emptyList(),
+    val images: List<ImageFormData> = emptyList()
 )
+
+data class ImageFormData(
+    val uri: String,
+    val type: ImageType,
+    val isPrimary: Boolean = false
+)
+
+enum class ImageType {
+    LOCAL_FILE,
+    URL,
+    WIKIPEDIA
+}
