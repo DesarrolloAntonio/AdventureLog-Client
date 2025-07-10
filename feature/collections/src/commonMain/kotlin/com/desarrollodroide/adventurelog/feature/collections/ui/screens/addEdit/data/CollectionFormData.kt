@@ -5,5 +5,6 @@ data class CollectionFormData(
     val description: String = "",
     val isPublic: Boolean = false,
     val startDate: String = "",
-    val endDate: String = ""
+    val endDate: String = "",
+    val link: String = ""
 )
