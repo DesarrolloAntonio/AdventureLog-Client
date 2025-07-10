@@ -31,10 +31,12 @@ import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.BasicInfoSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.DateSection
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.ImagesSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.TagsSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
+import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -50,6 +52,9 @@ fun AddEditAdventureScreen(
     onClearLocationSearch: () -> Unit = {},
     onReverseGeocode: (Double, Double) -> Unit = { _, _ -> },
     reverseGeocodeResult: ReverseGeocodeResult? = null,
+    wikipediaImageState: WikipediaImageState = WikipediaImageState.Idle,
+    onSearchWikipediaImage: (String) -> Unit = {},
+    onResetWikipediaState: () -> Unit = {},
     modifier: Modifier = Modifier,
     initialData: AdventureFormData? = null
 ) {
@@ -101,6 +106,14 @@ fun AddEditAdventureScreen(
             TagsSection(
                 formData = formData,
                 onFormDataChange = { formData = it }
+            )
+
+            ImagesSection(
+                formData = formData,
+                onFormDataChange = { formData = it },
+                wikipediaImageState = wikipediaImageState,
+                onSearchWikipediaImage = onSearchWikipediaImage,
+                onResetWikipediaState = onResetWikipediaState
             )
 
             DateSection(

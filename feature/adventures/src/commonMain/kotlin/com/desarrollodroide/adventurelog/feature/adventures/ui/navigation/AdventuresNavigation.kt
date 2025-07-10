@@ -87,7 +87,14 @@ fun NavGraphBuilder.adventuresScreen(
                 onReverseGeocode = { lat, lon ->
                     viewModel.reverseGeocode(lat, lon)
                 },
-                reverseGeocodeResult = uiState.reverseGeocodeResult
+                reverseGeocodeResult = uiState.reverseGeocodeResult,
+                wikipediaImageState = uiState.wikipediaImageState,
+                onSearchWikipediaImage = { query ->
+                    viewModel.searchWikipediaImage(query)
+                },
+                onResetWikipediaState = {
+                    viewModel.resetWikipediaImageState()
+                }
             )
 
             SnackbarHost(

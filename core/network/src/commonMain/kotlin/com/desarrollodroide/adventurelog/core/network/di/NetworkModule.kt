@@ -3,6 +3,8 @@ package com.desarrollodroide.adventurelog.core.network.di
 import com.desarrollodroide.adventurelog.BuildConfig
 import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.KtorAdventurelogNetwork
+import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaDataSourceImpl
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -18,6 +20,12 @@ val networkModule = module {
     single<AdventureLogNetworkDataSource> {
         KtorAdventurelogNetwork(
             adventurelogClient = get(named(BuildConfig.APP_NAME)),
+        )
+    }
+    
+    single<WikipediaDataSource> {
+        WikipediaDataSourceImpl(
+            httpClient = get(named(BuildConfig.APP_NAME))
         )
     }
 

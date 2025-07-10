@@ -23,6 +23,7 @@ val adventureModule = module {
             generateDescriptionUseCase = get(),
             searchLocationsUseCase = get(),
             reverseGeocodeUseCase = get(),
+            searchWikipediaImageUseCase = get(),
             adventureId = params.getOrNull()
         )
     }
