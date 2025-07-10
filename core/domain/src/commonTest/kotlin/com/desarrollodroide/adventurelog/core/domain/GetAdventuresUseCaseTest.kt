@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,7 +52,8 @@ class GetAdventuresUseCaseTest {
             latitude: String?,
             longitude: String?,
             isPublic: Boolean,
-            visitDates: Visit?
+            visits: List<VisitFormData>,
+            activityTypes: List<String>
         ): Either<String, Adventure> {
             throw NotImplementedError()
         }

@@ -5,7 +5,7 @@ import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
@@ -110,7 +110,8 @@ class LogoutUseCaseTest {
             latitude: String?,
             longitude: String?,
             isPublic: Boolean,
-            visitDates: Visit?
+            visits: List<VisitFormData>,
+            activityTypes: List<String>
         ): AdventureDTO {
             throw NotImplementedError()
         }
@@ -138,7 +139,16 @@ class LogoutUseCaseTest {
         }
 
         override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResultDTO {
-            return ReverseGeocodeResultDTO()
+            return ReverseGeocodeResultDTO(
+                city = "Test City",
+                region = "Test Region",
+                country = "Test Country",
+                cityId = "city-1",
+                regionId = "region-1",
+                countryId = "country-1",
+                displayName = "Test City, Test Region, Test Country",
+                locationName = "Test Location"
+            )
         }
 
         override suspend fun getUserStats(username: String): UserStatsDTO {

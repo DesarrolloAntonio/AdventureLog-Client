@@ -5,7 +5,7 @@ import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
@@ -115,7 +115,8 @@ class InitializeSessionUseCaseTest {
             latitude: String?,
             longitude: String?,
             isPublic: Boolean,
-            visitDates: Visit?
+            visits: List<VisitFormData>,
+            activityTypes: List<String>
         ): AdventureDTO {
             throw NotImplementedError()
         }
