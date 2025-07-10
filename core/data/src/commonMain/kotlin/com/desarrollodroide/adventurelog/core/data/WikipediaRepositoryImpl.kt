@@ -1,15 +1,11 @@
-package com.desarrollodroide.adventurelog.core.data.repository
+package com.desarrollodroide.adventurelog.core.data
 
-import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaDataSource
-
-interface WikipediaRepository {
-    suspend fun searchImage(query: String): Result<String?>
-}
+import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaNetworkDataSource
 
 class WikipediaRepositoryImpl(
-    private val wikipediaDataSource: WikipediaDataSource
+    private val wikipediaDataSource: WikipediaNetworkDataSource
 ) : WikipediaRepository {
-    
+
     override suspend fun searchImage(query: String): Result<String?> {
         return try {
             val imageUrl = wikipediaDataSource.searchImage(query)

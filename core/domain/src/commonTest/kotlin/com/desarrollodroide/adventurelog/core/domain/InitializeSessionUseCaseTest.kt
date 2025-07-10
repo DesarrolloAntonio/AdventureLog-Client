@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.Visit
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO

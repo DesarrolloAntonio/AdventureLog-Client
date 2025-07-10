@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.data
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.mappers.toUserStats
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow

@@ -1,13 +1,13 @@
-package com.desarrollodroide.adventurelog.core.network
+package com.desarrollodroide.adventurelog.core.network.datasource
 
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
-import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
-import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 
 interface AdventureLogNetworkDataSource {
@@ -69,7 +69,7 @@ interface AdventureLogNetworkDataSource {
      * Used during logout to reset network state
      */
     fun clearSession()
-    
+
     /**
      * Create a new adventure
      */
@@ -98,7 +98,7 @@ interface AdventureLogNetworkDataSource {
         startDate: String?,
         endDate: String?
     ): CollectionDTO
-    
+
     /**
      * Get all available categories
      */
@@ -110,14 +110,14 @@ interface AdventureLogNetworkDataSource {
     suspend fun generateDescription(
         name: String
     ): String
-    
+
     /**
      * Search for locations by query
      */
     suspend fun searchLocations(
         query: String
     ): List<GeocodeSearchResultDTO>
-    
+
     /**
      * Reverse geocode coordinates to get location details
      */
@@ -125,7 +125,7 @@ interface AdventureLogNetworkDataSource {
         latitude: Double,
         longitude: Double
     ): ReverseGeocodeResultDTO
-    
+
     /**
      * Get user statistics
      */

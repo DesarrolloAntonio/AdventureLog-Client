@@ -16,8 +16,8 @@ import com.desarrollodroide.adventurelog.core.data.CategoriesRepository
 import com.desarrollodroide.adventurelog.core.data.CategoriesRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.GeocodeRepository
 import com.desarrollodroide.adventurelog.core.data.GeocodeRepositoryImpl
-import com.desarrollodroide.adventurelog.core.data.repository.WikipediaRepository
-import com.desarrollodroide.adventurelog.core.data.repository.WikipediaRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.WikipediaRepository
+import com.desarrollodroide.adventurelog.core.data.WikipediaRepositoryImpl
 import com.desarrollodroide.adventurelog.core.network.di.networkModule
 import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named

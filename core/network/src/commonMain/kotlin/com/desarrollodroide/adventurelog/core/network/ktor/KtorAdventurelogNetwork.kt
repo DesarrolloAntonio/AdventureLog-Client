@@ -16,7 +16,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi

@@ -1,7 +1,7 @@
 package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 
 /**
  * Use case to handle user logout

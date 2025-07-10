@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.data
 
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import kotlinx.io.IOException

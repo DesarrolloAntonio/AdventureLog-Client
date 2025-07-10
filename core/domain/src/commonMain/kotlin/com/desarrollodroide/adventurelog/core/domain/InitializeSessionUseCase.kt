@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.model.UserDetails
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 
 /**
  * Use case to initialize user session if it exists

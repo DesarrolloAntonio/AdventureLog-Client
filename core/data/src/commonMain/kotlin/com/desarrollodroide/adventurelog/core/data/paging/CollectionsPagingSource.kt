@@ -7,7 +7,7 @@ import app.cash.paging.PagingSourceLoadResultError
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
 import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 
 class CollectionsPagingSource(

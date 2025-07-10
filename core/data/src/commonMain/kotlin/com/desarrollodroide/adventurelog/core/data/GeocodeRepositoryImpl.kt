@@ -4,7 +4,7 @@ import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
-import com.desarrollodroide.adventurelog.core.network.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
