@@ -14,17 +14,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.RemoveRedEye
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +47,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -73,142 +84,157 @@ fun AdventuresFilterBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
-        dragHandle = {
-            Surface(
-                modifier = Modifier.padding(top = 8.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(4.dp)
-                )
-            }
-        }
+        contentWindowInsets = { androidx.compose.foundation.layout.WindowInsets(0) }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
         ) {
-            // Header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Header with gradient background
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
             ) {
                 Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Filters",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-                        localFilters = AdventureFilters()
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primary
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.FilterList,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Adventure Filters",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "${getActiveFiltersCount(localFilters)} active filters",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear filters",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    
+                    IconButton(
+                        onClick = {
+                            localFilters = AdventureFilters()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Clear all",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Categories Section
-            CategoryFilterSection(
-                selectedCategories = localFilters.categoryNames,
-                categories = categories,
-                onCategoriesChanged = { categoryNames ->
-                    localFilters = localFilters.copy(categoryNames = categoryNames)
-                },
-                onManageCategoriesClick = onManageCategoriesClick
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-
-            // Sort Section
-            SortSection(
-                sortField = localFilters.sortField,
-                sortDirection = localFilters.sortDirection,
-                onSortFieldChanged = { field ->
-                    localFilters = localFilters.copy(sortField = field)
-                },
-                onSortDirectionChanged = { direction ->
-                    localFilters = localFilters.copy(sortDirection = direction)
-                }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-
-            // Visited Filter Section
-            VisitedFilterSection(
-                visitedFilter = localFilters.visitedFilter,
-                onVisitedFilterChanged = { filter ->
-                    localFilters = localFilters.copy(visitedFilter = filter)
-                }
-            )
-
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
-
-            // Include Collections Section
-            IncludeCollectionsSection(
-                includeCollections = localFilters.includeCollections,
-                onIncludeCollectionsChanged = { include: Boolean ->
-                    localFilters = localFilters.copy(includeCollections = include)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Apply Button
-            Button(
-                onClick = {
-                    onFiltersChanged(localFilters)
-                    onDismiss()
-                },
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(vertical = 8.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.FilterList,
-                    contentDescription = null
+                // Categories Section with Card
+                CategoryFilterSection(
+                    selectedCategories = localFilters.categoryNames,
+                    categories = categories,
+                    onCategoriesChanged = { categoryNames ->
+                        localFilters = localFilters.copy(categoryNames = categoryNames)
+                    },
+                    onManageCategoriesClick = onManageCategoriesClick
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Apply")
+
+                // Sort Section with improved layout
+                SortSection(
+                    sortField = localFilters.sortField,
+                    sortDirection = localFilters.sortDirection,
+                    onSortFieldChanged = { field ->
+                        localFilters = localFilters.copy(sortField = field)
+                    },
+                    onSortDirectionChanged = { direction ->
+                        localFilters = localFilters.copy(sortDirection = direction)
+                    }
+                )
+
+                // Visited Filter Section with visual indicators
+                VisitedFilterSection(
+                    visitedFilter = localFilters.visitedFilter,
+                    onVisitedFilterChanged = { filter ->
+                        localFilters = localFilters.copy(visitedFilter = filter)
+                    }
+                )
+
+                // Include Collections Section with switch
+                IncludeCollectionsSection(
+                    includeCollections = localFilters.includeCollections,
+                    onIncludeCollectionsChanged = { include ->
+                        localFilters = localFilters.copy(includeCollections = include)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(80.dp)) // Extra space for buttons
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Footer with Apply and Cancel buttons - Always visible at bottom
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Text("Cancel")
+                    }
+                    Button(
+                        onClick = {
+                            onFiltersChanged(localFilters)
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Apply Filters")
+                    }
+                }
+            }
         }
     }
 }
@@ -221,71 +247,116 @@ private fun CategoryFilterSection(
     onCategoriesChanged: (List<String>) -> Unit,
     onManageCategoriesClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = "Categories",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        if (categories.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "No categories available",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Category,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Categories",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                if (selectedCategories.isNotEmpty()) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = selectedCategories.size.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
             }
-        } else {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                categories.forEach { category ->
-                    FilterChip(
-                        selected = selectedCategories.contains(category.name),
-                        onClick = {
-                            if (selectedCategories.contains(category.name)) {
-                                onCategoriesChanged(selectedCategories - category.name)
-                            } else {
-                                onCategoriesChanged(selectedCategories + category.name)
-                            }
-                        },
-                        label = {
-                            Text(category.displayName)
-                        },
-                        leadingIcon = if (selectedCategories.contains(category.name)) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null
-                                )
-                            }
-                        } else null,
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            if (categories.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(8.dp)
                         )
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No categories available",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            } else {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    categories.forEach { category ->
+                        FilterChip(
+                            selected = selectedCategories.contains(category.name),
+                            onClick = {
+                                if (selectedCategories.contains(category.name)) {
+                                    onCategoriesChanged(selectedCategories - category.name)
+                                } else {
+                                    onCategoriesChanged(selectedCategories + category.name)
+                                }
+                            },
+                            label = {
+                                Text(category.displayName)
+                            },
+                            leadingIcon = if (selectedCategories.contains(category.name)) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            } else null,
+                            shape = RoundedCornerShape(20.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = selectedCategories.contains(category.name),
+                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                selectedBorderColor = MaterialTheme.colorScheme.primary,
+                                borderWidth = 1.dp,
+                                selectedBorderWidth = 1.5.dp
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -299,143 +370,163 @@ private fun SortSection(
     onSortFieldChanged: (SortField) -> Unit,
     onSortDirectionChanged: (SortDirection) -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
-    ) {
-        Text(
-            text = "Sort",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Sort Direction
-        Text(
-            text = "Sort direction",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SortDirectionChip(
-                text = "Ascending",
-                isSelected = sortDirection == SortDirection.ASCENDING,
-                onClick = { onSortDirectionChanged(SortDirection.ASCENDING) }
-            )
-            SortDirectionChip(
-                text = "Descending",
-                isSelected = sortDirection == SortDirection.DESCENDING,
-                onClick = { onSortDirectionChanged(SortDirection.DESCENDING) }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Sort Field
-        Text(
-            text = "Sort by",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Column {
-            SortFieldOption(
-                label = "Updated",
-                isSelected = sortField == SortField.UPDATED_AT,
-                onClick = { onSortFieldChanged(SortField.UPDATED_AT) }
-            )
-            SortFieldOption(
-                label = "Name",
-                isSelected = sortField == SortField.NAME,
-                onClick = { onSortFieldChanged(SortField.NAME) }
-            )
-            SortFieldOption(
-                label = "Date",
-                isSelected = sortField == SortField.CREATED_AT,
-                onClick = { onSortFieldChanged(SortField.CREATED_AT) }
-            )
-            SortFieldOption(
-                label = "Rating",
-                isSelected = sortField == SortField.RATING,
-                onClick = { onSortFieldChanged(SortField.RATING) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun SortDirectionChip(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
+    Card(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable { onClick() },
-        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        border = if (!isSelected) {
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
-        } else null
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = if (isSelected) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            style = MaterialTheme.typography.bodyMedium
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
-    }
-}
-
-@Composable
-private fun IncludeCollectionsSection(
-    includeCollections: Boolean,
-    onIncludeCollectionsChanged: (Boolean) -> Unit
-) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        Text(
-            text = "Sources",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onIncludeCollectionsChanged(!includeCollections) }
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            Checkbox(
-                checked = includeCollections,
-                onCheckedChange = onIncludeCollectionsChanged,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colorScheme.primary
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Sort,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
                 )
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Include collection adventures",
-                style = MaterialTheme.typography.bodyLarge
-            )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Sort Options",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sort Direction with visual toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onSortDirectionChanged(SortDirection.ASCENDING) },
+                    color = if (sortDirection == SortDirection.ASCENDING) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (sortDirection == SortDirection.ASCENDING) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        }
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = if (sortDirection == SortDirection.ASCENDING) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Ascending",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (sortDirection == SortDirection.ASCENDING) {
+                                FontWeight.SemiBold
+                            } else {
+                                FontWeight.Normal
+                            }
+                        )
+                    }
+                }
+                
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onSortDirectionChanged(SortDirection.DESCENDING) },
+                    color = if (sortDirection == SortDirection.DESCENDING) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (sortDirection == SortDirection.DESCENDING) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        }
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = if (sortDirection == SortDirection.DESCENDING) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Descending",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (sortDirection == SortDirection.DESCENDING) {
+                                FontWeight.SemiBold
+                            } else {
+                                FontWeight.Normal
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Sort Fields
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                SortFieldOption(
+                    label = "Recently Updated",
+                    isSelected = sortField == SortField.UPDATED_AT,
+                    onClick = { onSortFieldChanged(SortField.UPDATED_AT) }
+                )
+                SortFieldOption(
+                    label = "Name",
+                    isSelected = sortField == SortField.NAME,
+                    onClick = { onSortFieldChanged(SortField.NAME) }
+                )
+                SortFieldOption(
+                    label = "Creation Date",
+                    isSelected = sortField == SortField.CREATED_AT,
+                    onClick = { onSortFieldChanged(SortField.CREATED_AT) }
+                )
+                SortFieldOption(
+                    label = "Rating",
+                    isSelected = sortField == SortField.RATING,
+                    onClick = { onSortFieldChanged(SortField.RATING) }
+                )
+            }
         }
     }
 }
@@ -446,25 +537,37 @@ private fun SortFieldOption(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clip(RoundedCornerShape(8.dp))
+            .clickable { onClick() },
+        color = if (isSelected) {
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+        } else {
+            Color.Transparent
+        }
     ) {
-        RadioButton(
-            selected = isSelected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colorScheme.primary
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = isSelected,
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colorScheme.primary
+                )
             )
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge
-        )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+            )
+        }
     }
 }
 
@@ -473,45 +576,62 @@ private fun VisitedFilterSection(
     visitedFilter: VisitedFilter,
     onVisitedFilterChanged: (VisitedFilter) -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Visibility,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Visited",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.RemoveRedEye,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Visit Status",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            VisitedFilterChip(
-                text = "All",
-                isSelected = visitedFilter == VisitedFilter.ALL,
-                onClick = { onVisitedFilterChanged(VisitedFilter.ALL) }
-            )
-            VisitedFilterChip(
-                text = "Visited",
-                isSelected = visitedFilter == VisitedFilter.VISITED,
-                onClick = { onVisitedFilterChanged(VisitedFilter.VISITED) }
-            )
-            VisitedFilterChip(
-                text = "Not visited",
-                isSelected = visitedFilter == VisitedFilter.NOT_VISITED,
-                onClick = { onVisitedFilterChanged(VisitedFilter.NOT_VISITED) }
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                VisitedFilterChip(
+                    text = "All",
+                    icon = null,
+                    isSelected = visitedFilter == VisitedFilter.ALL,
+                    onClick = { onVisitedFilterChanged(VisitedFilter.ALL) },
+                    modifier = Modifier.weight(1f)
+                )
+                VisitedFilterChip(
+                    text = "Visited",
+                    icon = Icons.Default.RemoveRedEye,
+                    isSelected = visitedFilter == VisitedFilter.VISITED,
+                    onClick = { onVisitedFilterChanged(VisitedFilter.VISITED) },
+                    modifier = Modifier.weight(1f)
+                )
+                VisitedFilterChip(
+                    text = "Not Visited",
+                    icon = Icons.Default.VisibilityOff,
+                    isSelected = visitedFilter == VisitedFilter.NOT_VISITED,
+                    onClick = { onVisitedFilterChanged(VisitedFilter.NOT_VISITED) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
@@ -519,31 +639,114 @@ private fun VisitedFilterSection(
 @Composable
 private fun VisitedFilterChip(
     text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector?,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+        modifier = modifier
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() },
-        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        border = if (!isSelected) {
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
-        } else null
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        color = if (isSelected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        border = BorderStroke(
+            width = 1.dp,
             color = if (isSelected) {
-                MaterialTheme.colorScheme.onPrimary
+                MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-            style = MaterialTheme.typography.bodyMedium
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            }
         )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (isSelected) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+        }
     }
 }
 
+@Composable
+private fun IncludeCollectionsSection(
+    includeCollections: Boolean,
+    onIncludeCollectionsChanged: (Boolean) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Collection Adventures",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "Include adventures from collections",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = includeCollections,
+                onCheckedChange = onIncludeCollectionsChanged,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = MaterialTheme.colorScheme.primary,
+                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            )
+        }
+    }
+}
+
+private fun getActiveFiltersCount(filters: AdventureFilters): Int {
+    var count = 0
+    if (filters.categoryNames.isNotEmpty()) count++
+    if (filters.sortField != SortField.UPDATED_AT) count++
+    if (filters.sortDirection != SortDirection.DESCENDING) count++
+    if (filters.visitedFilter != VisitedFilter.ALL) count++
+    if (filters.includeCollections) count++
+    return count
+}
