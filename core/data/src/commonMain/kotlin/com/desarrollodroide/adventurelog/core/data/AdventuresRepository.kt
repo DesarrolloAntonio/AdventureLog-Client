@@ -14,6 +14,15 @@ interface AdventuresRepository {
     val adventuresFlow: StateFlow<List<Adventure>>
     
     fun getAdventuresPagingData(): Flow<PagingData<Adventure>>
+    
+    fun getAdventuresPagingDataFiltered(
+        categoryNames: List<String>? = null,
+        sortBy: String? = null,
+        sortOrder: String? = null,
+        isVisited: Boolean? = null,
+        searchQuery: String? = null,
+        includeCollections: Boolean = false
+    ): Flow<PagingData<Adventure>>
 
     suspend fun getAdventures(
         page: Int, pageSize: Int

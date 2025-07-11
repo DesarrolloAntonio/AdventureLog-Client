@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 fun NavGraphBuilder.adventuresScreen(
     onAdventureClick: (Adventure, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
+    onManageCategoriesClick: () -> Unit,
     navController: NavController,
     collections: List<Collection> = emptyList()
 ) {
@@ -36,6 +37,7 @@ fun NavGraphBuilder.adventuresScreen(
         AdventureListScreen(
             onAdventureClick = onAdventureClick,
             onAddAdventureClick = onAddAdventureClick,
+            onManageCategoriesClick = onManageCategoriesClick,
             collections = collections
         )
     }

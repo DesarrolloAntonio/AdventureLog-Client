@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,10 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,7 +43,9 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.feature.adventures.ui.components.AdventuresFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
@@ -51,22 +57,38 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AdventureListScreen(
     onAdventureClick: (Adventure, List<Collection>) -> Unit = { _, _ -> },
     onAddAdventureClick: () -> Unit = { },
+    onManageCategoriesClick: () -> Unit = { },
     collections: List<Collection> = emptyList(),
     modifier: Modifier = Modifier,
     viewModel: AdventuresViewModel = koinViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val filters by viewModel.filters.collectAsStateWithLifecycle()
+    val showFilters by viewModel.showFilters.collectAsStateWithLifecycle()
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     val pagingItems = viewModel.adventuresPagingData.collectAsLazyPagingItems()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+
+    if (showFilters) {
+        AdventuresFilterBottomSheet(
+            filters = filters,
+            categories = categories,
+            onFiltersChanged = viewModel::onFiltersChanged,
+            onDismiss = viewModel::hideFilters,
+            onManageCategoriesClick = onManageCategoriesClick
+        )
+    }
 
     AdventureListContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
+        hasActiveFilters = viewModel.hasActiveFilters(),
         collections = collections,
         isRefreshing = isRefreshing,
         onAdventureClick = onAdventureClick,
         onAddAdventureClick = onAddAdventureClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
+        onShowFilters = viewModel::showFilters,
         onRefresh = {
             viewModel.refresh()
             pagingItems.refresh()
@@ -86,11 +108,13 @@ fun AdventureListScreen(
 private fun AdventureListContent(
     pagingItems: LazyPagingItems<Adventure>,
     searchQuery: String,
+    hasActiveFilters: Boolean,
     collections: List<Collection>,
     isRefreshing: Boolean,
     onAdventureClick: (Adventure, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
+    onShowFilters: () -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -99,12 +123,41 @@ private fun AdventureListContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            SimpleSearchBar(
-                searchQuery = searchQuery,
-                onSearchQueryChange = onSearchQueryChange,
-                onSearchSubmit = { },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SimpleSearchBar(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = onSearchQueryChange,
+                    onSearchSubmit = { },
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(
+                    onClick = onShowFilters,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Box {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "Filter",
+                            tint = if (hasActiveFilters) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                        if (hasActiveFilters) {
+                            Badge(
+                                modifier = Modifier.align(Alignment.TopEnd),
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -166,12 +219,15 @@ private fun AdventureListContent(
 
                 pagingItems.loadState.refresh is LoadStateNotLoading -> {
                     when {
-                        pagingItems.itemCount == 0 && searchQuery.isEmpty() -> {
+                        pagingItems.itemCount == 0 && searchQuery.isEmpty() && !hasActiveFilters -> {
                             EmptyState()
                         }
 
-                        pagingItems.itemCount == 0 && searchQuery.isNotEmpty() -> {
-                            NoSearchResultsState(searchQuery = searchQuery)
+                        pagingItems.itemCount == 0 && (searchQuery.isNotEmpty() || hasActiveFilters) -> {
+                            NoSearchResultsState(
+                                searchQuery = searchQuery,
+                                hasFilters = hasActiveFilters
+                            )
                         }
 
                         else -> {
@@ -300,7 +356,10 @@ private fun EmptyState() {
 }
 
 @Composable
-private fun NoSearchResultsState(searchQuery: String) {
+private fun NoSearchResultsState(
+    searchQuery: String,
+    hasFilters: Boolean
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -312,12 +371,20 @@ private fun NoSearchResultsState(searchQuery: String) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "No results for \"$searchQuery\"",
+                text = when {
+                    searchQuery.isNotEmpty() && hasFilters -> "No results for \"$searchQuery\" with current filters"
+                    searchQuery.isNotEmpty() -> "No results for \"$searchQuery\""
+                    else -> "No results with current filters"
+                },
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
             )
             Text(
-                text = "Try searching with different keywords",
+                text = when {
+                    hasFilters -> "Try adjusting your filters or search terms"
+                    else -> "Try searching with different keywords"
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

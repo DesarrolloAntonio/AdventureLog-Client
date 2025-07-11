@@ -14,6 +14,21 @@ interface AdventureApi {
     ): List<AdventureDTO>
 
     /**
+     * Get filtered and paginated list of adventures
+     * Uses the /api/adventures/filtered/ endpoint
+     */
+    suspend fun getAdventuresFiltered(
+        page: Int,
+        pageSize: Int,
+        categoryIds: List<String>? = null,
+        sortBy: String? = null,
+        sortOrder: String? = null,
+        isVisited: Boolean? = null,
+        searchQuery: String? = null,
+        includeCollections: Boolean = false
+    ): List<AdventureDTO>
+
+    /**
      * Get adventure details by ID
      */
     suspend fun getAdventureDetail(

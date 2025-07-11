@@ -66,6 +66,90 @@ internal class KtorAdventureNetworkDataSource(
         return adventuresResponse.results ?: emptyList()
     }
 
+    override suspend fun getAdventuresFiltered(
+        page: Int,
+        pageSize: Int,
+        categoryIds: List<String>?,
+        sortBy: String?,
+        sortOrder: String?,
+        isVisited: Boolean?,
+        searchQuery: String?,
+        includeCollections: Boolean
+    ): List<AdventureDTO> {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/adventures/filtered/"
+        
+        logger.d { 
+            "🌐 API Request - GET $url with filters: " +
+            "page=$page, pageSize=$pageSize, categories=$categoryIds, " +
+            "sortBy=$sortBy, sortOrder=$sortOrder, isVisited=$isVisited, search=$searchQuery" 
+        }
+        
+        val response = httpClient.get(url) {
+            parameter("page", page)
+            parameter("page_size", pageSize)
+            
+            // Map parameters to match backend expectations
+            // types parameter: backend expects comma-separated category names or "all"
+            if (!categoryIds.isNullOrEmpty()) {
+                parameter("types", categoryIds.joinToString(","))
+            } else {
+                parameter("types", "all")
+            }
+            
+            // order_by and order_direction
+            sortBy?.let { parameter("order_by", it) }
+            sortOrder?.let { parameter("order_direction", it) }
+            
+            // is_visited parameter: backend expects "true", "false", or "all"
+            when (isVisited) {
+                true -> parameter("is_visited", "true")
+                false -> parameter("is_visited", "false")
+                null -> parameter("is_visited", "all")
+            }
+            
+            // search parameter if provided
+            searchQuery?.let { 
+                if (it.isNotBlank()) {
+                    parameter("search", it)
+                }
+            }
+            
+            // include_collections parameter
+            parameter("include_collections", includeCollections.toString())
+            
+            headers {
+                commonHeaders(session.sessionToken)
+            }
+        }
+        
+        logger.d { "Response status: ${response.status}" }
+        logger.d { "Response headers: ${response.headers.entries()}" }
+
+        if (!response.status.isSuccess()) {
+            val errorBody = try {
+                response.body<String>()
+            } catch (e: Exception) {
+                "Unable to read error body"
+            }
+            logger.e { "Failed to fetch filtered adventures. Error: $errorBody" }
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch filtered adventures with status: ${response.status}"
+            )
+        }
+
+        val responseText = response.body<String>()
+        val adventuresResponse = json.decodeFromString<AdventuresDTO>(responseText)
+        
+        logger.d { 
+            "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} filtered adventures " +
+            "for page $page (total: ${adventuresResponse.count})" 
+        }
+
+        return adventuresResponse.results ?: emptyList()
+    }
+
     override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/$objectId/"

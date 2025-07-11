@@ -227,6 +227,29 @@ class KtorAdventurelogNetwork(
         return adventureDataSource.getAdventures(page, pageSize)
     }
 
+    override suspend fun getAdventuresFiltered(
+        page: Int,
+        pageSize: Int,
+        categoryIds: List<String>?,
+        sortBy: String?,
+        sortOrder: String?,
+        isVisited: Boolean?,
+        searchQuery: String?,
+        includeCollections: Boolean
+    ): List<AdventureDTO> {
+        ensureInitialized()
+        return adventureDataSource.getAdventuresFiltered(
+            page = page,
+            pageSize = pageSize,
+            categoryIds = categoryIds,
+            sortBy = sortBy,
+            sortOrder = sortOrder,
+            isVisited = isVisited,
+            searchQuery = searchQuery,
+            includeCollections = includeCollections
+        )
+    }
+
     override suspend fun getAdventureDetail(
         objectId: String
     ): AdventureDTO {

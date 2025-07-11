@@ -6,6 +6,7 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSource
+import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSourceFiltered
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
@@ -34,6 +35,36 @@ class AdventuresRepositoryImpl(
                 prefetchDistance = 10     // Cargar siguiente página cuando falten 10 items
             ),
             pagingSourceFactory = { AdventuresPagingSource(networkDataSource, pageSize = 30) }
+        ).flow
+    }
+    
+    override fun getAdventuresPagingDataFiltered(
+        categoryNames: List<String>?,
+        sortBy: String?,
+        sortOrder: String?,
+        isVisited: Boolean?,
+        searchQuery: String?,
+        includeCollections: Boolean
+    ): Flow<PagingData<Adventure>> {
+        return Pager<Int, Adventure>(
+            config = PagingConfig(
+                pageSize = 30,
+                enablePlaceholders = false,
+                initialLoadSize = 30,
+                prefetchDistance = 10
+            ),
+            pagingSourceFactory = { 
+                AdventuresPagingSourceFiltered(
+                    networkDataSource = networkDataSource,
+                    pageSize = 30,
+                    categoryNames = categoryNames,
+                    sortBy = sortBy,
+                    sortOrder = sortOrder,
+                    isVisited = isVisited,
+                    searchQuery = searchQuery,
+                    includeCollections = includeCollections
+                ) 
+            }
         ).flow
     }
 
