@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material3.Button
@@ -136,14 +137,12 @@ fun AdventuresFilterBottomSheet(
                     }
                     
                     IconButton(
-                        onClick = {
-                            localFilters = AdventureFilters()
-                        }
+                        onClick = onDismiss
                     ) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear all",
-                            tint = MaterialTheme.colorScheme.error
+                            contentDescription = "Close",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -194,7 +193,7 @@ fun AdventuresFilterBottomSheet(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(80.dp)) // Extra space for buttons
+                Spacer(modifier = Modifier.height(16.dp)) // Reduced space
             }
 
             // Footer with Apply and Cancel buttons - Always visible at bottom
@@ -415,6 +414,7 @@ private fun SortSection(
                     } else {
                         MaterialTheme.colorScheme.surface
                     },
+                    shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(
                         width = 1.dp,
                         color = if (sortDirection == SortDirection.ASCENDING) {
@@ -462,6 +462,7 @@ private fun SortSection(
                     } else {
                         MaterialTheme.colorScheme.surface
                     },
+                    shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(
                         width = 1.dp,
                         color = if (sortDirection == SortDirection.DESCENDING) {
@@ -504,7 +505,7 @@ private fun SortSection(
 
             // Sort Fields
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 SortFieldOption(
                     label = "Recently Updated",
@@ -551,20 +552,21 @@ private fun SortFieldOption(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(
                 selected = isSelected,
                 onClick = onClick,
+                modifier = Modifier.size(40.dp),
                 colors = RadioButtonDefaults.colors(
                     selectedColor = MaterialTheme.colorScheme.primary
                 )
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
             )
         }
@@ -608,28 +610,25 @@ private fun VisitedFilterSection(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 VisitedFilterChip(
                     text = "All",
-                    icon = null,
+                    icon = Icons.Default.Visibility,
                     isSelected = visitedFilter == VisitedFilter.ALL,
-                    onClick = { onVisitedFilterChanged(VisitedFilter.ALL) },
-                    modifier = Modifier.weight(1f)
+                    onClick = { onVisitedFilterChanged(VisitedFilter.ALL) }
                 )
                 VisitedFilterChip(
                     text = "Visited",
                     icon = Icons.Default.RemoveRedEye,
                     isSelected = visitedFilter == VisitedFilter.VISITED,
-                    onClick = { onVisitedFilterChanged(VisitedFilter.VISITED) },
-                    modifier = Modifier.weight(1f)
+                    onClick = { onVisitedFilterChanged(VisitedFilter.VISITED) }
                 )
                 VisitedFilterChip(
                     text = "Not Visited",
                     icon = Icons.Default.VisibilityOff,
                     isSelected = visitedFilter == VisitedFilter.NOT_VISITED,
-                    onClick = { onVisitedFilterChanged(VisitedFilter.NOT_VISITED) },
-                    modifier = Modifier.weight(1f)
+                    onClick = { onVisitedFilterChanged(VisitedFilter.NOT_VISITED) }
                 )
             }
         }
@@ -646,7 +645,6 @@ private fun VisitedFilterChip(
 ) {
     Surface(
         modifier = modifier
-            .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() },
         color = if (isSelected) {
@@ -654,6 +652,7 @@ private fun VisitedFilterChip(
         } else {
             MaterialTheme.colorScheme.surface
         },
+        shape = RoundedCornerShape(12.dp),
         border = BorderStroke(
             width = 1.dp,
             color = if (isSelected) {
@@ -663,34 +662,39 @@ private fun VisitedFilterChip(
             }
         )
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+            contentAlignment = Alignment.Center
         ) {
-            icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = if (isSelected) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-            }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurface
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                icon?.let {
+                    Icon(
+                        imageVector = it,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                 }
-            )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    maxLines = 1
+                )
+            }
         }
     }
 }
