@@ -5,6 +5,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import com.desarrollodroide.adventurelog.core.domain.LoginUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.GetAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCollectionsPagingUseCase
@@ -15,6 +16,7 @@ import com.desarrollodroide.adventurelog.core.domain.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.domain.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.domain.CreateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.CreateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
@@ -29,6 +31,7 @@ val domainModule = module {
 
     factoryOf(::LoginUseCase)
     factoryOf(::GetAdventuresUseCase)
+    factoryOf(::GetAdventureUseCase)
     factoryOf(::GetAdventuresPagingUseCase)
     factoryOf(::GetCollectionsUseCase)
     factoryOf(::GetCollectionsPagingUseCase)
@@ -39,6 +42,7 @@ val domainModule = module {
     factoryOf(::RememberMeCredentialsUseCase)
     factoryOf(::CreateAdventureUseCase)
     factoryOf(::UpdateAdventureUseCase)
+    factoryOf(::DeleteAdventureUseCase)
     factoryOf(::CreateCollectionUseCase)
     factoryOf(::UpdateCollectionUseCase)
     factoryOf(::GetCategoriesUseCase)

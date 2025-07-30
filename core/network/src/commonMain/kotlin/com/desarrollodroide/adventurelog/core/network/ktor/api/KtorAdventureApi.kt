@@ -9,9 +9,9 @@ import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.mappers.toVisitRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
 import com.desarrollodroide.adventurelog.core.network.utils.toCoordinateString
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import io.ktor.client.HttpClient
@@ -77,12 +77,19 @@ internal class KtorAdventureNetworkDataSource(
         includeCollections: Boolean
     ): List<AdventureDTO> {
         val session = sessionProvider()
+        
+        // If there's a search query, use the search endpoint
+        if (!searchQuery.isNullOrBlank()) {
+            return searchAdventures(searchQuery)
+        }
+        
+        // Otherwise use the filtered endpoint
         val url = "${session.baseUrl}/api/adventures/filtered/"
         
         logger.d { 
             "🌐 API Request - GET $url with filters: " +
             "page=$page, pageSize=$pageSize, categories=$categoryIds, " +
-            "sortBy=$sortBy, sortOrder=$sortOrder, isVisited=$isVisited, search=$searchQuery" 
+            "sortBy=$sortBy, sortOrder=$sortOrder, isVisited=$isVisited" 
         }
         
         val response = httpClient.get(url) {
@@ -108,13 +115,6 @@ internal class KtorAdventureNetworkDataSource(
                 null -> parameter("is_visited", "all")
             }
             
-            // search parameter if provided
-            searchQuery?.let { 
-                if (it.isNotBlank()) {
-                    parameter("search", it)
-                }
-            }
-            
             // include_collections parameter
             parameter("include_collections", includeCollections.toString())
             
@@ -124,7 +124,6 @@ internal class KtorAdventureNetworkDataSource(
         }
         
         logger.d { "Response status: ${response.status}" }
-        logger.d { "Response headers: ${response.headers.entries()}" }
 
         if (!response.status.isSuccess()) {
             val errorBody = try {
@@ -148,6 +147,44 @@ internal class KtorAdventureNetworkDataSource(
         }
 
         return adventuresResponse.results ?: emptyList()
+    }
+    
+    private suspend fun searchAdventures(searchQuery: String): List<AdventureDTO> {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/search/"
+        
+        logger.d { "🔍 API Request - GET $url with query: '$searchQuery'" }
+        
+        val response = httpClient.get(url) {
+            parameter("query", searchQuery)
+            headers {
+                commonHeaders(session.sessionToken)
+            }
+        }
+        
+        if (!response.status.isSuccess()) {
+            val errorBody = try {
+                response.body<String>()
+            } catch (e: Exception) {
+                "Unable to read error body"
+            }
+            logger.e { "Failed to search adventures. Error: $errorBody" }
+            throw HttpException(
+                response.status.value,
+                "Failed to search adventures with status: ${response.status}"
+            )
+        }
+        
+        val responseText = response.body<String>()
+        // The search endpoint returns a different format with multiple entity types
+        val searchResults = json.decodeFromString<SearchResultsDTO>(responseText)
+        
+        logger.d { 
+            "📦 Search Response - Found ${searchResults.adventures?.size ?: 0} adventures " +
+            "for query: '$searchQuery'" 
+        }
+        
+        return searchResults.adventures ?: emptyList()
     }
 
     override suspend fun getAdventureDetail(objectId: String): AdventureDTO {

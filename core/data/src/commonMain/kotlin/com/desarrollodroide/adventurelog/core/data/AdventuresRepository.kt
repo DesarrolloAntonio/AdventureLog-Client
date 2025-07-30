@@ -51,4 +51,8 @@ interface AdventuresRepository {
     suspend fun generateDescription(
         name: String
     ): Either<String, String>
+
+    suspend fun deleteAdventure(
+        adventureId: String
+    ): Either<String, Unit>
 }

@@ -146,4 +146,9 @@ interface AdventureLogNetworkDataSource {
     suspend fun getUserStats(
         username: String
     ): UserStatsDTO
+
+    /**
+     * Delete an adventure
+     */
+    suspend fun deleteAdventure(adventureId: String)
 }

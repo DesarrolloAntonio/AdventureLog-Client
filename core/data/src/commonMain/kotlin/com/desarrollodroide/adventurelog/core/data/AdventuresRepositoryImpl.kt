@@ -204,4 +204,24 @@ class AdventuresRepositoryImpl(
             }
         }
     }
+
+    override suspend fun deleteAdventure(adventureId: String): Either<String, Unit> {
+        return try {
+            networkDataSource.deleteAdventure(adventureId)
+            
+            // Remove the deleted adventure from the flow
+            _adventuresFlow.value = _adventuresFlow.value.filter { it.id != adventureId }
+            
+            Either.Right(Unit)
+        } catch (e: HttpException) {
+            println("HTTP Error during deleteAdventure: ${e.code}")
+            Either.Left("Failed to delete adventure: HTTP ${e.code}")
+        } catch (e: IOException) {
+            println("IO Error during deleteAdventure: ${e.message}")
+            Either.Left("Network error: ${e.message}")
+        } catch (e: Exception) {
+            println("Unexpected error during deleteAdventure: ${e.message}")
+            Either.Left("Unexpected error: ${e.message}")
+        }
+    }
 }

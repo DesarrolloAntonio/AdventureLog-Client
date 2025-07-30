@@ -421,4 +421,9 @@ class KtorAdventurelogNetwork(
         ensureInitialized()
         return userDataSource.getUserStats(username)
     }
+    
+    override suspend fun deleteAdventure(adventureId: String) {
+        ensureInitialized()
+        return adventureDataSource.deleteAdventure(adventureId)
+    }
 }
