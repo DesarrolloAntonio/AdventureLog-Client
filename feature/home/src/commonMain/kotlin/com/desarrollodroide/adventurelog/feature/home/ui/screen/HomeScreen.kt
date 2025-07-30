@@ -375,9 +375,6 @@ fun HomeScreenContent(
 
                                 onAdventureClick(adventureWithEmptyCollections)
                             },
-                            onAddAdventureClick = {
-                                navController.navigate("add_adventure")
-                            },
                             onManageCategoriesClick = {
                                 // TODO: Navigate to manage categories screen
                                 // For now, we can show a placeholder or navigate to settings

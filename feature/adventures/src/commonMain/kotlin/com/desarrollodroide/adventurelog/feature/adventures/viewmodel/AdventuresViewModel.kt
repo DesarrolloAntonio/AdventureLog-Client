@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.paging.PagingData
 import app.cash.paging.cachedIn
-import app.cash.paging.filter
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.GetAdventuresPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.AdventureFilters
@@ -18,6 +18,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -25,12 +26,14 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class AdventuresViewModel(
     private val getAdventuresPagingUseCase: GetAdventuresPagingUseCase,
-    private val getCategoriesUseCase: GetCategoriesUseCase
+    private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val deleteAdventureUseCase: DeleteAdventureUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -45,8 +48,37 @@ class AdventuresViewModel(
     private val _showFilters = MutableStateFlow(false)
     val showFilters: StateFlow<Boolean> = _showFilters.asStateFlow()
 
-    private val _categories = MutableStateFlow<List<Category>>(emptyList())
-    val categories: StateFlow<List<Category>> = _categories.asStateFlow()
+    private val _categoriesState = MutableStateFlow<CategoriesState>(CategoriesState.Loading)
+    val categoriesState: StateFlow<CategoriesState> = _categoriesState.asStateFlow()
+
+    // Convenience property for backward compatibility
+    @Suppress("unused")
+    val categories: StateFlow<List<Category>> = _categoriesState.map { state ->
+        when (state) {
+            is CategoriesState.Success -> state.categories
+            else -> emptyList()
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    private val _deleteState = MutableStateFlow<DeleteState>(DeleteState.Idle)
+    val deleteState: StateFlow<DeleteState> = _deleteState.asStateFlow()
+
+    sealed class CategoriesState {
+        data object Loading : CategoriesState()
+        data class Success(val categories: List<Category>) : CategoriesState()
+        data class Error(val message: String) : CategoriesState()
+    }
+
+    sealed class DeleteState {
+        data object Idle : DeleteState()
+        data object Loading : DeleteState()
+        data object Success : DeleteState()
+        data class Error(val message: String) : DeleteState()
+    }
 
     init {
         loadCategories()
@@ -124,15 +156,38 @@ class AdventuresViewModel(
 
     private fun loadCategories() {
         viewModelScope.launch {
+            _categoriesState.value = CategoriesState.Loading
             when (val result = getCategoriesUseCase()) {
                 is Either.Left -> {
-                    // Handle error if needed
-                    _categories.value = emptyList()
+                    _categoriesState.value = CategoriesState.Error(result.value)
                 }
                 is Either.Right -> {
-                    _categories.value = result.value
+                    _categoriesState.value = CategoriesState.Success(result.value)
                 }
             }
         }
+    }
+
+    fun retryLoadCategories() {
+        loadCategories()
+    }
+
+    fun deleteAdventure(adventureId: String) {
+        viewModelScope.launch {
+            _deleteState.value = DeleteState.Loading
+            when (val result = deleteAdventureUseCase(adventureId)) {
+                is Either.Left -> {
+                    _deleteState.value = DeleteState.Error(result.value)
+                }
+                is Either.Right -> {
+                    _deleteState.value = DeleteState.Success
+                    // The paging data will automatically refresh due to the repository updating the flow
+                }
+            }
+        }
+    }
+
+    fun clearDeleteState() {
+        _deleteState.value = DeleteState.Idle
     }
 }

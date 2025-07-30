@@ -12,7 +12,8 @@ val adventureModule = module {
     viewModel { 
         AdventuresViewModel(
             getAdventuresPagingUseCase = get(),
-            getCategoriesUseCase = get()
+            getCategoriesUseCase = get(),
+            deleteAdventureUseCase = get()
         ) 
     }
     
@@ -20,12 +21,14 @@ val adventureModule = module {
         AddEditAdventureViewModel(
             createAdventureUseCase = get(),
             updateAdventureUseCase = get(),
+            getAdventureUseCase = get(),
             getCategoriesUseCase = get(),
             generateDescriptionUseCase = get(),
             searchLocationsUseCase = get(),
             reverseGeocodeUseCase = get(),
             searchWikipediaImageUseCase = get(),
-            adventureId = params.getOrNull()
+            adventureId = params.getOrNull(),
+            existingAdventure = params.getOrNull()
         )
     }
 }

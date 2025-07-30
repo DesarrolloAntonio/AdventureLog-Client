@@ -22,29 +22,30 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
@@ -68,15 +69,18 @@ import com.desarrollodroide.adventurelog.core.model.AdventureFilters
 import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.core.model.SortField
 import com.desarrollodroide.adventurelog.core.model.VisitedFilter
+import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel.CategoriesState
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AdventuresFilterBottomSheet(
     filters: AdventureFilters,
-    categories: List<Category>,
+    categoriesState: CategoriesState,
     onFiltersChanged: (AdventureFilters) -> Unit,
     onDismiss: () -> Unit,
-    onManageCategoriesClick: () -> Unit = {}
+    onManageCategoriesClick: () -> Unit = {},
+    onRetryLoadCategories: () -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var localFilters by remember(filters) { mutableStateOf(filters) }
@@ -87,151 +91,177 @@ fun AdventuresFilterBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = { androidx.compose.foundation.layout.WindowInsets(0) }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
+        AdventuresFilterContent(
+            filters = localFilters,
+            categoriesState = categoriesState,
+            onFiltersChanged = { localFilters = it },
+            onApply = {
+                onFiltersChanged(localFilters)
+                onDismiss()
+            },
+            onCancel = onDismiss,
+            onManageCategoriesClick = onManageCategoriesClick,
+            onRetryLoadCategories = onRetryLoadCategories
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal fun AdventuresFilterContent(
+    filters: AdventureFilters,
+    categoriesState: CategoriesState,
+    onFiltersChanged: (AdventureFilters) -> Unit,
+    onApply: () -> Unit,
+    onCancel: () -> Unit,
+    onManageCategoriesClick: () -> Unit = {},
+    onRetryLoadCategories: () -> Unit = {}
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+    ) {
+        // Header with gradient background
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ) {
-            // Header with gradient background
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary
                     ) {
-                        Surface(
-                            modifier = Modifier.size(40.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primary
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.FilterList,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "Adventure Filters",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "${getActiveFiltersCount(localFilters)} active filters",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
-                    
-                    IconButton(
-                        onClick = onDismiss
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Close",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Adventure Filters",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "${getActiveFiltersCount(filters)} active filters",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
+                
+                IconButton(
+                    onClick = {
+                        onFiltersChanged(AdventureFilters())
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CleaningServices,
+                        contentDescription = "Reset filters",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
+        }
 
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = 8.dp)
+        ) {
+            // Categories Section with Card
+            CategoryFilterSection(
+                selectedCategories = filters.categoryNames,
+                categoriesState = categoriesState,
+                onCategoriesChanged = { categoryNames ->
+                    onFiltersChanged(filters.copy(categoryNames = categoryNames))
+                },
+                onManageCategoriesClick = onManageCategoriesClick,
+                onRetryLoadCategories = onRetryLoadCategories
+            )
+
+            // Sort Section with improved layout
+            SortSection(
+                sortField = filters.sortField,
+                sortDirection = filters.sortDirection,
+                onSortFieldChanged = { field ->
+                    onFiltersChanged(filters.copy(sortField = field))
+                },
+                onSortDirectionChanged = { direction ->
+                    onFiltersChanged(filters.copy(sortDirection = direction))
+                }
+            )
+
+            // Visited Filter Section with visual indicators
+            VisitedFilterSection(
+                visitedFilter = filters.visitedFilter,
+                onVisitedFilterChanged = { filter ->
+                    onFiltersChanged(filters.copy(visitedFilter = filter))
+                }
+            )
+
+            // Include Collections Section with switch
+            IncludeCollectionsSection(
+                includeCollections = filters.includeCollections,
+                onIncludeCollectionsChanged = { include ->
+                    onFiltersChanged(filters.copy(includeCollections = include))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Footer with Apply and Cancel buttons - Always visible at bottom
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shadowElevation = 8.dp
+        ) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = 8.dp)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Categories Section with Card
-                CategoryFilterSection(
-                    selectedCategories = localFilters.categoryNames,
-                    categories = categories,
-                    onCategoriesChanged = { categoryNames ->
-                        localFilters = localFilters.copy(categoryNames = categoryNames)
-                    },
-                    onManageCategoriesClick = onManageCategoriesClick
-                )
-
-                // Sort Section with improved layout
-                SortSection(
-                    sortField = localFilters.sortField,
-                    sortDirection = localFilters.sortDirection,
-                    onSortFieldChanged = { field ->
-                        localFilters = localFilters.copy(sortField = field)
-                    },
-                    onSortDirectionChanged = { direction ->
-                        localFilters = localFilters.copy(sortDirection = direction)
-                    }
-                )
-
-                // Visited Filter Section with visual indicators
-                VisitedFilterSection(
-                    visitedFilter = localFilters.visitedFilter,
-                    onVisitedFilterChanged = { filter ->
-                        localFilters = localFilters.copy(visitedFilter = filter)
-                    }
-                )
-
-                // Include Collections Section with switch
-                IncludeCollectionsSection(
-                    includeCollections = localFilters.includeCollections,
-                    onIncludeCollectionsChanged = { include ->
-                        localFilters = localFilters.copy(includeCollections = include)
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(16.dp)) // Reduced space
-            }
-
-            // Footer with Apply and Cancel buttons - Always visible at bottom
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shadowElevation = 8.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                Button(
+                    onClick = onCancel,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 ) {
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    ) {
-                        Text("Cancel")
-                    }
-                    Button(
-                        onClick = {
-                            onFiltersChanged(localFilters)
-                            onDismiss()
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Apply Filters")
-                    }
+                    Text("Cancel")
+                }
+                Button(
+                    onClick = onApply,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Apply Filters")
                 }
             }
         }
@@ -242,9 +272,10 @@ fun AdventuresFilterBottomSheet(
 @Composable
 private fun CategoryFilterSection(
     selectedCategories: List<String>,
-    categories: List<Category>,
+    categoriesState: CategoriesState,
     onCategoriesChanged: (List<String>) -> Unit,
-    onManageCategoriesClick: () -> Unit
+    onManageCategoriesClick: () -> Unit,
+    onRetryLoadCategories: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -297,64 +328,128 @@ private fun CategoryFilterSection(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if (categories.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(8.dp)
+            when (categoriesState) {
+                is CategoriesState.Loading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(40.dp),
+                            color = MaterialTheme.colorScheme.primary
                         )
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No categories available",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    }
                 }
-            } else {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    categories.forEach { category ->
-                        FilterChip(
-                            selected = selectedCategories.contains(category.name),
-                            onClick = {
-                                if (selectedCategories.contains(category.name)) {
-                                    onCategoriesChanged(selectedCategories - category.name)
-                                } else {
-                                    onCategoriesChanged(selectedCategories + category.name)
-                                }
-                            },
-                            label = {
-                                Text(category.displayName)
-                            },
-                            leadingIcon = if (selectedCategories.contains(category.name)) {
-                                {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            } else null,
-                            shape = RoundedCornerShape(20.dp),
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            border = FilterChipDefaults.filterChipBorder(
-                                enabled = true,
-                                selected = selectedCategories.contains(category.name),
-                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                selectedBorderColor = MaterialTheme.colorScheme.primary,
-                                borderWidth = 1.dp,
-                                selectedBorderWidth = 1.5.dp
+                
+                is CategoriesState.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(8.dp)
                             )
-                        )
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Text(
+                                text = categoriesState.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            OutlinedButton(
+                                onClick = onRetryLoadCategories,
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+                
+                is CategoriesState.Success -> {
+                    val categories = categoriesState.categories
+                    if (categories.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No categories available",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            categories.forEach { category ->
+                                FilterChip(
+                                    selected = selectedCategories.contains(category.name),
+                                    onClick = {
+                                        if (selectedCategories.contains(category.name)) {
+                                            onCategoriesChanged(selectedCategories - category.name)
+                                        } else {
+                                            onCategoriesChanged(selectedCategories + category.name)
+                                        }
+                                    },
+                                    label = {
+                                        Text(category.displayName)
+                                    },
+                                    leadingIcon = if (selectedCategories.contains(category.name)) {
+                                        {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    } else null,
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    border = FilterChipDefaults.filterChipBorder(
+                                        enabled = true,
+                                        selected = selectedCategories.contains(category.name),
+                                        borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                        selectedBorderColor = MaterialTheme.colorScheme.primary,
+                                        borderWidth = 1.dp,
+                                        selectedBorderWidth = 1.5.dp
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -754,3 +849,53 @@ private fun getActiveFiltersCount(filters: AdventureFilters): Int {
     if (filters.includeCollections) count++
     return count
 }
+
+@Preview()
+@Composable
+fun AdventuresFilterBottomSheetPreview() {
+    val mockFilters = AdventureFilters(
+        categoryNames = listOf("Hiking", "Camping"),
+        sortField = SortField.NAME,
+        sortDirection = SortDirection.ASCENDING,
+        visitedFilter = VisitedFilter.VISITED,
+        includeCollections = true
+    )
+    val mockCategories = listOf(
+        Category(
+            id = "cat_001_en",
+            name = "mountain_hiking",
+            displayName = "Mountain Hiking",
+            icon = "ic_mountain_peak",
+            numAdventures = "27"
+        ),
+        Category(
+            id = "cat_002_en",
+            name = "urban_exploration",
+            displayName = "Urban Exploration",
+            icon = "ic_city_skyline",
+            numAdventures = "42"
+        ),
+        Category(
+            id = "cat_003_en",
+            name = "beach_relaxation",
+            displayName = "Beach Relaxation",
+            icon = "ic_beach_umbrella",
+            numAdventures = "18"
+        )
+    )
+
+    MaterialTheme {
+        Surface {
+            AdventuresFilterContent(
+                filters = mockFilters,
+                categoriesState = CategoriesState.Success(mockCategories),
+                onFiltersChanged = {},
+                onApply = {},
+                onCancel = {},
+                onManageCategoriesClick = {},
+                onRetryLoadCategories = {}
+            )
+        }
+    }
+}
+

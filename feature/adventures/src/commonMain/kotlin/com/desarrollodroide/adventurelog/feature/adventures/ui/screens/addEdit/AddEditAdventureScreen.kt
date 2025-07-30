@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,10 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,7 +22,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
@@ -41,7 +39,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AddEditAdventureScreen(
+    isEditMode: Boolean = false,
+    existingAdventure: com.desarrollodroide.adventurelog.core.model.Adventure? = null,
     categories: List<Category>,
+    isLoading: Boolean = false,
     onNavigateBack: () -> Unit,
     onSave: (adventureData: AdventureFormData) -> Unit,
     onGenerateDescription: (name: String, onDescriptionGenerated: (String) -> Unit) -> Unit,
@@ -55,14 +56,37 @@ fun AddEditAdventureScreen(
     wikipediaImageState: WikipediaImageState = WikipediaImageState.Idle,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
-    modifier: Modifier = Modifier,
-    initialData: AdventureFormData? = null
+    modifier: Modifier = Modifier
 ) {
-    var formData by remember {
+    var formData by remember(existingAdventure) {
         mutableStateOf(
-            initialData ?: AdventureFormData(
-                category = categories.firstOrNull()
-            )
+            if (existingAdventure != null) {
+                AdventureFormData(
+                    name = existingAdventure.name,
+                    description = existingAdventure.description,
+                    category = categories.find { it.id == existingAdventure.category?.id },
+                    rating = existingAdventure.rating.toInt(),
+                    link = existingAdventure.link,
+                    location = existingAdventure.location,
+                    latitude = existingAdventure.latitude,
+                    longitude = existingAdventure.longitude,
+                    isPublic = existingAdventure.isPublic,
+                    tags = existingAdventure.activityTypes,
+                    visits = existingAdventure.visits.map { visit ->
+                        VisitFormData(
+                            startDate = visit.startDate,
+                            endDate = visit.endDate,
+                            timezone = visit.timezone,
+                            notes = visit.notes,
+                            isAllDay = true // Default to true since Visit model doesn't have this field
+                        )
+                    }
+                )
+            } else {
+                AdventureFormData(
+                    category = categories.firstOrNull()
+                )
+            }
         )
     }
     
@@ -73,6 +97,17 @@ fun AddEditAdventureScreen(
         }
     }
 
+    if (isLoading && existingAdventure == null && isEditMode) {
+        // Show loading state while loading adventure for edit
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = androidx.compose.ui.Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+    
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -129,7 +164,7 @@ fun AddEditAdventureScreen(
             ) {
                 PrimaryButton(
                     onClick = { onSave(formData) },
-                    text = if (initialData != null) "Update Adventure" else "Create Adventure"
+                    text = if (isEditMode) "Update Adventure" else "Create Adventure"
                 )
 
                 TextButton(
@@ -176,12 +211,44 @@ private fun AddEditAdventureScreenPreview() {
 @Preview
 @Composable
 private fun AddEditAdventureScreenWithDataPreview() {
+    val sampleAdventure = com.desarrollodroide.adventurelog.core.model.Adventure(
+        id = "1",
+        userId = "user123",
+        name = "Visit to Prado Museum",
+        description = "An incredible experience visiting one of the most important art galleries in the world.",
+        category = Category("3", "museum", "Museum", "🏛️", "0"),
+        rating = 5.0,
+        link = "https://www.museodelprado.es",
+        location = "Madrid, Spain",
+        latitude = "40.4138",
+        longitude = "-3.6921",
+        isPublic = true,
+        activityTypes = listOf("art", "culture", "madrid"),
+        visits = listOf(
+            com.desarrollodroide.adventurelog.core.model.Visit(
+                id = "1",
+                startDate = "2024-01-15",
+                endDate = "2024-01-15",
+                timezone = "Europe/Madrid",
+                notes = "Amazing collection of Velázquez paintings"
+            )
+        ),
+        createdAt = "",
+        updatedAt = "",
+        images = emptyList(),
+        collections = emptyList(),
+        isVisited = true,
+        attachments = emptyList()
+    )
+    
     MaterialTheme {
         Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
             AddEditAdventureScreen(
+                isEditMode = true,
+                existingAdventure = sampleAdventure,
                 categories = listOf(
                     Category("1", "general", "General", "🌍", "0"),
                     Category("2", "hotel", "Hotel", "🏨", "0"),
@@ -202,27 +269,6 @@ private fun AddEditAdventureScreenWithDataPreview() {
                         displayName = "Museo del Prado, Madrid, España",
                         type = "museum",
                         category = "tourism"
-                    )
-                ),
-                initialData = AdventureFormData(
-                    name = "Visit to Prado Museum",
-                    description = "An incredible experience visiting one of the most important art galleries in the world.",
-                    category = Category("3", "museum", "Museum", "🏛️", "0"),
-                    rating = 5,
-                    link = "https://www.museodelprado.es",
-                    location = "Madrid, Spain",
-                    latitude = "40.4138",
-                    longitude = "-3.6921",
-                    isPublic = true,
-                    tags = listOf("art", "culture", "madrid"),
-                    visits = listOf(
-                        VisitFormData(
-                            startDate = "2024-01-15",
-                            endDate = "2024-01-15",
-                            timezone = "Europe/Madrid",
-                            notes = "Amazing collection of Velázquez paintings",
-                            isAllDay = true
-                        )
                     )
                 )
             )

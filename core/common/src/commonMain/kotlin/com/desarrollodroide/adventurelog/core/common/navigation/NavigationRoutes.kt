@@ -14,6 +14,12 @@ object NavigationRoutes {
 
     object Adventures {
         const val route = "adventures"
+        const val add = "adventures/add"
+        const val editRoute = "adventures/edit?adventureId={adventureId}&adventureJson={adventureJson}"
+        
+        fun createEditRoute(adventureId: String, adventureJson: String): String {
+            return "adventures/edit?adventureId=$adventureId&adventureJson=$adventureJson"
+        }
     }
 
     object Settings {

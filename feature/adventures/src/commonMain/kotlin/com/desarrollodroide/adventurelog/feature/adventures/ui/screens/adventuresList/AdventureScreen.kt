@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,12 +25,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,7 +50,6 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.AdventuresFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
@@ -58,6 +64,7 @@ fun AdventureListScreen(
     onAdventureClick: (Adventure, List<Collection>) -> Unit = { _, _ -> },
     onAddAdventureClick: () -> Unit = { },
     onManageCategoriesClick: () -> Unit = { },
+    onEditAdventure: (Adventure) -> Unit = { },
     collections: List<Collection> = emptyList(),
     modifier: Modifier = Modifier,
     viewModel: AdventuresViewModel = koinViewModel()
@@ -65,17 +72,22 @@ fun AdventureListScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val filters by viewModel.filters.collectAsStateWithLifecycle()
     val showFilters by viewModel.showFilters.collectAsStateWithLifecycle()
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val categoriesState by viewModel.categoriesState.collectAsStateWithLifecycle()
     val pagingItems = viewModel.adventuresPagingData.collectAsLazyPagingItems()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
+
+    var adventureToDelete by remember { mutableStateOf<Adventure?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     if (showFilters) {
         AdventuresFilterBottomSheet(
             filters = filters,
-            categories = categories,
+            categoriesState = categoriesState,
             onFiltersChanged = viewModel::onFiltersChanged,
             onDismiss = viewModel::hideFilters,
-            onManageCategoriesClick = onManageCategoriesClick
+            onManageCategoriesClick = onManageCategoriesClick,
+            onRetryLoadCategories = viewModel::retryLoadCategories
         )
     }
 
@@ -85,10 +97,13 @@ fun AdventureListScreen(
         hasActiveFilters = viewModel.hasActiveFilters(),
         collections = collections,
         isRefreshing = isRefreshing,
+        snackbarHostState = snackbarHostState,
         onAdventureClick = onAdventureClick,
         onAddAdventureClick = onAddAdventureClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
         onShowFilters = viewModel::showFilters,
+        onEditAdventure = onEditAdventure,
+        onDeleteAdventure = { adventure -> adventureToDelete = adventure },
         onRefresh = {
             viewModel.refresh()
             pagingItems.refresh()
@@ -101,6 +116,47 @@ fun AdventureListScreen(
             viewModel.onRefreshComplete()
         }
     }
+
+    LaunchedEffect(deleteState) {
+        when (val state = deleteState) {
+            is AdventuresViewModel.DeleteState.Success -> {
+                snackbarHostState.showSnackbar("Adventure deleted successfully")
+                viewModel.clearDeleteState()
+                pagingItems.refresh()
+            }
+
+            is AdventuresViewModel.DeleteState.Error -> {
+                snackbarHostState.showSnackbar("Error: ${state.message}")
+                viewModel.clearDeleteState()
+            }
+
+            else -> {}
+        }
+    }
+
+    // Delete confirmation dialog
+    adventureToDelete?.let { adventure ->
+        AlertDialog(
+            onDismissRequest = { adventureToDelete = null },
+            title = { Text("Delete Adventure") },
+            text = { Text("Are you sure you want to delete \"${adventure.name}\"? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteAdventure(adventure.id)
+                        adventureToDelete = null
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { adventureToDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -111,10 +167,13 @@ private fun AdventureListContent(
     hasActiveFilters: Boolean,
     collections: List<Collection>,
     isRefreshing: Boolean,
+    snackbarHostState: SnackbarHostState,
     onAdventureClick: (Adventure, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onShowFilters: () -> Unit,
+    onEditAdventure: (Adventure) -> Unit,
+    onDeleteAdventure: (Adventure) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -171,6 +230,7 @@ private fun AdventureListContent(
                 )
             }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.systemBars
     ) { paddingValues ->
@@ -193,10 +253,12 @@ private fun AdventureListContent(
                                 collections.find { it.id == id }
                             }
                             onAdventureClick(adventure, adventureCollections)
-                        }
+                        },
+                        onEditAdventure = onEditAdventure,
+                        onDeleteAdventure = onDeleteAdventure
                     )
                 }
-                
+
                 pagingItems.loadState.refresh is LoadStateLoading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -240,7 +302,9 @@ private fun AdventureListContent(
                                             collections.find { it.id == id }
                                         }
                                     onAdventureClick(adventure, adventureCollections)
-                                }
+                                },
+                                onEditAdventure = onEditAdventure,
+                                onDeleteAdventure = onDeleteAdventure
                             )
                         }
                     }
@@ -254,7 +318,9 @@ private fun AdventureListContent(
 private fun AdventuresPagingList(
     pagingItems: LazyPagingItems<Adventure>,
     collections: List<Collection>,
-    onAdventureClick: (Adventure) -> Unit
+    onAdventureClick: (Adventure) -> Unit,
+    onEditAdventure: (Adventure) -> Unit,
+    onDeleteAdventure: (Adventure) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -275,7 +341,9 @@ private fun AdventuresPagingList(
                 AdventureItem(
                     adventure = adventure,
                     collections = collections,
-                    onClick = { onAdventureClick(adventure) }
+                    onClick = { onAdventureClick(adventure) },
+                    onEdit = { onEditAdventure(adventure) },
+                    onDelete = { onDeleteAdventure(adventure) }
                 )
             }
         }

@@ -5,14 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.CreateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.GetAdventureUseCase
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
-import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.domain.GenerateDescriptionUseCase
 import com.desarrollodroide.adventurelog.core.domain.SearchLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.ReverseGeocodeUseCase
@@ -27,6 +28,7 @@ data class AddEditAdventureUiState(
     val isSaved: Boolean = false,
     val errorMessage: String? = null,
     val categories: List<Category> = emptyList(),
+    val existingAdventure: Adventure? = null,
     val isGeneratingDescription: Boolean = false,
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
@@ -45,12 +47,14 @@ sealed class WikipediaImageState {
 class AddEditAdventureViewModel(
     private val createAdventureUseCase: CreateAdventureUseCase,
     private val updateAdventureUseCase: UpdateAdventureUseCase,
+    private val getAdventureUseCase: GetAdventureUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val generateDescriptionUseCase: GenerateDescriptionUseCase,
     private val searchLocationsUseCase: SearchLocationsUseCase,
     private val reverseGeocodeUseCase: ReverseGeocodeUseCase,
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
-    private val adventureId: String? = null
+    private val adventureId: String? = null,
+    private val existingAdventure: Adventure? = null
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddEditAdventureUiState())
@@ -58,6 +62,37 @@ class AddEditAdventureViewModel(
     
     init {
         loadCategories()
+        if (existingAdventure != null) {
+            _uiState.value = _uiState.value.copy(existingAdventure = existingAdventure)
+        } else if (adventureId != null) {
+            loadAdventure(adventureId)
+        }
+    }
+    
+    private fun loadAdventure(adventureId: String) {
+        // Only load from server if we don't already have the adventure
+        if (_uiState.value.existingAdventure != null) {
+            return
+        }
+        
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            
+            when (val result = getAdventureUseCase(adventureId)) {
+                is Either.Left -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Failed to load adventure: ${result.value}"
+                    )
+                }
+                is Either.Right -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        existingAdventure = result.value
+                    )
+                }
+            }
+        }
     }
     
     private fun loadCategories() {
@@ -143,6 +178,10 @@ class AddEditAdventureViewModel(
     
     fun clearSavedState() {
         _uiState.value = _uiState.value.copy(isSaved = false)
+    }
+    
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(errorMessage = null)
     }
     
     fun generateDescription(name: String, onDescriptionGenerated: (String) -> Unit) {
