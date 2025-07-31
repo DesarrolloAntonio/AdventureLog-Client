@@ -39,9 +39,10 @@ fun AdventureItem(
     onEdit: () -> Unit = {},
     onRemoveFromCollection: () -> Unit = {},
     onDelete: () -> Unit = {},
-    sessionToken: String = ""
+    sessionToken: String = "",
+    showMenu: Boolean = true
 ) {
-    var showMenu by remember { mutableStateOf(false) }
+    var showDropdownMenu by remember { mutableStateOf(false) }
 
     val imageLoader = LocalImageLoader.current
     val sessionTokenManager = LocalSessionTokenManager.current
@@ -168,67 +169,69 @@ fun AdventureItem(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                Surface(
-                    modifier = Modifier.size(36.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    color = Color.Black.copy(alpha = 0.5f)
+            if (showMenu) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
                 ) {
-                    IconButton(
-                        onClick = { showMenu = true },
-                        modifier = Modifier.fillMaxSize()
+                    Surface(
+                        modifier = Modifier.size(36.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        color = Color.Black.copy(alpha = 0.5f)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
+                        IconButton(
+                            onClick = { showDropdownMenu = true },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More options",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    DropdownMenu(
+                        expanded = showDropdownMenu,
+                        onDismissRequest = { showDropdownMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Open Details") },
+                            onClick = {
+                                onOpenDetails()
+                                showDropdownMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Edit Adventure") },
+                            onClick = {
+                                onEdit()
+                                showDropdownMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Remove from collection") },
+                            onClick = {
+                                onRemoveFromCollection()
+                                showDropdownMenu = false
+                            }
+                        )
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    "Delete",
+                                    color = Color(0xFFFF3B30)
+                                )
+                            },
+                            onClick = {
+                                onDelete()
+                                showDropdownMenu = false
+                            }
                         )
                     }
-                }
-
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Open Details") },
-                        onClick = {
-                            onOpenDetails()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Edit Adventure") },
-                        onClick = {
-                            onEdit()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Remove from collection") },
-                        onClick = {
-                            onRemoveFromCollection()
-                            showMenu = false
-                        }
-                    )
-                    HorizontalDivider()
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                "Delete",
-                                color = Color(0xFFFF3B30)
-                            )
-                        },
-                        onClick = {
-                            onDelete()
-                            showMenu = false
-                        }
-                    )
                 }
             }
         }

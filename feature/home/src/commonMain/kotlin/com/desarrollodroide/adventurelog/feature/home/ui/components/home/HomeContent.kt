@@ -139,7 +139,8 @@ private fun HomeContentSuccess(
             AdventureItem(
                 adventure = adventure,
                 onClick = { onAdventureClick(adventure) },
-                sessionToken = sessionToken
+                sessionToken = sessionToken,
+                showMenu = false
             )
         }
     }
