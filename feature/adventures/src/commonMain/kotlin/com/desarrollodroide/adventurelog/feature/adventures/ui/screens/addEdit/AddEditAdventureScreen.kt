@@ -64,7 +64,7 @@ fun AddEditAdventureScreen(
                 AdventureFormData(
                     name = existingAdventure.name,
                     description = existingAdventure.description,
-                    category = categories.find { it.id == existingAdventure.category?.id },
+                    category = existingAdventure.category,
                     rating = existingAdventure.rating.toInt(),
                     link = existingAdventure.link,
                     location = existingAdventure.location,
