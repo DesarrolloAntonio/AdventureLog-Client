@@ -57,16 +57,16 @@ interface AdventureApi {
      */
     suspend fun updateAdventure(
         adventureId: String,
-        name: String? = null,
-        description: String? = null,
-        categoryId: String? = null,
-        rating: Double? = null,
-        link: String? = null,
-        location: String? = null,
-        latitude: String? = null,
-        longitude: String? = null,
-        isPublic: Boolean? = null,
-        visits: List<VisitFormData>? = null
+        name: String,
+        description: String,
+        category: Category?,
+        rating: Double,
+        link: String,
+        location: String,
+        latitude: String?,
+        longitude: String?,
+        isPublic: Boolean,
+        tags: List<String>
     ): AdventureDTO
     
     /**

@@ -1,5 +1,16 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -11,20 +22,10 @@ import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditAdventureScreen
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.adventuresList.AdventureListScreen
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.remember
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
-import androidx.compose.runtime.Composable
-import kotlinx.serialization.json.Json
 
 /**
  * Extension function to add adventures screens to a navigation graph
@@ -81,7 +82,11 @@ fun NavGraphBuilder.adventuresScreen(
         val adventureId = backStackEntry.savedStateHandle.get<String>("adventureId") ?: ""
         val adventureJson = backStackEntry.savedStateHandle.get<String>("adventureJson") ?: ""
         
-        val adventure = json.decodeFromString<Adventure>(adventureJson)
+        val adventure = if (adventureJson.isNotEmpty()) {
+            json.decodeFromString<Adventure>(adventureJson)
+        } else {
+            null
+        }
         
         AddEditAdventureContent(
             adventureId = adventureId,
@@ -103,7 +108,7 @@ private fun AddEditAdventureContent(
     val viewModel = koinViewModel<AddEditAdventureViewModel> { 
         parametersOf(adventureId, adventure)
     }
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     
     // Handle navigation when save is successful

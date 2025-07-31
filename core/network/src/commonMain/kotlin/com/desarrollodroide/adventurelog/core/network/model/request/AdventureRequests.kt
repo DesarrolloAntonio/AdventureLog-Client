@@ -23,37 +23,41 @@ data class CreateAdventureRequest(
 
 @Serializable
 data class UpdateAdventureRequest(
-    val name: String? = null,
-    val description: String? = null,
-    val rating: Double? = null,
-    val location: String? = null,
+    val name: String,
+    val description: String,
+    val rating: Double,
+    @SerialName("activity_types")
+    val activityTypes: List<String>,
+    val location: String,
     @SerialName("is_public")
-    val isPublic: Boolean? = null,
+    val isPublic: Boolean,
+    val collections: List<String>,
+    val link: String,
     val longitude: String? = null,
     val latitude: String? = null,
-    val visits: List<VisitRequest>? = null,
+    val visits: List<VisitRequest>,
     val category: CategoryRequest? = null,
-    val notes: String? = null,
-    val link: String? = null
+    val city: Map<String, String> = emptyMap(),
+    val country: Map<String, String> = emptyMap(),
+    val region: Map<String, String> = emptyMap()
 )
 
 @Serializable
 data class VisitRequest(
     @SerialName("start_date")
-    val startDate: String? = null,
+    val startDate: String,
     @SerialName("end_date")
-    val endDate: String? = null,
-    val timezone: String? = null,
-    val notes: String? = null
+    val endDate: String,
+    val timezone: String,
+    val notes: String
 )
 
 @Serializable
 data class CategoryRequest(
-    val id: String? = null,
-    val name: String? = null,
+    val name: String,
     @SerialName("display_name")
-    val displayName: String? = null,
-    val icon: String? = null
+    val displayName: String,
+    val icon: String
 )
 
 @Serializable

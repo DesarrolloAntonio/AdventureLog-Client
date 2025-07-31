@@ -122,7 +122,7 @@ class AddEditAdventureViewModel(
                     adventureId = adventureId,
                     name = formData.name,
                     description = formData.description,
-                    categoryName = formData.category?.id?:"",
+                    category = formData.category,
                     rating = formData.rating.toDouble(),
                     link = formData.link,
                     location = formData.location,

@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Category
 
 class UpdateAdventureUseCase(
     private val adventuresRepository: AdventuresRepository
@@ -11,7 +12,7 @@ class UpdateAdventureUseCase(
         adventureId: String,
         name: String,
         description: String,
-        categoryName: String?,
+        category: Category?,
         rating: Double,
         link: String,
         location: String,
@@ -20,7 +21,18 @@ class UpdateAdventureUseCase(
         isPublic: Boolean,
         tags: List<String>
     ): Either<String, Adventure> {
-        // TODO: Implement adventure update logic
-        return Either.Left("Not implemented yet")
+        return adventuresRepository.updateAdventure(
+            adventureId = adventureId,
+            name = name,
+            description = description,
+            category = category,
+            rating = rating,
+            link = link,
+            location = location,
+            latitude = latitude,
+            longitude = longitude,
+            isPublic = isPublic,
+            tags = tags
+        )
     }
 }

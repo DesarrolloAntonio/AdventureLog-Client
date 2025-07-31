@@ -151,4 +151,21 @@ interface AdventureLogNetworkDataSource {
      * Delete an adventure
      */
     suspend fun deleteAdventure(adventureId: String)
+    
+    /**
+     * Update an existing adventure
+     */
+    suspend fun updateAdventure(
+        adventureId: String,
+        name: String,
+        description: String,
+        category: Category?,
+        rating: Double,
+        link: String,
+        location: String,
+        latitude: String?,
+        longitude: String?,
+        isPublic: Boolean,
+        tags: List<String>
+    ): AdventureDTO
 }

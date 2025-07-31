@@ -10,7 +10,6 @@ import com.desarrollodroide.adventurelog.core.network.utils.toCoordinateString
 
 fun Category.toCategoryRequest(): CategoryRequest {
     return CategoryRequest(
-        id = id,
         name = name,
         displayName = displayName,
         icon = icon

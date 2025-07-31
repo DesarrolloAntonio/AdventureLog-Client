@@ -8,7 +8,9 @@ import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdventureRequest
-import com.desarrollodroide.adventurelog.core.network.model.mappers.toVisitRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.UpdateAdventureRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
@@ -39,9 +41,9 @@ internal class KtorAdventureNetworkDataSource(
     override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/"
-        
+
         logger.d { "🌐 API Request - GET $url?page=$page&page_size=$pageSize" }
-        
+
         val response = httpClient.get(url) {
             parameter("page", page)
             parameter("page_size", pageSize)
@@ -59,7 +61,7 @@ internal class KtorAdventureNetworkDataSource(
 
         val responseText = response.body<String>()
         val adventuresResponse = json.decodeFromString<AdventuresDTO>(responseText)
-        
+
         logger.d { "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} adventures for page $page (requested pageSize: $pageSize)" }
         logger.d { "   Total count: ${adventuresResponse.count}" }
 
@@ -77,25 +79,25 @@ internal class KtorAdventureNetworkDataSource(
         includeCollections: Boolean
     ): List<AdventureDTO> {
         val session = sessionProvider()
-        
+
         // If there's a search query, use the search endpoint
         if (!searchQuery.isNullOrBlank()) {
             return searchAdventures(searchQuery)
         }
-        
+
         // Otherwise use the filtered endpoint
         val url = "${session.baseUrl}/api/adventures/filtered/"
-        
-        logger.d { 
+
+        logger.d {
             "🌐 API Request - GET $url with filters: " +
-            "page=$page, pageSize=$pageSize, categories=$categoryIds, " +
-            "sortBy=$sortBy, sortOrder=$sortOrder, isVisited=$isVisited" 
+                    "page=$page, pageSize=$pageSize, categories=$categoryIds, " +
+                    "sortBy=$sortBy, sortOrder=$sortOrder, isVisited=$isVisited"
         }
-        
+
         val response = httpClient.get(url) {
             parameter("page", page)
             parameter("page_size", pageSize)
-            
+
             // Map parameters to match backend expectations
             // types parameter: backend expects comma-separated category names or "all"
             if (!categoryIds.isNullOrEmpty()) {
@@ -103,32 +105,32 @@ internal class KtorAdventureNetworkDataSource(
             } else {
                 parameter("types", "all")
             }
-            
+
             // order_by and order_direction
             sortBy?.let { parameter("order_by", it) }
             sortOrder?.let { parameter("order_direction", it) }
-            
+
             // is_visited parameter: backend expects "true", "false", or "all"
             when (isVisited) {
                 true -> parameter("is_visited", "true")
                 false -> parameter("is_visited", "false")
                 null -> parameter("is_visited", "all")
             }
-            
+
             // include_collections parameter
             parameter("include_collections", includeCollections.toString())
-            
+
             headers {
                 commonHeaders(session.sessionToken)
             }
         }
-        
+
         logger.d { "Response status: ${response.status}" }
 
         if (!response.status.isSuccess()) {
             val errorBody = try {
                 response.body<String>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 "Unable to read error body"
             }
             logger.e { "Failed to fetch filtered adventures. Error: $errorBody" }
@@ -140,32 +142,32 @@ internal class KtorAdventureNetworkDataSource(
 
         val responseText = response.body<String>()
         val adventuresResponse = json.decodeFromString<AdventuresDTO>(responseText)
-        
-        logger.d { 
+
+        logger.d {
             "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} filtered adventures " +
-            "for page $page (total: ${adventuresResponse.count})" 
+                    "for page $page (total: ${adventuresResponse.count})"
         }
 
         return adventuresResponse.results ?: emptyList()
     }
-    
+
     private suspend fun searchAdventures(searchQuery: String): List<AdventureDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/search/"
-        
+
         logger.d { "🔍 API Request - GET $url with query: '$searchQuery'" }
-        
+
         val response = httpClient.get(url) {
             parameter("query", searchQuery)
             headers {
                 commonHeaders(session.sessionToken)
             }
         }
-        
+
         if (!response.status.isSuccess()) {
             val errorBody = try {
                 response.body<String>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 "Unable to read error body"
             }
             logger.e { "Failed to search adventures. Error: $errorBody" }
@@ -174,23 +176,23 @@ internal class KtorAdventureNetworkDataSource(
                 "Failed to search adventures with status: ${response.status}"
             )
         }
-        
+
         val responseText = response.body<String>()
         // The search endpoint returns a different format with multiple entity types
         val searchResults = json.decodeFromString<SearchResultsDTO>(responseText)
-        
-        logger.d { 
+
+        logger.d {
             "📦 Search Response - Found ${searchResults.adventures?.size ?: 0} adventures " +
-            "for query: '$searchQuery'" 
+                    "for query: '$searchQuery'"
         }
-        
+
         return searchResults.adventures ?: emptyList()
     }
 
     override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/$objectId/"
-        
+
         val response = httpClient.get(url) {
             headers {
                 commonHeaders(session.sessionToken)
@@ -223,7 +225,7 @@ internal class KtorAdventureNetworkDataSource(
     ): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/"
-        
+
         val requestBody = createAdventureRequest(
             name = name,
             description = description,
@@ -251,7 +253,7 @@ internal class KtorAdventureNetworkDataSource(
         if (!response.status.isSuccess()) {
             val errorBody = try {
                 response.body<String>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 "Unable to read error body"
             }
             logger.e { "Failed to create adventure. Status: ${response.status}, Error: $errorBody" }
@@ -267,54 +269,76 @@ internal class KtorAdventureNetworkDataSource(
 
     override suspend fun updateAdventure(
         adventureId: String,
-        name: String?,
-        description: String?,
-        categoryId: String?,
-        rating: Double?,
-        link: String?,
-        location: String?,
+        name: String,
+        description: String,
+        category: Category?,
+        rating: Double,
+        link: String,
+        location: String,
         latitude: String?,
         longitude: String?,
-        isPublic: Boolean?,
-        visits: List<VisitFormData>?
+        isPublic: Boolean,
+        tags: List<String>
     ): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/$adventureId/"
-        
-        val updates = buildMap {
-            name?.let { put("name", it) }
-            description?.let { put("description", it) }
-            categoryId?.let { 
-                if (it.isNotBlank()) {
-                    // For now, skip category updates until we understand the format
-                    logger.d { "Category updates not implemented yet" }
-                }
-            }
-            rating?.let { put("rating", it) }
-            link?.let { put("link", it) }
-            location?.let { put("location", it) }
-            latitude.toCoordinateString()?.let { put("latitude", it) }
-            longitude.toCoordinateString()?.let { put("longitude", it) }
-            isPublic?.let { put("is_public", it) }
-            visits?.let { 
-                if (it.isNotEmpty()) {
-                    put("visits", it.map { visit -> visit.toVisitRequest() })
-                }
-            }
+
+        // First, get the current adventure to preserve collections and visits
+        val currentAdventure = try {
+            getAdventureDetail(adventureId)
+        } catch (_: Exception) {
+            logger.w { "Failed to get current adventure data, proceeding without it" }
+            null
         }
+
+        val updateRequest = UpdateAdventureRequest(
+            name = name,
+            description = description,
+            rating = rating,
+            link = link,
+            location = location,
+            latitude = latitude.toCoordinateString(),
+            longitude = longitude.toCoordinateString(),
+            isPublic = isPublic,
+            activityTypes = tags,
+            collections = currentAdventure?.collections ?: emptyList(),
+            category = category?.let { cat ->
+                CategoryRequest(
+                    name = cat.name,
+                    displayName = cat.displayName,
+                    icon = cat.icon
+                )
+            },
+            visits = currentAdventure?.visits?.map { visit ->
+                VisitRequest(
+                    startDate = visit.startDate ?: "",
+                    endDate = visit.endDate ?: "",
+                    timezone = visit.timezone ?: "UTC",
+                    notes = visit.notes ?: ""
+                )
+            } ?: emptyList()
+        )
+
+        logger.d { "Updating adventure $adventureId" }
 
         val response = httpClient.patch(url) {
             contentType(ContentType.Application.Json)
             headers {
                 commonHeaders(session.sessionToken)
             }
-            setBody(updates)
+            setBody(updateRequest)
         }
 
         if (!response.status.isSuccess()) {
+            val errorBody = try {
+                response.body<String>()
+            } catch (_: Exception) {
+                "Unable to read error body"
+            }
+            logger.e { "Failed to update adventure. Status: ${response.status}, Error: $errorBody" }
             throw HttpException(
                 response.status.value,
-                "Failed to update adventure with status: ${response.status}"
+                "Failed to update adventure with status: ${response.status}. Error: $errorBody"
             )
         }
 
@@ -325,7 +349,7 @@ internal class KtorAdventureNetworkDataSource(
     override suspend fun deleteAdventure(adventureId: String) {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/adventures/$adventureId/"
-        
+
         val response = httpClient.delete(url) {
             headers {
                 commonHeaders(session.sessionToken)

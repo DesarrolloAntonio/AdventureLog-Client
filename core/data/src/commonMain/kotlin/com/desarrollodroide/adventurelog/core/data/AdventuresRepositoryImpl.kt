@@ -224,4 +224,50 @@ class AdventuresRepositoryImpl(
             Either.Left("Unexpected error: ${e.message}")
         }
     }
+    
+    override suspend fun updateAdventure(
+        adventureId: String,
+        name: String,
+        description: String,
+        category: Category?,
+        rating: Double,
+        link: String,
+        location: String,
+        latitude: String?,
+        longitude: String?,
+        isPublic: Boolean,
+        tags: List<String>
+    ): Either<String, Adventure> {
+        return try {
+            val adventure = networkDataSource.updateAdventure(
+                adventureId = adventureId,
+                name = name,
+                description = description,
+                category = category,
+                rating = rating,
+                link = link,
+                location = location,
+                latitude = latitude,
+                longitude = longitude,
+                isPublic = isPublic,
+                tags = tags
+            ).toDomainModel()
+            
+            // Update the adventure in the flow
+            _adventuresFlow.value = _adventuresFlow.value.map { 
+                if (it.id == adventureId) adventure else it 
+            }
+            
+            Either.Right(adventure)
+        } catch (e: HttpException) {
+            println("HTTP Error during updateAdventure: ${e.code}")
+            Either.Left("Failed to update adventure: HTTP ${e.code}")
+        } catch (e: IOException) {
+            println("IO Error during updateAdventure: ${e.message}")
+            Either.Left("Network error: ${e.message}")
+        } catch (e: Exception) {
+            println("Unexpected error during updateAdventure: ${e.message}")
+            Either.Left("Unexpected error: ${e.message}")
+        }
+    }
 }

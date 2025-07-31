@@ -55,4 +55,18 @@ interface AdventuresRepository {
     suspend fun deleteAdventure(
         adventureId: String
     ): Either<String, Unit>
+    
+    suspend fun updateAdventure(
+        adventureId: String,
+        name: String,
+        description: String,
+        category: Category?,
+        rating: Double,
+        link: String,
+        location: String,
+        latitude: String?,
+        longitude: String?,
+        isPublic: Boolean,
+        tags: List<String>
+    ): Either<String, Adventure>
 }

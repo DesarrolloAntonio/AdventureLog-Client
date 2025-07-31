@@ -65,6 +65,25 @@ fun BasicInfoSection(
     isGeneratingDescription: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(true) }
+    var linkError by remember { mutableStateOf("") }
+    
+    fun validateUrl(url: String): Boolean {
+        if (url.isBlank()) {
+            linkError = ""
+            return true // Empty URL is valid (optional field)
+        }
+        
+        val hasProtocol = url.startsWith("http://", ignoreCase = true) || 
+                         url.startsWith("https://", ignoreCase = true)
+        
+        return if (!hasProtocol) {
+            linkError = "URL must include http:// or https://"
+            false
+        } else {
+            linkError = ""
+            true
+        }
+    }
     
     Card(
         modifier = Modifier
@@ -165,15 +184,18 @@ fun BasicInfoSection(
                     
                     StyledTextField(
                         value = formData.link,
-                        onValueChange = { 
-                            onFormDataChange(formData.copy(link = it))
+                        onValueChange = { newValue ->
+                            onFormDataChange(formData.copy(link = newValue))
+                            validateUrl(newValue)
                         },
                         label = "Website Link",
                         icon = Icons.Outlined.Link,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
                             imeAction = ImeAction.Next
-                        )
+                        ),
+                        isError = linkError.isNotEmpty(),
+                        errorMessage = linkError
                     )
                     
                     DescriptionSection(

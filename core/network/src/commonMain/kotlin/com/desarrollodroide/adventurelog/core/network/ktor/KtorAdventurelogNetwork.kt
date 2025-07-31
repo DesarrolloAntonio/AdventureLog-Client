@@ -426,4 +426,33 @@ class KtorAdventurelogNetwork(
         ensureInitialized()
         return adventureDataSource.deleteAdventure(adventureId)
     }
+    
+    override suspend fun updateAdventure(
+        adventureId: String,
+        name: String,
+        description: String,
+        category: Category?,
+        rating: Double,
+        link: String,
+        location: String,
+        latitude: String?,
+        longitude: String?,
+        isPublic: Boolean,
+        tags: List<String>
+    ): AdventureDTO {
+        ensureInitialized()
+        return adventureDataSource.updateAdventure(
+            adventureId = adventureId,
+            name = name,
+            description = description,
+            category = category,
+            rating = rating,
+            link = link,
+            location = location,
+            latitude = latitude,
+            longitude = longitude,
+            isPublic = isPublic,
+            tags = tags
+        )
+    }
 }
