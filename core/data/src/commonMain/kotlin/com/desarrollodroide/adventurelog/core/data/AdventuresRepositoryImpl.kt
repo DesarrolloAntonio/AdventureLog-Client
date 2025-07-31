@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
 
 class AdventuresRepositoryImpl(
@@ -26,16 +27,21 @@ class AdventuresRepositoryImpl(
     private val _adventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
     override val adventuresFlow: StateFlow<List<Adventure>> = _adventuresFlow.asStateFlow()
     
+    // Version counter to force paging invalidation
+    private val _version = MutableStateFlow(0)
+    
     override fun getAdventuresPagingData(): Flow<PagingData<Adventure>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 30,
-                enablePlaceholders = false,
-                initialLoadSize = 30,    // Primera carga igual al pageSize
-                prefetchDistance = 10     // Cargar siguiente página cuando falten 10 items
-            ),
-            pagingSourceFactory = { AdventuresPagingSource(networkDataSource, pageSize = 30) }
-        ).flow
+        return _version.flatMapLatest { _ ->
+            Pager(
+                config = PagingConfig(
+                    pageSize = 30,
+                    enablePlaceholders = false,
+                    initialLoadSize = 30,
+                    prefetchDistance = 10
+                ),
+                pagingSourceFactory = { AdventuresPagingSource(networkDataSource, pageSize = 30) }
+            ).flow
+        }
     }
     
     override fun getAdventuresPagingDataFiltered(
@@ -46,26 +52,28 @@ class AdventuresRepositoryImpl(
         searchQuery: String?,
         includeCollections: Boolean
     ): Flow<PagingData<Adventure>> {
-        return Pager<Int, Adventure>(
-            config = PagingConfig(
-                pageSize = 30,
-                enablePlaceholders = false,
-                initialLoadSize = 30,
-                prefetchDistance = 10
-            ),
-            pagingSourceFactory = { 
-                AdventuresPagingSourceFiltered(
-                    networkDataSource = networkDataSource,
+        return _version.flatMapLatest { _ ->
+            Pager<Int, Adventure>(
+                config = PagingConfig(
                     pageSize = 30,
-                    categoryNames = categoryNames,
-                    sortBy = sortBy,
-                    sortOrder = sortOrder,
-                    isVisited = isVisited,
-                    searchQuery = searchQuery,
-                    includeCollections = includeCollections
-                ) 
-            }
-        ).flow
+                    enablePlaceholders = false,
+                    initialLoadSize = 30,
+                    prefetchDistance = 10
+                ),
+                pagingSourceFactory = { 
+                    AdventuresPagingSourceFiltered(
+                        networkDataSource = networkDataSource,
+                        pageSize = 30,
+                        categoryNames = categoryNames,
+                        sortBy = sortBy,
+                        sortOrder = sortOrder,
+                        isVisited = isVisited,
+                        searchQuery = searchQuery,
+                        includeCollections = includeCollections
+                    ) 
+                }
+            ).flow
+        }
     }
 
     override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>> {
@@ -145,6 +153,9 @@ class AdventuresRepositoryImpl(
             // Add the new adventure to the beginning of the flow (most recent first)
             _adventuresFlow.value = listOf(adventure) + _adventuresFlow.value
             
+            // Increment version to invalidate paging
+            _version.value++
+            
             Either.Right(adventure)
         } catch (e: HttpException) {
             println("HTTP Error during createAdventure: ${e.code}")
@@ -212,6 +223,9 @@ class AdventuresRepositoryImpl(
             // Remove the deleted adventure from the flow
             _adventuresFlow.value = _adventuresFlow.value.filter { it.id != adventureId }
             
+            // Increment version to invalidate paging
+            _version.value++
+            
             Either.Right(Unit)
         } catch (e: HttpException) {
             println("HTTP Error during deleteAdventure: ${e.code}")
@@ -257,6 +271,9 @@ class AdventuresRepositoryImpl(
             _adventuresFlow.value = _adventuresFlow.value.map { 
                 if (it.id == adventureId) adventure else it 
             }
+            
+            // Increment version to invalidate paging
+            _version.value++
             
             Either.Right(adventure)
         } catch (e: HttpException) {
