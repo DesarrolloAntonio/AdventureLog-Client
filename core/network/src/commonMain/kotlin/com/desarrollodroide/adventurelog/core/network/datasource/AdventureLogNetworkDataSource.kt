@@ -168,4 +168,22 @@ interface AdventureLogNetworkDataSource {
         isPublic: Boolean,
         tags: List<String>
     ): AdventureDTO
+
+    /**
+     * Delete a collection
+     */
+    suspend fun deleteCollection(collectionId: String)
+
+    /**
+     * Update an existing collection
+     */
+    suspend fun updateCollection(
+        collectionId: String,
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        startDate: String?,
+        endDate: String?,
+        link: String?
+    ): CollectionDTO
 }

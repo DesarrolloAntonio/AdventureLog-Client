@@ -29,11 +29,12 @@ interface CollectionApi {
      */
     suspend fun updateCollection(
         collectionId: String,
-        name: String? = null,
-        description: String? = null,
-        isPublic: Boolean? = null,
+        name: String,
+        description: String,
+        isPublic: Boolean,
         startDate: String? = null,
-        endDate: String? = null
+        endDate: String? = null,
+        link: String? = null
     ): CollectionDTO
     
     /**

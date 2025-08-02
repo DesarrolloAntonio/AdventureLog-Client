@@ -12,7 +12,8 @@ val collectionsModule = module {
 
     viewModel {
         CollectionsViewModel(
-            getCollectionsPagingUseCase = get()
+            getCollectionsPagingUseCase = get(),
+            deleteCollectionUseCase = get()
         )
     }
 
@@ -25,7 +26,9 @@ val collectionsModule = module {
     viewModel { params ->
         AddEditCollectionViewModel(
             collectionId = params.getOrNull(),
-            collectionsRepository = get()
+            collectionsRepository = get(),
+            getCollectionDetailUseCase = get(),
+            updateCollectionUseCase = get()
         )
     }
 }

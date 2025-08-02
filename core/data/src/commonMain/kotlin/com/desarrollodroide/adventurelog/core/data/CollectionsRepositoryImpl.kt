@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
 
 class CollectionsRepositoryImpl(
@@ -23,16 +24,21 @@ class CollectionsRepositoryImpl(
     private val _collectionsFlow = MutableStateFlow<List<Collection>>(emptyList())
     override val collectionsFlow: StateFlow<List<Collection>> = _collectionsFlow.asStateFlow()
 
+    // Version counter to force paging invalidation
+    private val _version = MutableStateFlow(0)
+
     override fun getCollectionsPagingData(): Flow<PagingData<Collection>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 30,
-                enablePlaceholders = false,
-                initialLoadSize = 30,
-                prefetchDistance = 10
-            ),
-            pagingSourceFactory = { CollectionsPagingSource(networkDataSource, pageSize = 30) }
-        ).flow
+        return _version.flatMapLatest { _ ->
+            Pager(
+                config = PagingConfig(
+                    pageSize = 30,
+                    enablePlaceholders = false,
+                    initialLoadSize = 30,
+                    prefetchDistance = 10
+                ),
+                pagingSourceFactory = { CollectionsPagingSource(networkDataSource, pageSize = 30) }
+            ).flow
+        }
     }
 
     override suspend fun getCollections(
@@ -115,6 +121,9 @@ class CollectionsRepositoryImpl(
             // Add the new collection to the flow
             _collectionsFlow.value = _collectionsFlow.value + collection
 
+            // Increment version to invalidate paging
+            _version.value++
+
             Either.Right(collection)
         } catch (e: HttpException) {
             println("HTTP Error during createCollection: ${e.code}")
@@ -146,6 +155,70 @@ class CollectionsRepositoryImpl(
         } catch (e: Exception) {
             println("Unexpected error during refreshCollections: ${e.message}")
             Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun deleteCollection(collectionId: String): Either<String, Unit> {
+        return try {
+            networkDataSource.deleteCollection(collectionId)
+            
+            // Remove the deleted collection from the flow
+            _collectionsFlow.value = _collectionsFlow.value.filter { it.id != collectionId }
+            
+            // Increment version to invalidate paging
+            _version.value++
+            
+            Either.Right(Unit)
+        } catch (e: HttpException) {
+            println("HTTP Error during deleteCollection: ${e.code}")
+            Either.Left("Failed to delete collection: HTTP ${e.code}")
+        } catch (e: IOException) {
+            println("IO Error during deleteCollection: ${e.message}")
+            Either.Left("Network error: ${e.message}")
+        } catch (e: Exception) {
+            println("Unexpected error during deleteCollection: ${e.message}")
+            Either.Left("Unexpected error: ${e.message}")
+        }
+    }
+
+    override suspend fun updateCollection(
+        collectionId: String,
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        startDate: String?,
+        endDate: String?,
+        link: String?
+    ): Either<String, Collection> {
+        return try {
+            val collection = networkDataSource.updateCollection(
+                collectionId = collectionId,
+                name = name,
+                description = description,
+                isPublic = isPublic,
+                startDate = startDate,
+                endDate = endDate,
+                link = link
+            ).toDomainModel()
+
+            // Update the collection in the flow
+            _collectionsFlow.value = _collectionsFlow.value.map { 
+                if (it.id == collectionId) collection else it
+            }
+
+            // Increment version to invalidate paging
+            _version.value++
+
+            Either.Right(collection)
+        } catch (e: HttpException) {
+            println("HTTP Error during updateCollection: ${e.code}")
+            Either.Left("Failed to update collection: HTTP ${e.code}")
+        } catch (e: IOException) {
+            println("IO Error during updateCollection: ${e.message}")
+            Either.Left("Network error: ${e.message}")
+        } catch (e: Exception) {
+            println("Unexpected error during updateCollection: ${e.message}")
+            Either.Left("Unexpected error: ${e.message}")
         }
     }
 }

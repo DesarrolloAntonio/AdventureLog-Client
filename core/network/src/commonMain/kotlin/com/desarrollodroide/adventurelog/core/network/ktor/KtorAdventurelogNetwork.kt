@@ -455,4 +455,30 @@ class KtorAdventurelogNetwork(
             tags = tags
         )
     }
+    
+    override suspend fun deleteCollection(collectionId: String) {
+        ensureInitialized()
+        return collectionDataSource.deleteCollection(collectionId)
+    }
+
+    override suspend fun updateCollection(
+        collectionId: String,
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        startDate: String?,
+        endDate: String?,
+        link: String?
+    ): CollectionDTO {
+        ensureInitialized()
+        return collectionDataSource.updateCollection(
+            collectionId = collectionId,
+            name = name,
+            description = description,
+            isPublic = isPublic,
+            startDate = startDate,
+            endDate = endDate,
+            link = link
+        )
+    }
 }

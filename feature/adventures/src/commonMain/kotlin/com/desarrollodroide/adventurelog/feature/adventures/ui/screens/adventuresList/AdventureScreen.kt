@@ -120,9 +120,9 @@ fun AdventureListScreen(
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
             is AdventuresViewModel.DeleteState.Success -> {
+                pagingItems.refresh()
                 snackbarHostState.showSnackbar("Adventure deleted successfully")
                 viewModel.clearDeleteState()
-                pagingItems.refresh()
             }
 
             is AdventuresViewModel.DeleteState.Error -> {

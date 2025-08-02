@@ -24,5 +24,6 @@ data class UpdateCollectionRequest(
     @SerialName("start_date")
     val startDate: String? = null,
     @SerialName("end_date")
-    val endDate: String? = null
+    val endDate: String? = null,
+    val link: String? = null
 )

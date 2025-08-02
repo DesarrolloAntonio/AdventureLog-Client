@@ -19,6 +19,7 @@ import com.desarrollodroide.adventurelog.core.domain.UpdateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.CreateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.UpdateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.DeleteCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.GenerateDescriptionUseCase
 import com.desarrollodroide.adventurelog.core.domain.SearchLocationsUseCase
@@ -45,6 +46,7 @@ val domainModule = module {
     factoryOf(::DeleteAdventureUseCase)
     factoryOf(::CreateCollectionUseCase)
     factoryOf(::UpdateCollectionUseCase)
+    factoryOf(::DeleteCollectionUseCase)
     factoryOf(::GetCategoriesUseCase)
     factoryOf(::GenerateDescriptionUseCase)
     factoryOf(::SearchLocationsUseCase)

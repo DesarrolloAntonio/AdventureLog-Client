@@ -14,18 +14,25 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,20 +57,34 @@ import org.koin.compose.viewmodel.koinViewModel
 fun CollectionsScreen(
     onCollectionClick: (String, String) -> Unit = { _, _ -> },
     onAddCollectionClick: () -> Unit = { },
+    onEditCollection: (Collection) -> Unit = { },
+    onPagingItemsReady: (LazyPagingItems<Collection>) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pagingItems = viewModel.collectionsPagingData.collectAsLazyPagingItems()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
+
+    var collectionToDelete by remember { mutableStateOf<Collection?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Notify when paging items are ready
+    LaunchedEffect(pagingItems) {
+        onPagingItemsReady(pagingItems)
+    }
 
     CollectionsContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
         isRefreshing = isRefreshing,
+        snackbarHostState = snackbarHostState,
         onCollectionClick = onCollectionClick,
         onAddCollectionClick = onAddCollectionClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
+        onEditCollection = onEditCollection,
+        onDeleteCollection = { collection -> collectionToDelete = collection },
         onRefresh = {
             viewModel.refresh()
             pagingItems.refresh()
@@ -76,6 +97,47 @@ fun CollectionsScreen(
             viewModel.onRefreshComplete()
         }
     }
+
+    LaunchedEffect(deleteState) {
+        when (val state = deleteState) {
+            is CollectionsViewModel.DeleteState.Success -> {
+                pagingItems.refresh()
+                snackbarHostState.showSnackbar("Collection deleted successfully")
+                viewModel.clearDeleteState()
+            }
+
+            is CollectionsViewModel.DeleteState.Error -> {
+                snackbarHostState.showSnackbar("Error: ${state.message}")
+                viewModel.clearDeleteState()
+            }
+
+            else -> {}
+        }
+    }
+
+    // Delete confirmation dialog
+    collectionToDelete?.let { collection ->
+        AlertDialog(
+            onDismissRequest = { collectionToDelete = null },
+            title = { Text("Delete Collection") },
+            text = { Text("Are you sure you want to delete \"${collection.name}\"? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteCollection(collection.id)
+                        collectionToDelete = null
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { collectionToDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,9 +146,12 @@ private fun CollectionsContent(
     pagingItems: LazyPagingItems<Collection>,
     searchQuery: String,
     isRefreshing: Boolean,
+    snackbarHostState: SnackbarHostState,
     onCollectionClick: (String, String) -> Unit,
     onAddCollectionClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
+    onEditCollection: (Collection) -> Unit,
+    onDeleteCollection: (Collection) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -114,6 +179,7 @@ private fun CollectionsContent(
                 )
             }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.systemBars
     ) { paddingValues ->
@@ -130,7 +196,9 @@ private fun CollectionsContent(
                 isRefreshing && pagingItems.itemCount > 0 -> {
                     CollectionsPagingList(
                         pagingItems = pagingItems,
-                        onCollectionClick = onCollectionClick
+                        onCollectionClick = onCollectionClick,
+                        onEditCollection = onEditCollection,
+                        onDeleteCollection = onDeleteCollection
                     )
                 }
 
@@ -167,7 +235,9 @@ private fun CollectionsContent(
                         else -> {
                             CollectionsPagingList(
                                 pagingItems = pagingItems,
-                                onCollectionClick = onCollectionClick
+                                onCollectionClick = onCollectionClick,
+                                onEditCollection = onEditCollection,
+                                onDeleteCollection = onDeleteCollection
                             )
                         }
                     }
@@ -180,7 +250,9 @@ private fun CollectionsContent(
 @Composable
 private fun CollectionsPagingList(
     pagingItems: LazyPagingItems<Collection>,
-    onCollectionClick: (String, String) -> Unit
+    onCollectionClick: (String, String) -> Unit,
+    onEditCollection: (Collection) -> Unit,
+    onDeleteCollection: (Collection) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -200,7 +272,9 @@ private fun CollectionsPagingList(
             if (collection != null) {
                 CollectionItem(
                     collection = collection,
-                    onClick = { onCollectionClick(collection.id, collection.name) }
+                    onClick = { onCollectionClick(collection.id, collection.name) },
+                    onEditCollection = { onEditCollection(collection) },
+                    onDeleteCollection = { onDeleteCollection(collection) }
                 )
             }
         }

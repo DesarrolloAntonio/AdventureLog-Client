@@ -25,4 +25,16 @@ interface CollectionsRepository {
 
     suspend fun refreshCollections(): Either<ApiResponse, List<Collection>>
 
+    suspend fun deleteCollection(collectionId: String): Either<String, Unit>
+
+    suspend fun updateCollection(
+        collectionId: String,
+        name: String,
+        description: String,
+        isPublic: Boolean,
+        startDate: String?,
+        endDate: String?,
+        link: String?
+    ): Either<String, Collection>
+
 }

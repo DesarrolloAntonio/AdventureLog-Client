@@ -7,6 +7,7 @@ import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateCollectionRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.UpdateCollectionRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionsDTO
 import io.ktor.client.HttpClient
@@ -117,29 +118,31 @@ internal class KtorCollectionApi(
 
     override suspend fun updateCollection(
         collectionId: String,
-        name: String?,
-        description: String?,
-        isPublic: Boolean?,
+        name: String,
+        description: String,
+        isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): CollectionDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/collections/$collectionId/"
         
-        val updates = buildMap {
-            name?.let { put("name", it) }
-            description?.let { put("description", it) }
-            isPublic?.let { put("is_public", it) }
-            startDate?.let { put("start_date", it) }
-            endDate?.let { put("end_date", it) }
-        }
+        val requestBody = UpdateCollectionRequest(
+            name = name,
+            description = description,
+            isPublic = isPublic,
+            startDate = startDate,
+            endDate = endDate,
+            link = link
+        )
 
         val response = httpClient.patch(url) {
             contentType(ContentType.Application.Json)
             headers {
                 commonHeaders(session.sessionToken)
             }
-            setBody(updates)
+            setBody(requestBody)
         }
 
         if (!response.status.isSuccess()) {

@@ -13,9 +13,17 @@ class UpdateCollectionUseCase(
         description: String,
         isPublic: Boolean,
         startDate: String? = null,
-        endDate: String? = null
+        endDate: String? = null,
+        link: String? = null
     ): Either<String, Collection> {
-        // TODO: Implement collection update logic
-        return Either.Left("Not implemented yet")
+        return collectionsRepository.updateCollection(
+            collectionId = collectionId,
+            name = name,
+            description = description,
+            isPublic = isPublic,
+            startDate = startDate,
+            endDate = endDate,
+            link = link
+        )
     }
 }
