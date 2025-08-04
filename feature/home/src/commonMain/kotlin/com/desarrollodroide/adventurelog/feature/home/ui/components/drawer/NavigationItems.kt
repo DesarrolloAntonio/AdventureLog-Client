@@ -37,21 +37,18 @@ fun createNavigationItems(
             selectedIcon = Icons.Filled.Collections,
             onClick = onCollectionsClick
         ),
-        // TODO: Implement Travel feature
-        /*NavigationItem(
-            title = "Travels",
-            icon = Icons.Outlined.FlightTakeoff,
-            selectedIcon = Icons.Filled.Flight,
+        NavigationItem(
+            title = "Travel",
+            icon = Icons.Outlined.Public,
+            selectedIcon = Icons.Filled.Public,
             onClick = onTravelClick
-        ),*/
-        // TODO: Implement Map feature
-        /*NavigationItem(
+        ),
+        NavigationItem(
             title = "Map",
             icon = Icons.Outlined.Map,
             selectedIcon = Icons.Filled.Map,
-            badgeCount = 1,
             onClick = onMapClick
-        ),*/
+        ),
         // TODO: Implement Calendar feature
         /*NavigationItem(
             title = "Calendar",

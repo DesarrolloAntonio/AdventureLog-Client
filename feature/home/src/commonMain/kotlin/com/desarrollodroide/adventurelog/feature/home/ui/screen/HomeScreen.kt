@@ -39,13 +39,16 @@ import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsView
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
 import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.adventuresScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
+import com.desarrollodroide.adventurelog.feature.map.ui.screen.MapScreen
+import com.desarrollodroide.adventurelog.feature.map.viewmodel.MapViewModel
+import com.desarrollodroide.adventurelog.feature.world.navigation.worldGraph
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
@@ -73,7 +76,6 @@ import com.desarrollodroide.adventurelog.resources.main_background
 @Composable
 fun HomeScreenRoute(
     viewModel: HomeViewModel = koinViewModel(),
-    settingsViewModel: SettingsViewModel = koinViewModel(),
     onAdventureClick: (Adventure) -> Unit = { },
     onNavigateToLogin: () -> Unit = { }
 ) {
@@ -281,7 +283,7 @@ fun HomeScreenContent(
 
                                         // Arrow separator
                                         Icon(
-                                            imageVector = Icons.Default.ArrowForward,
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                             contentDescription = null,
                                             modifier = Modifier.padding(horizontal = 4.dp)
                                                 .width(12.dp),
@@ -422,12 +424,19 @@ fun HomeScreenContent(
                             )
                         }
 
-                        composable(NavigationRoutes.Travel.route) {
-                            PlaceholderScreen("Travel")
-                        }
+                        worldGraph(navController)
 
                         composable(NavigationRoutes.Map.route) {
-                            PlaceholderScreen("Map")
+                            val mapViewModel = koinViewModel<MapViewModel>()
+                            MapScreen(
+                                viewModel = mapViewModel,
+                                onAdventureClick = { adventureId ->
+                                    // TODO: Navigate to adventure detail with adventureId
+                                },
+                                onAddAdventureClick = {
+                                    navController.navigate(NavigationRoutes.Adventures.add)
+                                }
+                            )
                         }
 
                         composable(NavigationRoutes.Calendar.route) {
