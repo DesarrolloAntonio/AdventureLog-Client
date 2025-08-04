@@ -61,6 +61,8 @@ kotlin {
             implementation(projects.feature.detail)
             implementation(projects.feature.ui)
             implementation(projects.feature.collections)
+            implementation(projects.feature.world)
+            implementation(projects.feature.map)
             implementation(projects.core.model)
 
             implementation(compose.material3)

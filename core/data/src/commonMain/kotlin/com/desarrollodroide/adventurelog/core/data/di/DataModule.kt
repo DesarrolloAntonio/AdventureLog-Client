@@ -14,6 +14,8 @@ import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.data.UserRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.CategoriesRepository
 import com.desarrollodroide.adventurelog.core.data.CategoriesRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.CountriesRepository
+import com.desarrollodroide.adventurelog.core.data.CountriesRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.GeocodeRepository
 import com.desarrollodroide.adventurelog.core.data.GeocodeRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.WikipediaRepository
@@ -51,6 +53,9 @@ val dataModule = module {
     }
     single<CategoriesRepository> {
         CategoriesRepositoryImpl(networkDataSource = get())
+    }
+    single<CountriesRepository> {
+        CountriesRepositoryImpl(networkDataSource = get())
     }
     single<GeocodeRepository> {
         GeocodeRepositoryImpl(

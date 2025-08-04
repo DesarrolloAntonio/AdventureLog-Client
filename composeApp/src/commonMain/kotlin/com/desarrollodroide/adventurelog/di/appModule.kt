@@ -9,8 +9,10 @@ import com.desarrollodroide.adventurelog.feature.collections.di.collectionsModul
 import com.desarrollodroide.adventurelog.feature.detail.di.detailModule
 import com.desarrollodroide.adventurelog.feature.home.di.homeModule
 import com.desarrollodroide.adventurelog.feature.login.di.loginModule
+import com.desarrollodroide.adventurelog.feature.map.di.mapModule
 import com.desarrollodroide.adventurelog.feature.settings.di.settingsModule
 import com.desarrollodroide.adventurelog.feature.ui.di.imageLoaderModule
+import com.desarrollodroide.adventurelog.feature.world.di.worldModule
 
 import io.ktor.client.HttpClient
 import org.koin.dsl.module
@@ -25,6 +27,8 @@ val appModule = module {
         settingsModule,
         detailModule,
         collectionsModule,
+        worldModule,
+        mapModule,
         imageLoaderModule
     )
     
