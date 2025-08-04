@@ -5,10 +5,14 @@ import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
 
 interface AdventureLogNetworkDataSource {
 
@@ -186,4 +190,24 @@ interface AdventureLogNetworkDataSource {
         endDate: String?,
         link: String?
     ): CollectionDTO
+    
+    /**
+     * Get all countries
+     */
+    suspend fun getCountries(): List<CountryDTO>
+    
+    /**
+     * Get regions for a specific country
+     */
+    suspend fun getRegions(countryCode: String): List<RegionDTO>
+    
+    /**
+     * Get visited regions for the current user
+     */
+    suspend fun getVisitedRegions(): List<VisitedRegionDTO>
+    
+    /**
+     * Get visited cities for the current user
+     */
+    suspend fun getVisitedCities(): List<VisitedCityDTO>
 }

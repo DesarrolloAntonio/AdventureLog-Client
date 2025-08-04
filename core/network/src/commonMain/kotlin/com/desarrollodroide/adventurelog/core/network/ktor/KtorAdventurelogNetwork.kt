@@ -5,20 +5,9 @@ import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDT
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
-import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
 import com.desarrollodroide.adventurelog.core.network.api.CollectionApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAdventureNetworkDataSource
@@ -26,12 +15,23 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCollectionApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.api.CategoryApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCategoryNetworkDataSource
-import com.desarrollodroide.adventurelog.core.network.model.response.WikipediaDescriptionResponse
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import com.desarrollodroide.adventurelog.core.network.api.UserApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorUserApi
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
+import com.desarrollodroide.adventurelog.core.network.api.ContentApi
+import com.desarrollodroide.adventurelog.core.network.api.CountriesApi
+import com.desarrollodroide.adventurelog.core.network.api.GeocodingApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorContentApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCountriesApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorGeocodingApi
+import com.desarrollodroide.adventurelog.core.network.api.AuthApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
 
 class KtorAdventurelogNetwork(
     private val adventurelogClient: HttpClient
@@ -43,6 +43,17 @@ class KtorAdventurelogNetwork(
 
     private var sessionToken: String? = null
     private var baseUrl: String? = null
+    
+    private val authDataSource: AuthApi by lazy {
+        KtorAuthApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            onSessionTokenReceived = { token ->
+                sessionToken = token
+            },
+            json = json
+        )
+    }
     
     private val adventureDataSource: AdventureApi by lazy {
         KtorAdventureNetworkDataSource(
@@ -75,10 +86,30 @@ class KtorAdventurelogNetwork(
             json = json
         )
     }
+    
+    private val countriesDataSource: CountriesApi by lazy {
+        KtorCountriesApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+    
+    private val geocodingDataSource: GeocodingApi by lazy {
+        KtorGeocodingApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+    
+    private val contentDataSource: ContentApi by lazy {
+        KtorContentApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
 
     companion object {
-        private const val LOGIN_ENDPOINT = "auth/browser/v1/auth/login"
-        private const val USER_DETAILS_ENDPOINT = "api/user/details/"
+        // Constants moved to respective DataSource implementations
     }
 
     override fun initializeFromSession(
@@ -108,115 +139,20 @@ class KtorAdventurelogNetwork(
         password: String
     ): UserDetailsDTO {
         baseUrl = url.trimEnd('/')
-        val loginUrl = "$baseUrl/$LOGIN_ENDPOINT"
-        logger.d { "Login URL: $loginUrl" }
-
-        val response = adventurelogClient.post(loginUrl) {
-            contentType(ContentType.Application.Json)
-            headers {
-                append(HttpHeaders.Accept, "application/json")
-                append("X-Is-Mobile", "true")
-                append("Referer", baseUrl ?: "")
-            }
-            setBody(LoginRequest(
-                username = username,
-                password = password
-            ))
-        }
-
-        logger.d { "Login response status: ${response.status}" }
-        logger.d { "Login response headers: ${response.headers.entries()}" }
-
-        if (response.status.isSuccess()) {
-            val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
-            logger.d { "Cookies from login response: $cookies" }
-
-            for (cookie in cookies) {
-                if (cookie.contains("sessionid=")) {
-                    val sessionidPattern = Regex("sessionid=([^;]+)")
-                    val matchResult = sessionidPattern.find(cookie)
-                    sessionToken = matchResult?.groupValues?.get(1)
-                    logger.d { "Extracted sessionId from cookies: $sessionToken" }
-                }
-            }
-
-            if (sessionToken == null) {
-                logger.w { "No session token found in cookies" }
-            }
-
-            val responseBody = response.body<String>()
-            logger.d { "Login response body: $responseBody" }
-
-            val loginResponse = json.decodeFromString<LoginResponse>(responseBody)
-
-            logger.d { "Login successful for user: ${loginResponse.data.user.username}" }
-
-            return UserDetailsDTO(
-                id = loginResponse.data.user.id,
-                username = loginResponse.data.user.username,
-                email = loginResponse.data.user.email,
-                hasPassword = if (loginResponse.data.user.hasUsablePassword) "true" else "false",
-                sessionToken = sessionToken
-            )
-        } else {
-            try {
-                val errorBody = response.body<String>()
-                logger.e { "Login failed with status: ${response.status}. Error body: $errorBody" }
-            } catch (e: Exception) {
-                logger.e { "Login failed with status: ${response.status}. Could not read error body." }
-            }
-
-            throw HttpException(
-                response.status.value,
-                "Login failed with status: ${response.status}"
-            )
-        }
+        // Initialize the session info before calling login
+        // The authDataSource will use the sessionProvider to get the baseUrl
+        
+        val userDetails = authDataSource.login(username, password)
+        
+        // The session token is already updated via the onSessionTokenReceived callback
+        logger.d { "Login completed successfully for user: ${userDetails.username}" }
+        
+        return userDetails
     }
 
     override suspend fun getUserDetails(): UserDetailsDTO {
-        try {
-            if (baseUrl == null) {
-                logger.e { "Base URL is not initialized, login must be called first" }
-                throw IllegalStateException("Base URL is not initialized, login must be called first")
-            }
-
-            val url = "$baseUrl/$USER_DETAILS_ENDPOINT"
-            logger.d { "Fetching user details from URL: $url" }
-
-            val response = adventurelogClient.get(url) {
-                headers {
-                    append(HttpHeaders.Accept, "application/json")
-                    append("X-Is-Mobile", "true")
-
-                    sessionToken?.let { token ->
-                        append("X-Session-Token", token)
-                        logger.d { "Using X-Session-Token for authentication: $token" }
-                    }
-
-                    if (sessionToken == null) {
-                        logger.w { "No authentication token available for request" }
-                    }
-                }
-            }
-
-            logger.d { "User details response status: ${response.status}" }
-            logger.d { "User details response headers: ${response.headers.entries()}" }
-
-            if (response.status.isSuccess()) {
-                val userDetails = response.body<UserDetailsDTO>()
-                logger.d { "Successfully fetched user details: ${userDetails.username}" }
-                return userDetails
-            } else {
-                logger.e { "Failed to fetch user details with status: ${response.status}" }
-                throw HttpException(
-                    response.status.value,
-                    "Failed to fetch user details with status: ${response.status}"
-                )
-            }
-        } catch (e: Exception) {
-            logger.e(e) { "Exception while fetching user details: ${e.message}" }
-            throw e
-        }
+        ensureInitialized()
+        return userDataSource.getUserDetails()
     }
 
     override suspend fun getAdventures(
@@ -334,52 +270,14 @@ class KtorAdventurelogNetwork(
         name: String
     ): String {
         ensureInitialized()
-        
-        val url = "$baseUrl/api/generate/desc/"
-        logger.d { "Generating description for: $name" }
-        
-        val response = adventurelogClient.get(url) {
-            headers {
-                append(HttpHeaders.Accept, "application/json")
-                sessionToken?.let { token ->
-                    append("X-Session-Token", token)
-                }
-            }
-            url {
-                parameters.append("name", name)
-            }
-        }
-        
-        val wikipediaResponse = response.body<WikipediaDescriptionResponse>()
-        return wikipediaResponse.extract ?: throw Exception("No description found")
+        return contentDataSource.generateDescription(name)
     }
     
     override suspend fun searchLocations(
         query: String
     ): List<GeocodeSearchResultDTO> {
         ensureInitialized()
-        
-        val url = "$baseUrl/api/reverse-geocode/search/"
-        logger.d { "Searching locations for query: $query" }
-        
-        val response = adventurelogClient.get(url) {
-            headers {
-                append(HttpHeaders.Accept, "application/json")
-                sessionToken?.let { token ->
-                    append("X-Session-Token", token)
-                }
-            }
-            url {
-                parameters.append("query", query)
-            }
-        }
-        
-        if (response.status.isSuccess()) {
-            return response.body<List<GeocodeSearchResultDTO>>()
-        } else {
-            logger.e { "Failed to search locations with status: ${response.status}" }
-            return emptyList()
-        }
+        return geocodingDataSource.searchLocations(query)
     }
     
     override suspend fun reverseGeocode(
@@ -387,32 +285,7 @@ class KtorAdventurelogNetwork(
         longitude: Double
     ): ReverseGeocodeResultDTO {
         ensureInitialized()
-        
-        val url = "$baseUrl/api/reverse-geocode/reverse_geocode/"
-        logger.d { "Reverse geocoding for lat: $latitude, lon: $longitude" }
-        
-        val response = adventurelogClient.get(url) {
-            headers {
-                append(HttpHeaders.Accept, "application/json")
-                sessionToken?.let { token ->
-                    append("X-Session-Token", token)
-                }
-            }
-            url {
-                parameters.append("lat", latitude.toString())
-                parameters.append("lon", longitude.toString())
-            }
-        }
-        
-        if (response.status.isSuccess()) {
-            return response.body<ReverseGeocodeResultDTO>()
-        } else {
-            logger.e { "Failed to reverse geocode with status: ${response.status}" }
-            throw HttpException(
-                response.status.value,
-                "Failed to reverse geocode with status: ${response.status}"
-            )
-        }
+        return geocodingDataSource.reverseGeocode(latitude, longitude)
     }
     
     override suspend fun getUserStats(
@@ -480,5 +353,25 @@ class KtorAdventurelogNetwork(
             endDate = endDate,
             link = link
         )
+    }
+    
+    override suspend fun getCountries(): List<CountryDTO> {
+        ensureInitialized()
+        return countriesDataSource.getCountries()
+    }
+    
+    override suspend fun getRegions(countryCode: String): List<RegionDTO> {
+        ensureInitialized()
+        return countriesDataSource.getRegions(countryCode)
+    }
+    
+    override suspend fun getVisitedRegions(): List<VisitedRegionDTO> {
+        ensureInitialized()
+        return countriesDataSource.getVisitedRegions()
+    }
+    
+    override suspend fun getVisitedCities(): List<VisitedCityDTO> {
+        ensureInitialized()
+        return countriesDataSource.getVisitedCities()
     }
 }
