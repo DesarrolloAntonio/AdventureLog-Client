@@ -65,7 +65,7 @@ fun HomeDrawer(
     // Main drawer with content and animations
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = true,
+        gesturesEnabled = currentScreen != CurrentScreen.MAP, // Disable gestures on map screen
         drawerContent = {
             DrawerContent(
                 userName = userName,

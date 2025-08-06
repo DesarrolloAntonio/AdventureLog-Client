@@ -22,5 +22,8 @@ data class Adventure(
     val visits: List<Visit>,
     val isVisited: Boolean,
     val category: Category?,
-    val attachments: List<Attachment>
+    val attachments: List<Attachment>,
+    val country: Country? = null,
+    val region: Region? = null,
+    val city: City? = null
 )

@@ -22,9 +22,9 @@ kotlin {
         
         androidMain.dependencies {
             implementation(libs.androidx.ui.tooling)
-            // Google Maps for Jetpack Compose
             implementation(libs.maps.compose)
             implementation(libs.play.services.maps)
+            implementation(libs.coil.compose)
         }
     }
 }
