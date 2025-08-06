@@ -35,12 +35,10 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeD
 import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
-import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
-import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsContent
 import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.adventuresScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
-import com.desarrollodroide.adventurelog.feature.map.ui.screen.MapScreen
-import com.desarrollodroide.adventurelog.feature.map.viewmodel.MapViewModel
+import com.desarrollodroide.adventurelog.feature.map.navigation.mapScreen
+import com.desarrollodroide.adventurelog.feature.settings.navigation.settingsScreen
 import com.desarrollodroide.adventurelog.feature.world.navigation.worldGraph
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
@@ -398,46 +396,24 @@ fun HomeScreenContent(
                             navController = navController
                         )
 
-                        composable(
-                            route = NavigationRoutes.Settings.route,
-                            // Settings appears from bottom for a distinctive style
-                            enterTransition = NavigationAnimations.enterTransitionVertical,
-                            exitTransition = NavigationAnimations.exitTransitionVertical,
-                        ) {
-                            val settingsViewModel = koinViewModel<SettingsViewModel>()
-                            val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
-                            SettingsContent(
-                                compactView = compactView,
-                                onCompactViewChanged = settingsViewModel::setCompactView,
-                                onLogout = onLogout,
-                                onNavigateToSourceCode = { /* TODO */ },
-                                onNavigateToTermsOfUse = { /* TODO */ },
-                                onNavigateToPrivacyPolicy = { /* TODO */ },
-                                onNavigateToLogs = { /* TODO */ },
-                                onViewLastCrash = { /* TODO */ },
-                                themeMode = settingsViewModel.themeMode,
-                                onThemeModeChanged = settingsViewModel::setThemeMode,
-                                useDynamicColors = settingsViewModel.useDynamicColors,
-                                onDynamicColorsChanged = settingsViewModel::setUseDynamicColors,
-                                goToLogin = { /* TODO */ },
-                                serverUrl = settingsViewModel.getServerUrl()
-                            )
-                        }
+                        settingsScreen(
+                            onLogout = onLogout,
+                            onNavigateToSourceCode = { /* TODO */ },
+                            onNavigateToTermsOfUse = { /* TODO */ },
+                            onNavigateToPrivacyPolicy = { /* TODO */ },
+                            onNavigateToLogs = { /* TODO */ },
+                            onViewLastCrash = { /* TODO */ },
+                            goToLogin = { /* TODO */ }
+                        )
 
                         worldGraph(navController)
 
-                        composable(NavigationRoutes.Map.route) {
-                            val mapViewModel = koinViewModel<MapViewModel>()
-                            MapScreen(
-                                viewModel = mapViewModel,
-                                onAdventureClick = { adventureId ->
-                                    // TODO: Navigate to adventure detail with adventureId
-                                },
-                                onAddAdventureClick = {
-                                    navController.navigate(NavigationRoutes.Adventures.add)
-                                }
-                            )
-                        }
+                        mapScreen(
+                            navController = navController,
+                            onAdventureClick = { adventureId ->
+                                // TODO: Navigate to adventure detail with adventureId
+                            }
+                        )
 
                         composable(NavigationRoutes.Calendar.route) {
                             PlaceholderScreen("Calendar")
