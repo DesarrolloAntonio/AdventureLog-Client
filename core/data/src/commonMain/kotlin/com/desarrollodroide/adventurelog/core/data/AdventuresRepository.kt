@@ -27,6 +27,8 @@ interface AdventuresRepository {
     suspend fun getAdventures(
         page: Int, pageSize: Int
     ): Either<ApiResponse, List<Adventure>>
+    
+    suspend fun getAllAdventures(): Either<ApiResponse, List<Adventure>>
 
     suspend fun getAdventure(
         objectId: String

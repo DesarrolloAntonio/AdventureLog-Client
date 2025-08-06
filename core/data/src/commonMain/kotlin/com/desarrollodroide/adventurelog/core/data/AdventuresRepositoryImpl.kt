@@ -27,6 +27,9 @@ class AdventuresRepositoryImpl(
     private val _adventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
     override val adventuresFlow: StateFlow<List<Adventure>> = _adventuresFlow.asStateFlow()
     
+    // Separate flow for map adventures
+    private val _mapAdventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
+    
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
     
@@ -101,6 +104,34 @@ class AdventuresRepositoryImpl(
             Either.Left(ApiResponse.HttpError)
         }
     }
+    
+    override suspend fun getAllAdventures(): Either<ApiResponse, List<Adventure>> {
+        return try {
+            // Load all adventures (up to 1000) for the map
+            val adventures = networkDataSource.getAdventures(page = 1, pageSize = 1000).map { it.toDomainModel() }
+            
+            // Update the map-specific flow
+            _mapAdventuresFlow.value = adventures
+            
+            // Also update the main flow if needed
+            _adventuresFlow.value = adventures
+            
+            Either.Right(adventures)
+        } catch (e: HttpException) {
+            println("HTTP Error during getAllAdventuresForMap: ${e.code}")
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            println("IO Error during getAllAdventuresForMap: ${e.message}")
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            println("Unexpected error during getAllAdventuresForMap: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
 
     override suspend fun getAdventure(objectId: String): Either<ApiResponse, Adventure> {
         return try {
@@ -171,7 +202,9 @@ class AdventuresRepositoryImpl(
 
     override suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>> {
         return try {
-            val adventures = networkDataSource.getAdventures(1, 10).map { it.toDomainModel() }
+            // Load a large page to get all adventures for the map
+            // This is called by MapViewModel which needs all adventures
+            val adventures = networkDataSource.getAdventures(1, 1000).map { it.toDomainModel() }
             _adventuresFlow.value = adventures
             Either.Right(adventures)
         } catch (e: HttpException) {
