@@ -61,7 +61,16 @@ data class AdventureDTO(
     val category: CategoryDTO? = null,
 
     @SerialName("attachments")
-    val attachments: List<AttachmentDTO>? = null
+    val attachments: List<AttachmentDTO>? = null,
+    
+    @SerialName("country")
+    val country: CountryDTO? = null,
+    
+    @SerialName("region")
+    val region: RegionDTO? = null,
+    
+    @SerialName("city")
+    val city: CityDTO? = null
 )
 
 fun AdventureDTO.toDomainModel(): Adventure = Adventure(
@@ -83,5 +92,8 @@ fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     visits = visits?.map { it.toDomainModel() } ?: emptyList(),
     isVisited = isVisited ?: false,
     category = category?.toDomainModel(),
-    attachments = attachments?.map { it.toDomainModel() } ?: emptyList()
+    attachments = attachments?.map { it.toDomainModel() } ?: emptyList(),
+    country = country?.toDomainModel(),
+    region = region?.toDomainModel(),
+    city = city?.toDomainModel()
 )
