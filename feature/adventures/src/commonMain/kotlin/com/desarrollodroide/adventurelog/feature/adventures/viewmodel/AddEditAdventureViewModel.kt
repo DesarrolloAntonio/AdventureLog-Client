@@ -3,9 +3,9 @@ package com.desarrollodroide.adventurelog.feature.adventures.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.CreateAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.UpdateAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventureUseCase
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,10 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
-import com.desarrollodroide.adventurelog.core.domain.GenerateDescriptionUseCase
-import com.desarrollodroide.adventurelog.core.domain.SearchLocationsUseCase
-import com.desarrollodroide.adventurelog.core.domain.ReverseGeocodeUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GenerateDescriptionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SearchLocationsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ReverseGeocodeUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResult
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult

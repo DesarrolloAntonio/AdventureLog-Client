@@ -4,6 +4,7 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData

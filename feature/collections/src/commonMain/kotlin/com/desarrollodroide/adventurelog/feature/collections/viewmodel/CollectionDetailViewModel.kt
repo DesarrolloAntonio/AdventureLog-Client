@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.GetCollectionDetailUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

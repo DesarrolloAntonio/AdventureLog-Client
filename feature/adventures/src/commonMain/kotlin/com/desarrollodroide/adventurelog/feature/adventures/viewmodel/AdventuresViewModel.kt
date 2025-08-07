@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import app.cash.paging.PagingData
 import app.cash.paging.cachedIn
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.GetAdventuresPagingUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
-import com.desarrollodroide.adventurelog.core.domain.DeleteAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.AdventureFilters

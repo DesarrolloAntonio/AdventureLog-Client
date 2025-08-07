@@ -1,15 +1,19 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
+import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.mappers.toUserStats
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 /**
@@ -160,17 +164,25 @@ class UserRepositoryImpl(
         clearUserSession()
     }
     
-    override suspend fun getUserStats(username: String): UserStats {
+    override suspend fun getUserStats(username: String): Either<ApiResponse, UserStats> {
         return try {
             val statsDTO = networkDataSource.getUserStats(username)
             val stats = statsDTO.toUserStats()
             // Cache the stats in the flow
             userStatsFlow.value = stats
-            stats
+            Either.Right(stats)
+        } catch (e: HttpException) {
+            println("HTTP Error getting user stats: ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            println("IO Error getting user stats: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Error getting user stats: ${e.message}")
-            // Return default stats on error
-            UserStats()
+            println("Unexpected error getting user stats: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
     

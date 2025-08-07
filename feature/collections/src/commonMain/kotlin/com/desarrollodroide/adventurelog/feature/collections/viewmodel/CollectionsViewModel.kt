@@ -6,8 +6,8 @@ import app.cash.paging.PagingData
 import app.cash.paging.cachedIn
 import app.cash.paging.filter
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.GetCollectionsPagingUseCase
-import com.desarrollodroide.adventurelog.core.domain.DeleteCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCollectionUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

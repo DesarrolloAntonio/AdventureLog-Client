@@ -4,6 +4,7 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.CollectionsRepository
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

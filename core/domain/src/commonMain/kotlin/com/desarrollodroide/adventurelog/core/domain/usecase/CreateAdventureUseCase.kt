@@ -1,5 +1,6 @@
-package com.desarrollodroide.adventurelog.core.domain
+package com.desarrollodroide.adventurelog.core.domain.usecase
 
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Adventure
@@ -28,7 +29,7 @@ class CreateAdventureUseCase(
         }
         
         // Create the adventure
-        return adventuresRepository.createAdventure(
+        return when (val result = adventuresRepository.createAdventure(
             name = name,
             description = description,
             category = category,
@@ -40,6 +41,15 @@ class CreateAdventureUseCase(
             isPublic = isPublic,
             visits = visits,
             activityTypes = tags
-        )
+        )) {
+            is Either.Left -> {
+                when (result.value) {
+                    is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
+                    is ApiResponse.HttpError -> Either.Left("Failed to create adventure. Please try again.")
+                    is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
+                }
+            }
+            is Either.Right -> Either.Right(result.value)
+        }
     }
 }

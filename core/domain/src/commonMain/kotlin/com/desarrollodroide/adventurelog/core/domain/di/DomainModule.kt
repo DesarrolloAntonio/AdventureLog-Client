@@ -3,29 +3,30 @@ package com.desarrollodroide.adventurelog.core.domain.di
 import com.desarrollodroide.adventurelog.core.data.di.dataModule
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
-import com.desarrollodroide.adventurelog.core.domain.LoginUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetAdventuresUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetAdventuresPagingUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetAllAdventures
-import com.desarrollodroide.adventurelog.core.domain.GetCollectionsUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetCollectionsPagingUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetCollectionDetailUseCase
-import com.desarrollodroide.adventurelog.core.domain.InitializeSessionUseCase
-import com.desarrollodroide.adventurelog.core.domain.SaveSessionUseCase
-import com.desarrollodroide.adventurelog.core.domain.LogoutUseCase
-import com.desarrollodroide.adventurelog.core.domain.RememberMeCredentialsUseCase
-import com.desarrollodroide.adventurelog.core.domain.CreateAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.UpdateAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.DeleteAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.CreateCollectionUseCase
-import com.desarrollodroide.adventurelog.core.domain.UpdateCollectionUseCase
-import com.desarrollodroide.adventurelog.core.domain.DeleteCollectionUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetCategoriesUseCase
-import com.desarrollodroide.adventurelog.core.domain.GenerateDescriptionUseCase
-import com.desarrollodroide.adventurelog.core.domain.SearchLocationsUseCase
-import com.desarrollodroide.adventurelog.core.domain.GetUserStatsUseCase
-import com.desarrollodroide.adventurelog.core.domain.ReverseGeocodeUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GenerateDescriptionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SearchLocationsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ReverseGeocodeUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImageUseCase
 
 val domainModule = module {
@@ -35,7 +36,7 @@ val domainModule = module {
     factoryOf(::GetAdventuresUseCase)
     factoryOf(::GetAdventureUseCase)
     factoryOf(::GetAdventuresPagingUseCase)
-    factoryOf(::GetAllAdventures)
+    factoryOf(::GetAllAdventuresUseCase)
     factoryOf(::GetCollectionsUseCase)
     factoryOf(::GetCollectionsPagingUseCase)
     factoryOf(::GetCollectionDetailUseCase)
@@ -54,5 +55,6 @@ val domainModule = module {
     factoryOf(::SearchLocationsUseCase)
     factoryOf(::ReverseGeocodeUseCase)
     factoryOf(::GetUserStatsUseCase)
+    factoryOf(::ObserveUserStatsUseCase)
     factoryOf(::SearchWikipediaImageUseCase)
 }

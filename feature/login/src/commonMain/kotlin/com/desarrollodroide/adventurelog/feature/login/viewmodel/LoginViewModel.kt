@@ -3,10 +3,10 @@ package com.desarrollodroide.adventurelog.feature.login.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.LoginUseCase
-import com.desarrollodroide.adventurelog.core.domain.InitializeSessionUseCase
-import com.desarrollodroide.adventurelog.core.domain.SaveSessionUseCase
-import com.desarrollodroide.adventurelog.core.domain.RememberMeCredentialsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import isValidUrl

@@ -1,11 +1,11 @@
 package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

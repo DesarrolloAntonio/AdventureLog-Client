@@ -46,17 +46,17 @@ interface AdventuresRepository {
         isPublic: Boolean,
         visits: List<VisitFormData>,
         activityTypes: List<String> = emptyList()
-    ): Either<String, Adventure>
+    ): Either<ApiResponse, Adventure>
 
     suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>>
 
     suspend fun generateDescription(
         name: String
-    ): Either<String, String>
+    ): Either<ApiResponse, String>
 
     suspend fun deleteAdventure(
         adventureId: String
-    ): Either<String, Unit>
+    ): Either<ApiResponse, Unit>
     
     suspend fun updateAdventure(
         adventureId: String,
@@ -70,5 +70,5 @@ interface AdventuresRepository {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>
-    ): Either<String, Adventure>
+    ): Either<ApiResponse, Adventure>
 }

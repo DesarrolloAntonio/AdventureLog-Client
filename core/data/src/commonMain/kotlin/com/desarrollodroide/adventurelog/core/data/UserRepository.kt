@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
+import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
@@ -70,9 +72,9 @@ interface UserRepository {
     /**
      * Get user statistics
      * @param username Username to get stats for
-     * @return UserStats with adventure counts, visited places, etc.
+     * @return Either with ApiResponse error or UserStats with adventure counts, visited places, etc.
      */
-    suspend fun getUserStats(username: String): UserStats
+    suspend fun getUserStats(username: String): Either<ApiResponse, UserStats>
     
     /**
      * Gets user stats as a Flow (cached)

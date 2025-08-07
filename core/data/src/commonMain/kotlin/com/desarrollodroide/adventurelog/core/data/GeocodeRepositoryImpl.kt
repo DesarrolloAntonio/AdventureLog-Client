@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.core.data
 
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
@@ -17,7 +18,7 @@ class GeocodeRepositoryImpl(
     
     private val logger = Logger.withTag("GeocodeRepository")
     
-    override suspend fun searchLocations(query: String): Either<String, List<GeocodeSearchResult>> =
+    override suspend fun searchLocations(query: String): Either<ApiResponse, List<GeocodeSearchResult>> =
         withContext(ioDispatcher) {
             try {
                 logger.d { "Searching locations for query: $query" }
@@ -38,20 +39,23 @@ class GeocodeRepositoryImpl(
                 Either.Right(domainResults)
             } catch (e: HttpException) {
                 logger.e { "HTTP Error searching locations: ${e.code}" }
-                Either.Left("Failed to search locations: HTTP ${e.code}")
+                when (e.code) {
+                    401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                    else -> Either.Left(ApiResponse.HttpError)
+                }
             } catch (e: IOException) {
                 logger.e { "IO Error searching locations: ${e.message}" }
-                Either.Left("Network error: ${e.message}")
+                Either.Left(ApiResponse.IOException)
             } catch (e: Exception) {
                 logger.e(e) { "Unexpected error searching locations: ${e.message}" }
-                Either.Left("Unexpected error: ${e.message}")
+                Either.Left(ApiResponse.HttpError)
             }
         }
     
     override suspend fun reverseGeocode(
         latitude: Double,
         longitude: Double
-    ): Either<String, ReverseGeocodeResult> = withContext(ioDispatcher) {
+    ): Either<ApiResponse, ReverseGeocodeResult> = withContext(ioDispatcher) {
         try {
             logger.d { "Reverse geocoding for lat: $latitude, lon: $longitude" }
             val result = networkDataSource.reverseGeocode(latitude, longitude)
@@ -71,13 +75,16 @@ class GeocodeRepositoryImpl(
             Either.Right(domainResult)
         } catch (e: HttpException) {
             logger.e { "HTTP Error reverse geocoding: ${e.code}" }
-            Either.Left("Failed to get location details: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             logger.e { "IO Error reverse geocoding: ${e.message}" }
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e(e) { "Unexpected error reverse geocoding: ${e.message}" }
-            Either.Left("Unexpected error: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
 }

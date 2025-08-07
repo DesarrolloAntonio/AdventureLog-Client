@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.core.domain
+package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.common.ApiResponse

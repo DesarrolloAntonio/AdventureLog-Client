@@ -21,11 +21,11 @@ interface CollectionsRepository {
         isPublic: Boolean,
         startDate: String?,
         endDate: String?
-    ): Either<String, Collection>
+    ): Either<ApiResponse, Collection>
 
     suspend fun refreshCollections(): Either<ApiResponse, List<Collection>>
 
-    suspend fun deleteCollection(collectionId: String): Either<String, Unit>
+    suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit>
 
     suspend fun updateCollection(
         collectionId: String,
@@ -35,6 +35,6 @@ interface CollectionsRepository {
         startDate: String?,
         endDate: String?,
         link: String?
-    ): Either<String, Collection>
+    ): Either<ApiResponse, Collection>
 
 }

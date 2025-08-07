@@ -3,9 +3,9 @@ package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.data.CollectionsRepository
-import com.desarrollodroide.adventurelog.core.domain.GetCollectionDetailUseCase
-import com.desarrollodroide.adventurelog.core.domain.UpdateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCollectionUseCase
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +21,7 @@ data class AddEditCollectionUiState(
 
 class AddEditCollectionViewModel(
     private val collectionId: String?,
-    private val collectionsRepository: CollectionsRepository,
+    private val createCollectionUseCase: CreateCollectionUseCase,
     private val getCollectionDetailUseCase: GetCollectionDetailUseCase,
     private val updateCollectionUseCase: UpdateCollectionUseCase
 ) : ViewModel() {
@@ -80,7 +80,7 @@ class AddEditCollectionViewModel(
                     )
                 } else {
                     // Create new collection
-                    collectionsRepository.createCollection(
+                    createCollectionUseCase(
                         name = formData.name,
                         description = formData.description,
                         isPublic = formData.isPublic,

@@ -159,7 +159,7 @@ class AdventuresRepositoryImpl(
         isPublic: Boolean,
         visits: List<VisitFormData>,
         activityTypes: List<String>
-    ): Either<String, Adventure> {
+    ): Either<ApiResponse, Adventure> {
         return try {
             val adventure = networkDataSource.createAdventure(
                 name = name,
@@ -184,13 +184,16 @@ class AdventuresRepositoryImpl(
             Either.Right(adventure)
         } catch (e: HttpException) {
             println("HTTP Error during createAdventure: ${e.code}")
-            Either.Left("Failed to create adventure: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             println("IO Error during createAdventure: ${e.message}")
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             println("Unexpected error during createAdventure: ${e.message}")
-            Either.Left("Unexpected error: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
 
@@ -219,31 +222,30 @@ class AdventuresRepositoryImpl(
 
     override suspend fun generateDescription(
         name: String
-    ): Either<String, String> {
+    ): Either<ApiResponse, String> {
         return try {
             val description = networkDataSource.generateDescription(name)
             if (description.isBlank()) {
-                Either.Left("No description found for $name")
+                Either.Left(ApiResponse.HttpError)
             } else {
                 Either.Right(description)
             }
         } catch (e: HttpException) {
             println("HTTP Error during generateDescription: ${e.code}")
-            Either.Left("Failed to generate description: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             println("IO Error during generateDescription: ${e.message}")
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             println("Error during generateDescription: ${e.message}")
-            // Handle the "No description found" exception from the network layer
-            when (e.message) {
-                "No description found" -> Either.Left("No Wikipedia description available for \"$name\"")
-                else -> Either.Left("Failed to generate description: ${e.message}")
-            }
+            Either.Left(ApiResponse.HttpError)
         }
     }
 
-    override suspend fun deleteAdventure(adventureId: String): Either<String, Unit> {
+    override suspend fun deleteAdventure(adventureId: String): Either<ApiResponse, Unit> {
         return try {
             networkDataSource.deleteAdventure(adventureId)
             
@@ -256,13 +258,16 @@ class AdventuresRepositoryImpl(
             Either.Right(Unit)
         } catch (e: HttpException) {
             println("HTTP Error during deleteAdventure: ${e.code}")
-            Either.Left("Failed to delete adventure: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             println("IO Error during deleteAdventure: ${e.message}")
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             println("Unexpected error during deleteAdventure: ${e.message}")
-            Either.Left("Unexpected error: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
     
@@ -278,7 +283,7 @@ class AdventuresRepositoryImpl(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>
-    ): Either<String, Adventure> {
+    ): Either<ApiResponse, Adventure> {
         return try {
             val adventure = networkDataSource.updateAdventure(
                 adventureId = adventureId,
@@ -305,13 +310,16 @@ class AdventuresRepositoryImpl(
             Either.Right(adventure)
         } catch (e: HttpException) {
             println("HTTP Error during updateAdventure: ${e.code}")
-            Either.Left("Failed to update adventure: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             println("IO Error during updateAdventure: ${e.message}")
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             println("Unexpected error during updateAdventure: ${e.message}")
-            Either.Left("Unexpected error: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
 }

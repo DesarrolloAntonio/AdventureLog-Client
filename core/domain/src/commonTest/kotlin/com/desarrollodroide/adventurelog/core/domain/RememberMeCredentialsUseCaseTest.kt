@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
+import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats

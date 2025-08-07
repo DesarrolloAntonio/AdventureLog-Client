@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.core.domain
+package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.data.CollectionsRepository

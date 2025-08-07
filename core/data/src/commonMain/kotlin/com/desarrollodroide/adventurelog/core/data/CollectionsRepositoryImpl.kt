@@ -108,7 +108,7 @@ class CollectionsRepositoryImpl(
         isPublic: Boolean,
         startDate: String?,
         endDate: String?
-    ): Either<String, Collection> {
+    ): Either<ApiResponse, Collection> {
         return try {
             val collection = networkDataSource.createCollection(
                 name = name,
@@ -127,13 +127,16 @@ class CollectionsRepositoryImpl(
             Either.Right(collection)
         } catch (e: HttpException) {
             println("HTTP Error during createCollection: ${e.code}")
-            Either.Left("Failed to create collection: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             println("IO Error during createCollection: ${e.message}")
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             println("Unexpected error during createCollection: ${e.message}")
-            Either.Left("Unexpected error: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
 
@@ -158,7 +161,7 @@ class CollectionsRepositoryImpl(
         }
     }
 
-    override suspend fun deleteCollection(collectionId: String): Either<String, Unit> {
+    override suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit> {
         return try {
             networkDataSource.deleteCollection(collectionId)
             
@@ -171,13 +174,16 @@ class CollectionsRepositoryImpl(
             Either.Right(Unit)
         } catch (e: HttpException) {
             println("HTTP Error during deleteCollection: ${e.code}")
-            Either.Left("Failed to delete collection: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             println("IO Error during deleteCollection: ${e.message}")
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             println("Unexpected error during deleteCollection: ${e.message}")
-            Either.Left("Unexpected error: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
 
@@ -189,7 +195,7 @@ class CollectionsRepositoryImpl(
         startDate: String?,
         endDate: String?,
         link: String?
-    ): Either<String, Collection> {
+    ): Either<ApiResponse, Collection> {
         return try {
             val collection = networkDataSource.updateCollection(
                 collectionId = collectionId,
@@ -212,13 +218,16 @@ class CollectionsRepositoryImpl(
             Either.Right(collection)
         } catch (e: HttpException) {
             println("HTTP Error during updateCollection: ${e.code}")
-            Either.Left("Failed to update collection: HTTP ${e.code}")
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
         } catch (e: IOException) {
             println("IO Error during updateCollection: ${e.message}")
-            Either.Left("Network error: ${e.message}")
+            Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             println("Unexpected error during updateCollection: ${e.message}")
-            Either.Left("Unexpected error: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.core.domain
+package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.model.Account
