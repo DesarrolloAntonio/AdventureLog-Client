@@ -73,4 +73,10 @@ interface UserRepository {
      * @return UserStats with adventure counts, visited places, etc.
      */
     suspend fun getUserStats(username: String): UserStats
+    
+    /**
+     * Gets user stats as a Flow (cached)
+     * @return Flow of UserStats or null if not loaded
+     */
+    fun getUserStatsFlow(): Flow<UserStats?>
 }

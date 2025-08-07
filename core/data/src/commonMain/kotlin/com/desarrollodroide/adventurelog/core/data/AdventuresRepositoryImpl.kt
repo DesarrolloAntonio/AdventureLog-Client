@@ -27,9 +27,6 @@ class AdventuresRepositoryImpl(
     private val _adventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
     override val adventuresFlow: StateFlow<List<Adventure>> = _adventuresFlow.asStateFlow()
     
-    // Separate flow for map adventures
-    private val _mapAdventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
-    
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
     
@@ -109,9 +106,6 @@ class AdventuresRepositoryImpl(
         return try {
             // Load all adventures (up to 1000) for the map
             val adventures = networkDataSource.getAdventures(page = 1, pageSize = 1000).map { it.toDomainModel() }
-            
-            // Update the map-specific flow
-            _mapAdventuresFlow.value = adventures
             
             // Also update the main flow if needed
             _adventuresFlow.value = adventures

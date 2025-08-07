@@ -29,6 +29,7 @@ class UserRepositoryImpl(
     // StateFlows to observe changes
     private val rememberMeFlow = MutableStateFlow<Account?>(null)
     private val userSessionFlow = MutableStateFlow<UserDetails?>(null)
+    private val userStatsFlow = MutableStateFlow<UserStats?>(null)
 
     // Keys for storing user data
     private object Keys {
@@ -162,11 +163,18 @@ class UserRepositoryImpl(
     override suspend fun getUserStats(username: String): UserStats {
         return try {
             val statsDTO = networkDataSource.getUserStats(username)
-            statsDTO.toUserStats()
+            val stats = statsDTO.toUserStats()
+            // Cache the stats in the flow
+            userStatsFlow.value = stats
+            stats
         } catch (e: Exception) {
             println("Error getting user stats: ${e.message}")
             // Return default stats on error
             UserStats()
         }
+    }
+    
+    override fun getUserStatsFlow(): Flow<UserStats?> {
+        return userStatsFlow.asStateFlow()
     }
 }
