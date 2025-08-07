@@ -10,7 +10,7 @@ data class VisitedCityDTO(
     val id: Int,
     
     @SerialName("user_id")
-    val userId: Int,
+    val userId: String,
     
     @SerialName("city")
     val city: String,

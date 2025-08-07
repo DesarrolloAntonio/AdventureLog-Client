@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VisitedCity(
     val id: Int,
-    val userId: Int,
+    val userId: String,
     val cityId: String,
     val name: String,
     val longitude: Double?,
