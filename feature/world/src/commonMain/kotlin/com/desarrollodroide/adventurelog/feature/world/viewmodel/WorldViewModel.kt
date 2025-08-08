@@ -3,7 +3,10 @@ package com.desarrollodroide.adventurelog.feature.world.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.data.CountriesRepository
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCountriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshCountriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedCitiesUseCase
 import com.desarrollodroide.adventurelog.core.model.Country
 import com.desarrollodroide.adventurelog.feature.world.ui.state.WorldUiState
 import com.desarrollodroide.adventurelog.feature.world.ui.state.FilterMode
@@ -15,7 +18,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class WorldViewModel(
-    private val countriesRepository: CountriesRepository
+    private val getCountriesUseCase: GetCountriesUseCase,
+    private val refreshCountriesUseCase: RefreshCountriesUseCase,
+    private val getVisitedRegionsUseCase: GetVisitedRegionsUseCase,
+    private val getVisitedCitiesUseCase: GetVisitedCitiesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorldUiState())
@@ -45,7 +51,7 @@ class WorldViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
-            when (val result = countriesRepository.refreshCountries()) {
+            when (val result = refreshCountriesUseCase()) {
                 is Either.Right -> {
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -73,7 +79,7 @@ class WorldViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
-            when (val result = countriesRepository.getCountries()) {
+            when (val result = getCountriesUseCase()) {
                 is Either.Right -> {
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -101,10 +107,10 @@ class WorldViewModel(
     private fun loadVisitedData() {
         viewModelScope.launch {
             // Load visited regions
-            countriesRepository.getVisitedRegions()
+            getVisitedRegionsUseCase()
             
             // Load visited cities
-            countriesRepository.getVisitedCities()
+            getVisitedCitiesUseCase()
         }
     }
     

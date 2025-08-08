@@ -29,6 +29,9 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUse
 import com.desarrollodroide.adventurelog.core.domain.usecase.ReverseGeocodeUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCountriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshCountriesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedCitiesUseCase
 
 val domainModule = module {
     includes(dataModule)
@@ -59,4 +62,7 @@ val domainModule = module {
     factoryOf(::ObserveUserStatsUseCase)
     factoryOf(::SearchWikipediaImageUseCase)
     factoryOf(::GetVisitedRegionsUseCase)
+    factoryOf(::GetCountriesUseCase)
+    factoryOf(::RefreshCountriesUseCase)
+    factoryOf(::GetVisitedCitiesUseCase)
 }
