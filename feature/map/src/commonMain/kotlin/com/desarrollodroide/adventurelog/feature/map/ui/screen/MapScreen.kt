@@ -37,6 +37,8 @@ fun MapScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         MapContent(
             adventures = filteredAdventures,
+            visitedRegions = uiState.visitedRegions,
+            showRegions = uiState.filters.showRegions,
             isLoading = uiState.isLoading,
             error = uiState.error,
             onAdventureClick = onAdventureClick
@@ -45,14 +47,12 @@ fun MapScreen(
         ClearStatsSection(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                .padding(top = 32.dp, start = 16.dp, end = 16.dp),
             visitedCount = uiState.filters.visitedCount,
             plannedCount = uiState.filters.plannedCount,
             regionCount = uiState.filters.regionCount,
             onFilterClick = { showFilterSheet = true }
         )
-        
-
     }
     
     if (showFilterSheet) {

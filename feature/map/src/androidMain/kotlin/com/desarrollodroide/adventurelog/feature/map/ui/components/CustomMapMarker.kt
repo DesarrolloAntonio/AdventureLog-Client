@@ -53,7 +53,8 @@ fun CustomMapMarker(
             if (emoji != null) {
                 Text(
                     text = emoji,
-                    fontSize = 18.sp
+                    fontSize = 16.sp,
+                    modifier = Modifier.offset(y = (-2).dp) // Move emoji up
                 )
             } else {
                 Box(

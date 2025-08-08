@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.UIKitView
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreLocation.CLLocationCoordinate2D
 import platform.CoreLocation.CLLocationCoordinate2DMake
@@ -19,6 +20,8 @@ import platform.darwin.NSObject
 @Composable
 actual fun AdventureMapView(
     adventures: List<Adventure>,
+    visitedRegions: List<VisitedRegion>,
+    showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
     modifier: Modifier
 ) {
@@ -59,6 +62,23 @@ actual fun AdventureMapView(
                     }
                 }
                 
+                // Add region overlays if enabled
+                if (showRegions) {
+                    visitedRegions.forEach { region ->
+                        region.latitude?.let { lat ->
+                            region.longitude?.let { lng ->
+                                // Create a circle overlay for the region
+                                val coordinate = CLLocationCoordinate2DMake(lat, lng)
+                                val circle = MKCircle.circleWithCenterCoordinate(
+                                    coordinate,
+                                    radius = 50000.0 // 50km radius
+                                )
+                                addOverlay(circle)
+                            }
+                        }
+                    }
+                }
+                
                 // Fit all annotations
                 if (adventures.isNotEmpty()) {
                     showAnnotations(annotations(), animated = true)
@@ -73,6 +93,7 @@ actual fun AdventureMapView(
         update = { mapView ->
             // Update annotations if adventures change
             mapView.removeAnnotations(mapView.annotations())
+            mapView.removeOverlays(mapView.overlays())
             
             adventures.forEach { adventure ->
                 val lat = adventure.latitude?.toDoubleOrNull()
@@ -86,6 +107,22 @@ actual fun AdventureMapView(
                         coordinate = CLLocationCoordinate2DMake(lat, lng)
                     )
                     mapView.addAnnotation(annotation)
+                }
+            }
+            
+            // Add region overlays if enabled
+            if (showRegions) {
+                visitedRegions.forEach { region ->
+                    region.latitude?.let { lat ->
+                        region.longitude?.let { lng ->
+                            val coordinate = CLLocationCoordinate2DMake(lat, lng)
+                            val circle = MKCircle.circleWithCenterCoordinate(
+                                coordinate,
+                                radius = 50000.0
+                            )
+                            mapView.addOverlay(circle)
+                        }
+                    }
                 }
             }
             

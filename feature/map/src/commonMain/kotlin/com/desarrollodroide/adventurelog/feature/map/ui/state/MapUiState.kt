@@ -1,11 +1,12 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.state
 
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 
 data class MapUiState(
     val isLoading: Boolean = false,
     val adventures: List<Adventure> = emptyList(),
+    val visitedRegions: List<VisitedRegion> = emptyList(),
     val activityTypes: List<String> = emptyList(),
     val error: String? = null,
     val filters: MapFilters = MapFilters()
