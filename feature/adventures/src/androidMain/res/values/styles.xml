@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Style for EmojiPickerView with better text visibility -->
+    <style name="EmojiPickerStyle">
+        <!-- Make category text and icons more visible -->
+        <item name="colorControlNormal">#424242</item>
+        <!-- Selected category accent color -->
+        <item name="colorAccent">#6200EE</item>
+        <!-- Text color for labels like "Recently used" -->
+        <item name="android:textColorPrimary">#212121</item>
+        <item name="android:textColorSecondary">#424242</item>
+    </style>
+</resources>

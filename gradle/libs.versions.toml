@@ -12,6 +12,7 @@ androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
 coil = "3.2.0"
 compose-plugin = "1.8.2"
+emoji2-emojipicker = "1.5.0"
 filekit = "0.8.8"
 junit = "4.13.2"
 kotlin = "2.2.0-RC2"
@@ -40,6 +41,8 @@ multiplatform-paging = "3.3.0-alpha02-0.5.1"
 kotlinx-datetime = "0.6.1"
 
 [libraries]
+androidx-emoji2-bundled = { module = "androidx.emoji2:emoji2-bundled", version.ref = "emoji2-emojipicker" }
+androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version.ref = "emoji2-emojipicker" }
 androidx-lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 coil = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
