@@ -84,6 +84,11 @@ internal fun LoginScreen(
             clearErrors()
         }
     }
+    
+    // Don't show login form while checking session or navigating
+    if (loginUiState is LoginUiState.Loading || loginUiState is LoginUiState.Success) {
+        return
+    }
 
     KeyboardDismissible(
         modifier = Modifier.fillMaxSize()
@@ -101,7 +106,7 @@ internal fun LoginScreen(
                 onClickTestButton = { }
             )
 
-            // Use the reusable LoadingDialog component
+            // Use the reusable LoadingDialog component for login action
             LoadingDialog(
                 isLoading = loginUiState is LoginUiState.Loading,
                 showMessage = false
