@@ -63,7 +63,6 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AdventureListScreen(
     onAdventureClick: (Adventure, List<Collection>) -> Unit = { _, _ -> },
     onAddAdventureClick: () -> Unit = { },
-    onManageCategoriesClick: () -> Unit = { },
     onEditAdventure: (Adventure) -> Unit = { },
     collections: List<Collection> = emptyList(),
     modifier: Modifier = Modifier,
@@ -86,8 +85,14 @@ fun AdventureListScreen(
             categoriesState = categoriesState,
             onFiltersChanged = viewModel::onFiltersChanged,
             onDismiss = viewModel::hideFilters,
-            onManageCategoriesClick = onManageCategoriesClick,
-            onRetryLoadCategories = viewModel::retryLoadCategories
+            onManageCategoriesClick = {
+                // This will refresh categories after category management operations
+                viewModel.retryLoadCategories()
+            },
+            onRetryLoadCategories = viewModel::retryLoadCategories,
+            onAddCategory = viewModel::addCategory,
+            onUpdateCategory = viewModel::updateCategory,
+            onDeleteCategory = viewModel::deleteCategory
         )
     }
 

@@ -32,7 +32,6 @@ import org.koin.core.parameter.parametersOf
  */
 fun NavGraphBuilder.adventuresScreen(
     onAdventureClick: (Adventure, List<Collection>) -> Unit,
-    onManageCategoriesClick: () -> Unit,
     navController: NavController,
     collections: List<Collection> = emptyList()
 ) {
@@ -49,7 +48,6 @@ fun NavGraphBuilder.adventuresScreen(
             onAddAdventureClick = {
                 navController.navigate(NavigationRoutes.Adventures.add)
             },
-            onManageCategoriesClick = onManageCategoriesClick,
             onEditAdventure = { adventure ->
                 val adventureJson = json.encodeToString(adventure)
                 navController.navigate(NavigationRoutes.Adventures.createEditRoute(adventure.id, adventureJson))

@@ -190,4 +190,34 @@ class AdventuresViewModel(
     fun clearDeleteState() {
         _deleteState.value = DeleteState.Idle
     }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun addCategory(name: String, icon: String) {
+        // TODO: Implement when backend API is ready
+        // This should call a CreateCategoryUseCase
+        viewModelScope.launch {
+            // For now, just reload categories to show any changes
+            loadCategories()
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun updateCategory(category: Category) {
+        // TODO: Implement when backend API is ready
+        // This should call an UpdateCategoryUseCase
+        viewModelScope.launch {
+            // For now, just reload categories to show any changes
+            loadCategories()
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun deleteCategory(categoryId: String) {
+        // TODO: Implement when backend API is ready
+        // This should call a DeleteCategoryUseCase
+        viewModelScope.launch {
+            // For now, just reload categories to show any changes
+            loadCategories()
+        }
+    }
 }
