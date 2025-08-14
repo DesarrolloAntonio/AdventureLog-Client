@@ -32,6 +32,21 @@ class GetAdventuresUseCaseTest {
             return flowOf(PagingData.empty())
         }
 
+        override fun getAdventuresPagingDataFiltered(
+            categoryNames: List<String>?,
+            sortBy: String?,
+            sortOrder: String?,
+            isVisited: Boolean?,
+            searchQuery: String?,
+            includeCollections: Boolean
+        ): Flow<PagingData<Adventure>> {
+            return flowOf(PagingData.empty())
+        }
+
+        override suspend fun getAllAdventures(): Either<ApiResponse, List<Adventure>> {
+            return getAdventuresResult
+        }
+
         override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>> {
             getAdventuresCallCount++
             lastPageParam = page
@@ -55,7 +70,7 @@ class GetAdventuresUseCaseTest {
             isPublic: Boolean,
             visits: List<VisitFormData>,
             activityTypes: List<String>
-        ): Either<String, Adventure> {
+        ): Either<ApiResponse, Adventure> {
             throw NotImplementedError()
         }
 
@@ -63,8 +78,28 @@ class GetAdventuresUseCaseTest {
             return getAdventuresResult
         }
 
-        override suspend fun generateDescription(name: String): Either<String, String> {
+        override suspend fun generateDescription(name: String): Either<ApiResponse, String> {
             return Either.Right("Generated description for $name")
+        }
+
+        override suspend fun deleteAdventure(adventureId: String): Either<ApiResponse, Unit> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun updateAdventure(
+            adventureId: String,
+            name: String,
+            description: String,
+            category: Category?,
+            rating: Double,
+            link: String,
+            location: String,
+            latitude: String?,
+            longitude: String?,
+            isPublic: Boolean,
+            tags: List<String>
+        ): Either<ApiResponse, Adventure> {
+            throw NotImplementedError()
         }
     }
 

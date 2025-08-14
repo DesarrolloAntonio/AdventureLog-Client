@@ -52,7 +52,7 @@ fun ManageCategoriesDialog(
     categoriesState: CategoriesState,
     onDismiss: () -> Unit,
     onAddCategory: (name: String, icon: String) -> Unit,
-    onEditCategory: (Category) -> Unit,
+    onEditCategory: (categoryId: String, name: String, icon: String) -> Unit,
     onDeleteCategory: (String) -> Unit,
     onRetryLoadCategories: () -> Unit
 ) {
@@ -209,7 +209,7 @@ fun ManageCategoriesDialog(
             category = category,
             onDismiss = { categoryToEdit = null },
             onSave = { name, icon ->
-                onEditCategory(category.copy(displayName = name, icon = icon))
+                onEditCategory(category.id, name, icon)
                 categoryToEdit = null
             }
         )

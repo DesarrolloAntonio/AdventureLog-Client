@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.core.domain
 
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
+import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.model.Account
@@ -61,8 +63,12 @@ class RememberMeCredentialsUseCaseTest {
             throw NotImplementedError()
         }
 
-        override suspend fun getUserStats(username: String): UserStats {
-            return UserStats()
+        override suspend fun getUserStats(username: String): Either<ApiResponse, UserStats> {
+            return Either.Right(UserStats())
+        }
+
+        override fun getUserStatsFlow(): Flow<UserStats?> {
+            throw NotImplementedError()
         }
     }
 

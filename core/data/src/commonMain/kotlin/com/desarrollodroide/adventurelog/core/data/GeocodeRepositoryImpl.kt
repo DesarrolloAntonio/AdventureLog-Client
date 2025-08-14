@@ -5,14 +5,14 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
 
 class GeocodeRepositoryImpl(
-    private val networkDataSource: AdventureLogNetworkDataSource,
+    private val networkDataSource: AdventureLogNetwork,
     private val ioDispatcher: CoroutineDispatcher
 ) : GeocodeRepository {
     

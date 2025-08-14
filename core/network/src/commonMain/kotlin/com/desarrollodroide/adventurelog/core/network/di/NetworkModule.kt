@@ -1,8 +1,8 @@
 package com.desarrollodroide.adventurelog.core.network.di
 
 import com.desarrollodroide.adventurelog.BuildConfig
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
-import com.desarrollodroide.adventurelog.core.network.ktor.KtorAdventurelogNetwork
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
+import com.desarrollodroide.adventurelog.core.network.ktor.KtorAdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.KtorWikipediaNetwork
 import io.ktor.client.HttpClient
@@ -17,8 +17,8 @@ import org.koin.dsl.module
 const val KEY = "key"
 
 val networkModule = module {
-    single<AdventureLogNetworkDataSource> {
-        KtorAdventurelogNetwork(
+    single<AdventureLogNetwork> {
+        KtorAdventureLogNetwork(
             adventurelogClient = get(named(BuildConfig.APP_NAME)),
         )
     }

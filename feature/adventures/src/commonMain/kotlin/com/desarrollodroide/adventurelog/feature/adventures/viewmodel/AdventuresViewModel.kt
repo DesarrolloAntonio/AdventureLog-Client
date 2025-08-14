@@ -5,12 +5,15 @@ import androidx.lifecycle.viewModelScope
 import app.cash.paging.PagingData
 import app.cash.paging.cachedIn
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCategoryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCategoryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.AdventureFilters
+import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.core.model.SortField
 import com.desarrollodroide.adventurelog.core.model.VisitedFilter
@@ -33,7 +36,10 @@ import kotlinx.coroutines.launch
 class AdventuresViewModel(
     private val getAdventuresPagingUseCase: GetAdventuresPagingUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
-    private val deleteAdventureUseCase: DeleteAdventureUseCase
+    private val deleteAdventureUseCase: DeleteAdventureUseCase,
+    private val createCategoryUseCase: CreateCategoryUseCase,
+    private val updateCategoryUseCase: UpdateCategoryUseCase,
+    private val deleteCategoryUseCase: DeleteCategoryUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -66,6 +72,9 @@ class AdventuresViewModel(
 
     private val _deleteState = MutableStateFlow<DeleteState>(DeleteState.Idle)
     val deleteState: StateFlow<DeleteState> = _deleteState.asStateFlow()
+    
+    private val _categoryOperationState = MutableStateFlow<CategoryOperationState>(CategoryOperationState.Idle)
+    val categoryOperationState: StateFlow<CategoryOperationState> = _categoryOperationState.asStateFlow()
 
     sealed class CategoriesState {
         data object Loading : CategoriesState()
@@ -78,6 +87,13 @@ class AdventuresViewModel(
         data object Loading : DeleteState()
         data object Success : DeleteState()
         data class Error(val message: String) : DeleteState()
+    }
+    
+    sealed class CategoryOperationState {
+        data object Idle : CategoryOperationState()
+        data object Loading : CategoryOperationState()
+        data object Success : CategoryOperationState()
+        data class Error(val message: String) : CategoryOperationState()
     }
 
     init {
@@ -191,33 +207,70 @@ class AdventuresViewModel(
         _deleteState.value = DeleteState.Idle
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun addCategory(name: String, icon: String) {
-        // TODO: Implement when backend API is ready
-        // This should call a CreateCategoryUseCase
+    fun createCategory(name: String, icon: String) {
         viewModelScope.launch {
-            // For now, just reload categories to show any changes
-            loadCategories()
+            _categoryOperationState.value = CategoryOperationState.Loading
+            
+            // Create internal name from display name (lowercase, replace spaces with underscores)
+            val internalName = name.lowercase().replace(" ", "_")
+            
+            when (val result = createCategoryUseCase(
+                name = internalName,
+                displayName = name,
+                icon = icon
+            )) {
+                is Either.Left -> {
+                    _categoryOperationState.value = CategoryOperationState.Error(result.value)
+                }
+                is Either.Right -> {
+                    _categoryOperationState.value = CategoryOperationState.Success
+                    loadCategories() // Reload categories to show the new one
+                }
+            }
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun updateCategory(category: Category) {
-        // TODO: Implement when backend API is ready
-        // This should call an UpdateCategoryUseCase
+    fun updateCategory(categoryId: String, name: String, icon: String) {
         viewModelScope.launch {
-            // For now, just reload categories to show any changes
-            loadCategories()
+            _categoryOperationState.value = CategoryOperationState.Loading
+            
+            // Create internal name from display name (lowercase, replace spaces with underscores)
+            val internalName = name.lowercase().replace(" ", "_")
+            
+            when (val result = updateCategoryUseCase(
+                categoryId = categoryId,
+                name = internalName,
+                displayName = name,
+                icon = icon
+            )) {
+                is Either.Left -> {
+                    _categoryOperationState.value = CategoryOperationState.Error(result.value)
+                }
+                is Either.Right -> {
+                    _categoryOperationState.value = CategoryOperationState.Success
+                    loadCategories() // Reload categories to show the updated one
+                }
+            }
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun deleteCategory(categoryId: String) {
-        // TODO: Implement when backend API is ready
-        // This should call a DeleteCategoryUseCase
         viewModelScope.launch {
-            // For now, just reload categories to show any changes
-            loadCategories()
+            _categoryOperationState.value = CategoryOperationState.Loading
+            
+            when (val result = deleteCategoryUseCase(categoryId)) {
+                is Either.Left -> {
+                    _categoryOperationState.value = CategoryOperationState.Error(result.value)
+                }
+                is Either.Right -> {
+                    _categoryOperationState.value = CategoryOperationState.Success
+                    loadCategories() // Reload categories after deletion
+                }
+            }
         }
+    }
+    
+    fun clearCategoryOperationState() {
+        _categoryOperationState.value = CategoryOperationState.Idle
     }
 }

@@ -47,12 +47,28 @@ class GetCollectionsUseCaseTest {
             isPublic: Boolean,
             startDate: String?,
             endDate: String?
-        ): Either<String, Collection> {
+        ): Either<ApiResponse, Collection> {
             throw NotImplementedError()
         }
 
         override suspend fun refreshCollections(): Either<ApiResponse, List<Collection>> {
             return getCollectionsResult
+        }
+
+        override suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun updateCollection(
+            collectionId: String,
+            name: String,
+            description: String,
+            isPublic: Boolean,
+            startDate: String?,
+            endDate: String?,
+            link: String?
+        ): Either<ApiResponse, Collection> {
+            throw NotImplementedError()
         }
     }
 

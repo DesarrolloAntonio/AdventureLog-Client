@@ -4,7 +4,7 @@ import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.UserDetails
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
 
 class LoginRepositoryImpl(
-    private val adventureLogNetworkDataSource: AdventureLogNetworkDataSource,
+    private val adventureLogNetworkDataSource: AdventureLogNetwork,
     private val ioDispatcher: CoroutineDispatcher
 ) : LoginRepository {
     private val logger = Logger.withTag("LoginRepositoryImpl")

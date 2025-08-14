@@ -75,6 +75,7 @@ fun AdventureListScreen(
     val pagingItems = viewModel.adventuresPagingData.collectAsLazyPagingItems()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
+    val categoryOperationState by viewModel.categoryOperationState.collectAsStateWithLifecycle()
 
     var adventureToDelete by remember { mutableStateOf<Adventure?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -90,7 +91,7 @@ fun AdventureListScreen(
                 viewModel.retryLoadCategories()
             },
             onRetryLoadCategories = viewModel::retryLoadCategories,
-            onAddCategory = viewModel::addCategory,
+            onAddCategory = viewModel::createCategory,
             onUpdateCategory = viewModel::updateCategory,
             onDeleteCategory = viewModel::deleteCategory
         )
@@ -133,6 +134,22 @@ fun AdventureListScreen(
             is AdventuresViewModel.DeleteState.Error -> {
                 snackbarHostState.showSnackbar("Error: ${state.message}")
                 viewModel.clearDeleteState()
+            }
+
+            else -> {}
+        }
+    }
+    
+    LaunchedEffect(categoryOperationState) {
+        when (val state = categoryOperationState) {
+            is AdventuresViewModel.CategoryOperationState.Success -> {
+                snackbarHostState.showSnackbar("Category operation successful")
+                viewModel.clearCategoryOperationState()
+            }
+
+            is AdventuresViewModel.CategoryOperationState.Error -> {
+                snackbarHostState.showSnackbar("Error: ${state.message}")
+                viewModel.clearCategoryOperationState()
             }
 
             else -> {}

@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.model.Country
 import com.desarrollodroide.adventurelog.core.model.Region
 import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.io.IOException
 
 class CountriesRepositoryImpl(
-    private val networkDataSource: AdventureLogNetworkDataSource
+    private val networkDataSource: AdventureLogNetwork
 ) : CountriesRepository {
 
     private val _countriesFlow = MutableStateFlow<List<Country>>(emptyList())

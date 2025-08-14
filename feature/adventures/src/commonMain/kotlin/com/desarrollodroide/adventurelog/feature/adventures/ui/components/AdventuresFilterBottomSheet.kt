@@ -63,7 +63,7 @@ fun AdventuresFilterBottomSheet(
     onManageCategoriesClick: () -> Unit = {},
     onRetryLoadCategories: () -> Unit = {},
     onAddCategory: ((String, String) -> Unit)? = null,
-    onUpdateCategory: ((Category) -> Unit)? = null,
+    onUpdateCategory: ((String, String, String) -> Unit)? = null,
     onDeleteCategory: ((String) -> Unit)? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -99,8 +99,8 @@ fun AdventuresFilterBottomSheet(
                 onAddCategory?.invoke(name, icon)
                 onManageCategoriesClick()
             },
-            onEditCategory = { category ->
-                onUpdateCategory?.invoke(category)
+            onEditCategory = { categoryId, name, icon ->
+                onUpdateCategory?.invoke(categoryId, name, icon)
                 onManageCategoriesClick()
             },
             onDeleteCategory = { categoryId ->

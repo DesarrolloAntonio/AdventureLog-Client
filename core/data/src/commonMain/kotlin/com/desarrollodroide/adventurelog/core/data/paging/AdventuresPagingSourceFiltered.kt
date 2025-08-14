@@ -4,14 +4,14 @@ import app.cash.paging.PagingSource
 import app.cash.paging.PagingState
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 
 /**
  * PagingSource that uses the filtered endpoint for server-side filtering
  */
 class AdventuresPagingSourceFiltered(
-    private val networkDataSource: AdventureLogNetworkDataSource,
+    private val networkDataSource: AdventureLogNetwork,
     private val pageSize: Int = 30,
     private val categoryNames: List<String>? = null,
     private val sortBy: String? = null,

@@ -7,14 +7,14 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserDetails
 import io.ktor.client.HttpClient
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
 import com.desarrollodroide.adventurelog.core.network.api.CollectionApi
-import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAdventureNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAdventureApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCollectionApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.api.CategoryApi
-import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCategoryNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCategoryApi
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import com.desarrollodroide.adventurelog.core.network.api.UserApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorUserApi
@@ -33,9 +33,9 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorGeocodingApi
 import com.desarrollodroide.adventurelog.core.network.api.AuthApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
 
-class KtorAdventurelogNetwork(
+class KtorAdventureLogNetwork(
     private val adventurelogClient: HttpClient
-) : AdventureLogNetworkDataSource {
+) : AdventureLogNetwork {
 
     private val logger = Logger.withTag("KtorAdventurelogNetwork")
 
@@ -56,7 +56,7 @@ class KtorAdventurelogNetwork(
     }
     
     private val adventureDataSource: AdventureApi by lazy {
-        KtorAdventureNetworkDataSource(
+        KtorAdventureApi(
             httpClient = adventurelogClient,
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
             json = json
@@ -72,7 +72,7 @@ class KtorAdventurelogNetwork(
     }
     
     private val categoryDataSource: CategoryApi by lazy {
-        KtorCategoryNetworkDataSource(
+        KtorCategoryApi(
             httpClient = adventurelogClient,
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
             json = json
@@ -108,7 +108,7 @@ class KtorAdventurelogNetwork(
         )
     }
 
-    companion object {
+    companion object Companion {
         // Constants moved to respective DataSource implementations
     }
 
@@ -264,6 +264,44 @@ class KtorAdventurelogNetwork(
     override suspend fun getCategories(): List<CategoryDTO> {
         ensureInitialized()
         return categoryDataSource.getCategories()
+    }
+    
+    override suspend fun getCategoryById(categoryId: String): CategoryDTO {
+        ensureInitialized()
+        return categoryDataSource.getCategoryById(categoryId)
+    }
+    
+    override suspend fun createCategory(
+        name: String,
+        displayName: String,
+        icon: String?
+    ): CategoryDTO {
+        ensureInitialized()
+        return categoryDataSource.createCategory(
+            name = name,
+            displayName = displayName,
+            icon = icon
+        )
+    }
+    
+    override suspend fun updateCategory(
+        categoryId: String,
+        name: String,
+        displayName: String,
+        icon: String?
+    ): CategoryDTO {
+        ensureInitialized()
+        return categoryDataSource.updateCategory(
+            categoryId = categoryId,
+            name = name,
+            displayName = displayName,
+            icon = icon
+        )
+    }
+    
+    override suspend fun deleteCategory(categoryId: String) {
+        ensureInitialized()
+        return categoryDataSource.deleteCategory(categoryId)
     }
 
     override suspend fun generateDescription(

@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.core.domain
 
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
+import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.model.Account
@@ -7,14 +9,18 @@ import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -62,12 +68,16 @@ class InitializeSessionUseCaseTest {
             throw NotImplementedError()
         }
 
-        override suspend fun getUserStats(username: String): UserStats {
-            return UserStats()
+        override suspend fun getUserStats(username: String): Either<ApiResponse, UserStats> {
+            return Either.Right(UserStats())
+        }
+
+        override fun getUserStatsFlow(): Flow<UserStats?> {
+            throw NotImplementedError()
         }
     }
 
-    private open class FakeNetworkDataSource : AdventureLogNetworkDataSource {
+    private open class FakeNetworkDataSource : AdventureLogNetwork {
         var lastServerUrl: String? = null
         var lastSessionToken: String? = null
         var initializeFromSessionCalled = false
@@ -159,6 +169,96 @@ class InitializeSessionUseCaseTest {
 
         override suspend fun getUserStats(username: String): UserStatsDTO {
             return UserStatsDTO()
+        }
+
+        override suspend fun getAdventuresFiltered(
+            page: Int,
+            pageSize: Int,
+            categoryIds: List<String>?,
+            sortBy: String?,
+            sortOrder: String?,
+            isVisited: Boolean?,
+            searchQuery: String?,
+            includeCollections: Boolean
+        ): List<AdventureDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getCategoryById(categoryId: String): CategoryDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun createCategory(
+            name: String,
+            displayName: String,
+            icon: String?
+        ): CategoryDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun updateCategory(
+            categoryId: String,
+            name: String,
+            displayName: String,
+            icon: String?
+        ): CategoryDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun deleteCategory(categoryId: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun deleteAdventure(adventureId: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun updateAdventure(
+            adventureId: String,
+            name: String,
+            description: String,
+            category: Category?,
+            rating: Double,
+            link: String,
+            location: String,
+            latitude: String?,
+            longitude: String?,
+            isPublic: Boolean,
+            tags: List<String>
+        ): AdventureDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun deleteCollection(collectionId: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun updateCollection(
+            collectionId: String,
+            name: String,
+            description: String,
+            isPublic: Boolean,
+            startDate: String?,
+            endDate: String?,
+            link: String?
+        ): CollectionDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getCountries(): List<CountryDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getRegions(countryCode: String): List<RegionDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getVisitedRegions(): List<VisitedRegionDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getVisitedCities(): List<VisitedCityDTO> {
+            throw NotImplementedError()
         }
     }
 

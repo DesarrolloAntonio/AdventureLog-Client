@@ -1,7 +1,7 @@
 package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 
 /**
  * Use case to handle user logout
@@ -9,7 +9,7 @@ import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNet
  */
 class LogoutUseCase(
     private val userRepository: UserRepository,
-    private val networkDataSource: AdventureLogNetworkDataSource
+    private val networkDataSource: AdventureLogNetwork
 ) {
 
     /**

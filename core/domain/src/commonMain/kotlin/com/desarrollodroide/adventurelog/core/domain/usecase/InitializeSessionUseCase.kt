@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.data.UserRepository
 import com.desarrollodroide.adventurelog.core.model.UserDetails
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 
 /**
  * Use case to initialize user session if it exists
@@ -10,7 +10,7 @@ import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNet
  */
 class InitializeSessionUseCase(
     private val userRepository: UserRepository,
-    private val networkDataSource: AdventureLogNetworkDataSource
+    private val networkDataSource: AdventureLogNetwork
 ) {
 
     /**

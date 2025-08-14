@@ -5,7 +5,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetworkDataSource
+import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.mappers.toUserStats
 import com.russhwolf.settings.Settings
@@ -21,7 +21,7 @@ import kotlinx.serialization.json.Json
  */
 class UserRepositoryImpl(
     private val settings: Settings,
-    private val networkDataSource: AdventureLogNetworkDataSource
+    private val networkDataSource: AdventureLogNetwork
 ) : UserRepository {
 
     private val json = Json {

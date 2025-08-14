@@ -13,7 +13,10 @@ val adventureModule = module {
         AdventuresViewModel(
             getAdventuresPagingUseCase = get(),
             getCategoriesUseCase = get(),
-            deleteAdventureUseCase = get()
+            deleteAdventureUseCase = get(),
+            createCategoryUseCase = get(),
+            updateCategoryUseCase = get(),
+            deleteCategoryUseCase = get()
         ) 
     }
     

@@ -30,7 +30,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 
-internal class KtorAdventureNetworkDataSource(
+internal class KtorAdventureApi(
     private val httpClient: HttpClient,
     private val sessionProvider: () -> SessionInfo,
     private val json: Json = defaultJson
