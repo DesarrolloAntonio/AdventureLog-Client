@@ -1,8 +1,8 @@
 # 🏕️ Adventure Log
 
 ![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=develop)
-![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)
-![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.5.1-green.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.0--RC2-blue.svg)
+![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.2-green.svg)
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-orange.svg)
 ![Modular](https://img.shields.io/badge/Design-Modular-yellow.svg)
 ![KMM](https://img.shields.io/badge/Platform-KMM-purple.svg)
@@ -40,62 +40,6 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
   <img src="docs/screenshots/add_adventure_screen.png" width="230" alt="Add Adventure"/>
 </p>
 
-## 🗺️ Roadmap
-
-### 📍 Version 1.0 - MVP Release
-> **Status**: 🚧 In Development | **Target**: Q1 2025
-
-#### Core Features
-- [ ] 🔗 [Link Adventures to Collections](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/5)
-- [ ] 🗺️ [Build the interactive Map view](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/6)
-- [ ] 🔐 User login and authentication
-- [ ] 🎨 Main dashboard UI design
-- [ ] 📋 Basic list views
-
-#### Data Management  
-- [ ] ➕ Implement Create/Update/Delete for Adventures
-- [ ] 📁 Implement Create/Update/Delete for Collections
-- [ ] 📄 Add pagination to lists
-- [ ] 🔄 Add sorting options to the adventures list
-- [ ] 🔄 Add sorting options to the collection list
-
-#### Additional Features
-- [ ] 📅 Build the Calendar view
-- [ ] 📊 Build the user stats dashboard
-- [ ] 🔍 Add filters (by category, by visited status)
-- [x] ✈️ Create travel view - **In Progress**
-
-#### Development & QA
-- [ ] ✅ Perform final testing and Quality Assurance (QA)
-- [ ] 📝 Create a markdown generator for descriptions
-- [ ] 📱 Adapt design for tablets
-
-### 🚀 Version 1.1 - Enhanced Experience
-> **Status**: 📋 Planned | **Target**: Q2 2025
-
-- [ ] 🌐 Offline sync capabilities
-- [ ] 📸 Photo gallery with albums
-- [ ] 🔔 Trip reminders and notifications
-- [ ] 📍 Location tracking during adventures
-- [ ] 🌍 Multi-language support
-- [ ] 💾 Local backup and restore
-
-### 🌟 Version 2.0 - Social Features
-> **Status**: 💡 Concept | **Target**: Q3 2025
-
-- [ ] 👥 Share adventures with friends
-- [ ] 💬 Comments and reactions
-- [ ] 🏆 Achievement system
-- [ ] 🗺️ Public adventure discovery
-- [ ] 📲 Export to social media
-
-### 📊 Progress Tracking
-
-For detailed progress and to contribute, check our:
-- 📋 [Issues Board](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues)
-- 🎯 [MVP Roadmap Issue](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/4)
-- 💬 [Discussions](https://github.com/DesarrolloAntonio/AdventureLog-Client/discussions)
-
 ## 🏗️ Architecture
 
 Adventure Log implements a **Clean Architecture** approach combined with **modular design principles**, creating a codebase that is maintainable, testable, and scalable.
@@ -120,7 +64,8 @@ AdventureLog/
 │   ├── domain/           # Business logic and use cases
 │   ├── model/            # Domain models
 │   ├── network/          # Network communication
-│   └── permissions/      # Permission handling
+│   ├── permissions/      # Permission handling
+│   └── ui/               # Core UI utilities
 │
 └── feature/              # Feature modules
     ├── adventures/       # Adventure listing and management
@@ -130,8 +75,8 @@ AdventureLog/
     ├── login/            # Authentication
     ├── map/              # Map visualization
     ├── settings/         # Application settings
-    ├── world/            # World view features
-    └── ui/               # Shared UI components and utilities
+    ├── ui/               # Shared UI components and utilities
+    └── world/            # World exploration features
 ```
 
 ### Clean Architecture Layers
@@ -180,8 +125,9 @@ AdventureLog/
 - **Networking**
   - [Ktor](https://ktor.io/): Kotlin multiplatform HTTP client
 
-- **Development Tools**
-  - [Compose Hot Reload](https://developer.android.com/jetpack/compose/tooling/hot-reload): Rapid UI development
+- **Data Persistence**
+  - [Multiplatform Settings](https://github.com/russhwolf/multiplatform-settings): Key-value storage
+  - [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization): JSON serialization
 
 ## 🧩 Modular Navigation System
 
@@ -220,7 +166,7 @@ The app uses sealed classes to represent different UI states, providing type-saf
 - Android Studio Hedgehog or newer
 - Xcode 14 or newer (for iOS development)
 - JDK 11+
-- Kotlin 1.9.0+
+- Kotlin 2.2.0+
 
 ### Setup & Build
 
@@ -249,6 +195,17 @@ The app uses sealed classes to represent different UI states, providing type-saf
    ```
 
 3. Build and run on an iOS device or simulator
+
+### Running Tests
+
+```bash
+# Run all tests
+./gradlew allTests
+
+# Run specific module tests
+./gradlew :core:domain:allTests
+./gradlew :core:model:allTests
+```
 
 ## ⚙️ Project Configuration
 
@@ -279,29 +236,30 @@ The project uses a typical KMM setup with Gradle, supporting:
 - **Platform-Specific Adapters**: Native functionality wrapped in platform modules
 - **Expect/Actual Pattern**: For platform-specific implementations
 
+## 🗺️ Roadmap
+
+Track our development progress and upcoming features on our [GitHub Project Board](https://github.com/users/DesarrolloAntonio/projects/2).
+
 ## 🧪 Testing Strategy
 
-- **Unit Tests**: Test individual components and business logic (Coming)
+- **Unit Tests**:
+  - ✅ Domain layer: Use cases tests (8 test files)
+  - ✅ Model layer: Data models tests (12 test files)
+  - 🚧 Data layer tests (Coming)
+  - 🚧 Network layer tests (Coming)
+  - 🚧 ViewModel tests (Coming)
 - **Integration Tests**: Verify interactions between components (Coming)
 - **UI Tests**: Test user interfaces and workflows (Coming)
+
+## ⚠️ Known Issues
+
+- **MockK Support**: Currently, MockK doesn't support iOS targets in Kotlin Multiplatform. Tests use manual fakes instead of mocking libraries for cross-platform compatibility.
 
 ## 🛠️ Development Workflow
 
 1. **Feature Development**: New features start in their own modules
 2. **Core Enhancements**: Core module changes consider all dependent features
 3. **Navigation Updates**: Navigation changes require careful consideration of deep links
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### How to Contribute
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## 📚 Resources & Learning
 
