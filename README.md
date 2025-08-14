@@ -1,8 +1,8 @@
 # 🏕️ Adventure Log
 
 ![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=develop)
-![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg)
-![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.5.1-green.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.0--RC2-blue.svg)
+![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.2-green.svg)
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-orange.svg)
 ![Modular](https://img.shields.io/badge/Design-Modular-yellow.svg)
 ![KMM](https://img.shields.io/badge/Platform-KMM-purple.svg)
@@ -64,7 +64,8 @@ AdventureLog/
 │   ├── domain/           # Business logic and use cases
 │   ├── model/            # Domain models
 │   ├── network/          # Network communication
-│   └── permissions/      # Permission handling
+│   ├── permissions/      # Permission handling
+│   └── ui/               # Core UI utilities
 │
 └── feature/              # Feature modules
     ├── adventures/       # Adventure listing and management
@@ -72,8 +73,10 @@ AdventureLog/
     ├── detail/           # Adventure details
     ├── home/             # Home screen and dashboard
     ├── login/            # Authentication
+    ├── map/              # Map visualization
     ├── settings/         # Application settings
-    └── ui/               # Shared UI components and utilities
+    ├── ui/               # Shared UI components and utilities
+    └── world/            # World exploration features
 ```
 
 ### Clean Architecture Layers
@@ -122,8 +125,9 @@ AdventureLog/
 - **Networking**
   - [Ktor](https://ktor.io/): Kotlin multiplatform HTTP client
 
-- **Development Tools**
-  - [Compose Hot Reload](https://developer.android.com/jetpack/compose/tooling/hot-reload): Rapid UI development
+- **Data Persistence**
+  - [Multiplatform Settings](https://github.com/russhwolf/multiplatform-settings): Key-value storage
+  - [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization): JSON serialization
 
 ## 🧩 Modular Navigation System
 
@@ -162,7 +166,7 @@ The app uses sealed classes to represent different UI states, providing type-saf
 - Android Studio Hedgehog or newer
 - Xcode 14 or newer (for iOS development)
 - JDK 11+
-- Kotlin 1.9.0+
+- Kotlin 2.2.0+
 
 ### Setup & Build
 
@@ -191,6 +195,17 @@ The app uses sealed classes to represent different UI states, providing type-saf
    ```
 
 3. Build and run on an iOS device or simulator
+
+### Running Tests
+
+```bash
+# Run all tests
+./gradlew allTests
+
+# Run specific module tests
+./gradlew :core:domain:allTests
+./gradlew :core:model:allTests
+```
 
 ## ⚙️ Project Configuration
 
@@ -223,13 +238,22 @@ The project uses a typical KMM setup with Gradle, supporting:
 
 ## 🗺️ Roadmap
 
-Track our development progress and upcoming features on our [GitHub Project Board](https://github.com/users/DesarrolloAntonio/projects/2).
+For detailed roadmap and planned features, see [ROADMAP.md](ROADMAP.md).
 
 ## 🧪 Testing Strategy
 
-- **Unit Tests**:Test individual components and business logic (Coming)
+- **Unit Tests**:
+  - ✅ Domain layer: Use cases tests (8 test files)
+  - ✅ Model layer: Data models tests (12 test files)
+  - 🚧 Data layer tests (Coming)
+  - 🚧 Network layer tests (Coming)
+  - 🚧 ViewModel tests (Coming)
 - **Integration Tests**: Verify interactions between components (Coming)
 - **UI Tests**: Test user interfaces and workflows (Coming)
+
+## ⚠️ Known Issues
+
+- **MockK Support**: MockK doesn't support Kotlin/Native targets in Kotlin Multiplatform. Tests use manual fakes instead of mocking libraries for cross-platform compatibility.
 
 ## 🛠️ Development Workflow
 
