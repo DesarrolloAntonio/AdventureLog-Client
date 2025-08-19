@@ -9,7 +9,6 @@ kotlin {
             api(projects.core.common)
             implementation(projects.core.model)
             api(projects.core.domain)
-            implementation(projects.core.designsystem)
             implementation(projects.feature.ui)
             implementation(projects.core.data)
             
