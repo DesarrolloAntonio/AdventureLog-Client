@@ -11,7 +11,10 @@ interface CollectionsRepository {
 
     val collectionsFlow: StateFlow<List<Collection>>
 
-    fun getCollectionsPagingData(): Flow<PagingData<Collection>>
+    fun getCollectionsPagingData(
+        sortField: String? = null,
+        sortDirection: String? = null
+    ): Flow<PagingData<Collection>>
 
     suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<Collection>>
     suspend fun getCollection(collectionId: String): Either<ApiResponse, Collection>

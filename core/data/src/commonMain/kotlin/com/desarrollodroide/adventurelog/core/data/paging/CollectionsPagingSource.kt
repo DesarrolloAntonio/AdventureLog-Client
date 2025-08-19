@@ -12,10 +12,13 @@ import com.desarrollodroide.adventurelog.core.network.model.response.toDomainMod
 
 class CollectionsPagingSource(
     private val networkDataSource: AdventureLogNetwork,
-    private val pageSize: Int = 30
+    private val pageSize: Int = 30,
+    private val sortField: String? = null,
+    private val sortDirection: String? = null
 ) : PagingSource<Int, Collection>() {
 
     private var totalItemsLoaded = 0
+    private val allLoadedCollections = mutableListOf<Collection>()
 
     override suspend fun load(
         params: PagingSourceLoadParams<Int>
@@ -24,6 +27,7 @@ class CollectionsPagingSource(
         val size = pageSize
 
         println("🔍 CollectionsPagingSource - Requesting page: $page, pageSize: $size")
+        println("   Sort options: field=$sortField, direction=$sortDirection")
 
         return try {
             val collections = networkDataSource.getCollections(
@@ -31,12 +35,18 @@ class CollectionsPagingSource(
                 pageSize = size
             ).map { it.toDomainModel() }
 
-            totalItemsLoaded += collections.size
+            // Add new collections to our accumulated list
+            allLoadedCollections.addAll(collections)
+            totalItemsLoaded = allLoadedCollections.size
 
-            println("✅ CollectionsPagingSource - Received ${collections.size} collections for page $page (total loaded: $totalItemsLoaded)")
-            if (collections.isNotEmpty()) {
-                println("   First collection: ${collections.first().name}")
-                println("   Last collection: ${collections.last().name}")
+            // Sort all loaded collections based on current sort options
+            val sortedCollections = sortCollections(allLoadedCollections, sortField, sortDirection)
+
+            println("✅ CollectionsPagingSource - Received ${collections.size} new collections for page $page")
+            println("   Total loaded and sorted: ${sortedCollections.size}")
+            if (sortedCollections.isNotEmpty()) {
+                println("   First collection after sort: ${sortedCollections.first().name}")
+                println("   Last collection after sort: ${sortedCollections.last().name}")
             }
 
             val nextKey = when {
@@ -57,7 +67,7 @@ class CollectionsPagingSource(
             }
 
             PagingSourceLoadResultPage(
-                data = collections,
+                data = sortedCollections,
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = nextKey
             ) as PagingSourceLoadResult<Int, Collection>
@@ -68,8 +78,41 @@ class CollectionsPagingSource(
         }
     }
 
+    private fun sortCollections(
+        collections: List<Collection>,
+        sortField: String?,
+        sortDirection: String?
+    ): List<Collection> {
+        val sorted = when (sortField) {
+            "NAME" -> {
+                collections.sortedBy { it.name.lowercase() }
+            }
+            "START_DATE" -> {
+                collections.sortedBy { collection ->
+                    // Simple string comparison for dates in ISO format (YYYY-MM-DD)
+                    // Null dates go to the end
+                    collection.startDate ?: "9999-12-31"
+                }
+            }
+            "UPDATED_AT" -> {
+                collections.sortedBy { it.updatedAt }
+            }
+            else -> {
+                // Default: sort by updated date descending
+                collections.sortedByDescending { it.updatedAt }
+            }
+        }
+
+        return if (sortDirection == "ASCENDING") {
+            sorted
+        } else {
+            sorted.reversed()
+        }
+    }
+
     override fun getRefreshKey(state: PagingState<Int, Collection>): Int? {
         totalItemsLoaded = 0
+        allLoadedCollections.clear()
 
         val key = state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)

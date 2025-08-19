@@ -5,16 +5,21 @@ import androidx.lifecycle.viewModelScope
 import app.cash.paging.PagingData
 import app.cash.paging.cachedIn
 import app.cash.paging.filter
+import app.cash.paging.map
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCollectionUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.SortDirection
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionSortOptions
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionSortField
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -30,6 +35,12 @@ class CollectionsViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _sortOptions = MutableStateFlow(CollectionSortOptions())
+    val sortOptions: StateFlow<CollectionSortOptions> = _sortOptions.asStateFlow()
+
+    private val _showSortSheet = MutableStateFlow(false)
+    val showSortSheet: StateFlow<Boolean> = _showSortSheet.asStateFlow()
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -43,25 +54,48 @@ class CollectionsViewModel(
         data class Error(val message: String) : DeleteState()
     }
 
-    val collectionsPagingData: Flow<PagingData<Collection>> = _searchQuery
-        .debounce(300)
-        .distinctUntilChanged()
-        .flatMapLatest { query ->
-            getCollectionsPagingUseCase()
-                .map { pagingData ->
-                    if (query.isEmpty()) {
-                        pagingData
-                    } else {
-                        pagingData.filter { collection ->
-                            collection.name.contains(query, ignoreCase = true)
-                        }
+    val collectionsPagingData: Flow<PagingData<Collection>> = combine(
+        _searchQuery.debounce(300).distinctUntilChanged(),
+        _sortOptions
+    ) { query, sortOptions ->
+        Pair(query, sortOptions)
+    }.flatMapLatest { (query, sortOptions) ->
+        getCollectionsPagingUseCase(
+            sortField = sortOptions.sortField.name,
+            sortDirection = sortOptions.sortDirection.name
+        )
+            .map { pagingData ->
+                if (query.isEmpty()) {
+                    pagingData
+                } else {
+                    pagingData.filter { collection ->
+                        collection.name.contains(query, ignoreCase = true)
                     }
                 }
-        }
-        .cachedIn(viewModelScope)
+            }
+    }.cachedIn(viewModelScope)
+
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
+    }
+
+    fun onSortOptionsChanged(options: CollectionSortOptions) {
+        _sortOptions.value = options
+    }
+
+    fun showSortSheet() {
+        _showSortSheet.value = true
+    }
+
+    fun hideSortSheet() {
+        _showSortSheet.value = false
+    }
+
+    fun hasActiveSorting(): Boolean {
+        val options = _sortOptions.value
+        return options.sortField != CollectionSortField.UPDATED_AT || 
+               options.sortDirection != SortDirection.DESCENDING
     }
 
     fun refresh() {

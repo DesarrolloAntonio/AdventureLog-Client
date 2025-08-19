@@ -30,7 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.core.model.VisitedFilter
+import com.desarrollodroide.adventurelog.feature.adventures.model.VisitedFilter
 
 @Composable
 fun VisitedFilterSection(

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +15,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -47,6 +51,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionItem
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsSortBottomSheet
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
@@ -63,6 +68,8 @@ fun CollectionsScreen(
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val sortOptions by viewModel.sortOptions.collectAsStateWithLifecycle()
+    val showSortSheet by viewModel.showSortSheet.collectAsStateWithLifecycle()
     val pagingItems = viewModel.collectionsPagingData.collectAsLazyPagingItems()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
@@ -75,14 +82,25 @@ fun CollectionsScreen(
         onPagingItemsReady(pagingItems)
     }
 
+    // Show sort bottom sheet
+    if (showSortSheet) {
+        CollectionsSortBottomSheet(
+            sortOptions = sortOptions,
+            onSortOptionsChanged = viewModel::onSortOptionsChanged,
+            onDismiss = viewModel::hideSortSheet
+        )
+    }
+
     CollectionsContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
+        hasActiveSorting = viewModel.hasActiveSorting(),
         isRefreshing = isRefreshing,
         snackbarHostState = snackbarHostState,
         onCollectionClick = onCollectionClick,
         onAddCollectionClick = onAddCollectionClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
+        onShowSort = viewModel::showSortSheet,
         onEditCollection = onEditCollection,
         onDeleteCollection = { collection -> collectionToDelete = collection },
         onRefresh = {
@@ -145,11 +163,13 @@ fun CollectionsScreen(
 private fun CollectionsContent(
     pagingItems: LazyPagingItems<Collection>,
     searchQuery: String,
+    hasActiveSorting: Boolean,
     isRefreshing: Boolean,
     snackbarHostState: SnackbarHostState,
     onCollectionClick: (String, String) -> Unit,
     onAddCollectionClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
+    onShowSort: () -> Unit,
     onEditCollection: (Collection) -> Unit,
     onDeleteCollection: (Collection) -> Unit,
     onRefresh: () -> Unit,
@@ -160,12 +180,42 @@ private fun CollectionsContent(
     Scaffold(
         modifier = modifier,
         topBar = {
-            SimpleSearchBar(
-                searchQuery = searchQuery,
-                onSearchQueryChange = onSearchQueryChange,
-                onSearchSubmit = { },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SimpleSearchBar(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = onSearchQueryChange,
+                    onSearchSubmit = { },
+                    placeholder = "Search collections...",
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(
+                    onClick = onShowSort,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Box {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
+                            contentDescription = "Sort",
+                            tint = if (hasActiveSorting) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        )
+                        if (hasActiveSorting) {
+                            Badge(
+                                modifier = Modifier.align(Alignment.TopEnd),
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
         },
         floatingActionButton = {
             FloatingActionButton(

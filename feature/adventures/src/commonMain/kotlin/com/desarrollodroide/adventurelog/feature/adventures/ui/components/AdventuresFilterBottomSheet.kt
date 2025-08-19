@@ -41,11 +41,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.core.model.AdventureFilters
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.SortDirection
-import com.desarrollodroide.adventurelog.core.model.SortField
-import com.desarrollodroide.adventurelog.core.model.VisitedFilter
+import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureFilters
+import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureSortField
+import com.desarrollodroide.adventurelog.feature.adventures.model.VisitedFilter
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.categories.ManageCategoriesDialog
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.filters.CategoryFilterSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.filters.SortSection
@@ -321,7 +321,7 @@ private fun IncludeCollectionsSection(
 private fun getActiveFiltersCount(filters: AdventureFilters): Int {
     var count = 0
     if (filters.categoryNames.isNotEmpty()) count++
-    if (filters.sortField != SortField.UPDATED_AT) count++
+    if (filters.sortField != AdventureSortField.UPDATED_AT) count++
     if (filters.sortDirection != SortDirection.DESCENDING) count++
     if (filters.visitedFilter != VisitedFilter.ALL) count++
     if (filters.includeCollections) count++
@@ -333,7 +333,7 @@ private fun getActiveFiltersCount(filters: AdventureFilters): Int {
 fun AdventuresFilterBottomSheetPreview() {
     val mockFilters = AdventureFilters(
         categoryNames = listOf("Hiking", "Camping"),
-        sortField = SortField.NAME,
+        sortField = AdventureSortField.NAME,
         sortDirection = SortDirection.ASCENDING,
         visitedFilter = VisitedFilter.VISITED,
         includeCollections = true

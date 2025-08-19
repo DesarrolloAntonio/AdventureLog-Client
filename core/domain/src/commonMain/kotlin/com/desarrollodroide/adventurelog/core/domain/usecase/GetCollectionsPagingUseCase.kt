@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 class GetCollectionsPagingUseCase(
     private val collectionsRepository: CollectionsRepository
 ) {
-    operator fun invoke(): Flow<PagingData<Collection>> =
-        collectionsRepository.getCollectionsPagingData()
+    operator fun invoke(
+        sortField: String? = null,
+        sortDirection: String? = null
+    ): Flow<PagingData<Collection>> =
+        collectionsRepository.getCollectionsPagingData(sortField, sortDirection)
 }

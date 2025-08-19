@@ -27,7 +27,10 @@ class CollectionsRepositoryImpl(
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
 
-    override fun getCollectionsPagingData(): Flow<PagingData<Collection>> {
+    override fun getCollectionsPagingData(
+        sortField: String?,
+        sortDirection: String?
+    ): Flow<PagingData<Collection>> {
         return _version.flatMapLatest { _ ->
             Pager(
                 config = PagingConfig(
@@ -36,7 +39,14 @@ class CollectionsRepositoryImpl(
                     initialLoadSize = 30,
                     prefetchDistance = 10
                 ),
-                pagingSourceFactory = { CollectionsPagingSource(networkDataSource, pageSize = 30) }
+                pagingSourceFactory = { 
+                    CollectionsPagingSource(
+                        networkDataSource = networkDataSource, 
+                        pageSize = 30,
+                        sortField = sortField,
+                        sortDirection = sortDirection
+                    ) 
+                }
             ).flow
         }
     }

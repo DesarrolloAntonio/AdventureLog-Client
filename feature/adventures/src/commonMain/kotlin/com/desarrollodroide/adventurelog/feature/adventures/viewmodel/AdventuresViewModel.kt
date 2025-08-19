@@ -12,11 +12,11 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPaging
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.AdventureFilters
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.SortDirection
-import com.desarrollodroide.adventurelog.core.model.SortField
-import com.desarrollodroide.adventurelog.core.model.VisitedFilter
+import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureFilters
+import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureSortField
+import com.desarrollodroide.adventurelog.feature.adventures.model.VisitedFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -108,7 +108,7 @@ class AdventuresViewModel(
     }.flatMapLatest { (query, filters) ->
         // Only pass non-default values to avoid using the filtered endpoint unnecessarily
         val hasActiveFilters = filters.categoryNames.isNotEmpty() ||
-                filters.sortField != SortField.UPDATED_AT ||
+                filters.sortField != AdventureSortField.UPDATED_AT ||
                 filters.sortDirection != SortDirection.DESCENDING ||
                 filters.visitedFilter != VisitedFilter.ALL ||
                 query.isNotEmpty() ||
@@ -117,7 +117,7 @@ class AdventuresViewModel(
         if (hasActiveFilters) {
             getAdventuresPagingUseCase(
                 categoryNames = filters.categoryNames.ifEmpty { null },
-                sortBy = if (filters.sortField != SortField.UPDATED_AT) filters.sortField.apiValue else null,
+                sortBy = if (filters.sortField != AdventureSortField.UPDATED_AT) filters.sortField.apiValue else null,
                 sortOrder = if (filters.sortDirection != SortDirection.DESCENDING) filters.sortDirection.apiValue else null,
                 isVisited = when (filters.visitedFilter) {
                     VisitedFilter.ALL -> null
@@ -164,7 +164,7 @@ class AdventuresViewModel(
     fun hasActiveFilters(): Boolean {
         val currentFilters = _filters.value
         return currentFilters.categoryNames.isNotEmpty() ||
-                currentFilters.sortField != SortField.UPDATED_AT ||
+                currentFilters.sortField != AdventureSortField.UPDATED_AT ||
                 currentFilters.sortDirection != SortDirection.DESCENDING ||
                 currentFilters.visitedFilter != VisitedFilter.ALL ||
                 currentFilters.includeCollections

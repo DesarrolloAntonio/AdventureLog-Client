@@ -22,6 +22,7 @@
   - Create/edit/delete collections
   - Search collections
   - Public/private visibility
+  - Sort collections (by name, date, updated)
 
 - ✅ **Categories System**
   - Custom categories with icons
@@ -58,6 +59,9 @@
   - Primary image selection
 
 ## 🚧 In Development (Current Sprint)
+
+### Collections Features
+- [ ] **Add Shared/Archived filters** (tabs in header)
 
 Currently focusing on bug fixes and performance improvements.
 
