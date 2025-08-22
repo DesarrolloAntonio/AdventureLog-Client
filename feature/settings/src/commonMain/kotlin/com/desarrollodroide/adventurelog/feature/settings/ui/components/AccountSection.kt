@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Feedback
@@ -22,7 +21,6 @@ import com.desarrollodroide.adventurelog.feature.settings.ui.screen.Item
 @Composable
 fun AccountSection(
     serverUrl: String,
-    onLogout: () -> Unit,
     onNavigateToTermsOfUse: () -> Unit,
     onNavigateToPrivacyPolicy: () -> Unit,
     onNavigateToSeverSettings: () -> Unit,
@@ -40,14 +38,6 @@ fun AccountSection(
             style = MaterialTheme.typography.titleSmall
         )
         Spacer(modifier = Modifier.height(5.dp))
-        ClickableOption(
-            Item(
-                title = "Logout",
-                subtitle = serverUrl,
-                icon = Icons.AutoMirrored.Filled.Logout,
-                onClick = onLogout
-            ),
-        )
         ClickableOption(
             Item(
                 title = "Server Settings Guide",

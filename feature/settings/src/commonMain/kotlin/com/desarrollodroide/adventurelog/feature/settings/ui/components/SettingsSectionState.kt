@@ -13,30 +13,6 @@ sealed class SettingsSectionState {
     ) : SettingsSectionState()
 
     /**
-     * Represents the feed settings section.
-     */
-    data class Feed(
-        val compactView: Boolean,
-    ) : SettingsSectionState()
-
-    /**
-     * Represents the defaults settings section.
-     */
-    data class Defaults(
-        val makeArchivePublic: Boolean,
-        val createEbook: Boolean,
-        val createArchive: Boolean,
-        val autoAddBookmark: Boolean
-    ) : SettingsSectionState()
-
-    /**
-     * Represents the data settings section.
-     */
-    data class Data(
-        val cacheSize: String
-    ) : SettingsSectionState()
-
-    /**
      * Represents an error state within the settings.
      */
     data class Error(val message: String) : SettingsSectionState()

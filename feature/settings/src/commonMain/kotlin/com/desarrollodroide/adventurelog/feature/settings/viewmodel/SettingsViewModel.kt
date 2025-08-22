@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.core.data.SettingsRepository
-import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -13,7 +12,6 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
-    private val logoutUseCase: LogoutUseCase
 //    private val imageLoader: ImageLoader
 ) : ViewModel() {
 
@@ -33,20 +31,6 @@ class SettingsViewModel(
 
     init {
         loadSettings()
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            try {
-                logoutUseCase()
-                println("Logout completed successfully")
-                // Note: Navigation back to login will be handled by the main navigation
-                // observing the user session state
-            } catch (e: Exception) {
-                println("Error during logout: ${e.message}")
-                // Even if logout fails, local data should be cleared by the UseCase
-            }
-        }
     }
 
     private fun loadSettings() {

@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,9 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
@@ -25,113 +22,53 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.constants.ADVENTURELOG_GITHUB_URL
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformActionsProvider
-import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformBackHandler
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.AccountSection
-import com.desarrollodroide.adventurelog.feature.settings.ui.components.DebugSection
-import com.desarrollodroide.adventurelog.feature.settings.ui.components.FeedSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisualSection
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreenRoute(
-    settingsViewModel: SettingsViewModel,
+fun SettingsScreen(
+    onNavigateToSourceCode: () -> Unit,
     onNavigateToTermsOfUse: () -> Unit,
     onNavigateToPrivacyPolicy: () -> Unit,
-    onNavigateToSourceCode: () -> Unit,
-    onNavigateToLogs: () -> Unit,
-    onViewLastCrash: () -> Unit,
-    goToLogin: () -> Unit,
-    onBack: () -> Unit
 ) {
-    PlatformBackHandler {
-        onBack()
-    }
-
-    val compactView by settingsViewModel.compactView.collectAsStateWithLifecycle()
-
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Settings", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-
-        Box(
-            modifier = Modifier
-                .padding(paddingValues)
-        ) {
-            SettingsContent(
-                onLogout = { settingsViewModel.logout() },
-                goToLogin = {
-                    //settingsViewModel.clearImageCache()
-                    goToLogin.invoke()
-                },
-                themeMode = settingsViewModel.themeMode,
-                onThemeModeChanged = { newMode ->
-                    settingsViewModel.setThemeMode(newMode)
-                },
-                compactView = compactView,
-                onCompactViewChanged = { isCompact ->
-                    settingsViewModel.setCompactView(isCompact)
-                },
-                onNavigateToTermsOfUse = onNavigateToTermsOfUse,
-                onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
-                onNavigateToSourceCode = onNavigateToSourceCode,
-                onNavigateToLogs = onNavigateToLogs,
-                onViewLastCrash = onViewLastCrash,
-                useDynamicColors = settingsViewModel.useDynamicColors,
-                onDynamicColorsChanged = { useDynamic ->
-                    settingsViewModel.setUseDynamicColors(useDynamic)
-                },
-                serverUrl = settingsViewModel.getServerUrl()
-            )
-        }
-    }
+    val settingsViewModel = koinViewModel<SettingsViewModel>()
+    
+    SettingsContent(
+        onNavigateToSourceCode = onNavigateToSourceCode,
+        onNavigateToTermsOfUse = onNavigateToTermsOfUse,
+        onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
+        themeMode = settingsViewModel.themeMode,
+        onThemeModeChanged = settingsViewModel::setThemeMode,
+        useDynamicColors = settingsViewModel.useDynamicColors,
+        onDynamicColorsChanged = settingsViewModel::setUseDynamicColors,
+        serverUrl = settingsViewModel.getServerUrl()
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsContent(
-    compactView: Boolean,
-    onCompactViewChanged: (Boolean) -> Unit,
-    onLogout: () -> Unit,
     onNavigateToSourceCode: () -> Unit,
     onNavigateToTermsOfUse: () -> Unit,
     onNavigateToPrivacyPolicy: () -> Unit,
-    onNavigateToLogs: () -> Unit,
-    onViewLastCrash: () -> Unit,
     themeMode: StateFlow<ThemeMode>,
     onThemeModeChanged: (ThemeMode) -> Unit,
     useDynamicColors: StateFlow<Boolean>,
     onDynamicColorsChanged: (Boolean) -> Unit,
-    goToLogin: () -> Unit,
     serverUrl: String,
     ) {
     val platformActions by PlatformActionsProvider.platformActions.collectAsState()
@@ -169,23 +106,8 @@ fun SettingsContent(
             )
             CustomHorizontalDivider()
             Spacer(modifier = Modifier.height(18.dp))
-            FeedSection(
-                compactView = compactView,
-                onCompactViewChanged = onCompactViewChanged,
-            )
-            CustomHorizontalDivider()
-            Spacer(modifier = Modifier.height(18.dp))
-            CustomHorizontalDivider()
-                Spacer(modifier = Modifier.height(18.dp))
-                DebugSection (
-                    onNavigateToLogs = onNavigateToLogs,
-                    onViewLastCrash = onViewLastCrash
-                )
-            CustomHorizontalDivider()
-            Spacer(modifier = Modifier.height(18.dp))
             AccountSection(
                 serverUrl = serverUrl,
-                onLogout = onLogout,
                 onNavigateToTermsOfUse = onNavigateToTermsOfUse,
                 onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
                 onNavigateToSeverSettings = {
@@ -251,19 +173,13 @@ private fun SettingsScreenLightPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             SettingsContent(
-                compactView = false,
-                onCompactViewChanged = {},
-                onLogout = {},
                 onNavigateToSourceCode = {},
                 onNavigateToTermsOfUse = {},
                 onNavigateToPrivacyPolicy = {},
-                onNavigateToLogs = {},
-                onViewLastCrash = {},
                 themeMode = MutableStateFlow(ThemeMode.LIGHT),
                 onThemeModeChanged = {},
                 useDynamicColors = MutableStateFlow(true),
                 onDynamicColorsChanged = {},
-                goToLogin = {},
                 serverUrl = "https://example-server.com"
             )
         }
@@ -276,19 +192,13 @@ private fun SettingsScreenDarkPreview() {
     MaterialTheme(colorScheme = darkColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             SettingsContent(
-                compactView = true,
-                onCompactViewChanged = {},
-                onLogout = {},
                 onNavigateToSourceCode = {},
                 onNavigateToTermsOfUse = {},
                 onNavigateToPrivacyPolicy = {},
-                onNavigateToLogs = {},
-                onViewLastCrash = {},
                 themeMode = MutableStateFlow(ThemeMode.DARK),
                 onThemeModeChanged = {},
                 useDynamicColors = MutableStateFlow(false),
                 onDynamicColorsChanged = {},
-                goToLogin = {},
                 serverUrl = "https://example-server.com"
             )
         }

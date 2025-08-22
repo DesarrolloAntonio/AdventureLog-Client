@@ -393,13 +393,9 @@ fun HomeScreenContent(
                         )
 
                         settingsScreen(
-                            onLogout = onLogout,
                             onNavigateToSourceCode = { /* TODO */ },
                             onNavigateToTermsOfUse = { /* TODO */ },
                             onNavigateToPrivacyPolicy = { /* TODO */ },
-                            onNavigateToLogs = { /* TODO */ },
-                            onViewLastCrash = { /* TODO */ },
-                            goToLogin = { /* TODO */ }
                         )
 
                         worldGraph(navController)

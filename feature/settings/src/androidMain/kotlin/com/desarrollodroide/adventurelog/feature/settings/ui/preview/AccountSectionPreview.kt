@@ -21,7 +21,6 @@ fun AccountSectionLightPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             AccountSection(
                 serverUrl = "https://example-server.com",
-                onLogout = {},
                 onNavigateToTermsOfUse = {},
                 onNavigateToPrivacyPolicy = {},
                 onNavigateToSeverSettings = {},
@@ -42,7 +41,6 @@ fun AccountSectionDarkPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             AccountSection(
                 serverUrl = "https://server-dark-mode.com",
-                onLogout = {},
                 onNavigateToTermsOfUse = {},
                 onNavigateToPrivacyPolicy = {},
                 onNavigateToSeverSettings = {},
@@ -63,7 +61,6 @@ fun AccountSectionNoServerPreview() {
         Surface(color = MaterialTheme.colorScheme.background) {
             AccountSection(
                 serverUrl = "",
-                onLogout = {},
                 onNavigateToTermsOfUse = {},
                 onNavigateToPrivacyPolicy = {},
                 onNavigateToSeverSettings = {},
