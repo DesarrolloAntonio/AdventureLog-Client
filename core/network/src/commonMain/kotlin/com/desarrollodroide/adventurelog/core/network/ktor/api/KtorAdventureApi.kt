@@ -300,7 +300,7 @@ internal class KtorAdventureApi(
             latitude = latitude.toCoordinateString(),
             longitude = longitude.toCoordinateString(),
             isPublic = isPublic,
-            tags = tags,  // Changed from activityTypes to tags
+            tags = tags,  
             collections = currentAdventure?.collections ?: emptyList(),
             category = category?.let { cat ->
                 CategoryRequest(
@@ -308,15 +308,7 @@ internal class KtorAdventureApi(
                     displayName = cat.displayName,
                     icon = cat.icon
                 )
-            },
-            visits = currentAdventure?.visits?.map { visit ->
-                VisitRequest(
-                    startDate = visit.startDate ?: "",
-                    endDate = visit.endDate ?: "",
-                    timezone = visit.timezone ?: "UTC",
-                    notes = visit.notes ?: ""
-                )
-            } ?: emptyList()
+            }
         )
 
         logger.d { "Updating adventure $adventureId" }
