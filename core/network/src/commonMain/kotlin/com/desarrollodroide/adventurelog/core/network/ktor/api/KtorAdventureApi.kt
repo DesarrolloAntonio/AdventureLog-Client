@@ -40,7 +40,7 @@ internal class KtorAdventureApi(
 
     override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/adventures/"
+        val url = "${session.baseUrl}/api/locations/"
 
         logger.d { "🌐 API Request - GET $url?page=$page&page_size=$pageSize" }
 
@@ -55,14 +55,14 @@ internal class KtorAdventureApi(
         if (!response.status.isSuccess()) {
             throw HttpException(
                 response.status.value,
-                "Failed to fetch adventures with status: ${response.status}"
+                "Failed to fetch locations with status: ${response.status}"
             )
         }
 
         val responseText = response.body<String>()
         val adventuresResponse = json.decodeFromString<AdventuresDTO>(responseText)
 
-        logger.d { "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} adventures for page $page (requested pageSize: $pageSize)" }
+        logger.d { "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} locations for page $page (requested pageSize: $pageSize)" }
         logger.d { "   Total count: ${adventuresResponse.count}" }
 
         return adventuresResponse.results ?: emptyList()
@@ -86,7 +86,7 @@ internal class KtorAdventureApi(
         }
 
         // Otherwise use the filtered endpoint
-        val url = "${session.baseUrl}/api/adventures/filtered/"
+        val url = "${session.baseUrl}/api/locations/filtered/"
 
         logger.d {
             "🌐 API Request - GET $url with filters: " +
@@ -182,16 +182,16 @@ internal class KtorAdventureApi(
         val searchResults = json.decodeFromString<SearchResultsDTO>(responseText)
 
         logger.d {
-            "📦 Search Response - Found ${searchResults.adventures?.size ?: 0} adventures " +
+            "📦 Search Response - Found ${searchResults.getLocationsList().size} locations " +
                     "for query: '$searchQuery'"
         }
 
-        return searchResults.adventures ?: emptyList()
+        return searchResults.getLocationsList()
     }
 
     override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/adventures/$objectId/"
+        val url = "${session.baseUrl}/api/locations/$objectId/"
 
         val response = httpClient.get(url) {
             headers {
@@ -202,7 +202,7 @@ internal class KtorAdventureApi(
         if (!response.status.isSuccess()) {
             throw HttpException(
                 response.status.value,
-                "Failed to fetch adventure detail with status: ${response.status}"
+                "Failed to fetch location detail with status: ${response.status}"
             )
         }
 
@@ -224,7 +224,7 @@ internal class KtorAdventureApi(
         activityTypes: List<String>
     ): AdventureDTO {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/adventures/"
+        val url = "${session.baseUrl}/api/locations/"
 
         val requestBody = createAdventureRequest(
             name = name,
@@ -256,10 +256,10 @@ internal class KtorAdventureApi(
             } catch (_: Exception) {
                 "Unable to read error body"
             }
-            logger.e { "Failed to create adventure. Status: ${response.status}, Error: $errorBody" }
+            logger.e { "Failed to create location. Status: ${response.status}, Error: $errorBody" }
             throw HttpException(
                 response.status.value,
-                "Failed to create adventure with status: ${response.status}. Error: $errorBody"
+                "Failed to create location with status: ${response.status}. Error: $errorBody"
             )
         }
 
@@ -281,7 +281,7 @@ internal class KtorAdventureApi(
         tags: List<String>
     ): AdventureDTO {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/adventures/$adventureId/"
+        val url = "${session.baseUrl}/api/locations/$adventureId/"
 
         // First, get the current adventure to preserve collections and visits
         val currentAdventure = try {
@@ -300,7 +300,7 @@ internal class KtorAdventureApi(
             latitude = latitude.toCoordinateString(),
             longitude = longitude.toCoordinateString(),
             isPublic = isPublic,
-            activityTypes = tags,
+            tags = tags,  // Changed from activityTypes to tags
             collections = currentAdventure?.collections ?: emptyList(),
             category = category?.let { cat ->
                 CategoryRequest(
@@ -335,10 +335,10 @@ internal class KtorAdventureApi(
             } catch (_: Exception) {
                 "Unable to read error body"
             }
-            logger.e { "Failed to update adventure. Status: ${response.status}, Error: $errorBody" }
+            logger.e { "Failed to update location. Status: ${response.status}, Error: $errorBody" }
             throw HttpException(
                 response.status.value,
-                "Failed to update adventure with status: ${response.status}. Error: $errorBody"
+                "Failed to update location with status: ${response.status}. Error: $errorBody"
             )
         }
 
@@ -348,7 +348,7 @@ internal class KtorAdventureApi(
 
     override suspend fun deleteAdventure(adventureId: String) {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/adventures/$adventureId/"
+        val url = "${session.baseUrl}/api/locations/$adventureId/"
 
         val response = httpClient.delete(url) {
             headers {
@@ -359,7 +359,7 @@ internal class KtorAdventureApi(
         if (!response.status.isSuccess()) {
             throw HttpException(
                 response.status.value,
-                "Failed to delete adventure with status: ${response.status}"
+                "Failed to delete location with status: ${response.status}"
             )
         }
     }

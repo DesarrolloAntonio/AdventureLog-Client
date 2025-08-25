@@ -9,11 +9,11 @@ data class AdventureDTO(
     @SerialName("id")
     val id: String? = null,
 
-    @SerialName("user_id")
-    val userId: String? = null,
+    @SerialName("user")
+    val user: UserDTO? = null,
 
     @SerialName("name")
-    val name: String,  // Required (*)
+    val name: String,
 
     @SerialName("description")
     val description: String? = null,
@@ -21,7 +21,7 @@ data class AdventureDTO(
     @SerialName("rating")
     val rating: Double? = null,
 
-    @SerialName("activity_types")
+    @SerialName("tags")
     val activityTypes: List<String>? = null,
 
     @SerialName("location")
@@ -55,7 +55,7 @@ data class AdventureDTO(
     val visits: List<VisitDTO>? = null,
 
     @SerialName("is_visited")
-    val isVisited: Boolean? = null,
+    val isVisited: String? = null,
 
     @SerialName("category")
     val category: CategoryDTO? = null,
@@ -70,12 +70,15 @@ data class AdventureDTO(
     val region: RegionDTO? = null,
     
     @SerialName("city")
-    val city: CityDTO? = null
+    val city: CityDTO? = null,
+    
+    @SerialName("trails")
+    val trails: List<TrailDTO>? = null
 )
 
 fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     id = id ?: "",
-    userId = userId ?: "",
+    userId = user?.uuid ?: "",
     name = name,
     description = description ?: "",
     rating = rating ?: 0.0,
@@ -90,7 +93,7 @@ fun AdventureDTO.toDomainModel(): Adventure = Adventure(
     longitude = longitude ?: "",
     latitude = latitude ?: "",
     visits = visits?.map { it.toDomainModel() } ?: emptyList(),
-    isVisited = isVisited ?: false,
+    isVisited = isVisited?.toBoolean() ?: false,
     category = category?.toDomainModel(),
     attachments = attachments?.map { it.toDomainModel() } ?: emptyList(),
     country = country?.toDomainModel(),

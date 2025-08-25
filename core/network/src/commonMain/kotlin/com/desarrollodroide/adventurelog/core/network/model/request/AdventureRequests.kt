@@ -8,8 +8,8 @@ data class CreateAdventureRequest(
     val name: String,
     val description: String? = null,
     val rating: Double? = null,
-    @SerialName("activity_types")
-    val activityTypes: List<String>? = null,
+    @SerialName("tags")
+    val tags: List<String>? = null,
     val location: String? = null,
     @SerialName("is_public")
     val isPublic: Boolean = false,
@@ -26,8 +26,8 @@ data class UpdateAdventureRequest(
     val name: String,
     val description: String,
     val rating: Double,
-    @SerialName("activity_types")
-    val activityTypes: List<String>,
+    @SerialName("tags")
+    val tags: List<String>,
     val location: String,
     @SerialName("is_public")
     val isPublic: Boolean,

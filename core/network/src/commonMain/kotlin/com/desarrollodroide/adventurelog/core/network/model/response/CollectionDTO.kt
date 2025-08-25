@@ -12,7 +12,7 @@ data class CollectionDTO(
     @SerialName("description")
     val description: String? = null,
 
-    @SerialName("user_id")
+    @SerialName("user")
     val userId: String? = null,
 
     @SerialName("name")
@@ -21,7 +21,7 @@ data class CollectionDTO(
     @SerialName("is_public")
     val isPublic: Boolean = false,
 
-    @SerialName("adventures")
+    @SerialName("locations")
     val adventures: List<AdventureDTO>? = null,
 
     @SerialName("created_at")

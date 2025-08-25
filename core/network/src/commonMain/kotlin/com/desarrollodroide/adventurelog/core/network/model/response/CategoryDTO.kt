@@ -11,15 +11,14 @@ data class CategoryDTO(
     @SerialName("display_name")
     val displayName: String,
     val icon: String? = null,
-    @SerialName("num_adventures")
+    @SerialName("num_locations")
     val numAdventures: String? = null
 )
-
 
 fun CategoryDTO.toDomainModel() = Category(
     id = id,
     name = name,
     displayName = displayName,
-    icon = icon?: "",
+    icon = icon ?: "",
     numAdventures = numAdventures ?: ""
 )

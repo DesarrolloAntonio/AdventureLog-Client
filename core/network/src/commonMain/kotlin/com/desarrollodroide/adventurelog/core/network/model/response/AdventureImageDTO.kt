@@ -12,23 +12,22 @@ data class AdventureImageDTO(
     @SerialName("image")
     val image: String? = null,
 
-    @SerialName("adventure")
-    val adventure: String,  // Required (*)
-
     @SerialName("is_primary")
     val isPrimary: Boolean = false,
 
-    @SerialName("user_id")
+    @SerialName("user")
     val userId: String? = null,
 
     @SerialName("immich_id")
-    val immichId: String? = null
+    val immichId: String? = null,
+    
+    val adventure: String? = null
 )
 
 fun AdventureImageDTO.toDomainModel() = AdventureImage(
     id = id ?: "",
     image = image ?: "",
-    adventure = adventure,
+    adventure = adventure ?: "",
     isPrimary = isPrimary,
     userId = userId ?: ""
 )

@@ -26,7 +26,6 @@ fun Visit.toVisitRequest(): VisitRequest {
 }
 
 fun VisitFormData.toVisitRequest(): VisitRequest {
-    // Convert date to ISO format with time and timezone
     val formattedStartDate = if (startDate.isNotEmpty()) {
         if (isAllDay) {
             "${startDate}T00:00:00Z"
@@ -72,7 +71,7 @@ fun createAdventureRequest(
         name = name,
         description = description.takeIf { it.isNotBlank() },
         rating = rating.takeIf { it > 0 },
-        activityTypes = activityTypes.takeIf { it.isNotEmpty() },
+        tags = activityTypes.takeIf { it.isNotEmpty() },
         location = location.takeIf { it.isNotBlank() },
         isPublic = isPublic,
         collections = emptyList(),

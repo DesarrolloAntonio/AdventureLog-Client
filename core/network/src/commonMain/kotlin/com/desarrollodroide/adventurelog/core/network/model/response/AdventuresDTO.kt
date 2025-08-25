@@ -22,7 +22,19 @@ data class AdventuresDTO(
             results = listOf(
                 AdventureDTO(
                     id = "da55cb2e-d2cf-4ff0-b243-86da0a5e5a2f",
-                    userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
+                    user = UserDTO(
+                        uuid = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
+                        username = "memnoch",
+                        firstName = "Antonio",
+                        lastName = "Corrales",
+                        profilePic = "http://192.168.1.27:8016/media/profile-pics/1200x655_iStock-2097492658.webp",
+                        publicProfile = true,
+                        measurementSystem = "metric",
+                        dateJoined = "2025-01-30T07:15:10.367579Z",
+                        isStaff = false,
+                        disablePassword = false,
+                        hasPassword = true
+                    ),
                     name = "Teruel",
                     description = "Albarracín\nMorada de Rubielos\nRubielos de Mora\nLinares de Mora\nMosqueruela\nCatavieja",
                     rating = null,
@@ -46,7 +58,7 @@ data class AdventuresDTO(
                     longitude = "-1.444279",
                     latitude = "40.407283",
                     visits = emptyList(),
-                    isVisited = false,
+                    isVisited = "false",
                     category = CategoryDTO(
                         id = "6c0a78cf-f657-45ca-9303-4bb1a7ab48e3",
                         name = "tour",
@@ -58,7 +70,19 @@ data class AdventuresDTO(
                 ),
                 AdventureDTO(
                     id = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-                    userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
+                    user = UserDTO(
+                        uuid = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
+                        username = "memnoch",
+                        firstName = "Antonio",
+                        lastName = "Corrales",
+                        profilePic = "http://192.168.1.27:8016/media/profile-pics/1200x655_iStock-2097492658.webp",
+                        publicProfile = true,
+                        measurementSystem = "metric",
+                        dateJoined = "2025-01-30T07:15:10.367579Z",
+                        isStaff = false,
+                        disablePassword = false,
+                        hasPassword = true
+                    ),
                     name = "Navalagamella",
                     description = "https://sendasdeviaje.com/navalagamella-ruta-molinos/",
                     rating = null,
@@ -82,7 +106,7 @@ data class AdventuresDTO(
                     longitude = "-4.122708",
                     latitude = "40.469059",
                     visits = emptyList(),
-                    isVisited = false,
+                    isVisited = "false",
                     category = CategoryDTO(
                         id = "87667725-8055-4754-be59-1155fac675f1",
                         name = "ruta",
@@ -96,6 +120,3 @@ data class AdventuresDTO(
         )
     }
 }
-
-
-
