@@ -12,17 +12,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
@@ -33,14 +40,88 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.c
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.TagsSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AddEditAdventureScreen(
+    adventureId: String?,
+    adventure: Adventure?,
+    navController: NavController
+) {
+    val viewModel = koinViewModel<AddEditAdventureViewModel> {
+        parametersOf(adventureId, adventure)
+    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Handle navigation when save is successful
+    LaunchedEffect(uiState.isSaved) {
+        if (uiState.isSaved) {
+            navController.navigateUp()
+            viewModel.clearSavedState()
+        }
+    }
+
+    // Show error if any
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        AddEditAdventureContent(
+            isEditMode = adventureId != null,
+            existingAdventure = uiState.existingAdventure,
+            categories = uiState.categories,
+            isLoading = uiState.isLoading,
+            onNavigateBack = {
+                navController.navigateUp()
+            },
+            onSave = { formData ->
+                viewModel.saveAdventure(formData)
+            },
+            onGenerateDescription = { name, onDescriptionGenerated ->
+                viewModel.generateDescription(name, onDescriptionGenerated)
+            },
+            isGeneratingDescription = uiState.isGeneratingDescription,
+            locationSearchResults = uiState.locationSearchResults,
+            isSearchingLocation = uiState.isSearchingLocation,
+            onSearchLocation = { query ->
+                viewModel.searchLocations(query)
+            },
+            onClearLocationSearch = {
+                viewModel.clearLocationSearch()
+            },
+            onReverseGeocode = { lat, lon ->
+                viewModel.reverseGeocode(lat, lon)
+            },
+            reverseGeocodeResult = uiState.reverseGeocodeResult,
+            wikipediaImageState = uiState.wikipediaImageState,
+            onSearchWikipediaImage = { query ->
+                viewModel.searchWikipediaImage(query)
+            },
+            onResetWikipediaState = {
+                viewModel.resetWikipediaImageState()
+            }
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
+}
+@Composable
+fun AddEditAdventureContent(
     isEditMode: Boolean = false,
-    existingAdventure: com.desarrollodroide.adventurelog.core.model.Adventure? = null,
+    existingAdventure: Adventure? = null,
     categories: List<Category>,
     isLoading: Boolean = false,
     onNavigateBack: () -> Unit,
@@ -190,7 +271,7 @@ private fun AddEditAdventureScreenPreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            AddEditAdventureScreen(
+            AddEditAdventureContent(
                 categories = listOf(
                     Category("1", "general", "General", "🌍", "0"),
                     Category("2", "hotel", "Hotel", "🏨", "0"),
@@ -246,7 +327,7 @@ private fun AddEditAdventureScreenWithDataPreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            AddEditAdventureScreen(
+            AddEditAdventureContent(
                 isEditMode = true,
                 existingAdventure = sampleAdventure,
                 categories = listOf(
@@ -286,7 +367,7 @@ private fun AddEditAdventureScreenDarkPreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            AddEditAdventureScreen(
+            AddEditAdventureContent(
                 categories = listOf(
                     Category("1", "general", "General", "🌍", "0"),
                     Category("2", "hotel", "Hotel", "🏨", "0"),
