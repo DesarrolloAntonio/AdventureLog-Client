@@ -26,7 +26,10 @@ class GetCollectionsUseCaseTest {
         private val _collectionsFlow = MutableStateFlow<List<Collection>>(emptyList())
         override val collectionsFlow: StateFlow<List<Collection>> = _collectionsFlow
 
-        override fun getCollectionsPagingData(): Flow<PagingData<Collection>> {
+        override fun getCollectionsPagingData(
+            sortField: String?,
+            sortDirection: String?
+        ): Flow<PagingData<Collection>> {
             return flowOf(PagingData.empty())
         }
 

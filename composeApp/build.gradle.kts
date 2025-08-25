@@ -95,8 +95,8 @@ android {
         applicationId = "com.desarrollodroide.adventurelog"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 5
-        versionName = "0.0.5-alpha"
+        versionCode = 6
+        versionName = "0.0.6-alpha"
 
         // Set the Maps API Key as a BuildConfig field
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
