@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPaging
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllAdventuresUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
@@ -17,6 +18,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCollectionUseCase
@@ -46,6 +48,7 @@ val domainModule = module {
     factoryOf(::GetAllAdventuresUseCase)
     factoryOf(::GetCollectionsUseCase)
     factoryOf(::GetCollectionsPagingUseCase)
+    factoryOf(::ObserveCollectionsUseCase)
     factoryOf(::GetCollectionDetailUseCase)
     factoryOf(::InitializeSessionUseCase)
     factoryOf(::SaveSessionUseCase)
@@ -53,6 +56,7 @@ val domainModule = module {
     factoryOf(::RememberMeCredentialsUseCase)
     factoryOf(::CreateAdventureUseCase)
     factoryOf(::UpdateAdventureUseCase)
+    factoryOf(::UpdateAdventureCollectionsUseCase)
     factoryOf(::DeleteAdventureUseCase)
     factoryOf(::CreateCollectionUseCase)
     factoryOf(::UpdateCollectionUseCase)

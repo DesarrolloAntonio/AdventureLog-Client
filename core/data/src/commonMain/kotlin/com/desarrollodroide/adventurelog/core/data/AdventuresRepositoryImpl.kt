@@ -282,7 +282,8 @@ class AdventuresRepositoryImpl(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        tags: List<String>
+        tags: List<String>,
+        collections: List<String>
     ): Either<ApiResponse, Adventure> {
         return try {
             val adventure = networkDataSource.updateAdventure(
@@ -296,7 +297,8 @@ class AdventuresRepositoryImpl(
                 latitude = latitude,
                 longitude = longitude,
                 isPublic = isPublic,
-                tags = tags
+                tags = tags,
+                collections = collections
             ).toDomainModel()
             
             // Update the adventure in the flow

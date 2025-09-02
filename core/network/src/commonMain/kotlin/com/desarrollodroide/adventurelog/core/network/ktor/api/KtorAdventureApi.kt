@@ -278,18 +278,11 @@ internal class KtorAdventureApi(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        tags: List<String>
+        tags: List<String>,
+        collections: List<String>
     ): AdventureDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/$adventureId/"
-
-        // First, get the current adventure to preserve collections and visits
-        val currentAdventure = try {
-            getAdventureDetail(adventureId)
-        } catch (_: Exception) {
-            logger.w { "Failed to get current adventure data, proceeding without it" }
-            null
-        }
 
         val updateRequest = UpdateAdventureRequest(
             name = name,
@@ -301,7 +294,7 @@ internal class KtorAdventureApi(
             longitude = longitude.toCoordinateString(),
             isPublic = isPublic,
             tags = tags,  
-            collections = currentAdventure?.collections ?: emptyList(),
+            collections = collections,
             category = category?.let { cat ->
                 CategoryRequest(
                     name = cat.name,
@@ -311,7 +304,7 @@ internal class KtorAdventureApi(
             }
         )
 
-        logger.d { "Updating adventure $adventureId" }
+        logger.d { "Updating adventure $adventureId with ${collections.size} collections" }
 
         val response = httpClient.patch(url) {
             contentType(ContentType.Application.Json)

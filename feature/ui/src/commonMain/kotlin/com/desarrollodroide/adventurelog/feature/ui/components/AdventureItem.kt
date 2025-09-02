@@ -37,7 +37,7 @@ fun AdventureItem(
     onClick: () -> Unit = {},
     onOpenDetails: () -> Unit = { onClick() },
     onEdit: () -> Unit = {},
-    onRemoveFromCollection: () -> Unit = {},
+    onManageCollections: () -> Unit = {},
     onDelete: () -> Unit = {},
     sessionToken: String = "",
     showMenu: Boolean = true
@@ -212,9 +212,9 @@ fun AdventureItem(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Remove from collection") },
+                            text = { Text("Manage Collections") },
                             onClick = {
-                                onRemoveFromCollection()
+                                onManageCollections()
                                 showDropdownMenu = false
                             }
                         )
@@ -251,7 +251,7 @@ private fun AdventureItemLightPreview() {
                         collections = PreviewData.collections,
                         onOpenDetails = {},
                         onEdit = {},
-                        onRemoveFromCollection = {},
+                        onManageCollections = {},
                         onDelete = {}
                     )
                 }
@@ -272,7 +272,7 @@ private fun AdventureItemDarkPreview() {
                         collections = PreviewData.collections,
                         onOpenDetails = {},
                         onEdit = {},
-                        onRemoveFromCollection = {},
+                        onManageCollections = {},
                         onDelete = {}
                     )
                 }
@@ -293,7 +293,7 @@ private fun AdventureItemPrivatePreview() {
                         collections = PreviewData.collections,
                         onOpenDetails = {},
                         onEdit = {},
-                        onRemoveFromCollection = {},
+                        onManageCollections = {},
                         onDelete = {}
                     )
                 }
@@ -323,7 +323,7 @@ private fun AdventureItemNoImagePreview() {
                         collections = PreviewData.collections,
                         onOpenDetails = {},
                         onEdit = {},
-                        onRemoveFromCollection = {},
+                        onManageCollections = {},
                         onDelete = {}
                     )
                 }

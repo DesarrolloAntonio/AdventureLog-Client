@@ -367,16 +367,11 @@ fun HomeScreenContent(
                         }
 
                         adventuresScreen(
-                            onAdventureClick = { adventure, _ ->
-                                // Temporarily pass empty collections list until backend provides collection names
-                                val adventureWithEmptyCollections = adventure.copy(
-                                    collections = emptyList()
-                                )
-
-                                onAdventureClick(adventureWithEmptyCollections)
+                            onAdventureClick = { adventure, collections ->
+                                // Now we have the actual collections from the adventure
+                                onAdventureClick(adventure)
                             },
-                            navController = navController,
-                            collections = emptyList() // Pass empty list for now
+                            navController = navController
                         )
 
                         collectionsScreen(

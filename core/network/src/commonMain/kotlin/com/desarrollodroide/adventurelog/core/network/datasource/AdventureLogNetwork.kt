@@ -199,7 +199,8 @@ interface AdventureLogNetwork {
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        tags: List<String>
+        tags: List<String>,
+        collections: List<String> = emptyList()
     ): AdventureDTO
 
     /**

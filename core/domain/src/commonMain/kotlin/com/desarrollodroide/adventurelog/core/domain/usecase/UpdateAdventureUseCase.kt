@@ -20,7 +20,8 @@ class UpdateAdventureUseCase(
         latitude: String?,
         longitude: String?,
         isPublic: Boolean,
-        tags: List<String>
+        tags: List<String>,
+        collections: List<String> = emptyList()
     ): Either<String, Adventure> {
         return when (val result = adventuresRepository.updateAdventure(
             adventureId = adventureId,
@@ -33,7 +34,8 @@ class UpdateAdventureUseCase(
             latitude = latitude,
             longitude = longitude,
             isPublic = isPublic,
-            tags = tags
+            tags = tags,
+            collections = collections
         )) {
             is Either.Left -> {
                 when (result.value) {

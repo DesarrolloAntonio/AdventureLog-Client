@@ -8,11 +8,15 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCategoryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCategoryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureFilters
 import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureSortField
@@ -36,10 +40,13 @@ import kotlinx.coroutines.launch
 class AdventuresViewModel(
     private val getAdventuresPagingUseCase: GetAdventuresPagingUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val getCollectionsUseCase: GetCollectionsUseCase,
+    private val observeCollectionsUseCase: ObserveCollectionsUseCase,
     private val deleteAdventureUseCase: DeleteAdventureUseCase,
     private val createCategoryUseCase: CreateCategoryUseCase,
     private val updateCategoryUseCase: UpdateCategoryUseCase,
-    private val deleteCategoryUseCase: DeleteCategoryUseCase
+    private val deleteCategoryUseCase: DeleteCategoryUseCase,
+    private val updateAdventureCollectionsUseCase: UpdateAdventureCollectionsUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -57,6 +64,14 @@ class AdventuresViewModel(
     private val _categoriesState = MutableStateFlow<CategoriesState>(CategoriesState.Loading)
     val categoriesState: StateFlow<CategoriesState> = _categoriesState.asStateFlow()
 
+    // Directly observe collections from repository
+    val collections: StateFlow<List<Collection>> = observeCollectionsUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     // Convenience property for backward compatibility
     @Suppress("unused")
     val categories: StateFlow<List<Category>> = _categoriesState.map { state ->
@@ -72,6 +87,9 @@ class AdventuresViewModel(
 
     private val _deleteState = MutableStateFlow<DeleteState>(DeleteState.Idle)
     val deleteState: StateFlow<DeleteState> = _deleteState.asStateFlow()
+    
+    private val _updateCollectionsState = MutableStateFlow<UpdateCollectionsState>(UpdateCollectionsState.Idle)
+    val updateCollectionsState: StateFlow<UpdateCollectionsState> = _updateCollectionsState.asStateFlow()
     
     private val _categoryOperationState = MutableStateFlow<CategoryOperationState>(CategoryOperationState.Idle)
     val categoryOperationState: StateFlow<CategoryOperationState> = _categoryOperationState.asStateFlow()
@@ -89,6 +107,13 @@ class AdventuresViewModel(
         data class Error(val message: String) : DeleteState()
     }
     
+    sealed class UpdateCollectionsState {
+        data object Idle : UpdateCollectionsState()
+        data object Loading : UpdateCollectionsState()
+        data object Success : UpdateCollectionsState()
+        data class Error(val message: String) : UpdateCollectionsState()
+    }
+    
     sealed class CategoryOperationState {
         data object Idle : CategoryOperationState()
         data object Loading : CategoryOperationState()
@@ -98,6 +123,13 @@ class AdventuresViewModel(
 
     init {
         loadCategories()
+        // Trigger initial load of collections if empty
+        viewModelScope.launch {
+            if (observeCollectionsUseCase().value.isEmpty()) {
+                // This will populate the collectionsFlow in the repository
+                getCollectionsUseCase(page = 1, pageSize = 100)
+            }
+        }
     }
 
     val adventuresPagingData: Flow<PagingData<Adventure>> = combine(
@@ -272,5 +304,25 @@ class AdventuresViewModel(
     
     fun clearCategoryOperationState() {
         _categoryOperationState.value = CategoryOperationState.Idle
+    }
+
+    fun updateAdventureCollections(adventureId: String, collectionIds: List<String>) {
+        viewModelScope.launch {
+            _updateCollectionsState.value = UpdateCollectionsState.Loading
+            
+            when (val result = updateAdventureCollectionsUseCase(adventureId, collectionIds)) {
+                is Either.Left -> {
+                    _updateCollectionsState.value = UpdateCollectionsState.Error(result.value)
+                }
+                is Either.Right -> {
+                    _updateCollectionsState.value = UpdateCollectionsState.Success
+                    // The paging data will automatically refresh due to repository updating
+                }
+            }
+        }
+    }
+    
+    fun clearUpdateCollectionsState() {
+        _updateCollectionsState.value = UpdateCollectionsState.Idle
     }
 }
