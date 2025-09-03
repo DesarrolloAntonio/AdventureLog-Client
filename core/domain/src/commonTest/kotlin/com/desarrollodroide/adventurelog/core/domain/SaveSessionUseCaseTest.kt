@@ -77,7 +77,6 @@ class SaveSessionUseCaseTest {
     @Test
     fun `invoke handles different user details correctly`() = runTest {
         val userDetails = UserDetails(
-            id = 2,
             profilePic = "https://example.com/pic.jpg",
             uuid = "12345",
             publicProfile = false,
@@ -87,7 +86,7 @@ class SaveSessionUseCaseTest {
             lastName = "Doe",
             dateJoined = "2023-01-01",
             isStaff = true,
-            hasPassword = "true",
+            hasPassword = true,
             sessionToken = "session-123",
             serverUrl = "https://example.com"
         )
@@ -103,7 +102,6 @@ class SaveSessionUseCaseTest {
     }
 
     private fun createFakeUserDetails() = UserDetails(
-        id = 1,
         profilePic = null,
         uuid = "test-uuid",
         publicProfile = true,
@@ -113,7 +111,7 @@ class SaveSessionUseCaseTest {
         lastName = "User",
         dateJoined = "2024-01-01",
         isStaff = false,
-        hasPassword = "true",
+        hasPassword = true,
         sessionToken = "test-session-token",
         serverUrl = "https://test.com"
     )

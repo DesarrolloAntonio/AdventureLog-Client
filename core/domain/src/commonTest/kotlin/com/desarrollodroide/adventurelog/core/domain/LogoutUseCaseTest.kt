@@ -10,7 +10,7 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
@@ -87,11 +87,11 @@ class LogoutUseCaseTest {
             throw NotImplementedError()
         }
 
-        override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
+        override suspend fun getAdventures(page: Int, pageSize: Int): List<LocationDTO> {
             throw NotImplementedError()
         }
 
-        override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
+        override suspend fun getAdventureDetail(objectId: String): LocationDTO {
             throw NotImplementedError()
         }
 
@@ -123,7 +123,7 @@ class LogoutUseCaseTest {
             isPublic: Boolean,
             visits: List<VisitFormData>,
             activityTypes: List<String>
-        ): AdventureDTO {
+        ): LocationDTO {
             throw NotImplementedError()
         }
 
@@ -175,7 +175,7 @@ class LogoutUseCaseTest {
             isVisited: Boolean?,
             searchQuery: String?,
             includeCollections: Boolean
-        ): List<AdventureDTO> {
+        ): List<LocationDTO> {
             throw NotImplementedError()
         }
 
@@ -219,8 +219,9 @@ class LogoutUseCaseTest {
             latitude: String?,
             longitude: String?,
             isPublic: Boolean,
-            tags: List<String>
-        ): AdventureDTO {
+            tags: List<String>,
+            collections: List<String>
+        ): LocationDTO {
             throw NotImplementedError()
         }
 

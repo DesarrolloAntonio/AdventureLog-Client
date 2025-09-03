@@ -10,7 +10,7 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
@@ -92,11 +92,11 @@ class InitializeSessionUseCaseTest {
             throw NotImplementedError()
         }
 
-        override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
+        override suspend fun getAdventures(page: Int, pageSize: Int): List<LocationDTO> {
             throw NotImplementedError()
         }
 
-        override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
+        override suspend fun getAdventureDetail(objectId: String): LocationDTO {
             throw NotImplementedError()
         }
 
@@ -128,7 +128,7 @@ class InitializeSessionUseCaseTest {
             isPublic: Boolean,
             visits: List<VisitFormData>,
             activityTypes: List<String>
-        ): AdventureDTO {
+        ): LocationDTO {
             throw NotImplementedError()
         }
 
@@ -180,7 +180,7 @@ class InitializeSessionUseCaseTest {
             isVisited: Boolean?,
             searchQuery: String?,
             includeCollections: Boolean
-        ): List<AdventureDTO> {
+        ): List<LocationDTO> {
             throw NotImplementedError()
         }
 
@@ -224,8 +224,9 @@ class InitializeSessionUseCaseTest {
             latitude: String?,
             longitude: String?,
             isPublic: Boolean,
-            tags: List<String>
-        ): AdventureDTO {
+            tags: List<String>,
+            collections: List<String>
+        ): LocationDTO {
             throw NotImplementedError()
         }
 
@@ -322,18 +323,18 @@ class InitializeSessionUseCaseTest {
     }
 
     private fun createFakeUserDetails() = UserDetails(
-        id = 1,
-        profilePic = null,
-        uuid = "test-uuid",
-        publicProfile = true,
+        uuid = "user123",
         username = "testuser",
-        email = "test@example.com",
         firstName = "Test",
         lastName = "User",
-        dateJoined = "2024-01-01",
+        profilePic = "",
+        publicProfile = true,
+        measurementSystem = "metric",
+        dateJoined = "2024-01-01T00:00:00Z",
         isStaff = false,
-        hasPassword = "true",
-        sessionToken = "test-session-token",
-        serverUrl = "https://test.com"
+        disablePassword = false,
+        hasPassword = true,
+        serverUrl = "https://test.com",
+        sessionToken = "test-session-token"
     )
 }

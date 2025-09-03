@@ -132,7 +132,7 @@ class GetCollectionDetailUseCaseTest {
             description = "Test collection description",
             userId = "user123",
             isPublic = true,
-            adventures = emptyList(),
+            locations = emptyList(),
             createdAt = "2024-01-01T00:00:00Z",
             startDate = null,
             endDate = null,

@@ -5,8 +5,9 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,15 +21,15 @@ import kotlin.test.assertTrue
 class GetAdventuresUseCaseTest {
 
     private class FakeAdventuresRepository : AdventuresRepository {
-        var getAdventuresResult: Either<ApiResponse, List<Adventure>> = Either.Right(emptyList())
+        var getAdventuresResult: Either<ApiResponse, List<Location>> = Either.Right(emptyList())
         var getAdventuresCallCount = 0
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
 
-        private val _adventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
-        override val adventuresFlow: StateFlow<List<Adventure>> = _adventuresFlow
+        private val _adventuresFlow = MutableStateFlow<List<Location>>(emptyList())
+        override val adventuresFlow: StateFlow<List<Location>> = _adventuresFlow
 
-        override fun getAdventuresPagingData(): Flow<PagingData<Adventure>> {
+        override fun getAdventuresPagingData(): Flow<PagingData<Location>> {
             return flowOf(PagingData.empty())
         }
 
@@ -39,22 +40,22 @@ class GetAdventuresUseCaseTest {
             isVisited: Boolean?,
             searchQuery: String?,
             includeCollections: Boolean
-        ): Flow<PagingData<Adventure>> {
+        ): Flow<PagingData<Location>> {
             return flowOf(PagingData.empty())
         }
 
-        override suspend fun getAllAdventures(): Either<ApiResponse, List<Adventure>> {
+        override suspend fun getAllAdventures(): Either<ApiResponse, List<Location>> {
             return getAdventuresResult
         }
 
-        override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>> {
+        override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Location>> {
             getAdventuresCallCount++
             lastPageParam = page
             lastPageSizeParam = pageSize
             return getAdventuresResult
         }
 
-        override suspend fun getAdventure(objectId: String): Either<ApiResponse, Adventure> {
+        override suspend fun getAdventure(objectId: String): Either<ApiResponse, Location> {
             throw NotImplementedError()
         }
 
@@ -70,11 +71,11 @@ class GetAdventuresUseCaseTest {
             isPublic: Boolean,
             visits: List<VisitFormData>,
             activityTypes: List<String>
-        ): Either<ApiResponse, Adventure> {
+        ): Either<ApiResponse, Location> {
             throw NotImplementedError()
         }
 
-        override suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>> {
+        override suspend fun refreshAdventures(): Either<ApiResponse, List<Location>> {
             return getAdventuresResult
         }
 
@@ -97,8 +98,9 @@ class GetAdventuresUseCaseTest {
             latitude: String?,
             longitude: String?,
             isPublic: Boolean,
-            tags: List<String>
-        ): Either<ApiResponse, Adventure> {
+            tags: List<String>,
+            collections: List<String>
+        ): Either<ApiResponse, Location> {
             throw NotImplementedError()
         }
     }
@@ -175,14 +177,13 @@ class GetAdventuresUseCaseTest {
         assertTrue(result.value.isEmpty())
     }
 
-    private fun createFakeAdventure(id: String, name: String): Adventure {
-        return Adventure(
+    private fun createFakeAdventure(id: String, name: String): Location {
+        return Location(
             id = id,
-            userId = "user123",
             name = name,
             description = "Test adventure description",
             rating = 4.5,
-            activityTypes = listOf("Hiking", "Outdoor"),
+            tags = listOf("Hiking", "Outdoor"), // CORRECCIÓN: 'activityTypes' renombrado a 'tags'
             location = "Test Location",
             isPublic = true,
             collections = listOf("test-collection"),
@@ -195,7 +196,28 @@ class GetAdventuresUseCaseTest {
             visits = emptyList(),
             isVisited = false,
             category = null,
-            attachments = emptyList()
+            attachments = emptyList(),
+            user = createFakeUser(),
+            city = null,
+            country = null,
+            region = null,
+            trails = emptyList()
+        )
+    }
+
+    private fun createFakeUser(): UserDetails {
+        return UserDetails(
+            uuid = "user123",
+            username = "testuser",
+            firstName = "Test",
+            lastName = "User",
+            profilePic = "",
+            publicProfile = true,
+            measurementSystem = "metric",
+            dateJoined = "2024-01-01T00:00:00Z",
+            isStaff = false,
+            disablePassword = false,
+            hasPassword = true
         )
     }
 }

@@ -88,7 +88,6 @@ class LoginUseCaseTest {
 
     companion object {
         private fun createFakeUserDetails() = UserDetails(
-            id = 1,
             profilePic = null,
             uuid = "test-uuid",
             publicProfile = true,
@@ -98,7 +97,7 @@ class LoginUseCaseTest {
             lastName = "User",
             dateJoined = "2024-01-01",
             isStaff = false,
-            hasPassword = "true",
+            hasPassword = true,
             sessionToken = "test-session-token",
             serverUrl = "https://test.com"
         )
