@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.model
 
-import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.UserStats
+import com.desarrollodroide.adventurelog.core.model.Location
 
 sealed interface HomeUiState {
     data object Empty : HomeUiState
@@ -9,6 +8,6 @@ sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Success(
         val userName: String = "",
-        val recentAdventures: List<Adventure> = emptyList()
+        val recentLocations: List<Location> = emptyList()
     ) : HomeUiState
 }

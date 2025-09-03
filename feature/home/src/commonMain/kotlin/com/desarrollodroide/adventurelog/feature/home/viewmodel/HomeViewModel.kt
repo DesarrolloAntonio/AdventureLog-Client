@@ -92,7 +92,7 @@ class HomeViewModel(
                         _uiState.update {
                             HomeUiState.Success(
                                 userName = _userDetails.value?.firstName ?: "User",
-                                recentAdventures = recentAdventures
+                                recentLocations = recentAdventures
                             )
                         }
                         println("LOADED ADVENTURES SUCCESSFULLY: ${allAdventures.size} total, showing ${recentAdventures.size} recent")

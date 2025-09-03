@@ -8,7 +8,7 @@ import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
  */
 enum class CurrentScreen(val route: String, val index: Int, val title: String) {
     HOME(NavigationRoutes.Home.screen, 0, "Home"), // Title will be customized in getTitle()
-    ADVENTURES(NavigationRoutes.Adventures.route, 1, "Adventures"),
+    ADVENTURES(NavigationRoutes.Adventures.route, 1, "Locations"),
     COLLECTIONS(NavigationRoutes.Collections.route, 2, "Collections"),
     TRAVEL(NavigationRoutes.Travel.route, 3, "Travel"),
     MAP(NavigationRoutes.Map.route, 4, "Map"),

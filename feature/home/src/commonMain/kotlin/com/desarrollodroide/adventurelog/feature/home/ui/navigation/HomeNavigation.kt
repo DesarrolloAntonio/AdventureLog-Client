@@ -5,10 +5,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.home.ui.screen.HomeScreenRoute
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 
 interface HomeNavigator {
-    fun goToDetail(adventure: Adventure)
+    fun goToDetail(location: Location)
     fun goToLogin()
 }
 

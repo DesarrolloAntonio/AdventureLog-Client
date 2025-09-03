@@ -243,7 +243,7 @@ fun DrawerContentBody(
                 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Animate the Adventures section title
+                // Animate the Locations section title
                 AnimatedSectionTitle(
                     title = "MY ADVENTURES",
                     visible = visible,

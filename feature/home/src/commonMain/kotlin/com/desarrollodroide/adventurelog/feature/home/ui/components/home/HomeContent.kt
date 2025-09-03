@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
@@ -54,7 +54,7 @@ fun HomeContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     statsState: StatsUiState,
-    onAdventureClick: (Adventure) -> Unit = { },
+    onAdventureClick: (Location) -> Unit = { },
     sessionToken: String = ""
 ) {
     Box(
@@ -88,7 +88,7 @@ fun HomeContent(
                 HomeContentSuccess(
                     userName = homeUiState.userName,
                     statsState = statsState,
-                    recentAdventures = homeUiState.recentAdventures,
+                    recentLocations = homeUiState.recentLocations,
                     onAdventureClick = onAdventureClick,
                     sessionToken = sessionToken
                 )
@@ -101,8 +101,8 @@ fun HomeContent(
 private fun HomeContentSuccess(
     userName: String,
     statsState: StatsUiState,
-    recentAdventures: List<Adventure>,
-    onAdventureClick: (Adventure) -> Unit = { },
+    recentLocations: List<Location>,
+    onAdventureClick: (Location) -> Unit = { },
     sessionToken: String = "",
     modifier: Modifier = Modifier
 ) {
@@ -135,9 +135,9 @@ private fun HomeContentSuccess(
             )
         }
         
-        items(recentAdventures) { adventure ->
+        items(recentLocations) { adventure ->
             AdventureItem(
-                adventure = adventure,
+                location = adventure,
                 onClick = { onAdventureClick(adventure) },
                 sessionToken = sessionToken,
                 showMenu = false

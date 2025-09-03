@@ -65,7 +65,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection as AdventureCollection
 import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import androidx.compose.ui.layout.ContentScale
@@ -77,7 +77,7 @@ import com.desarrollodroide.adventurelog.resources.main_background
 @Composable
 fun HomeScreenRoute(
     viewModel: HomeViewModel = koinViewModel(),
-    onAdventureClick: (Adventure) -> Unit = { },
+    onAdventureClick: (Location) -> Unit = { },
     onNavigateToLogin: () -> Unit = { }
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -115,7 +115,7 @@ fun HomeScreenContent(
     homeUiState: HomeUiState,
     statsState: StatsUiState,
     userDetails: UserDetails? = null,
-    onAdventureClick: (Adventure) -> Unit = { },
+    onAdventureClick: (Location) -> Unit = { },
     onLogout: () -> Unit = {}
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -369,14 +369,14 @@ fun HomeScreenContent(
                             )
                         }
 
-                        // Adventures screen with navigator
+                        // Locations screen with navigator
                         adventuresScreen(
                             navigator = object : AdventuresNavigator {
                                 override fun navigateToAdventureDetail(
-                                    adventure: Adventure,
+                                    location: Location,
                                     collections: List<AdventureCollection>
                                 ) {
-                                    onAdventureClick(adventure)
+                                    onAdventureClick(location)
                                 }
                                 
                                 override fun navigateToAddAdventure() {
@@ -413,8 +413,8 @@ fun HomeScreenContent(
                                     navController.navigate("edit_collection/$collectionId")
                                 }
                                 
-                                override fun navigateToAdventure(adventure: Adventure) {
-                                    onAdventureClick(adventure)
+                                override fun navigateToAdventure(location: Location) {
+                                    onAdventureClick(location)
                                 }
                                 
                                 override fun navigateToHome() {
@@ -507,11 +507,11 @@ private fun HomeScreenSuccessPreview() {
         HomeScreenContent(
             homeUiState = HomeUiState.Success(
                 userName = "Antonio",
-                recentAdventures = emptyList()
+                recentLocations = emptyList()
             ),
             statsState = StatsUiState.Success(sampleStats),
             userDetails = UserDetails(
-                id = 123,
+                pk = 123, // Se cambia 'id' por 'pk'
                 username = "antonio",
                 firstName = "Antonio",
                 lastName = "García",
@@ -522,7 +522,7 @@ private fun HomeScreenSuccessPreview() {
                 sessionToken = "token123",
                 uuid = "user-uuid-123",
                 publicProfile = true,
-                hasPassword = "true",
+                hasPassword = true,
                 serverUrl = "https://example-server.com"
             )
         )

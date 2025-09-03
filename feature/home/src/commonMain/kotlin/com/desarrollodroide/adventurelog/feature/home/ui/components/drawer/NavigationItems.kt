@@ -26,7 +26,7 @@ fun createNavigationItems(
             onClick = onHomeClick
         ),
         NavigationItem(
-            title = "Adventures",
+            title = "Locations",
             icon = Icons.Outlined.Explore,
             selectedIcon = Icons.Filled.Explore,
             onClick = onAdventuresClick

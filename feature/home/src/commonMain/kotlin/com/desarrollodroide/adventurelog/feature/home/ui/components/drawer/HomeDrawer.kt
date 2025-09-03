@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,7 +50,7 @@ fun HomeDrawer(
     }
     
     val adventureCount = when (homeUiState) {
-        is HomeUiState.Success -> homeUiState.recentAdventures.size
+        is HomeUiState.Success -> homeUiState.recentLocations.size
         else -> 0
     }
     
