@@ -82,9 +82,18 @@ class KtorAuthApi(
 
             return UserDetailsDTO(
                 id = loginResponse.data.user.id,
+                uuid = loginResponse.data.user.uuid ?: "",
                 username = loginResponse.data.user.username,
                 email = loginResponse.data.user.email,
-                hasPassword = if (loginResponse.data.user.hasUsablePassword) "true" else "false",
+                firstName = loginResponse.data.user.firstName,
+                lastName = loginResponse.data.user.lastName,
+                profilePic = loginResponse.data.user.profilePic,
+                publicProfile = loginResponse.data.user.publicProfile ?: false,
+                measurementSystem = loginResponse.data.user.measurementSystem,
+                dateJoined = loginResponse.data.user.dateJoined,
+                isStaff = loginResponse.data.user.isStaff ?: false,
+                disablePassword = loginResponse.data.user.disablePassword ?: false,
+                hasPassword = loginResponse.data.user.hasUsablePassword ?: true,
                 sessionToken = sessionToken
             )
         } else {

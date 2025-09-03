@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.network.datasource
 
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
@@ -22,7 +22,7 @@ interface AdventureLogNetwork {
     suspend fun getAdventures(
         page: Int,
         pageSize: Int
-    ): List<AdventureDTO>
+    ): List<LocationDTO>
 
     /**
      * Get filtered and paginated list of adventures
@@ -36,14 +36,14 @@ interface AdventureLogNetwork {
         isVisited: Boolean? = null,
         searchQuery: String? = null,
         includeCollections: Boolean = false
-    ): List<AdventureDTO>
+    ): List<LocationDTO>
 
     /**
      * Get adventure details by ID
      */
     suspend fun getAdventureDetail(
         objectId: String
-    ): AdventureDTO
+    ): LocationDTO
 
     /**
      * Get paginated list of collections
@@ -103,7 +103,7 @@ interface AdventureLogNetwork {
         isPublic: Boolean,
         visits: List<VisitFormData>,
         activityTypes: List<String> = emptyList()
-    ): AdventureDTO
+    ): LocationDTO
 
     /**
      * Create a new collection
@@ -201,7 +201,7 @@ interface AdventureLogNetwork {
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String> = emptyList()
-    ): AdventureDTO
+    ): LocationDTO
 
     /**
      * Delete a collection

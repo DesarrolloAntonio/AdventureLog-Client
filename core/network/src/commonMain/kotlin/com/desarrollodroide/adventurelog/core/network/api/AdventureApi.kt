@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.api
 
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
@@ -11,7 +11,7 @@ interface AdventureApi {
     suspend fun getAdventures(
         page: Int,
         pageSize: Int
-    ): List<AdventureDTO>
+    ): List<LocationDTO>
 
     /**
      * Get filtered and paginated list of adventures
@@ -26,14 +26,14 @@ interface AdventureApi {
         isVisited: Boolean? = null,
         searchQuery: String? = null,
         includeCollections: Boolean = false
-    ): List<AdventureDTO>
+    ): List<LocationDTO>
 
     /**
      * Get adventure details by ID
      */
     suspend fun getAdventureDetail(
         objectId: String
-    ): AdventureDTO
+    ): LocationDTO
     
     /**
      * Create a new adventure
@@ -50,7 +50,7 @@ interface AdventureApi {
         isPublic: Boolean,
         visits: List<VisitFormData>,
         activityTypes: List<String> = emptyList()
-    ): AdventureDTO
+    ): LocationDTO
     
     /**
      * Update an existing adventure
@@ -68,7 +68,7 @@ interface AdventureApi {
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String> = emptyList()
-    ): AdventureDTO
+    ): LocationDTO
     
     /**
      * Delete an adventure

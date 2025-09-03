@@ -1,15 +1,16 @@
 package com.desarrollodroide.adventurelog.core.network.model.response
 
+import com.desarrollodroide.adventurelog.core.model.Transportation
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TransportationDTO(
     @SerialName("id")
-    val id: String? = null,
+    val id: String,
 
-    @SerialName("user_id")
-    val userId: String? = null,
+    @SerialName("user")
+    val user: Int,
 
     @SerialName("type")
     val type: String,
@@ -45,10 +46,10 @@ data class TransportationDTO(
     val collection: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String? = null,
+    val createdAt: String,
 
     @SerialName("updated_at")
-    val updatedAt: String? = null,
+    val updatedAt: String,
 
     @SerialName("end_date")
     val endDate: String? = null,
@@ -69,5 +70,42 @@ data class TransportationDTO(
     val startTimezone: String? = null,
 
     @SerialName("end_timezone")
-    val endTimezone: String? = null
+    val endTimezone: String? = null,
+
+    @SerialName("distance")
+    val distance: String? = null,
+
+    @SerialName("images")
+    val images: String? = null,
+
+    @SerialName("attachments")
+    val attachments: String? = null
+)
+
+fun TransportationDTO.toDomainModel(): Transportation = Transportation(
+    id = id,
+    user = user,
+    type = type,
+    name = name,
+    description = description,
+    rating = rating,
+    link = link,
+    date = date,
+    flightNumber = flightNumber,
+    fromLocation = fromLocation,
+    toLocation = toLocation,
+    isPublic = isPublic,
+    collection = collection,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    endDate = endDate,
+    originLatitude = originLatitude,
+    originLongitude = originLongitude,
+    destinationLatitude = destinationLatitude,
+    destinationLongitude = destinationLongitude,
+    startTimezone = startTimezone,
+    endTimezone = endTimezone,
+    distance = distance,
+    images = images,
+    attachments = attachments
 )

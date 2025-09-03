@@ -8,11 +8,10 @@ import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdventureRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.UpdateAdventureRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.UpdateLocationRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventuresDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LocationsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
 import com.desarrollodroide.adventurelog.core.network.utils.toCoordinateString
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
@@ -38,7 +37,7 @@ internal class KtorAdventureApi(
 
     private val logger = Logger.withTag("KtorAdventureNetworkDataSource")
 
-    override suspend fun getAdventures(page: Int, pageSize: Int): List<AdventureDTO> {
+    override suspend fun getAdventures(page: Int, pageSize: Int): List<LocationDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/"
 
@@ -60,7 +59,7 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        val adventuresResponse = json.decodeFromString<AdventuresDTO>(responseText)
+        val adventuresResponse = json.decodeFromString<LocationsDTO>(responseText)
 
         logger.d { "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} locations for page $page (requested pageSize: $pageSize)" }
         logger.d { "   Total count: ${adventuresResponse.count}" }
@@ -77,7 +76,7 @@ internal class KtorAdventureApi(
         isVisited: Boolean?,
         searchQuery: String?,
         includeCollections: Boolean
-    ): List<AdventureDTO> {
+    ): List<LocationDTO> {
         val session = sessionProvider()
 
         // If there's a search query, use the search endpoint
@@ -141,7 +140,7 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        val adventuresResponse = json.decodeFromString<AdventuresDTO>(responseText)
+        val adventuresResponse = json.decodeFromString<LocationsDTO>(responseText)
 
         logger.d {
             "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} filtered adventures " +
@@ -151,7 +150,7 @@ internal class KtorAdventureApi(
         return adventuresResponse.results ?: emptyList()
     }
 
-    private suspend fun searchAdventures(searchQuery: String): List<AdventureDTO> {
+    private suspend fun searchAdventures(searchQuery: String): List<LocationDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/search/"
 
@@ -189,7 +188,7 @@ internal class KtorAdventureApi(
         return searchResults.getLocationsList()
     }
 
-    override suspend fun getAdventureDetail(objectId: String): AdventureDTO {
+    override suspend fun getAdventureDetail(objectId: String): LocationDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/$objectId/"
 
@@ -207,7 +206,7 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<AdventureDTO>(responseText)
+        return json.decodeFromString<LocationDTO>(responseText)
     }
 
     override suspend fun createAdventure(
@@ -222,7 +221,7 @@ internal class KtorAdventureApi(
         isPublic: Boolean,
         visits: List<VisitFormData>,
         activityTypes: List<String>
-    ): AdventureDTO {
+    ): LocationDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/"
 
@@ -264,7 +263,7 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<AdventureDTO>(responseText)
+        return json.decodeFromString<LocationDTO>(responseText)
     }
 
     override suspend fun updateAdventure(
@@ -280,11 +279,11 @@ internal class KtorAdventureApi(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String>
-    ): AdventureDTO {
+    ): LocationDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/$adventureId/"
 
-        val updateRequest = UpdateAdventureRequest(
+        val updateRequest = UpdateLocationRequest(
             name = name,
             description = description,
             rating = rating,
@@ -328,7 +327,7 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<AdventureDTO>(responseText)
+        return json.decodeFromString<LocationDTO>(responseText)
     }
 
     override suspend fun deleteAdventure(adventureId: String) {

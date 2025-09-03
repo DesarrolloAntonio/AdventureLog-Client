@@ -22,7 +22,7 @@ data class CollectionDTO(
     val isPublic: Boolean = false,
 
     @SerialName("locations")
-    val adventures: List<AdventureDTO>? = null,
+    val adventures: List<LocationDTO>? = null,
 
     @SerialName("created_at")
     val createdAt: String? = null,
@@ -64,7 +64,7 @@ fun CollectionDTO.toDomainModel(): Collection = Collection(
     userId = userId ?: "",
     name = name,
     isPublic = isPublic,
-    adventures = adventures?.map { it.toDomainModel() } ?: emptyList(),
+    locations = adventures?.map { it.toDomainModel() } ?: emptyList(),
     createdAt = createdAt ?: "",
     startDate = startDate,
     endDate = endDate,

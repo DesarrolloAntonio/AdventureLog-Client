@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateAdventureRequest(
+data class CreateLocationRequest(
     val name: String,
     val description: String? = null,
     val rating: Double? = null,
@@ -22,7 +22,7 @@ data class CreateAdventureRequest(
 )
 
 @Serializable
-data class UpdateAdventureRequest(
+data class UpdateLocationRequest(
     val name: String,
     val description: String,
     val rating: Double,
@@ -44,11 +44,11 @@ data class UpdateAdventureRequest(
 @Serializable
 data class VisitRequest(
     @SerialName("start_date")
-    val startDate: String,
+    val startDate: String?,
     @SerialName("end_date")
-    val endDate: String,
-    val timezone: String,
-    val notes: String
+    val endDate: String?,
+    val timezone: String?,
+    val notes: String?
 )
 
 @Serializable

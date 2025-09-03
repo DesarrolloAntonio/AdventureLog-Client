@@ -25,11 +25,28 @@ data class LoginData(
 @Serializable
 data class LoginUserData(
     val id: Int,
+    val uuid: String? = null,
     val display: String,
     @SerialName("has_usable_password")
-    val hasUsablePassword: Boolean,
+    val hasUsablePassword: Boolean? = null,
     val email: String,
-    val username: String
+    val username: String,
+    @SerialName("first_name")
+    val firstName: String? = null,
+    @SerialName("last_name")
+    val lastName: String? = null,
+    @SerialName("profile_pic")
+    val profilePic: String? = null,
+    @SerialName("public_profile")
+    val publicProfile: Boolean? = null,
+    @SerialName("measurement_system")
+    val measurementSystem: String? = null,
+    @SerialName("date_joined")
+    val dateJoined: String? = null,
+    @SerialName("is_staff")
+    val isStaff: Boolean? = null,
+    @SerialName("disable_password")
+    val disablePassword: Boolean? = null
 )
 
 @Serializable

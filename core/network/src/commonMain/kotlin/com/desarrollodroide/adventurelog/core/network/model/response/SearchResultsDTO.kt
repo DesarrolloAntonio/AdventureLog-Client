@@ -6,30 +6,30 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SearchResultsDTO(
     @SerialName("locations")
-    val locations: List<AdventureDTO>? = null,
-    
+    val locations: List<LocationDTO>? = null,
+
     @SerialName("collections")
     val collections: List<CollectionDTO>? = null,
-    
+
     @SerialName("users")
     val users: List<UserDetailsDTO>? = null,
-    
+
     @SerialName("countries")
     val countries: List<CountryDTO>? = null,
-    
+
     @SerialName("regions")
     val regions: List<RegionDTO>? = null,
-    
+
     @SerialName("cities")
     val cities: List<CityDTO>? = null,
-    
+
     @SerialName("visited_regions")
     val visitedRegions: List<VisitedRegionDTO>? = null,
-    
+
     @SerialName("visited_cities")
     val visitedCities: List<VisitedCityDTO>? = null
 ) {
-    fun getLocationsList(): List<AdventureDTO> {
+    fun getLocationsList(): List<LocationDTO> {
         return locations ?: emptyList()
     }
 }

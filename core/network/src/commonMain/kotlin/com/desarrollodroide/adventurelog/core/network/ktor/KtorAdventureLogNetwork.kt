@@ -1,7 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network.ktor
 
 import co.touchlab.kermit.Logger
-import com.desarrollodroide.adventurelog.core.network.model.response.AdventureDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
@@ -158,7 +158,7 @@ class KtorAdventureLogNetwork(
     override suspend fun getAdventures(
         page: Int,
         pageSize: Int
-    ): List<AdventureDTO> {
+    ): List<LocationDTO> {
         ensureInitialized()
         return adventureDataSource.getAdventures(page, pageSize)
     }
@@ -172,7 +172,7 @@ class KtorAdventureLogNetwork(
         isVisited: Boolean?,
         searchQuery: String?,
         includeCollections: Boolean
-    ): List<AdventureDTO> {
+    ): List<LocationDTO> {
         ensureInitialized()
         return adventureDataSource.getAdventuresFiltered(
             page = page,
@@ -188,7 +188,7 @@ class KtorAdventureLogNetwork(
 
     override suspend fun getAdventureDetail(
         objectId: String
-    ): AdventureDTO {
+    ): LocationDTO {
         ensureInitialized()
         return adventureDataSource.getAdventureDetail(objectId)
     }
@@ -220,7 +220,7 @@ class KtorAdventureLogNetwork(
         isPublic: Boolean,
         visits: List<VisitFormData>,
         activityTypes: List<String>
-    ): AdventureDTO {
+    ): LocationDTO {
         ensureInitialized()
         return adventureDataSource.createAdventure(
             name = name,
@@ -351,7 +351,7 @@ class KtorAdventureLogNetwork(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String>
-    ): AdventureDTO {
+    ): LocationDTO {
         ensureInitialized()
         return adventureDataSource.updateAdventure(
             adventureId = adventureId,

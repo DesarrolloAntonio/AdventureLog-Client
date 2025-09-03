@@ -1,15 +1,17 @@
 package com.desarrollodroide.adventurelog.core.network.model.response
 
+import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.ChecklistItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ChecklistDTO(
     @SerialName("id")
-    val id: String? = null,
+    val id: String,
 
-    @SerialName("user_id")
-    val userId: String? = null,
+    @SerialName("user")
+    val user: Int,
 
     @SerialName("name")
     val name: String,
@@ -24,10 +26,10 @@ data class ChecklistDTO(
     val collection: String? = null,
 
     @SerialName("created_at")
-    val createdAt: String? = null,
+    val createdAt: String,
 
     @SerialName("updated_at")
-    val updatedAt: String? = null,
+    val updatedAt: String,
 
     @SerialName("items")
     val items: List<ChecklistItemDTO>
@@ -36,10 +38,10 @@ data class ChecklistDTO(
 @Serializable
 data class ChecklistItemDTO(
     @SerialName("id")
-    val id: String? = null,
+    val id: String,
 
-    @SerialName("user_id")
-    val userId: String? = null,
+    @SerialName("user")
+    val user: Int,
 
     @SerialName("name")
     val name: String,
@@ -48,11 +50,33 @@ data class ChecklistItemDTO(
     val isChecked: Boolean = false,
 
     @SerialName("checklist")
-    val checklist: String? = null,
+    val checklist: String,
 
     @SerialName("created_at")
-    val createdAt: String? = null,
+    val createdAt: String,
 
     @SerialName("updated_at")
-    val updatedAt: String? = null
+    val updatedAt: String
+)
+
+fun ChecklistDTO.toDomainModel(): Checklist = Checklist(
+    id = id,
+    user = user,
+    name = name,
+    date = date,
+    isPublic = isPublic,
+    collection = collection,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    items = items.map { it.toDomainModel() }
+)
+
+fun ChecklistItemDTO.toDomainModel(): ChecklistItem = ChecklistItem(
+    id = id,
+    user = user,
+    name = name,
+    isChecked = isChecked,
+    checklist = checklist,
+    createdAt = createdAt,
+    updatedAt = updatedAt
 )

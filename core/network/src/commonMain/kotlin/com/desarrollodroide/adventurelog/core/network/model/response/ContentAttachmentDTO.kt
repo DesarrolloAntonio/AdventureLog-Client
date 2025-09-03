@@ -4,8 +4,9 @@ import com.desarrollodroide.adventurelog.core.model.Attachment
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// This is the same as AttachmentDTO - they represent the same entity
 @Serializable
-data class AttachmentDTO(
+data class ContentAttachmentDTO(
     @SerialName("id")
     val id: String,
     
@@ -25,7 +26,7 @@ data class AttachmentDTO(
     val geojson: String? = null
 )
 
-fun AttachmentDTO.toDomainModel(): Attachment = Attachment(
+fun ContentAttachmentDTO.toDomainModel(): Attachment = Attachment(
     id = id,
     file = file,
     extension = extension,

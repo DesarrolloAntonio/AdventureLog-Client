@@ -4,7 +4,7 @@ import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
-import com.desarrollodroide.adventurelog.core.network.model.request.CreateAdventureRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.CreateLocationRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
 import com.desarrollodroide.adventurelog.core.network.utils.toCoordinateString
 
@@ -66,8 +66,8 @@ fun createAdventureRequest(
     isPublic: Boolean,
     visits: List<VisitFormData>,
     activityTypes: List<String> = emptyList()
-): CreateAdventureRequest {
-    return CreateAdventureRequest(
+): CreateLocationRequest {
+    return CreateLocationRequest(
         name = name,
         description = description.takeIf { it.isNotBlank() },
         rating = rating.takeIf { it > 0 },

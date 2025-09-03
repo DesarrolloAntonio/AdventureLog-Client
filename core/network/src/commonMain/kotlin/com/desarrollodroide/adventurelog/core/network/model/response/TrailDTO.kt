@@ -1,24 +1,25 @@
 package com.desarrollodroide.adventurelog.core.network.model.response
 
+import com.desarrollodroide.adventurelog.core.model.Trail
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TrailDTO(
     @SerialName("id")
-    val id: String? = null,
+    val id: String,
     
     @SerialName("user")
-    val user: String? = null,
+    val user: String,
     
     @SerialName("name")
     val name: String,
     
     @SerialName("location")
-    val location: String? = null,
+    val location: String,
     
     @SerialName("created_at")
-    val createdAt: String? = null,
+    val createdAt: String,
     
     @SerialName("link")
     val link: String? = null,
@@ -34,4 +35,17 @@ data class TrailDTO(
     
     @SerialName("wanderer_link")
     val wandererLink: String? = null
+)
+
+fun TrailDTO.toDomainModel(): Trail = Trail(
+    id = id,
+    user = user,
+    name = name,
+    location = location,
+    createdAt = createdAt,
+    link = link,
+    wandererId = wandererId,
+    provider = provider,
+    wandererData = wandererData,
+    wandererLink = wandererLink
 )

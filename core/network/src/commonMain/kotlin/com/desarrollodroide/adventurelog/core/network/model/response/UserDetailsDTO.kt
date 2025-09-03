@@ -13,13 +13,16 @@ data class UserDetailsDTO(
     val profilePic: String? = null,
 
     @SerialName("uuid")
-    val uuid: String? = null,
+    val uuid: String,
 
     @SerialName("public_profile")
-    val publicProfile: Boolean? = null,
+    val publicProfile: Boolean = false,
+
+    @SerialName("measurement_system")
+    val measurementSystem: String? = null,
 
     @SerialName("username")
-    val username: String? = null,
+    val username: String,
 
     @SerialName("email")
     val email: String? = null,
@@ -34,27 +37,32 @@ data class UserDetailsDTO(
     val dateJoined: String? = null,
 
     @SerialName("is_staff")
-    val isStaff: Boolean? = null,
+    val isStaff: Boolean = false,
+
+    @SerialName("disable_password")
+    val disablePassword: Boolean = false,
 
     @SerialName("has_password")
-    val hasPassword: String? = null,
+    val hasPassword: Boolean = true,
     
     @SerialName("session_token")
     val sessionToken: String? = null
 )
 
 fun UserDetailsDTO.toDomainModel(serverUrl: String = ""): UserDetails = UserDetails(
-    id = id ?: -1,
+    pk = id,
     profilePic = profilePic,
-    uuid = uuid ?: "",
-    publicProfile = publicProfile ?: false,
-    username = username ?: "",
-    email = email ?: "",
+    uuid = uuid,
+    publicProfile = publicProfile,
+    measurementSystem = measurementSystem ?: "metric",
+    username = username,
+    email = email,
     firstName = firstName ?: "",
     lastName = lastName ?: "",
     dateJoined = dateJoined ?: "",
-    isStaff = isStaff ?: false,
-    hasPassword = hasPassword ?: "",
-    sessionToken = sessionToken?: "",
+    isStaff = isStaff,
+    disablePassword = disablePassword,
+    hasPassword = hasPassword,
+    sessionToken = sessionToken ?: "",
     serverUrl = serverUrl
 )
