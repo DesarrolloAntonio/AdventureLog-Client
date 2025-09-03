@@ -296,7 +296,7 @@ private fun IncludeCollectionsSection(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Collection Adventures",
+                    text = "Collection Locations",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )

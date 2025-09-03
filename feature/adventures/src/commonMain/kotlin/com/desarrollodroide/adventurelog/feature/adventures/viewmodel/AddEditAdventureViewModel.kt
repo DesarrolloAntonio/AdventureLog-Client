@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GenerateDescriptionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchLocationsUseCase
@@ -28,7 +28,7 @@ data class AddEditAdventureUiState(
     val isSaved: Boolean = false,
     val errorMessage: String? = null,
     val categories: List<Category> = emptyList(),
-    val existingAdventure: Adventure? = null,
+    val existingLocation: Location? = null,
     val isGeneratingDescription: Boolean = false,
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
@@ -54,7 +54,7 @@ class AddEditAdventureViewModel(
     private val reverseGeocodeUseCase: ReverseGeocodeUseCase,
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
     private val adventureId: String? = null,
-    private val existingAdventure: Adventure? = null
+    private val existingLocation: Location? = null
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddEditAdventureUiState())
@@ -62,8 +62,8 @@ class AddEditAdventureViewModel(
     
     init {
         loadCategories()
-        if (existingAdventure != null) {
-            _uiState.value = _uiState.value.copy(existingAdventure = existingAdventure)
+        if (existingLocation != null) {
+            _uiState.value = _uiState.value.copy(existingLocation = existingLocation)
         } else if (adventureId != null) {
             loadAdventure(adventureId)
         }
@@ -71,7 +71,7 @@ class AddEditAdventureViewModel(
     
     private fun loadAdventure(adventureId: String) {
         // Only load from server if we don't already have the adventure
-        if (_uiState.value.existingAdventure != null) {
+        if (_uiState.value.existingLocation != null) {
             return
         }
         
@@ -88,7 +88,7 @@ class AddEditAdventureViewModel(
                 is Either.Right -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        existingAdventure = result.value
+                        existingLocation = result.value
                     )
                 }
             }

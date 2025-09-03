@@ -5,18 +5,18 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection as AdventureCollection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditAdventureScreen
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.adventuresList.AdventureListScreen
 import kotlinx.serialization.json.Json
 
 /**
- * Navigator interface for Adventures feature
- * Defines external navigation actions that the Adventures feature can trigger
+ * Navigator interface for Locations feature
+ * Defines external navigation actions that the Locations feature can trigger
  */
 interface AdventuresNavigator {
-    fun navigateToAdventureDetail(adventure: Adventure, collections: List<AdventureCollection>)
+    fun navigateToAdventureDetail(location: Location, collections: List<AdventureCollection>)
     fun navigateToAddAdventure()
     fun navigateToEditAdventure(adventureId: String, adventureJson: String)
     fun navigateBack()
@@ -34,7 +34,7 @@ fun NavGraphBuilder.adventuresScreen(
         isLenient = true
     }
     
-    // Adventures List Screen
+    // Locations List Screen
     composable(route = NavigationRoutes.Adventures.route) {
         AdventureListScreen(
             onAdventureClick = { adventure, collections ->
@@ -54,7 +54,7 @@ fun NavGraphBuilder.adventuresScreen(
     composable(route = NavigationRoutes.Adventures.add) {
         AddEditAdventureScreen(
             adventureId = null,
-            adventure = null,
+            location = null,
             onNavigateBack = {
                 navigator.navigateBack()
             }
@@ -76,15 +76,15 @@ fun NavGraphBuilder.adventuresScreen(
         val adventureId = backStackEntry.savedStateHandle.get<String>("adventureId") ?: ""
         val adventureJson = backStackEntry.savedStateHandle.get<String>("adventureJson") ?: ""
         
-        val adventure = if (adventureJson.isNotEmpty()) {
-            json.decodeFromString<Adventure>(adventureJson)
+        val location = if (adventureJson.isNotEmpty()) {
+            json.decodeFromString<Location>(adventureJson)
         } else {
             null
         }
         
         AddEditAdventureScreen(
             adventureId = adventureId,
-            adventure = adventure,
+            location = location,
             onNavigateBack = {
                 navigator.navigateBack()
             }

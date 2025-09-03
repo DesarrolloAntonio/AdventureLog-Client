@@ -28,10 +28,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.City
+import com.desarrollodroide.adventurelog.core.model.Country
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
+import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Region
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
+import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.BasicInfoSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.DateSection
@@ -40,8 +45,8 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.c
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.TagsSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
-import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
+import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -49,11 +54,11 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun AddEditAdventureScreen(
     adventureId: String?,
-    adventure: Adventure?,
+    location: Location?,
     onNavigateBack: () -> Unit
 ) {
     val viewModel = koinViewModel<AddEditAdventureViewModel> {
-        parametersOf(adventureId, adventure)
+        parametersOf(adventureId, location)
     }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -77,7 +82,7 @@ fun AddEditAdventureScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         AddEditAdventureContent(
             isEditMode = adventureId != null,
-            existingAdventure = uiState.existingAdventure,
+            existingLocation = uiState.existingLocation,
             categories = uiState.categories,
             isLoading = uiState.isLoading,
             onNavigateBack = onNavigateBack,
@@ -118,7 +123,7 @@ fun AddEditAdventureScreen(
 @Composable
 fun AddEditAdventureContent(
     isEditMode: Boolean = false,
-    existingAdventure: Adventure? = null,
+    existingLocation: Location? = null,
     categories: List<Category>,
     isLoading: Boolean = false,
     onNavigateBack: () -> Unit,
@@ -136,26 +141,26 @@ fun AddEditAdventureContent(
     onResetWikipediaState: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    var formData by remember(existingAdventure) {
+    var formData by remember(existingLocation) {
         mutableStateOf(
-            if (existingAdventure != null) {
+            if (existingLocation != null) {
                 AdventureFormData(
-                    name = existingAdventure.name,
-                    description = existingAdventure.description,
-                    category = existingAdventure.category,
-                    rating = existingAdventure.rating.toInt(),
-                    link = existingAdventure.link,
-                    location = existingAdventure.location,
-                    latitude = existingAdventure.latitude,
-                    longitude = existingAdventure.longitude,
-                    isPublic = existingAdventure.isPublic,
-                    tags = existingAdventure.activityTypes,
-                    visits = existingAdventure.visits.map { visit ->
+                    name = existingLocation.name,
+                    description = existingLocation.description?:"",
+                    category = existingLocation.category,
+                    rating = existingLocation.rating?.toInt() ?: 0,
+                    link = existingLocation.link?:"",
+                    location = existingLocation.location?:"",
+                    latitude = existingLocation.latitude,
+                    longitude = existingLocation.longitude,
+                    isPublic = existingLocation.isPublic,
+                    tags = existingLocation.tags,
+                    visits = existingLocation.visits.map { visit ->
                         VisitFormData(
-                            startDate = visit.startDate,
+                            startDate = visit.startDate?:"",
                             endDate = visit.endDate,
-                            timezone = visit.timezone,
-                            notes = visit.notes,
+                            timezone = visit.timezone?:"",
+                            notes = visit.notes?:"",
                             isAllDay = true // Default to true since Visit model doesn't have this field
                         )
                     }
@@ -167,25 +172,28 @@ fun AddEditAdventureContent(
             }
         )
     }
-    
+
     // Update location when reverse geocode completes
-    reverseGeocodeResult?.displayName?.let { displayName ->
-        if (formData.location.isEmpty()) {
-            formData = formData.copy(location = displayName)
+    LaunchedEffect(reverseGeocodeResult) {
+        reverseGeocodeResult?.displayName?.let { displayName ->
+            if (formData.location?.isEmpty() == true) {
+                formData = formData.copy(location = displayName)
+            }
         }
     }
 
-    if (isLoading && existingAdventure == null && isEditMode) {
+
+    if (isLoading && existingLocation == null && isEditMode) {
         // Show loading state while loading adventure for edit
         Box(
             modifier = modifier.fillMaxSize(),
-            contentAlignment = androidx.compose.ui.Alignment.Center
+            contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
         }
         return
     }
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -193,72 +201,82 @@ fun AddEditAdventureContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-            BasicInfoSection(
-                formData = formData,
-                categories = categories,
-                onFormDataChange = { formData = it },
-                onNavigateBack = onNavigateBack,
-                onGenerateDescription = {
-                    onGenerateDescription(formData.name) { generatedDescription ->
-                        formData = formData.copy(description = generatedDescription)
-                    }
-                },
-                isGeneratingDescription = isGeneratingDescription
-            )
-
-            LocationSection(
-                formData = formData,
-                onFormDataChange = { formData = it },
-                locationSearchResults = locationSearchResults,
-                isSearchingLocation = isSearchingLocation,
-                onSearchLocation = onSearchLocation,
-                onClearLocationSearch = onClearLocationSearch,
-                onReverseGeocode = onReverseGeocode
-            )
-
-            TagsSection(
-                formData = formData,
-                onFormDataChange = { formData = it }
-            )
-
-            ImagesSection(
-                formData = formData,
-                onFormDataChange = { formData = it },
-                wikipediaImageState = wikipediaImageState,
-                onSearchWikipediaImage = onSearchWikipediaImage,
-                onResetWikipediaState = onResetWikipediaState
-            )
-
-            DateSection(
-                formData = formData,
-                onFormDataChange = { formData = it }
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                PrimaryButton(
-                    onClick = { onSave(formData) },
-                    text = if (isEditMode) "Update Adventure" else "Create Adventure"
-                )
-
-                TextButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Cancel",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        BasicInfoSection(
+            formData = formData,
+            categories = categories,
+            onFormDataChange = { formData = it },
+            onNavigateBack = onNavigateBack,
+            onGenerateDescription = {
+                onGenerateDescription(formData.name) { generatedDescription ->
+                    formData = formData.copy(description = generatedDescription)
                 }
-            }
+            },
+            isGeneratingDescription = isGeneratingDescription
+        )
 
-            Spacer(modifier = Modifier.height(32.dp))
+        LocationSection(
+            formData = formData,
+            onFormDataChange = { formData = it },
+            locationSearchResults = locationSearchResults,
+            isSearchingLocation = isSearchingLocation,
+            onSearchLocation = onSearchLocation,
+            onClearLocationSearch = onClearLocationSearch,
+            onReverseGeocode = onReverseGeocode
+        )
+
+        TagsSection(
+            formData = formData,
+            onFormDataChange = { formData = it }
+        )
+
+        ImagesSection(
+            formData = formData,
+            onFormDataChange = { formData = it },
+            wikipediaImageState = wikipediaImageState,
+            onSearchWikipediaImage = onSearchWikipediaImage,
+            onResetWikipediaState = onResetWikipediaState
+        )
+
+        DateSection(
+            formData = formData,
+            onFormDataChange = { formData = it }
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            PrimaryButton(
+                onClick = { onSave(formData) },
+                text = if (isEditMode) "Update Adventure" else "Create Adventure"
+            )
+
+            TextButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Cancel",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
+
+private val mockUser = UserDetails(
+    uuid = "user123",
+    username = "previewUser",
+    dateJoined = "2025-01-01T00:00:00Z"
+)
+private val mockCountry = Country(id = 1, name = "Spain", countryCode = "ES", flagUrl = "", numRegions = 1, numVisits = 1, subregion = "Southern Europe", capital = "Madrid", longitude = -3.703790, latitude = 40.416775)
+private val mockRegion = Region(id = "region-madrid", name = "Community of Madrid", countryName = "Spain", numCities = 1, longitude = -3.703790, latitude = 40.416775, countryId = 1)
+private val mockCity = City(id = "city-madrid", name = "Madrid", regionName = "Community of Madrid", countryName = "Spain", longitude = -3.703790, latitude = 40.416775, regionId = "region-madrid")
+
 
 @Preview
 @Composable
@@ -289,9 +307,9 @@ private fun AddEditAdventureScreenPreview() {
 @Preview
 @Composable
 private fun AddEditAdventureScreenWithDataPreview() {
-    val sampleAdventure = com.desarrollodroide.adventurelog.core.model.Adventure(
+    val sampleLocation = Location(
         id = "1",
-        userId = "user123",
+        user = mockUser,
         name = "Visit to Prado Museum",
         description = "An incredible experience visiting one of the most important art galleries in the world.",
         category = Category("3", "museum", "Museum", "🏛️", "0"),
@@ -301,24 +319,30 @@ private fun AddEditAdventureScreenWithDataPreview() {
         latitude = "40.4138",
         longitude = "-3.6921",
         isPublic = true,
-        activityTypes = listOf("art", "culture", "madrid"),
+        tags = listOf("art", "culture", "madrid"),
         visits = listOf(
-            com.desarrollodroide.adventurelog.core.model.Visit(
+            Visit(
                 id = "1",
+                location = "1",
                 startDate = "2024-01-15",
                 endDate = "2024-01-15",
                 timezone = "Europe/Madrid",
-                notes = "Amazing collection of Velázquez paintings"
+                notes = "Amazing collection of Velázquez paintings",
+                createdAt = "2024-01-15T10:00:00Z",
+                updatedAt = "2024-01-15T10:00:00Z"
             )
         ),
-        createdAt = "",
-        updatedAt = "",
+        createdAt = "2024-01-10T10:00:00Z",
+        updatedAt = "2024-01-11T10:00:00Z",
         images = emptyList(),
         collections = emptyList(),
         isVisited = true,
-        attachments = emptyList()
+        attachments = emptyList(),
+        city = mockCity,
+        country = mockCountry,
+        region = mockRegion
     )
-    
+
     MaterialTheme {
         Surface(
             color = MaterialTheme.colorScheme.background,
@@ -326,7 +350,7 @@ private fun AddEditAdventureScreenWithDataPreview() {
         ) {
             AddEditAdventureContent(
                 isEditMode = true,
-                existingAdventure = sampleAdventure,
+                existingLocation = sampleLocation,
                 categories = listOf(
                     Category("1", "general", "General", "🌍", "0"),
                     Category("2", "hotel", "Hotel", "🏨", "0"),

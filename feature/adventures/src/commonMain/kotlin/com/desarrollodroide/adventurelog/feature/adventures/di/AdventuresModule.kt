@@ -34,7 +34,7 @@ val adventureModule = module {
             reverseGeocodeUseCase = get(),
             searchWikipediaImageUseCase = get(),
             adventureId = params.getOrNull(),
-            existingAdventure = params.getOrNull()
+            existingLocation = params.getOrNull()
         )
     }
 }

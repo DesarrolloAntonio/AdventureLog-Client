@@ -14,7 +14,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCas
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.SortDirection
@@ -132,7 +132,7 @@ class AdventuresViewModel(
         }
     }
 
-    val adventuresPagingData: Flow<PagingData<Adventure>> = combine(
+    val adventuresPagingData: Flow<PagingData<Location>> = combine(
         _searchQuery.debounce(300).distinctUntilChanged(),
         _filters
     ) { query, filters ->

@@ -49,7 +49,7 @@ import app.cash.paging.LoadStateNotLoading
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.AdventuresFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
@@ -62,9 +62,9 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AdventureListScreen(
-    onAdventureClick: (Adventure, List<Collection>) -> Unit = { _, _ -> },
+    onAdventureClick: (Location, List<Collection>) -> Unit = { _, _ -> },
     onAddAdventureClick: () -> Unit = { },
-    onEditAdventure: (Adventure) -> Unit = { },
+    onEditAdventure: (Location) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: AdventuresViewModel = koinViewModel()
 ) {
@@ -79,8 +79,8 @@ fun AdventureListScreen(
     val updateCollectionsState by viewModel.updateCollectionsState.collectAsStateWithLifecycle()
     val categoryOperationState by viewModel.categoryOperationState.collectAsStateWithLifecycle()
 
-    var adventureToDelete by remember { mutableStateOf<Adventure?>(null) }
-    var adventureToManageCollections by remember { mutableStateOf<Adventure?>(null) }
+    var locationToDelete by remember { mutableStateOf<Location?>(null) }
+    var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     if (showFilters) {
@@ -112,8 +112,8 @@ fun AdventureListScreen(
         onSearchQueryChange = viewModel::onSearchQueryChange,
         onShowFilters = viewModel::showFilters,
         onEditAdventure = onEditAdventure,
-        onDeleteAdventure = { adventure -> adventureToDelete = adventure },
-        onManageCollections = { adventure -> adventureToManageCollections = adventure },
+        onDeleteAdventure = { adventure -> locationToDelete = adventure },
+        onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
             pagingItems.refresh()
@@ -178,23 +178,23 @@ fun AdventureListScreen(
     }
 
     // Delete confirmation dialog
-    adventureToDelete?.let { adventure ->
+    locationToDelete?.let { adventure ->
         AlertDialog(
-            onDismissRequest = { adventureToDelete = null },
+            onDismissRequest = { locationToDelete = null },
             title = { Text("Delete Adventure") },
             text = { Text("Are you sure you want to delete \"${adventure.name}\"? This action cannot be undone.") },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.deleteAdventure(adventure.id)
-                        adventureToDelete = null
+                        locationToDelete = null
                     }
                 ) {
                     Text("Delete", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { adventureToDelete = null }) {
+                TextButton(onClick = { locationToDelete = null }) {
                     Text("Cancel")
                 }
             }
@@ -202,15 +202,15 @@ fun AdventureListScreen(
     }
 
     // Manage Collections dialog
-    adventureToManageCollections?.let { adventure ->
+    locationToManageCollections?.let { adventure ->
         ManageCollectionsDialog(
-            adventure = adventure,
+            location = adventure,
             allCollections = collections,
             onUpdateCollections = { adventureId, collectionIds ->
                 viewModel.updateAdventureCollections(adventureId, collectionIds)
-                adventureToManageCollections = null
+                locationToManageCollections = null
             },
-            onDismiss = { adventureToManageCollections = null }
+            onDismiss = { locationToManageCollections = null }
         )
     }
 }
@@ -218,19 +218,19 @@ fun AdventureListScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AdventureListContent(
-    pagingItems: LazyPagingItems<Adventure>,
+    pagingItems: LazyPagingItems<Location>,
     searchQuery: String,
     hasActiveFilters: Boolean,
     collections: List<Collection>,
     isRefreshing: Boolean,
     snackbarHostState: SnackbarHostState,
-    onAdventureClick: (Adventure, List<Collection>) -> Unit,
+    onAdventureClick: (Location, List<Collection>) -> Unit,
     onAddAdventureClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onShowFilters: () -> Unit,
-    onEditAdventure: (Adventure) -> Unit,
-    onDeleteAdventure: (Adventure) -> Unit,
-    onManageCollections: (Adventure) -> Unit,
+    onEditAdventure: (Location) -> Unit,
+    onDeleteAdventure: (Location) -> Unit,
+    onManageCollections: (Location) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -375,12 +375,12 @@ private fun AdventureListContent(
 
 @Composable
 private fun AdventuresPagingList(
-    pagingItems: LazyPagingItems<Adventure>,
+    pagingItems: LazyPagingItems<Location>,
     collections: List<Collection>,
-    onAdventureClick: (Adventure) -> Unit,
-    onEditAdventure: (Adventure) -> Unit,
-    onDeleteAdventure: (Adventure) -> Unit,
-    onManageCollections: (Adventure) -> Unit
+    onAdventureClick: (Location) -> Unit,
+    onEditAdventure: (Location) -> Unit,
+    onDeleteAdventure: (Location) -> Unit,
+    onManageCollections: (Location) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -399,7 +399,7 @@ private fun AdventuresPagingList(
             val adventure = pagingItems[index]
             if (adventure != null) {
                 AdventureItem(
-                    adventure = adventure,
+                    location = adventure,
                     collections = collections,
                     onClick = { onAdventureClick(adventure) },
                     onEdit = { onEditAdventure(adventure) },
