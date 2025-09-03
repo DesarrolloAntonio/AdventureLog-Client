@@ -1,7 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.detail.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,8 +13,8 @@ class AdventureDetailViewModel (
     // Add Use cases classes here
 ): ViewModel() {
 
-    private val _adventure = MutableStateFlow<Adventure?>(null)
-    val adventure: StateFlow<Adventure?> = _adventure.asStateFlow()
+    private val _location = MutableStateFlow<Location?>(null)
+    val location: StateFlow<Location?> = _location.asStateFlow()
     
     /**
      * Handle edit adventure action

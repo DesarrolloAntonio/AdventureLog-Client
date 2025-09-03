@@ -10,9 +10,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.AdventureImage
+import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.ContentImage
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.City
+import com.desarrollodroide.adventurelog.core.model.Country
+import com.desarrollodroide.adventurelog.core.model.Region
+import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.*
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
@@ -20,15 +24,15 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AdventureDetailScreenRoute(
-    adventure: Adventure,
+    location: Location,
     onBackClick: () -> Unit
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
 
     AdventureDetailScreen(
-        adventure = adventure,
+        location = location,
         onBackClick = onBackClick,
-        onEditClick = { viewModel.editAdventure(adventure.id) },
+        onEditClick = { viewModel.editAdventure(location.id) },
         onOpenMap = { lat: String, long: String -> viewModel.openMap(lat, long) },
         onOpenLink = { url: String -> viewModel.openLink(url) }
     )
@@ -36,7 +40,7 @@ fun AdventureDetailScreenRoute(
 
 @Composable
 fun AdventureDetailScreen(
-    adventure: Adventure,
+    location: Location,
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
     onOpenMap: (String, String) -> Unit,
@@ -54,7 +58,7 @@ fun AdventureDetailScreen(
                 .verticalScroll(scrollState)
         ) {
             CoverImageWithButtons(
-                imageUrl = adventure.images.firstOrNull()?.image,
+                imageUrl = location.images.firstOrNull()?.image,
                 onBackClick = onBackClick,
                 onShareClick = { /* TODO: Implement share */ }
             )
@@ -74,51 +78,54 @@ fun AdventureDetailScreen(
                         .padding(24.dp)
                 ) {
                     HeaderInfo(
-                        title = adventure.name,
-                        location = adventure.location
+                        title = location.name,
+                        location = location.location
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
                     CategoryTags(
-                        category = adventure.category,
-                        isPublic = adventure.isPublic
+                        category = location.category,
+                        isPublic = location.isPublic
                     )
 
-                    if (adventure.images.isNotEmpty()) {
+                    if (location.images.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         AdventurePhotosCarousel(
-                            images = adventure.images,
+                            images = location.images,
                             // Enable these when edit functionality is implemented
                             // onAddPhoto = { /* TODO: Implement add photo */ },
                             // onDeletePhoto = { image -> /* TODO: Implement delete photo */ }
                         )
                     }
 
-                    AboutSection(description = adventure.description)
+                    AboutSection(description = location.description)
 
-                    if (adventure.latitude.isNotEmpty() && adventure.longitude.isNotEmpty()) {
+                    val lat = location.latitude
+                    val lon = location.longitude
+
+                    if (!lat.isNullOrBlank() && !lon.isNullOrBlank()) {
                         MapSection(
-                            latitude = adventure.latitude,
-                            longitude = adventure.longitude,
-                            location = adventure.location,
+                            latitude = lat,
+                            longitude = lon,
+                            location = location.location,
                             onOpenMap = onOpenMap
                         )
                     }
 
-                    adventure.link?.let { link ->
+                    location.link?.let { link ->
                         if (link.isNotEmpty()) {
                             LinkSection(link = link, onOpenLink = onOpenLink)
                         }
                     }
 
-                    if (adventure.visits.isNotEmpty()) {
-                        VisitsSection(visits = adventure.visits)
+                    if (location.visits.isNotEmpty()) {
+                        VisitsSection(visits = location.visits)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
                     CreationInfo(
-                        createdAt = adventure.createdAt,
-                        updatedAt = adventure.updatedAt
+                        createdAt = location.createdAt,
+                        updatedAt = location.updatedAt
                     )
                     
                     // Extra padding at the bottom to ensure background covers everything
@@ -130,56 +137,74 @@ fun AdventureDetailScreen(
 }
 
 // Previews
+
+// ✅ CORRECCIÓN: Se crean objetos de ejemplo para las nuevas data classes requeridas.
+private val mockUser = UserDetails(
+    uuid = "user123",
+    username = "previewUser",
+    dateJoined = "2025-01-01T00:00:00Z"
+)
+
+private val mockCountry = Country(
+    id = 1,
+    name = "Spain",
+    countryCode = "ES",
+    flagUrl = "",
+    numRegions = 1,
+    numVisits = 1,
+    subregion = "Southern Europe",
+    capital = "Madrid",
+    longitude = -3.703790,
+    latitude = 40.416775
+)
+
+private val mockRegion = Region(
+    id = "region-madrid",
+    name = "Community of Madrid",
+    countryName = "Spain",
+    numCities = 1,
+    longitude = -3.703790,
+    latitude = 40.416775,
+    countryId = 1
+)
+
+private val mockCity = City(
+    id = "city-madrid",
+    name = "Madrid",
+    regionName = "Community of Madrid",
+    countryName = "Spain",
+    longitude = -3.703790,
+    latitude = 40.416775,
+    regionId = "region-madrid"
+)
+
+
 /**
  * Creates an adventure with multiple images for testing the carousel
  */
-private fun createAdventureWithMultipleImages(): Adventure {
-    // Create a list of images for the carousel
+private fun createAdventureWithMultipleImages(): Location {
     val images = listOf(
-        AdventureImage(
+        ContentImage(
             id = "img1",
             image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
-            adventure = "adv1",
             isPrimary = true,
-            userId = "user123"
+            user = "user123"
         ),
-        AdventureImage(
+        ContentImage(
             id = "img2",
             image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
-            adventure = "adv1",
             isPrimary = false,
-            userId = "user123"
-        ),
-        AdventureImage(
-            id = "img3",
-            image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
-            adventure = "adv1",
-            isPrimary = false,
-            userId = "user123"
-        ),
-        AdventureImage(
-            id = "img4",
-            image = "https://images.unsplash.com/photo-1554995207-c18c203602cb",
-            adventure = "adv1",
-            isPrimary = false,
-            userId = "user123"
-        ),
-        AdventureImage(
-            id = "img5",
-            image = "https://images.unsplash.com/photo-1560624052-449f5ddf0c31",
-            adventure = "adv1",
-            isPrimary = false,
-            userId = "user123"
+            user = "user123"
         )
     )
 
-    return Adventure(
+    return Location(
         id = "adv1",
-        userId = "user123",
+        user = mockUser, // Se añade el objeto UserDetails
         name = "Mountain Adventure",
-        description = "An amazing mountain adventure with breathtaking views and challenging trails. Perfect for hiking enthusiasts looking for their next great outdoor experience.",
+        description = "An amazing mountain adventure with breathtaking views and challenging trails.",
         rating = 4.5,
-        activityTypes = listOf("Hiking", "Nature", "Photography"),
+        tags = listOf("Hiking", "Nature", "Photography"), // Se renombra 'activityTypes' a 'tags'
         location = "Rocky Mountains, Colorado",
         isPublic = true,
         collections = emptyList(),
@@ -192,31 +217,13 @@ private fun createAdventureWithMultipleImages(): Adventure {
         visits = listOf(
             Visit(
                 id = "visit1",
+                location = "adv1",
                 startDate = "2025-08-13T00:00:00Z",
                 endDate = "2025-08-13T00:00:00Z",
                 notes = "",
-                timezone = "Madrid"
-            ),
-            Visit(
-                id = "visit2",
-                startDate = "2025-08-31T00:00:00Z",
-                endDate = "2025-08-31T00:00:00Z",
-                notes = "",
-                timezone = "Madrid"
-            ),
-            Visit(
-                id = "visit3",
-                startDate = "2025-08-28T06:59:00Z",
-                endDate = "2025-08-30T06:59:00Z",
-                notes = "",
-                timezone = "Madrid"
-            ),
-            Visit(
-                id = "visit4",
-                startDate = "2025-08-14T00:00:00Z",
-                endDate = "2025-08-14T00:00:00Z",
-                notes = "Notas",
-                timezone = ""
+                timezone = "Europe/Madrid",
+                createdAt = "2025-08-13T00:00:00Z",
+                updatedAt = "2025-08-13T00:00:00Z"
             )
         ),
         isVisited = true,
@@ -227,7 +234,10 @@ private fun createAdventureWithMultipleImages(): Adventure {
             icon = "🥾",
             numAdventures = "10"
         ),
-        attachments = emptyList()
+        attachments = emptyList(),
+        city = mockCity,
+        country = mockCountry,
+        region = mockRegion
     )
 }
 
@@ -237,10 +247,10 @@ private fun AdventureDetailScreenLightPreview() {
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
-                adventure = createAdventureWithMultipleImages(),
+                location = createAdventureWithMultipleImages(),
                 onBackClick = {},
                 onEditClick = {},
-                onOpenMap = { _: String, _: String -> },
+                onOpenMap = { _, _ -> },
                 onOpenLink = {}
             )
         }
@@ -253,15 +263,15 @@ private fun AdventureDetailScreenDarkPreview() {
     MaterialTheme(colorScheme = darkColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
-                adventure = createAdventureWithMultipleImages().copy(
+                location = createAdventureWithMultipleImages().copy(
                     name = "Night Sky Photography Tour",
-                    description = "Experience the wonders of astrophotography in one of the darkest skies in North America.",
-                    activityTypes = listOf("Photography", "Astronomy", "Night Tour"),
+                    description = "Experience the wonders of astrophotography.",
+                    tags = listOf("Photography", "Astronomy", "Night Tour"),
                     isPublic = false
                 ),
                 onBackClick = {},
                 onEditClick = {},
-                onOpenMap = { _: String, _: String -> },
+                onOpenMap = { _, _ -> },
                 onOpenLink = {}
             )
         }
@@ -271,32 +281,24 @@ private fun AdventureDetailScreenDarkPreview() {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun HotelBalnearioDetailPreview() {
-    val hotelBalneario = Adventure(
+    val hotelBalneario = Location(
         id = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
-        userId = "user123",
-        name = "Gran Hotel Balneario De Puente Viesgo (Pendiente) - 4 h 28 min (445 km)",
+        user = mockUser,
+        name = "Gran Hotel Balneario De Puente Viesgo",
         description = "Spa termal en Cantabria con aguas termales y tratamientos de bienestar",
         rating = 3.4,
-        activityTypes = listOf("Spa", "Relax", "Turismo"),
-        location = "4h 28min (445 km)",
+        tags = listOf("Spa", "Relax", "Turismo"),
+        location = "Puente Viesgo, Cantabria",
         isPublic = false,
         collections = emptyList(),
         createdAt = "2025-03-01T10:00:00.000Z",
         updatedAt = "2025-03-15T14:30:00.000Z",
         images = listOf(
-            AdventureImage(
+            ContentImage(
                 id = "img1",
                 image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
-                adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
                 isPrimary = true,
-                userId = "user123"
-            ),
-            AdventureImage(
-                id = "img2",
-                image = "https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f",
-                adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
-                isPrimary = false,
-                userId = "user123"
+                user = "user123"
             )
         ),
         link = "https://www.booking.com/hotel/es/gran-balneario-de-puente-viesgo.es.html",
@@ -305,22 +307,25 @@ private fun HotelBalnearioDetailPreview() {
         visits = emptyList(),
         isVisited = false,
         category = Category(
-            id = "cat1",
+            id = "cat-hotel",
             name = "hotel",
             displayName = "Hotel",
             icon = "🏨",
             numAdventures = "5"
         ),
-        attachments = emptyList()
+        attachments = emptyList(),
+        city = mockCity,
+        country = mockCountry,
+        region = mockRegion
     )
 
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
-                adventure = hotelBalneario,
+                location = hotelBalneario,
                 onBackClick = {},
                 onEditClick = {},
-                onOpenMap = { _: String, _: String -> },
+                onOpenMap = { _, _ -> },
                 onOpenLink = {}
             )
         }
@@ -330,32 +335,24 @@ private fun HotelBalnearioDetailPreview() {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun NavalagamellaDetailPreview() {
-    val navalagamella = Adventure(
+    val navalagamella = Location(
         id = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-        userId = "user123",
+        user = mockUser,
         name = "Navalagamella",
         description = "Ruta de los molinos con paisajes naturales y arroyos",
         rating = 2.2,
-        activityTypes = listOf("Senderismo", "Naturaleza"),
-        location = "",
+        tags = listOf("Senderismo", "Naturaleza"),
+        location = "Navalagamella, Madrid",
         isPublic = false,
         collections = emptyList(),
         createdAt = "2025-02-20T09:15:00.000Z",
         updatedAt = "2025-03-10T11:45:00.000Z",
         images = listOf(
-            AdventureImage(
+            ContentImage(
                 id = "img2",
-                image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
-                adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-                isPrimary = true,
-                userId = "user123"
-            ),
-            AdventureImage(
-                id = "img3",
                 image = "https://images.unsplash.com/photo-1551632811-561732d1e306",
-                adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-                isPrimary = false,
-                userId = "user123"
+                isPrimary = true,
+                user = "user123"
             )
         ),
         link = "https://sendasdeviaje.com/navalagamella-ruta-molinos/",
@@ -364,22 +361,25 @@ private fun NavalagamellaDetailPreview() {
         visits = emptyList(),
         isVisited = false,
         category = Category(
-            id = "cat2",
+            id = "cat-ruta",
             name = "ruta",
             displayName = "Ruta",
             icon = "🏞️",
             numAdventures = "3"
         ),
-        attachments = emptyList()
+        attachments = emptyList(),
+        city = mockCity,
+        country = mockCountry,
+        region = mockRegion
     )
 
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
-                adventure = navalagamella,
+                location = navalagamella,
                 onBackClick = {},
                 onEditClick = {},
-                onOpenMap = { _: String, _: String -> },
+                onOpenMap = { _, _ -> },
                 onOpenLink = {}
             )
         }

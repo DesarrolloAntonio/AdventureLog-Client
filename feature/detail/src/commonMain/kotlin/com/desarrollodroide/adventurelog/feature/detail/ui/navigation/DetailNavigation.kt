@@ -9,7 +9,7 @@ import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.detail.ui.screen.AdventureDetailScreenRoute
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import kotlinx.serialization.json.Json
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 
 fun NavGraphBuilder.detailNavGraph(
     navigator: DetailNavigator
@@ -36,10 +36,10 @@ fun NavGraphBuilder.detailNavGraph(
         ) { backStackEntry ->
             val adventureJson = backStackEntry.savedStateHandle.get<String>("adventureJson") ?: ""
             
-            val adventure = json.decodeFromString<Adventure>(adventureJson)
+            val location = json.decodeFromString<Location>(adventureJson)
             
             AdventureDetailScreenRoute(
-                adventure = adventure,
+                location = location,
                 onBackClick = { navigator.navigateUp() }
             )
         }

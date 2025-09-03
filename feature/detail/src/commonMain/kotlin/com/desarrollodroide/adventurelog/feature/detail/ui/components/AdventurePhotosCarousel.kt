@@ -38,7 +38,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import coil3.compose.rememberAsyncImagePainter
 import coil3.ImageLoader
-import com.desarrollodroide.adventurelog.core.model.AdventureImage
+import com.desarrollodroide.adventurelog.core.model.ContentImage
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 
 /**
@@ -47,9 +47,9 @@ import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdventurePhotosCarousel(
-    images: List<AdventureImage>,
+    images: List<ContentImage>,
     onAddPhoto: (() -> Unit)? = null, // Optional for now
-    onDeletePhoto: ((AdventureImage) -> Unit)? = null, // Optional for now
+    onDeletePhoto: ((ContentImage) -> Unit)? = null, // Optional for now
     modifier: Modifier = Modifier
 ) {
     val imageLoader = LocalImageLoader.current
@@ -138,7 +138,7 @@ fun AdventurePhotosCarousel(
  */
 @Composable
 private fun PhotoCarouselItem(
-    image: AdventureImage,
+    image: ContentImage,
     index: Int,
     imageLoader: ImageLoader,
     onClick: () -> Unit,
@@ -248,10 +248,10 @@ private class ZoomableImageState {
  */
 @Composable
 private fun FullscreenImageViewer(
-    images: List<AdventureImage>,
+    images: List<ContentImage>,
     initialIndex: Int,
     onDismiss: () -> Unit,
-    onDeletePhoto: ((AdventureImage) -> Unit)? = null
+    onDeletePhoto: ((ContentImage) -> Unit)? = null
 ) {
     val imageLoader = LocalImageLoader.current
     val selectedImage = images[initialIndex]

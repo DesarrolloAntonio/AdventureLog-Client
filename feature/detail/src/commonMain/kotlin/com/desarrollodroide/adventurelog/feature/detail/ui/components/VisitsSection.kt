@@ -65,12 +65,10 @@ private fun VisitItem(
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
-        // Timeline indicator on the left
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(40.dp)
         ) {
-            // Top line
             if (!isFirst) {
                 Box(
                     modifier = Modifier
@@ -79,16 +77,12 @@ private fun VisitItem(
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                 )
             }
-
-            // Circle indicator
             Box(
                 modifier = Modifier
                     .size(12.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary)
             )
-
-            // Bottom line
             if (!isLast) {
                 Box(
                     modifier = Modifier
@@ -114,56 +108,58 @@ private fun VisitItem(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                // Check if it's a single day visit (All Day)
-                val isAllDay = visit.startDate == visit.endDate ||
-                              (visit.startDate.contains("T") && visit.endDate.contains("T") &&
-                               visit.startDate.split("T").first() == visit.endDate.split("T").first())
+                visit.startDate?.let { startDate ->
+                    val isAllDay = visit.endDate?.let { endDate ->
+                        startDate == endDate ||
+                                (startDate.contains("T") && endDate.contains("T") &&
+                                        startDate.split("T").first() == endDate.split("T").first())
+                    } ?: (visit.endDate == null)
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (isAllDay) {
-                        // All Day badge
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (isAllDay) {
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primary
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Text(
+                                    text = "All Day",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "All Day",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                text = formatDateDisplay(startDate),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        } else {
+                            Text(
+                                text = "From: ${formatDateDisplay(startDate)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = formatDateDisplay(visit.startDate),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                    } else {
-                        // Date range
-                        Text(
-                            text = "From: ${formatDateDisplay(visit.startDate)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
+                    }
+
+                    if (!isAllDay) {
+                        visit.endDate?.let { endDate ->
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "To: ${formatDateDisplay(endDate)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 
-                if (!isAllDay) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "To: ${formatDateDisplay(visit.endDate)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                // Notes or location info
                 visit.notes?.let { notes ->
                     if (notes.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
@@ -175,8 +171,7 @@ private fun VisitItem(
                         )
                     }
                 }
-                
-                // Location badge if timezone indicates a location
+
                 val location = extractLocationFromTimezone(visit.timezone)
                 if (location.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -202,11 +197,10 @@ private fun VisitItem(
     }
 }
 
-// Helper function to format dates for display
-private fun formatDateDisplay(dateString: String): String {
-    // Keep the incoming format to avoid hardcoded month names.
-    // If the string contains a time component (ISO 8601 with 'T'),
-    // return only the date part; otherwise return as-is.
+private fun formatDateDisplay(dateString: String?): String {
+    if (dateString.isNullOrBlank()) {
+        return ""
+    }
     return try {
         if (dateString.contains("T")) {
             dateString.substringBefore("T")
@@ -218,10 +212,11 @@ private fun formatDateDisplay(dateString: String): String {
     }
 }
 
-// Helper function to extract location from timezone
-private fun extractLocationFromTimezone(timezone: String): String {
+private fun extractLocationFromTimezone(timezone: String?): String {
+    if (timezone.isNullOrBlank()) {
+        return ""
+    }
     return when {
-        timezone.isEmpty() -> ""
         timezone.contains("/") -> {
             val parts = timezone.split("/")
             parts.lastOrNull()?.replace("_", " ") ?: timezone
