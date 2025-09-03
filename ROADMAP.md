@@ -23,6 +23,7 @@
   - Search collections
   - Public/private visibility
   - Sort collections (by name, date, updated)
+  - Add/remove adventures from collections
 
 - ✅ **Categories System**
   - Custom categories with icons
@@ -66,9 +67,13 @@
 Currently focusing on bug fixes and performance improvements.
 
 ### Core Features Missing
-- [ ] **Link Adventures to Collections**
-  - Display collections in adventure detail
-  - Add/remove adventures from collections
+
+- [ ] **Display collections in adventure detail**
+  - Show which collections an adventure belongs to
+
+- [ ] **Multi-language Support**
+  - Internationalization (i18n) setup
+  - Language selector in settings
 
 - [ ] **Calendar View** 
   - Monthly/weekly view of adventures
@@ -80,6 +85,7 @@ Currently focusing on bug fixes and performance improvements.
   - Attachment support (PDFs, documents)
   - GPX track import/export
   - Weather information integration
+  - Trail Management
 
 ### Data Management
 - [ ] **Advanced Search**
