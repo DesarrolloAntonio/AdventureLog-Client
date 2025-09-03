@@ -8,9 +8,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
@@ -18,7 +17,7 @@ import com.google.maps.android.compose.*
 
 @Composable
 actual fun AdventureMapView(
-    adventures: List<Adventure>,
+    locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
@@ -31,10 +30,10 @@ actual fun AdventureMapView(
         )
     }
     
-    val bounds = remember(adventures, visitedRegions, showRegions) {
-        val adventuresWithLocation = adventures.filter { adventure ->
-            val lat = adventure.latitude.toDoubleOrNull()
-            val lng = adventure.longitude.toDoubleOrNull()
+    val bounds = remember(locations, visitedRegions, showRegions) {
+        val adventuresWithLocation = locations.filter { adventure ->
+            val lat = adventure.latitude?.toDoubleOrNull()
+            val lng = adventure.longitude?.toDoubleOrNull()
             lat != null && lng != null && lat != 0.0 && lng != 0.0
         }
         
@@ -52,8 +51,8 @@ actual fun AdventureMapView(
             val builder = LatLngBounds.Builder()
             
             adventuresWithLocation.forEach { adventure ->
-                val lat = adventure.latitude.toDoubleOrNull()!!
-                val lng = adventure.longitude.toDoubleOrNull()!!
+                val lat = adventure.latitude?.toDoubleOrNull()!!
+                val lng = adventure.longitude?.toDoubleOrNull()!!
                 builder.include(LatLng(lat, lng))
             }
             
@@ -102,10 +101,10 @@ actual fun AdventureMapView(
         )
     }
     
-    val adventuresWithLocation = remember(adventures) {
-        adventures.filter { adventure ->
-            val lat = adventure.latitude.toDoubleOrNull()
-            val lng = adventure.longitude.toDoubleOrNull()
+    val adventuresWithLocation = remember(locations) {
+        locations.filter { adventure ->
+            val lat = adventure.latitude?.toDoubleOrNull()
+            val lng = adventure.longitude?.toDoubleOrNull()
             lat != null && lng != null && lat != 0.0 && lng != 0.0
         }
     }
@@ -137,8 +136,8 @@ actual fun AdventureMapView(
         
         // Draw adventure markers
         adventuresWithLocation.forEach { adventure ->
-            val lat = adventure.latitude.toDoubleOrNull() ?: return@forEach
-            val lng = adventure.longitude.toDoubleOrNull() ?: return@forEach
+            val lat = adventure.latitude?.toDoubleOrNull() ?: return@forEach
+            val lng = adventure.longitude?.toDoubleOrNull() ?: return@forEach
             val markerState = rememberMarkerState(position = LatLng(lat, lng))
             
             MarkerComposable(
@@ -151,7 +150,7 @@ actual fun AdventureMapView(
                 }
             ) {
                 AdventureMarker(
-                    adventure = adventure,
+                    location = adventure,
                     isVisited = adventure.isVisited
                 )
             }
@@ -161,7 +160,7 @@ actual fun AdventureMapView(
 
 @Composable
 private fun AdventureMarker(
-    adventure: Adventure,
+    location: Location,
     isVisited: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -173,7 +172,7 @@ private fun AdventureMarker(
     
     SimpleMapMarker(
         color = markerColor,
-        emoji = adventure.category?.icon,
+        emoji = location.category?.icon,
         modifier = modifier
     )
 }
