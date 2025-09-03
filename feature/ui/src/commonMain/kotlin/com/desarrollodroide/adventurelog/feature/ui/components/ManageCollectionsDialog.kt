@@ -1,15 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -19,20 +14,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageCollectionsDialog(
-    adventure: Adventure,
+    location: Location,
     allCollections: List<Collection>,
     onUpdateCollections: (adventureId: String, collectionIds: List<String>) -> Unit,
     onDismiss: () -> Unit
@@ -61,7 +54,7 @@ fun ManageCollectionsDialog(
         }
     ) {
         ManageCollectionsContent(
-            adventure = adventure,
+            location = location,
             allCollections = allCollections,
             onUpdateCollections = onUpdateCollections,
             onDismiss = onDismiss
@@ -72,13 +65,13 @@ fun ManageCollectionsDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ManageCollectionsContent(
-    adventure: Adventure,
+    location: Location,
     allCollections: List<Collection>,
     onUpdateCollections: (adventureId: String, collectionIds: List<String>) -> Unit,
     onDismiss: () -> Unit
 ) {
     var selectedCollections by remember { 
-        mutableStateOf(adventure.collections.toSet()) 
+        mutableStateOf(location.collections.toSet())
     }
     var isLoading by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
@@ -105,8 +98,8 @@ private fun ManageCollectionsContent(
         filteredUnselected.sortedBy { it.name.lowercase() }
     }
     
-    val hasChanges = remember(selectedCollections, adventure.collections) {
-        selectedCollections != adventure.collections.toSet()
+    val hasChanges = remember(selectedCollections, location.collections) {
+        selectedCollections != location.collections.toSet()
     }
 
     Column(
@@ -130,7 +123,7 @@ private fun ManageCollectionsContent(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = adventure.name,
+                    text = location.name,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -345,7 +338,7 @@ private fun ManageCollectionsContent(
                     onClick = {
                         coroutineScope.launch {
                             isLoading = true
-                            onUpdateCollections(adventure.id, selectedCollections.toList())
+                            onUpdateCollections(location.id, selectedCollections.toList())
                             onDismiss()
                         }
                     },
@@ -461,9 +454,9 @@ private fun CollectionSelectionItem(
                         }
                     }
                     
-                    if (collection.adventures.isNotEmpty()) {
+                    if (collection.locations.isNotEmpty()) {
                         Text(
-                            "${collection.adventures.size} adventure${if (collection.adventures.size != 1) "s" else ""}",
+                            "${collection.locations.size} adventure${if (collection.locations.size != 1) "s" else ""}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )

@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
@@ -32,7 +32,7 @@ import com.desarrollodroide.adventurelog.resources.adventureitem_placeholder
 @Composable
 fun AdventureItem(
     modifier: Modifier = Modifier,
-    adventure: Adventure,
+    location: Location,
     collections: List<Collection> = emptyList(),
     onClick: () -> Unit = {},
     onOpenDetails: () -> Unit = { onClick() },
@@ -63,12 +63,12 @@ fun AdventureItem(
         )
     ) {
         Box {
-            val hasImage = adventure.images.firstOrNull()?.image?.isNotEmpty() == true
+            val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
             
             if (hasImage) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = adventure.images.first().image,
+                        model = location.images.first().image,
                         imageLoader = imageLoader
                     ),
                     contentDescription = null,
@@ -106,7 +106,7 @@ fun AdventureItem(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = adventure.name,
+                    text = location.name,
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -114,7 +114,7 @@ fun AdventureItem(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                if (adventure.category != null || !adventure.isPublic || adventure.collections.isNotEmpty()) {
+                if (location.category != null || !location.isPublic || location.collections.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     @OptIn(ExperimentalLayoutApi::class)
@@ -124,7 +124,7 @@ fun AdventureItem(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         // Category tag
-                        adventure.category?.let { category ->
+                        location.category?.let { category ->
                             TagChip(
                                 text = "${category.icon} ${category.displayName}",
                                 backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
@@ -133,7 +133,7 @@ fun AdventureItem(
                         }
 
                         // Private tag
-                        if (!adventure.isPublic) {
+                        if (!location.isPublic) {
                             TagChip(
                                 text = "🔒 Private",
                                 backgroundColor = MaterialTheme.colorScheme.error.copy(alpha = 0.9f),
@@ -142,7 +142,7 @@ fun AdventureItem(
                         }
 
                         // Collection tags
-                        val collectionNames = adventure.collections.mapNotNull { id ->
+                        val collectionNames = location.collections.mapNotNull { id ->
                             collections.find { it.id == id }?.name
                         }
 
@@ -247,7 +247,7 @@ private fun AdventureItemLightPreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Box(modifier = Modifier.padding(16.dp)) {
                     AdventureItem(
-                        adventure = PreviewData.adventures[0],
+                        location = PreviewData.locations[0],
                         collections = PreviewData.collections,
                         onOpenDetails = {},
                         onEdit = {},
@@ -268,7 +268,7 @@ private fun AdventureItemDarkPreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Box(modifier = Modifier.padding(16.dp)) {
                     AdventureItem(
-                        adventure = PreviewData.adventures[1],
+                        location = PreviewData.locations[1],
                         collections = PreviewData.collections,
                         onOpenDetails = {},
                         onEdit = {},
@@ -289,7 +289,7 @@ private fun AdventureItemPrivatePreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Box(modifier = Modifier.padding(16.dp)) {
                     AdventureItem(
-                        adventure = PreviewData.adventures[0],
+                        location = PreviewData.locations[0],
                         collections = PreviewData.collections,
                         onOpenDetails = {},
                         onEdit = {},
@@ -310,7 +310,7 @@ private fun AdventureItemNoImagePreview() {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Box(modifier = Modifier.padding(16.dp)) {
                     AdventureItem(
-                        adventure = PreviewData.adventures[0].copy(
+                        location = PreviewData.locations[0].copy(
                             images = emptyList(), // No images
                             category = Category(
                                 id = "cat1",
@@ -343,7 +343,7 @@ private fun AdventureItemNoImageMountainPreview() {
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     AdventureItem(
-                        adventure = PreviewData.adventures[0].copy(
+                        location = PreviewData.locations[0].copy(
                             images = emptyList(),
                             name = "Epic Mountain Trail",
                             category = Category(
@@ -358,7 +358,7 @@ private fun AdventureItemNoImageMountainPreview() {
                     )
                     
                     AdventureItem(
-                        adventure = PreviewData.adventures[0].copy(
+                        location = PreviewData.locations[0].copy(
                             images = emptyList(),
                             name = "Beach Paradise Getaway",
                             category = Category(
