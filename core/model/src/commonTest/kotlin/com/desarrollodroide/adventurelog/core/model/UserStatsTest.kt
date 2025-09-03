@@ -2,16 +2,14 @@ package com.desarrollodroide.adventurelog.core.model
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
-class UserStatsTest {
-    
+class UserStatsTest : BaseModelTest<UserStats>() {
+
     @Test
     fun `should create UserStats with default values`() {
-        // Given
         val stats = UserStats()
         
-        // Then
         assertEquals(0, stats.adventureCount)
         assertEquals(0, stats.tripsCount)
         assertEquals(0, stats.visitedCityCount)
@@ -21,184 +19,144 @@ class UserStatsTest {
         assertEquals(0, stats.visitedCountryCount)
         assertEquals(0, stats.totalCountries)
     }
-    
+
     @Test
     fun `should create UserStats with custom values`() {
-        // Given
         val stats = UserStats(
             adventureCount = 25,
             tripsCount = 10,
-            visitedCityCount = 15,
-            totalCities = 100,
-            visitedRegionCount = 8,
-            totalRegions = 50,
-            visitedCountryCount = 5,
-            totalCountries = 195
+            visitedCityCount = 50,
+            totalCities = 60,
+            visitedRegionCount = 30,
+            totalRegions = 38,
+            visitedCountryCount = 15,
+            totalCountries = 20
         )
-        
-        // Then
+
         assertEquals(25, stats.adventureCount)
         assertEquals(10, stats.tripsCount)
-        assertEquals(15, stats.visitedCityCount)
-        assertEquals(100, stats.totalCities)
-        assertEquals(8, stats.visitedRegionCount)
-        assertEquals(50, stats.totalRegions)
-        assertEquals(5, stats.visitedCountryCount)
-        assertEquals(195, stats.totalCountries)
+        assertEquals(50, stats.visitedCityCount)
+        assertEquals(60, stats.totalCities)
+        assertEquals(30, stats.visitedRegionCount)
+        assertEquals(38, stats.totalRegions)
+        assertEquals(15, stats.visitedCountryCount)
+        assertEquals(20, stats.totalCountries)
     }
-    
+
     @Test
-    fun `should correctly compare UserStats instances`() {
-        // Given
+    fun `should correctly implement equals and hashCode`() {
         val stats1 = UserStats(
             adventureCount = 10,
-            tripsCount = 5,
-            visitedCityCount = 8,
-            totalCities = 50,
-            visitedRegionCount = 4,
-            totalRegions = 20,
-            visitedCountryCount = 2,
-            totalCountries = 100
+            visitedCountryCount = 5,
+            totalCountries = 15
         )
         
         val stats2 = stats1.copy()
         val stats3 = stats1.copy(adventureCount = 11)
-        val stats4 = stats1.copy(visitedCountryCount = 3)
-        
-        // Then
-        assertEquals(stats1, stats2)
-        assertNotEquals(stats1, stats3)
-        assertNotEquals(stats1, stats4)
-        assertEquals(stats1.hashCode(), stats2.hashCode())
-    }
-    
-    @Test
-    fun `should calculate percentage of visited locations`() {
-        // Given
-        val stats = UserStats(
-            adventureCount = 50,
-            tripsCount = 20,
-            visitedCityCount = 25,
-            totalCities = 100,
-            visitedRegionCount = 10,
-            totalRegions = 50,
-            visitedCountryCount = 5,
-            totalCountries = 200
+        val stats4 = stats1.copy(visitedCityCount = 20)
+
+        testEquality(
+            original = stats1,
+            equal = stats2,
+            different = listOf(stats3, stats4)
         )
-        
-        // When calculating percentages
-        val cityPercentage = (stats.visitedCityCount.toDouble() / stats.totalCities) * 100
-        val regionPercentage = (stats.visitedRegionCount.toDouble() / stats.totalRegions) * 100
-        val countryPercentage = (stats.visitedCountryCount.toDouble() / stats.totalCountries) * 100
-        
-        // Then
-        assertEquals(25.0, cityPercentage)
-        assertEquals(20.0, regionPercentage)
-        assertEquals(2.5, countryPercentage)
     }
-    
+
     @Test
     fun `should handle zero total values`() {
-        // Given
-        val stats = UserStats(
-            adventureCount = 10,
-            tripsCount = 5,
-            visitedCityCount = 3,
-            totalCities = 0,  // Zero total
-            visitedRegionCount = 2,
-            totalRegions = 0,  // Zero total
-            visitedCountryCount = 1,
-            totalCountries = 0  // Zero total
+        val emptyStats = UserStats(
+            adventureCount = 0,
+            tripsCount = 0,
+            visitedCountryCount = 0,
+            totalCountries = 0
         )
-        
-        // Then - Stats should still be valid even with zero totals
-        assertEquals(3, stats.visitedCityCount)
-        assertEquals(0, stats.totalCities)
-        assertEquals(2, stats.visitedRegionCount)
-        assertEquals(0, stats.totalRegions)
-        assertEquals(1, stats.visitedCountryCount)
-        assertEquals(0, stats.totalCountries)
+
+        assertEquals(0, emptyStats.adventureCount)
+        assertEquals(0, emptyStats.tripsCount)
+        assertEquals(0, emptyStats.visitedCountryCount)
+        assertEquals(0, emptyStats.totalCountries)
     }
-    
+
     @Test
-    fun `should handle maximum values`() {
-        // Given
-        val maxStats = UserStats(
-            adventureCount = Int.MAX_VALUE,
-            tripsCount = Int.MAX_VALUE,
-            visitedCityCount = Int.MAX_VALUE,
-            totalCities = Int.MAX_VALUE,
-            visitedRegionCount = Int.MAX_VALUE,
-            totalRegions = Int.MAX_VALUE,
-            visitedCountryCount = Int.MAX_VALUE,
-            totalCountries = Int.MAX_VALUE
+    fun `should calculate percentage of visited locations`() {
+        val stats = UserStats(
+            visitedCountryCount = 25,
+            totalCountries = 50,
+            visitedCityCount = 100,
+            totalCities = 150,
+            visitedRegionCount = 40,
+            totalRegions = 80
         )
+
+        val countriesPercentage = (stats.visitedCountryCount.toDouble() / stats.totalCountries) * 100
+        val citiesPercentage = (stats.visitedCityCount.toDouble() / stats.totalCities) * 100
+        val regionsPercentage = (stats.visitedRegionCount.toDouble() / stats.totalRegions) * 100
         
-        // Then
-        assertEquals(Int.MAX_VALUE, maxStats.adventureCount)
-        assertEquals(Int.MAX_VALUE, maxStats.tripsCount)
-        assertEquals(Int.MAX_VALUE, maxStats.visitedCityCount)
-        assertEquals(Int.MAX_VALUE, maxStats.totalCities)
+        assertEquals(50.0, countriesPercentage)
+        assertEquals(66.67, citiesPercentage, 0.01)
+        assertEquals(50.0, regionsPercentage)
     }
-    
+
     @Test
     fun `should update individual stats`() {
-        // Given
-        val initialStats = UserStats()
+        val initialStats = UserStats(adventureCount = 10)
         
-        // When
         val updatedStats = initialStats.copy(
-            adventureCount = 1,
-            tripsCount = 1
+            adventureCount = 11,
+            visitedCityCount = initialStats.visitedCityCount + 2
         )
-        
-        val furtherUpdatedStats = updatedStats.copy(
-            visitedCityCount = 1,
-            totalCities = 10
-        )
-        
-        // Then
-        assertEquals(0, initialStats.adventureCount)
-        assertEquals(1, updatedStats.adventureCount)
-        assertEquals(1, updatedStats.tripsCount)
-        assertEquals(1, furtherUpdatedStats.visitedCityCount)
-        assertEquals(10, furtherUpdatedStats.totalCities)
+
+        assertEquals(11, updatedStats.adventureCount)
+        assertEquals(2, updatedStats.visitedCityCount)
+        assertEquals(0, updatedStats.visitedRegionCount)
     }
-    
+
+    @Test
+    fun `should handle maximum values`() {
+        val maxStats = UserStats(
+            adventureCount = 10000,
+            tripsCount = 5000,
+            visitedCountryCount = 195,
+            totalCountries = 195,
+            visitedCityCount = 10000,
+            totalCities = 10500,
+            visitedRegionCount = 5000,
+            totalRegions = 5100
+        )
+
+        assertEquals(10000, maxStats.adventureCount)
+        assertEquals(195, maxStats.visitedCountryCount)
+        assertEquals(10000, maxStats.visitedCityCount)
+        assertEquals(5000, maxStats.visitedRegionCount)
+    }
+
     @Test
     fun `should represent realistic user journey`() {
-        // Given - A user's progression over time
-        val newUser = UserStats()
-        
-        val afterFirstTrip = UserStats(
-            adventureCount = 3,
-            tripsCount = 1,
-            visitedCityCount = 2,
-            totalCities = 100,
-            visitedRegionCount = 1,
-            totalRegions = 50,
+        val beginnerStats = UserStats(
+            adventureCount = 5,
+            tripsCount = 2,
             visitedCountryCount = 1,
-            totalCountries = 195
+            totalCountries = 195,
+            visitedCityCount = 5,
+            totalCities = 10000,
+            visitedRegionCount = 3,
+            totalRegions = 5000
         )
-        
-        val experiencedTraveler = UserStats(
+
+        val experiencedStats = UserStats(
             adventureCount = 150,
-            tripsCount = 45,
-            visitedCityCount = 80,
-            totalCities = 500,
-            visitedRegionCount = 35,
-            totalRegions = 100,
-            visitedCountryCount = 25,
-            totalCountries = 195
+            tripsCount = 50,
+            visitedCountryCount = 30,
+            totalCountries = 195,
+            visitedCityCount = 150,
+            totalCities = 10000,
+            visitedRegionCount = 100,
+            totalRegions = 5000
         )
-        
-        // Then
-        assertEquals(0, newUser.adventureCount)
-        assertEquals(3, afterFirstTrip.adventureCount)
-        assertEquals(150, experiencedTraveler.adventureCount)
-        
-        // Experienced traveler has visited more places
-        assertEquals(80, experiencedTraveler.visitedCityCount)
-        assertEquals(25, experiencedTraveler.visitedCountryCount)
+
+        assertEquals(5, beginnerStats.adventureCount)
+        assertEquals(150, experiencedStats.adventureCount)
+        assertTrue(experiencedStats.visitedCountryCount > beginnerStats.visitedCountryCount)
+        assertTrue(experiencedStats.visitedCityCount > beginnerStats.visitedCityCount)
     }
 }

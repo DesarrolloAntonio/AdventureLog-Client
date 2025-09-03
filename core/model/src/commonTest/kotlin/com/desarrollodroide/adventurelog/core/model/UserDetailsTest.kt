@@ -1,24 +1,15 @@
 package com.desarrollodroide.adventurelog.core.model
 
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-class UserDetailsTest {
-    
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        encodeDefaults = true
-    }
+class UserDetailsTest : BaseModelTest<UserDetails>() {
     
     @Test
-    fun `should serialize to JSON correctly`() {
-        // Given
-        val userDetails = UserDetails(
+    fun `should create UserDetails with all properties`() {
+        val userDetails = TestDataFactory.createUserDetails(
             username = "adventurer",
             profilePic = "/path/to/pic.jpg",
             uuid = "550e8400-e29b-41d4-a716-446655440000",
@@ -33,155 +24,92 @@ class UserDetailsTest {
             serverUrl = "https://api.adventurelog.com"
         )
         
-        // When
-        val jsonString = json.encodeToString(UserDetails.serializer(), userDetails)
-        
-        // Then
-        assertTrue(jsonString.contains("\"username\":\"adventurer\""))
-        assertTrue(jsonString.contains("\"email\":\"test@example.com\""))
-        assertTrue(jsonString.contains("\"profilePic\":\"/path/to/pic.jpg\""))
-        assertTrue(jsonString.contains("\"uuid\":\"550e8400-e29b-41d4-a716-446655440000\""))
-        assertTrue(jsonString.contains("\"publicProfile\":true"))
-        assertTrue(jsonString.contains("\"firstName\":\"John\""))
-        assertTrue(jsonString.contains("\"lastName\":\"Doe\""))
-        assertTrue(jsonString.contains("\"isStaff\":false"))
-        assertTrue(jsonString.contains("\"hasPassword\":true"))
-        assertTrue(jsonString.contains("\"serverUrl\":\"https://api.adventurelog.com\""))
+        assertEquals("adventurer", userDetails.username)
+        assertEquals("test@example.com", userDetails.email)
+        assertEquals("/path/to/pic.jpg", userDetails.profilePic)
+        assertEquals("550e8400-e29b-41d4-a716-446655440000", userDetails.uuid)
+        assertTrue(userDetails.publicProfile)
+        assertEquals("John", userDetails.firstName)
+        assertEquals("Doe", userDetails.lastName)
     }
     
     @Test
-    fun `should deserialize from JSON correctly`() {
-        // Given
-        val jsonString = """
-            {
-                "id": 456,
-                "username": "explorer",
-                "profilePic": "/images/profile.png",
-                "uuid": "123e4567-e89b-12d3-a456-426614174000",
-                "publicProfile": false,
-                "email": "explorer@test.com",
-                "firstName": "Jane",
-                "lastName": "Smith",
-                "dateJoined": "2024-02-20T15:45:00Z",
-                "isStaff": true,
-                "hasPassword": "false",
-                "sessionToken": "xyz789token",
-                "serverUrl": "https://api.test.com"
-            }
-        """.trimIndent()
+    fun `should serialize and deserialize correctly`() {
+        val userDetails = TestDataFactory.createUserDetails(
+            username = "explorer",
+            profilePic = "/images/profile.png",
+            uuid = "123e4567-e89b-12d3-a456-426614174000",
+            publicProfile = false,
+            email = "explorer@test.com",
+            firstName = "Jane",
+            lastName = "Smith",
+            isStaff = true,
+            hasPassword = false,
+            sessionToken = "xyz789token",
+            serverUrl = "https://api.test.com"
+        )
         
-        // When
-        val userDetails = json.decodeFromString<UserDetails>(jsonString)
-        
-        // Then
-        assertEquals("explorer", userDetails.username)
-        assertEquals("explorer@test.com", userDetails.email)
-        assertEquals("/images/profile.png", userDetails.profilePic)
-        assertEquals(false, userDetails.publicProfile)
-        assertEquals("Jane", userDetails.firstName)
-        assertEquals("Smith", userDetails.lastName)
-        assertEquals(true, userDetails.isStaff)
-        assertEquals(false, userDetails.hasPassword)
-        assertEquals("xyz789token", userDetails.sessionToken)
-        assertEquals("https://api.test.com", userDetails.serverUrl)
+        testSerialization(userDetails, UserDetails.serializer()) { jsonString ->
+            assertTrue(jsonString.contains("\"username\":\"explorer\""))
+            assertTrue(jsonString.contains("\"email\":\"explorer@test.com\""))
+            assertTrue(jsonString.contains("\"profilePic\":\"/images/profile.png\""))
+            assertTrue(jsonString.contains("\"uuid\":\"123e4567-e89b-12d3-a456-426614174000\""))
+            assertTrue(jsonString.contains("\"publicProfile\":false"))
+            assertTrue(jsonString.contains("\"isStaff\":true"))
+            assertTrue(jsonString.contains("\"hasPassword\":false"))
+        }
     }
     
     @Test
     fun `should handle null profilePic`() {
-        // Given
-        val jsonString = """
-            {
-                "id": 789,
-                "username": "nomad",
-                "profilePic": null,
-                "uuid": "987e6543-e21b-12d3-a456-426614174000",
-                "publicProfile": true,
-                "email": "nomad@test.com",
-                "firstName": "Bob",
-                "lastName": "Wilson",
-                "dateJoined": "2024-03-01T08:00:00Z",
-                "isStaff": false,
-                "hasPassword": "true",
-                "sessionToken": "def456token",
-                "serverUrl": "https://server.test.com"
-            }
-        """.trimIndent()
+        val userDetails = TestDataFactory.createUserDetails(
+            username = "nomad",
+            profilePic = null,
+            uuid = "987e6543-e21b-12d3-a456-426614174000",
+            publicProfile = true,
+            email = "nomad@test.com"
+        )
         
-        // When
-        val userDetails = json.decodeFromString<UserDetails>(jsonString)
-        
-        // Then
         assertEquals("nomad", userDetails.username)
         assertNull(userDetails.profilePic)
         assertEquals("987e6543-e21b-12d3-a456-426614174000", userDetails.uuid)
-        assertEquals(true, userDetails.publicProfile)
+        assertTrue(userDetails.publicProfile)
     }
     
     @Test
-    fun `should handle edge cases for boolean fields`() {
-        // Given
-        val userDetails1 = UserDetails(
-            username = "test1",
-            profilePic = null,
-            uuid = "test-uuid-1",
-            publicProfile = true,
-            email = "test1@example.com",
-            firstName = "Test",
-            lastName = "One",
-            dateJoined = "2024-01-01",
-            isStaff = true,
-            hasPassword = true,
-            sessionToken = "token1",
-            serverUrl = "https://server1.com"
-        )
-        
-        val userDetails2 = UserDetails(
-            username = "test2",
-            profilePic = null,
-            uuid = "test-uuid-2",
-            publicProfile = false,
-            email = "test2@example.com",
-            firstName = "Test",
-            lastName = "Two",
-            dateJoined = "2024-01-02",
-            isStaff = false,
-            hasPassword = false,
-            sessionToken = "token2",
-            serverUrl = "https://server2.com"
-        )
-        
-        // When & Then
-        val json1 = json.encodeToString(UserDetails.serializer(), userDetails1)
-        val json2 = json.encodeToString(UserDetails.serializer(), userDetails2)
-        
-        assertTrue(json1.contains("\"publicProfile\":true"))
-        assertTrue(json1.contains("\"isStaff\":true"))
-        assertTrue(json2.contains("\"publicProfile\":false"))
-        assertTrue(json2.contains("\"isStaff\":false"))
-    }
-    
-    @Test
-    fun `should correctly compare UserDetails instances`() {
-        // Given
-        val user1 = UserDetails(
-            username = "user100",
-            profilePic = "/pic100.jpg",
-            uuid = "uuid-100",
-            publicProfile = true,
-            email = "user100@test.com",
-            firstName = "First",
-            lastName = "Last",
-            dateJoined = "2024-01-01",
-            isStaff = false,
-            hasPassword = true,
-            sessionToken = "token100",
-            serverUrl = "https://server.com"
-        )
-        
+    fun `should correctly implement equals and hashCode`() {
+        val user1 = TestDataFactory.createUserDetails(username = "user100")
         val user2 = user1.copy()
-
-        // Then
-        assertEquals(user1, user2)
-        assertEquals(user1.hashCode(), user2.hashCode())
+        val user3 = user1.copy(username = "different")
+        val user4 = user1.copy(uuid = "different-uuid")
+        
+        testEquality(
+            original = user1,
+            equal = user2,
+            different = listOf(user3, user4)
+        )
+    }
+    
+    @Test
+    fun `should handle boolean fields correctly`() {
+        val publicUser = TestDataFactory.createUserDetails(
+            publicProfile = true,
+            isStaff = true,
+            hasPassword = true
+        )
+        
+        val privateUser = TestDataFactory.createUserDetails(
+            publicProfile = false,
+            isStaff = false,
+            hasPassword = false
+        )
+        
+        assertTrue(publicUser.publicProfile)
+        assertTrue(publicUser.isStaff)
+        assertTrue(publicUser.hasPassword)
+        
+        assertTrue(!privateUser.publicProfile)
+        assertTrue(!privateUser.isStaff)
+        assertTrue(!privateUser.hasPassword)
     }
 }

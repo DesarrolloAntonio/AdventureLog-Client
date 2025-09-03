@@ -36,12 +36,13 @@ class MapViewModel(
         viewModelScope.launch {
             // Get current user session to obtain username
             val userSession = userRepository.getUserSessionOnce()
-            if (userSession == null) {
-                logger.w { "No user session found, cannot observe stats" }
+            val username = userSession?.username
+            if (username == null) {
+                logger.w { "No username found in session, cannot observe stats" }
                 return@launch
             }
             
-            observeUserStatsUseCase(userSession.username).collect { stats ->
+            observeUserStatsUseCase(username).collect { stats ->
                 logger.d { "📊 User stats updated:" }
                 logger.d { "  - Trips (visited): ${stats.tripsCount}" }
                 logger.d { "  - Visited regions: ${stats.visitedRegionCount}" }
@@ -103,7 +104,7 @@ class MapViewModel(
                     
                     // Filter adventures with valid location
                     val adventuresWithLocation = adventures.filter { 
-                        it.latitude.isNotBlank() && it.longitude.isNotBlank() &&
+                        !it.latitude.isNullOrBlank() && !it.longitude.isNullOrBlank() &&
                         it.latitude != "0.0" && it.longitude != "0.0"
                     }
                     
@@ -112,13 +113,13 @@ class MapViewModel(
                     
                     // Get unique activity types for filters
                     val activityTypes = adventuresWithLocation
-                        .flatMap { it.activityTypes }
+                        .flatMap { it.tags }
                         .distinct()
                         .sorted()
                     
                     logger.d { "📊 Map statistics:" }
                     logger.d { "  - Total adventures: ${adventures.size}" }
-                    logger.d { "  - Adventures with location: ${adventuresWithLocation.size}" }
+                    logger.d { "  - Locations with location: ${adventuresWithLocation.size}" }
                     logger.d { "  - Planned (with location): $plannedCount" }
                     
                     val adventuresWithoutLocation = adventures.size - adventuresWithLocation.size
@@ -128,7 +129,7 @@ class MapViewModel(
                     
                     _uiState.update { state ->
                         state.copy(
-                            adventures = adventuresWithLocation,
+                            locations = adventuresWithLocation,
                             activityTypes = activityTypes,
                             filters = state.filters.copy(
                                 plannedCount = plannedCount

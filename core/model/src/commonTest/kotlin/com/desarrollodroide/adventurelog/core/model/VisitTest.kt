@@ -1,214 +1,111 @@
 package com.desarrollodroide.adventurelog.core.model
 
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class VisitTest {
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        encodeDefaults = true
-    }
-
-    private val mockDate = "2025-09-03T15:00:00Z"
-
+class VisitTest : BaseModelTest<Visit>() {
+    
     @Test
     fun `should create Visit with all properties`() {
-        // Given
-        val visit = Visit(
+        val visit = TestDataFactory.createVisit(
             id = "visit-123",
             location = "loc-1",
             startDate = "2024-06-01",
             endDate = "2024-06-07",
             notes = "Amazing week-long vacation with family",
-            timezone = "UTC",
-            createdAt = mockDate,
-            updatedAt = mockDate
+            timezone = "UTC"
         )
-
-        // Then
+        
         assertEquals("visit-123", visit.id)
         assertEquals("loc-1", visit.location)
         assertEquals("2024-06-01", visit.startDate)
         assertEquals("2024-06-07", visit.endDate)
         assertEquals("Amazing week-long vacation with family", visit.notes)
+        assertEquals("UTC", visit.timezone)
     }
-
+    
     @Test
     fun `should use PreviewData visits correctly`() {
-        // Given
-        val visit1 = PreviewData.visits[0]
-        val visit2 = PreviewData.visits[1]
-
-        // Then
-        assertEquals("1", visit1.id)
-        assertEquals("location-1", visit1.location)
-        assertEquals("2024-01-15", visit1.startDate)
-        assertEquals("2024-01-20", visit1.endDate)
-        assertEquals("Amazing experience", visit1.notes)
-
-        assertEquals("2", visit2.id)
-        assertEquals("location-2", visit2.location)
-        assertEquals("2024-02-01", visit2.startDate)
-        assertEquals("2024-02-05", visit2.endDate)
-        assertEquals("Great weekend getaway", visit2.notes)
+        val visits = PreviewData.visits
+        
+        assertEquals(2, visits.size)
+        assertEquals("1", visits[0].id)
+        assertEquals("location-1", visits[0].location)
+        assertEquals("2024-01-15", visits[0].startDate)
+        assertEquals("Amazing experience", visits[0].notes)
+        
+        assertEquals("2", visits[1].id)
+        assertEquals("location-2", visits[1].location)
+        assertEquals("2024-02-01", visits[1].startDate)
+        assertEquals("Great weekend getaway", visits[1].notes)
     }
-
+    
     @Test
-    fun `should serialize to JSON correctly`() {
-        // Given
-        val visit = Visit(
+    fun `should serialize and deserialize correctly`() {
+        val visit = TestDataFactory.createVisit(
             id = "v-456",
             location = "loc-2",
             startDate = "2024-12-24",
             endDate = "2024-12-26",
-            notes = "Christmas holidays",
-            timezone = "UTC",
-            createdAt = mockDate,
-            updatedAt = mockDate
+            notes = "Christmas holidays"
         )
-
-        // When
-        val jsonString = json.encodeToString(Visit.serializer(), visit)
-
-        // Then
-        assertTrue(jsonString.contains("\"id\":\"v-456\""))
-        assertTrue(jsonString.contains("\"location\":\"loc-2\""))
-        assertTrue(jsonString.contains("\"startDate\":\"2024-12-24\""))
-        assertTrue(jsonString.contains("\"notes\":\"Christmas holidays\""))
-        assertTrue(jsonString.contains("\"createdAt\":\"$mockDate\""))
+        
+        testSerialization(visit, Visit.serializer()) { jsonString ->
+            assertTrue(jsonString.contains("\"id\":\"v-456\""))
+            assertTrue(jsonString.contains("\"location\":\"loc-2\""))
+            assertTrue(jsonString.contains("\"startDate\":\"2024-12-24\""))
+            assertTrue(jsonString.contains("\"notes\":\"Christmas holidays\""))
+        }
     }
-
+    
     @Test
-    fun `should deserialize from JSON correctly`() {
-        // Given
-        val jsonString = """
-            {
-                "id": "visit-789",
-                "location": "loc-3",
-                "startDate": "2024-07-01",
-                "endDate": "2024-07-15",
-                "notes": "Summer vacation in Europe",
-                "timezone": "UTC",
-                "createdAt": "$mockDate",
-                "updatedAt": "$mockDate"
-            }
-        """.trimIndent()
-
-        // When
-        val visit = json.decodeFromString<Visit>(jsonString)
-
-        // Then
-        assertEquals("visit-789", visit.id)
-        assertEquals("loc-3", visit.location)
-        assertEquals("2024-07-01", visit.startDate)
-        assertEquals("Summer vacation in Europe", visit.notes)
-    }
-
-    @Test
-    fun `should correctly compare Visit instances`() {
-        // Given
-        val visit1 = Visit(
-            id = "1",
-            location = "loc-4",
-            startDate = "2024-03-01",
-            endDate = "2024-03-03",
-            notes = "Weekend trip",
-            timezone = "UTC",
-            createdAt = mockDate,
-            updatedAt = mockDate
-        )
-
+    fun `should correctly implement equals and hashCode`() {
+        val visit1 = TestDataFactory.createVisit()
         val visit2 = visit1.copy()
         val visit3 = visit1.copy(id = "2")
         val visit4 = visit1.copy(notes = "Different notes")
-
-        // Then
-        assertEquals(visit1, visit2)
-        assertNotEquals(visit1, visit3)
-        assertNotEquals(visit1, visit4)
-        assertEquals(visit1.hashCode(), visit2.hashCode())
+        
+        testEquality(
+            original = visit1,
+            equal = visit2,
+            different = listOf(visit3, visit4)
+        )
     }
-
+    
     @Test
-    fun `should handle same day visits`() {
-        // Given
-        val sameDayVisit = Visit(
-            id = "same-day",
-            location = "loc-5",
+    fun `should handle edge cases`() {
+        // Same day visit
+        val sameDayVisit = TestDataFactory.createVisit(
             startDate = "2024-05-15",
             endDate = "2024-05-15",
-            notes = "Day trip to the mountains",
-            timezone = "UTC",
-            createdAt = mockDate,
-            updatedAt = mockDate
+            notes = "Day trip to the mountains"
         )
-
-        // Then
         assertEquals(sameDayVisit.startDate, sameDayVisit.endDate)
-    }
-
-    @Test
-    fun `should handle empty notes`() {
-        // Given
-        val visitWithoutNotes = Visit(
-            id = "no-notes",
-            location = "loc-6",
-            startDate = "2024-08-01",
-            endDate = "2024-08-05",
-            notes = "",
-            timezone = "UTC",
-            createdAt = mockDate,
-            updatedAt = mockDate
-        )
-
-        // Then
-        assertEquals("", visitWithoutNotes.notes)
-        assertTrue(visitWithoutNotes.notes!!.isEmpty())
-    }
-
-    @Test
-    fun `should handle various date formats`() {
-        // Given
-        val visits = listOf(
-            Visit("1", "loc-7", "2024-01-01", "2024-01-02", "UTC", "ISO format", emptyList(), mockDate, mockDate),
-            Visit("2", "loc-7", "2024-12-31", "2025-01-01", "UTC", "Year transition", emptyList(), mockDate, mockDate),
-            Visit("3", "loc-7", "2024-02-29", "2024-03-01", "UTC", "Leap year", emptyList(), mockDate, mockDate)
-        )
-
-        // Then
-        assertEquals("2024-01-01", visits[0].startDate)
-        assertEquals("2024-12-31", visits[1].startDate)
-        assertEquals("2025-01-01", visits[1].endDate)
-        assertEquals("2024-02-29", visits[2].startDate) // Leap year date
-    }
-
-    @Test
-    fun `should handle long notes`() {
-        // Given
+        
+        // Empty notes
+        val emptyNotesVisit = TestDataFactory.createVisit(notes = "")
+        assertTrue(emptyNotesVisit.notes!!.isEmpty())
+        
+        // Long notes
         val longNotes = "This was an incredible adventure! " +
                 "We visited multiple locations, tried local cuisine, " +
                 "met wonderful people, and created memories that will last a lifetime. " +
                 "The weather was perfect throughout our stay."
-
-        val visitWithLongNotes = Visit(
-            id = "long-notes",
-            location = "loc-8",
-            startDate = "2024-09-01",
-            endDate = "2024-09-14",
-            notes = longNotes,
-            timezone = "UTC",
-            createdAt = mockDate,
-            updatedAt = mockDate
+        val longNotesVisit = TestDataFactory.createVisit(notes = longNotes)
+        assertEquals(longNotes, longNotesVisit.notes)
+        assertTrue(longNotesVisit.notes!!.length > 100)
+        
+        // Various date formats
+        val visits = listOf(
+            TestDataFactory.createVisit(startDate = "2024-01-01", endDate = "2024-01-02"),
+            TestDataFactory.createVisit(startDate = "2024-12-31", endDate = "2025-01-01"),
+            TestDataFactory.createVisit(startDate = "2024-02-29", endDate = "2024-03-01")
         )
-
-        // Then
-        assertEquals(longNotes, visitWithLongNotes.notes)
-        assertTrue(visitWithLongNotes.notes!!.length > 100)
+        assertEquals("2024-01-01", visits[0].startDate)
+        assertEquals("2024-12-31", visits[1].startDate)
+        assertEquals("2025-01-01", visits[1].endDate)
+        assertEquals("2024-02-29", visits[2].startDate)
     }
 }

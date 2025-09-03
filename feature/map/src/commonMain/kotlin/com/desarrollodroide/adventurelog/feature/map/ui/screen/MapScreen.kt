@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,13 +21,13 @@ fun MapScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showFilterSheet by remember { mutableStateOf(false) }
     
-    val filteredAdventures = remember(uiState.adventures, uiState.filters) {
-        uiState.adventures.filter { adventure ->
+    val filteredAdventures = remember(uiState.locations, uiState.filters) {
+        uiState.locations.filter { adventure ->
             val matchesVisitFilter = (adventure.isVisited && uiState.filters.showVisited) || 
                                     (!adventure.isVisited && uiState.filters.showPlanned)
             
             val matchesActivityType = uiState.filters.selectedActivityTypes.isEmpty() ||
-                                    adventure.activityTypes.any { it in uiState.filters.selectedActivityTypes }
+                                    adventure.tags.any { it in uiState.filters.selectedActivityTypes }
             
             matchesVisitFilter && matchesActivityType
         }
@@ -36,7 +35,7 @@ fun MapScreen(
     
     Box(modifier = Modifier.fillMaxSize()) {
         MapContent(
-            adventures = filteredAdventures,
+            locations = filteredAdventures,
             visitedRegions = uiState.visitedRegions,
             showRegions = uiState.filters.showRegions,
             isLoading = uiState.isLoading,

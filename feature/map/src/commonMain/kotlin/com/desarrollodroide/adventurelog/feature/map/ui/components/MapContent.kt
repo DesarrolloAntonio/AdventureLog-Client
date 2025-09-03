@@ -9,12 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 
 @Composable
 fun MapContent(
-    adventures: List<Adventure>,
+    locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
     showRegions: Boolean,
     isLoading: Boolean,
@@ -65,7 +65,7 @@ fun MapContent(
                     shape = RoundedCornerShape(24.dp)
                 ) {
                     AdventureMapView(
-                        adventures = adventures,
+                        locations = locations,
                         visitedRegions = visitedRegions,
                         showRegions = showRegions,
                         onAdventureClick = onAdventureClick,
