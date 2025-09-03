@@ -7,7 +7,7 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSource
 import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSourceFiltered
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
@@ -24,13 +24,13 @@ class AdventuresRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
 ) : AdventuresRepository {
 
-    private val _adventuresFlow = MutableStateFlow<List<Adventure>>(emptyList())
-    override val adventuresFlow: StateFlow<List<Adventure>> = _adventuresFlow.asStateFlow()
+    private val _adventuresFlow = MutableStateFlow<List<Location>>(emptyList())
+    override val adventuresFlow: StateFlow<List<Location>> = _adventuresFlow.asStateFlow()
     
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
     
-    override fun getAdventuresPagingData(): Flow<PagingData<Adventure>> {
+    override fun getAdventuresPagingData(): Flow<PagingData<Location>> {
         return _version.flatMapLatest { _ ->
             Pager(
                 config = PagingConfig(
@@ -51,9 +51,9 @@ class AdventuresRepositoryImpl(
         isVisited: Boolean?,
         searchQuery: String?,
         includeCollections: Boolean
-    ): Flow<PagingData<Adventure>> {
+    ): Flow<PagingData<Location>> {
         return _version.flatMapLatest { _ ->
-            Pager<Int, Adventure>(
+            Pager<Int, Location>(
                 config = PagingConfig(
                     pageSize = 30,
                     enablePlaceholders = false,
@@ -76,7 +76,7 @@ class AdventuresRepositoryImpl(
         }
     }
 
-    override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Adventure>> {
+    override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Location>> {
         return try {
             val adventures = networkDataSource.getAdventures(page, pageSize).map { it.toDomainModel() }
             
@@ -102,7 +102,7 @@ class AdventuresRepositoryImpl(
         }
     }
     
-    override suspend fun getAllAdventures(): Either<ApiResponse, List<Adventure>> {
+    override suspend fun getAllAdventures(): Either<ApiResponse, List<Location>> {
         return try {
             // Load all adventures (up to 1000) for the map
             val adventures = networkDataSource.getAdventures(page = 1, pageSize = 1000).map { it.toDomainModel() }
@@ -127,7 +127,7 @@ class AdventuresRepositoryImpl(
         }
     }
 
-    override suspend fun getAdventure(objectId: String): Either<ApiResponse, Adventure> {
+    override suspend fun getAdventure(objectId: String): Either<ApiResponse, Location> {
         return try {
             val adventure = networkDataSource.getAdventureDetail(objectId).toDomainModel()
             Either.Right(adventure)
@@ -159,7 +159,7 @@ class AdventuresRepositoryImpl(
         isPublic: Boolean,
         visits: List<VisitFormData>,
         activityTypes: List<String>
-    ): Either<ApiResponse, Adventure> {
+    ): Either<ApiResponse, Location> {
         return try {
             val adventure = networkDataSource.createAdventure(
                 name = name,
@@ -197,7 +197,7 @@ class AdventuresRepositoryImpl(
         }
     }
 
-    override suspend fun refreshAdventures(): Either<ApiResponse, List<Adventure>> {
+    override suspend fun refreshAdventures(): Either<ApiResponse, List<Location>> {
         return try {
             // Load a large page to get all adventures for the map
             // This is called by MapViewModel which needs all adventures
@@ -284,7 +284,7 @@ class AdventuresRepositoryImpl(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String>
-    ): Either<ApiResponse, Adventure> {
+    ): Either<ApiResponse, Location> {
         return try {
             val adventure = networkDataSource.updateAdventure(
                 adventureId = adventureId,

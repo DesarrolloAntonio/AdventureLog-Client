@@ -13,9 +13,8 @@ import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.DetailNavi
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.HomeNavigator
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedNavHost
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
 
 @Composable
 fun AdventureLogNavGraph(
@@ -38,8 +37,8 @@ fun AdventureLogNavGraph(
     }
     
     val homeNavigator = object : HomeNavigator {
-        override fun goToDetail(adventure: Adventure) {
-            val adventureJson = json.encodeToString(adventure)
+        override fun goToDetail(location: Location) {
+            val adventureJson = json.encodeToString(location)
             navController.navigate("detail?adventureJson=$adventureJson")
         }
         

@@ -6,20 +6,20 @@ import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultError
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 
 class AdventuresPagingSource(
     private val networkDataSource: AdventureLogNetwork,
     private val pageSize: Int = 30
-) : PagingSource<Int, Adventure>() {
+) : PagingSource<Int, Location>() {
     
     private var totalItemsLoaded = 0
     
     override suspend fun load(
         params: PagingSourceLoadParams<Int>
-    ): PagingSourceLoadResult<Int, Adventure> {
+    ): PagingSourceLoadResult<Int, Location> {
         val page = params.key ?: 1
         // Force our pageSize instead of using params.loadSize
         val size = pageSize
@@ -59,15 +59,15 @@ class AdventuresPagingSource(
                 data = adventures,
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = nextKey
-            ) as PagingSourceLoadResult<Int, Adventure>
+            ) as PagingSourceLoadResult<Int, Location>
         } catch (e: Exception) {
             println("❌ PagingSource - Error loading page $page: ${e.message}")
             e.printStackTrace()
-            PagingSourceLoadResultError<Int, Adventure>(e) as PagingSourceLoadResult<Int, Adventure>
+            PagingSourceLoadResultError<Int, Location>(e) as PagingSourceLoadResult<Int, Location>
         }
     }
     
-    override fun getRefreshKey(state: PagingState<Int, Adventure>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Location>): Int? {
         // Reset counter on refresh
         totalItemsLoaded = 0
         

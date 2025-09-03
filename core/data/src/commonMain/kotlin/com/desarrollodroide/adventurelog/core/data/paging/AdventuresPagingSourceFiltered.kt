@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.data.paging
 import app.cash.paging.PagingSource
 import app.cash.paging.PagingState
 import co.touchlab.kermit.Logger
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 
@@ -19,18 +19,18 @@ class AdventuresPagingSourceFiltered(
     private val isVisited: Boolean? = null,
     private val searchQuery: String? = null,
     private val includeCollections: Boolean = false
-) : PagingSource<Int, Adventure>() {
+) : PagingSource<Int, Location>() {
     
     private val logger = Logger.withTag("AdventuresPagingSourceFiltered")
     
-    override fun getRefreshKey(state: PagingState<Int, Adventure>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Location>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
     }
     
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Adventure> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Location> {
         val currentPage = params.key ?: 1
         
         logger.d { 

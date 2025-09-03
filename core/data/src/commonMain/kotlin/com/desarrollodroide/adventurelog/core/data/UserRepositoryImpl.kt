@@ -68,12 +68,12 @@ class UserRepositoryImpl(
             if (userSessionJson != null) {
                 val userDetails = json.decodeFromString<UserDetails>(userSessionJson)
 
-                if (userDetails.serverUrl.isBlank()) {
+                if (userDetails.serverUrl?.isBlank() == true) {
                     val rememberUrl = settings.getStringOrNull(Keys.REMEMBER_URL) ?: ""
                     if (rememberUrl.isNotBlank()) {
                         val updatedUserDetails = userDetails.copy(serverUrl = rememberUrl)
                         userSessionFlow.value = updatedUserDetails
-                        val updatedJson = json.encodeToString(updatedUserDetails)
+                        val updatedJson = json.encodeToString(UserDetails.serializer(), updatedUserDetails)
                         settings.putString(Keys.USER_SESSION, updatedJson)
                     } else {
                         userSessionFlow.value = userDetails
@@ -134,7 +134,7 @@ class UserRepositoryImpl(
 
     override suspend fun saveUserSession(userDetails: UserDetails) {
         try {
-            val userSessionJson = json.encodeToString(userDetails)
+            val userSessionJson = json.encodeToString(UserDetails.serializer(), userDetails)
             settings.putString(Keys.USER_SESSION, userSessionJson)
             userSessionFlow.value = userDetails
         } catch (e: Exception) {
