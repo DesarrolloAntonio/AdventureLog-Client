@@ -36,7 +36,9 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeCon
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.adventuresScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.AdventuresNavigator
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.CollectionsNavigator
 import com.desarrollodroide.adventurelog.feature.map.navigation.mapScreen
 import com.desarrollodroide.adventurelog.feature.settings.navigation.settingsScreen
 import com.desarrollodroide.adventurelog.feature.world.navigation.worldGraph
@@ -64,6 +66,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Collection as AdventureCollection
 import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import androidx.compose.ui.layout.ContentScale
 import com.desarrollodroide.adventurelog.resources.main_background
@@ -366,25 +369,62 @@ fun HomeScreenContent(
                             )
                         }
 
+                        // Adventures screen with navigator
                         adventuresScreen(
-                            onAdventureClick = { adventure, collections ->
-                                // Now we have the actual collections from the adventure
-                                onAdventureClick(adventure)
-                            },
-                            navController = navController
+                            navigator = object : AdventuresNavigator {
+                                override fun navigateToAdventureDetail(
+                                    adventure: Adventure,
+                                    collections: List<AdventureCollection>
+                                ) {
+                                    onAdventureClick(adventure)
+                                }
+                                
+                                override fun navigateToAddAdventure() {
+                                    navController.navigate(NavigationRoutes.Adventures.add)
+                                }
+                                
+                                override fun navigateToEditAdventure(
+                                    adventureId: String,
+                                    adventureJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Adventures.createEditRoute(adventureId, adventureJson)
+                                    )
+                                }
+                                
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
                         )
 
+                        // Collections screen with navigator
                         collectionsScreen(
-                            onCollectionClick = { collectionId, collectionName ->
-                                // No need to reset scroll when navigating TO a collection
-                                navController.navigate("collection/$collectionId/$collectionName")
-                            },
-                            onHomeClick = navigateToHome,
-                            onAdventureClick = onAdventureClick,
-                            onAddCollectionClick = {
-                                navController.navigate("add_collection")
-                            },
-                            navController = navController
+                            navigator = object : CollectionsNavigator {
+                                override fun navigateToCollectionDetail(collectionId: String, collectionName: String) {
+                                    navController.navigate("collection/$collectionId/$collectionName")
+                                }
+                                
+                                override fun navigateToAddCollection() {
+                                    navController.navigate("add_collection")
+                                }
+                                
+                                override fun navigateToEditCollection(collectionId: String) {
+                                    navController.navigate("edit_collection/$collectionId")
+                                }
+                                
+                                override fun navigateToAdventure(adventure: Adventure) {
+                                    onAdventureClick(adventure)
+                                }
+                                
+                                override fun navigateToHome() {
+                                    navigateToHome()
+                                }
+                                
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
                         )
 
                         settingsScreen(

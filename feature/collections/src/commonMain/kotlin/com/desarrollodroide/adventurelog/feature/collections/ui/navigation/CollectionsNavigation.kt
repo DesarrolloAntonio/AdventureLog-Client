@@ -1,40 +1,48 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import app.cash.paging.compose.LazyPagingItems
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
+import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionDetailScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionsScreen
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
-import com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen
-import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel
-import app.cash.paging.compose.LazyPagingItems
-import com.desarrollodroide.adventurelog.core.model.Collection
 
 /**
- * Extension function to add collections screen to a navigation graph
- * Meant to be used internally by the Home feature
+ * Navigator interface for Collections feature
+ * Defines external navigation actions that the Collections feature can trigger
+ */
+interface CollectionsNavigator {
+    fun navigateToCollectionDetail(collectionId: String, collectionName: String)
+    fun navigateToAddCollection()
+    fun navigateToEditCollection(collectionId: String)
+    fun navigateToAdventure(adventure: Adventure)
+    fun navigateToHome()
+    fun navigateBack()
+}
+
+/**
+ * Extension function to add collections screens to a navigation graph
  */
 fun NavGraphBuilder.collectionsScreen(
-    onCollectionClick: (String, String) -> Unit, // Now passes both ID and name
-    onHomeClick: () -> Unit,
-    onAdventureClick: (Adventure) -> Unit,
-    onAddCollectionClick: () -> Unit,
-    navController: NavController
+    navigator: CollectionsNavigator
 ) {
     // Collections List Screen
     composable(route = NavigationRoutes.Collections.route) { backStackEntry ->
@@ -50,10 +58,14 @@ fun NavGraphBuilder.collectionsScreen(
         }
         
         CollectionsScreen(
-            onCollectionClick = onCollectionClick,
-            onAddCollectionClick = onAddCollectionClick,
+            onCollectionClick = { collectionId, collectionName ->
+                navigator.navigateToCollectionDetail(collectionId, collectionName)
+            },
+            onAddCollectionClick = {
+                navigator.navigateToAddCollection()
+            },
             onEditCollection = { collection ->
-                navController.navigate("edit_collection/${collection.id}")
+                navigator.navigateToEditCollection(collection.id)
             },
             onPagingItemsReady = { items ->
                 pagingItems.value = items
@@ -77,26 +89,29 @@ fun NavGraphBuilder.collectionsScreen(
         CollectionDetailScreen(
             collectionId = collectionId,
             onBackClick = { 
-                // Navigate back to collections list
-                navController.navigateUp()
+                navigator.navigateBack()
             },
-            onHomeClick = onHomeClick,
-            onAdventureClick = onAdventureClick
+            onHomeClick = {
+                navigator.navigateToHome()
+            },
+            onAdventureClick = { adventure ->
+                navigator.navigateToAdventure(adventure)
+            }
         )
     }
     
     // Add Collection Screen
-    composable(route = "add_collection") {
+    composable(route = "add_collection") { backStackEntry ->
         val viewModel = koinViewModel<AddEditCollectionViewModel> {
             parametersOf(null) // null for new collection
         }
-        val uiState by viewModel.uiState.collectAsState()
-        val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val snackbarHostState = remember { SnackbarHostState() }
         
         // Handle navigation when save is successful
         LaunchedEffect(uiState.isSaved) {
             if (uiState.isSaved) {
-                navController.navigateUp()
+                navigator.navigateBack()
                 viewModel.clearSavedState()
             }
         }
@@ -110,13 +125,13 @@ fun NavGraphBuilder.collectionsScreen(
         
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {
-                androidx.compose.material3.CircularProgressIndicator(
+                CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
                 AddEditCollectionScreen(
                     onNavigateBack = {
-                        navController.navigateUp()
+                        navigator.navigateBack()
                     },
                     onSave = { formData ->
                         viewModel.saveCollection(formData)
@@ -125,7 +140,7 @@ fun NavGraphBuilder.collectionsScreen(
                 )
             }
             
-            androidx.compose.material3.SnackbarHost(
+            SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
@@ -145,20 +160,15 @@ fun NavGraphBuilder.collectionsScreen(
         val viewModel = koinViewModel<AddEditCollectionViewModel> {
             parametersOf(collectionId)
         }
-        val uiState by viewModel.uiState.collectAsState()
-        val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
-        
-        // Get the parent collections screen entry to refresh it
-        val parentEntry = remember(backStackEntry) {
-            navController.getBackStackEntry(NavigationRoutes.Collections.route)
-        }
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        val snackbarHostState = remember { SnackbarHostState() }
         
         // Handle navigation when save is successful
         LaunchedEffect(uiState.isSaved) {
             if (uiState.isSaved) {
                 // Set a flag to refresh the collections list
-                parentEntry.savedStateHandle["refresh"] = true
-                navController.navigateUp()
+                backStackEntry.savedStateHandle["refresh"] = true
+                navigator.navigateBack()
                 viewModel.clearSavedState()
             }
         }
@@ -172,13 +182,13 @@ fun NavGraphBuilder.collectionsScreen(
         
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {
-                androidx.compose.material3.CircularProgressIndicator(
+                CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
                 AddEditCollectionScreen(
                     onNavigateBack = {
-                        navController.navigateUp()
+                        navigator.navigateBack()
                     },
                     onSave = { formData ->
                         viewModel.saveCollection(formData)
@@ -187,7 +197,7 @@ fun NavGraphBuilder.collectionsScreen(
                 )
             }
             
-            androidx.compose.material3.SnackbarHost(
+            SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )

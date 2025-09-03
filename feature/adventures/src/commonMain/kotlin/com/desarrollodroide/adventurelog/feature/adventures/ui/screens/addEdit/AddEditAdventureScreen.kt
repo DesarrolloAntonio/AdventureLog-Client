@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.desarrollodroide.adventurelog.core.model.Adventure
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
@@ -51,7 +50,7 @@ import org.koin.core.parameter.parametersOf
 fun AddEditAdventureScreen(
     adventureId: String?,
     adventure: Adventure?,
-    navController: NavController
+    onNavigateBack: () -> Unit
 ) {
     val viewModel = koinViewModel<AddEditAdventureViewModel> {
         parametersOf(adventureId, adventure)
@@ -62,7 +61,7 @@ fun AddEditAdventureScreen(
     // Handle navigation when save is successful
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
-            navController.navigateUp()
+            onNavigateBack()
             viewModel.clearSavedState()
         }
     }
@@ -81,9 +80,7 @@ fun AddEditAdventureScreen(
             existingAdventure = uiState.existingAdventure,
             categories = uiState.categories,
             isLoading = uiState.isLoading,
-            onNavigateBack = {
-                navController.navigateUp()
-            },
+            onNavigateBack = onNavigateBack,
             onSave = { formData ->
                 viewModel.saveAdventure(formData)
             },

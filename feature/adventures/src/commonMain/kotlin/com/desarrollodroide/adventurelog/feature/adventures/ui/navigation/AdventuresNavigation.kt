@@ -1,38 +1,32 @@
 package com.desarrollodroide.adventurelog.feature.adventures.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditAdventureContent
+import com.desarrollodroide.adventurelog.core.model.Collection as AdventureCollection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditAdventureScreen
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.adventuresList.AdventureListScreen
-import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
 import kotlinx.serialization.json.Json
-import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
+
+/**
+ * Navigator interface for Adventures feature
+ * Defines external navigation actions that the Adventures feature can trigger
+ */
+interface AdventuresNavigator {
+    fun navigateToAdventureDetail(adventure: Adventure, collections: List<AdventureCollection>)
+    fun navigateToAddAdventure()
+    fun navigateToEditAdventure(adventureId: String, adventureJson: String)
+    fun navigateBack()
+}
 
 /**
  * Extension function to add adventures screens to a navigation graph
  */
 fun NavGraphBuilder.adventuresScreen(
-    onAdventureClick: (Adventure, List<Collection>) -> Unit,
-    navController: NavController
+    navigator: AdventuresNavigator
 ) {
     val json = Json {
         ignoreUnknownKeys = true
@@ -43,13 +37,15 @@ fun NavGraphBuilder.adventuresScreen(
     // Adventures List Screen
     composable(route = NavigationRoutes.Adventures.route) {
         AdventureListScreen(
-            onAdventureClick = onAdventureClick,
+            onAdventureClick = { adventure, collections ->
+                navigator.navigateToAdventureDetail(adventure, collections)
+            },
             onAddAdventureClick = {
-                navController.navigate(NavigationRoutes.Adventures.add)
+                navigator.navigateToAddAdventure()
             },
             onEditAdventure = { adventure ->
                 val adventureJson = json.encodeToString(adventure)
-                navController.navigate(NavigationRoutes.Adventures.createEditRoute(adventure.id, adventureJson))
+                navigator.navigateToEditAdventure(adventure.id, adventureJson)
             }
         )
     }
@@ -59,7 +55,9 @@ fun NavGraphBuilder.adventuresScreen(
         AddEditAdventureScreen(
             adventureId = null,
             adventure = null,
-            navController = navController
+            onNavigateBack = {
+                navigator.navigateBack()
+            }
         )
     }
     
@@ -87,7 +85,9 @@ fun NavGraphBuilder.adventuresScreen(
         AddEditAdventureScreen(
             adventureId = adventureId,
             adventure = adventure,
-            navController = navController
+            onNavigateBack = {
+                navigator.navigateBack()
+            }
         )
     }
 }
