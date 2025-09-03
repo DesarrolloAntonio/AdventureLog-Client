@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 
 class UpdateAdventureCollectionsUseCase(
     private val adventuresRepository: AdventuresRepository
@@ -11,7 +11,7 @@ class UpdateAdventureCollectionsUseCase(
     suspend operator fun invoke(
         adventureId: String,
         collectionIds: List<String>
-    ): Either<String, Adventure> {
+    ): Either<String, Location> {
         // Get the current adventure
         return when (val adventureResult = adventuresRepository.getAdventure(adventureId)) {
             is Either.Left -> {
@@ -29,15 +29,15 @@ class UpdateAdventureCollectionsUseCase(
                 val updateResult = adventuresRepository.updateAdventure(
                     adventureId = adventureId,
                     name = adventure.name,
-                    description = adventure.description,
+                    description = adventure.description ?: "",
                     category = adventure.category,
-                    rating = adventure.rating,
-                    link = adventure.link,
-                    location = adventure.location,
+                    rating = adventure.rating ?: 0.0,
+                    link = adventure.link ?: "",
+                    location = adventure.location ?: "",
                     latitude = adventure.latitude,
                     longitude = adventure.longitude,
                     isPublic = adventure.isPublic,
-                    tags = adventure.activityTypes,
+                    tags = adventure.tags,
                     collections = collectionIds
                 )
                 

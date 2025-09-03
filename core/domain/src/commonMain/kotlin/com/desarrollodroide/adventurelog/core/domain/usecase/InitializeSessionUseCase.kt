@@ -23,10 +23,9 @@ class InitializeSessionUseCase(
 
             if (existingSession != null) {
                 networkDataSource.initializeFromSession(
-                    serverUrl = existingSession.serverUrl,
+                    serverUrl = existingSession.serverUrl ?: "",
                     sessionToken = existingSession.sessionToken
                 )
-
                 existingSession
             } else {
                 null

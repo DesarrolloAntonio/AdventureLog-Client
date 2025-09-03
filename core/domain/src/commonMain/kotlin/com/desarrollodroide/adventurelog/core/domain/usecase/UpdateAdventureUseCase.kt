@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 
 class UpdateAdventureUseCase(
@@ -22,7 +22,7 @@ class UpdateAdventureUseCase(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String> = emptyList()
-    ): Either<String, Adventure> {
+    ): Either<String, Location> {
         return when (val result = adventuresRepository.updateAdventure(
             adventureId = adventureId,
             name = name,

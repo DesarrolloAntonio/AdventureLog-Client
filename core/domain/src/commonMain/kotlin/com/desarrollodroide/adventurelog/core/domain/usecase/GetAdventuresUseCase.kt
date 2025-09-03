@@ -3,12 +3,12 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 
 class GetAdventuresUseCase(
     private val adventuresRepository: AdventuresRepository
 ) {
-    suspend operator fun invoke(page: Int, pageSize: Int): Either<String, List<Adventure>> =
+    suspend operator fun invoke(page: Int, pageSize: Int): Either<String, List<Location>> =
         when (val result = adventuresRepository.getAdventures(page, pageSize)) {
             is Either.Left -> {
                 when (result.value) {

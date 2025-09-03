@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
@@ -22,7 +22,7 @@ class CreateAdventureUseCase(
         isPublic: Boolean,
         tags: List<String>,
         visits: List<VisitFormData> = emptyList()
-    ): Either<String, Adventure> {
+    ): Either<String, Location> {
         // Validate required fields
         if (name.isBlank()) {
             return Either.Left("Adventure name is required")

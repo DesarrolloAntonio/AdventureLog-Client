@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import kotlinx.coroutines.flow.Flow
 
 class GetAdventuresPagingUseCase(
@@ -15,7 +15,7 @@ class GetAdventuresPagingUseCase(
         isVisited: Boolean? = null,
         searchQuery: String? = null,
         includeCollections: Boolean = false
-    ): Flow<PagingData<Adventure>> {
+    ): Flow<PagingData<Location>> {
         // Check if we actually have any filters applied
         val hasFilters = !categoryNames.isNullOrEmpty() || 
                         (sortBy != null && sortBy != "updated_at") || 
