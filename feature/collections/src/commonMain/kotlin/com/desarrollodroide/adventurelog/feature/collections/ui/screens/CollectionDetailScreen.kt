@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
@@ -25,7 +25,7 @@ fun CollectionDetailScreen(
     collectionId: String,
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
-    onAdventureClick: (Adventure) -> Unit,
+    onAdventureClick: (Location) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = koinViewModel()
 ) {
@@ -69,7 +69,7 @@ fun CollectionDetailScreen(
 @Composable
 fun CollectionDetailContent(
     collection: Collection,
-    onAdventureClick: (Adventure) -> Unit,
+    onAdventureClick: (Location) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -93,7 +93,7 @@ fun CollectionDetailContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Adventures",
+                    text = "Locations",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -108,7 +108,7 @@ fun CollectionDetailContent(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Text(
-                            text = "${collection.adventures.size}",
+                            text = "${collection.locations.size}",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold
@@ -118,7 +118,7 @@ fun CollectionDetailContent(
             }
         }
         
-        if (collection.adventures.isEmpty()) {
+        if (collection.locations.isEmpty()) {
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -154,9 +154,9 @@ fun CollectionDetailContent(
                 }
             }
         } else {
-            items(collection.adventures) { adventure ->
+            items(collection.locations) { adventure ->
                 AdventureItem(
-                    adventure = adventure,
+                    location = adventure,
                     onClick = { onAdventureClick(adventure) }
                 )
             }

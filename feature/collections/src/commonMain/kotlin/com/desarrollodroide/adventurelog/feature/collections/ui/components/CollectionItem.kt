@@ -1,20 +1,24 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -30,6 +34,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -62,8 +68,8 @@ fun CollectionItem(
     ) {
         Box {
             // If there are adventures with images, use the first one as the collection background
-            if (collection.adventures.isNotEmpty() && collection.adventures.any { it.images.isNotEmpty() }) {
-                val adventure = collection.adventures.first { it.images.isNotEmpty() }
+            if (collection.locations.isNotEmpty() && collection.locations.any { it.images.isNotEmpty() }) {
+                val adventure = collection.locations.first { it.images.isNotEmpty() }
                 val primaryImage = adventure.images.find { it.isPrimary } ?: adventure.images.first()
                 
                 Image(
@@ -78,12 +84,12 @@ fun CollectionItem(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                // Placeholder colored background if no images available
-                Box(
+                // Simple but nice design for empty collections
+                EmptyCollectionDesign(
+                    collectionName = collection.name,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(250.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
                 )
             }
             
@@ -130,7 +136,7 @@ fun CollectionItem(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "${collection.adventures.size} adventures",
+                                text = "${collection.locations.size} adventures",
                                 color = Color.White,
                                 fontSize = 12.sp
                             )
@@ -140,8 +146,8 @@ fun CollectionItem(
                     Spacer(modifier = Modifier.width(8.dp))
                     
                     // Preview of adventure thumbnails if there are any
-                    if (collection.adventures.isNotEmpty()) {
-                        val thumbnailsToShow = collection.adventures
+                    if (collection.locations.isNotEmpty()) {
+                        val thumbnailsToShow = collection.locations
                             .filter { it.images.isNotEmpty() }
                             .take(3)
                         
@@ -167,9 +173,9 @@ fun CollectionItem(
                         }
                         
                         // If there are more adventures than shown, indicate it
-                        if (collection.adventures.size > 3) {
+                        if (collection.locations.size > 3) {
                             Text(
-                                text = "+${collection.adventures.size - 3}",
+                                text = "+${collection.locations.size - 3}",
                                 color = Color.White,
                                 fontSize = 12.sp
                             )
@@ -212,7 +218,6 @@ fun CollectionItem(
                             showMenu = false
                         }
                     )
-                    Divider()
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -224,6 +229,114 @@ fun CollectionItem(
                             onDeleteCollection()
                             showMenu = false
                         }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyCollectionDesign(
+    collectionName: String,
+    modifier: Modifier = Modifier
+) {
+    // Generate a simple but nice design based on collection name
+    val designIndex = remember(collectionName) { 
+        kotlin.math.abs(collectionName.hashCode() % 8)
+    }
+    
+    // Predefined safe color combinations
+    val (backgroundColor, accentColor) = when (designIndex) {
+        0 -> Color(0xFFE8EAF6) to Color(0xFF5C6BC0) // Indigo
+        1 -> Color(0xFFE0F2F1) to Color(0xFF26A69A) // Teal
+        2 -> Color(0xFFFFF3E0) to Color(0xFFFF9800) // Orange
+        3 -> Color(0xFFF3E5F5) to Color(0xFF9C27B0) // Purple
+        4 -> Color(0xFFE8F5E9) to Color(0xFF4CAF50) // Green
+        5 -> Color(0xFFFFEBEE) to Color(0xFFEF5350) // Red
+        6 -> Color(0xFFF1F8E9) to Color(0xFF689F38) // Light Green
+        else -> Color(0xFFFAFAFA) to Color(0xFF607D8B) // Blue Grey
+    }
+    
+    Box(modifier = modifier) {
+        // Gradient background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            backgroundColor,
+                            backgroundColor.copy(alpha = 0.7f),
+                            Color.White
+                        )
+                    )
+                )
+        )
+        
+        // Simple geometric decoration - just the grid
+        Canvas(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Draw subtle grid lines
+            val gridSize = 100.dp.toPx()
+            val gridAlpha = 0.03f
+            
+            // Vertical lines
+            var x = gridSize
+            while (x < size.width) {
+                drawLine(
+                    color = accentColor.copy(alpha = gridAlpha),
+                    start = Offset(x, 0f),
+                    end = Offset(x, size.height),
+                    strokeWidth = 1.dp.toPx()
+                )
+                x += gridSize
+            }
+            
+            // Horizontal lines
+            var y = gridSize
+            while (y < size.height) {
+                drawLine(
+                    color = accentColor.copy(alpha = gridAlpha),
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = 1.dp.toPx()
+                )
+                y += gridSize
+            }
+        }
+        
+        // Icon positioned higher but avoiding overlay overlap
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 30.dp) // Positioned in upper third to avoid overlay
+        ) {
+            // White circle background
+            Surface(
+                modifier = Modifier.size(100.dp),
+                shape = CircleShape,
+                color = Color.White.copy(alpha = 0.9f),
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    // Colored background for icon
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .background(
+                                color = accentColor.copy(alpha = 0.1f),
+                                shape = CircleShape
+                            )
+                    )
+                    
+                    // Always the same icon - PhotoLibrary
+                    Icon(
+                        imageVector = Icons.Outlined.PhotoLibrary,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = accentColor.copy(alpha = 0.8f)
                     )
                 }
             }

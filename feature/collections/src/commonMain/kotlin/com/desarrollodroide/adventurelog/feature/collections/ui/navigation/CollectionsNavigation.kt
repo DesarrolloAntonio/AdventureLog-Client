@@ -9,14 +9,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import app.cash.paging.compose.LazyPagingItems
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionDetailScreen
@@ -33,7 +32,7 @@ interface CollectionsNavigator {
     fun navigateToCollectionDetail(collectionId: String, collectionName: String)
     fun navigateToAddCollection()
     fun navigateToEditCollection(collectionId: String)
-    fun navigateToAdventure(adventure: Adventure)
+    fun navigateToAdventure(location: Location)
     fun navigateToHome()
     fun navigateBack()
 }
