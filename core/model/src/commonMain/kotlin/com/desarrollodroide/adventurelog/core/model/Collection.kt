@@ -6,7 +6,7 @@ data class Collection(
     val userId: String,
     val name: String,
     val isPublic: Boolean,
-    val adventures: List<Adventure>,
+    val locations: List<Location>,
     val createdAt: String,
     val startDate: String?,
     val endDate: String?,

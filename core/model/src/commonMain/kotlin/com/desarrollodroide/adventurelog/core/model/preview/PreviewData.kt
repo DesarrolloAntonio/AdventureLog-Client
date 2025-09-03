@@ -1,12 +1,82 @@
 package com.desarrollodroide.adventurelog.core.model.preview
 
-import com.desarrollodroide.adventurelog.core.model.Adventure
-import com.desarrollodroide.adventurelog.core.model.AdventureImage
-import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.*
 
 object PreviewData {
+    
+    // Sample users
+    val sampleUser1 = UserDetails(
+        pk = 1,
+        uuid = "user1-uuid",
+        username = "user1",
+        firstName = "John",
+        lastName = "Doe",
+        email = "john@example.com",
+        profilePic = null,
+        publicProfile = true,
+        measurementSystem = "metric",
+        dateJoined = "2024-01-01",
+        isStaff = false,
+        disablePassword = false,
+        hasPassword = true,
+        sessionToken = null,
+        serverUrl = null
+    )
+    
+    val sampleUser2 = UserDetails(
+        pk = 2,
+        uuid = "user2-uuid",
+        username = "user2",
+        firstName = "Jane",
+        lastName = "Smith",
+        email = "jane@example.com",
+        profilePic = null,
+        publicProfile = true,
+        measurementSystem = "metric",
+        dateJoined = "2024-01-02",
+        isStaff = false,
+        disablePassword = false,
+        hasPassword = true,
+        sessionToken = null,
+        serverUrl = null
+    )
+    
+    val sampleUser3 = UserDetails(
+        pk = 3,
+        uuid = "user3-uuid",
+        username = "user3",
+        firstName = "Bob",
+        lastName = "Johnson",
+        email = "bob@example.com",
+        profilePic = null,
+        publicProfile = true,
+        measurementSystem = "metric",
+        dateJoined = "2024-01-03",
+        isStaff = false,
+        disablePassword = false,
+        hasPassword = true,
+        sessionToken = null,
+        serverUrl = null
+    )
+    
+    val sampleUserDefault = UserDetails(
+        pk = 4,
+        uuid = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
+        username = "memnoch",
+        firstName = "Antonio",
+        lastName = "Corrales",
+        email = "antonio@example.com",
+        profilePic = null,
+        publicProfile = true,
+        measurementSystem = "metric",
+        dateJoined = "2025-01-30T07:15:10.367579Z",
+        isStaff = false,
+        disablePassword = false,
+        hasPassword = true,
+        sessionToken = null,
+        serverUrl = null
+    )
+    
     val categories = listOf(
         Category(
             id = "1",
@@ -40,209 +110,216 @@ object PreviewData {
 
     // Imágenes para la primera aventura (Lake District Mountain Resort)
     val lakeMountainImages = listOf(
-        AdventureImage(
+        ContentImage(
             id = "1-1",
+            user = "user1",
             image = "https://images.unsplash.com/photo-1571896349842-33c89424de2d",
-            adventure = "1",
-            isPrimary = true,
-            userId = "user1"
+            immichId = null,
+            isPrimary = true
         ),
-        AdventureImage(
+        ContentImage(
             id = "1-2",
+            user = "user1",
             image = "https://images.unsplash.com/photo-1554995207-c18c203602cb",
-            adventure = "1",
-            isPrimary = false,
-            userId = "user1"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "1-3",
+            user = "user1",
             image = "https://images.unsplash.com/photo-1551632811-561732d1e306",
-            adventure = "1",
-            isPrimary = false,
-            userId = "user1"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "1-4",
+            user = "user1",
             image = "https://images.unsplash.com/photo-1560624052-449f5ddf0c31",
-            adventure = "1",
-            isPrimary = false,
-            userId = "user1"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "1-5",
+            user = "user1",
             image = "https://images.unsplash.com/photo-1568084680786-a84f91d1153c",
-            adventure = "1",
-            isPrimary = false,
-            userId = "user1"
+            immichId = null,
+            isPrimary = false
         ),
     )
 
     // Imágenes para la segunda aventura (Coastal Beach Resort)
     val beachResortImages = listOf(
-        AdventureImage(
+        ContentImage(
             id = "2-1",
+            user = "user2",
             image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
-            adventure = "2",
-            isPrimary = true,
-            userId = "user2"
+            immichId = null,
+            isPrimary = true
         ),
-        AdventureImage(
+        ContentImage(
             id = "2-2",
+            user = "user2",
             image = "https://images.unsplash.com/photo-1573790387438-4da905039392",
-            adventure = "2",
-            isPrimary = false,
-            userId = "user2"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "2-3",
+            user = "user2",
             image = "https://images.unsplash.com/photo-1540541338287-41700207dee6",
-            adventure = "2",
-            isPrimary = false,
-            userId = "user2"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "2-4",
+            user = "user2",
             image = "https://images.unsplash.com/photo-1533760881669-80db4d7b4c15",
-            adventure = "2",
-            isPrimary = false,
-            userId = "user2"
+            immichId = null,
+            isPrimary = false
         ),
     )
 
     // Imágenes para la tercera aventura (Mountain View Hotel)
     val mountainHotelImages = listOf(
-        AdventureImage(
+        ContentImage(
             id = "3-1",
+            user = "user3",
             image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
-            adventure = "3",
-            isPrimary = true,
-            userId = "user3"
+            immichId = null,
+            isPrimary = true
         ),
-        AdventureImage(
+        ContentImage(
             id = "3-2",
+            user = "user3",
             image = "https://images.unsplash.com/photo-1519944518895-f08a12d6dfd5",
-            adventure = "3",
-            isPrimary = false,
-            userId = "user3"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "3-3",
+            user = "user3",
             image = "https://images.unsplash.com/photo-1548704606-c65a61e6afe7",
-            adventure = "3",
-            isPrimary = false,
-            userId = "user3"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "3-4",
+            user = "user3",
             image = "https://images.unsplash.com/photo-1443385434562-3aded81268b4",
-            adventure = "3",
-            isPrimary = false,
-            userId = "user3"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "3-5",
+            user = "user3",
             image = "https://images.unsplash.com/photo-1509023464722-18d996393ca8",
-            adventure = "3",
-            isPrimary = false,
-            userId = "user3"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "3-6",
+            user = "user3",
             image = "https://images.unsplash.com/photo-1483777979751-03fa468d266c",
-            adventure = "3",
-            isPrimary = false,
-            userId = "user3"
+            immichId = null,
+            isPrimary = false
         ),
     )
 
     // Imágenes para ejemplos específicos
     val balnearioImages = listOf(
-        AdventureImage(
+        ContentImage(
             id = "b-1",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1566073771259-6a8506099945",
-            adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
-            isPrimary = true,
-            userId = "user123"
+            immichId = null,
+            isPrimary = true
         ),
-        AdventureImage(
+        ContentImage(
             id = "b-2",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f",
-            adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
-            isPrimary = false,
-            userId = "user123"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "b-3",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1584132967334-10e028bd69f7",
-            adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
-            isPrimary = false,
-            userId = "user123"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "b-4",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1519449556851-5720b33024e7",
-            adventure = "c9cfb44c-536a-492c-87ff-8c3bb5d3eec5",
-            isPrimary = false,
-            userId = "user123"
+            immichId = null,
+            isPrimary = false
         ),
     )
 
     val navalagamellaImages = listOf(
-        AdventureImage(
+        ContentImage(
             id = "n-1",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4",
-            adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-            isPrimary = true,
-            userId = "user123"
+            immichId = null,
+            isPrimary = true
         ),
-        AdventureImage(
+        ContentImage(
             id = "n-2",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1551632811-561732d1e306",
-            adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-            isPrimary = false,
-            userId = "user123"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "n-3",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1551849630-3c2969e08b74",
-            adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-            isPrimary = false,
-            userId = "user123"
+            immichId = null,
+            isPrimary = false
         ),
-        AdventureImage(
+        ContentImage(
             id = "n-4",
+            user = "user123",
             image = "https://images.unsplash.com/photo-1547125696-1d32a98e3d36",
-            adventure = "2ac911dd-8742-45e6-b105-5c04779e8bea",
-            isPrimary = false,
-            userId = "user123"
+            immichId = null,
+            isPrimary = false
         ),
     )
 
     val visits = listOf(
         Visit(
             id = "1",
+            location = "location-1",
             startDate = "2024-01-15",
             endDate = "2024-01-20",
             notes = "Amazing experience",
-            timezone = "Europe/Madrid"
+            timezone = "Europe/Madrid",
+            activities = emptyList(),
+            createdAt = "2024-01-15",
+            updatedAt = "2024-01-20"
         ),
         Visit(
             id = "2",
+            location = "location-2",
             startDate = "2024-02-01",
             endDate = "2024-02-05",
             notes = "Great weekend getaway",
-            timezone = "UTC"
+            timezone = "UTC",
+            activities = emptyList(),
+            createdAt = "2024-02-01",
+            updatedAt = "2024-02-05"
         )
     )
 
-    val adventures = listOf(
-        Adventure(
+    val locations = listOf(
+        Location(
             id = "1",
-            userId = "user1",
             name = "Lake District Mountain Resort (Pending)",
             description = "Beautiful mountain resort with scenic views and spa facilities",
             rating = 4.5,
-            activityTypes = listOf("Spa", "Swimming", "Hiking"),
+            tags = listOf("Spa", "Swimming", "Hiking"),
             location = "4h 28min (445 km)",
             isPublic = false,
             collections = listOf("planned-collection-id"),
@@ -255,15 +332,19 @@ object PreviewData {
             visits = listOf(visits[0]),
             isVisited = false,
             category = categories[0],
-            attachments = listOf()
+            attachments = listOf(),
+            user = sampleUser1,
+            city = null,
+            country = null,
+            region = null,
+            trails = emptyList()
         ),
-        Adventure(
+        Location(
             id = "2",
-            userId = "user2",
             name = "Coastal Beach Resort & Spa",
             description = "Luxurious beachfront resort with private beach access",
             rating = 4.8,
-            activityTypes = listOf("Beach", "Spa", "Water Sports"),
+            tags = listOf("Beach", "Spa", "Water Sports"),
             location = "2h 15min (180 km)",
             isPublic = true,
             collections = listOf("summer-2024-collection-id"),
@@ -276,15 +357,19 @@ object PreviewData {
             visits = listOf(visits[1]),
             isVisited = true,
             category = categories[2],
-            attachments = listOf()
+            attachments = listOf(),
+            user = sampleUser2,
+            city = null,
+            country = null,
+            region = null,
+            trails = emptyList()
         ),
-        Adventure(
+        Location(
             id = "3",
-            userId = "user3",
             name = "Mountain View Hotel",
             description = "Cozy mountain hotel with panoramic views",
             rating = 4.2,
-            activityTypes = listOf("Hiking", "Skiing"),
+            tags = listOf("Hiking", "Skiing"),
             location = "3h 45min (320 km)",
             isPublic = true,
             collections = listOf("winter-2024-collection-id"),
@@ -297,7 +382,12 @@ object PreviewData {
             visits = emptyList(),
             isVisited = false,
             category = categories[0],
-            attachments = listOf()
+            attachments = listOf(),
+            user = sampleUser3,
+            city = null,
+            country = null,
+            region = null,
+            trails = emptyList()
         ),
     )
     
@@ -306,9 +396,9 @@ object PreviewData {
             id = "c1",
             description = "A collection of summer adventures in Spain",
             userId = "user1",
-            name = "Summer Adventures",
+            name = "Summer Locations",
             isPublic = false,
-            adventures = listOf(adventures[0]),
+            locations = listOf(locations[0]),
             createdAt = "2025-01-30T07:21:07.230845Z",
             startDate = null,
             endDate = null,
@@ -327,7 +417,7 @@ object PreviewData {
             userId = "user1",
             name = "Winter Mountains",
             isPublic = false,
-            adventures = listOf(adventures[1], adventures[2]),
+            locations = listOf(locations[1], locations[2]),
             createdAt = "2025-01-30T15:57:27.605536Z",
             startDate = null,
             endDate = null,
@@ -346,7 +436,7 @@ object PreviewData {
             userId = "user1",
             name = "Beach Destinations",
             isPublic = false,
-            adventures = emptyList(),
+            locations = emptyList(),
             createdAt = "2025-02-09T12:21:01.829885Z",
             startDate = null,
             endDate = null,
@@ -368,7 +458,7 @@ object PreviewData {
             userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Álava",
             isPublic = false,
-            adventures = adventures.take(2),
+            locations = locations.take(2),
             createdAt = "2025-01-30T07:21:07.230845Z",
             startDate = null,
             endDate = null,
@@ -387,7 +477,7 @@ object PreviewData {
             userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Albacete",
             isPublic = false,
-            adventures = adventures.take(3),
+            locations = locations.take(3),
             createdAt = "2025-01-30T15:57:27.605536Z",
             startDate = null,
             endDate = null,
@@ -406,7 +496,7 @@ object PreviewData {
             userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Alicante",
             isPublic = false,
-            adventures = emptyList(),
+            locations = emptyList(),
             createdAt = "2025-02-09T12:21:01.829885Z",
             startDate = null,
             endDate = null,
@@ -425,7 +515,7 @@ object PreviewData {
             userId = "e0c8df01-2bf8-403f-a4da-a0d09ef32353",
             name = "Teruel",
             isPublic = false,
-            adventures = adventures.take(1),
+            locations = locations.take(1),
             createdAt = "2025-02-15T12:41:12.529110Z",
             startDate = null,
             endDate = null,

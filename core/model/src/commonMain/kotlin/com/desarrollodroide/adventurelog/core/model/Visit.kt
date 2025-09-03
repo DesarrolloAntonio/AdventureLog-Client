@@ -5,8 +5,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Visit(
     val id: String,
-    val startDate: String,
-    val endDate: String,
-    val notes: String,
-    val timezone: String
+    val location: String,  // UUID de location
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val timezone: String? = null,
+    val notes: String? = null,
+    val activities: List<Activity> = emptyList(),
+    val createdAt: String,
+    val updatedAt: String
 )

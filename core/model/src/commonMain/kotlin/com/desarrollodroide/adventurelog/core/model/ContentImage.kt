@@ -3,10 +3,10 @@ package com.desarrollodroide.adventurelog.core.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AdventureImage(
+data class ContentImage(
     val id: String,
     val image: String,
-    val adventure: String,
-    val isPrimary: Boolean,
-    val userId: String
+    val isPrimary: Boolean = false,
+    val user: String,  // UUID String
+    val immichId: String? = null
 )

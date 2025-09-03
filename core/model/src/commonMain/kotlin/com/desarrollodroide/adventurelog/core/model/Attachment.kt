@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 data class Attachment(
     val id: String,
     val file: String,
-    val adventure: String,
     val extension: String,
-    val name: String,
-    val userId: Int
+    val name: String? = null,
+    val user: String,  // UUID String
+    val geojson: String? = null
 )
