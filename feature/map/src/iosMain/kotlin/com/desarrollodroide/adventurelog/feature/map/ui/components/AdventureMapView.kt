@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.UIKitView
-import com.desarrollodroide.adventurelog.core.model.Adventure
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreLocation.CLLocationCoordinate2D
@@ -19,7 +19,7 @@ import platform.darwin.NSObject
 @OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun AdventureMapView(
-    adventures: List<Adventure>,
+    locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
@@ -47,7 +47,7 @@ actual fun AdventureMapView(
                 setDelegate(mapDelegate)
                 
                 // Add annotations for all adventures
-                adventures.forEach { adventure ->
+                locations.forEach { adventure ->
                     val lat = adventure.latitude?.toDoubleOrNull()
                     val lng = adventure.longitude?.toDoubleOrNull()
                     
@@ -80,7 +80,7 @@ actual fun AdventureMapView(
                 }
                 
                 // Fit all annotations
-                if (adventures.isNotEmpty()) {
+                if (locations.isNotEmpty()) {
                     showAnnotations(annotations(), animated = true)
                 } else {
                     // Default to world view if no adventures
@@ -95,7 +95,7 @@ actual fun AdventureMapView(
             mapView.removeAnnotations(mapView.annotations())
             mapView.removeOverlays(mapView.overlays())
             
-            adventures.forEach { adventure ->
+            locations.forEach { adventure ->
                 val lat = adventure.latitude?.toDoubleOrNull()
                 val lng = adventure.longitude?.toDoubleOrNull()
                 
@@ -126,7 +126,7 @@ actual fun AdventureMapView(
                 }
             }
             
-            if (adventures.isNotEmpty()) {
+            if (locations.isNotEmpty()) {
                 mapView.showAnnotations(mapView.annotations(), animated = true)
             }
         }
