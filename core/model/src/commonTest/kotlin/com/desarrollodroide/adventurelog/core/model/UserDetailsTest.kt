@@ -19,7 +19,6 @@ class UserDetailsTest {
     fun `should serialize to JSON correctly`() {
         // Given
         val userDetails = UserDetails(
-            id = 123,
             username = "adventurer",
             profilePic = "/path/to/pic.jpg",
             uuid = "550e8400-e29b-41d4-a716-446655440000",
@@ -29,7 +28,7 @@ class UserDetailsTest {
             lastName = "Doe",
             dateJoined = "2024-01-15T10:30:00Z",
             isStaff = false,
-            hasPassword = "true",
+            hasPassword = true,
             sessionToken = "abc123token",
             serverUrl = "https://api.adventurelog.com"
         )
@@ -38,7 +37,6 @@ class UserDetailsTest {
         val jsonString = json.encodeToString(UserDetails.serializer(), userDetails)
         
         // Then
-        assertTrue(jsonString.contains("\"id\":123"))
         assertTrue(jsonString.contains("\"username\":\"adventurer\""))
         assertTrue(jsonString.contains("\"email\":\"test@example.com\""))
         assertTrue(jsonString.contains("\"profilePic\":\"/path/to/pic.jpg\""))
@@ -47,7 +45,7 @@ class UserDetailsTest {
         assertTrue(jsonString.contains("\"firstName\":\"John\""))
         assertTrue(jsonString.contains("\"lastName\":\"Doe\""))
         assertTrue(jsonString.contains("\"isStaff\":false"))
-        assertTrue(jsonString.contains("\"hasPassword\":\"true\""))
+        assertTrue(jsonString.contains("\"hasPassword\":true"))
         assertTrue(jsonString.contains("\"serverUrl\":\"https://api.adventurelog.com\""))
     }
     
@@ -76,7 +74,6 @@ class UserDetailsTest {
         val userDetails = json.decodeFromString<UserDetails>(jsonString)
         
         // Then
-        assertEquals(456, userDetails.id)
         assertEquals("explorer", userDetails.username)
         assertEquals("explorer@test.com", userDetails.email)
         assertEquals("/images/profile.png", userDetails.profilePic)
@@ -84,7 +81,7 @@ class UserDetailsTest {
         assertEquals("Jane", userDetails.firstName)
         assertEquals("Smith", userDetails.lastName)
         assertEquals(true, userDetails.isStaff)
-        assertEquals("false", userDetails.hasPassword)
+        assertEquals(false, userDetails.hasPassword)
         assertEquals("xyz789token", userDetails.sessionToken)
         assertEquals("https://api.test.com", userDetails.serverUrl)
     }
@@ -114,7 +111,6 @@ class UserDetailsTest {
         val userDetails = json.decodeFromString<UserDetails>(jsonString)
         
         // Then
-        assertEquals(789, userDetails.id)
         assertEquals("nomad", userDetails.username)
         assertNull(userDetails.profilePic)
         assertEquals("987e6543-e21b-12d3-a456-426614174000", userDetails.uuid)
@@ -125,7 +121,6 @@ class UserDetailsTest {
     fun `should handle edge cases for boolean fields`() {
         // Given
         val userDetails1 = UserDetails(
-            id = 1,
             username = "test1",
             profilePic = null,
             uuid = "test-uuid-1",
@@ -135,13 +130,12 @@ class UserDetailsTest {
             lastName = "One",
             dateJoined = "2024-01-01",
             isStaff = true,
-            hasPassword = "true",
+            hasPassword = true,
             sessionToken = "token1",
             serverUrl = "https://server1.com"
         )
         
         val userDetails2 = UserDetails(
-            id = 2,
             username = "test2",
             profilePic = null,
             uuid = "test-uuid-2",
@@ -151,7 +145,7 @@ class UserDetailsTest {
             lastName = "Two",
             dateJoined = "2024-01-02",
             isStaff = false,
-            hasPassword = "false",
+            hasPassword = false,
             sessionToken = "token2",
             serverUrl = "https://server2.com"
         )
@@ -170,7 +164,6 @@ class UserDetailsTest {
     fun `should correctly compare UserDetails instances`() {
         // Given
         val user1 = UserDetails(
-            id = 100,
             username = "user100",
             profilePic = "/pic100.jpg",
             uuid = "uuid-100",
@@ -180,17 +173,15 @@ class UserDetailsTest {
             lastName = "Last",
             dateJoined = "2024-01-01",
             isStaff = false,
-            hasPassword = "true",
+            hasPassword = true,
             sessionToken = "token100",
             serverUrl = "https://server.com"
         )
         
         val user2 = user1.copy()
-        val user3 = user1.copy(id = 101)
-        
+
         // Then
         assertEquals(user1, user2)
-        assertNotEquals(user1, user3)
         assertEquals(user1.hashCode(), user2.hashCode())
     }
 }

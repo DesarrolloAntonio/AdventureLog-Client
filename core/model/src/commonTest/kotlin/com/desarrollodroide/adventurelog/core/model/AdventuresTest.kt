@@ -8,17 +8,32 @@ import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 
 class AdventuresTest {
-    
+
+    // Helper function to create a fake user object
+    private fun createFakeUser(id: String) = UserDetails(
+        uuid = id,
+        username = "testuser",
+        firstName = "Test",
+        lastName = "User",
+        profilePic = "",
+        publicProfile = true,
+        measurementSystem = "metric",
+        dateJoined = "2024-01-01T00:00:00Z",
+        isStaff = false,
+        disablePassword = false,
+        hasPassword = true
+    )
+
     @Test
     fun `should create Adventures with all properties`() {
         // Given
-        val adventure1 = Adventure(
+        val location1 = Location(
             id = "1",
-            userId = "user1",
+            user = createFakeUser("user1"),
             name = "Adventure 1",
             description = "Description 1",
             rating = 4.0,
-            activityTypes = listOf("hiking"),
+            tags = listOf("hiking"),
             location = "Location 1",
             isPublic = true,
             collections = listOf("Collection 1"),
@@ -31,16 +46,17 @@ class AdventuresTest {
             visits = emptyList(),
             isVisited = false,
             category = null,
-            attachments = emptyList()
+            attachments = emptyList(),
+            trails = emptyList()
         )
-        
-        val adventure2 = Adventure(
+
+        val location2 = Location(
             id = "2",
-            userId = "user2",
+            user = createFakeUser("user2"),
             name = "Adventure 2",
             description = "Description 2",
             rating = 5.0,
-            activityTypes = listOf("camping"),
+            tags = listOf("camping"),
             location = "Location 2",
             isPublic = false,
             collections = listOf("Collection 2"),
@@ -53,192 +69,188 @@ class AdventuresTest {
             visits = emptyList(),
             isVisited = true,
             category = null,
-            attachments = emptyList()
+            attachments = emptyList(),
+            trails = emptyList()
         )
-        
-        val adventures = Adventures(
+
+        val locations = Locations(
             count = 2,
             next = "https://api.example.com/adventures?page=2",
             previous = "https://api.example.com/adventures?page=0",
-            results = listOf(adventure1, adventure2)
+            results = listOf(location1, location2)
         )
-        
+
         // Then
-        assertEquals(2, adventures.count)
-        assertEquals("https://api.example.com/adventures?page=2", adventures.next)
-        assertEquals("https://api.example.com/adventures?page=0", adventures.previous)
-        assertEquals(2, adventures.results.size)
-        assertEquals("Adventure 1", adventures.results[0].name)
-        assertEquals("Adventure 2", adventures.results[1].name)
+        assertEquals(2, locations.count)
+        assertEquals("https://api.example.com/adventures?page=2", locations.next)
+        assertEquals("https://api.example.com/adventures?page=0", locations.previous)
+        assertEquals(2, locations.results.size)
+        assertEquals("Adventure 1", locations.results[0].name)
+        assertEquals("Adventure 2", locations.results[1].name)
     }
-    
+
     @Test
     fun `should create empty Adventures`() {
         // Given
-        val emptyAdventures = Adventures(
+        val emptyLocations = Locations(
             count = 0,
             next = "",
             previous = "",
             results = emptyList()
         )
-        
+
         // Then
-        assertEquals(0, emptyAdventures.count)
-        assertEquals("", emptyAdventures.next)
-        assertEquals("", emptyAdventures.previous)
-        assertTrue(emptyAdventures.results.isEmpty())
+        assertEquals(0, emptyLocations.count)
+        assertEquals("", emptyLocations.next)
+        assertEquals("", emptyLocations.previous)
+        assertTrue(emptyLocations.results.isEmpty())
     }
-    
+
     @Test
     fun `should use PreviewData adventures`() {
         // Given
-        val adventures = Adventures(
-            count = PreviewData.adventures.size,
+        val locations = Locations(
+            count = PreviewData.locations.size,
             next = "https://api.example.com/adventures?page=2",
             previous = "",
-            results = PreviewData.adventures
+            results = PreviewData.locations
         )
-        
+
         // Then
-        assertEquals(3, adventures.count)
-        assertEquals(3, adventures.results.size)
-        assertEquals("Lake District Mountain Resort (Pending)", adventures.results[0].name)
-        assertEquals("Coastal Beach Resort & Spa", adventures.results[1].name)
-        assertEquals("Mountain View Hotel", adventures.results[2].name)
+        assertEquals(3, locations.count)
+        assertEquals(3, locations.results.size)
+        assertEquals("Lake District Mountain Resort (Pending)", locations.results[0].name)
+        assertEquals("Coastal Beach Resort & Spa", locations.results[1].name)
+        assertEquals("Mountain View Hotel", locations.results[2].name)
     }
-    
+
     @Test
     fun `should correctly compare Adventures instances`() {
         // Given
-        val adventures1 = Adventures(
+        val locations1 = Locations(
             count = 1,
             next = "next1",
             previous = "prev1",
-            results = listOf(PreviewData.adventures[0])
+            results = listOf(PreviewData.locations[0])
         )
-        
-        val adventures2 = adventures1.copy()
-        val adventures3 = adventures1.copy(count = 2)
-        val adventures4 = adventures1.copy(results = emptyList())
-        
+
+        val adventures2 = locations1.copy()
+        val adventures3 = locations1.copy(count = 2)
+        val adventures4 = locations1.copy(results = emptyList())
+
         // Then
-        assertEquals(adventures1, adventures2)
-        assertNotEquals(adventures1, adventures3)
-        assertNotEquals(adventures1, adventures4)
-        assertEquals(adventures1.hashCode(), adventures2.hashCode())
+        assertEquals(locations1, adventures2)
+        assertNotEquals(locations1, adventures3)
+        assertNotEquals(locations1, adventures4)
+        assertEquals(locations1.hashCode(), adventures2.hashCode())
     }
-    
+
     @Test
     fun `should handle pagination correctly`() {
         // Given
-        val firstPage = Adventures(
+        val firstPage = Locations(
             count = 100,
             next = "https://api.example.com/adventures?page=2&limit=10",
             previous = "",
-            results = PreviewData.adventures.take(10)
+            results = PreviewData.locations.take(10)
         )
-        
-        val middlePage = Adventures(
+
+        val middlePage = Locations(
             count = 100,
             next = "https://api.example.com/adventures?page=6&limit=10",
             previous = "https://api.example.com/adventures?page=4&limit=10",
-            results = PreviewData.adventures.take(10)
+            results = PreviewData.locations.take(10)
         )
-        
-        val lastPage = Adventures(
+
+        val lastPage = Locations(
             count = 100,
             next = "",
             previous = "https://api.example.com/adventures?page=9&limit=10",
-            results = PreviewData.adventures.take(10)
+            results = PreviewData.locations.take(10)
         )
-        
+
         // Then
-        // First page has no previous
         assertEquals("", firstPage.previous)
         assertFalse(firstPage.next.isEmpty())
-        
-        // Middle page has both
+
         assertFalse(middlePage.previous.isEmpty())
         assertFalse(middlePage.next.isEmpty())
-        
-        // Last page has no next
+
         assertEquals("", lastPage.next)
         assertFalse(lastPage.previous.isEmpty())
     }
-    
+
     @Test
     fun `should handle single page results`() {
-        // Given - All results fit in one page
-        val singlePage = Adventures(
+        // Given
+        val singlePage = Locations(
             count = 3,
             next = "",
             previous = "",
-            results = PreviewData.adventures
+            results = PreviewData.locations
         )
-        
+
         // Then
         assertEquals("", singlePage.next)
         assertEquals("", singlePage.previous)
         assertEquals(3, singlePage.count)
         assertEquals(3, singlePage.results.size)
     }
-    
+
     @Test
     fun `should handle large count with small results`() {
-        // Given - Typical paginated response
-        val paginatedAdventures = Adventures(
-            count = 1000,  // Total count in database
+        // Given
+        val paginatedLocations = Locations(
+            count = 1000,
             next = "https://api.example.com/adventures?offset=20&limit=20",
             previous = "",
-            results = PreviewData.adventures  // Only returning first page
+            results = PreviewData.locations
         )
-        
+
         // Then
-        assertEquals(1000, paginatedAdventures.count)
-        assertEquals(3, paginatedAdventures.results.size)  // Only 3 items in current page
-        assertTrue(paginatedAdventures.count > paginatedAdventures.results.size)
+        assertEquals(1000, paginatedLocations.count)
+        assertEquals(3, paginatedLocations.results.size)
+        assertTrue(paginatedLocations.count > paginatedLocations.results.size)
     }
-    
+
     @Test
     fun `should verify adventures properties`() {
         // Given
-        val adventures = Adventures(
+        val locations = Locations(
             count = 2,
             next = "next_url",
             previous = "prev_url",
             results = listOf(
-                PreviewData.adventures[0],
-                PreviewData.adventures[1]
+                PreviewData.locations[0],
+                PreviewData.locations[1]
             )
         )
-        
+
         // Then
-        // Verify first adventure
-        val firstAdventure = adventures.results[0]
+        val firstAdventure = locations.results[0]
         assertEquals("1", firstAdventure.id)
         assertFalse(firstAdventure.isVisited)
         assertEquals(4.5, firstAdventure.rating)
-        
-        // Verify second adventure
-        val secondAdventure = adventures.results[1]
+
+        val secondAdventure = locations.results[1]
         assertEquals("2", secondAdventure.id)
         assertTrue(secondAdventure.isVisited)
         assertEquals(4.8, secondAdventure.rating)
     }
-    
+
     @Test
     fun `should handle null pagination URLs`() {
         // Given
-        val adventures = Adventures(
+        val locations = Locations(
             count = 5,
             next = "",
             previous = "",
-            results = PreviewData.adventures
+            results = PreviewData.locations
         )
-        
+
         // Then
-        assertTrue(adventures.next.isEmpty())
-        assertTrue(adventures.previous.isEmpty())
-        assertEquals(5, adventures.count)
+        assertTrue(locations.next.isEmpty())
+        assertTrue(locations.previous.isEmpty())
+        assertEquals(5, locations.count)
     }
 }
