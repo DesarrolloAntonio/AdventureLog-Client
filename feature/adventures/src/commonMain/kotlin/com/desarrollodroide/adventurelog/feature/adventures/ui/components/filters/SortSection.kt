@@ -32,13 +32,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.SortDirection
-import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureSortField
+import com.desarrollodroide.adventurelog.feature.adventures.model.LocationSortField
 
 @Composable
 fun SortSection(
-    sortField: AdventureSortField,
+    sortField: LocationSortField,
     sortDirection: SortDirection,
-    onSortFieldChanged: (AdventureSortField) -> Unit,
+    onSortFieldChanged: (LocationSortField) -> Unit,
     onSortDirectionChanged: (SortDirection) -> Unit
 ) {
     Card(
@@ -181,23 +181,23 @@ fun SortSection(
             ) {
                 SortFieldOption(
                     label = "Recently Updated",
-                    isSelected = sortField == AdventureSortField.UPDATED_AT,
-                    onClick = { onSortFieldChanged(AdventureSortField.UPDATED_AT) }
+                    isSelected = sortField == LocationSortField.UPDATED_AT,
+                    onClick = { onSortFieldChanged(LocationSortField.UPDATED_AT) }
                 )
                 SortFieldOption(
                     label = "Name",
-                    isSelected = sortField == AdventureSortField.NAME,
-                    onClick = { onSortFieldChanged(AdventureSortField.NAME) }
+                    isSelected = sortField == LocationSortField.NAME,
+                    onClick = { onSortFieldChanged(LocationSortField.NAME) }
                 )
                 SortFieldOption(
                     label = "Creation Date",
-                    isSelected = sortField == AdventureSortField.CREATED_AT,
-                    onClick = { onSortFieldChanged(AdventureSortField.CREATED_AT) }
+                    isSelected = sortField == LocationSortField.CREATED_AT,
+                    onClick = { onSortFieldChanged(LocationSortField.CREATED_AT) }
                 )
                 SortFieldOption(
                     label = "Rating",
-                    isSelected = sortField == AdventureSortField.RATING,
-                    onClick = { onSortFieldChanged(AdventureSortField.RATING) }
+                    isSelected = sortField == LocationSortField.RATING,
+                    onClick = { onSortFieldChanged(LocationSortField.RATING) }
                 )
             }
         }

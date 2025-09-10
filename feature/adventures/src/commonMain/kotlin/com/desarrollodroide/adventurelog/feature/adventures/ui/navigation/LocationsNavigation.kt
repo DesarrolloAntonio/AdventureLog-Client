@@ -7,8 +7,8 @@ import androidx.navigation.navArgument
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection as AdventureCollection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditAdventureScreen
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.adventuresList.AdventureListScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditLocationScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.locationsList.LocationListScreen
 import kotlinx.serialization.json.Json
 
 /**
@@ -16,9 +16,9 @@ import kotlinx.serialization.json.Json
  * Defines external navigation actions that the Locations feature can trigger
  */
 interface AdventuresNavigator {
-    fun navigateToAdventureDetail(location: Location, collections: List<AdventureCollection>)
-    fun navigateToAddAdventure()
-    fun navigateToEditAdventure(adventureId: String, adventureJson: String)
+    fun navigateToLocationDetail(location: Location, collections: List<AdventureCollection>)
+    fun navigateToAddLocation()
+    fun navigateToEditLocation(adventureId: String, adventureJson: String)
     fun navigateBack()
 }
 
@@ -36,23 +36,23 @@ fun NavGraphBuilder.adventuresScreen(
     
     // Locations List Screen
     composable(route = NavigationRoutes.Adventures.route) {
-        AdventureListScreen(
+        LocationListScreen(
             onAdventureClick = { adventure, collections ->
-                navigator.navigateToAdventureDetail(adventure, collections)
+                navigator.navigateToLocationDetail(adventure, collections)
             },
             onAddAdventureClick = {
-                navigator.navigateToAddAdventure()
+                navigator.navigateToAddLocation()
             },
             onEditAdventure = { adventure ->
                 val adventureJson = json.encodeToString(adventure)
-                navigator.navigateToEditAdventure(adventure.id, adventureJson)
+                navigator.navigateToEditLocation(adventure.id, adventureJson)
             }
         )
     }
     
     // Add Adventure Screen
     composable(route = NavigationRoutes.Adventures.add) {
-        AddEditAdventureScreen(
+        AddEditLocationScreen(
             adventureId = null,
             location = null,
             onNavigateBack = {
@@ -82,7 +82,7 @@ fun NavGraphBuilder.adventuresScreen(
             null
         }
         
-        AddEditAdventureScreen(
+        AddEditLocationScreen(
             adventureId = adventureId,
             location = location,
             onNavigateBack = {

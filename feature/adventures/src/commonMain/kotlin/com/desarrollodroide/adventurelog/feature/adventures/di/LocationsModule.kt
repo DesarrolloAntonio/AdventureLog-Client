@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdv
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
-val adventureModule = module {
+val locationsModule = module {
     includes(domainModule)
     
     viewModel { 

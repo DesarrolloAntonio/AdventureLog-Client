@@ -52,7 +52,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun AddEditAdventureScreen(
+fun AddEditLocationScreen(
     adventureId: String?,
     location: Location?,
     onNavigateBack: () -> Unit

@@ -18,8 +18,8 @@ import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.SortDirection
-import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureFilters
-import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureSortField
+import com.desarrollodroide.adventurelog.feature.adventures.model.LocationFilters
+import com.desarrollodroide.adventurelog.feature.adventures.model.LocationSortField
 import com.desarrollodroide.adventurelog.feature.adventures.model.VisitedFilter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -52,8 +52,8 @@ class AdventuresViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _filters = MutableStateFlow(AdventureFilters())
-    val filters: StateFlow<AdventureFilters> = _filters.asStateFlow()
+    private val _filters = MutableStateFlow(LocationFilters())
+    val filters: StateFlow<LocationFilters> = _filters.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -140,7 +140,7 @@ class AdventuresViewModel(
     }.flatMapLatest { (query, filters) ->
         // Only pass non-default values to avoid using the filtered endpoint unnecessarily
         val hasActiveFilters = filters.categoryNames.isNotEmpty() ||
-                filters.sortField != AdventureSortField.UPDATED_AT ||
+                filters.sortField != LocationSortField.UPDATED_AT ||
                 filters.sortDirection != SortDirection.DESCENDING ||
                 filters.visitedFilter != VisitedFilter.ALL ||
                 query.isNotEmpty() ||
@@ -149,7 +149,7 @@ class AdventuresViewModel(
         if (hasActiveFilters) {
             getAdventuresPagingUseCase(
                 categoryNames = filters.categoryNames.ifEmpty { null },
-                sortBy = if (filters.sortField != AdventureSortField.UPDATED_AT) filters.sortField.apiValue else null,
+                sortBy = if (filters.sortField != LocationSortField.UPDATED_AT) filters.sortField.apiValue else null,
                 sortOrder = if (filters.sortDirection != SortDirection.DESCENDING) filters.sortDirection.apiValue else null,
                 isVisited = when (filters.visitedFilter) {
                     VisitedFilter.ALL -> null
@@ -169,7 +169,7 @@ class AdventuresViewModel(
         _searchQuery.value = query
     }
 
-    fun onFiltersChanged(filters: AdventureFilters) {
+    fun onFiltersChanged(filters: LocationFilters) {
         _filters.value = filters
     }
 
@@ -190,13 +190,13 @@ class AdventuresViewModel(
     }
 
     fun clearFilters() {
-        _filters.value = AdventureFilters()
+        _filters.value = LocationFilters()
     }
 
     fun hasActiveFilters(): Boolean {
         val currentFilters = _filters.value
         return currentFilters.categoryNames.isNotEmpty() ||
-                currentFilters.sortField != AdventureSortField.UPDATED_AT ||
+                currentFilters.sortField != LocationSortField.UPDATED_AT ||
                 currentFilters.sortDirection != SortDirection.DESCENDING ||
                 currentFilters.visitedFilter != VisitedFilter.ALL ||
                 currentFilters.includeCollections

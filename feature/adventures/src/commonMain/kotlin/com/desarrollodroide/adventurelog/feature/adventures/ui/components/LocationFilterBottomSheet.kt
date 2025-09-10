@@ -41,10 +41,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.SortDirection
-import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureFilters
-import com.desarrollodroide.adventurelog.feature.adventures.model.AdventureSortField
+import com.desarrollodroide.adventurelog.feature.adventures.model.LocationFilters
+import com.desarrollodroide.adventurelog.feature.adventures.model.LocationSortField
 import com.desarrollodroide.adventurelog.feature.adventures.model.VisitedFilter
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.categories.ManageCategoriesDialog
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.filters.CategoryFilterSection
@@ -55,10 +54,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdventuresFilterBottomSheet(
-    filters: AdventureFilters,
+fun LocationsFilterBottomSheet(
+    filters: LocationFilters,
     categoriesState: CategoriesState,
-    onFiltersChanged: (AdventureFilters) -> Unit,
+    onFiltersChanged: (LocationFilters) -> Unit,
     onDismiss: () -> Unit,
     onManageCategoriesClick: () -> Unit = {},
     onRetryLoadCategories: () -> Unit = {},
@@ -76,7 +75,7 @@ fun AdventuresFilterBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = { androidx.compose.foundation.layout.WindowInsets(0) }
     ) {
-        AdventuresFilterContent(
+        LocationsFilterContent(
             filters = localFilters,
             categoriesState = categoriesState,
             onFiltersChanged = { localFilters = it },
@@ -113,10 +112,10 @@ fun AdventuresFilterBottomSheet(
 }
 
 @Composable
-internal fun AdventuresFilterContent(
-    filters: AdventureFilters,
+internal fun LocationsFilterContent(
+    filters: LocationFilters,
     categoriesState: CategoriesState,
-    onFiltersChanged: (AdventureFilters) -> Unit,
+    onFiltersChanged: (LocationFilters) -> Unit,
     onApply: () -> Unit,
     onCancel: () -> Unit,
     onManageCategoriesClick: () -> Unit = {},
@@ -159,7 +158,7 @@ internal fun AdventuresFilterContent(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Adventure Filters",
+                            text = "Location Filters",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -173,7 +172,7 @@ internal fun AdventuresFilterContent(
                 
                 IconButton(
                     onClick = {
-                        onFiltersChanged(AdventureFilters())
+                        onFiltersChanged(LocationFilters())
                     }
                 ) {
                     Icon(
@@ -301,7 +300,7 @@ private fun IncludeCollectionsSection(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Include adventures from collections",
+                    text = "Include locations from collections",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -318,10 +317,10 @@ private fun IncludeCollectionsSection(
     }
 }
 
-private fun getActiveFiltersCount(filters: AdventureFilters): Int {
+private fun getActiveFiltersCount(filters: LocationFilters): Int {
     var count = 0
     if (filters.categoryNames.isNotEmpty()) count++
-    if (filters.sortField != AdventureSortField.UPDATED_AT) count++
+    if (filters.sortField != LocationSortField.UPDATED_AT) count++
     if (filters.sortDirection != SortDirection.DESCENDING) count++
     if (filters.visitedFilter != VisitedFilter.ALL) count++
     if (filters.includeCollections) count++
@@ -330,10 +329,10 @@ private fun getActiveFiltersCount(filters: AdventureFilters): Int {
 
 @Preview
 @Composable
-fun AdventuresFilterBottomSheetPreview() {
-    val mockFilters = AdventureFilters(
+fun LocationsFilterBottomSheetPreview() {
+    val mockFilters = LocationFilters(
         categoryNames = listOf("Hiking", "Camping"),
-        sortField = AdventureSortField.NAME,
+        sortField = LocationSortField.NAME,
         sortDirection = SortDirection.ASCENDING,
         visitedFilter = VisitedFilter.VISITED,
         includeCollections = true
@@ -341,7 +340,7 @@ fun AdventuresFilterBottomSheetPreview() {
 
     MaterialTheme {
         Surface {
-            AdventuresFilterContent(
+            LocationsFilterContent(
                 filters = mockFilters,
                 categoriesState = CategoriesState.Success(emptyList()),
                 onFiltersChanged = {},

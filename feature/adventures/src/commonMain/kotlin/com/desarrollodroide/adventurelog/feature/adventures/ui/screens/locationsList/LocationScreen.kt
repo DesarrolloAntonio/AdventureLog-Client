@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.adventuresList
+package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.locationsList
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,7 +51,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.components.AdventuresFilterBottomSheet
+import com.desarrollodroide.adventurelog.feature.adventures.ui.components.LocationsFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
@@ -61,7 +61,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AdventureListScreen(
+fun LocationListScreen(
     onAdventureClick: (Location, List<Collection>) -> Unit = { _, _ -> },
     onAddAdventureClick: () -> Unit = { },
     onEditAdventure: (Location) -> Unit = { },
@@ -84,7 +84,7 @@ fun AdventureListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     if (showFilters) {
-        AdventuresFilterBottomSheet(
+        LocationsFilterBottomSheet(
             filters = filters,
             categoriesState = categoriesState,
             onFiltersChanged = viewModel::onFiltersChanged,

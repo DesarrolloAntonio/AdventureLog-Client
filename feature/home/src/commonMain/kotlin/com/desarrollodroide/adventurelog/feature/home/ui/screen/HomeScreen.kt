@@ -372,18 +372,18 @@ fun HomeScreenContent(
                         // Locations screen with navigator
                         adventuresScreen(
                             navigator = object : AdventuresNavigator {
-                                override fun navigateToAdventureDetail(
+                                override fun navigateToLocationDetail(
                                     location: Location,
                                     collections: List<AdventureCollection>
                                 ) {
                                     onAdventureClick(location)
                                 }
                                 
-                                override fun navigateToAddAdventure() {
+                                override fun navigateToAddLocation() {
                                     navController.navigate(NavigationRoutes.Adventures.add)
                                 }
                                 
-                                override fun navigateToEditAdventure(
+                                override fun navigateToEditLocation(
                                     adventureId: String,
                                     adventureJson: String
                                 ) {

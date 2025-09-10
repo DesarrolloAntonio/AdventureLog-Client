@@ -273,11 +273,11 @@ private fun CategoryManageItem(
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
-                val adventureCount = category.numAdventures.toIntOrNull() ?: 0
+                val locationCount = category.numAdventures.toIntOrNull() ?: 0
                 Text(
-                    text = when (adventureCount) {
-                        1 -> "1 adventure"
-                        else -> "${category.numAdventures} adventures"
+                    text = when (locationCount) {
+                        1 -> "1 location"
+                        else -> "${category.numAdventures} locations"
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

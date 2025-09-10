@@ -1,15 +1,19 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -25,9 +29,6 @@ import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalSessionTokenManager
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
-import org.jetbrains.compose.resources.painterResource
-import com.desarrollodroide.adventurelog.resources.Res
-import com.desarrollodroide.adventurelog.resources.adventureitem_placeholder
 
 @Composable
 fun AdventureItem(
@@ -78,13 +79,11 @@ fun AdventureItem(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Image(
-                    painter = painterResource(Res.drawable.adventureitem_placeholder),
-                    contentDescription = null,
+                EmptyAdventureDesign(
+                    adventureName = location.name,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(250.dp),
-                    contentScale = ContentScale.Crop
+                        .height(250.dp)
                 )
             }
 
@@ -232,6 +231,103 @@ fun AdventureItem(
                             }
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyAdventureDesign(
+    adventureName: String,
+    modifier: Modifier = Modifier
+) {
+    val designIndex = remember(adventureName) { 
+        kotlin.math.abs(adventureName.hashCode() % 8)
+    }
+    
+    val (backgroundColor, accentColor) = when (designIndex) {
+        0 -> Color(0xFFE8EAF6) to Color(0xFF5C6BC0) // Indigo
+        1 -> Color(0xFFE0F2F1) to Color(0xFF26A69A) // Teal
+        2 -> Color(0xFFFFF3E0) to Color(0xFFFF9800) // Orange
+        3 -> Color(0xFFF3E5F5) to Color(0xFF9C27B0) // Purple
+        4 -> Color(0xFFE8F5E9) to Color(0xFF4CAF50) // Green
+        5 -> Color(0xFFFFEBEE) to Color(0xFFEF5350) // Red
+        6 -> Color(0xFFF1F8E9) to Color(0xFF689F38) // Light Green
+        else -> Color(0xFFFAFAFA) to Color(0xFF607D8B) // Blue Grey
+    }
+    
+    Box(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            backgroundColor,
+                            backgroundColor.copy(alpha = 0.7f),
+                            Color.White
+                        )
+                    )
+                )
+        )
+        
+        Canvas(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            val gridSize = 100.dp.toPx()
+            val gridAlpha = 0.03f
+            
+            var x = gridSize
+            while (x < size.width) {
+                drawLine(
+                    color = accentColor.copy(alpha = gridAlpha),
+                    start = Offset(x, 0f),
+                    end = Offset(x, size.height),
+                    strokeWidth = 1.dp.toPx()
+                )
+                x += gridSize
+            }
+            
+            var y = gridSize
+            while (y < size.height) {
+                drawLine(
+                    color = accentColor.copy(alpha = gridAlpha),
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = 1.dp.toPx()
+                )
+                y += gridSize
+            }
+        }
+        
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 30.dp)
+        ) {
+            Surface(
+                modifier = Modifier.size(100.dp),
+                shape = CircleShape,
+                color = Color.White.copy(alpha = 0.9f),
+                shadowElevation = 4.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .background(
+                                color = accentColor.copy(alpha = 0.1f),
+                                shape = CircleShape
+                            )
+                    )
+                    
+                    Icon(
+                        imageVector = Icons.Outlined.Explore,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = accentColor.copy(alpha = 0.8f)
+                    )
                 }
             }
         }
