@@ -59,6 +59,7 @@ fun AdventureDetailScreen(
         ) {
             CoverImageWithButtons(
                 imageUrl = location.images.firstOrNull()?.image,
+                adventureName = location.name,
                 onBackClick = onBackClick,
                 onShareClick = { /* TODO: Implement share */ }
             )
@@ -79,13 +80,15 @@ fun AdventureDetailScreen(
                 ) {
                     HeaderInfo(
                         title = location.name,
-                        location = location.location
+                        location = location.location,
+                        rating = location.rating
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
                     CategoryTags(
                         category = location.category,
-                        isPublic = location.isPublic
+                        isPublic = location.isPublic,
+                        tags = location.tags
                     )
 
                     if (location.images.isNotEmpty()) {
@@ -138,7 +141,6 @@ fun AdventureDetailScreen(
 
 // Previews
 
-// ✅ CORRECCIÓN: Se crean objetos de ejemplo para las nuevas data classes requeridas.
 private val mockUser = UserDetails(
     uuid = "user123",
     username = "previewUser",
@@ -178,7 +180,6 @@ private val mockCity = City(
     regionId = "region-madrid"
 )
 
-
 /**
  * Creates an adventure with multiple images for testing the carousel
  */
@@ -200,11 +201,11 @@ private fun createAdventureWithMultipleImages(): Location {
 
     return Location(
         id = "adv1",
-        user = mockUser, // Se añade el objeto UserDetails
+        user = mockUser,
         name = "Mountain Adventure",
         description = "An amazing mountain adventure with breathtaking views and challenging trails.",
         rating = 4.5,
-        tags = listOf("Hiking", "Nature", "Photography"), // Se renombra 'activityTypes' a 'tags'
+        tags = listOf("Hiking", "Nature", "Photography"),
         location = "Rocky Mountains, Colorado",
         isPublic = true,
         collections = emptyList(),
@@ -377,6 +378,47 @@ private fun NavalagamellaDetailPreview() {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
                 location = navalagamella,
+                onBackClick = {},
+                onEditClick = {},
+                onOpenMap = { _, _ -> },
+                onOpenLink = {}
+            )
+        }
+    }
+}
+
+@org.jetbrains.compose.ui.tooling.preview.Preview
+@Composable
+private fun AdventureDetailScreenNoImagePreview() {
+    val adventureNoImage = Location(
+        id = "test1B",
+        user = mockUser,
+        name = "test1B",
+        description = "Una aventura sin imagen para probar el diseño vacío",
+        rating = 5.0,
+        tags = listOf("test2", "test3"),
+        location = "Antonio Corrales",
+        isPublic = false,
+        collections = emptyList(),
+        createdAt = "2025-01-20T10:00:00.000Z",
+        updatedAt = "2025-01-20T14:30:00.000Z",
+        images = emptyList(), // Sin imágenes
+        link = null,
+        longitude = null,
+        latitude = null,
+        visits = emptyList(),
+        isVisited = false,
+        category = null,
+        attachments = emptyList(),
+        city = mockCity,
+        country = mockCountry,
+        region = mockRegion
+    )
+
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
+            AdventureDetailScreen(
+                location = adventureNoImage,
                 onBackClick = {},
                 onEditClick = {},
                 onOpenMap = { _, _ -> },
