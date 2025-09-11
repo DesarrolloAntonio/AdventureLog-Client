@@ -19,7 +19,10 @@ val collectionsModule = module {
 
     viewModel {
         CollectionDetailViewModel(
-            getCollectionDetailUseCase = get()
+            getCollectionDetailUseCase = get(),
+            deleteAdventureUseCase = get(),
+            updateAdventureCollectionsUseCase = get(),
+            getCollectionsUseCase = get()
         )
     }
 

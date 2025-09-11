@@ -13,11 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.DeleteState
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.UpdateCollectionsState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -26,13 +30,49 @@ fun CollectionDetailScreen(
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
     onAdventureClick: (Location) -> Unit,
+    onEditAdventure: (Location) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
+    val updateCollectionsState by viewModel.updateCollectionsState.collectAsStateWithLifecycle()
+    
+    var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
     
     LaunchedEffect(collectionId) {
         viewModel.loadCollection(collectionId)
+    }
+    
+    // Handle delete state changes
+    LaunchedEffect(deleteState) {
+        when (val state = deleteState) {
+            is DeleteState.Success -> {
+                snackbarHostState.showSnackbar("Adventure deleted successfully")
+                viewModel.clearDeleteState()
+            }
+            is DeleteState.Error -> {
+                snackbarHostState.showSnackbar("Error: ${state.message}")
+                viewModel.clearDeleteState()
+            }
+            else -> {}
+        }
+    }
+    
+    // Handle update collections state changes
+    LaunchedEffect(updateCollectionsState) {
+        when (val state = updateCollectionsState) {
+            is UpdateCollectionsState.Success -> {
+                snackbarHostState.showSnackbar("Collections updated successfully")
+                viewModel.clearUpdateCollectionsState()
+            }
+            is UpdateCollectionsState.Error -> {
+                snackbarHostState.showSnackbar("Error updating collections: ${state.message}")
+                viewModel.clearUpdateCollectionsState()
+            }
+            else -> {}
+        }
     }
     
     Box(
@@ -59,10 +99,36 @@ fun CollectionDetailScreen(
                 CollectionDetailContent(
                     collection = uiState.collection!!,
                     onAdventureClick = onAdventureClick,
+                    onEditAdventure = onEditAdventure,
+                    onDeleteAdventure = { adventure -> 
+                        viewModel.deleteAdventure(adventure.id)
+                    },
+                    onManageCollections = { adventure -> 
+                        viewModel.loadAllCollections() // Cargar solo cuando se necesite
+                        locationToManageCollections = adventure 
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }
         }
+        
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
+    
+    // Manage Collections dialog
+    locationToManageCollections?.let { adventure ->
+        ManageCollectionsDialog(
+            location = adventure,
+            allCollections = uiState.allCollections,
+            onUpdateCollections = { adventureId, collectionIds ->
+                viewModel.updateAdventureCollections(adventureId, collectionIds)
+                locationToManageCollections = null
+            },
+            onDismiss = { locationToManageCollections = null }
+        )
     }
 }
 
@@ -70,6 +136,9 @@ fun CollectionDetailScreen(
 fun CollectionDetailContent(
     collection: Collection,
     onAdventureClick: (Location) -> Unit,
+    onEditAdventure: (Location) -> Unit,
+    onDeleteAdventure: (Location) -> Unit,
+    onManageCollections: (Location) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -157,7 +226,10 @@ fun CollectionDetailContent(
             items(collection.locations) { adventure ->
                 AdventureItem(
                     location = adventure,
-                    onClick = { onAdventureClick(adventure) }
+                    onClick = { onAdventureClick(adventure) },
+                    onEdit = { onEditAdventure(adventure) },
+                    onDelete = { onDeleteAdventure(adventure) },
+                    onManageCollections = { onManageCollections(adventure) }
                 )
             }
         }
@@ -225,4 +297,3 @@ fun CollectionHeader(
         }
     }
 }
-

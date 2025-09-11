@@ -44,6 +44,7 @@ fun AdventureItem(
     showMenu: Boolean = true
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val imageLoader = LocalImageLoader.current
     val sessionTokenManager = LocalSessionTokenManager.current
@@ -226,7 +227,7 @@ fun AdventureItem(
                                 )
                             },
                             onClick = {
-                                onDelete()
+                                showDeleteDialog = true
                                 showDropdownMenu = false
                             }
                         )
@@ -234,6 +235,30 @@ fun AdventureItem(
                 }
             }
         }
+    }
+    
+    // Delete confirmation dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Adventure") },
+            text = { Text("Are you sure you want to delete \"${location.name}\"? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete()
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Delete", color = Color(0xFFFF3B30))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

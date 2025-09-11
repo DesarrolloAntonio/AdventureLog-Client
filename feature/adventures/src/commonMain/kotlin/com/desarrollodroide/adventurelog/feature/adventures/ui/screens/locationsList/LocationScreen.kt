@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -79,7 +77,6 @@ fun LocationListScreen(
     val updateCollectionsState by viewModel.updateCollectionsState.collectAsStateWithLifecycle()
     val categoryOperationState by viewModel.categoryOperationState.collectAsStateWithLifecycle()
 
-    var locationToDelete by remember { mutableStateOf<Location?>(null) }
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -112,7 +109,9 @@ fun LocationListScreen(
         onSearchQueryChange = viewModel::onSearchQueryChange,
         onShowFilters = viewModel::showFilters,
         onEditAdventure = onEditAdventure,
-        onDeleteAdventure = { adventure -> locationToDelete = adventure },
+        onDeleteAdventure = { adventure -> 
+            viewModel.deleteAdventure(adventure.id)
+        },
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
@@ -175,30 +174,6 @@ fun LocationListScreen(
 
             else -> {}
         }
-    }
-
-    // Delete confirmation dialog
-    locationToDelete?.let { adventure ->
-        AlertDialog(
-            onDismissRequest = { locationToDelete = null },
-            title = { Text("Delete Adventure") },
-            text = { Text("Are you sure you want to delete \"${adventure.name}\"? This action cannot be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.deleteAdventure(adventure.id)
-                        locationToDelete = null
-                    }
-                ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { locationToDelete = null }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 
     // Manage Collections dialog

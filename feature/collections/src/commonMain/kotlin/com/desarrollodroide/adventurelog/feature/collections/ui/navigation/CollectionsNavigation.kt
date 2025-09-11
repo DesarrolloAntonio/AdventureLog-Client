@@ -33,6 +33,7 @@ interface CollectionsNavigator {
     fun navigateToAddCollection()
     fun navigateToEditCollection(collectionId: String)
     fun navigateToAdventure(location: Location)
+    fun navigateToEditAdventure(adventure: Location)
     fun navigateToHome()
     fun navigateBack()
 }
@@ -95,6 +96,9 @@ fun NavGraphBuilder.collectionsScreen(
             },
             onAdventureClick = { adventure ->
                 navigator.navigateToAdventure(adventure)
+            },
+            onEditAdventure = { adventure ->
+                navigator.navigateToEditAdventure(adventure)
             }
         )
     }
