@@ -83,6 +83,35 @@ internal class KtorCollectionApi(
             throw e
         }
     }
+    
+    override suspend fun getAllCollections(): List<CollectionDTO> {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/collections/all/"
+        
+        val response = httpClient.get(url) {
+            headers {
+                commonHeaders(session.sessionToken)
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch all collections with status: ${response.status}"
+            )
+        }
+
+        val responseText = response.body<String>()
+        
+        try {
+            val collections = json.decodeFromString<List<CollectionDTO>>(responseText)
+            logger.d { "Fetched ${collections.size} collections from /all endpoint" }
+            return collections
+        } catch (e: Exception) {
+            logJsonError("All collections JSON parse error", responseText, e)
+            throw e
+        }
+    }
 
     override suspend fun getCollectionDetail(collectionId: String): CollectionDTO {
         val session = sessionProvider()

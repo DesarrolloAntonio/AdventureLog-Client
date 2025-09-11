@@ -91,6 +91,30 @@ class CollectionsRepositoryImpl(
             Either.Left(ApiResponse.HttpError)
         }
     }
+    
+    override suspend fun getAllCollections(): Either<ApiResponse, List<Collection>> {
+        return try {
+            val collections = networkDataSource.getAllCollections().map { it.toDomainModel() }
+            
+            // Actualizar el cache con todas las colecciones
+            _collectionsFlow.value = collections
+            
+            Either.Right(collections)
+        } catch (e: HttpException) {
+            println("HTTP Error during getAllCollections: ${e.code}")
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            println("IO Error during getAllCollections: ${e.message}")
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            println("Unexpected error during getAllCollections: ${e.message}")
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
 
     override suspend fun getCollection(collectionId: String): Either<ApiResponse, Collection> {
         return try {

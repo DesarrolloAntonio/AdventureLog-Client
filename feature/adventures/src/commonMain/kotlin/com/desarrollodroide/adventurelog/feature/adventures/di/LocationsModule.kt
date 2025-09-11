@@ -13,7 +13,7 @@ val locationsModule = module {
         AdventuresViewModel(
             getAdventuresPagingUseCase = get(),
             getCategoriesUseCase = get(),
-            getCollectionsUseCase = get(),
+            getAllCollectionsUseCase = get(),
             observeCollectionsUseCase = get(),
             deleteAdventureUseCase = get(),
             createCategoryUseCase = get(),

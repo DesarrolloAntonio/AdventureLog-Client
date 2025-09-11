@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +39,7 @@ class CollectionDetailViewModel(
     private val getCollectionDetailUseCase: GetCollectionDetailUseCase,
     private val deleteAdventureUseCase: DeleteAdventureUseCase,
     private val updateAdventureCollectionsUseCase: UpdateAdventureCollectionsUseCase,
-    private val getCollectionsUseCase: GetCollectionsUseCase
+    private val getAllCollectionsUseCase: GetAllCollectionsUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
@@ -79,7 +79,7 @@ class CollectionDetailViewModel(
     
     fun loadAllCollections() {
         viewModelScope.launch {
-            when (val result = getCollectionsUseCase(page = 1, pageSize = 100)) {
+            when (val result = getAllCollectionsUseCase()) {
                 is Either.Left -> {
                     // Could handle error if needed
                 }

@@ -22,7 +22,7 @@ val collectionsModule = module {
             getCollectionDetailUseCase = get(),
             deleteAdventureUseCase = get(),
             updateAdventureCollectionsUseCase = get(),
-            getCollectionsUseCase = get()
+            getAllCollectionsUseCase = get()
         )
     }
 

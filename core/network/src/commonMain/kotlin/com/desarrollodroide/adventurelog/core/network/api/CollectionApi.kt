@@ -7,6 +7,11 @@ interface CollectionApi {
      * Get paginated list of collections
      */
     suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO>
+    
+    /**
+     * Get all collections without pagination
+     */
+    suspend fun getAllCollections(): List<CollectionDTO>
 
     /**
      * Get collection details by ID

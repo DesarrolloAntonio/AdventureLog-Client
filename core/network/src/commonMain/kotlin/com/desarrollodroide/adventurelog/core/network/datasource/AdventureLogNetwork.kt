@@ -52,6 +52,11 @@ interface AdventureLogNetwork {
         page: Int,
         pageSize: Int
     ): List<CollectionDTO>
+    
+    /**
+     * Get all collections without pagination
+     */
+    suspend fun getAllCollections(): List<CollectionDTO>
 
     /**
      * Get collection details by ID

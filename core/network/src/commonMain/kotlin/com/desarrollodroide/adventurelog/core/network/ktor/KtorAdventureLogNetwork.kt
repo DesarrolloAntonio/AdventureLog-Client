@@ -200,6 +200,11 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return collectionDataSource.getCollections(page, pageSize)
     }
+    
+    override suspend fun getAllCollections(): List<CollectionDTO> {
+        ensureInitialized()
+        return collectionDataSource.getAllCollections()
+    }
 
     override suspend fun getCollectionDetail(
         collectionId: String

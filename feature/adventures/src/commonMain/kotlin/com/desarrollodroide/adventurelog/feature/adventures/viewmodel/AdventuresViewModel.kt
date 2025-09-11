@@ -12,7 +12,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureColl
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCategoryUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 class AdventuresViewModel(
     private val getAdventuresPagingUseCase: GetAdventuresPagingUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
-    private val getCollectionsUseCase: GetCollectionsUseCase,
+    private val getAllCollectionsUseCase: GetAllCollectionsUseCase,
     private val observeCollectionsUseCase: ObserveCollectionsUseCase,
     private val deleteAdventureUseCase: DeleteAdventureUseCase,
     private val createCategoryUseCase: CreateCategoryUseCase,
@@ -127,7 +127,7 @@ class AdventuresViewModel(
         viewModelScope.launch {
             if (observeCollectionsUseCase().value.isEmpty()) {
                 // This will populate the collectionsFlow in the repository
-                getCollectionsUseCase(page = 1, pageSize = 100)
+                getAllCollectionsUseCase()
             }
         }
     }
