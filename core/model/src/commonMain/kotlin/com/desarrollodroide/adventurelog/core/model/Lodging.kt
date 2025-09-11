@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Lodging(
     val id: String,
-    val user: Int,
+    val user: String,
     val name: String,
     val type: String = "other",
     val description: String? = null,
@@ -23,6 +23,6 @@ data class Lodging(
     val createdAt: String,
     val updatedAt: String,
     val timezone: String? = null,
-    val images: String? = null,
-    val attachments: String? = null
+    val images: List<ContentImage>? = null,
+    val attachments: List<Attachment>? = null
 )

@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Activity(
     val id: String,
-    val user: Int,
+    val user: String,
     val visit: String,
     val trail: String? = null,
     val gpxFile: String? = null,

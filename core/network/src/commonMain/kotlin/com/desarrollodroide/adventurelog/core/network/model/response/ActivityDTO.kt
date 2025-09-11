@@ -10,7 +10,7 @@ data class ActivityDTO(
     val id: String,
     
     @SerialName("user")
-    val user: Int,
+    val user: String,
     
     @SerialName("visit")
     val visit: String,

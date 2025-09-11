@@ -6,6 +6,7 @@ import app.cash.paging.PagingSourceLoadResult
 import app.cash.paging.PagingSourceLoadResultError
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
+import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
@@ -17,6 +18,8 @@ class CollectionsPagingSource(
     private val sortDirection: String? = null
 ) : PagingSource<Int, Collection>() {
 
+    private val logger = Logger.withTag("CollectionsPagingSource")
+    
     private var totalItemsLoaded = 0
     private val allLoadedCollections = mutableListOf<Collection>()
 
@@ -26,8 +29,8 @@ class CollectionsPagingSource(
         val page = params.key ?: 1
         val size = pageSize
 
-        println("🔍 CollectionsPagingSource - Requesting page: $page, pageSize: $size")
-        println("   Sort options: field=$sortField, direction=$sortDirection")
+        logger.d { "🔍 CollectionsPagingSource - Requesting page: $page, pageSize: $size" }
+        logger.d { "   Sort options: field=$sortField, direction=$sortDirection" }
 
         return try {
             val collections = networkDataSource.getCollections(
@@ -42,26 +45,26 @@ class CollectionsPagingSource(
             // Sort all loaded collections based on current sort options
             val sortedCollections = sortCollections(allLoadedCollections, sortField, sortDirection)
 
-            println("✅ CollectionsPagingSource - Received ${collections.size} new collections for page $page")
-            println("   Total loaded and sorted: ${sortedCollections.size}")
+            logger.d { "✅ CollectionsPagingSource - Received ${collections.size} new collections for page $page" }
+            logger.d { "   Total loaded and sorted: ${sortedCollections.size}" }
             if (sortedCollections.isNotEmpty()) {
-                println("   First collection after sort: ${sortedCollections.first().name}")
-                println("   Last collection after sort: ${sortedCollections.last().name}")
+                logger.d { "   First collection after sort: ${sortedCollections.first().name}" }
+                logger.d { "   Last collection after sort: ${sortedCollections.last().name}" }
             }
 
             val nextKey = when {
                 collections.isEmpty() -> {
-                    println("🏁 CollectionsPagingSource - No collections returned, last page")
+                    logger.d { "🏁 CollectionsPagingSource - No collections returned, last page" }
                     null
                 }
 
                 collections.size < size -> {
-                    println("🏁 CollectionsPagingSource - Last page reached (received ${collections.size} < $size)")
+                    logger.d { "🏁 CollectionsPagingSource - Last page reached (received ${collections.size} < $size)" }
                     null
                 }
 
                 else -> {
-                    println("➡️ CollectionsPagingSource - Full page received, nextKey = ${page + 1}")
+                    logger.d { "➡️ CollectionsPagingSource - Full page received, nextKey = ${page + 1}" }
                     page + 1
                 }
             }
@@ -72,8 +75,7 @@ class CollectionsPagingSource(
                 nextKey = nextKey
             ) as PagingSourceLoadResult<Int, Collection>
         } catch (e: Exception) {
-            println("❌ CollectionsPagingSource - Error loading page $page: ${e.message}")
-            e.printStackTrace()
+            logger.e(e) { "❌ CollectionsPagingSource - Error loading page $page: ${e.message}" }
             PagingSourceLoadResultError<Int, Collection>(e) as PagingSourceLoadResult<Int, Collection>
         }
     }
@@ -118,7 +120,7 @@ class CollectionsPagingSource(
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
-        println("🔄 CollectionsPagingSource - getRefreshKey called, returning: $key")
+        logger.d { "🔄 CollectionsPagingSource - getRefreshKey called, returning: $key" }
         return key
     }
 }

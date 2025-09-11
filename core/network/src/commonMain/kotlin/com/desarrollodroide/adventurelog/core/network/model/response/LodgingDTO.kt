@@ -10,7 +10,7 @@ data class LodgingDTO(
     val id: String,
     
     @SerialName("user")
-    val user: Int,
+    val user: String,
     
     @SerialName("name")
     val name: String,
@@ -64,10 +64,10 @@ data class LodgingDTO(
     val timezone: String? = null,
     
     @SerialName("images")
-    val images: String? = null,
+    val images: List<ContentImageDTO>? = null,
     
     @SerialName("attachments")
-    val attachments: String? = null
+    val attachments: List<AttachmentDTO>? = null
 )
 
 fun LodgingDTO.toDomainModel(): Lodging = Lodging(
@@ -90,6 +90,6 @@ fun LodgingDTO.toDomainModel(): Lodging = Lodging(
     createdAt = createdAt,
     updatedAt = updatedAt,
     timezone = timezone,
-    images = images,
-    attachments = attachments
+    images = images?.map { it.toDomainModel() },
+    attachments = attachments?.map { it.toDomainModel() }
 )

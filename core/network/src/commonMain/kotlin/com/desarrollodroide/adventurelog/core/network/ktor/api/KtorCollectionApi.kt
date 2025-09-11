@@ -32,6 +32,27 @@ internal class KtorCollectionApi(
 
     private val logger = Logger.withTag("KtorCollectionApi")
 
+    private fun logJsonError(context: String, jsonContent: String, error: Exception) {
+        logger.e(error) { "$context: ${error.message}" }
+        
+        // Log JSON in chunks to avoid truncation
+        val chunkSize = 3000
+        val totalChunks = (jsonContent.length + chunkSize - 1) / chunkSize
+        
+        logger.e { "=== JSON DEBUG START ($context) ===" }
+        logger.e { "Total JSON length: ${jsonContent.length} characters" }
+        logger.e { "Showing in $totalChunks chunks:" }
+        
+        for (i in 0 until totalChunks) {
+            val start = i * chunkSize
+            val end = minOf(start + chunkSize, jsonContent.length)
+            val chunk = jsonContent.substring(start, end)
+            logger.e { "Chunk ${i + 1}/$totalChunks: $chunk" }
+        }
+        
+        logger.e { "=== JSON DEBUG END ===" }
+    }
+
     override suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/collections/"
@@ -52,10 +73,15 @@ internal class KtorCollectionApi(
         }
 
         val responseText = response.body<String>()
-        val collectionsResponse = json.decodeFromString<CollectionsDTO>(responseText)
         
-        logger.d { "Fetched ${collectionsResponse.results?.size ?: 0} collections" }
-        return collectionsResponse.results ?: emptyList()
+        try {
+            val collectionsResponse = json.decodeFromString<CollectionsDTO>(responseText)
+            logger.d { "Fetched ${collectionsResponse.results?.size ?: 0} collections" }
+            return collectionsResponse.results ?: emptyList()
+        } catch (e: Exception) {
+            logJsonError("Collections JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun getCollectionDetail(collectionId: String): CollectionDTO {
@@ -76,7 +102,13 @@ internal class KtorCollectionApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<CollectionDTO>(responseText)
+        
+        try {
+            return json.decodeFromString<CollectionDTO>(responseText)
+        } catch (e: Exception) {
+            logJsonError("Collection detail JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun createCollection(
@@ -113,7 +145,13 @@ internal class KtorCollectionApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<CollectionDTO>(responseText)
+        
+        try {
+            return json.decodeFromString<CollectionDTO>(responseText)
+        } catch (e: Exception) {
+            logJsonError("Create collection JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun updateCollection(
@@ -153,7 +191,13 @@ internal class KtorCollectionApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<CollectionDTO>(responseText)
+        
+        try {
+            return json.decodeFromString<CollectionDTO>(responseText)
+        } catch (e: Exception) {
+            logJsonError("Update collection JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun deleteCollection(collectionId: String) {

@@ -37,6 +37,27 @@ internal class KtorAdventureApi(
 
     private val logger = Logger.withTag("KtorAdventureNetworkDataSource")
 
+    private fun logJsonError(context: String, jsonContent: String, error: Exception) {
+        logger.e(error) { "$context: ${error.message}" }
+        
+        // Log JSON in chunks to avoid truncation
+        val chunkSize = 3000
+        val totalChunks = (jsonContent.length + chunkSize - 1) / chunkSize
+        
+        logger.e { "=== JSON DEBUG START ($context) ===" }
+        logger.e { "Total JSON length: ${jsonContent.length} characters" }
+        logger.e { "Showing in $totalChunks chunks:" }
+        
+        for (i in 0 until totalChunks) {
+            val start = i * chunkSize
+            val end = minOf(start + chunkSize, jsonContent.length)
+            val chunk = jsonContent.substring(start, end)
+            logger.e { "Chunk ${i + 1}/$totalChunks: $chunk" }
+        }
+        
+        logger.e { "=== JSON DEBUG END ===" }
+    }
+
     override suspend fun getAdventures(page: Int, pageSize: Int): List<LocationDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/"
@@ -59,12 +80,18 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        val adventuresResponse = json.decodeFromString<LocationsDTO>(responseText)
+        
+        try {
+            val adventuresResponse = json.decodeFromString<LocationsDTO>(responseText)
 
-        logger.d { "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} locations for page $page (requested pageSize: $pageSize)" }
-        logger.d { "   Total count: ${adventuresResponse.count}" }
+            logger.d { "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} locations for page $page (requested pageSize: $pageSize)" }
+            logger.d { "   Total count: ${adventuresResponse.count}" }
 
-        return adventuresResponse.results ?: emptyList()
+            return adventuresResponse.results ?: emptyList()
+        } catch (e: Exception) {
+            logJsonError("Adventures JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun getAdventuresFiltered(
@@ -140,14 +167,20 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        val adventuresResponse = json.decodeFromString<LocationsDTO>(responseText)
+        
+        try {
+            val adventuresResponse = json.decodeFromString<LocationsDTO>(responseText)
 
-        logger.d {
-            "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} filtered adventures " +
-                    "for page $page (total: ${adventuresResponse.count})"
+            logger.d {
+                "📦 API Response - Fetched ${adventuresResponse.results?.size ?: 0} filtered adventures " +
+                        "for page $page (total: ${adventuresResponse.count})"
+            }
+
+            return adventuresResponse.results ?: emptyList()
+        } catch (e: Exception) {
+            logJsonError("Filtered adventures JSON parse error", responseText, e)
+            throw e
         }
-
-        return adventuresResponse.results ?: emptyList()
     }
 
     private suspend fun searchAdventures(searchQuery: String): List<LocationDTO> {
@@ -177,15 +210,21 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        // The search endpoint returns a different format with multiple entity types
-        val searchResults = json.decodeFromString<SearchResultsDTO>(responseText)
+        
+        try {
+            // The search endpoint returns a different format with multiple entity types
+            val searchResults = json.decodeFromString<SearchResultsDTO>(responseText)
 
-        logger.d {
-            "📦 Search Response - Found ${searchResults.getLocationsList().size} locations " +
-                    "for query: '$searchQuery'"
+            logger.d {
+                "📦 Search Response - Found ${searchResults.getLocationsList().size} locations " +
+                        "for query: '$searchQuery'"
+            }
+
+            return searchResults.getLocationsList()
+        } catch (e: Exception) {
+            logJsonError("Search adventures JSON parse error", responseText, e)
+            throw e
         }
-
-        return searchResults.getLocationsList()
     }
 
     override suspend fun getAdventureDetail(objectId: String): LocationDTO {
@@ -206,7 +245,13 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<LocationDTO>(responseText)
+        
+        try {
+            return json.decodeFromString<LocationDTO>(responseText)
+        } catch (e: Exception) {
+            logJsonError("Create adventure JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun createAdventure(
@@ -263,7 +308,13 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<LocationDTO>(responseText)
+        
+        try {
+            return json.decodeFromString<LocationDTO>(responseText)
+        } catch (e: Exception) {
+            logJsonError("Create adventure JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun updateAdventure(
@@ -327,7 +378,13 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<LocationDTO>(responseText)
+        
+        try {
+            return json.decodeFromString<LocationDTO>(responseText)
+        } catch (e: Exception) {
+            logJsonError("Create adventure JSON parse error", responseText, e)
+            throw e
+        }
     }
 
     override suspend fun deleteAdventure(adventureId: String) {

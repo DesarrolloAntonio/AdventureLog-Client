@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Checklist(
     val id: String,
-    val user: Int,
+    val user: String,
     val name: String,
     val date: String? = null,
     val isPublic: Boolean = false,
@@ -18,7 +18,7 @@ data class Checklist(
 @Serializable
 data class ChecklistItem(
     val id: String,
-    val user: Int,
+    val user: String,
     val name: String,
     val isChecked: Boolean = false,
     val checklist: String,

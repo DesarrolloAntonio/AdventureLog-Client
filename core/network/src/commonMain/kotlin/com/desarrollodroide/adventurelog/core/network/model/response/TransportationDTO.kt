@@ -10,7 +10,7 @@ data class TransportationDTO(
     val id: String,
 
     @SerialName("user")
-    val user: Int,
+    val user: String,
 
     @SerialName("type")
     val type: String,
@@ -76,10 +76,10 @@ data class TransportationDTO(
     val distance: String? = null,
 
     @SerialName("images")
-    val images: String? = null,
+    val images: List<ContentImageDTO>? = null,
 
     @SerialName("attachments")
-    val attachments: String? = null
+    val attachments: List<AttachmentDTO>? = null
 )
 
 fun TransportationDTO.toDomainModel(): Transportation = Transportation(
@@ -106,6 +106,6 @@ fun TransportationDTO.toDomainModel(): Transportation = Transportation(
     startTimezone = startTimezone,
     endTimezone = endTimezone,
     distance = distance,
-    images = images,
-    attachments = attachments
+    images = images?.map { it.toDomainModel() },
+    attachments = attachments?.map { it.toDomainModel() }
 )

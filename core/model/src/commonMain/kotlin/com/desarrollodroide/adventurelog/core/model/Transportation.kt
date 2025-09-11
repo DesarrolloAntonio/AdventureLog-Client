@@ -1,11 +1,12 @@
 package com.desarrollodroide.adventurelog.core.model
 
+import com.desarrollodroide.adventurelog.core.model.ContentImage
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Transportation(
     val id: String,
-    val user: Int,
+    val user: String,
     val type: String,
     val name: String,
     val description: String? = null,
@@ -27,6 +28,6 @@ data class Transportation(
     val startTimezone: String? = null,
     val endTimezone: String? = null,
     val distance: String? = null,
-    val images: String? = null,
-    val attachments: String? = null
+    val images: List<ContentImage>? = null,
+    val attachments: List<Attachment>? = null
 )
