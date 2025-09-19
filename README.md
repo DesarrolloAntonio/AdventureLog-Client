@@ -12,10 +12,12 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 ## 🌟 Features
 
 - **Cross-Platform Experience**: Share code between Android & iOS with Kotlin Multiplatform
-- **Rich Adventure Management**: Track locations, add notes, photos, and categorize your adventures
+- **Rich Adventure Management**: Track locations, add photos, and categorize your adventures
+- **Collections Organization**: Group and organize adventures into meaningful collections
+- **World Exploration**: Track visited countries, regions, and cities with comprehensive statistics
+- **Interactive Map**: Visualize adventures on an interactive map with location markers
 - **Beautiful UI**: Modern Material 3 design with fluid animations and transitions
-- **Offline Support**: Access your adventures even without network connectivity
-- **Dark Mode**: Comfortable viewing experience in all lighting conditions
+- **AI-Powered Features**: Generate descriptions and enrich content with AI assistance
 - **Modular Navigation**: Feature-based navigation system for scalable routing
 
 ## 📱 Screenshots
