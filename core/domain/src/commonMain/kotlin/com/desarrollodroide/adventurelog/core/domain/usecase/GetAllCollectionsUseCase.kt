@@ -8,8 +8,8 @@ import com.desarrollodroide.adventurelog.core.model.Collection
 class GetAllCollectionsUseCase(
     private val collectionsRepository: CollectionsRepository
 ) {
-    suspend operator fun invoke(): Either<String, List<Collection>> =
-        when (val result = collectionsRepository.getAllCollections()) {
+    suspend operator fun invoke(forceRefresh: Boolean = false): Either<String, List<Collection>> =
+        when (val result = collectionsRepository.getAllCollections(forceRefresh = forceRefresh)) {
             is Either.Left -> {
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("Network unavailable")

@@ -8,6 +8,7 @@ import app.cash.paging.filter
 import app.cash.paging.map
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCollectionUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.SortDirection
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class CollectionsViewModel(
     private val getCollectionsPagingUseCase: GetCollectionsPagingUseCase,
+    private val getAllCollectionsUseCase: GetAllCollectionsUseCase,
     private val deleteCollectionUseCase: DeleteCollectionUseCase
 ) : ViewModel() {
 
@@ -99,11 +101,11 @@ class CollectionsViewModel(
     }
 
     fun refresh() {
-        _isRefreshing.value = true
-    }
-
-    fun onRefreshComplete() {
-        _isRefreshing.value = false
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            getAllCollectionsUseCase(forceRefresh = true)
+            _isRefreshing.value = false
+        }
     }
 
     fun deleteCollection(collectionId: String) {

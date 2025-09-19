@@ -13,6 +13,7 @@ val collectionsModule = module {
     viewModel {
         CollectionsViewModel(
             getCollectionsPagingUseCase = get(),
+            getAllCollectionsUseCase = get(),
             deleteCollectionUseCase = get()
         )
     }
@@ -22,6 +23,7 @@ val collectionsModule = module {
             getCollectionDetailUseCase = get(),
             deleteAdventureUseCase = get(),
             updateAdventureCollectionsUseCase = get(),
+            observeCollectionsUseCase = get(),
             getAllCollectionsUseCase = get()
         )
     }

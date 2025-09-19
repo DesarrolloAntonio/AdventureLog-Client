@@ -35,6 +35,8 @@ fun CollectionDetailScreen(
     viewModel: CollectionDetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val allCollections by viewModel.allCollections.collectAsStateWithLifecycle()
+    val collectionsLoading by viewModel.collectionsLoading.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
     val updateCollectionsState by viewModel.updateCollectionsState.collectAsStateWithLifecycle()
     
@@ -104,7 +106,6 @@ fun CollectionDetailScreen(
                         viewModel.deleteAdventure(adventure.id)
                     },
                     onManageCollections = { adventure -> 
-                        viewModel.loadAllCollections() // Cargar solo cuando se necesite
                         locationToManageCollections = adventure 
                     },
                     modifier = Modifier.fillMaxSize()
@@ -122,10 +123,14 @@ fun CollectionDetailScreen(
     locationToManageCollections?.let { adventure ->
         ManageCollectionsDialog(
             location = adventure,
-            allCollections = uiState.allCollections,
+            allCollections = allCollections,
+            isLoadingCollections = collectionsLoading,
             onUpdateCollections = { adventureId, collectionIds ->
                 viewModel.updateAdventureCollections(adventureId, collectionIds)
                 locationToManageCollections = null
+            },
+            onRefreshCollections = {
+                viewModel.refreshCollections()
             },
             onDismiss = { locationToManageCollections = null }
         )

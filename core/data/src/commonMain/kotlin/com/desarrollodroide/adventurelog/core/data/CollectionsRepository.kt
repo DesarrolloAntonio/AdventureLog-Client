@@ -17,7 +17,7 @@ interface CollectionsRepository {
     ): Flow<PagingData<Collection>>
 
     suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<Collection>>
-    suspend fun getAllCollections(): Either<ApiResponse, List<Collection>>
+    suspend fun getAllCollections(forceRefresh: Boolean = false): Either<ApiResponse, List<Collection>>
     suspend fun getCollection(collectionId: String): Either<ApiResponse, Collection>
     suspend fun createCollection(
         name: String,

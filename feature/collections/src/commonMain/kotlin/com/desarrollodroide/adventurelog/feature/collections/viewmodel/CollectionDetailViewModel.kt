@@ -6,17 +6,19 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
 
 data class CollectionDetailUiState(
     val collection: Collection? = null,
-    val allCollections: List<Collection> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
@@ -39,11 +41,35 @@ class CollectionDetailViewModel(
     private val getCollectionDetailUseCase: GetCollectionDetailUseCase,
     private val deleteAdventureUseCase: DeleteAdventureUseCase,
     private val updateAdventureCollectionsUseCase: UpdateAdventureCollectionsUseCase,
+    private val observeCollectionsUseCase: ObserveCollectionsUseCase,
     private val getAllCollectionsUseCase: GetAllCollectionsUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
     val uiState: StateFlow<CollectionDetailUiState> = _uiState.asStateFlow()
+    
+    val allCollections: StateFlow<List<Collection>> = observeCollectionsUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    
+    private val _collectionsLoading = MutableStateFlow(false)
+    val collectionsLoading: StateFlow<Boolean> = _collectionsLoading.asStateFlow()
+    
+    init {
+        viewModelScope.launch {
+            if (observeCollectionsUseCase().value.isEmpty()) {
+                _collectionsLoading.value = true
+                try {
+                    getAllCollectionsUseCase(forceRefresh = false)
+                } finally {
+                    _collectionsLoading.value = false
+                }
+            }
+        }
+    }
     
     private val _deleteState = MutableStateFlow<DeleteState>(DeleteState.Idle)
     val deleteState: StateFlow<DeleteState> = _deleteState.asStateFlow()
@@ -77,21 +103,6 @@ class CollectionDetailViewModel(
         }
     }
     
-    fun loadAllCollections() {
-        viewModelScope.launch {
-            when (val result = getAllCollectionsUseCase()) {
-                is Either.Left -> {
-                    // Could handle error if needed
-                }
-                is Either.Right -> {
-                    _uiState.update { currentState ->
-                        currentState.copy(allCollections = result.value)
-                    }
-                }
-            }
-        }
-    }
-    
     fun deleteAdventure(adventureId: String) {
         viewModelScope.launch {
             _deleteState.update { DeleteState.Loading }
@@ -102,7 +113,6 @@ class CollectionDetailViewModel(
                 }
                 is Either.Right -> {
                     _deleteState.update { DeleteState.Success }
-                    // Refresh the collection to update the adventure list
                     _uiState.value.collection?.let { collection ->
                         loadCollection(collection.id)
                     }
@@ -121,7 +131,6 @@ class CollectionDetailViewModel(
                 }
                 is Either.Right -> {
                     _updateCollectionsState.update { UpdateCollectionsState.Success }
-                    // Refresh the collection to update the adventure list
                     _uiState.value.collection?.let { collection ->
                         loadCollection(collection.id)
                     }
@@ -136,5 +145,16 @@ class CollectionDetailViewModel(
     
     fun clearUpdateCollectionsState() {
         _updateCollectionsState.update { UpdateCollectionsState.Idle }
+    }
+    
+    fun refreshCollections() {
+        viewModelScope.launch {
+            _collectionsLoading.value = true
+            try {
+                getAllCollectionsUseCase(forceRefresh = true)
+            } finally {
+                _collectionsLoading.value = false
+            }
+        }
     }
 }

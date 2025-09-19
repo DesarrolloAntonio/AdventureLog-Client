@@ -71,6 +71,9 @@ class AdventuresViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+    
+    private val _collectionsLoading = MutableStateFlow(false)
+    val collectionsLoading: StateFlow<Boolean> = _collectionsLoading.asStateFlow()
 
     // Convenience property for backward compatibility
     @Suppress("unused")
@@ -121,16 +124,19 @@ class AdventuresViewModel(
         data class Error(val message: String) : CategoryOperationState()
     }
 
-    init {
-        loadCategories()
-        // Trigger initial load of collections if empty
-        viewModelScope.launch {
-            if (observeCollectionsUseCase().value.isEmpty()) {
-                // This will populate the collectionsFlow in the repository
-                getAllCollectionsUseCase()
+        init {
+            loadCategories()
+            viewModelScope.launch {
+                if (observeCollectionsUseCase().value.isEmpty()) {
+                    _collectionsLoading.value = true
+                    try {
+                        getAllCollectionsUseCase(forceRefresh = false)
+                    } finally {
+                        _collectionsLoading.value = false
+                    }
+                }
             }
         }
-    }
 
     val adventuresPagingData: Flow<PagingData<Location>> = combine(
         _searchQuery.debounce(300).distinctUntilChanged(),
@@ -160,7 +166,6 @@ class AdventuresViewModel(
                 includeCollections = filters.includeCollections
             )
         } else {
-            // Use the regular endpoint when no filters are applied
             getAdventuresPagingUseCase()
         }
     }.cachedIn(viewModelScope)
@@ -243,7 +248,6 @@ class AdventuresViewModel(
         viewModelScope.launch {
             _categoryOperationState.value = CategoryOperationState.Loading
             
-            // Create internal name from display name (lowercase, replace spaces with underscores)
             val internalName = name.lowercase().replace(" ", "_")
             
             when (val result = createCategoryUseCase(
@@ -256,7 +260,7 @@ class AdventuresViewModel(
                 }
                 is Either.Right -> {
                     _categoryOperationState.value = CategoryOperationState.Success
-                    loadCategories() // Reload categories to show the new one
+                    loadCategories()
                 }
             }
         }
@@ -266,7 +270,6 @@ class AdventuresViewModel(
         viewModelScope.launch {
             _categoryOperationState.value = CategoryOperationState.Loading
             
-            // Create internal name from display name (lowercase, replace spaces with underscores)
             val internalName = name.lowercase().replace(" ", "_")
             
             when (val result = updateCategoryUseCase(
@@ -280,7 +283,7 @@ class AdventuresViewModel(
                 }
                 is Either.Right -> {
                     _categoryOperationState.value = CategoryOperationState.Success
-                    loadCategories() // Reload categories to show the updated one
+                    loadCategories()
                 }
             }
         }
@@ -296,7 +299,7 @@ class AdventuresViewModel(
                 }
                 is Either.Right -> {
                     _categoryOperationState.value = CategoryOperationState.Success
-                    loadCategories() // Reload categories after deletion
+                    loadCategories()
                 }
             }
         }
@@ -316,7 +319,6 @@ class AdventuresViewModel(
                 }
                 is Either.Right -> {
                     _updateCollectionsState.value = UpdateCollectionsState.Success
-                    // The paging data will automatically refresh due to repository updating
                 }
             }
         }
@@ -324,5 +326,16 @@ class AdventuresViewModel(
     
     fun clearUpdateCollectionsState() {
         _updateCollectionsState.value = UpdateCollectionsState.Idle
+    }
+    
+    fun refreshCollections() {
+        viewModelScope.launch {
+            _collectionsLoading.value = true
+            try {
+                getAllCollectionsUseCase(forceRefresh = true)
+            } finally {
+                _collectionsLoading.value = false
+            }
+        }
     }
 }

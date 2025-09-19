@@ -55,7 +55,6 @@ class CollectionsRepositoryImpl(
         page: Int,
         pageSize: Int
     ): Either<ApiResponse, List<Collection>> {
-        // If we already have collections cached and it's the first page, return from cache
         if (page == 1 && _collectionsFlow.value.isNotEmpty()) {
             val cachedCollections = _collectionsFlow.value
             val requestedCollections = if (pageSize >= cachedCollections.size) {
@@ -70,7 +69,6 @@ class CollectionsRepositoryImpl(
             val collections =
                 networkDataSource.getCollections(page, pageSize).map { it.toDomainModel() }
 
-            // Update the flow with the new collections (only for first page)
             if (page == 1) {
                 _collectionsFlow.value = collections
             }
@@ -92,11 +90,14 @@ class CollectionsRepositoryImpl(
         }
     }
     
-    override suspend fun getAllCollections(): Either<ApiResponse, List<Collection>> {
+    override suspend fun getAllCollections(forceRefresh: Boolean): Either<ApiResponse, List<Collection>> {
+        if (!forceRefresh && _collectionsFlow.value.isNotEmpty()) {
+            return Either.Right(_collectionsFlow.value)
+        }
+        
         return try {
             val collections = networkDataSource.getAllCollections().map { it.toDomainModel() }
             
-            // Actualizar el cache con todas las colecciones
             _collectionsFlow.value = collections
             
             Either.Right(collections)
@@ -152,10 +153,8 @@ class CollectionsRepositoryImpl(
                 endDate = endDate
             ).toDomainModel()
 
-            // Add the new collection to the flow
             _collectionsFlow.value = _collectionsFlow.value + collection
 
-            // Increment version to invalidate paging
             _version.value++
 
             Either.Right(collection)
@@ -199,10 +198,8 @@ class CollectionsRepositoryImpl(
         return try {
             networkDataSource.deleteCollection(collectionId)
             
-            // Remove the deleted collection from the flow
             _collectionsFlow.value = _collectionsFlow.value.filter { it.id != collectionId }
             
-            // Increment version to invalidate paging
             _version.value++
             
             Either.Right(Unit)
@@ -241,12 +238,10 @@ class CollectionsRepositoryImpl(
                 link = link
             ).toDomainModel()
 
-            // Update the collection in the flow
             _collectionsFlow.value = _collectionsFlow.value.map { 
                 if (it.id == collectionId) collection else it
             }
 
-            // Increment version to invalidate paging
             _version.value++
 
             Either.Right(collection)

@@ -27,7 +27,9 @@ import kotlinx.coroutines.launch
 fun ManageCollectionsDialog(
     location: Location,
     allCollections: List<Collection>,
+    isLoadingCollections: Boolean = false,
     onUpdateCollections: (adventureId: String, collectionIds: List<String>) -> Unit,
+    onRefreshCollections: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     val bottomSheetState = rememberModalBottomSheetState(
@@ -56,7 +58,9 @@ fun ManageCollectionsDialog(
         ManageCollectionsContent(
             location = location,
             allCollections = allCollections,
+            isLoadingCollections = isLoadingCollections,
             onUpdateCollections = onUpdateCollections,
+            onRefreshCollections = onRefreshCollections,
             onDismiss = onDismiss
         )
     }
@@ -67,7 +71,9 @@ fun ManageCollectionsDialog(
 private fun ManageCollectionsContent(
     location: Location,
     allCollections: List<Collection>,
+    isLoadingCollections: Boolean,
     onUpdateCollections: (adventureId: String, collectionIds: List<String>) -> Unit,
+    onRefreshCollections: (() -> Unit)?,
     onDismiss: () -> Unit
 ) {
     var selectedCollections by remember { 
@@ -132,16 +138,43 @@ private fun ManageCollectionsContent(
                 )
             }
             
-            // Close button
-            IconButton(
-                onClick = onDismiss,
-                modifier = Modifier.offset(x = 12.dp)
+            // Actions row
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    Icons.Filled.Close,
-                    contentDescription = "Close",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                // Refresh button
+                onRefreshCollections?.let { refresh ->
+                    IconButton(
+                        onClick = refresh,
+                        enabled = !isLoadingCollections
+                    ) {
+                        if (isLoadingCollections) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Icon(
+                                Icons.Filled.Refresh,
+                                contentDescription = "Refresh collections",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                
+                // Close button
+                IconButton(
+                    onClick = onDismiss
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
         
@@ -191,7 +224,32 @@ private fun ManageCollectionsContent(
         }
         
         // Collections list
-        if (sortedAndFilteredCollections.isEmpty()) {
+        if (isLoadingCollections && allCollections.isEmpty()) {
+            // Loading state when no collections are available
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        strokeWidth = 4.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Loading collections...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else if (sortedAndFilteredCollections.isEmpty()) {
             // Empty state
             Box(
                 modifier = Modifier

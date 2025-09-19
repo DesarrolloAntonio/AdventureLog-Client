@@ -71,6 +71,7 @@ fun LocationListScreen(
     val showFilters by viewModel.showFilters.collectAsStateWithLifecycle()
     val categoriesState by viewModel.categoriesState.collectAsStateWithLifecycle()
     val collections by viewModel.collections.collectAsStateWithLifecycle()
+    val collectionsLoading by viewModel.collectionsLoading.collectAsStateWithLifecycle()
     val pagingItems = viewModel.adventuresPagingData.collectAsLazyPagingItems()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
@@ -80,22 +81,21 @@ fun LocationListScreen(
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    if (showFilters) {
-        LocationsFilterBottomSheet(
-            filters = filters,
-            categoriesState = categoriesState,
-            onFiltersChanged = viewModel::onFiltersChanged,
-            onDismiss = viewModel::hideFilters,
-            onManageCategoriesClick = {
-                // This will refresh categories after category management operations
-                viewModel.retryLoadCategories()
-            },
-            onRetryLoadCategories = viewModel::retryLoadCategories,
-            onAddCategory = viewModel::createCategory,
-            onUpdateCategory = viewModel::updateCategory,
-            onDeleteCategory = viewModel::deleteCategory
-        )
-    }
+        if (showFilters) {
+            LocationsFilterBottomSheet(
+                filters = filters,
+                categoriesState = categoriesState,
+                onFiltersChanged = viewModel::onFiltersChanged,
+                onDismiss = viewModel::hideFilters,
+                onManageCategoriesClick = {
+                    viewModel.retryLoadCategories()
+                },
+                onRetryLoadCategories = viewModel::retryLoadCategories,
+                onAddCategory = viewModel::createCategory,
+                onUpdateCategory = viewModel::updateCategory,
+                onDeleteCategory = viewModel::deleteCategory
+            )
+        }
 
     AdventureListContent(
         pagingItems = pagingItems,
@@ -181,9 +181,13 @@ fun LocationListScreen(
         ManageCollectionsDialog(
             location = adventure,
             allCollections = collections,
+            isLoadingCollections = collectionsLoading,
             onUpdateCollections = { adventureId, collectionIds ->
                 viewModel.updateAdventureCollections(adventureId, collectionIds)
                 locationToManageCollections = null
+            },
+            onRefreshCollections = {
+                viewModel.refreshCollections()
             },
             onDismiss = { locationToManageCollections = null }
         )
@@ -384,7 +388,6 @@ private fun AdventuresPagingList(
             }
         }
 
-        // Load state for append (loading more items)
         when (pagingItems.loadState.append) {
             is LoadStateLoading -> {
                 item {
@@ -420,7 +423,7 @@ private fun AdventuresPagingList(
             }
 
             is LoadStateNotLoading -> {
-                // Do nothing
+                // Nothing to do
             }
         }
     }

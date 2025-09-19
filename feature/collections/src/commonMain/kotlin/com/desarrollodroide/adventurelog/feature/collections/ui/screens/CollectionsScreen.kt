@@ -111,8 +111,8 @@ fun CollectionsScreen(
     )
 
     LaunchedEffect(pagingItems.loadState.refresh) {
-        if (pagingItems.loadState.refresh is LoadStateNotLoading) {
-            viewModel.onRefreshComplete()
+        if (pagingItems.loadState.refresh is LoadStateNotLoading && isRefreshing) {
+            // Refresh completes automatically in the viewModel
         }
     }
 
@@ -329,7 +329,6 @@ private fun CollectionsPagingList(
             }
         }
 
-        // Load state for append (loading more items)
         when (pagingItems.loadState.append) {
             is LoadStateLoading -> {
                 item {
@@ -365,7 +364,7 @@ private fun CollectionsPagingList(
             }
 
             is LoadStateNotLoading -> {
-                // Do nothing
+                // Nothing to do
             }
         }
     }

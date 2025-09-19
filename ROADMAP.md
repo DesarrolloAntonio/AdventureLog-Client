@@ -63,6 +63,7 @@
 
 ### Collections Features
 - [ ] **Add Shared/Archived filters** (tabs in header)
+- [ ] **Update collections list implementation** - Modify collections to use new endpoint without detail when available
 
 Currently focusing on bug fixes and performance improvements.
 
