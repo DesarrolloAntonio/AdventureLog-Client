@@ -20,6 +20,8 @@ import com.desarrollodroide.adventurelog.core.data.GeocodeRepository
 import com.desarrollodroide.adventurelog.core.data.GeocodeRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.WikipediaRepository
 import com.desarrollodroide.adventurelog.core.data.WikipediaRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.TransportationRepository
+import com.desarrollodroide.adventurelog.core.data.TransportationRepositoryImpl
 import com.desarrollodroide.adventurelog.core.network.di.networkModule
 import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named
@@ -66,6 +68,11 @@ val dataModule = module {
     single<WikipediaRepository> {
         WikipediaRepositoryImpl(
             wikipediaDataSource = get()
+        )
+    }
+    single<TransportationRepository> {
+        TransportationRepositoryImpl(
+            transportationApi = get()
         )
     }
 }

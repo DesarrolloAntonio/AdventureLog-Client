@@ -7,7 +7,7 @@ import app.cash.paging.PagingSourceLoadResultError
 import app.cash.paging.PagingSourceLoadResultPage
 import app.cash.paging.PagingState
 import co.touchlab.kermit.Logger
-import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 
@@ -16,16 +16,16 @@ class CollectionsPagingSource(
     private val pageSize: Int = 30,
     private val sortField: String? = null,
     private val sortDirection: String? = null
-) : PagingSource<Int, Collection>() {
+) : PagingSource<Int, UltraSlimCollection>() {
 
     private val logger = Logger.withTag("CollectionsPagingSource")
     
     private var totalItemsLoaded = 0
-    private val allLoadedCollections = mutableListOf<Collection>()
+    private val allLoadedCollections = mutableListOf<UltraSlimCollection>()
 
     override suspend fun load(
         params: PagingSourceLoadParams<Int>
-    ): PagingSourceLoadResult<Int, Collection> {
+    ): PagingSourceLoadResult<Int, UltraSlimCollection> {
         val page = params.key ?: 1
         val size = pageSize
 
@@ -73,18 +73,18 @@ class CollectionsPagingSource(
                 data = sortedCollections,
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = nextKey
-            ) as PagingSourceLoadResult<Int, Collection>
+            ) as PagingSourceLoadResult<Int, UltraSlimCollection>
         } catch (e: Exception) {
             logger.e(e) { "❌ CollectionsPagingSource - Error loading page $page: ${e.message}" }
-            PagingSourceLoadResultError<Int, Collection>(e) as PagingSourceLoadResult<Int, Collection>
+            PagingSourceLoadResultError<Int, UltraSlimCollection>(e) as PagingSourceLoadResult<Int, UltraSlimCollection>
         }
     }
 
     private fun sortCollections(
-        collections: List<Collection>,
+        collections: List<UltraSlimCollection>,
         sortField: String?,
         sortDirection: String?
-    ): List<Collection> {
+    ): List<UltraSlimCollection> {
         val sorted = when (sortField) {
             "NAME" -> {
                 collections.sortedBy { it.name.lowercase() }
@@ -112,7 +112,7 @@ class CollectionsPagingSource(
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, Collection>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, UltraSlimCollection>): Int? {
         totalItemsLoaded = 0
         allLoadedCollections.clear()
 

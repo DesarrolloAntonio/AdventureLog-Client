@@ -7,9 +7,12 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.paging.CollectionsPagingSource
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.core.model.toUltraSlimCollection
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,16 +24,17 @@ class CollectionsRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
 ) : CollectionsRepository {
 
-    private val _collectionsFlow = MutableStateFlow<List<Collection>>(emptyList())
-    override val collectionsFlow: StateFlow<List<Collection>> = _collectionsFlow.asStateFlow()
+    private val _collectionsFlow = MutableStateFlow<List<UltraSlimCollection>>(emptyList())
+    override val collectionsFlow: StateFlow<List<UltraSlimCollection>> = _collectionsFlow.asStateFlow()
 
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCollectionsPagingData(
         sortField: String?,
         sortDirection: String?
-    ): Flow<PagingData<Collection>> {
+    ): Flow<PagingData<UltraSlimCollection>> {
         return _version.flatMapLatest { _ ->
             Pager(
                 config = PagingConfig(
@@ -54,7 +58,7 @@ class CollectionsRepositoryImpl(
     override suspend fun getCollections(
         page: Int,
         pageSize: Int
-    ): Either<ApiResponse, List<Collection>> {
+    ): Either<ApiResponse, List<UltraSlimCollection>> {
         if (page == 1 && _collectionsFlow.value.isNotEmpty()) {
             val cachedCollections = _collectionsFlow.value
             val requestedCollections = if (pageSize >= cachedCollections.size) {
@@ -90,7 +94,7 @@ class CollectionsRepositoryImpl(
         }
     }
     
-    override suspend fun getAllCollections(forceRefresh: Boolean): Either<ApiResponse, List<Collection>> {
+    override suspend fun getAllCollections(forceRefresh: Boolean): Either<ApiResponse, List<UltraSlimCollection>> {
         if (!forceRefresh && _collectionsFlow.value.isNotEmpty()) {
             return Either.Right(_collectionsFlow.value)
         }
@@ -153,7 +157,10 @@ class CollectionsRepositoryImpl(
                 endDate = endDate
             ).toDomainModel()
 
-            _collectionsFlow.value = _collectionsFlow.value + collection
+            // Convert created collection to UltraSlimCollection for the list
+            val slimCollection = collection.toUltraSlimCollection()
+
+            _collectionsFlow.value = _collectionsFlow.value + slimCollection
 
             _version.value++
 
@@ -173,7 +180,7 @@ class CollectionsRepositoryImpl(
         }
     }
 
-    override suspend fun refreshCollections(): Either<ApiResponse, List<Collection>> {
+    override suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>> {
         return try {
             val collections = networkDataSource.getCollections(1, 1000).map { it.toDomainModel() }
             _collectionsFlow.value = collections
@@ -238,8 +245,11 @@ class CollectionsRepositoryImpl(
                 link = link
             ).toDomainModel()
 
+            // Update the slim collection in the list
+            val slimCollection = collection.toUltraSlimCollection()
+
             _collectionsFlow.value = _collectionsFlow.value.map { 
-                if (it.id == collectionId) collection else it
+                if (it.id == collectionId) slimCollection else it
             }
 
             _version.value++
