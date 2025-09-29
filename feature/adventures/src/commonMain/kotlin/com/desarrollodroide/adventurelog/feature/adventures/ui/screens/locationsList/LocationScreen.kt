@@ -49,6 +49,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.components.LocationsFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AdventuresViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
@@ -60,7 +61,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LocationListScreen(
-    onAdventureClick: (Location, List<Collection>) -> Unit = { _, _ -> },
+    onAdventureClick: (Location) -> Unit = { },
     onAddAdventureClick: () -> Unit = { },
     onEditAdventure: (Location) -> Unit = { },
     modifier: Modifier = Modifier,
@@ -200,10 +201,10 @@ private fun AdventureListContent(
     pagingItems: LazyPagingItems<Location>,
     searchQuery: String,
     hasActiveFilters: Boolean,
-    collections: List<Collection>,
+    collections: List<UltraSlimCollection>,
     isRefreshing: Boolean,
     snackbarHostState: SnackbarHostState,
-    onAdventureClick: (Location, List<Collection>) -> Unit,
+    onAdventureClick: (Location) -> Unit,
     onAddAdventureClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onShowFilters: () -> Unit,
@@ -284,12 +285,7 @@ private fun AdventureListContent(
                     AdventuresPagingList(
                         pagingItems = pagingItems,
                         collections = collections,
-                        onAdventureClick = { adventure ->
-                            val adventureCollections = adventure.collections.mapNotNull { id ->
-                                collections.find { it.id == id }
-                            }
-                            onAdventureClick(adventure, adventureCollections)
-                        },
+                        onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
                         onDeleteAdventure = onDeleteAdventure,
                         onManageCollections = onManageCollections
@@ -333,13 +329,7 @@ private fun AdventureListContent(
                             AdventuresPagingList(
                                 pagingItems = pagingItems,
                                 collections = collections,
-                                onAdventureClick = { adventure ->
-                                    val adventureCollections =
-                                        adventure.collections.mapNotNull { id ->
-                                            collections.find { it.id == id }
-                                        }
-                                    onAdventureClick(adventure, adventureCollections)
-                                },
+                                onAdventureClick = onAdventureClick,
                                 onEditAdventure = onEditAdventure,
                                 onDeleteAdventure = onDeleteAdventure,
                                 onManageCollections = onManageCollections
@@ -355,7 +345,7 @@ private fun AdventureListContent(
 @Composable
 private fun AdventuresPagingList(
     pagingItems: LazyPagingItems<Location>,
-    collections: List<Collection>,
+    collections: List<UltraSlimCollection>,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -379,7 +369,6 @@ private fun AdventuresPagingList(
             if (adventure != null) {
                 AdventureItem(
                     location = adventure,
-                    collections = collections,
                     onClick = { onAdventureClick(adventure) },
                     onEdit = { onEditAdventure(adventure) },
                     onDelete = { onDeleteAdventure(adventure) },

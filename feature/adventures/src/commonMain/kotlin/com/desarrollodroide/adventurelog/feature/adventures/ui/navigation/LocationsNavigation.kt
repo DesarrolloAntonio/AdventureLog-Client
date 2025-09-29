@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.Location
-import com.desarrollodroide.adventurelog.core.model.Collection as AdventureCollection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.AddEditLocationScreen
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.locationsList.LocationListScreen
 import kotlinx.serialization.json.Json
@@ -16,7 +16,7 @@ import kotlinx.serialization.json.Json
  * Defines external navigation actions that the Locations feature can trigger
  */
 interface AdventuresNavigator {
-    fun navigateToLocationDetail(location: Location, collections: List<AdventureCollection>)
+    fun navigateToLocationDetail(location: Location)
     fun navigateToAddLocation()
     fun navigateToEditLocation(adventureId: String, adventureJson: String)
     fun navigateBack()
@@ -37,8 +37,8 @@ fun NavGraphBuilder.adventuresScreen(
     // Locations List Screen
     composable(route = NavigationRoutes.Adventures.route) {
         LocationListScreen(
-            onAdventureClick = { adventure, collections ->
-                navigator.navigateToLocationDetail(adventure, collections)
+            onAdventureClick = { adventure ->
+                navigator.navigateToLocationDetail(adventure)
             },
             onAddAdventureClick = {
                 navigator.navigateToAddLocation()
