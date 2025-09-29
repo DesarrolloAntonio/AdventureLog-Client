@@ -16,7 +16,7 @@ import androidx.navigation.navArgument
 import app.cash.paging.compose.LazyPagingItems
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.Location
-import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionDetailScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionsScreen
@@ -46,7 +46,7 @@ fun NavGraphBuilder.collectionsScreen(
 ) {
     // Collections List Screen
     composable(route = NavigationRoutes.Collections.route) { backStackEntry ->
-        val pagingItems = remember { mutableStateOf<LazyPagingItems<Collection>?>(null) }
+        val pagingItems = remember { mutableStateOf<LazyPagingItems<UltraSlimCollection>?>(null) }
         
         // Listen for refresh flag
         val refresh = backStackEntry.savedStateHandle.get<Boolean>("refresh") ?: false
@@ -99,7 +99,8 @@ fun NavGraphBuilder.collectionsScreen(
             },
             onEditAdventure = { adventure ->
                 navigator.navigateToEditAdventure(adventure)
-            }
+            },
+            onEditTransportation = { /* TODO: Implement transportation edit */ }
         )
     }
     

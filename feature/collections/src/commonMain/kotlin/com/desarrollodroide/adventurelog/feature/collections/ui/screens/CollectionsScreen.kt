@@ -49,8 +49,8 @@ import app.cash.paging.LoadStateNotLoading
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
-import com.desarrollodroide.adventurelog.core.model.Collection
-import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionItem
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.SlimCollectionItem
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsSortBottomSheet
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
@@ -62,8 +62,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun CollectionsScreen(
     onCollectionClick: (String, String) -> Unit = { _, _ -> },
     onAddCollectionClick: () -> Unit = { },
-    onEditCollection: (Collection) -> Unit = { },
-    onPagingItemsReady: (LazyPagingItems<Collection>) -> Unit = { },
+    onEditCollection: (UltraSlimCollection) -> Unit = { },
+    onPagingItemsReady: (LazyPagingItems<UltraSlimCollection>) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
@@ -74,7 +74,7 @@ fun CollectionsScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
 
-    var collectionToDelete by remember { mutableStateOf<Collection?>(null) }
+    var collectionToDelete by remember { mutableStateOf<UltraSlimCollection?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     
     // Notify when paging items are ready
@@ -161,7 +161,7 @@ fun CollectionsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CollectionsContent(
-    pagingItems: LazyPagingItems<Collection>,
+    pagingItems: LazyPagingItems<UltraSlimCollection>,
     searchQuery: String,
     hasActiveSorting: Boolean,
     isRefreshing: Boolean,
@@ -170,8 +170,8 @@ private fun CollectionsContent(
     onAddCollectionClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onShowSort: () -> Unit,
-    onEditCollection: (Collection) -> Unit,
-    onDeleteCollection: (Collection) -> Unit,
+    onEditCollection: (UltraSlimCollection) -> Unit,
+    onDeleteCollection: (UltraSlimCollection) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -299,10 +299,10 @@ private fun CollectionsContent(
 
 @Composable
 private fun CollectionsPagingList(
-    pagingItems: LazyPagingItems<Collection>,
+    pagingItems: LazyPagingItems<UltraSlimCollection>,
     onCollectionClick: (String, String) -> Unit,
-    onEditCollection: (Collection) -> Unit,
-    onDeleteCollection: (Collection) -> Unit
+    onEditCollection: (UltraSlimCollection) -> Unit,
+    onDeleteCollection: (UltraSlimCollection) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -320,7 +320,7 @@ private fun CollectionsPagingList(
         ) { index ->
             val collection = pagingItems[index]
             if (collection != null) {
-                CollectionItem(
+                SlimCollectionItem(
                     collection = collection,
                     onClick = { onCollectionClick(collection.id, collection.name) },
                     onEditCollection = { onEditCollection(collection) },

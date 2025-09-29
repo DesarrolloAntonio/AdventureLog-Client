@@ -22,6 +22,7 @@ val collectionsModule = module {
         CollectionDetailViewModel(
             getCollectionDetailUseCase = get(),
             deleteAdventureUseCase = get(),
+            deleteTransportationUseCase = get(),
             updateAdventureCollectionsUseCase = get(),
             observeCollectionsUseCase = get(),
             getAllCollectionsUseCase = get()

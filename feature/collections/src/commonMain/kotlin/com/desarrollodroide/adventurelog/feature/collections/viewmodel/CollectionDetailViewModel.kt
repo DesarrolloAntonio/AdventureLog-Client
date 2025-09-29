@@ -5,10 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteTransportationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,6 +43,7 @@ sealed class UpdateCollectionsState {
 class CollectionDetailViewModel(
     private val getCollectionDetailUseCase: GetCollectionDetailUseCase,
     private val deleteAdventureUseCase: DeleteAdventureUseCase,
+    private val deleteTransportationUseCase: DeleteTransportationUseCase,
     private val updateAdventureCollectionsUseCase: UpdateAdventureCollectionsUseCase,
     private val observeCollectionsUseCase: ObserveCollectionsUseCase,
     private val getAllCollectionsUseCase: GetAllCollectionsUseCase
@@ -48,7 +52,7 @@ class CollectionDetailViewModel(
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
     val uiState: StateFlow<CollectionDetailUiState> = _uiState.asStateFlow()
     
-    val allCollections: StateFlow<List<Collection>> = observeCollectionsUseCase()
+    val allCollections: StateFlow<List<UltraSlimCollection>> = observeCollectionsUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -76,6 +80,9 @@ class CollectionDetailViewModel(
     
     private val _updateCollectionsState = MutableStateFlow<UpdateCollectionsState>(UpdateCollectionsState.Idle)
     val updateCollectionsState: StateFlow<UpdateCollectionsState> = _updateCollectionsState.asStateFlow()
+    
+    private val _selectedTab = MutableStateFlow(CollectionTab.ALL)
+    val selectedTab: StateFlow<CollectionTab> = _selectedTab.asStateFlow()
     
     fun loadCollection(collectionId: String) {
         viewModelScope.launch {
@@ -108,6 +115,24 @@ class CollectionDetailViewModel(
             _deleteState.update { DeleteState.Loading }
             
             when (val result = deleteAdventureUseCase(adventureId)) {
+                is Either.Left -> {
+                    _deleteState.update { DeleteState.Error(result.value) }
+                }
+                is Either.Right -> {
+                    _deleteState.update { DeleteState.Success }
+                    _uiState.value.collection?.let { collection ->
+                        loadCollection(collection.id)
+                    }
+                }
+            }
+        }
+    }
+    
+    fun deleteTransportation(transportationId: String) {
+        viewModelScope.launch {
+            _deleteState.update { DeleteState.Loading }
+            
+            when (val result = deleteTransportationUseCase(transportationId)) {
                 is Either.Left -> {
                     _deleteState.update { DeleteState.Error(result.value) }
                 }
@@ -156,5 +181,9 @@ class CollectionDetailViewModel(
                 _collectionsLoading.value = false
             }
         }
+    }
+    
+    fun onTabSelected(tab: CollectionTab) {
+        _selectedTab.value = tab
     }
 }
