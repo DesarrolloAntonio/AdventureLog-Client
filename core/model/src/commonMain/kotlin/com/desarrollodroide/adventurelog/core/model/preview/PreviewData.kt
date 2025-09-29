@@ -451,6 +451,66 @@ object PreviewData {
         )
     )
     
+    // UltraSlimCollections for testing UI components
+    val sampleUltraSlimCollections = listOf(
+        UltraSlimCollection(
+            id = "1",
+            name = "Summer 2025",
+            description = "Summer adventures and trips",
+            isPublic = true,
+            isArchived = false,
+            createdAt = "2025-01-01T00:00:00Z",
+            updatedAt = "2025-01-01T00:00:00Z",
+            startDate = "2025-06-01T00:00:00Z",
+            endDate = "2025-08-31T00:00:00Z",
+            adventureCount = 5,
+            featuredImage = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
+            link = null
+        ),
+        UltraSlimCollection(
+            id = "2",
+            name = "Mountain Hikes",
+            description = "Collection of mountain hiking adventures",
+            isPublic = false,
+            isArchived = false,
+            createdAt = "2025-01-01T00:00:00Z",
+            updatedAt = "2025-01-01T00:00:00Z",
+            startDate = null,
+            endDate = null,
+            adventureCount = 3,
+            featuredImage = "https://images.unsplash.com/photo-1551632811-561732d1e306",
+            link = null
+        ),
+        UltraSlimCollection(
+            id = "3",
+            name = "City Breaks",
+            description = "Urban explorations and city adventures",
+            isPublic = true,
+            isArchived = false,
+            createdAt = "2025-01-01T00:00:00Z",
+            updatedAt = "2025-01-01T00:00:00Z",
+            startDate = null,
+            endDate = null,
+            adventureCount = 8,
+            featuredImage = "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df",
+            link = null
+        ),
+        UltraSlimCollection(
+            id = "4",
+            name = "Favorite Places",
+            description = "My all-time favorite locations",
+            isPublic = true,
+            isArchived = false,
+            createdAt = "2025-01-01T00:00:00Z",
+            updatedAt = "2025-01-01T00:00:00Z",
+            startDate = null,
+            endDate = null,
+            adventureCount = 12,
+            featuredImage = null,
+            link = null
+        )
+    )
+    
     val spainRegionsCollections = listOf(
         Collection(
             id = "cdcd3ecc-215f-4fdf-a748-94b95e8956a4",
