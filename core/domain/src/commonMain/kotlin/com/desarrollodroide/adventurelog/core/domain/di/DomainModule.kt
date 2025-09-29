@@ -38,6 +38,10 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUs
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCountriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshCountriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedCitiesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateTransportationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateTransportationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetTransportationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteTransportationUseCase
 
 val domainModule = module {
     includes(dataModule)
@@ -77,4 +81,8 @@ val domainModule = module {
     factoryOf(::GetCountriesUseCase)
     factoryOf(::RefreshCountriesUseCase)
     factoryOf(::GetVisitedCitiesUseCase)
+    factoryOf(::CreateTransportationUseCase)
+    factoryOf(::UpdateTransportationUseCase)
+    factoryOf(::GetTransportationUseCase)
+    factoryOf(::DeleteTransportationUseCase)
 }

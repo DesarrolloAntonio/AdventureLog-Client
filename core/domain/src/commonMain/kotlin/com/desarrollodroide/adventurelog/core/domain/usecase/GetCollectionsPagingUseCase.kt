@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.data.CollectionsRepository
-import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.Flow
 
 class GetCollectionsPagingUseCase(
@@ -11,6 +11,6 @@ class GetCollectionsPagingUseCase(
     operator fun invoke(
         sortField: String? = null,
         sortDirection: String? = null
-    ): Flow<PagingData<Collection>> =
+    ): Flow<PagingData<UltraSlimCollection>> =
         collectionsRepository.getCollectionsPagingData(sortField, sortDirection)
 }
