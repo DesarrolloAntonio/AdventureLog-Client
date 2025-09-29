@@ -17,7 +17,7 @@ fun NavGraphBuilder.mapScreen(
         MapScreen(
             onAdventureClick = onAdventureClick,
             onAddAdventureClick = {
-                navController.navigate(NavigationRoutes.Adventures.add)
+                navController.navigate(NavigationRoutes.Locations.add)
             }
         )
     }

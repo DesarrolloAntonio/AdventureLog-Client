@@ -12,7 +12,7 @@ object NavigationRoutes {
         const val screen = "home"
     }
 
-    object Adventures {
+    object Locations {
         const val route = "adventures"
         const val add = "adventures/add"
         const val editRoute = "adventures/edit?adventureId={adventureId}&adventureJson={adventureJson}"

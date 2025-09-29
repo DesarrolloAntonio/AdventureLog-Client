@@ -35,14 +35,15 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeD
 import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
-import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.adventuresScreen
-import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.AdventuresNavigator
+import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.locationsScreen
+import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.LocationsNavigator
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.CollectionsNavigator
 import com.desarrollodroide.adventurelog.feature.map.navigation.mapScreen
 import com.desarrollodroide.adventurelog.feature.settings.navigation.settingsScreen
 import com.desarrollodroide.adventurelog.feature.world.navigation.worldGraph
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -66,7 +67,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Location
-import com.desarrollodroide.adventurelog.core.model.Collection as AdventureCollection
 import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import androidx.compose.ui.layout.ContentScale
 import com.desarrollodroide.adventurelog.resources.main_background
@@ -123,6 +123,14 @@ fun HomeScreenContent(
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
+    val json = remember {
+        Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+            isLenient = true
+        }
+    }
+
     // User name to display
     val userName = userDetails?.fullName ?: "User"
 
@@ -155,7 +163,8 @@ fun HomeScreenContent(
         derivedStateOf {
             if (isCollectionDetail) {
                 // Get the collection name from the backstack entry
-                currentBackStackEntry?.savedStateHandle?.get<String>("collectionName") ?: "Collection"
+                currentBackStackEntry?.savedStateHandle?.get<String>("collectionName")
+                    ?: "Collection"
             } else {
                 "Collection"
             }
@@ -370,28 +379,28 @@ fun HomeScreenContent(
                         }
 
                         // Locations screen with navigator
-                        adventuresScreen(
-                            navigator = object : AdventuresNavigator {
-                                override fun navigateToLocationDetail(
-                                    location: Location,
-                                    collections: List<AdventureCollection>
-                                ) {
+                        locationsScreen(
+                            navigator = object : LocationsNavigator {
+                                override fun navigateToLocationDetail(location: Location) {
                                     onAdventureClick(location)
                                 }
-                                
+
                                 override fun navigateToAddLocation() {
-                                    navController.navigate(NavigationRoutes.Adventures.add)
+                                    navController.navigate(NavigationRoutes.Locations.add)
                                 }
-                                
+
                                 override fun navigateToEditLocation(
-                                    adventureId: String,
-                                    adventureJson: String
+                                    locationId: String,
+                                    locationJson: String
                                 ) {
                                     navController.navigate(
-                                        NavigationRoutes.Adventures.createEditRoute(adventureId, adventureJson)
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            locationId,
+                                            locationJson
+                                        )
                                     )
                                 }
-                                
+
                                 override fun navigateBack() {
                                     navController.navigateUp()
                                 }
@@ -401,26 +410,39 @@ fun HomeScreenContent(
                         // Collections screen with navigator
                         collectionsScreen(
                             navigator = object : CollectionsNavigator {
-                                override fun navigateToCollectionDetail(collectionId: String, collectionName: String) {
+                                override fun navigateToCollectionDetail(
+                                    collectionId: String,
+                                    collectionName: String
+                                ) {
                                     navController.navigate("collection/$collectionId/$collectionName")
                                 }
-                                
+
                                 override fun navigateToAddCollection() {
                                     navController.navigate("add_collection")
                                 }
-                                
+
                                 override fun navigateToEditCollection(collectionId: String) {
                                     navController.navigate("edit_collection/$collectionId")
                                 }
-                                
+
                                 override fun navigateToAdventure(location: Location) {
                                     onAdventureClick(location)
                                 }
-                                
+
+                                override fun navigateToEditAdventure(adventure: Location) {
+                                    val adventureJson = json.encodeToString(adventure)
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            adventureId = adventure.id,
+                                            adventureJson = adventureJson
+                                        )
+                                    )
+                                }
+
                                 override fun navigateToHome() {
                                     navigateToHome()
                                 }
-                                
+
                                 override fun navigateBack() {
                                     navController.navigateUp()
                                 }
