@@ -72,7 +72,7 @@ val dataModule = module {
     }
     single<TransportationRepository> {
         TransportationRepositoryImpl(
-            transportationApi = get()
+            networkDataSource = get()
         )
     }
 }

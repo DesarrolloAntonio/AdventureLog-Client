@@ -9,7 +9,8 @@ import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateCollectionRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.UpdateCollectionRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
-import com.desarrollodroide.adventurelog.core.network.model.response.CollectionsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionsDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -53,7 +54,7 @@ internal class KtorCollectionApi(
         logger.e { "=== JSON DEBUG END ===" }
     }
 
-    override suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO> {
+    override suspend fun getCollections(page: Int, pageSize: Int): List<UltraSlimCollectionDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/collections/"
         
@@ -75,7 +76,7 @@ internal class KtorCollectionApi(
         val responseText = response.body<String>()
         
         try {
-            val collectionsResponse = json.decodeFromString<CollectionsDTO>(responseText)
+            val collectionsResponse = json.decodeFromString<UltraSlimCollectionsDTO>(responseText)
             logger.d { "Fetched ${collectionsResponse.results?.size ?: 0} collections" }
             return collectionsResponse.results ?: emptyList()
         } catch (e: Exception) {
@@ -84,7 +85,7 @@ internal class KtorCollectionApi(
         }
     }
     
-    override suspend fun getAllCollections(): List<CollectionDTO> {
+    override suspend fun getAllCollections(): List<UltraSlimCollectionDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/collections/all/"
         
@@ -104,7 +105,7 @@ internal class KtorCollectionApi(
         val responseText = response.body<String>()
         
         try {
-            val collections = json.decodeFromString<List<CollectionDTO>>(responseText)
+            val collections = json.decodeFromString<List<UltraSlimCollectionDTO>>(responseText)
             logger.d { "Fetched ${collections.size} collections from /all endpoint" }
             return collections
         } catch (e: Exception) {

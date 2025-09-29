@@ -68,12 +68,12 @@ fun CollectionDTO.toDomainModel(): Collection = Collection(
     createdAt = createdAt ?: "",
     startDate = startDate,
     endDate = endDate,
-    transportations = transportations?.map { it.id ?: "" } ?: emptyList(),
-    notes = notes?.map { it.id ?: "" } ?: emptyList(),
+    transportations = transportations?.map { it.toDomainModel() } ?: emptyList(),
+    notes = notes?.map { it.id } ?: emptyList(),
     updatedAt = updatedAt ?: "",
-    checklists = checklists?.map { it.id ?: "" } ?: emptyList(),
+    checklists = checklists?.map { it.id } ?: emptyList(),
     isArchived = isArchived,
     sharedWith = sharedWith ?: emptyList(),
     link = link ?: "",
-    lodging = lodging?.map { it.id ?: "" } ?: emptyList()
+    lodging = lodging?.map { it.id } ?: emptyList()
 )

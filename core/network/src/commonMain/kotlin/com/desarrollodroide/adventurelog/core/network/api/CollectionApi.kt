@@ -1,17 +1,18 @@
 package com.desarrollodroide.adventurelog.core.network.api
 
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
 
 interface CollectionApi {
     /**
-     * Get paginated list of collections
+     * Get paginated list of collections (returns slim version)
      */
-    suspend fun getCollections(page: Int, pageSize: Int): List<CollectionDTO>
+    suspend fun getCollections(page: Int, pageSize: Int): List<UltraSlimCollectionDTO>
     
     /**
-     * Get all collections without pagination
+     * Get all collections without pagination (returns slim version)
      */
-    suspend fun getAllCollections(): List<CollectionDTO>
+    suspend fun getAllCollections(): List<UltraSlimCollectionDTO>
 
     /**
      * Get collection details by ID

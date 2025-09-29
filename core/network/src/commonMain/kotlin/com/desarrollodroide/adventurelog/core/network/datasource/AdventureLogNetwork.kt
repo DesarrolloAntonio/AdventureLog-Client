@@ -1,10 +1,12 @@
 package com.desarrollodroide.adventurelog.core.network.datasource
 
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
@@ -46,20 +48,20 @@ interface AdventureLogNetwork {
     ): LocationDTO
 
     /**
-     * Get paginated list of collections
+     * Get paginated list of collections (returns slim version)
      */
     suspend fun getCollections(
         page: Int,
         pageSize: Int
-    ): List<CollectionDTO>
+    ): List<UltraSlimCollectionDTO>
     
     /**
-     * Get all collections without pagination
+     * Get all collections without pagination (returns slim version)
      */
-    suspend fun getAllCollections(): List<CollectionDTO>
+    suspend fun getAllCollections(): List<UltraSlimCollectionDTO>
 
     /**
-     * Get collection details by ID
+     * Get collection details by ID (returns full version)
      */
     suspend fun getCollectionDetail(
         collectionId: String
@@ -245,4 +247,67 @@ interface AdventureLogNetwork {
      * Get visited cities for the current user
      */
     suspend fun getVisitedCities(): List<VisitedCityDTO>
+    
+    /**
+     * Create a new transportation
+     */
+    suspend fun createTransportation(
+        name: String,
+        type: String,
+        description: String,
+        rating: Double,
+        link: String,
+        fromLocation: String,
+        toLocation: String,
+        departureDate: String,
+        arrivalDate: String,
+        departureTimezone: String,
+        arrivalTimezone: String,
+        flightNumber: String,
+        distance: String,
+        originLatitude: String?,
+        originLongitude: String?,
+        destinationLatitude: String?,
+        destinationLongitude: String?,
+        isPublic: Boolean,
+        images: List<String>,
+        attachments: List<String>
+    ): Transportation
+    
+    /**
+     * Update an existing transportation
+     */
+    suspend fun updateTransportation(
+        transportationId: String,
+        name: String,
+        type: String,
+        description: String,
+        rating: Double,
+        link: String,
+        fromLocation: String,
+        toLocation: String,
+        departureDate: String,
+        arrivalDate: String,
+        departureTimezone: String,
+        arrivalTimezone: String,
+        flightNumber: String,
+        distance: String,
+        originLatitude: String?,
+        originLongitude: String?,
+        destinationLatitude: String?,
+        destinationLongitude: String?,
+        isPublic: Boolean,
+        images: List<String>,
+        attachments: List<String>
+    ): Transportation
+    
+    /**
+     * Get a transportation by ID
+     */
+    suspend fun getTransportation(transportationId: String): Transportation
+    
+    /**
+     * Delete a transportation
+     */
+    suspend fun deleteTransportation(transportationId: String)
 }

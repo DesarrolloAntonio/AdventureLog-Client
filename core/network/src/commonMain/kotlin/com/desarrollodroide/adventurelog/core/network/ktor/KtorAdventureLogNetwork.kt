@@ -3,9 +3,11 @@ package com.desarrollodroide.adventurelog.core.network.ktor
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
@@ -31,7 +33,9 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorContentApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorCountriesApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorGeocodingApi
 import com.desarrollodroide.adventurelog.core.network.api.AuthApi
+import com.desarrollodroide.adventurelog.core.network.api.TransportationApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTransportationApi
 
 class KtorAdventureLogNetwork(
     private val adventurelogClient: HttpClient
@@ -103,6 +107,13 @@ class KtorAdventureLogNetwork(
     
     private val contentDataSource: ContentApi by lazy {
         KtorContentApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+    
+    private val transportationDataSource: TransportationApi by lazy {
+        KtorTransportationApi(
             httpClient = adventurelogClient,
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
         )
@@ -196,12 +207,12 @@ class KtorAdventureLogNetwork(
     override suspend fun getCollections(
         page: Int,
         pageSize: Int
-    ): List<CollectionDTO> {
+    ): List<UltraSlimCollectionDTO> {
         ensureInitialized()
         return collectionDataSource.getCollections(page, pageSize)
     }
     
-    override suspend fun getAllCollections(): List<CollectionDTO> {
+    override suspend fun getAllCollections(): List<UltraSlimCollectionDTO> {
         ensureInitialized()
         return collectionDataSource.getAllCollections()
     }
@@ -418,5 +429,111 @@ class KtorAdventureLogNetwork(
     override suspend fun getVisitedCities(): List<VisitedCityDTO> {
         ensureInitialized()
         return countriesDataSource.getVisitedCities()
+    }
+    
+    override suspend fun createTransportation(
+        name: String,
+        type: String,
+        description: String,
+        rating: Double,
+        link: String,
+        fromLocation: String,
+        toLocation: String,
+        departureDate: String,
+        arrivalDate: String,
+        departureTimezone: String,
+        arrivalTimezone: String,
+        flightNumber: String,
+        distance: String,
+        originLatitude: String?,
+        originLongitude: String?,
+        destinationLatitude: String?,
+        destinationLongitude: String?,
+        isPublic: Boolean,
+        images: List<String>,
+        attachments: List<String>
+    ): Transportation {
+        ensureInitialized()
+        return transportationDataSource.createTransportation(
+            name = name,
+            type = type,
+            description = description,
+            rating = rating,
+            link = link,
+            fromLocation = fromLocation,
+            toLocation = toLocation,
+            departureDate = departureDate,
+            arrivalDate = arrivalDate,
+            departureTimezone = departureTimezone,
+            arrivalTimezone = arrivalTimezone,
+            flightNumber = flightNumber,
+            distance = distance,
+            originLatitude = originLatitude,
+            originLongitude = originLongitude,
+            destinationLatitude = destinationLatitude,
+            destinationLongitude = destinationLongitude,
+            isPublic = isPublic,
+            images = images,
+            attachments = attachments
+        )
+    }
+    
+    override suspend fun updateTransportation(
+        transportationId: String,
+        name: String,
+        type: String,
+        description: String,
+        rating: Double,
+        link: String,
+        fromLocation: String,
+        toLocation: String,
+        departureDate: String,
+        arrivalDate: String,
+        departureTimezone: String,
+        arrivalTimezone: String,
+        flightNumber: String,
+        distance: String,
+        originLatitude: String?,
+        originLongitude: String?,
+        destinationLatitude: String?,
+        destinationLongitude: String?,
+        isPublic: Boolean,
+        images: List<String>,
+        attachments: List<String>
+    ): Transportation {
+        ensureInitialized()
+        return transportationDataSource.updateTransportation(
+            transportationId = transportationId,
+            name = name,
+            type = type,
+            description = description,
+            rating = rating,
+            link = link,
+            fromLocation = fromLocation,
+            toLocation = toLocation,
+            departureDate = departureDate,
+            arrivalDate = arrivalDate,
+            departureTimezone = departureTimezone,
+            arrivalTimezone = arrivalTimezone,
+            flightNumber = flightNumber,
+            distance = distance,
+            originLatitude = originLatitude,
+            originLongitude = originLongitude,
+            destinationLatitude = destinationLatitude,
+            destinationLongitude = destinationLongitude,
+            isPublic = isPublic,
+            images = images,
+            attachments = attachments
+        )
+    }
+    
+    override suspend fun getTransportation(transportationId: String): Transportation {
+        ensureInitialized()
+        return transportationDataSource.getTransportation(transportationId)
+    }
+    
+    override suspend fun deleteTransportation(transportationId: String) {
+        ensureInitialized()
+        return transportationDataSource.deleteTransportation(transportationId)
     }
 }
