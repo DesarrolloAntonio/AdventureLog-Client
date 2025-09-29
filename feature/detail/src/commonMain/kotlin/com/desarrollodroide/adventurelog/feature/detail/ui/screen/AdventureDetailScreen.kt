@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,8 @@ import com.desarrollodroide.adventurelog.core.model.Country
 import com.desarrollodroide.adventurelog.core.model.Region
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.*
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -28,9 +31,11 @@ fun AdventureDetailScreenRoute(
     onBackClick: () -> Unit
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
+    val collections by viewModel.getCollectionsForLocation(location).collectAsStateWithLifecycle()
 
     AdventureDetailScreen(
         location = location,
+        collections = collections,
         onBackClick = onBackClick,
         onEditClick = { viewModel.editAdventure(location.id) },
         onOpenMap = { lat: String, long: String -> viewModel.openMap(lat, long) },
@@ -41,6 +46,7 @@ fun AdventureDetailScreenRoute(
 @Composable
 fun AdventureDetailScreen(
     location: Location,
+    collections: List<UltraSlimCollection> = emptyList(),
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
     onOpenMap: (String, String) -> Unit,
@@ -90,6 +96,18 @@ fun AdventureDetailScreen(
                         isPublic = location.isPublic,
                         tags = location.tags
                     )
+
+                    // Collections section
+                    if (collections.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        CollectionsSection(
+                            collections = collections,
+                            onCollectionClick = { collection ->
+                                // TODO: Navigate to collection detail
+                                println("Navigate to collection: ${collection.name}")
+                            }
+                        )
+                    }
 
                     if (location.images.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(24.dp))
@@ -245,10 +263,13 @@ private fun createAdventureWithMultipleImages(): Location {
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 private fun AdventureDetailScreenLightPreview() {
+    val mockCollections = PreviewData.sampleUltraSlimCollections.take(2)
+    
     MaterialTheme(colorScheme = lightColorScheme()) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
                 location = createAdventureWithMultipleImages(),
+                collections = mockCollections,
                 onBackClick = {},
                 onEditClick = {},
                 onOpenMap = { _, _ -> },
@@ -270,6 +291,7 @@ private fun AdventureDetailScreenDarkPreview() {
                     tags = listOf("Photography", "Astronomy", "Night Tour"),
                     isPublic = false
                 ),
+                collections = emptyList(),
                 onBackClick = {},
                 onEditClick = {},
                 onOpenMap = { _, _ -> },
@@ -324,6 +346,7 @@ private fun HotelBalnearioDetailPreview() {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
                 location = hotelBalneario,
+                collections = emptyList(),
                 onBackClick = {},
                 onEditClick = {},
                 onOpenMap = { _, _ -> },
@@ -378,6 +401,7 @@ private fun NavalagamellaDetailPreview() {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
                 location = navalagamella,
+                collections = emptyList(),
                 onBackClick = {},
                 onEditClick = {},
                 onOpenMap = { _, _ -> },
@@ -419,6 +443,7 @@ private fun AdventureDetailScreenNoImagePreview() {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             AdventureDetailScreen(
                 location = adventureNoImage,
+                collections = emptyList(),
                 onBackClick = {},
                 onEditClick = {},
                 onOpenMap = { _, _ -> },
