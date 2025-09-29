@@ -16,7 +16,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUs
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
-import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.feature.adventures.model.LocationFilters
 import com.desarrollodroide.adventurelog.feature.adventures.model.LocationSortField
@@ -65,7 +65,7 @@ class AdventuresViewModel(
     val categoriesState: StateFlow<CategoriesState> = _categoriesState.asStateFlow()
 
     // Directly observe collections from repository
-    val collections: StateFlow<List<Collection>> = observeCollectionsUseCase()
+    val collections: StateFlow<List<UltraSlimCollection>> = observeCollectionsUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
