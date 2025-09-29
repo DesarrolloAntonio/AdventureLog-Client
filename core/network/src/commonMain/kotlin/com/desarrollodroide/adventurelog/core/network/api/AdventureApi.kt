@@ -6,18 +6,17 @@ import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
 interface AdventureApi {
     /**
-     * Get paginated list of adventures
+     * Get paginated list of locations
      */
-    suspend fun getAdventures(
+    suspend fun getLocations(
         page: Int,
         pageSize: Int
     ): List<LocationDTO>
 
     /**
-     * Get filtered and paginated list of adventures
-     * Uses the /api/adventures/filtered/ endpoint
+     * Get filtered and paginated list of locations
      */
-    suspend fun getAdventuresFiltered(
+    suspend fun getLocationsFiltered(
         page: Int,
         pageSize: Int,
         categoryIds: List<String>? = null,
@@ -29,16 +28,16 @@ interface AdventureApi {
     ): List<LocationDTO>
 
     /**
-     * Get adventure details by ID
+     * Get location details by ID
      */
     suspend fun getAdventureDetail(
         objectId: String
     ): LocationDTO
     
     /**
-     * Create a new adventure
+     * Create a new location
      */
-    suspend fun createAdventure(
+    suspend fun createLocation(
         name: String,
         description: String,
         category: Category,
@@ -53,7 +52,7 @@ interface AdventureApi {
     ): LocationDTO
     
     /**
-     * Update an existing adventure
+     * Update an existing location
      */
     suspend fun updateAdventure(
         adventureId: String,
@@ -71,7 +70,7 @@ interface AdventureApi {
     ): LocationDTO
     
     /**
-     * Delete an adventure
+     * Delete a location
      */
-    suspend fun deleteAdventure(adventureId: String)
+    suspend fun deleteLocation(adventureId: String)
 }

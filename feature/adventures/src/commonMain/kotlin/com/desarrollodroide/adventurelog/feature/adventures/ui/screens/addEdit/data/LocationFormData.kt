@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
-data class AdventureFormData(
+data class LocationFormData(
     val name: String = "",
     val description: String = "",
     val category: Category? = null,

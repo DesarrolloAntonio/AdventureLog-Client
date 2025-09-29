@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditT
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.ImagesSection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.data.TransportationFormData
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
 
@@ -16,8 +16,8 @@ fun TransportationImagesSection(
     onResetWikipediaState: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Convert TransportationFormData to AdventureFormData for compatibility
-    val adventureFormData = AdventureFormData(
+    // Convert TransportationFormData to LocationFormData for compatibility
+    val adventureFormData = LocationFormData(
         name = formData.name,
         description = formData.description,
         rating = formData.rating,

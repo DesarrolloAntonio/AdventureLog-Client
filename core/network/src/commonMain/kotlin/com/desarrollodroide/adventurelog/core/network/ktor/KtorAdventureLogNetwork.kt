@@ -171,7 +171,7 @@ class KtorAdventureLogNetwork(
         pageSize: Int
     ): List<LocationDTO> {
         ensureInitialized()
-        return adventureDataSource.getAdventures(page, pageSize)
+        return adventureDataSource.getLocations(page, pageSize)
     }
 
     override suspend fun getAdventuresFiltered(
@@ -185,7 +185,7 @@ class KtorAdventureLogNetwork(
         includeCollections: Boolean
     ): List<LocationDTO> {
         ensureInitialized()
-        return adventureDataSource.getAdventuresFiltered(
+        return adventureDataSource.getLocationsFiltered(
             page = page,
             pageSize = pageSize,
             categoryIds = categoryIds,
@@ -238,7 +238,7 @@ class KtorAdventureLogNetwork(
         activityTypes: List<String>
     ): LocationDTO {
         ensureInitialized()
-        return adventureDataSource.createAdventure(
+        return adventureDataSource.createLocation(
             name = name,
             description = description,
             category = category,
@@ -351,7 +351,7 @@ class KtorAdventureLogNetwork(
     
     override suspend fun deleteAdventure(adventureId: String) {
         ensureInitialized()
-        return adventureDataSource.deleteAdventure(adventureId)
+        return adventureDataSource.deleteLocation(adventureId)
     }
     
     override suspend fun updateAdventure(

@@ -6,7 +6,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventureUseCase
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -112,7 +112,7 @@ class AddEditAdventureViewModel(
         }
     }
     
-    fun saveAdventure(formData: AdventureFormData) {
+    fun saveLocation(formData: LocationFormData) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             

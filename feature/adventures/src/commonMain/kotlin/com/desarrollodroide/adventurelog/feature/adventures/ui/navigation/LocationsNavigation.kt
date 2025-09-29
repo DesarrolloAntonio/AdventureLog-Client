@@ -52,7 +52,7 @@ fun NavGraphBuilder.locationsScreen(
     // Add Adventure Screen
     composable(route = NavigationRoutes.Locations.add) {
         AddEditLocationScreen(
-            adventureId = null,
+            locationId = null,
             location = null,
             onNavigateBack = {
                 navigator.navigateBack()
@@ -82,7 +82,7 @@ fun NavGraphBuilder.locationsScreen(
         }
         
         AddEditLocationScreen(
-            adventureId = adventureId,
+            locationId = adventureId,
             location = location,
             onNavigateBack = {
                 navigator.navigateBack()

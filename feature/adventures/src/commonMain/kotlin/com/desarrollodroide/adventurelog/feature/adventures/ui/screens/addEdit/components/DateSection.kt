@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.date.*
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -26,8 +26,8 @@ import kotlinx.datetime.toLocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateSection(
-    formData: AdventureFormData,
-    onFormDataChange: (AdventureFormData) -> Unit
+    formData: LocationFormData,
+    onFormDataChange: (LocationFormData) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var showStartDatePicker by remember { mutableStateOf(false) }

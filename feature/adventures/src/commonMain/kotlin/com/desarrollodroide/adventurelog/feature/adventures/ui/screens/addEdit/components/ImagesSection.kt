@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -50,7 +47,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageType
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
@@ -67,8 +64,8 @@ import androidx.compose.material3.CircularProgressIndicator
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ImagesSection(
-    formData: AdventureFormData,
-    onFormDataChange: (AdventureFormData) -> Unit,
+    formData: LocationFormData,
+    onFormDataChange: (LocationFormData) -> Unit,
     wikipediaImageState: WikipediaImageState,
     onSearchWikipediaImage: (String) -> Unit,
     onResetWikipediaState: () -> Unit

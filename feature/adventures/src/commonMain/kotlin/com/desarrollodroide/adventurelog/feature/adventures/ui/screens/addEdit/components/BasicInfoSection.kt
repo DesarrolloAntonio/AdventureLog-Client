@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Public
@@ -50,16 +49,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.feature.ui.components.DescriptionSection
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 
 @Composable
 fun BasicInfoSection(
-    formData: AdventureFormData,
+    formData: LocationFormData,
     categories: List<Category>,
-    onFormDataChange: (AdventureFormData) -> Unit,
+    onFormDataChange: (LocationFormData) -> Unit,
     onNavigateBack: () -> Unit = {},
     onGenerateDescription: () -> Unit = {},
     isGeneratingDescription: Boolean = false

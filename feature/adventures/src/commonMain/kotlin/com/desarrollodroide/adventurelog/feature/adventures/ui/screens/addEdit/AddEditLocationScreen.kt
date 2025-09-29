@@ -43,7 +43,7 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.c
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.ImagesSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.TagsSection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
@@ -53,12 +53,12 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AddEditLocationScreen(
-    adventureId: String?,
+    locationId: String?,
     location: Location?,
     onNavigateBack: () -> Unit
 ) {
     val viewModel = koinViewModel<AddEditAdventureViewModel> {
-        parametersOf(adventureId, location)
+        parametersOf(locationId, location)
     }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -80,14 +80,14 @@ fun AddEditLocationScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AddEditAdventureContent(
-            isEditMode = adventureId != null,
+        AddEditLocationContent(
+            isEditMode = locationId != null,
             existingLocation = uiState.existingLocation,
             categories = uiState.categories,
             isLoading = uiState.isLoading,
             onNavigateBack = onNavigateBack,
             onSave = { formData ->
-                viewModel.saveAdventure(formData)
+                viewModel.saveLocation(formData)
             },
             onGenerateDescription = { name, onDescriptionGenerated ->
                 viewModel.generateDescription(name, onDescriptionGenerated)
@@ -121,13 +121,13 @@ fun AddEditLocationScreen(
     }
 }
 @Composable
-fun AddEditAdventureContent(
+fun AddEditLocationContent(
     isEditMode: Boolean = false,
     existingLocation: Location? = null,
     categories: List<Category>,
     isLoading: Boolean = false,
     onNavigateBack: () -> Unit,
-    onSave: (adventureData: AdventureFormData) -> Unit,
+    onSave: (adventureData: LocationFormData) -> Unit,
     onGenerateDescription: (name: String, onDescriptionGenerated: (String) -> Unit) -> Unit,
     isGeneratingDescription: Boolean,
     locationSearchResults: List<GeocodeSearchResult> = emptyList(),
@@ -144,7 +144,7 @@ fun AddEditAdventureContent(
     var formData by remember(existingLocation) {
         mutableStateOf(
             if (existingLocation != null) {
-                AdventureFormData(
+                LocationFormData(
                     name = existingLocation.name,
                     description = existingLocation.description?:"",
                     category = existingLocation.category,
@@ -166,7 +166,7 @@ fun AddEditAdventureContent(
                     }
                 )
             } else {
-                AdventureFormData(
+                LocationFormData(
                     category = categories.firstOrNull()
                 )
             }
@@ -280,13 +280,13 @@ private val mockCity = City(id = "city-madrid", name = "Madrid", regionName = "C
 
 @Preview
 @Composable
-private fun AddEditAdventureScreenPreview() {
+private fun AddEditLocationScreenPreview() {
     MaterialTheme {
         Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            AddEditAdventureContent(
+            AddEditLocationContent(
                 categories = listOf(
                     Category("1", "general", "General", "🌍", "0"),
                     Category("2", "hotel", "Hotel", "🏨", "0"),
@@ -306,7 +306,7 @@ private fun AddEditAdventureScreenPreview() {
 
 @Preview
 @Composable
-private fun AddEditAdventureScreenWithDataPreview() {
+private fun AddEditLocationScreenWithDataPreview() {
     val sampleLocation = Location(
         id = "1",
         user = mockUser,
@@ -348,7 +348,7 @@ private fun AddEditAdventureScreenWithDataPreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            AddEditAdventureContent(
+            AddEditLocationContent(
                 isEditMode = true,
                 existingLocation = sampleLocation,
                 categories = listOf(
@@ -380,7 +380,7 @@ private fun AddEditAdventureScreenWithDataPreview() {
 
 @Preview
 @Composable
-private fun AddEditAdventureScreenDarkPreview() {
+private fun AddEditLocationScreenDarkPreview() {
     MaterialTheme(
         colorScheme = darkColorScheme()
     ) {
@@ -388,7 +388,7 @@ private fun AddEditAdventureScreenDarkPreview() {
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            AddEditAdventureContent(
+            AddEditLocationContent(
                 categories = listOf(
                     Category("1", "general", "General", "🌍", "0"),
                     Category("2", "hotel", "Hotel", "🏨", "0"),

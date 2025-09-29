@@ -2,10 +2,8 @@ package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.CleaningServices
@@ -14,17 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.AdventureFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.CompactPrimaryButton
-import kotlinx.coroutines.delay
 
 @Composable
 fun LocationSection(
-    formData: AdventureFormData,
-    onFormDataChange: (AdventureFormData) -> Unit,
+    formData: LocationFormData,
+    onFormDataChange: (LocationFormData) -> Unit,
     locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     isSearchingLocation: Boolean = false,
     onSearchLocation: (String) -> Unit = {},
