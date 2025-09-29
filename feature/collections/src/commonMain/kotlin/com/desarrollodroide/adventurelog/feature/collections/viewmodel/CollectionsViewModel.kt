@@ -10,7 +10,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCollectionUseCase
-import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionSortOptions
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionSortField
@@ -56,7 +56,7 @@ class CollectionsViewModel(
         data class Error(val message: String) : DeleteState()
     }
 
-    val collectionsPagingData: Flow<PagingData<Collection>> = combine(
+    val collectionsPagingData: Flow<PagingData<UltraSlimCollection>> = combine(
         _searchQuery.debounce(300).distinctUntilChanged(),
         _sortOptions
     ) { query, sortOptions ->
