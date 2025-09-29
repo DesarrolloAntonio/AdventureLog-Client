@@ -108,7 +108,7 @@ object PreviewData {
         )
     )
 
-    // Imágenes para la primera aventura (Lake District Mountain Resort)
+    // Images for the first adventure (Lake District Mountain Resort)
     val lakeMountainImages = listOf(
         ContentImage(
             id = "1-1",
@@ -147,7 +147,7 @@ object PreviewData {
         ),
     )
 
-    // Imágenes para la segunda aventura (Coastal Beach Resort)
+    // Images for the second adventure (Coastal Beach Resort)
     val beachResortImages = listOf(
         ContentImage(
             id = "2-1",
@@ -179,7 +179,7 @@ object PreviewData {
         ),
     )
 
-    // Imágenes para la tercera aventura (Mountain View Hotel)
+    // Images for the third adventure (Mountain View Hotel)
     val mountainHotelImages = listOf(
         ContentImage(
             id = "3-1",
@@ -225,7 +225,7 @@ object PreviewData {
         ),
     )
 
-    // Imágenes para ejemplos específicos
+    // Images for specific examples
     val balnearioImages = listOf(
         ContentImage(
             id = "b-1",
