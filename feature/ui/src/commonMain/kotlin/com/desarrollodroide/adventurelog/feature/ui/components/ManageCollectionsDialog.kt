@@ -19,14 +19,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Location
-import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageCollectionsDialog(
     location: Location,
-    allCollections: List<Collection>,
+    allCollections: List<UltraSlimCollection>,
     isLoadingCollections: Boolean = false,
     onUpdateCollections: (adventureId: String, collectionIds: List<String>) -> Unit,
     onRefreshCollections: (() -> Unit)? = null,
@@ -70,7 +70,7 @@ fun ManageCollectionsDialog(
 @Composable
 private fun ManageCollectionsContent(
     location: Location,
-    allCollections: List<Collection>,
+    allCollections: List<UltraSlimCollection>,
     isLoadingCollections: Boolean,
     onUpdateCollections: (adventureId: String, collectionIds: List<String>) -> Unit,
     onRefreshCollections: (() -> Unit)?,
@@ -431,7 +431,7 @@ private fun ManageCollectionsContent(
 
 @Composable
 private fun CollectionSelectionItem(
-    collection: Collection,
+    collection: UltraSlimCollection,
     isSelected: Boolean,
     onSelectionChange: () -> Unit
 ) {
@@ -512,9 +512,9 @@ private fun CollectionSelectionItem(
                         }
                     }
                     
-                    if (collection.locations.isNotEmpty()) {
+                    if (collection.adventureCount > 0) {
                         Text(
-                            "${collection.locations.size} adventure${if (collection.locations.size != 1) "s" else ""}",
+                            "${collection.adventureCount} adventure${if (collection.adventureCount != 1) "s" else ""}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -522,16 +522,14 @@ private fun CollectionSelectionItem(
                 }
                 
                 // Description
-                collection.description?.let { description ->
-                    if (description.isNotEmpty()) {
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                if (collection.description.isNotEmpty()) {
+                    Text(
+                        text = collection.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
