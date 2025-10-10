@@ -9,8 +9,11 @@ data class VisitedRegionDTO(
     @SerialName("id")
     val id: Int,
     
+    @SerialName("user")
+    val user: String? = null,
+    
     @SerialName("user_id")
-    val userId: String,
+    val userId: String? = null,
     
     @SerialName("region")
     val region: String,
@@ -23,12 +26,15 @@ data class VisitedRegionDTO(
     
     @SerialName("latitude")
     val latitude: String? = null
-)
+) {
+    val userIdValue: String
+        get() = userId ?: user ?: ""
+}
 
 fun VisitedRegionDTO.toDomainModel(): VisitedRegion {
     return VisitedRegion(
         id = id,
-        userId = userId,
+        userId = userIdValue,
         regionId = region,
         name = name,
         longitude = longitude?.toDoubleOrNull(),

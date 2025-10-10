@@ -191,6 +191,7 @@ private fun CollectionsContent(
                     onSearchQueryChange = onSearchQueryChange,
                     onSearchSubmit = { },
                     placeholder = "Search collections...",
+                    showSearchButton = false,
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(

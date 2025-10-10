@@ -38,15 +38,17 @@ class CollectionsRepositoryImpl(
         return _version.flatMapLatest { _ ->
             Pager(
                 config = PagingConfig(
-                    pageSize = 30,
+                    // Large page size to load all collections at once since there's no search endpoint in the backend
+                    // Collections are filtered in memory in the ViewModel
+                    pageSize = 10000,
                     enablePlaceholders = false,
-                    initialLoadSize = 30,
+                    initialLoadSize = 10000,
                     prefetchDistance = 10
                 ),
                 pagingSourceFactory = { 
                     CollectionsPagingSource(
                         networkDataSource = networkDataSource, 
-                        pageSize = 30,
+                        pageSize = 10000,
                         sortField = sortField,
                         sortDirection = sortDirection
                     ) 

@@ -44,14 +44,14 @@ val networkModule = module {
                 json(get())
             }
             install(Logging) {
-                level = LogLevel.ALL
+                level = LogLevel.BODY
                 logger = object : io.ktor.client.plugins.logging.Logger {
                     override fun log(message: String) {
                         // Split long messages to avoid truncation
                         if (message.length > 3000) {
                             val chunks = message.chunked(3000)
                             chunks.forEachIndexed { index, chunk ->
-                                println("HTTP Log Part ${index + 1}/${chunks.size}: $chunk")
+                                println(chunk)
                             }
                         } else {
                             println("HTTP Log: $message")

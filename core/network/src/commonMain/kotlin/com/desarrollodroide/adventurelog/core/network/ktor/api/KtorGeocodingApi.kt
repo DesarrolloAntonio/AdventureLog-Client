@@ -33,15 +33,17 @@ class KtorGeocodingApi(
                     append("X-Session-Token", token)
                 }
             }
-            parameter("query", query)
+            parameter("query", query.trim())
         }
         
         if (response.status.isSuccess()) {
             return response.body()
         } else {
             logger.e { "Failed to search locations with status: ${response.status}" }
-            // Return empty list for search failures instead of throwing
-            return emptyList()
+            throw HttpException(
+                code = response.status.value,
+                message = "Failed to search locations with status: ${response.status}"
+            )
         }
     }
     

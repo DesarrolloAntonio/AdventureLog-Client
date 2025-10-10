@@ -51,6 +51,9 @@ class AdventuresViewModel(
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    
+    private val _actualSearchQuery = MutableStateFlow("")
+    val actualSearchQuery: StateFlow<String> = _actualSearchQuery.asStateFlow()
 
     private val _filters = MutableStateFlow(LocationFilters())
     val filters: StateFlow<LocationFilters> = _filters.asStateFlow()
@@ -139,7 +142,7 @@ class AdventuresViewModel(
         }
 
     val adventuresPagingData: Flow<PagingData<Location>> = combine(
-        _searchQuery.debounce(300).distinctUntilChanged(),
+        _actualSearchQuery,
         _filters
     ) { query, filters ->
         Pair(query, filters)
@@ -172,6 +175,11 @@ class AdventuresViewModel(
 
     fun onSearchQueryChange(query: String) {
         _searchQuery.value = query
+    }
+    
+    fun executeSearch() {
+        _actualSearchQuery.value = _searchQuery.value
+        _searchQuery.value = ""
     }
 
     fun onFiltersChanged(filters: LocationFilters) {

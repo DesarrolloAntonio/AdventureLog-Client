@@ -10,7 +10,9 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.d
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
@@ -21,7 +23,6 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImag
 import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResult
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
-import kotlinx.coroutines.flow.collectLatest
 
 data class AddEditAdventureUiState(
     val isLoading: Boolean = false,
@@ -216,9 +217,10 @@ class AddEditAdventureViewModel(
     }
     
     fun searchLocations(query: String) {
-        if (query.isBlank()) {
+        if (query.isBlank() || query.length <= 2) {
             _uiState.value = _uiState.value.copy(
-                locationSearchResults = emptyList()
+                locationSearchResults = emptyList(),
+                isSearchingLocation = false
             )
             return
         }
@@ -229,20 +231,34 @@ class AddEditAdventureViewModel(
                 errorMessage = null
             )
             
-            when (val result = searchLocationsUseCase(query)) {
-                is Either.Left -> {
-                    _uiState.value = _uiState.value.copy(
-                        isSearchingLocation = false,
-                        locationSearchResults = emptyList(),
-                        errorMessage = result.value
-                    )
+            try {
+                when (val result = searchLocationsUseCase(query)) {
+                    is Either.Left -> {
+                        _uiState.value = _uiState.value.copy(
+                            isSearchingLocation = false,
+                            locationSearchResults = emptyList(),
+                            errorMessage = result.value
+                        )
+                    }
+                    is Either.Right -> {
+                        _uiState.value = _uiState.value.copy(
+                            isSearchingLocation = false,
+                            locationSearchResults = result.value
+                        )
+                    }
                 }
-                is Either.Right -> {
-                    _uiState.value = _uiState.value.copy(
-                        isSearchingLocation = false,
-                        locationSearchResults = result.value
-                    )
-                }
+            } catch (e: CancellationException) {
+                _uiState.value = _uiState.value.copy(
+                    isSearchingLocation = false,
+                    locationSearchResults = emptyList()
+                )
+                throw e
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSearchingLocation = false,
+                    locationSearchResults = emptyList(),
+                    errorMessage = e.message ?: "Search failed"
+                )
             }
         }
     }

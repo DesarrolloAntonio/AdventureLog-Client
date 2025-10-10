@@ -68,6 +68,7 @@ fun LocationListScreen(
     viewModel: AdventuresViewModel = koinViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val actualSearchQuery by viewModel.actualSearchQuery.collectAsStateWithLifecycle()
     val filters by viewModel.filters.collectAsStateWithLifecycle()
     val showFilters by viewModel.showFilters.collectAsStateWithLifecycle()
     val categoriesState by viewModel.categoriesState.collectAsStateWithLifecycle()
@@ -101,6 +102,7 @@ fun LocationListScreen(
     AdventureListContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
+        actualSearchQuery = actualSearchQuery,
         hasActiveFilters = viewModel.hasActiveFilters(),
         collections = collections,
         isRefreshing = isRefreshing,
@@ -108,6 +110,7 @@ fun LocationListScreen(
         onAdventureClick = onAdventureClick,
         onAddAdventureClick = onAddAdventureClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
+        onSearchSubmit = viewModel::executeSearch,
         onShowFilters = viewModel::showFilters,
         onEditAdventure = onEditAdventure,
         onDeleteAdventure = { adventure -> 
@@ -200,6 +203,7 @@ fun LocationListScreen(
 private fun AdventureListContent(
     pagingItems: LazyPagingItems<Location>,
     searchQuery: String,
+    actualSearchQuery: String,
     hasActiveFilters: Boolean,
     collections: List<UltraSlimCollection>,
     isRefreshing: Boolean,
@@ -207,6 +211,7 @@ private fun AdventureListContent(
     onAdventureClick: (Location) -> Unit,
     onAddAdventureClick: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
+    onSearchSubmit: () -> Unit,
     onShowFilters: () -> Unit,
     onEditAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -228,7 +233,8 @@ private fun AdventureListContent(
                 SimpleSearchBar(
                     searchQuery = searchQuery,
                     onSearchQueryChange = onSearchQueryChange,
-                    onSearchSubmit = { },
+                    onSearchSubmit = onSearchSubmit,
+                    activeSearchQuery = actualSearchQuery,
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(

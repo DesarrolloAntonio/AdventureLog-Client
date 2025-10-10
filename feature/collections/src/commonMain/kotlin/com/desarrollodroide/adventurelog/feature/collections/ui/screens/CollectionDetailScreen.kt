@@ -287,7 +287,8 @@ fun CollectionDetailContent(
                         id = transportation.id,
                         name = transportation.name,
                         type = transportation.type,
-                        imageUrl = transportation.images?.firstOrNull()?.image,
+                        imageUrl = transportation.images?.find { it.isPrimary }?.image 
+                            ?: transportation.images?.firstOrNull()?.image,
                         isNotInItineraryDateRange = isTransportationOutOfRange(
                             transportation = transportation,
                             collectionStartDate = collection.startDate,
@@ -428,7 +429,8 @@ fun CollectionDetailContent(
                         id = transportation.id,
                         name = transportation.name,
                         type = transportation.type,
-                        imageUrl = transportation.images?.firstOrNull()?.image,
+                        imageUrl = transportation.images?.find { it.isPrimary }?.image 
+                            ?: transportation.images?.firstOrNull()?.image,
                         isNotInItineraryDateRange = isTransportationOutOfRange(
                             transportation = transportation,
                             collectionStartDate = collection.startDate,
