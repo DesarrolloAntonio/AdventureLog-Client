@@ -336,6 +336,7 @@ internal class KtorAdventureApi(
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/$adventureId/"
 
+        // TODO: Remove visits=null workaround when backend issue #579 is fixed (visits should not be serialized)
         val updateRequest = UpdateLocationRequest(
             name = name,
             description = description,
@@ -347,7 +348,7 @@ internal class KtorAdventureApi(
             isPublic = isPublic,
             tags = tags,  
             collections = collections,
-            visits = visits.map { it.toVisitRequest() },
+            visits = null,
             category = category?.let { cat ->
                 CategoryRequest(
                     name = cat.name,
