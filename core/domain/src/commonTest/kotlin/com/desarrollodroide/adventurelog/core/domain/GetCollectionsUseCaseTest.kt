@@ -6,6 +6,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.CollectionsRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,25 +19,29 @@ import kotlin.test.assertTrue
 class GetCollectionsUseCaseTest {
 
     private class FakeCollectionsRepository : CollectionsRepository {
-        var getCollectionsResult: Either<ApiResponse, List<Collection>> = Either.Right(emptyList())
+        var getCollectionsResult: Either<ApiResponse, List<UltraSlimCollection>> = Either.Right(emptyList())
         var getCollectionsCallCount = 0
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
         
-        private val _collectionsFlow = MutableStateFlow<List<Collection>>(emptyList())
-        override val collectionsFlow: StateFlow<List<Collection>> = _collectionsFlow
+        private val _collectionsFlow = MutableStateFlow<List<UltraSlimCollection>>(emptyList())
+        override val collectionsFlow: StateFlow<List<UltraSlimCollection>> = _collectionsFlow
 
         override fun getCollectionsPagingData(
             sortField: String?,
             sortDirection: String?
-        ): Flow<PagingData<Collection>> {
+        ): Flow<PagingData<UltraSlimCollection>> {
             return flowOf(PagingData.empty())
         }
 
-        override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<Collection>> {
+        override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<UltraSlimCollection>> {
             getCollectionsCallCount++
             lastPageParam = page
             lastPageSizeParam = pageSize
+            return getCollectionsResult
+        }
+
+        override suspend fun getAllCollections(forceRefresh: Boolean): Either<ApiResponse, List<UltraSlimCollection>> {
             return getCollectionsResult
         }
 
@@ -54,7 +59,7 @@ class GetCollectionsUseCaseTest {
             throw NotImplementedError()
         }
 
-        override suspend fun refreshCollections(): Either<ApiResponse, List<Collection>> {
+        override suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>> {
             return getCollectionsResult
         }
 
@@ -81,8 +86,8 @@ class GetCollectionsUseCaseTest {
     @Test
     fun `invoke returns success when repository returns collections`() = runTest {
         val expectedCollections = listOf(
-            createFakeCollection("1", "Collection 1"),
-            createFakeCollection("2", "Collection 2")
+            createFakeUltraSlimCollection(id = "1", name = "Collection 1"),
+            createFakeUltraSlimCollection(id = "2", name = "Collection 2")
         )
         fakeRepository.getCollectionsResult = Either.Right(expectedCollections)
 
@@ -147,25 +152,20 @@ class GetCollectionsUseCaseTest {
         assertTrue(result.value.isEmpty())
     }
 
-    private fun createFakeCollection(id: String, name: String): Collection {
-        return Collection(
+    private fun createFakeUltraSlimCollection(id: String, name: String): UltraSlimCollection {
+        return UltraSlimCollection(
             id = id,
             name = name,
             description = "Test collection description",
-            userId = "user123",
             isPublic = true,
-            locations = emptyList(),
+            isArchived = false,
             createdAt = "2024-01-01T00:00:00Z",
+            updatedAt = "2024-01-01T00:00:00Z",
             startDate = null,
             endDate = null,
-            transportations = emptyList(),
-            notes = emptyList(),
-            updatedAt = "2024-01-01T00:00:00Z",
-            checklists = emptyList(),
-            isArchived = false,
-            sharedWith = emptyList(),
-            link = "https://test.com/collection/$id",
-            lodging = emptyList()
+            adventureCount = 0,
+            featuredImage = null,
+            link = "https://test.com/collection/$id"
         )
     }
 }

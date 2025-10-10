@@ -21,17 +21,21 @@ class GetCollectionDetailUseCaseTest {
         var getCollectionResult: Either<ApiResponse, Collection> = Either.Right(createFakeCollection())
         var lastCollectionIdParam: String? = null
         
-        private val _collectionsFlow = MutableStateFlow<List<Collection>>(emptyList())
-        override val collectionsFlow: StateFlow<List<Collection>> = _collectionsFlow
+        private val _collectionsFlow = MutableStateFlow<List<com.desarrollodroide.adventurelog.core.model.UltraSlimCollection>>(emptyList())
+        override val collectionsFlow: StateFlow<List<com.desarrollodroide.adventurelog.core.model.UltraSlimCollection>> = _collectionsFlow
 
         override fun getCollectionsPagingData(
             sortField: String?,
             sortDirection: String?
-        ): Flow<PagingData<Collection>> {
+        ): Flow<PagingData<com.desarrollodroide.adventurelog.core.model.UltraSlimCollection>> {
             return flowOf(PagingData.empty())
         }
 
-        override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<Collection>> {
+        override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<com.desarrollodroide.adventurelog.core.model.UltraSlimCollection>> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getAllCollections(forceRefresh: Boolean): Either<ApiResponse, List<com.desarrollodroide.adventurelog.core.model.UltraSlimCollection>> {
             throw NotImplementedError()
         }
 
@@ -50,7 +54,7 @@ class GetCollectionDetailUseCaseTest {
             throw NotImplementedError()
         }
 
-        override suspend fun refreshCollections(): Either<ApiResponse, List<Collection>> {
+        override suspend fun refreshCollections(): Either<ApiResponse, List<com.desarrollodroide.adventurelog.core.model.UltraSlimCollection>> {
             return Either.Right(emptyList())
         }
 

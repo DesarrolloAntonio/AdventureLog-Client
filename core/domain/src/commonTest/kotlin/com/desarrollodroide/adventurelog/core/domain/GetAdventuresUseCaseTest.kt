@@ -99,7 +99,8 @@ class GetAdventuresUseCaseTest {
             longitude: String?,
             isPublic: Boolean,
             tags: List<String>,
-            collections: List<String>
+            collections: List<String>,
+            visits: List<VisitFormData>
         ): Either<ApiResponse, Location> {
             throw NotImplementedError()
         }

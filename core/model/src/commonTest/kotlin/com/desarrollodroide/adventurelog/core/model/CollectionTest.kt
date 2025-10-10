@@ -29,7 +29,7 @@ class CollectionTest : BaseModelTest<Collection>() {
         ).copy(
             startDate = "2024-06-01",
             endDate = "2024-08-31",
-            transportations = listOf("car", "plane"),
+            transportations = emptyList(),
             notes = listOf("Remember sunscreen", "Book hotels early"),
             checklists = listOf("Packing list", "Documents"),
             sharedWith = listOf("user-2", "user-3"),
@@ -44,7 +44,7 @@ class CollectionTest : BaseModelTest<Collection>() {
         assertFalse(collection.isArchived)
         assertEquals(1, collection.locations.size)
         assertEquals("Test Adventure", collection.locations[0].name)
-        assertEquals(2, collection.transportations.size)
+        assertEquals(0, collection.transportations.size)
         assertEquals(2, collection.notes.size)
         assertEquals(2, collection.checklists.size)
         assertEquals(2, collection.sharedWith.size)
@@ -114,7 +114,7 @@ class CollectionTest : BaseModelTest<Collection>() {
             name = "Multi Locations",
             locations = locations
         ).copy(
-            transportations = listOf("car", "bike", "walk"),
+            transportations = emptyList(),
             notes = listOf("Note 1", "Note 2", "Note 3"),
             lodging = listOf("Hotel A", "Hotel B", "Camping")
         )
@@ -122,7 +122,7 @@ class CollectionTest : BaseModelTest<Collection>() {
         assertEquals(5, collection.locations.size)
         assertEquals("Location 0", collection.locations[0].name)
         assertEquals("Location 4", collection.locations[4].name)
-        assertEquals(3, collection.transportations.size)
+        assertEquals(0, collection.transportations.size)
         assertEquals(3, collection.notes.size)
         assertEquals(3, collection.lodging.size)
         assertTrue(collection.locations[0].isVisited)
