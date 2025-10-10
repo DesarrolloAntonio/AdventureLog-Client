@@ -366,7 +366,8 @@ class KtorAdventureLogNetwork(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>
+        collections: List<String>,
+        visits: List<VisitFormData>
     ): LocationDTO {
         ensureInitialized()
         return adventureDataSource.updateAdventure(
@@ -381,7 +382,8 @@ class KtorAdventureLogNetwork(
             longitude = longitude,
             isPublic = isPublic,
             tags = tags,
-            collections = collections
+            collections = collections,
+            visits = visits
         )
     }
     

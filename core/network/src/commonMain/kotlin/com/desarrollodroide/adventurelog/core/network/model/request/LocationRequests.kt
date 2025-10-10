@@ -35,6 +35,7 @@ data class UpdateLocationRequest(
     val link: String,
     val longitude: String? = null,
     val latitude: String? = null,
+    val visits: List<VisitRequest>? = null,
     val category: CategoryRequest? = null,
     val city: Map<String, String> = emptyMap(),
     val country: Map<String, String> = emptyMap(),

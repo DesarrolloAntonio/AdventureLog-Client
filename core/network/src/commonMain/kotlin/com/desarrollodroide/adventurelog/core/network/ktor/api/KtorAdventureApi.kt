@@ -8,6 +8,7 @@ import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdventureRequest
+import com.desarrollodroide.adventurelog.core.network.model.mappers.toVisitRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.UpdateLocationRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
@@ -329,7 +330,8 @@ internal class KtorAdventureApi(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>
+        collections: List<String>,
+        visits: List<VisitFormData>
     ): LocationDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/$adventureId/"
@@ -345,6 +347,7 @@ internal class KtorAdventureApi(
             isPublic = isPublic,
             tags = tags,  
             collections = collections,
+            visits = visits.map { it.toVisitRequest() },
             category = category?.let { cat ->
                 CategoryRequest(
                     name = cat.name,

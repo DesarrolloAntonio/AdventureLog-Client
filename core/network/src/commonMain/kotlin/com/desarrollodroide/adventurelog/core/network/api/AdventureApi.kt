@@ -66,7 +66,8 @@ interface AdventureApi {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList()
+        collections: List<String> = emptyList(),
+        visits: List<VisitFormData> = emptyList()
     ): LocationDTO
     
     /**

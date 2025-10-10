@@ -5,6 +5,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
 class UpdateAdventureUseCase(
     private val adventuresRepository: AdventuresRepository
@@ -21,7 +22,8 @@ class UpdateAdventureUseCase(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList()
+        collections: List<String> = emptyList(),
+        visits: List<VisitFormData> = emptyList()
     ): Either<String, Location> {
         return when (val result = adventuresRepository.updateAdventure(
             adventureId = adventureId,
@@ -35,7 +37,8 @@ class UpdateAdventureUseCase(
             longitude = longitude,
             isPublic = isPublic,
             tags = tags,
-            collections = collections
+            collections = collections,
+            visits = visits
         )) {
             is Either.Left -> {
                 when (result.value) {
