@@ -44,12 +44,42 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.c
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.TagsSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageFormData
+import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageType
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+private data class SplitDateTime(
+    val date: String,
+    val time: String?
+)
+
+private fun splitIsoDateTime(isoString: String?): SplitDateTime {
+    if (isoString.isNullOrBlank()) {
+        return SplitDateTime(date = "", time = null)
+    }
+    
+    return try {
+        if (isoString.contains('T')) {
+            val parts = isoString.split('T')
+            val date = parts[0]
+            val timePart = parts.getOrNull(1)?.substringBefore('+')?.substringBefore('Z') ?: ""
+            val time = if (timePart.isNotEmpty()) {
+                timePart.substring(0, minOf(5, timePart.length))
+            } else null
+            
+            SplitDateTime(date = date, time = time)
+        } else {
+            SplitDateTime(date = isoString, time = null)
+        }
+    } catch (e: Exception) {
+        SplitDateTime(date = isoString, time = null)
+    }
+}
 
 @Composable
 fun AddEditLocationScreen(
@@ -144,24 +174,48 @@ fun AddEditLocationContent(
     var formData by remember(existingLocation) {
         mutableStateOf(
             if (existingLocation != null) {
+                println("DEBUG: Loading existing location: ${existingLocation.name}")
+                println("DEBUG: Number of visits: ${existingLocation.visits.size}")
+                
+                val parsedVisits = existingLocation.visits.mapIndexed { index, visit ->
+                    println("DEBUG: Visit $index - startDate: ${visit.startDate}, endDate: ${visit.endDate}")
+                    
+                    val startDateTime = splitIsoDateTime(visit.startDate)
+                    val endDateTime = splitIsoDateTime(visit.endDate)
+                    
+                    println("DEBUG: Parsed visit $index - startDate: ${startDateTime.date}, startTime: ${startDateTime.time}")
+                    println("DEBUG: Parsed visit $index - endDate: ${endDateTime.date}, endTime: ${endDateTime.time}")
+                    
+                    VisitFormData(
+                        startDate = startDateTime.date,
+                        endDate = endDateTime.date,
+                        startTime = startDateTime.time,
+                        endTime = endDateTime.time,
+                        timezone = visit.timezone ?: "Europe/Madrid",
+                        notes = visit.notes ?: "",
+                        isAllDay = startDateTime.time == null && endDateTime.time == null
+                    )
+                }
+                
+                println("DEBUG: Total parsed visits: ${parsedVisits.size}")
+                
                 LocationFormData(
                     name = existingLocation.name,
-                    description = existingLocation.description?:"",
+                    description = existingLocation.description ?: "",
                     category = existingLocation.category,
                     rating = existingLocation.rating?.toInt() ?: 0,
-                    link = existingLocation.link?:"",
-                    location = existingLocation.location?:"",
+                    link = existingLocation.link ?: "",
+                    location = existingLocation.location ?: "",
                     latitude = existingLocation.latitude,
                     longitude = existingLocation.longitude,
                     isPublic = existingLocation.isPublic,
                     tags = existingLocation.tags,
-                    visits = existingLocation.visits.map { visit ->
-                        VisitFormData(
-                            startDate = visit.startDate?:"",
-                            endDate = visit.endDate,
-                            timezone = visit.timezone?:"",
-                            notes = visit.notes?:"",
-                            isAllDay = true // Default to true since Visit model doesn't have this field
+                    visits = parsedVisits,
+                    images = existingLocation.images.map { contentImage ->
+                        ImageFormData(
+                            uri = contentImage.image,
+                            type = ImageType.URL,
+                            isPrimary = contentImage.isPrimary
                         )
                     }
                 )

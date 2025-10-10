@@ -7,9 +7,14 @@ import androidx.compose.runtime.Composable
 @Composable
 internal fun TimePickerDialog(
     onDismiss: () -> Unit,
-    onConfirm: (Int, Int) -> Unit
+    onConfirm: (Int, Int) -> Unit,
+    initialHour: Int = 0,
+    initialMinute: Int = 0
 ) {
-    val timePickerState = rememberTimePickerState()
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialHour,
+        initialMinute = initialMinute
+    )
     
     AlertDialog(
         onDismissRequest = onDismiss,

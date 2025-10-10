@@ -934,10 +934,10 @@ private fun isTransportationInCollectionDateRange(
             return entStartDate <= colEndDate && entEndDate >= colStartDate
         } else {
             // Compare actual datetimes (simplified comparison)
-            val entStart = parseDateTime(transportationStart)
-            val entEnd = parseDateTime(transportationEnd ?: transportationStart)
-            val colStart = parseDateTime(collectionStartDate)
-            val colEnd = parseDateTime(collectionEndDate)
+            val entStart = parseDateTimeToComparable(transportationStart)
+            val entEnd = parseDateTimeToComparable(transportationEnd ?: transportationStart)
+            val colStart = parseDateTimeToComparable(collectionStartDate)
+            val colEnd = parseDateTimeToComparable(collectionEndDate)
             
             // Check if datetime ranges overlap
             return entStart <= colEnd && entEnd >= colStart
@@ -975,13 +975,8 @@ private fun extractDatePortion(dateString: String): Int {
     }
 }
 
-/**
- * Parses datetime string to comparable value (simplified)
- */
-private fun parseDateTime(dateString: String): Long {
+private fun parseDateTimeToComparable(dateString: String): Long {
     return try {
-        // For simplicity, convert ISO datetime to timestamp-like number
-        // This is a simplified approach - in a real implementation you'd use proper datetime parsing
         val cleanDate = dateString.replace("T", "").replace(":", "").replace("-", "").replace("Z", "")
         cleanDate.toLongOrNull() ?: 0L
     } catch (e: Exception) {

@@ -273,7 +273,17 @@ fun DateSection(
     
     // Date picker dialogs
     if (showStartDatePicker) {
+        val initialDateMillis = if (tempVisitData.startDate.isNotEmpty()) {
+            try {
+                val date = LocalDate.parse(tempVisitData.startDate)
+                date.toEpochDays() * 24 * 60 * 60 * 1000L
+            } catch (e: Exception) {
+                null
+            }
+        } else null
+        
         val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initialDateMillis,
             selectableDates = object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                     // Only allow dates that are on or before the end date
@@ -322,16 +332,31 @@ fun DateSection(
     }
     
     if (showEndDatePicker) {
+        val initialDateMillis = if (!tempVisitData.endDate.isNullOrEmpty()) {
+            try {
+                val date = LocalDate.parse(tempVisitData.endDate!!)
+                date.toEpochDays() * 24 * 60 * 60 * 1000L
+            } catch (e: Exception) {
+                if (tempVisitData.startDate.isNotEmpty()) {
+                    try {
+                        val startDate = LocalDate.parse(tempVisitData.startDate)
+                        startDate.toEpochDays() * 24 * 60 * 60 * 1000L
+                    } catch (e: Exception) {
+                        null
+                    }
+                } else null
+            }
+        } else if (tempVisitData.startDate.isNotEmpty()) {
+            try {
+                val startDate = LocalDate.parse(tempVisitData.startDate)
+                startDate.toEpochDays() * 24 * 60 * 60 * 1000L
+            } catch (e: Exception) {
+                null
+            }
+        } else null
+        
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = if (tempVisitData.startDate.isNotEmpty()) {
-                // Set initial date to start date if available
-                try {
-                    val startDate = LocalDate.parse(tempVisitData.startDate)
-                    startDate.toEpochDays() * 24 * 60 * 60 * 1000L
-                } catch (e: Exception) {
-                    null
-                }
-            } else null,
+            initialSelectedDateMillis = initialDateMillis,
             selectableDates = object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                     // Only allow dates that are on or after the start date
@@ -380,6 +405,17 @@ fun DateSection(
     
     // Time picker dialogs
     if (showStartTimePicker) {
+        val (initialHour, initialMinute) = if (!tempVisitData.startTime.isNullOrEmpty()) {
+            try {
+                val parts = tempVisitData.startTime!!.split(":")
+                parts[0].toInt() to parts[1].toInt()
+            } catch (e: Exception) {
+                0 to 0
+            }
+        } else {
+            0 to 0
+        }
+        
         TimePickerDialog(
             onDismiss = { showStartTimePicker = false },
             onConfirm = { hour, minute ->
@@ -387,11 +423,24 @@ fun DateSection(
                     startTime = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
                 )
                 showStartTimePicker = false
-            }
+            },
+            initialHour = initialHour,
+            initialMinute = initialMinute
         )
     }
     
     if (showEndTimePicker) {
+        val (initialHour, initialMinute) = if (!tempVisitData.endTime.isNullOrEmpty()) {
+            try {
+                val parts = tempVisitData.endTime!!.split(":")
+                parts[0].toInt() to parts[1].toInt()
+            } catch (e: Exception) {
+                0 to 0
+            }
+        } else {
+            0 to 0
+        }
+        
         TimePickerDialog(
             onDismiss = { showEndTimePicker = false },
             onConfirm = { hour, minute ->
@@ -399,7 +448,9 @@ fun DateSection(
                     endTime = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
                 )
                 showEndTimePicker = false
-            }
+            },
+            initialHour = initialHour,
+            initialMinute = initialMinute
         )
     }
 }
