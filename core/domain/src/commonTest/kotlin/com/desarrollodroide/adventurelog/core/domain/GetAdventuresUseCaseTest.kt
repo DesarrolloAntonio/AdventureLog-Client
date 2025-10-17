@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain
 import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
@@ -20,20 +20,20 @@ import kotlin.test.assertTrue
 
 class GetAdventuresUseCaseTest {
 
-    private class FakeAdventuresRepository : AdventuresRepository {
+    private class FakeAdventuresRepository : LocationsRepository {
         var getAdventuresResult: Either<ApiResponse, List<Location>> = Either.Right(emptyList())
         var getAdventuresCallCount = 0
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
 
         private val _adventuresFlow = MutableStateFlow<List<Location>>(emptyList())
-        override val adventuresFlow: StateFlow<List<Location>> = _adventuresFlow
+        override val locationsFlow: StateFlow<List<Location>> = _adventuresFlow
 
         override fun getAdventuresPagingData(): Flow<PagingData<Location>> {
             return flowOf(PagingData.empty())
         }
 
-        override fun getAdventuresPagingDataFiltered(
+        override fun getLocationsPagingDataFiltered(
             categoryNames: List<String>?,
             sortBy: String?,
             sortOrder: String?,
@@ -44,22 +44,22 @@ class GetAdventuresUseCaseTest {
             return flowOf(PagingData.empty())
         }
 
-        override suspend fun getAllAdventures(): Either<ApiResponse, List<Location>> {
+        override suspend fun getAllLocations(): Either<ApiResponse, List<Location>> {
             return getAdventuresResult
         }
 
-        override suspend fun getAdventures(page: Int, pageSize: Int): Either<ApiResponse, List<Location>> {
+        override suspend fun getLocations(page: Int, pageSize: Int): Either<ApiResponse, List<Location>> {
             getAdventuresCallCount++
             lastPageParam = page
             lastPageSizeParam = pageSize
             return getAdventuresResult
         }
 
-        override suspend fun getAdventure(objectId: String): Either<ApiResponse, Location> {
+        override suspend fun getLocation(objectId: String): Either<ApiResponse, Location> {
             throw NotImplementedError()
         }
 
-        override suspend fun createAdventure(
+        override suspend fun createLocation(
             name: String,
             description: String,
             category: Category,
@@ -75,7 +75,7 @@ class GetAdventuresUseCaseTest {
             throw NotImplementedError()
         }
 
-        override suspend fun refreshAdventures(): Either<ApiResponse, List<Location>> {
+        override suspend fun refreshLocations(): Either<ApiResponse, List<Location>> {
             return getAdventuresResult
         }
 
@@ -83,11 +83,11 @@ class GetAdventuresUseCaseTest {
             return Either.Right("Generated description for $name")
         }
 
-        override suspend fun deleteAdventure(adventureId: String): Either<ApiResponse, Unit> {
+        override suspend fun deleteLocation(adventureId: String): Either<ApiResponse, Unit> {
             throw NotImplementedError()
         }
 
-        override suspend fun updateAdventure(
+        override suspend fun updateLocation(
             adventureId: String,
             name: String,
             description: String,

@@ -2,10 +2,10 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 
 class GenerateDescriptionUseCase(
-    private val adventuresRepository: AdventuresRepository
+    private val adventuresRepository: LocationsRepository
 ) {
     suspend operator fun invoke(name: String): Either<String, String> {
         return when (val result = adventuresRepository.generateDescription(name)) {

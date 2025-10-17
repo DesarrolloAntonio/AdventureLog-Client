@@ -45,7 +45,7 @@ include(":core:network")
 include(":core:permissions")
 
 include(":feature:login")
-include(":feature:adventures")
+include(":feature:locations")
 include(":feature:collections")
 include(":feature:home")
 include(":feature:settings")

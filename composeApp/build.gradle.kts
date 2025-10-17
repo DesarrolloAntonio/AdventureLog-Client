@@ -56,7 +56,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.feature.login)
             implementation(projects.feature.home)
-            implementation(projects.feature.adventures)
+            implementation(projects.feature.locations)
             implementation(projects.feature.settings)
             implementation(projects.feature.detail)
             implementation(projects.feature.ui)
@@ -64,6 +64,7 @@ kotlin {
             implementation(projects.feature.world)
             implementation(projects.feature.map)
             implementation(projects.core.model)
+            implementation(projects.core.data)
 
             implementation(compose.material3)
             implementation(compose.components.resources)

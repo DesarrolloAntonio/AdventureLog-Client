@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
 import com.desarrollodroide.adventurelog.feature.map.ui.state.MapUiState
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MapViewModel(
-    private val getAllAdventuresForMapUseCase: GetAllAdventuresUseCase,
+    private val getAllLocationsUseCase: GetAllLocationsUseCase,
     private val observeUserStatsUseCase: ObserveUserStatsUseCase,
     private val getVisitedRegionsUseCase: GetVisitedRegionsUseCase,
     private val userRepository: UserRepository
@@ -88,7 +88,7 @@ class MapViewModel(
             
             logger.d { "📍 Loading all adventures for map..." }
             
-            when (val result = getAllAdventuresForMapUseCase()) {
+            when (val result = getAllLocationsUseCase()) {
                 is Either.Left -> {
                     logger.e { "❌ Error loading adventures: ${result.value}" }
                     _uiState.update { 

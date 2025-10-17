@@ -22,11 +22,11 @@ val collectionsModule = module {
     viewModel {
         CollectionDetailViewModel(
             getCollectionDetailUseCase = get(),
-            deleteAdventureUseCase = get(),
             deleteTransportationUseCase = get(),
-            updateAdventureCollectionsUseCase = get(),
             observeCollectionsUseCase = get(),
-            getAllCollectionsUseCase = get()
+            deleteLocationUseCase = get(),
+            updateLocationCollectionsUseCase = get(),
+            getAllCollectionsUseCase = get(),
         )
     }
 

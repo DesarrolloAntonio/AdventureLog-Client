@@ -2,13 +2,13 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 
 class DeleteAdventureUseCase(
-    private val adventuresRepository: AdventuresRepository
+    private val adventuresRepository: LocationsRepository
 ) {
     suspend operator fun invoke(adventureId: String): Either<String, Unit> {
-        return when (val result = adventuresRepository.deleteAdventure(adventureId)) {
+        return when (val result = adventuresRepository.deleteLocation(adventureId)) {
             is Either.Left -> {
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")

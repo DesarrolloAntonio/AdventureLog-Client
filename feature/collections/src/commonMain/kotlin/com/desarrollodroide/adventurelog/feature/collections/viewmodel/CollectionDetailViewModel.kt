@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteTransportationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
@@ -42,9 +44,9 @@ sealed class UpdateCollectionsState {
 
 class CollectionDetailViewModel(
     private val getCollectionDetailUseCase: GetCollectionDetailUseCase,
-    private val deleteAdventureUseCase: DeleteAdventureUseCase,
+    private val deleteLocationUseCase: DeleteLocationUseCase,  // cambiar aquí
     private val deleteTransportationUseCase: DeleteTransportationUseCase,
-    private val updateAdventureCollectionsUseCase: UpdateAdventureCollectionsUseCase,
+    private val updateLocationCollectionsUseCase: UpdateLocationCollectionsUseCase,  // cambiar aquí
     private val observeCollectionsUseCase: ObserveCollectionsUseCase,
     private val getAllCollectionsUseCase: GetAllCollectionsUseCase
 ) : ViewModel() {
@@ -114,7 +116,7 @@ class CollectionDetailViewModel(
         viewModelScope.launch {
             _deleteState.update { DeleteState.Loading }
             
-            when (val result = deleteAdventureUseCase(adventureId)) {
+            when (val result = deleteLocationUseCase(adventureId)) {
                 is Either.Left -> {
                     _deleteState.update { DeleteState.Error(result.value) }
                 }
@@ -150,7 +152,7 @@ class CollectionDetailViewModel(
         viewModelScope.launch {
             _updateCollectionsState.update { UpdateCollectionsState.Loading }
             
-            when (val result = updateAdventureCollectionsUseCase(adventureId, collectionIds)) {
+            when (val result = updateLocationCollectionsUseCase(adventureId, collectionIds)) {
                 is Either.Left -> {
                     _updateCollectionsState.update { UpdateCollectionsState.Error(result.value) }
                 }

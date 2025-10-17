@@ -2,18 +2,18 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.model.Location
 
 class UpdateAdventureCollectionsUseCase(
-    private val adventuresRepository: AdventuresRepository
+    private val adventuresRepository: LocationsRepository
 ) {
     suspend operator fun invoke(
         adventureId: String,
         collectionIds: List<String>
     ): Either<String, Location> {
         // Get the current adventure
-        return when (val adventureResult = adventuresRepository.getAdventure(adventureId)) {
+        return when (val adventureResult = adventuresRepository.getLocation(adventureId)) {
             is Either.Left -> {
                 val errorMessage = when (adventureResult.value) {
                     is ApiResponse.IOException -> "Network error"
@@ -26,7 +26,7 @@ class UpdateAdventureCollectionsUseCase(
                 val adventure = adventureResult.value
                 
                 // Update only the collections, keeping everything else the same
-                val updateResult = adventuresRepository.updateAdventure(
+                val updateResult = adventuresRepository.updateLocation(
                     adventureId = adventureId,
                     name = adventure.name,
                     description = adventure.description ?: "",

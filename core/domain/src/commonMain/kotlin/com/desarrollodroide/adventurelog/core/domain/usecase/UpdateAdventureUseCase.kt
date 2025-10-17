@@ -2,13 +2,13 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
 class UpdateAdventureUseCase(
-    private val adventuresRepository: AdventuresRepository
+    private val adventuresRepository: LocationsRepository
 ) {
     suspend operator fun invoke(
         adventureId: String,
@@ -25,7 +25,7 @@ class UpdateAdventureUseCase(
         collections: List<String> = emptyList(),
         visits: List<VisitFormData> = emptyList()
     ): Either<String, Location> {
-        return when (val result = adventuresRepository.updateAdventure(
+        return when (val result = adventuresRepository.updateLocation(
             adventureId = adventureId,
             name = name,
             description = description,

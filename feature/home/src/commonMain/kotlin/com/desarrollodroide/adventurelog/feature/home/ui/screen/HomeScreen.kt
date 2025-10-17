@@ -35,8 +35,8 @@ import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeD
 import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
-import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.locationsScreen
-import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.LocationsNavigator
+import com.desarrollodroide.adventurelog.feature.locations.ui.navigation.locationsScreen
+import com.desarrollodroide.adventurelog.feature.locations.ui.navigation.LocationsNavigator
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.CollectionsNavigator
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.transportationsScreen

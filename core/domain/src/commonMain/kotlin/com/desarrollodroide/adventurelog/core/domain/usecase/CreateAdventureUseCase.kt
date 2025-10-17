@@ -2,13 +2,13 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
 class CreateAdventureUseCase(
-    private val adventuresRepository: AdventuresRepository
+    private val adventuresRepository: LocationsRepository
 ) {
     suspend operator fun invoke(
         name: String,
@@ -29,7 +29,7 @@ class CreateAdventureUseCase(
         }
         
         // Create the adventure
-        return when (val result = adventuresRepository.createAdventure(
+        return when (val result = adventuresRepository.createLocation(
             name = name,
             description = description,
             category = category,

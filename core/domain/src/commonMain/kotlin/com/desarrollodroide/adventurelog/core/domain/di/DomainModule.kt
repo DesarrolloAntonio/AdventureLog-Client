@@ -3,10 +3,10 @@ package com.desarrollodroide.adventurelog.core.domain.di
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresPagingUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
@@ -16,10 +16,10 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUs
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.CreateAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCollectionUseCase
@@ -44,10 +44,10 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteTransportatio
 
 val domainModule = module {
     factoryOf(::LoginUseCase)
-    factoryOf(::GetAdventuresUseCase)
-    factoryOf(::GetAdventureUseCase)
-    factoryOf(::GetAdventuresPagingUseCase)
-    factoryOf(::GetAllAdventuresUseCase)
+    factoryOf(::GetLocationsUseCase)
+    factoryOf(::GetLocationUseCase)
+    factoryOf(::GetLocationsPagingUseCase)
+    factoryOf(::GetAllLocationsUseCase)
     factoryOf(::GetCollectionsUseCase)
     factoryOf(::GetAllCollectionsUseCase)
     factoryOf(::GetCollectionsPagingUseCase)
@@ -57,10 +57,10 @@ val domainModule = module {
     factoryOf(::SaveSessionUseCase)
     factoryOf(::LogoutUseCase)
     factoryOf(::RememberMeCredentialsUseCase)
-    factoryOf(::CreateAdventureUseCase)
-    factoryOf(::UpdateAdventureUseCase)
-    factoryOf(::UpdateAdventureCollectionsUseCase)
-    factoryOf(::DeleteAdventureUseCase)
+    factoryOf(::CreateLocationUseCase)
+    factoryOf(::UpdateLocationUseCase)
+    factoryOf(::UpdateLocationCollectionsUseCase)
+    factoryOf(::DeleteLocationUseCase)
     factoryOf(::CreateCollectionUseCase)
     factoryOf(::UpdateCollectionUseCase)
     factoryOf(::DeleteCollectionUseCase)

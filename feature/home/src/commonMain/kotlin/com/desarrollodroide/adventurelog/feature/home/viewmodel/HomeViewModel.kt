@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.UserDetails
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val getAdventuresUseCase: GetAdventuresUseCase,
+    private val getLocationsUseCase: GetLocationsUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val userRepository: UserRepository,
     private val getUserStatsUseCase: GetUserStatsUseCase
@@ -74,7 +74,7 @@ class HomeViewModel(
                 _uiState.update { HomeUiState.Loading }
 
                 // Load only 5 adventures for home screen
-                when (val result = getAdventuresUseCase(
+                when (val result = getLocationsUseCase(
                     page = 1,
                     pageSize = 5  // Only load what we need to show
                 )) {

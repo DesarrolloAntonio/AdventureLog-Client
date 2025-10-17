@@ -6,7 +6,7 @@ import org.koin.dsl.module
 
 val mapModule = module {
     viewModel { MapViewModel(
-        getAllAdventuresForMapUseCase = get(),
+        getAllLocationsUseCase = get(),
         observeUserStatsUseCase = get(),
         getVisitedRegionsUseCase = get(),
         userRepository = get())

@@ -4,7 +4,8 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.network.CacheStrategy
 import coil3.network.NetworkFetcher
 import coil3.network.ktor3.asNetworkClient
-import com.desarrollodroide.adventurelog.feature.adventures.di.locationsModule
+import com.desarrollodroide.adventurelog.core.data.di.dataModule
+import com.desarrollodroide.adventurelog.feature.locations.di.locationsModule
 import com.desarrollodroide.adventurelog.feature.collections.di.collectionsModule
 import com.desarrollodroide.adventurelog.feature.detail.di.detailModule
 import com.desarrollodroide.adventurelog.feature.home.di.homeModule
@@ -21,6 +22,7 @@ import org.koin.dsl.module
 val appModule = module {
     // Include all feature modules explicitly
     includes(
+        dataModule,
         loginModule,
         homeModule,
         locationsModule,

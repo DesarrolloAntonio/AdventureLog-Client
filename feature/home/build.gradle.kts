@@ -10,7 +10,7 @@ kotlin {
             implementation(projects.core.model)
             api(projects.core.domain)
             implementation(projects.feature.settings)
-            implementation(projects.feature.adventures)
+            implementation(projects.feature.locations)
             implementation(projects.feature.ui)
             implementation(projects.feature.collections)
             implementation(projects.feature.world)
