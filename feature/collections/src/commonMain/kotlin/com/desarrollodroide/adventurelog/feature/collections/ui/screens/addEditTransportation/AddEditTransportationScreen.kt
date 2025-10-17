@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation
+package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +14,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,14 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.Transportation
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.components.BasicInfoTransportationSection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.components.DateTransportationSection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.components.LocationTransportationSection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.data.TransportationFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.components.TransportationImagesSection
-import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditTransportationViewModel
-import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.components.BasicInfoTransportationSection
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.components.DateTransportationSection
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.components.LocationTransportationSection
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportationFormData
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditTransportationViewModel
+import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResult
+import com.desarrollodroide.adventurelog.feature.ui.components.ImagesSection
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -114,11 +114,11 @@ fun AddEditTransportationContent(
     onSave: (TransportationFormData) -> Unit,
     onGenerateDescription: (name: String, onDescriptionGenerated: (String) -> Unit) -> Unit,
     isGeneratingDescription: Boolean,
-    locationSearchResults: List<com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult> = emptyList(),
+    locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     isSearchingLocation: Boolean = false,
     onSearchLocation: (String) -> Unit = {},
     onClearLocationSearch: () -> Unit = {},
-    wikipediaImageState: WikipediaImageState = WikipediaImageState.Idle,
+    wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -177,9 +177,11 @@ fun AddEditTransportationContent(
             onClearLocationSearch = onClearLocationSearch
         )
 
-        TransportationImagesSection(
-            formData = formData,
-            onFormDataChange = { formData = it },
+        ImagesSection(
+            images = formData.images,
+            onImagesChange = { updatedImages ->
+                formData = formData.copy(images = updatedImages)
+            },
             wikipediaImageState = wikipediaImageState,
             onSearchWikipediaImage = onSearchWikipediaImage,
             onResetWikipediaState = onResetWikipediaState

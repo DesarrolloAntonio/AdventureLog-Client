@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.viewmodel
+package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,8 +12,8 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImag
 import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResult
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.Transportation
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.data.TransportationFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageType
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportationFormData
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +29,7 @@ data class AddEditTransportationUiState(
     val isGeneratingDescription: Boolean = false,
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
-    val wikipediaImageState: WikipediaImageState = WikipediaImageState.Idle
+    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading
 )
 
 class AddEditTransportationViewModel(
@@ -234,12 +234,7 @@ class AddEditTransportationViewModel(
         viewModelScope.launch {
             searchWikipediaImageUseCase(query).collectLatest { result ->
                 _uiState.value = _uiState.value.copy(
-                    wikipediaImageState = when (result) {
-                        is WikipediaImageResult.Loading -> WikipediaImageState.Searching
-                        is WikipediaImageResult.Success -> WikipediaImageState.Success(result.imageUrl)
-                        is WikipediaImageResult.NotFound -> WikipediaImageState.NotFound
-                        is WikipediaImageResult.Error -> WikipediaImageState.Error(result.message)
-                    }
+                    wikipediaImageState = result
                 )
             }
         }
@@ -247,7 +242,7 @@ class AddEditTransportationViewModel(
     
     fun resetWikipediaImageState() {
         _uiState.value = _uiState.value.copy(
-            wikipediaImageState = WikipediaImageState.Idle
+            wikipediaImageState = WikipediaImageResult.Loading
         )
     }
     
