@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.data.LoginRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.LoginRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import kotlinx.coroutines.test.runTest
