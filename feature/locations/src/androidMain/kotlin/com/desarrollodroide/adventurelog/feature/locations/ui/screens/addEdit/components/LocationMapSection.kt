@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components
+package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable

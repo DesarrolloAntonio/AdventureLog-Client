@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.components.categories
+package com.desarrollodroide.adventurelog.feature.locations.ui.components.categories
 
 import android.view.ContextThemeWrapper
 import android.view.MotionEvent
@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.emoji2.emojipicker.EmojiPickerView
-import com.desarrollodroide.adventurelog.feature.adventures.R
+import com.desarrollodroide.adventurelog.feature.locations.R
 
 @Composable
 actual fun EmojiPicker(
