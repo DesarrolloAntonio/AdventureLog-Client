@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.feature.home.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.data.UserRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
