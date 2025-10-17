@@ -39,6 +39,8 @@ import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.locati
 import com.desarrollodroide.adventurelog.feature.adventures.ui.navigation.LocationsNavigator
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.CollectionsNavigator
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.transportationsScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.TransportationsNavigator
 import com.desarrollodroide.adventurelog.feature.map.navigation.mapScreen
 import com.desarrollodroide.adventurelog.feature.settings.navigation.settingsScreen
 import com.desarrollodroide.adventurelog.feature.world.navigation.worldGraph
@@ -414,15 +416,22 @@ fun HomeScreenContent(
                                     collectionId: String,
                                     collectionName: String
                                 ) {
-                                    navController.navigate("collection/$collectionId/$collectionName")
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.createDetailRoute(
+                                            collectionId = collectionId,
+                                            collectionName = collectionName
+                                        )
+                                    )
                                 }
 
                                 override fun navigateToAddCollection() {
-                                    navController.navigate("add_collection")
+                                    navController.navigate(NavigationRoutes.Collections.add)
                                 }
 
                                 override fun navigateToEditCollection(collectionId: String) {
-                                    navController.navigate("edit_collection/$collectionId")
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.createEditRoute(collectionId)
+                                    )
                                 }
 
                                 override fun navigateToAdventure(location: Location) {
@@ -430,7 +439,10 @@ fun HomeScreenContent(
                                 }
 
                                 override fun navigateToEditAdventure(adventure: Location) {
-                                    val adventureJson = json.encodeToString(adventure)
+                                    val adventureJson = json.encodeToString(
+                                        serializer = Location.serializer(),
+                                        value = adventure
+                                    )
                                     navController.navigate(
                                         NavigationRoutes.Locations.createEditRoute(
                                             adventureId = adventure.id,
@@ -439,8 +451,45 @@ fun HomeScreenContent(
                                     )
                                 }
 
+                                override fun navigateToEditTransportation(
+                                    transportationId: String,
+                                    transportationJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createEditRoute(
+                                            transportationId = transportationId,
+                                            transportationJson = transportationJson
+                                        )
+                                    )
+                                }
+
                                 override fun navigateToHome() {
                                     navigateToHome()
+                                }
+
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
+                        )
+
+                        // Transportations screen with navigator
+                        transportationsScreen(
+                            navigator = object : TransportationsNavigator {
+                                override fun navigateToAddTransportation() {
+                                    navController.navigate(NavigationRoutes.Collections.Transportations.add)
+                                }
+
+                                override fun navigateToEditTransportation(
+                                    transportationId: String,
+                                    transportationJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createEditRoute(
+                                            transportationId = transportationId,
+                                            transportationJson = transportationJson
+                                        )
+                                    )
                                 }
 
                                 override fun navigateBack() {
