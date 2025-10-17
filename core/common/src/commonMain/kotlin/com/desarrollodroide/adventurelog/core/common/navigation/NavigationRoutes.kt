@@ -22,16 +22,32 @@ object NavigationRoutes {
         }
     }
 
-    object Settings {
-        const val route = "settings"
-    }
-
     object Collections {
         const val route = "collections"
+        const val add = "add_collection"
+        const val editRoute = "edit_collection/{collectionId}"
+        const val detailRoute = "collection/{collectionId}/{collectionName}"
         
-        fun createCollectionDetailRoute(collectionId: String): String {
-            return "collection/$collectionId"
+        fun createEditRoute(collectionId: String): String {
+            return "edit_collection/$collectionId"
         }
+        
+        fun createDetailRoute(collectionId: String, collectionName: String): String {
+            return "collection/$collectionId/$collectionName"
+        }
+        
+        object Transportations {
+            const val add = "transportations/add"
+            const val editRoute = "transportations/edit?transportationId={transportationId}&transportationJson={transportationJson}"
+            
+            fun createEditRoute(transportationId: String, transportationJson: String): String {
+                return "transportations/edit?transportationId=$transportationId&transportationJson=$transportationJson"
+            }
+        }
+    }
+
+    object Settings {
+        const val route = "settings"
     }
 
     object Travel {
