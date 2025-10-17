@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.
 
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 
 data class LocationFormData(
     val name: String = "",
@@ -17,15 +18,3 @@ data class LocationFormData(
     val visits: List<VisitFormData> = emptyList(),
     val images: List<ImageFormData> = emptyList()
 )
-
-data class ImageFormData(
-    val uri: String,
-    val type: ImageType,
-    val isPrimary: Boolean = false
-)
-
-enum class ImageType {
-    LOCAL_FILE,
-    URL,
-    WIKIPEDIA
-}

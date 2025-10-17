@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.CompactPrimaryButton
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 
 @Composable
 fun LocationSection(
@@ -43,7 +45,7 @@ fun LocationSection(
             onClearLocationSearch()
         }
     }
-    
+
     SectionCard(
         title = "Location Information",
         icon = Icons.Outlined.LocationOn,
@@ -56,14 +58,14 @@ fun LocationSection(
             // Location display field
             StyledTextField(
                 value = formData.location,
-                onValueChange = { 
+                onValueChange = {
                     onFormDataChange(formData.copy(location = it))
                 },
                 label = "Location",
                 icon = Icons.Default.LocationOn,
                 singleLine = true
             )
-            
+
             // Search field
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -73,7 +75,7 @@ fun LocationSection(
                 Box(modifier = Modifier.weight(1f)) {
                     StyledTextField(
                         value = searchQuery,
-                        onValueChange = { 
+                        onValueChange = {
                             searchQuery = it
                             // Debounced search is handled by LaunchedEffect
                         },
@@ -82,7 +84,7 @@ fun LocationSection(
                         singleLine = true
                     )
                 }
-                
+
                 if (searchQuery.isNotEmpty()) {
                     if (isSearchingLocation) {
                         CircularProgressIndicator(
@@ -103,7 +105,7 @@ fun LocationSection(
                     }
                 }
             }
-            
+
             // Search results
             if (showSearchResults && locationSearchResults.isNotEmpty()) {
                 Card(
@@ -123,7 +125,7 @@ fun LocationSection(
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
-                        
+
                         locationSearchResults.forEach { result ->
                             Card(
                                 onClick = {
@@ -162,7 +164,7 @@ fun LocationSection(
                     }
                 }
             }
-            
+
             // Map
             Card(
                 modifier = Modifier
@@ -189,7 +191,7 @@ fun LocationSection(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            
+
             // Coordinates info (optional display)
             if (formData.latitude != null && formData.longitude != null) {
                 Card(
@@ -236,14 +238,16 @@ fun LocationSection(
                                 )
                             }
                         }
-                        
+
                         IconButton(
                             onClick = {
-                                onFormDataChange(formData.copy(
-                                    location = "",
-                                    latitude = null,
-                                    longitude = null
-                                ))
+                                onFormDataChange(
+                                    formData.copy(
+                                        location = "",
+                                        latitude = null,
+                                        longitude = null
+                                    )
+                                )
                                 searchQuery = ""
                                 showSearchResults = false
                                 onClearLocationSearch()

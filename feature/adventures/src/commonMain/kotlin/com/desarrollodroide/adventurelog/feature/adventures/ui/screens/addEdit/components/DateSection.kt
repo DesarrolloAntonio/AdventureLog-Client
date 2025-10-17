@@ -15,9 +15,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.date.*
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.date.DateTimeField
+import com.desarrollodroide.adventurelog.feature.ui.components.date.TimePickerDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.date.TimezoneDropdown
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -40,7 +43,7 @@ fun DateSection(
             timezone = TimeZone.currentSystemDefault().id
         )
     ) }
-    
+
     SectionCard(
         title = "Date information",
         icon = Icons.Outlined.CalendarToday,
@@ -68,7 +71,7 @@ fun DateSection(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
-                    
+
                     // Timezone dropdown
                     TimezoneDropdown(
                         selectedTimezone = tempVisitData.timezone,
@@ -76,7 +79,7 @@ fun DateSection(
                             tempVisitData = tempVisitData.copy(timezone = timezone)
                         }
                     )
-                    
+
                     // All day switch
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -112,7 +115,7 @@ fun DateSection(
                     }
                 }
             }
-            
+
             // Start date
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -121,7 +124,7 @@ fun DateSection(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
+
                 DateTimeField(
                     date = tempVisitData.startDate,
                     time = if (tempVisitData.isAllDay) null else tempVisitData.startTime,
@@ -130,7 +133,7 @@ fun DateSection(
                     onTimeClick = { showStartTimePicker = true }
                 )
             }
-            
+
             // End date
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -139,7 +142,7 @@ fun DateSection(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
+
                 DateTimeField(
                     date = tempVisitData.endDate ?: tempVisitData.startDate,
                     time = if (tempVisitData.isAllDay) null else tempVisitData.endTime,
@@ -148,7 +151,7 @@ fun DateSection(
                     onTimeClick = { showEndTimePicker = true }
                 )
             }
-            
+
             // Add notes - using the same style as DescriptionSection
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
@@ -169,17 +172,17 @@ fun DateSection(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 OutlinedTextField(
                     value = tempVisitData.notes,
                     onValueChange = { notes ->
                         tempVisitData = tempVisitData.copy(notes = notes)
                     },
-                    placeholder = { 
+                    placeholder = {
                         Text(
                             text = "Add notes about this visit",
                             color = Color.Gray
-                        ) 
+                        )
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -190,17 +193,19 @@ fun DateSection(
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                            alpha = 0.3f
+                        ),
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Transparent
                     )
                 )
             }
-            
+
             // Add/Update button
-            val isFormValid = tempVisitData.startDate.isNotEmpty() && 
-                (tempVisitData.isAllDay || (!tempVisitData.startTime.isNullOrEmpty() && !tempVisitData.endTime.isNullOrEmpty()))
-            
+            val isFormValid = tempVisitData.startDate.isNotEmpty() &&
+                    (tempVisitData.isAllDay || (!tempVisitData.startTime.isNullOrEmpty() && !tempVisitData.endTime.isNullOrEmpty()))
+
             PrimaryButton(
                 onClick = {
                     if (isFormValid) {
@@ -212,7 +217,7 @@ fun DateSection(
                             formData.visits + tempVisitData
                         }
                         onFormDataChange(formData.copy(visits = updatedVisits))
-                        
+
                         // Reset form
                         tempVisitData = VisitFormData(
                             timezone = TimeZone.currentSystemDefault().id
@@ -223,7 +228,7 @@ fun DateSection(
                 text = if (editingVisitIndex != null) "Update" else "Add",
                 enabled = isFormValid
             )
-            
+
             // Visits section
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -242,7 +247,7 @@ fun DateSection(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
-                    
+
                     if (formData.visits.isEmpty()) {
                         Text(
                             text = "No visits added yet",
@@ -415,12 +420,14 @@ fun DateSection(
         } else {
             0 to 0
         }
-        
+
         TimePickerDialog(
             onDismiss = { showStartTimePicker = false },
             onConfirm = { hour, minute ->
                 tempVisitData = tempVisitData.copy(
-                    startTime = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                    startTime = "${hour.toString().padStart(2, '0')}:${
+                        minute.toString().padStart(2, '0')
+                    }"
                 )
                 showStartTimePicker = false
             },
@@ -440,12 +447,14 @@ fun DateSection(
         } else {
             0 to 0
         }
-        
+
         TimePickerDialog(
             onDismiss = { showEndTimePicker = false },
             onConfirm = { hour, minute ->
                 tempVisitData = tempVisitData.copy(
-                    endTime = "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+                    endTime = "${hour.toString().padStart(2, '0')}:${
+                        minute.toString().padStart(2, '0')
+                    }"
                 )
                 showEndTimePicker = false
             },

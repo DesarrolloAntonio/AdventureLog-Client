@@ -30,6 +30,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import com.desarrollodroide.adventurelog.feature.ui.components.TagChip
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -40,7 +42,7 @@ fun TagsSection(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var tagInput by remember { mutableStateOf("") }
-    
+
     SectionCard(
         title = "Tags (${formData.tags.size})",
         icon = Icons.Outlined.Tag,
@@ -69,7 +71,7 @@ fun TagsSection(
                         )
                     )
                 }
-                
+
                 IconButton(
                     onClick = {
                         if (tagInput.isNotBlank()) {
@@ -87,9 +89,9 @@ fun TagsSection(
                         .size(48.dp)
                         .clip(CircleShape)
                         .background(
-                            if (tagInput.isNotBlank()) 
-                                MaterialTheme.colorScheme.primary 
-                            else 
+                            if (tagInput.isNotBlank())
+                                MaterialTheme.colorScheme.primary
+                            else
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                         )
                 ) {
@@ -101,7 +103,7 @@ fun TagsSection(
                     )
                 }
             }
-            
+
             // Display existing tags
             if (formData.tags.isNotEmpty()) {
                 FlowRow(
