@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.data.GeocodeRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.GeocodeRepository
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 
 class ReverseGeocodeUseCase(

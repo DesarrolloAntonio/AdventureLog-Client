@@ -6,6 +6,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core.common)
+            api(projects.core.domain)
             implementation(projects.core.model)
             api(projects.core.network)
             implementation("com.russhwolf:multiplatform-settings:1.3.0")

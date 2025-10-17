@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.WikipediaRepository
 import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaNetworkDataSource
 
 class WikipediaRepositoryImpl(

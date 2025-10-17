@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.core.domain.usecase
 
-import com.desarrollodroide.adventurelog.core.data.WikipediaRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.WikipediaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

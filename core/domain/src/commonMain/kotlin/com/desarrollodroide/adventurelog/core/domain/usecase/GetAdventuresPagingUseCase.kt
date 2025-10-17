@@ -1,7 +1,7 @@
 package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import app.cash.paging.PagingData
-import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Location
 import kotlinx.coroutines.flow.Flow
 

@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
-import com.desarrollodroide.adventurelog.core.data.SettingsRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.SettingsRepository
 import org.koin.compose.koinInject
 
 private val lightScheme = lightColorScheme(

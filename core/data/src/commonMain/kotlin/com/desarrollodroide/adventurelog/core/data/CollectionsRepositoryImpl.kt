@@ -6,6 +6,7 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.paging.CollectionsPagingSource
+import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepository
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.toUltraSlimCollection

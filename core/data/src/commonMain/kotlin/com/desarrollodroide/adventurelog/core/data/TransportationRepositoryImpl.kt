@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.core.data
 
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.repository.TransportationRepository
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 

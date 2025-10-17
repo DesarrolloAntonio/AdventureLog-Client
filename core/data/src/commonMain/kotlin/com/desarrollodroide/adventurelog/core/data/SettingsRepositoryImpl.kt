@@ -1,14 +1,13 @@
 package com.desarrollodroide.adventurelog.core.data
 
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
+import com.desarrollodroide.adventurelog.core.domain.repository.SettingsRepository
 import com.desarrollodroide.adventurelog.core.model.LoginCredentials
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 /**

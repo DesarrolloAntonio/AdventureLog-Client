@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.core.domain.usecase
 
-import com.desarrollodroide.adventurelog.core.data.UserRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.model.Account
 import kotlinx.coroutines.flow.Flow
 

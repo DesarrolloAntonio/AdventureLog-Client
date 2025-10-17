@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.core.data
+package com.desarrollodroide.adventurelog.core.domain.repository
 
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Transportation

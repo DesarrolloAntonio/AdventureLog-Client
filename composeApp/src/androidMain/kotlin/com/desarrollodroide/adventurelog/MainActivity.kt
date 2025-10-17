@@ -14,7 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
-import com.desarrollodroide.adventurelog.core.data.SettingsRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.SettingsRepository
 import com.desarrollodroide.adventurelog.theme.AppTheme
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

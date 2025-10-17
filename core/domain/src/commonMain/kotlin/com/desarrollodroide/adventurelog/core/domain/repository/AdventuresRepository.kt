@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.core.data
+package com.desarrollodroide.adventurelog.core.domain.repository
 
 import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse

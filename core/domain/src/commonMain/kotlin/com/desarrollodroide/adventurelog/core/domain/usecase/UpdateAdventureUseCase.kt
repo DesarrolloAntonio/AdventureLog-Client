@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.data.AdventuresRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.AdventuresRepository
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
