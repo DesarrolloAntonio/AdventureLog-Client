@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.data.UserRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllAdventuresUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase

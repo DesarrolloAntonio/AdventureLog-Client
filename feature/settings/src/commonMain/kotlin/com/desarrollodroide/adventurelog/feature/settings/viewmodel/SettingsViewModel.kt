@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.feature.settings.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
-import com.desarrollodroide.adventurelog.core.data.SettingsRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.SettingsRepository
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
