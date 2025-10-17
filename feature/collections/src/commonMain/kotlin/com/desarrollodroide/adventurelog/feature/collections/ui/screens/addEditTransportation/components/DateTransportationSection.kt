@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.components
+package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +18,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.SectionCard
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.date.DateTimeField
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.data.TransportationFormData
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportationFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.date.DateTimeField
 
 @Composable
 fun DateTransportationSection(

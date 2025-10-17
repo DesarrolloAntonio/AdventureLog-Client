@@ -1,10 +1,11 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.components
+package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -38,10 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.RatingBar
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.SectionCard
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.StyledTextField
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.data.TransportationFormData
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportationFormData
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
+import com.desarrollodroide.adventurelog.feature.ui.components.RatingBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,24 +61,24 @@ fun BasicInfoTransportationSection(
         title = "Basic Information",
         icon = Icons.Outlined.Info,
         expanded = expanded,
-        onExpandedChange = { expanded = it }
+        onExpandedChange = { expanded = it },
+        leadingContent = {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Go back",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-            }
-
             StyledTextField(
                 value = formData.name,
                 onValueChange = { onFormDataChange(formData.copy(name = it)) },

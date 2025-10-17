@@ -1,9 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,10 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Title
@@ -36,13 +29,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.DescriptionSection
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 
 @Composable
 fun BasicInfoSection(
@@ -52,154 +46,104 @@ fun BasicInfoSection(
 ) {
     var expanded by remember { mutableStateOf(true) }
     
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable { expanded = !expanded }
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+    SectionCard(
+        title = "Collection Information",
+        icon = Icons.Outlined.Folder,
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        leadingContent = {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.size(32.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Go back",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.Outlined.Folder,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = "Collection Information",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
                 Icon(
-                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Go back",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
                 )
             }
+        }
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StyledTextField(
+                value = formData.name,
+                onValueChange = { 
+                    onFormDataChange(formData.copy(name = it))
+                },
+                label = "Collection Name",
+                icon = Icons.Outlined.Title,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                )
+            )
             
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
+            DescriptionSection(
+                description = formData.description,
+                onDescriptionChange = {
+                    onFormDataChange(formData.copy(description = it))
+                }
+            )
+            
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+                ),
+                border = CardDefaults.outlinedCardBorder()
             ) {
-                Column(
-                    modifier = Modifier.padding(top = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StyledTextField(
-                        value = formData.name,
-                        onValueChange = { 
-                            onFormDataChange(formData.copy(name = it))
-                        },
-                        label = "Collection Name",
-                        icon = Icons.Outlined.Title,
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next
-                        )
-                    )
-                    
-                    DescriptionSection(
-                        description = formData.description,
-                        onDescriptionChange = {
-                            onFormDataChange(formData.copy(description = it))
-                        }
-                    )
-                    
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-                        ),
-                        border = CardDefaults.outlinedCardBorder()
+                    Row(
+                        modifier = Modifier.weight(1f).padding(end = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(
-                                modifier = Modifier.weight(1f).padding(end = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Public,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Text(
-                                    text = "Public Collection",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                            Switch(
-                                checked = formData.isPublic,
-                                onCheckedChange = {
-                                    onFormDataChange(formData.copy(isPublic = it))
-                                },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Public,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = "Public Collection",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
-                    
-                    StyledTextField(
-                        value = formData.link,
-                        onValueChange = { 
-                            onFormDataChange(formData.copy(link = it))
+                    Switch(
+                        checked = formData.isPublic,
+                        onCheckedChange = {
+                            onFormDataChange(formData.copy(isPublic = it))
                         },
-                        label = "Link",
-                        icon = Icons.Outlined.Link,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Uri,
-                            imeAction = ImeAction.Done
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     )
                 }
             }
+            
+            StyledTextField(
+                value = formData.link,
+                onValueChange = { 
+                    onFormDataChange(formData.copy(link = it))
+                },
+                label = "Link",
+                icon = Icons.Outlined.Link,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Done
+                )
+            )
         }
     }
 }

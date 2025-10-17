@@ -16,11 +16,13 @@ import androidx.navigation.navArgument
 import app.cash.paging.compose.LazyPagingItems
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.AddEditCollectionScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionDetailScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.CollectionsScreen
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel
+import kotlinx.serialization.json.Json
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -34,6 +36,7 @@ interface CollectionsNavigator {
     fun navigateToEditCollection(collectionId: String)
     fun navigateToAdventure(location: Location)
     fun navigateToEditAdventure(adventure: Location)
+    fun navigateToEditTransportation(transportationId: String, transportationJson: String)
     fun navigateToHome()
     fun navigateBack()
 }
@@ -44,6 +47,12 @@ interface CollectionsNavigator {
 fun NavGraphBuilder.collectionsScreen(
     navigator: CollectionsNavigator
 ) {
+    val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        isLenient = true
+    }
+    
     // Collections List Screen
     composable(route = NavigationRoutes.Collections.route) { backStackEntry ->
         val pagingItems = remember { mutableStateOf<LazyPagingItems<UltraSlimCollection>?>(null) }
@@ -75,7 +84,7 @@ fun NavGraphBuilder.collectionsScreen(
     
     // Collection Detail Screen
     composable(
-        route = "collection/{collectionId}/{collectionName}",
+        route = NavigationRoutes.Collections.detailRoute,
         arguments = listOf(
             navArgument("collectionId") {
                 type = NavType.StringType
@@ -100,12 +109,18 @@ fun NavGraphBuilder.collectionsScreen(
             onEditAdventure = { adventure ->
                 navigator.navigateToEditAdventure(adventure)
             },
-            onEditTransportation = { /* TODO: Implement transportation edit */ }
+            onEditTransportation = { transportation ->
+                val transportationJson = json.encodeToString(
+                    serializer = Transportation.serializer(),
+                    value = transportation
+                )
+                navigator.navigateToEditTransportation(transportation.id, transportationJson)
+            }
         )
     }
     
     // Add Collection Screen
-    composable(route = "add_collection") { backStackEntry ->
+    composable(route = NavigationRoutes.Collections.add) { backStackEntry ->
         val viewModel = koinViewModel<AddEditCollectionViewModel> {
             parametersOf(null) // null for new collection
         }
@@ -153,7 +168,7 @@ fun NavGraphBuilder.collectionsScreen(
     
     // Edit Collection Screen
     composable(
-        route = "edit_collection/{collectionId}",
+        route = NavigationRoutes.Collections.editRoute,
         arguments = listOf(
             navArgument("collectionId") {
                 type = NavType.StringType

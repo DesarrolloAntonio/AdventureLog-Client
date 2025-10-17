@@ -1,8 +1,8 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEditTransportation.data
+package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data
 
 import com.desarrollodroide.adventurelog.core.model.Transportation
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageType
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 
 data class TransportationFormData(
     val name: String = "",

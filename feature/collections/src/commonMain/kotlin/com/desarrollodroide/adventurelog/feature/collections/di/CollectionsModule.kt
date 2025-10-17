@@ -4,6 +4,7 @@ import com.desarrollodroide.adventurelog.core.domain.di.domainModule
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditTransportationViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -35,6 +36,19 @@ val collectionsModule = module {
             createCollectionUseCase = get(),
             getCollectionDetailUseCase = get(),
             updateCollectionUseCase = get()
+        )
+    }
+
+    viewModel { params -> 
+        AddEditTransportationViewModel(
+            createTransportationUseCase = get(),
+            updateTransportationUseCase = get(),
+            getTransportationUseCase = get(),
+            generateDescriptionUseCase = get(),
+            searchLocationsUseCase = get(),
+            searchWikipediaImageUseCase = get(),
+            transportationId = params.getOrNull(),
+            existingTransportation = params.getOrNull()
         )
     }
 }
