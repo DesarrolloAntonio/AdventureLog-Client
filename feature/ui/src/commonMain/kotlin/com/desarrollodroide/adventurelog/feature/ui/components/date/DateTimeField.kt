@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.date
+package com.desarrollodroide.adventurelog.feature.ui.components.date
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,9 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.desarrollodroide.adventurelog.core.common.utils.formatDateForDisplay
 
 @Composable
-internal fun DateTimeField(
+fun DateTimeField(
     date: String,
     time: String?,
     isAllDay: Boolean,
@@ -139,21 +140,5 @@ internal fun DateTimeField(
                 )
             }
         }
-    }
-}
-
-internal fun formatDateForDisplay(dateString: String): String {
-    return try {
-        if (dateString.isEmpty()) return ""
-        
-        // Parse ISO date string (yyyy-MM-dd) and format to dd/mm/yyyy
-        val parts = dateString.split("-")
-        if (parts.size == 3) {
-            "${parts[2].padStart(2, '0')}/${parts[1].padStart(2, '0')}/${parts[0]}"
-        } else {
-            dateString
-        }
-    } catch (e: Exception) {
-        dateString
     }
 }

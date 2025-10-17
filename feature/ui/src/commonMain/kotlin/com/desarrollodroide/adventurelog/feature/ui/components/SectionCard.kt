@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components
+package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -33,6 +33,8 @@ fun SectionCard(
     icon: ImageVector,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
+    leadingContent: (@Composable () -> Unit)? = null,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Card(
@@ -65,6 +67,8 @@ fun SectionCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    leadingContent?.invoke()
+                    
                     Icon(
                         imageVector = icon,
                         contentDescription = null,

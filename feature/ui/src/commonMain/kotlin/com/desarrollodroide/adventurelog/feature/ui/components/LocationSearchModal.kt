@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components
+package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

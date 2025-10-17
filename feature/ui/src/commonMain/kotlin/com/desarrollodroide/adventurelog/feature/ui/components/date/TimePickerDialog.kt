@@ -1,11 +1,11 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.date
+package com.desarrollodroide.adventurelog.feature.ui.components.date
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TimePickerDialog(
+fun TimePickerDialog(
     onDismiss: () -> Unit,
     onConfirm: (Int, Int) -> Unit,
     initialHour: Int = 0,

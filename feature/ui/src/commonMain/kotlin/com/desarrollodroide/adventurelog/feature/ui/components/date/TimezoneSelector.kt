@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.date
+package com.desarrollodroide.adventurelog.feature.ui.components.date
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +20,7 @@ import kotlinx.datetime.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TimezoneDropdown(
+fun TimezoneDropdown(
     selectedTimezone: String,
     onTimezoneSelected: (String) -> Unit
 ) {

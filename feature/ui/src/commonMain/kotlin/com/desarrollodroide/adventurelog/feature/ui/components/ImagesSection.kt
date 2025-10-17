@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components
+package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,26 +47,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageType
-import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
-import com.desarrollodroide.adventurelog.feature.adventures.ui.components.ImagePicker
-import com.desarrollodroide.adventurelog.feature.adventures.ui.components.CameraCapture
-import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
+import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResult
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.compose.SubcomposeAsyncImage
 import androidx.compose.material3.CircularProgressIndicator
+import kotlin.collections.plus
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ImagesSection(
-    formData: LocationFormData,
-    onFormDataChange: (LocationFormData) -> Unit,
-    wikipediaImageState: WikipediaImageState,
+    images: List<ImageFormData>,
+    onImagesChange: (List<ImageFormData>) -> Unit,
+    wikipediaImageState: WikipediaImageResult,
     onSearchWikipediaImage: (String) -> Unit,
     onResetWikipediaState: () -> Unit
 ) {
@@ -77,7 +74,7 @@ fun ImagesSection(
     var showCameraCapture by remember { mutableStateOf(false) }
 
     SectionCard(
-        title = "Images (${formData.images.size})",
+        title = "Images (${images.size})",
         icon = Icons.Outlined.Image,
         expanded = expanded,
         onExpandedChange = { expanded = it }
@@ -111,7 +108,7 @@ fun ImagesSection(
             when (selectedTab) {
                 0 -> {
                     // Upload from device
-                    if (formData.images.size >= 10) {
+                    if (images.size >= 10) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
@@ -254,14 +251,14 @@ fun ImagesSection(
 
                         PrimaryButton(
                             onClick = {
-                                if (urlInput.isNotBlank() && formData.images.size < 10) {
+                                if (urlInput.isNotBlank() && images.size < 10) {
                                     isValidatingUrl = true
                                     urlError = null
                                     // URL validation will be handled in a composable effect
                                 }
                             },
                             text = if (isValidatingUrl) "Validating..." else "Add image",
-                            enabled = urlInput.isNotBlank() && formData.images.size < 10 && !isValidatingUrl
+                            enabled = urlInput.isNotBlank() && images.size < 10 && !isValidatingUrl
                         )
 
                         // URL validation effect
@@ -329,11 +326,9 @@ fun ImagesSection(
                                             val newImage = ImageFormData(
                                                 uri = urlInput,
                                                 type = ImageType.URL,
-                                                isPrimary = formData.images.isEmpty()
+                                                isPrimary = images.isEmpty()
                                             )
-                                            onFormDataChange(
-                                                formData.copy(images = formData.images + newImage)
-                                            )
+                                            onImagesChange(images + newImage)
                                             urlInput = ""
                                             isValidatingUrl = false
                                         }
@@ -364,7 +359,7 @@ fun ImagesSection(
                             value = wikipediaQuery,
                             onValueChange = {
                                 wikipediaQuery = it
-                                if (wikipediaImageState !is WikipediaImageState.Idle) {
+                                if (wikipediaImageState !is WikipediaImageResult.Loading) {
                                     onResetWikipediaState()
                                 }
                             },
@@ -389,37 +384,35 @@ fun ImagesSection(
 
                         PrimaryButton(
                             onClick = {
-                                if (wikipediaQuery.isNotBlank() && formData.images.size < 10) {
+                                if (wikipediaQuery.isNotBlank() && images.size < 10) {
                                     onSearchWikipediaImage(wikipediaQuery)
                                 }
                             },
                             text = when (wikipediaImageState) {
-                                is WikipediaImageState.Searching -> "Searching..."
+                                is WikipediaImageResult.Loading -> "Searching..."
                                 else -> "Search and add image"
                             },
-                            enabled = wikipediaQuery.isNotBlank() && 
-                                     formData.images.size < 10 && 
-                                     wikipediaImageState !is WikipediaImageState.Searching
+                            enabled = wikipediaQuery.isNotBlank() &&
+                                    images.size < 10 &&
+                                    wikipediaImageState !is WikipediaImageResult.Loading
                         )
 
                         // Handle different states
                         when (wikipediaImageState) {
-                            is WikipediaImageState.Success -> {
+                            is WikipediaImageResult.Success -> {
                                 LaunchedEffect(wikipediaImageState) {
                                     val newImage = ImageFormData(
                                         uri = wikipediaImageState.imageUrl,
                                         type = ImageType.WIKIPEDIA,
-                                        isPrimary = formData.images.isEmpty()
+                                        isPrimary = images.isEmpty()
                                     )
-                                    onFormDataChange(
-                                        formData.copy(images = formData.images + newImage)
-                                    )
+                                    onImagesChange(images + newImage)
                                     wikipediaQuery = ""
                                     onResetWikipediaState()
                                 }
                             }
-                            
-                            is WikipediaImageState.NotFound -> {
+
+                            is WikipediaImageResult.NotFound -> {
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
@@ -430,7 +423,11 @@ fun ImagesSection(
                                     ),
                                     border = CardDefaults.outlinedCardBorder().copy(
                                         width = 1.dp,
-                                        brush = SolidColor(MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                                        brush = SolidColor(
+                                            MaterialTheme.colorScheme.error.copy(
+                                                alpha = 0.5f
+                                            )
+                                        )
                                     )
                                 ) {
                                     Row(
@@ -454,8 +451,8 @@ fun ImagesSection(
                                     }
                                 }
                             }
-                            
-                            is WikipediaImageState.Error -> {
+
+                            is WikipediaImageResult.Error -> {
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
@@ -466,7 +463,11 @@ fun ImagesSection(
                                     ),
                                     border = CardDefaults.outlinedCardBorder().copy(
                                         width = 1.dp,
-                                        brush = SolidColor(MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                                        brush = SolidColor(
+                                            MaterialTheme.colorScheme.error.copy(
+                                                alpha = 0.5f
+                                            )
+                                        )
                                     )
                                 ) {
                                     Row(
@@ -490,7 +491,7 @@ fun ImagesSection(
                                     }
                                 }
                             }
-                            
+
                             else -> {}
                         }
                     }
@@ -498,7 +499,7 @@ fun ImagesSection(
             }
 
             // Images gallery
-            if (formData.images.isNotEmpty()) {
+            if (images.isNotEmpty()) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -512,7 +513,7 @@ fun ImagesSection(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "Selected images (${formData.images.size})",
+                            text = "Selected images (${images.size})",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -523,24 +524,24 @@ fun ImagesSection(
                             verticalArrangement = Arrangement.Top,
                             maxItemsInEachRow = 3
                         ) {
-                            formData.images.forEachIndexed { index, image ->
+                            images.forEachIndexed { index, image ->
                                 ImageItem(
                                     image = image,
                                     isPrimary = image.isPrimary,
                                     onDelete = {
-                                        val updatedImages = formData.images.toMutableList().apply {
+                                        val updatedImages = images.toMutableList().apply {
                                             removeAt(index)
                                         }
                                         if (image.isPrimary && updatedImages.isNotEmpty()) {
                                             updatedImages[0] = updatedImages[0].copy(isPrimary = true)
                                         }
-                                        onFormDataChange(formData.copy(images = updatedImages))
+                                        onImagesChange(updatedImages)
                                     },
                                     onSetPrimary = {
-                                        val updatedImages = formData.images.mapIndexed { i, img ->
+                                        val updatedImages = images.mapIndexed { i, img ->
                                             img.copy(isPrimary = i == index)
                                         }
-                                        onFormDataChange(formData.copy(images = updatedImages))
+                                        onImagesChange(updatedImages)
                                     }
                                 )
                             }
@@ -561,10 +562,8 @@ fun ImagesSection(
     if (showImagePicker) {
         ImagePicker(
             onImageSelected = { imageData ->
-                onFormDataChange(
-                    formData.copy(
-                        images = formData.images + imageData.copy(isPrimary = formData.images.isEmpty())
-                    )
+                onImagesChange(
+                    images + imageData.copy(isPrimary = images.isEmpty())
                 )
                 showImagePicker = false
             },
@@ -578,10 +577,8 @@ fun ImagesSection(
     if (showCameraCapture) {
         CameraCapture(
             onImageCaptured = { imageData ->
-                onFormDataChange(
-                    formData.copy(
-                        images = formData.images + imageData.copy(isPrimary = formData.images.isEmpty())
-                    )
+                onImagesChange(
+                    images + imageData.copy(isPrimary = images.isEmpty())
                 )
                 showCameraCapture = false
             },
