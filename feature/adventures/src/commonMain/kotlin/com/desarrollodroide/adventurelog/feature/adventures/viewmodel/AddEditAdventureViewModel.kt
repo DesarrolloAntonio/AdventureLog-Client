@@ -34,16 +34,8 @@ data class AddEditAdventureUiState(
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
     val reverseGeocodeResult: ReverseGeocodeResult? = null,
-    val wikipediaImageState: WikipediaImageState = WikipediaImageState.Idle
+    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading
 )
-
-sealed class WikipediaImageState {
-    object Idle : WikipediaImageState()
-    object Searching : WikipediaImageState()
-    data class Success(val imageUrl: String) : WikipediaImageState()
-    data class Error(val message: String) : WikipediaImageState()
-    object NotFound : WikipediaImageState()
-}
 
 class AddEditAdventureViewModel(
     private val createAdventureUseCase: CreateAdventureUseCase,
@@ -292,12 +284,7 @@ class AddEditAdventureViewModel(
         viewModelScope.launch {
             searchWikipediaImageUseCase(query).collectLatest { result ->
                 _uiState.value = _uiState.value.copy(
-                    wikipediaImageState = when (result) {
-                        is WikipediaImageResult.Loading -> WikipediaImageState.Searching
-                        is WikipediaImageResult.Success -> WikipediaImageState.Success(result.imageUrl)
-                        is WikipediaImageResult.NotFound -> WikipediaImageState.NotFound
-                        is WikipediaImageResult.Error -> WikipediaImageState.Error(result.message)
-                    }
+                    wikipediaImageState = result
                 )
             }
         }
@@ -305,7 +292,7 @@ class AddEditAdventureViewModel(
     
     fun resetWikipediaImageState() {
         _uiState.value = _uiState.value.copy(
-            wikipediaImageState = WikipediaImageState.Idle
+            wikipediaImageState = WikipediaImageResult.Loading
         )
     }
 }

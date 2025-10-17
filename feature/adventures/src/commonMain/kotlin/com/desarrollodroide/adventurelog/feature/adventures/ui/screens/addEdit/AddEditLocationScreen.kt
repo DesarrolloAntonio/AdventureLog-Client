@@ -40,14 +40,14 @@ import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.BasicInfoSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.DateSection
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.ImagesSection
+import com.desarrollodroide.adventurelog.feature.ui.components.ImagesSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.LocationSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.components.TagsSection
 import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.LocationFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageFormData
-import com.desarrollodroide.adventurelog.feature.adventures.ui.screens.addEdit.data.ImageType
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.AddEditAdventureViewModel
-import com.desarrollodroide.adventurelog.feature.adventures.viewmodel.WikipediaImageState
+import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResult
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -166,7 +166,7 @@ fun AddEditLocationContent(
     onClearLocationSearch: () -> Unit = {},
     onReverseGeocode: (Double, Double) -> Unit = { _, _ -> },
     reverseGeocodeResult: ReverseGeocodeResult? = null,
-    wikipediaImageState: WikipediaImageState = WikipediaImageState.Idle,
+    wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -284,8 +284,10 @@ fun AddEditLocationContent(
         )
 
         ImagesSection(
-            formData = formData,
-            onFormDataChange = { formData = it },
+            images = formData.images,
+            onImagesChange = { updatedImages ->
+                formData = formData.copy(images = updatedImages)
+            },
             wikipediaImageState = wikipediaImageState,
             onSearchWikipediaImage = onSearchWikipediaImage,
             onResetWikipediaState = onResetWikipediaState
