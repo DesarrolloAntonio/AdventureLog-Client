@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -23,24 +24,65 @@ import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.*
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
+import com.desarrollodroide.adventurelog.feature.detail.viewmodel.LocationState
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AdventureDetailScreenRoute(
-    location: Location,
+    locationId: String,
     onBackClick: () -> Unit
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
-    val collections by viewModel.getCollectionsForLocation(location).collectAsStateWithLifecycle()
+    
+    LaunchedEffect(locationId) {
+        viewModel.loadLocation(locationId)
+    }
+    
+    val locationState by viewModel.locationState.collectAsStateWithLifecycle()
+    val collections by viewModel.collections.collectAsStateWithLifecycle()
 
-    AdventureDetailScreen(
-        location = location,
-        collections = collections,
-        onBackClick = onBackClick,
-        onEditClick = { viewModel.editAdventure(location.id) },
-        onOpenMap = { lat: String, long: String -> viewModel.openMap(lat, long) },
-        onOpenLink = { url: String -> viewModel.openLink(url) }
-    )
+    when (val state = locationState) {
+        is LocationState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is LocationState.Success -> {
+            AdventureDetailScreen(
+                location = state.location,
+                collections = collections,
+                onBackClick = onBackClick,
+                onEditClick = { viewModel.editAdventure(state.location.id) },
+                onOpenMap = { lat: String, long: String -> viewModel.openMap(lat, long) },
+                onOpenLink = { url: String -> viewModel.openLink(url) }
+            )
+        }
+        is LocationState.Error -> {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Error loading location",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = state.message,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = onBackClick) {
+                        Text("Go Back")
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
