@@ -26,11 +26,21 @@ class InitializeSessionUseCase(
                     serverUrl = existingSession.serverUrl ?: "",
                     sessionToken = existingSession.sessionToken
                 )
-                existingSession
+                
+                try {
+                    networkDataSource.getUserDetails()
+                    existingSession
+                } catch (e: Exception) {
+                    println("❌ Token validation failed: ${e.message}")
+                    println("🧹 Clearing corrupted session")
+                    userRepository.clearUserSession()
+                    null
+                }
             } else {
                 null
             }
         } catch (e: Exception) {
+            println("⚠️ Session initialization failed: ${e.message}")
             null
         }
     }
