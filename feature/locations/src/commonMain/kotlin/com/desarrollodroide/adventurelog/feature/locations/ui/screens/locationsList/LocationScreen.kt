@@ -106,7 +106,10 @@ fun LocationListScreen(
         collections = collections,
         isRefreshing = isRefreshing,
         snackbarHostState = snackbarHostState,
-        onAdventureClick = onAdventureClick,
+        onAdventureClick = { adventure ->
+            viewModel.selectLocation(adventure)
+            onAdventureClick(adventure)
+        },
         onAddAdventureClick = onAddAdventureClick,
         onSearchQueryChange = viewModel::onSearchQueryChange,
         onSearchSubmit = viewModel::executeSearch,

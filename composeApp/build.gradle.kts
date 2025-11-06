@@ -134,7 +134,6 @@ android {
 // Hot reload support
 composeCompiler {
     featureFlags = setOf(
-        ComposeFeatureFlag.StrongSkipping,
         ComposeFeatureFlag.OptimizeNonSkippingGroups
     )
 }

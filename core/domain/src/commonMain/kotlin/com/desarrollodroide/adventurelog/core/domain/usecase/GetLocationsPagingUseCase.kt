@@ -36,4 +36,10 @@ class GetLocationsPagingUseCase(
             locationsRepository.getLocationsPagingData()
         }
     }
+    
+    fun selectLocation(location: Location) {
+        println("🟢 [GetLocationsPagingUseCase] Setting selectedLocation: ${location.id} - ${location.name}")
+        locationsRepository.selectedLocation = location
+        println("🟢 [GetLocationsPagingUseCase] selectedLocation is now: ${locationsRepository.selectedLocation?.name}")
+    }
 }

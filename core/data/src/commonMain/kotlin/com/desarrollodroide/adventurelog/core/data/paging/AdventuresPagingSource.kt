@@ -12,7 +12,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.toDomainMod
 
 class AdventuresPagingSource(
     private val networkDataSource: AdventureLogNetwork,
-    private val pageSize: Int = 30
+    private val pageSize: Int = 30,
+    private val onLocationsLoaded: (List<Location>) -> Unit = {}
 ) : PagingSource<Int, Location>() {
     
     private var totalItemsLoaded = 0
@@ -31,6 +32,9 @@ class AdventuresPagingSource(
                 page = page,
                 pageSize = size
             ).map { it.toDomainModel() }
+            
+            // Feed the cache with loaded locations
+            onLocationsLoaded(adventures)
             
             totalItemsLoaded += adventures.size
             

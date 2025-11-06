@@ -4,14 +4,12 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
-import com.desarrollodroide.adventurelog.core.domain.usecase.GetAdventuresUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsUseCase
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -26,10 +24,9 @@ class GetAdventuresUseCaseTest {
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
 
-        private val _adventuresFlow = MutableStateFlow<List<Location>>(emptyList())
-        override val locationsFlow: StateFlow<List<Location>> = _adventuresFlow
+        override var selectedLocation: Location? = null
 
-        override fun getAdventuresPagingData(): Flow<PagingData<Location>> {
+        override fun getLocationsPagingData(): Flow<PagingData<Location>> {
             return flowOf(PagingData.empty())
         }
 
@@ -107,7 +104,7 @@ class GetAdventuresUseCaseTest {
     }
 
     private val fakeRepository = FakeAdventuresRepository()
-    private val useCase = GetAdventuresUseCase(fakeRepository)
+    private val useCase = GetLocationsUseCase(fakeRepository)
 
     @Test
     fun `invoke returns success when repository returns adventures`() = runTest {
@@ -143,7 +140,7 @@ class GetAdventuresUseCaseTest {
         val result = useCase(page = 1, pageSize = 10)
 
         assertTrue(result is Either.Left)
-        assertEquals("Error getting adventures, try again later", result.value)
+        assertEquals("Error getting locations, try again later", result.value)
     }
 
     @Test

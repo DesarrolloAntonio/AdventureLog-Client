@@ -344,4 +344,9 @@ class LocationsViewModel(
             }
         }
     }
+    
+    fun selectLocation(location: Location) {
+        println("🔵 [LocationsViewModel] Selecting location: ${location.id} - ${location.name}")
+        getLocationsPagingUseCase.selectLocation(location)
+    }
 }

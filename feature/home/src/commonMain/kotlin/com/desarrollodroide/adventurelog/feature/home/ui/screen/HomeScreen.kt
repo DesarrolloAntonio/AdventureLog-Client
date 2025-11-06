@@ -90,7 +90,10 @@ fun HomeScreenRoute(
         homeUiState = homeUiState,
         statsState = statsState,
         userDetails = userDetails,
-        onAdventureClick = onAdventureClick,
+        onAdventureClick = { adventure ->
+            viewModel.selectLocation(adventure)
+            onAdventureClick(adventure)
+        },
         onLogout = {
             viewModel.logout()
             onNavigateToLogin()

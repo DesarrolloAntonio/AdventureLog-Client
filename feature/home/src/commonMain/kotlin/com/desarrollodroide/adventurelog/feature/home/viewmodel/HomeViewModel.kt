@@ -7,6 +7,7 @@ import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
+import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
@@ -142,5 +143,9 @@ class HomeViewModel(
                 }
             }
         }
+    }
+
+    fun selectLocation(location: Location) {
+        getLocationsUseCase.selectLocation(location)
     }
 }

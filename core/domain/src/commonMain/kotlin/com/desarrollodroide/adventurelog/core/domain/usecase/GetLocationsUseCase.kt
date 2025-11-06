@@ -19,4 +19,10 @@ class GetLocationsUseCase(
             }
             is Either.Right -> Either.Right(result.value)
         }
+
+    fun selectLocation(location: Location) {
+        println("🟡 [GetLocationsUseCase] Setting selectedLocation: ${location.id} - ${location.name}")
+        locationsRepository.selectedLocation = location
+        println("🟡 [GetLocationsUseCase] selectedLocation is now: ${locationsRepository.selectedLocation?.name}")
+    }
 }

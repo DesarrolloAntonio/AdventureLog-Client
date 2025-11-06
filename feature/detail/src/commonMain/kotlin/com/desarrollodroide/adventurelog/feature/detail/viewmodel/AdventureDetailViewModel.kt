@@ -61,6 +61,7 @@ class AdventureDetailViewModel(
                 is Either.Right -> {
                     println("✅ [ViewModel] Location loaded: ${result.value.name}")
                     _locationState.value = LocationState.Success(result.value)
+                    getLocationUseCase.clearSelectedLocation()
                 }
                 is Either.Left -> {
                     println("❌ [ViewModel] Error loading location: ${result.value}")

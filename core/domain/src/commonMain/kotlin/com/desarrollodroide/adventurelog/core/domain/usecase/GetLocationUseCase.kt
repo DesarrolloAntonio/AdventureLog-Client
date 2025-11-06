@@ -20,4 +20,8 @@ class GetLocationUseCase(
             is Either.Right -> Either.Right(result.value)
         }
     }
+
+    fun clearSelectedLocation() {
+        locationsRepository.selectedLocation = null
+    }
 }

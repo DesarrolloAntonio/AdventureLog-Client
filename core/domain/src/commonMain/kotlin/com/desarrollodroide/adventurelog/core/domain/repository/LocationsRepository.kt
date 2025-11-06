@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface LocationsRepository {
 
-    val locationsFlow: StateFlow<List<Location>>
+    var selectedLocation: Location?
     
     fun getLocationsPagingData(): Flow<PagingData<Location>>
     

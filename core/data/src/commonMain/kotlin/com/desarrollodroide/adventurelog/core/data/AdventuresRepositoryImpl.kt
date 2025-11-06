@@ -16,8 +16,6 @@ import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
 
@@ -25,9 +23,8 @@ class AdventuresRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
 ) : LocationsRepository {
 
-    private val _adventuresFlow = MutableStateFlow<List<Location>>(emptyList())
-    override val locationsFlow: StateFlow<List<Location>> = _adventuresFlow.asStateFlow()
-    
+    override var selectedLocation: Location? = null
+
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
     
@@ -80,12 +77,6 @@ class AdventuresRepositoryImpl(
     override suspend fun getLocations(page: Int, pageSize: Int): Either<ApiResponse, List<Location>> {
         return try {
             val adventures = networkDataSource.getAdventures(page, pageSize).map { it.toDomainModel() }
-            
-            // For page 1, update the flow
-            if (page == 1) {
-                _adventuresFlow.value = adventures
-            }
-            
             Either.Right(adventures)
         } catch (e: HttpException) {
             println("HTTP Error during getAdventures: ${e.code}")
@@ -105,12 +96,7 @@ class AdventuresRepositoryImpl(
     
     override suspend fun getAllLocations(): Either<ApiResponse, List<Location>> {
         return try {
-            // Load all adventures (up to 1000) for the map
             val adventures = networkDataSource.getAdventures(page = 1, pageSize = 1000).map { it.toDomainModel() }
-            
-            // Also update the main flow if needed
-            _adventuresFlow.value = adventures
-            
             Either.Right(adventures)
         } catch (e: HttpException) {
             println("HTTP Error during getAllAdventuresForMap: ${e.code}")
@@ -129,21 +115,30 @@ class AdventuresRepositoryImpl(
     }
 
     override suspend fun getLocation(objectId: String): Either<ApiResponse, Location> {
+        val cached = selectedLocation
+        println("🔍 [Repository] getLocation called for: $objectId")
+        println("🔍 [Repository] selectedLocation is: ${cached?.id} - ${cached?.name}")
+        
+        if (cached != null && cached.id == objectId) {
+            println("✨ Using selectedLocation for: $objectId")
+            return Either.Right(cached)
+        }
+        
+        println("⚠️ selectedLocation not available, fetching from network: $objectId")
         return try {
-            val adventure = networkDataSource.getAdventureDetail(objectId).toDomainModel()
-            Either.Right(adventure)
+            val location = networkDataSource.getAdventureDetail(objectId).toDomainModel()
+            Either.Right(location)
         } catch (e: HttpException) {
-            println("HTTP Error during getAdventure: ${e.code}")
+            println("HTTP Error during getLocation: ${e.code}")
             when (e.code) {
-                401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getAdventure: ${e.message}")
+            println("IO Error during getLocation: ${e.message}")
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getAdventure: ${e.message}")
+            println("Unexpected error during getLocation: ${e.message}")
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -176,9 +171,6 @@ class AdventuresRepositoryImpl(
                 activityTypes = activityTypes
             ).toDomainModel()
             
-            // Add the new adventure to the beginning of the flow (most recent first)
-            _adventuresFlow.value = listOf(adventure) + _adventuresFlow.value
-            
             // Increment version to invalidate paging
             _version.value++
             
@@ -200,10 +192,7 @@ class AdventuresRepositoryImpl(
 
     override suspend fun refreshLocations(): Either<ApiResponse, List<Location>> {
         return try {
-            // Load a large page to get all adventures for the map
-            // This is called by MapViewModel which needs all adventures
             val adventures = networkDataSource.getAdventures(1, 1000).map { it.toDomainModel() }
-            _adventuresFlow.value = adventures
             Either.Right(adventures)
         } catch (e: HttpException) {
             println("HTTP Error during refreshAdventures: ${e.code}")
@@ -249,9 +238,6 @@ class AdventuresRepositoryImpl(
     override suspend fun deleteLocation(adventureId: String): Either<ApiResponse, Unit> {
         return try {
             networkDataSource.deleteAdventure(adventureId)
-            
-            // Remove the deleted adventure from the flow
-            _adventuresFlow.value = _adventuresFlow.value.filter { it.id != adventureId }
             
             // Increment version to invalidate paging
             _version.value++
@@ -303,11 +289,6 @@ class AdventuresRepositoryImpl(
                 collections = collections,
                 visits = visits
             ).toDomainModel()
-            
-            // Update the adventure in the flow
-            _adventuresFlow.value = _adventuresFlow.value.map { 
-                if (it.id == adventureId) adventure else it 
-            }
             
             // Increment version to invalidate paging
             _version.value++

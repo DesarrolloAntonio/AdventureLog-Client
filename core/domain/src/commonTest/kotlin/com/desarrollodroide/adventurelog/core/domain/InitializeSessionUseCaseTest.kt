@@ -117,7 +117,21 @@ class InitializeSessionUseCaseTest {
         }
 
         override suspend fun getUserDetails(): UserDetailsDTO {
-            throw NotImplementedError()
+            return UserDetailsDTO(
+                id = 1,
+                username = "testuser",
+                firstName = "Test",
+                lastName = "User",
+                email = "test@example.com",
+                profilePic = null,
+                isStaff = false,
+                dateJoined = "2024-01-01T00:00:00Z",
+                uuid = "user123",
+                publicProfile = true,
+                measurementSystem = "metric",
+                disablePassword = false,
+                hasPassword = true
+            )
         }
 
         override suspend fun createAdventure(

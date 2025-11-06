@@ -18,7 +18,8 @@ class AdventuresPagingSourceFiltered(
     private val sortOrder: String? = null,
     private val isVisited: Boolean? = null,
     private val searchQuery: String? = null,
-    private val includeCollections: Boolean = false
+    private val includeCollections: Boolean = false,
+    private val onLocationsLoaded: (List<Location>) -> Unit = {}
 ) : PagingSource<Int, Location>() {
     
     private val logger = Logger.withTag("AdventuresPagingSourceFiltered")
@@ -50,6 +51,9 @@ class AdventuresPagingSourceFiltered(
                 searchQuery = searchQuery,
                 includeCollections = includeCollections
             ).map { it.toDomainModel() }
+            
+            // Feed the cache with loaded locations
+            onLocationsLoaded(adventures)
             
             logger.d { "Loaded ${adventures.size} filtered adventures for page $currentPage" }
             
