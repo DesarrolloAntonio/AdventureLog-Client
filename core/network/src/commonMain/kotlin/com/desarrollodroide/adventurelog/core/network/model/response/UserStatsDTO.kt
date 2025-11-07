@@ -5,8 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserStatsDTO(
-    @SerialName("adventure_count")
-    val adventureCount: Int? = null,
+    @SerialName("location_count")
+    val locationCount: Int? = null,
+
+    @SerialName("visited_location_count")
+    val visitedLocationCount: Int? = null,
     
     @SerialName("trips_count")
     val tripsCount: Int? = null,

@@ -19,8 +19,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AirplanemodeActive
 import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Terrain
 import androidx.compose.material3.Card
@@ -194,10 +194,10 @@ private fun SwipeableStatsCard(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             CompactStatItem(
-                                value = stats.adventureCount,
+                                value = stats.locationCount,
                                 label = "Total adventures",
-                                icon = Icons.Default.AirplanemodeActive,
-                                iconColor = Color(0xFFE91E63), // Pink color
+                                icon = Icons.Default.Place,
+                                iconColor = Color(0xFFE91E63),
                                 isLoading = isLoading
                             )
                             

@@ -567,7 +567,8 @@ private fun HomeScreenLoadingPreview() {
 @Composable
 private fun HomeScreenSuccessPreview() {
     val sampleStats = UserStats(
-        adventureCount = 12,
+        locationCount = 12,
+        visitedLocationCount = 2,
         tripsCount = 5,
         visitedCityCount = 0,
         totalCities = 15020,

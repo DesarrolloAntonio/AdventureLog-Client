@@ -5,7 +5,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDT
 
 fun UserStatsDTO.toUserStats(): UserStats {
     return UserStats(
-        adventureCount = adventureCount ?: 0,
+        locationCount = locationCount ?: 0,
+        visitedLocationCount = visitedLocationCount ?: 0,
         tripsCount = tripsCount ?: 0,
         visitedCityCount = visitedCityCount ?: 0,
         totalCities = totalCities ?: 0,

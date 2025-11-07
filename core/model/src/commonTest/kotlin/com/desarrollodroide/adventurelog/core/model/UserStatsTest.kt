@@ -10,7 +10,8 @@ class UserStatsTest : BaseModelTest<UserStats>() {
     fun `should create UserStats with default values`() {
         val stats = UserStats()
         
-        assertEquals(0, stats.adventureCount)
+        assertEquals(0, stats.locationCount)
+        assertEquals(0, stats.visitedLocationCount)
         assertEquals(0, stats.tripsCount)
         assertEquals(0, stats.visitedCityCount)
         assertEquals(0, stats.totalCities)
@@ -23,7 +24,8 @@ class UserStatsTest : BaseModelTest<UserStats>() {
     @Test
     fun `should create UserStats with custom values`() {
         val stats = UserStats(
-            adventureCount = 25,
+            locationCount = 25,
+            visitedLocationCount = 2,
             tripsCount = 10,
             visitedCityCount = 50,
             totalCities = 60,
@@ -33,7 +35,8 @@ class UserStatsTest : BaseModelTest<UserStats>() {
             totalCountries = 20
         )
 
-        assertEquals(25, stats.adventureCount)
+        assertEquals(25, stats.locationCount)
+        assertEquals(2, stats.visitedLocationCount)
         assertEquals(10, stats.tripsCount)
         assertEquals(50, stats.visitedCityCount)
         assertEquals(60, stats.totalCities)
@@ -46,13 +49,13 @@ class UserStatsTest : BaseModelTest<UserStats>() {
     @Test
     fun `should correctly implement equals and hashCode`() {
         val stats1 = UserStats(
-            adventureCount = 10,
+            locationCount = 10,
             visitedCountryCount = 5,
             totalCountries = 15
         )
         
         val stats2 = stats1.copy()
-        val stats3 = stats1.copy(adventureCount = 11)
+        val stats3 = stats1.copy(locationCount = 11)
         val stats4 = stats1.copy(visitedCityCount = 20)
 
         testEquality(
@@ -65,13 +68,15 @@ class UserStatsTest : BaseModelTest<UserStats>() {
     @Test
     fun `should handle zero total values`() {
         val emptyStats = UserStats(
-            adventureCount = 0,
+            locationCount = 0,
+            visitedLocationCount = 0,
             tripsCount = 0,
             visitedCountryCount = 0,
             totalCountries = 0
         )
 
-        assertEquals(0, emptyStats.adventureCount)
+        assertEquals(0, emptyStats.locationCount)
+        assertEquals(0, emptyStats.visitedLocationCount)
         assertEquals(0, emptyStats.tripsCount)
         assertEquals(0, emptyStats.visitedCountryCount)
         assertEquals(0, emptyStats.totalCountries)
@@ -99,14 +104,14 @@ class UserStatsTest : BaseModelTest<UserStats>() {
 
     @Test
     fun `should update individual stats`() {
-        val initialStats = UserStats(adventureCount = 10)
+        val initialStats = UserStats(locationCount = 10)
         
         val updatedStats = initialStats.copy(
-            adventureCount = 11,
+            locationCount = 11,
             visitedCityCount = initialStats.visitedCityCount + 2
         )
 
-        assertEquals(11, updatedStats.adventureCount)
+        assertEquals(11, updatedStats.locationCount)
         assertEquals(2, updatedStats.visitedCityCount)
         assertEquals(0, updatedStats.visitedRegionCount)
     }
@@ -114,7 +119,8 @@ class UserStatsTest : BaseModelTest<UserStats>() {
     @Test
     fun `should handle maximum values`() {
         val maxStats = UserStats(
-            adventureCount = 10000,
+            locationCount = 10000,
+            visitedLocationCount = 5000,
             tripsCount = 5000,
             visitedCountryCount = 195,
             totalCountries = 195,
@@ -124,7 +130,7 @@ class UserStatsTest : BaseModelTest<UserStats>() {
             totalRegions = 5100
         )
 
-        assertEquals(10000, maxStats.adventureCount)
+        assertEquals(10000, maxStats.locationCount)
         assertEquals(195, maxStats.visitedCountryCount)
         assertEquals(10000, maxStats.visitedCityCount)
         assertEquals(5000, maxStats.visitedRegionCount)
@@ -133,7 +139,7 @@ class UserStatsTest : BaseModelTest<UserStats>() {
     @Test
     fun `should represent realistic user journey`() {
         val beginnerStats = UserStats(
-            adventureCount = 5,
+            locationCount = 5,
             tripsCount = 2,
             visitedCountryCount = 1,
             totalCountries = 195,
@@ -144,7 +150,7 @@ class UserStatsTest : BaseModelTest<UserStats>() {
         )
 
         val experiencedStats = UserStats(
-            adventureCount = 150,
+            locationCount = 150,
             tripsCount = 50,
             visitedCountryCount = 30,
             totalCountries = 195,
@@ -154,8 +160,8 @@ class UserStatsTest : BaseModelTest<UserStats>() {
             totalRegions = 5000
         )
 
-        assertEquals(5, beginnerStats.adventureCount)
-        assertEquals(150, experiencedStats.adventureCount)
+        assertEquals(5, beginnerStats.locationCount)
+        assertEquals(150, experiencedStats.locationCount)
         assertTrue(experiencedStats.visitedCountryCount > beginnerStats.visitedCountryCount)
         assertTrue(experiencedStats.visitedCityCount > beginnerStats.visitedCityCount)
     }
