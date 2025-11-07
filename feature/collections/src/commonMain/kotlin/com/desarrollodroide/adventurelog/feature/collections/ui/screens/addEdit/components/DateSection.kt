@@ -37,12 +37,13 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.common.utils.formatDateForDisplay
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun DateSection(
     formData: CollectionFormData,

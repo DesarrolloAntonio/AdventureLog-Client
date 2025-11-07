@@ -21,12 +21,13 @@ import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import com.desarrollodroide.adventurelog.feature.ui.components.date.DateTimeField
 import com.desarrollodroide.adventurelog.feature.ui.components.date.TimePickerDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.date.TimezoneDropdown
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun DateSection(
     formData: LocationFormData,

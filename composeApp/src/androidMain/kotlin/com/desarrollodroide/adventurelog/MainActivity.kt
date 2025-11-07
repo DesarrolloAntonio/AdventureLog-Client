@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
         )
-        
+
         setContent {
             // Observe the theme mode
             val themeMode by settingsRepository.getThemeMode().collectAsState()
