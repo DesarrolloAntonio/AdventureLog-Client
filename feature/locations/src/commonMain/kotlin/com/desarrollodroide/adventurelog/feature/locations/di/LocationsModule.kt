@@ -33,6 +33,7 @@ val locationsModule = module {
             searchLocationsUseCase = get(),
             reverseGeocodeUseCase = get(),
             searchWikipediaImageUseCase = get(),
+            createCategoryUseCase = get(),
             adventureId = params.getOrNull(),
             existingLocation = params.getOrNull()
         )

@@ -6,12 +6,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -26,26 +30,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.categories.AddEditCategorySheet
 
 @Composable
 fun CategoryDropdown(
     categories: List<Category>,
     selectedCategory: Category?,
-    onCategorySelected: (Category?) -> Unit
+    onCategorySelected: (Category?) -> Unit,
+    onAddCategory: (name: String, icon: String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    
+    var showAddCategorySheet by remember { mutableStateOf(false) }
+
     Box {
         OutlinedTextField(
             value = selectedCategory?.let { "${it.icon} ${it.displayName}" } ?: "",
             onValueChange = { },
-            placeholder = { 
+            placeholder = {
                 Text(
-                    text = "Category",
+                    text = if (categories.isEmpty()) "No categories. Create one" else "Category",
                     color = Color.Gray
-                ) 
+                )
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -74,43 +82,90 @@ fun CategoryDropdown(
                 unfocusedBorderColor = Color.Transparent
             )
         )
-        
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
                 .clip(RoundedCornerShape(30.dp))
-                .clickable { expanded = true }
+                .clickable {
+                    if (categories.isEmpty()) {
+                        showAddCategorySheet = true
+                    } else {
+                        expanded = true
+                    }
+                }
         )
-        
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth(0.9f)
-        ) {
-            categories.forEach { category ->
+
+        if (categories.isNotEmpty()) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth(0.9f)
+            ) {
+                categories.forEach { category ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = category.icon,
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                                Text(
+                                    text = category.displayName,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        },
+                        onClick = {
+                            onCategorySelected(category)
+                            expanded = false
+                        }
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
                 DropdownMenuItem(
-                    text = { 
+                    text = {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = category.icon,
-                                style = MaterialTheme.typography.titleLarge
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
                             )
                             Text(
-                                text = category.displayName,
-                                style = MaterialTheme.typography.bodyLarge
+                                text = "Add new category",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
                     onClick = {
-                        onCategorySelected(category)
                         expanded = false
+                        showAddCategorySheet = true
                     }
                 )
             }
         }
+    }
+
+    if (showAddCategorySheet) {
+        AddEditCategorySheet(
+            category = null,
+            onDismiss = { showAddCategorySheet = false },
+            onSave = { name, icon ->
+                onAddCategory(name, icon)
+                showAddCategorySheet = false
+            }
+        )
     }
 }

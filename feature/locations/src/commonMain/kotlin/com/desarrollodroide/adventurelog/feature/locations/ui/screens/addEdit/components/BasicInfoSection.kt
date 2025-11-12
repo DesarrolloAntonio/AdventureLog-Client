@@ -60,7 +60,8 @@ fun BasicInfoSection(
     onFormDataChange: (LocationFormData) -> Unit,
     onNavigateBack: () -> Unit = {},
     onGenerateDescription: () -> Unit = {},
-    isGeneratingDescription: Boolean = false
+    isGeneratingDescription: Boolean = false,
+    onAddCategory: (name: String, icon: String) -> Unit = { _, _ -> }
 ) {
     var expanded by remember { mutableStateOf(true) }
     var linkError by remember { mutableStateOf("") }
@@ -122,7 +123,8 @@ fun BasicInfoSection(
                 selectedCategory = formData.category,
                 onCategorySelected = {
                     onFormDataChange(formData.copy(category = it))
-                }
+                },
+                onAddCategory = onAddCategory
             )
 
             RatingBar(

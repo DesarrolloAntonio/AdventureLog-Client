@@ -2,8 +2,8 @@ package com.desarrollodroide.adventurelog.feature.login.model
 
 data class LoginFormState(
     // Testing data
-//    val userName: String = "memnoch",
-//    val password: String = "JordalanA1",
+//    val userName: String = "TestMaestro",
+//    val password: String = "AdventureLogDev",
 //    val serverUrl: String = "http://192.168.1.27:8016/",
     val userName: String = "",
     val password: String = "",

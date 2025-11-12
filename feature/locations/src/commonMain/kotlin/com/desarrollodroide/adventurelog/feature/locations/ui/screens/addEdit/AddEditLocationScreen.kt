@@ -141,6 +141,9 @@ fun AddEditLocationScreen(
             },
             onResetWikipediaState = {
                 viewModel.resetWikipediaImageState()
+            },
+            onAddCategory = { name, icon ->
+                viewModel.createCategory(name = name, icon = icon)
             }
         )
 
@@ -169,6 +172,7 @@ fun AddEditLocationContent(
     wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
+    onAddCategory: (name: String, icon: String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var formData by remember(existingLocation) {
@@ -265,7 +269,8 @@ fun AddEditLocationContent(
                     formData = formData.copy(description = generatedDescription)
                 }
             },
-            isGeneratingDescription = isGeneratingDescription
+            isGeneratingDescription = isGeneratingDescription,
+            onAddCategory = onAddCategory
         )
 
         LocationSection(
@@ -293,10 +298,15 @@ fun AddEditLocationContent(
             onResetWikipediaState = onResetWikipediaState
         )
 
+        // TODO: Re-enable visits section when API supports nested visits creation
+        // Currently disabled because API returns 400: visits require 'location' field which doesn't exist during creation
+        // See: https://github.com/seanmorley15/AdventureLog/issues/915
+        /*
         DateSection(
             formData = formData,
             onFormDataChange = { formData = it }
         )
+        */
 
         Column(
             modifier = Modifier

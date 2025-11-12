@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network.model.response
 import com.desarrollodroide.adventurelog.core.model.Activity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class ActivityDTO(
@@ -87,8 +88,14 @@ data class ActivityDTO(
     @SerialName("external_service_id")
     val externalServiceId: String? = null,
     
+    // TODO: Backend issue - API spec is incomplete for geojson field
+    //       Current spec: "geojson": {"title": "Geojson", "type": "string", "readOnly": true}
+    //       Actual response: "geojson": {"type":"FeatureCollection","features":[]}
+    //       The spec should properly define the GeoJSON FeatureCollection structure with its fields
+    //       Using JsonElement as temporary workaround until backend provides proper OpenAPI schema
+    //       Create GitHub issue for backend team
     @SerialName("geojson")
-    val geojson: String? = null
+    val geojson: JsonElement? = null
 )
 
 fun ActivityDTO.toDomainModel(): Activity = Activity(
@@ -119,5 +126,5 @@ fun ActivityDTO.toDomainModel(): Activity = Activity(
     endLat = endLat,
     endLng = endLng,
     externalServiceId = externalServiceId,
-    geojson = geojson
+    geojson = geojson?.toString()
 )

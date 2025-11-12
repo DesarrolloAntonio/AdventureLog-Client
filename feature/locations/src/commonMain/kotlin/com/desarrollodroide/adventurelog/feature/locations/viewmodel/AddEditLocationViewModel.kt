@@ -21,6 +21,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.SearchLocationsUseC
 import com.desarrollodroide.adventurelog.core.domain.usecase.ReverseGeocodeUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResult
+import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 
@@ -46,6 +47,7 @@ class AddEditAdventureViewModel(
     private val searchLocationsUseCase: SearchLocationsUseCase,
     private val reverseGeocodeUseCase: ReverseGeocodeUseCase,
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
+    private val createCategoryUseCase: CreateCategoryUseCase,
     private val adventureId: String? = null,
     private val existingLocation: Location? = null
 ) : ViewModel() {
@@ -292,5 +294,24 @@ class AddEditAdventureViewModel(
         _uiState.value = _uiState.value.copy(
             wikipediaImageState = WikipediaImageResult.Loading
         )
+    }
+    
+    fun createCategory(name: String, icon: String) {
+        viewModelScope.launch {
+            when (val result = createCategoryUseCase(
+                name = name.lowercase().replace(" ", "_"),
+                displayName = name,
+                icon = icon
+            )) {
+                is Either.Left -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Failed to create category: ${result.value}"
+                    )
+                }
+                is Either.Right -> {
+                    loadCategories()
+                }
+            }
+        }
     }
 }

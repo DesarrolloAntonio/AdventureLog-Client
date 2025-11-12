@@ -522,7 +522,7 @@ fun DrawerItemAnimated(
                 .then(backgroundModifier)
                 .clickable(onClick = onClick)
                 .padding(start = 16.dp, end = 8.dp)
-                .clearAndSetSemantics {
+                .semantics {
                     contentDescription = accessibilityDescription
                     role = Role.Button
                 },

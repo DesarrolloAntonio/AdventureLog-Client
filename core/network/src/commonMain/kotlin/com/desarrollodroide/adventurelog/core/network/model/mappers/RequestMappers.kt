@@ -78,7 +78,9 @@ fun createAdventureRequest(
         link = link.takeIf { it.isNotBlank() },
         longitude = longitude.toCoordinateString(),
         latitude = latitude.toCoordinateString(),
-        visits = visits.map { it.toVisitRequest() },
+        // TODO: API does not support nested visits creation. Remove this null and send visits when backend issue is fixed
+        // See: https://github.com/seanmorley15/AdventureLog/issues/915
+        visits = null,
         category = category.toCategoryRequest()
     )
 }
