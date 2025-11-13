@@ -538,4 +538,19 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return transportationDataSource.deleteTransportation(transportationId)
     }
+    
+    override suspend fun uploadImage(
+        contentType: String,
+        objectId: String,
+        imageBytes: ByteArray,
+        fileName: String
+    ) {
+        ensureInitialized()
+        return contentDataSource.uploadImage(
+            contentType = contentType,
+            objectId = objectId,
+            imageBytes = imageBytes,
+            fileName = fileName
+        )
+    }
 }

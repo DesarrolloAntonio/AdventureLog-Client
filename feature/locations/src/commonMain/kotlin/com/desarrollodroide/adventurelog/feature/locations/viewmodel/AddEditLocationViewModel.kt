@@ -24,6 +24,9 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResul
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
+import com.desarrollodroide.adventurelog.core.domain.usecase.UploadImageUseCase
+import com.desarrollodroide.adventurelog.feature.ui.util.ImageBytesProvider
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 
 data class AddEditAdventureUiState(
     val isLoading: Boolean = false,
@@ -35,7 +38,9 @@ data class AddEditAdventureUiState(
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
     val reverseGeocodeResult: ReverseGeocodeResult? = null,
-    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading
+    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading,
+    val uploadingImagesCount: Int = 0,
+    val totalImagesToUpload: Int = 0
 )
 
 class AddEditAdventureViewModel(
@@ -48,6 +53,8 @@ class AddEditAdventureViewModel(
     private val reverseGeocodeUseCase: ReverseGeocodeUseCase,
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
     private val createCategoryUseCase: CreateCategoryUseCase,
+    private val uploadImageUseCase: UploadImageUseCase,
+    private val imageBytesProvider: ImageBytesProvider,
     private val adventureId: String? = null,
     private val existingLocation: Location? = null
 ) : ViewModel() {
@@ -158,14 +165,78 @@ class AddEditAdventureViewModel(
                     )
                 }
                 is Either.Right -> {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        isSaved = true
-                    )
-                    // The adventure was created successfully
-                    // We can access result.value if we need the created adventure
+                    val createdLocation = result.value
+                    val localImages = formData.images.filter { it.type == ImageType.LOCAL_FILE }
+                    
+                    if (localImages.isNotEmpty()) {
+                        _uiState.value = _uiState.value.copy(
+                            totalImagesToUpload = localImages.size,
+                            uploadingImagesCount = 0
+                        )
+                        
+                        uploadImages(
+                            locationId = createdLocation.id,
+                            images = localImages
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            isSaved = true
+                        )
+                    }
                 }
             }
+        }
+    }
+    
+    private suspend fun uploadImages(locationId: String, images: List<com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData>) {
+        var uploadedCount = 0
+        var hasError = false
+        
+        for (image in images) {
+            if (hasError) break
+            
+            val imageBytes = imageBytesProvider.getImageBytes(image.uri)
+            if (imageBytes == null) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Failed to read image file"
+                )
+                hasError = true
+                break
+            }
+            
+            val fileName = imageBytesProvider.getFileName(image.uri)
+            
+            when (uploadImageUseCase(
+                contentType = "location",
+                objectId = locationId,
+                imageBytes = imageBytes,
+                fileName = fileName
+            )) {
+                is Either.Left -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Failed to upload image: $fileName"
+                    )
+                    hasError = true
+                }
+                is Either.Right -> {
+                    uploadedCount++
+                    _uiState.value = _uiState.value.copy(
+                        uploadingImagesCount = uploadedCount
+                    )
+                }
+            }
+        }
+        
+        if (!hasError) {
+            _uiState.value = _uiState.value.copy(
+                isLoading = false,
+                isSaved = true,
+                uploadingImagesCount = 0,
+                totalImagesToUpload = 0
+            )
         }
     }
     

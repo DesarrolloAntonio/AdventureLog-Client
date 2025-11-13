@@ -311,4 +311,14 @@ interface AdventureLogNetwork {
      * Delete a transportation
      */
     suspend fun deleteTransportation(transportationId: String)
+    
+    /**
+     * Upload an image for a specific object
+     */
+    suspend fun uploadImage(
+        contentType: String,
+        objectId: String,
+        imageBytes: ByteArray,
+        fileName: String
+    )
 }

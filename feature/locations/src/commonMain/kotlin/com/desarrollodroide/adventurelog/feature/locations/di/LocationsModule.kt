@@ -3,11 +3,12 @@ package com.desarrollodroide.adventurelog.feature.locations.di
 import com.desarrollodroide.adventurelog.core.domain.di.domainModule
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.AddEditAdventureViewModel
+import com.desarrollodroide.adventurelog.feature.ui.di.imageLoaderModule
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val locationsModule = module {
-    includes(domainModule)
+    includes(domainModule, imageLoaderModule)
     
     viewModel { 
         LocationsViewModel(
@@ -34,6 +35,8 @@ val locationsModule = module {
             reverseGeocodeUseCase = get(),
             searchWikipediaImageUseCase = get(),
             createCategoryUseCase = get(),
+            uploadImageUseCase = get(),
+            imageBytesProvider = get(),
             adventureId = params.getOrNull(),
             existingLocation = params.getOrNull()
         )

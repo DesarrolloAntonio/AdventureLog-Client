@@ -16,11 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.desarrollodroide.adventurelog.feature.ui.util.ImageBytesProvider
+import com.desarrollodroide.adventurelog.feature.ui.util.createImageBytesProvider
 
-/**
- * Manages the session token for image authentication
- * Allows dynamic token updates that can be observed throughout the app
- */
 class SessionTokenManager {
     private val _sessionToken = MutableStateFlow<String?>(null)
     val sessionToken: StateFlow<String?> = _sessionToken
@@ -56,6 +54,8 @@ val imageLoaderModule = module {
             }
         }
     }
+
+    single { createImageBytesProvider(get()) }
 }
 
 /**

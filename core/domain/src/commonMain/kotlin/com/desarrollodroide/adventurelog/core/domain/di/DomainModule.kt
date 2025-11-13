@@ -41,6 +41,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.CreateTransportatio
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateTransportationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetTransportationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteTransportationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.UploadImageUseCase
 
 val domainModule = module {
     factoryOf(::LoginUseCase)
@@ -82,4 +83,5 @@ val domainModule = module {
     factoryOf(::UpdateTransportationUseCase)
     factoryOf(::GetTransportationUseCase)
     factoryOf(::DeleteTransportationUseCase)
+    factoryOf(::UploadImageUseCase)
 }

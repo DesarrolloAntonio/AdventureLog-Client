@@ -12,6 +12,7 @@ import com.desarrollodroide.adventurelog.core.data.SettingsRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.TransportationRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.UserRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.WikipediaRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.ImagesRepositoryImpl
 import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.CategoriesRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepository
@@ -22,6 +23,7 @@ import com.desarrollodroide.adventurelog.core.domain.repository.SettingsReposito
 import com.desarrollodroide.adventurelog.core.domain.repository.TransportationRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.WikipediaRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.ImagesRepository
 import com.desarrollodroide.adventurelog.core.network.di.networkModule
 import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named
@@ -72,6 +74,11 @@ val dataModule = module {
     }
     single<TransportationRepository> {
         TransportationRepositoryImpl(
+            networkDataSource = get()
+        )
+    }
+    single<ImagesRepository> {
+        ImagesRepositoryImpl(
             networkDataSource = get()
         )
     }
