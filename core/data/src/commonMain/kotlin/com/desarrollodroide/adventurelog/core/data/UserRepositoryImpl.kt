@@ -137,10 +137,16 @@ class UserRepositoryImpl(
         try {
             val userSessionJson = json.encodeToString(UserDetails.serializer(), userDetails)
             settings.putString(Keys.USER_SESSION, userSessionJson)
-            userSessionFlow.value = userDetails
         } catch (e: Exception) {
             println("Error saving user session: ${e.message}")
         }
+        // Publish regardless of whether persistence succeeded - the running app still needs a
+        // session, and a failed disk write should not log the user out of the current run.
+        setActiveSession(userDetails)
+    }
+
+    override fun setActiveSession(userDetails: UserDetails) {
+        userSessionFlow.value = userDetails
     }
 
     override fun getUserSession(): Flow<UserDetails?> {
@@ -150,6 +156,9 @@ class UserRepositoryImpl(
     override suspend fun getUserSessionOnce(): UserDetails? {
         return userSessionFlow.value
     }
+
+    override val activeSession: UserDetails?
+        get() = userSessionFlow.value
 
     override suspend fun clearUserSession() {
         settings.remove(Keys.USER_SESSION)

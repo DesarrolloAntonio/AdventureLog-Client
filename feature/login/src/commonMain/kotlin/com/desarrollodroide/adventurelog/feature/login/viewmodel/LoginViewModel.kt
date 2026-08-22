@@ -173,8 +173,18 @@ class LoginViewModel(
                         val userDetails = result.value
                         logger.d { "Login successful for user: ${userDetails.username}" }
 
+                        // The session must be published on every login - Home reads the user from
+                        // it for the greeting and to load stats. "Remember me" only decides
+                        // whether it also survives an app restart.
+                        // serverUrl is recorded here because the login response does not carry it,
+                        // and the image loader needs it to tell the user's own server apart from
+                        // third-party hosts before attaching the session token.
+                        saveSessionUseCase(
+                            userDetails.copy(serverUrl = url.trimEnd('/')),
+                            persist = rememberSession
+                        )
+
                         if (rememberSession) {
-                            saveSessionUseCase(userDetails)
                             rememberMeCredentialsUseCase.save(
                                 url = url,
                                 username = username,
@@ -183,7 +193,7 @@ class LoginViewModel(
                             logger.d { "Saved persistent session and credentials - will auto-login next time" }
                         } else {
                             rememberMeCredentialsUseCase.clear()
-                            logger.d { "Remember me not checked - won't save credentials or auto-login next time" }
+                            logger.d { "Remember me not checked - session is active for this run only" }
                         }
 
                         _uiState.update { LoginUiState.Success(userDetails) }

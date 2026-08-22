@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
+import com.desarrollodroide.adventurelog.feature.home.model.fullName
 import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,7 +53,7 @@ class HomeViewModel(
                     _uiState.update { currentState ->
                         if (currentState is HomeUiState.Success) {
                             currentState.copy(
-                                userName = userDetails?.firstName ?: "User"
+                                userName = userDetails?.fullName ?: "User"
                             )
                         } else {
                             currentState
@@ -92,7 +93,7 @@ class HomeViewModel(
 
                         _uiState.update {
                             HomeUiState.Success(
-                                userName = _userDetails.value?.firstName ?: "User",
+                                userName = _userDetails.value?.fullName ?: "User",
                                 recentLocations = recentAdventures
                             )
                         }

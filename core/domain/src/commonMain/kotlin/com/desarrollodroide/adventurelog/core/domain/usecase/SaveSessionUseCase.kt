@@ -4,18 +4,26 @@ import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 
 /**
- * Use case to save user session data
- * Used when user successfully logs in with "Remember me" checked
+ * Use case to establish the user session after a successful login.
  */
 class SaveSessionUseCase(
     private val userRepository: UserRepository
 ) {
 
     /**
-     * Saves the user session persistently
-     * @param userDetails User details to save
+     * Makes the session active for this run, and optionally persists it across app restarts.
+     *
+     * The session must always be published - screens read the logged-in user from it to render
+     * the greeting and to load stats. Only [persist] is tied to the "Remember me" checkbox.
+     *
+     * @param userDetails User details for the session
+     * @param persist Whether to also write the session to disk for auto-login
      */
-    suspend operator fun invoke(userDetails: UserDetails) {
-        userRepository.saveUserSession(userDetails)
+    suspend operator fun invoke(userDetails: UserDetails, persist: Boolean = true) {
+        if (persist) {
+            userRepository.saveUserSession(userDetails)
+        } else {
+            userRepository.setActiveSession(userDetails)
+        }
     }
 }

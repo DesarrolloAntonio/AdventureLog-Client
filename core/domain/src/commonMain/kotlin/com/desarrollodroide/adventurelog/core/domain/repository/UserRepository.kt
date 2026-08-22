@@ -40,6 +40,16 @@ interface UserRepository {
      * @param userDetails Complete user details to save
      */
     suspend fun saveUserSession(userDetails: UserDetails)
+
+    /**
+     * Publishes the session for the current run without writing it to disk.
+     *
+     * Screens observe [getUserSession] to know who is logged in, so this must happen on every
+     * successful login. Only persistence across app restarts is conditional on "Remember Me".
+     *
+     * @param userDetails Complete user details for the active session
+     */
+    fun setActiveSession(userDetails: UserDetails)
     
     /**
      * Gets current user session as a Flow
@@ -52,6 +62,15 @@ interface UserRepository {
      * @return UserDetails or null if not logged in
      */
     suspend fun getUserSessionOnce(): UserDetails?
+
+    /**
+     * The active session read synchronously, for callers that cannot suspend.
+     *
+     * Ktor's `defaultRequest` builder is one such caller: it has to attach credentials while the
+     * request is being built. Reading the session there - instead of having the UI push a token in -
+     * removes the race where the first image requests go out unauthenticated.
+     */
+    val activeSession: UserDetails?
     
     /**
      * Clears the current user session (logout)

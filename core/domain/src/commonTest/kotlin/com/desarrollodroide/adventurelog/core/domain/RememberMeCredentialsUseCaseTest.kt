@@ -43,9 +43,16 @@ class RememberMeCredentialsUseCaseTest {
             throw NotImplementedError()
         }
 
+        override fun setActiveSession(userDetails: UserDetails) {
+            throw NotImplementedError()
+        }
+
         override fun getUserSession(): Flow<UserDetails?> {
             throw NotImplementedError()
         }
+
+        override val activeSession: UserDetails?
+            get() = null
 
         override suspend fun getUserSessionOnce(): UserDetails? {
             throw NotImplementedError()

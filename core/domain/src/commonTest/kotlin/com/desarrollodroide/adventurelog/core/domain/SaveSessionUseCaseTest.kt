@@ -11,11 +11,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class SaveSessionUseCaseTest {
 
     private class FakeUserRepository : UserRepository {
         var savedUserDetails: UserDetails? = null
+        var activeUserDetails: UserDetails? = null
 
         override suspend fun saveRememberMeCredentials(url: String, username: String, password: String) {
             throw NotImplementedError()
@@ -31,11 +33,19 @@ class SaveSessionUseCaseTest {
 
         override suspend fun saveUserSession(userDetails: UserDetails) {
             savedUserDetails = userDetails
+            activeUserDetails = userDetails
+        }
+
+        override fun setActiveSession(userDetails: UserDetails) {
+            activeUserDetails = userDetails
         }
 
         override fun getUserSession(): Flow<UserDetails?> {
             throw NotImplementedError()
         }
+
+        override val activeSession: UserDetails?
+            get() = null
 
         override suspend fun getUserSessionOnce(): UserDetails? {
             throw NotImplementedError()
@@ -99,6 +109,34 @@ class SaveSessionUseCaseTest {
         assertEquals("john@example.com", fakeRepository.savedUserDetails?.email)
         assertEquals("John", fakeRepository.savedUserDetails?.firstName)
         assertEquals("Doe", fakeRepository.savedUserDetails?.lastName)
+    }
+
+    @Test
+    fun `invoke without persistence still activates the session`() = runTest {
+        val userDetails = createFakeUserDetails()
+
+        useCase(userDetails, persist = false)
+
+        // Home reads the logged-in user from the active session to render the greeting and to
+        // load stats, so it must be published even when "Remember me" is unchecked.
+        assertEquals(userDetails, fakeRepository.activeUserDetails)
+    }
+
+    @Test
+    fun `invoke without persistence does not write to disk`() = runTest {
+        useCase(createFakeUserDetails(), persist = false)
+
+        assertNull(fakeRepository.savedUserDetails)
+    }
+
+    @Test
+    fun `invoke with persistence both activates and stores the session`() = runTest {
+        val userDetails = createFakeUserDetails()
+
+        useCase(userDetails, persist = true)
+
+        assertEquals(userDetails, fakeRepository.activeUserDetails)
+        assertEquals(userDetails, fakeRepository.savedUserDetails)
     }
 
     private fun createFakeUserDetails() = UserDetails(
