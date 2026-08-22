@@ -89,19 +89,30 @@ internal class KtorUserApi(
         newPassword: String
     ): Boolean {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/auth/change-password/"
-        
-        val body = mapOf(
-            "current_password" to currentPassword,
-            "new_password" to newPassword
-        )
+        // allauth headless endpoint. The old /auth/change-password/ route does not exist on the
+        // server and answered 404 for every call.
+        val url = "${session.baseUrl}/auth/browser/v1/account/password/change"
+
+        // Accounts created through a social provider have no usable password; allauth rejects the
+        // request if current_password is sent as an empty string, so omit the key entirely.
+        val body = buildMap {
+            if (currentPassword.isNotBlank()) {
+                put("current_password", currentPassword)
+            }
+            put("new_password", newPassword)
+        }
 
         val response = httpClient.post(url) {
             contentType(ContentType.Application.Json)
             headers {
                 commonHeaders(session.sessionToken)
+                append("Referer", session.baseUrl)
             }
             setBody(body)
+        }
+
+        if (!response.status.isSuccess()) {
+            logger.e { "Password change failed with status: ${response.status}" }
         }
 
         return response.status.isSuccess()

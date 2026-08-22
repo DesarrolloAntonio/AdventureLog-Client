@@ -48,13 +48,5 @@ interface CollectionApi {
      */
     suspend fun deleteCollection(collectionId: String)
     
-    /**
-     * Add an adventure to a collection
-     */
-    suspend fun addAdventureToCollection(collectionId: String, adventureId: String)
     
-    /**
-     * Remove an adventure from a collection
-     */
-    suspend fun removeAdventureFromCollection(collectionId: String, adventureId: String)
 }

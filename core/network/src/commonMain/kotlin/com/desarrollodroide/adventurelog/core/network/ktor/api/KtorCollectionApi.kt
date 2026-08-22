@@ -248,39 +248,5 @@ internal class KtorCollectionApi(
         }
     }
 
-    override suspend fun addAdventureToCollection(collectionId: String, adventureId: String) {
-        val session = sessionProvider()
-        val url = "${session.baseUrl}/api/collections/$collectionId/adventures/$adventureId/"
-        
-        val response = httpClient.post(url) {
-            headers {
-                commonHeaders(session.sessionToken)
-            }
-        }
 
-        if (!response.status.isSuccess()) {
-            throw HttpException(
-                response.status.value,
-                "Failed to add adventure to collection with status: ${response.status}"
-            )
-        }
-    }
-
-    override suspend fun removeAdventureFromCollection(collectionId: String, adventureId: String) {
-        val session = sessionProvider()
-        val url = "${session.baseUrl}/api/collections/$collectionId/adventures/$adventureId/"
-        
-        val response = httpClient.delete(url) {
-            headers {
-                commonHeaders(session.sessionToken)
-            }
-        }
-
-        if (!response.status.isSuccess()) {
-            throw HttpException(
-                response.status.value,
-                "Failed to remove adventure from collection with status: ${response.status}"
-            )
-        }
-    }
 }
