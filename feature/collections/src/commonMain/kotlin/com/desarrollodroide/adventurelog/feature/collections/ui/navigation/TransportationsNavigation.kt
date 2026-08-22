@@ -10,7 +10,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditT
 import kotlinx.serialization.json.Json
 
 interface TransportationsNavigator {
-    fun navigateToAddTransportation()
+    fun navigateToAddTransportation(collectionId: String)
     fun navigateToEditTransportation(transportationId: String, transportationJson: String)
     fun navigateBack()
 }
@@ -24,10 +24,19 @@ fun NavGraphBuilder.transportationsScreen(
         isLenient = true
     }
 
-    composable(route = NavigationRoutes.Collections.Transportations.add) {
+    composable(
+        route = NavigationRoutes.Collections.Transportations.addRoute,
+        arguments = listOf(
+            navArgument("collectionId") {
+                type = NavType.StringType
+                defaultValue = ""
+            }
+        )
+    ) { backStackEntry ->
         AddEditTransportationScreen(
             transportationId = null,
             transportation = null,
+            collectionId = backStackEntry.savedStateHandle.get<String>("collectionId"),
             onNavigateBack = {
                 navigator.navigateBack()
             }

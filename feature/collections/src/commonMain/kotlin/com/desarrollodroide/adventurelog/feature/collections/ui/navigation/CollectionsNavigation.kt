@@ -36,6 +36,7 @@ interface CollectionsNavigator {
     fun navigateToEditCollection(collectionId: String)
     fun navigateToAdventure(location: Location)
     fun navigateToEditAdventure(adventure: Location)
+    fun navigateToAddTransportation(collectionId: String)
     fun navigateToEditTransportation(transportationId: String, transportationJson: String)
     fun navigateToHome()
     fun navigateBack()
@@ -108,6 +109,9 @@ fun NavGraphBuilder.collectionsScreen(
             },
             onEditAdventure = { adventure ->
                 navigator.navigateToEditAdventure(adventure)
+            },
+            onAddTransportation = {
+                navigator.navigateToAddTransportation(collectionId)
             },
             onEditTransportation = { transportation ->
                 val transportationJson = json.encodeToString(

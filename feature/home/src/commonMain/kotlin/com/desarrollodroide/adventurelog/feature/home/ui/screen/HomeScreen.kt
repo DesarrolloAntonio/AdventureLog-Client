@@ -453,6 +453,14 @@ fun HomeScreenContent(
                                     )
                                 }
 
+                                override fun navigateToAddTransportation(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createAddRoute(
+                                            collectionId = collectionId
+                                        )
+                                    )
+                                }
+
                                 override fun navigateToEditTransportation(
                                     transportationId: String,
                                     transportationJson: String
@@ -478,8 +486,12 @@ fun HomeScreenContent(
                         // Transportations screen with navigator
                         transportationsScreen(
                             navigator = object : TransportationsNavigator {
-                                override fun navigateToAddTransportation() {
-                                    navController.navigate(NavigationRoutes.Collections.Transportations.add)
+                                override fun navigateToAddTransportation(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createAddRoute(
+                                            collectionId = collectionId
+                                        )
+                                    )
                                 }
 
                                 override fun navigateToEditTransportation(

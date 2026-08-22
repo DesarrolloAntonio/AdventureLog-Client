@@ -47,8 +47,9 @@ val collectionsModule = module {
             generateDescriptionUseCase = get(),
             searchLocationsUseCase = get(),
             searchWikipediaImageUseCase = get(),
-            transportationId = params.getOrNull(),
-            existingTransportation = params.getOrNull()
+            transportationId = params.get(0),
+            existingTransportation = params.getOrNull(),
+            collectionId = params.get(2)
         )
     }
 }

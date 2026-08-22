@@ -22,7 +22,7 @@ enum class CurrentScreen(val route: String, val index: Int, val title: String) {
                 route.startsWith(NavigationRoutes.Collections.add) -> COLLECTIONS
                 route.startsWith("edit_collection/") -> COLLECTIONS
                 route.startsWith("collection/") -> COLLECTIONS
-                route.startsWith(NavigationRoutes.Collections.Transportations.add) -> COLLECTIONS
+                route.startsWith(NavigationRoutes.Collections.Transportations.addRoute.substringBefore('?')) -> COLLECTIONS
                 route.startsWith("transportations/edit") -> COLLECTIONS
                 route == NavigationRoutes.Travel.route -> TRAVEL
                 route == NavigationRoutes.Map.route -> MAP

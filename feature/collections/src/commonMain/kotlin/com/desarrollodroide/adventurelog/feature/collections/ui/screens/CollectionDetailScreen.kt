@@ -47,6 +47,7 @@ fun CollectionDetailScreen(
     onHomeClick: () -> Unit,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = koinViewModel()
@@ -128,6 +129,7 @@ fun CollectionDetailScreen(
                     onManageCollections = { adventure -> 
                         locationToManageCollections = adventure 
                     },
+                    onAddTransportation = onAddTransportation,
                     onEditTransportation = onEditTransportation,
                     onDeleteTransportation = { transportation ->
                         viewModel.deleteTransportation(transportation.id)
@@ -170,6 +172,7 @@ fun CollectionDetailContent(
     onEditAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit,
+    onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     onDeleteTransportation: (Transportation) -> Unit,
     modifier: Modifier = Modifier
@@ -297,20 +300,27 @@ fun CollectionDetailContent(
                     )
                 }
                 
-                if (transportations.isNotEmpty()) {
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Transportations",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Transportations",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        IconButton(onClick = onAddTransportation) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add transportation"
                             )
                         }
                     }
+                }
+
+                if (transportations.isNotEmpty()) {
                     
                     items(transportations) { transportation ->
                         TransportationItemCard(

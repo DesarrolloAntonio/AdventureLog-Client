@@ -37,7 +37,11 @@ object NavigationRoutes {
         }
         
         object Transportations {
-            const val add = "transportations/add"
+            const val addRoute = "transportations/add?collectionId={collectionId}"
+
+            fun createAddRoute(collectionId: String): String {
+                return "transportations/add?collectionId=$collectionId"
+            }
             const val editRoute = "transportations/edit?transportationId={transportationId}&transportationJson={transportationJson}"
             
             fun createEditRoute(transportationId: String, transportationJson: String): String {

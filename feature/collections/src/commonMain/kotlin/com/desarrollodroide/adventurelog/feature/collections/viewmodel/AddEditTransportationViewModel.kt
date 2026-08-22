@@ -40,7 +40,10 @@ class AddEditTransportationViewModel(
     private val searchLocationsUseCase: SearchLocationsUseCase,
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
     private val transportationId: String? = null,
-    private val existingTransportation: Transportation? = null
+    private val existingTransportation: Transportation? = null,
+    // Transportations belong to a collection; created without one they are orphaned and never
+    // appear in the collection detail screen.
+    private val collectionId: String? = null
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddEditTransportationUiState())
@@ -140,7 +143,8 @@ class AddEditTransportationViewModel(
                     destinationLongitude = formData.destinationLongitude,
                     isPublic = formData.isPublic,
                     images = imageUrls,
-                    attachments = formData.attachments
+                    attachments = formData.attachments,
+                    collectionId = collectionId
                 )
             }
             

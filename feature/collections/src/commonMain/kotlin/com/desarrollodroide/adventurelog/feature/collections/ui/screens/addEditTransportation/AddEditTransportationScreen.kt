@@ -43,11 +43,12 @@ import org.koin.core.parameter.parametersOf
 fun AddEditTransportationScreen(
     transportationId: String?,
     transportation: Transportation?,
+    collectionId: String? = null,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel = koinViewModel<AddEditTransportationViewModel> {
-        parametersOf(transportationId, transportation)
+        parametersOf(transportationId, transportation, collectionId)
     }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
