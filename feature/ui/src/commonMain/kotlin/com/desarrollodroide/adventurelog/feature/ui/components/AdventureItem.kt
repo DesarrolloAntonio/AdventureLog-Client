@@ -27,7 +27,6 @@ import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
-import com.desarrollodroide.adventurelog.feature.ui.di.LocalSessionTokenManager
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 
 @Composable
@@ -40,20 +39,12 @@ fun AdventureItem(
     onEdit: () -> Unit = {},
     onManageCollections: () -> Unit = {},
     onDelete: () -> Unit = {},
-    sessionToken: String = "",
     showMenu: Boolean = true
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     val imageLoader = LocalImageLoader.current
-    val sessionTokenManager = LocalSessionTokenManager.current
-
-    LaunchedEffect(sessionToken) {
-        if (sessionToken.isNotEmpty()) {
-            sessionTokenManager.updateSessionToken(sessionToken)
-        }
-    }
 
     Card(
         modifier = modifier

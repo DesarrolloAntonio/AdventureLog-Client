@@ -23,6 +23,10 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.ui.tooling)
         }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
     }
 }
 

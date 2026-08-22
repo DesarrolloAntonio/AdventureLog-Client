@@ -378,8 +378,7 @@ fun HomeScreenContent(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,
                                 statsState = statsState,
-                                onAdventureClick = onAdventureClick,
-                                sessionToken = userDetails?.sessionToken ?: ""
+                                onAdventureClick = onAdventureClick
                             )
                         }
 
@@ -594,7 +593,6 @@ private fun HomeScreenSuccessPreview() {
                 profilePic = null,
                 isStaff = false,
                 dateJoined = "2024-01-01",
-                sessionToken = "token123",
                 uuid = "user-uuid-123",
                 publicProfile = true,
                 hasPassword = true,

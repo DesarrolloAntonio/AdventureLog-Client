@@ -55,6 +55,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.compose.SubcomposeAsyncImage
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import androidx.compose.material3.CircularProgressIndicator
 import kotlin.collections.plus
 
@@ -628,6 +629,7 @@ private fun ImageItem(
                             .data(image.uri)
                             .crossfade(true)
                             .build(),
+                        imageLoader = LocalImageLoader.current,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),

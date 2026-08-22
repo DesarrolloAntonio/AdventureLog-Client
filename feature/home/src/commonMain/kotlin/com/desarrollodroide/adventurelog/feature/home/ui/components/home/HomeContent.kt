@@ -55,7 +55,6 @@ fun HomeContent(
     homeUiState: HomeUiState,
     statsState: StatsUiState,
     onAdventureClick: (Location) -> Unit = { },
-    sessionToken: String = ""
 ) {
     Box(
         modifier = modifier
@@ -90,7 +89,6 @@ fun HomeContent(
                     statsState = statsState,
                     recentLocations = homeUiState.recentLocations,
                     onAdventureClick = onAdventureClick,
-                    sessionToken = sessionToken
                 )
             }
         }
@@ -103,7 +101,6 @@ private fun HomeContentSuccess(
     statsState: StatsUiState,
     recentLocations: List<Location>,
     onAdventureClick: (Location) -> Unit = { },
-    sessionToken: String = "",
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -139,7 +136,6 @@ private fun HomeContentSuccess(
             AdventureItem(
                 location = adventure,
                 onClick = { onAdventureClick(adventure) },
-                sessionToken = sessionToken,
                 showMenu = false
             )
         }
