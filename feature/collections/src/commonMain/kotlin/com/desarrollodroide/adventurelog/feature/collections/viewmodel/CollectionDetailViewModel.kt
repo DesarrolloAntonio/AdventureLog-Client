@@ -4,10 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteAdventureUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteTransportationUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateAdventureCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationCollectionsUseCase
