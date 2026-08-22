@@ -5,6 +5,7 @@ import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNet
 import com.desarrollodroide.adventurelog.core.network.ktor.KtorAdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaNetworkDataSource
 import com.desarrollodroide.adventurelog.core.network.ktor.KtorWikipediaNetwork
+import com.desarrollodroide.adventurelog.core.network.ktor.RedactingHttpLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -44,20 +45,10 @@ val networkModule = module {
                 json(get())
             }
             install(Logging) {
-                level = LogLevel.BODY
-                logger = object : io.ktor.client.plugins.logging.Logger {
-                    override fun log(message: String) {
-                        // Split long messages to avoid truncation
-                        if (message.length > 3000) {
-                            val chunks = message.chunked(3000)
-                            chunks.forEachIndexed { index, chunk ->
-                                println(chunk)
-                            }
-                        } else {
-                            println("HTTP Log: $message")
-                        }
-                    }
-                }
+                // Bodies are only printed when explicitly opted in at build time, and even then
+                // RedactingHttpLogger strips passwords, tokens and session cookies.
+                level = if (BuildConfig.HTTP_LOGGING) LogLevel.BODY else LogLevel.NONE
+                logger = RedactingHttpLogger()
             }
         }
     }

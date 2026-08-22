@@ -130,11 +130,8 @@ class KtorAdventureLogNetwork(
         this.baseUrl = serverUrl.trimEnd('/')
         this.sessionToken = sessionToken
         logger.d {
-            "Network initialized from existing session - BaseURL: ${this.baseUrl}, SessionToken: ${
-                sessionToken?.take(
-                    10
-                )
-            }..."
+            "Network initialized from existing session - BaseURL: ${this.baseUrl}, " +
+                "SessionToken: ${if (sessionToken.isNullOrEmpty()) "absent" else "present"}"
         }
     }
 

@@ -5,6 +5,7 @@ import com.desarrollodroide.adventurelog.core.network.api.AuthApi
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
+import com.desarrollodroide.adventurelog.core.network.ktor.redactSecrets
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
@@ -50,11 +51,9 @@ class KtorAuthApi(
         }
 
         logger.d { "Login response status: ${response.status}" }
-        logger.d { "Login response headers: ${response.headers.entries()}" }
 
         if (response.status.isSuccess()) {
             val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
-            logger.d { "Cookies from login response: $cookies" }
 
             var sessionToken: String? = null
             for (cookie in cookies) {
@@ -62,19 +61,19 @@ class KtorAuthApi(
                     val sessionidPattern = Regex("sessionid=([^;]+)")
                     val matchResult = sessionidPattern.find(cookie)
                     sessionToken = matchResult?.groupValues?.get(1)
-                    logger.d { "Extracted sessionId from cookies: $sessionToken" }
                 }
             }
 
             if (sessionToken == null) {
                 logger.w { "No session token found in cookies" }
             } else {
+                // Never log the token itself - it grants full account access.
+                logger.d { "Session token received (${sessionToken.length} chars)" }
                 // Notify the parent about the new session token
                 onSessionTokenReceived(sessionToken)
             }
 
             val responseBody = response.body<String>()
-            logger.d { "Login response body: $responseBody" }
 
             val loginResponse = json.decodeFromString<LoginResponse>(responseBody)
 
@@ -99,7 +98,10 @@ class KtorAuthApi(
         } else {
             try {
                 val errorBody = response.body<String>()
-                logger.e { "Login failed with status: ${response.status}. Error body: $errorBody" }
+                logger.e {
+                    "Login failed with status: ${response.status}. " +
+                        "Error body: ${redactSecrets(errorBody)}"
+                }
             } catch (e: Exception) {
                 logger.e { "Login failed with status: ${response.status}. Could not read error body." }
             }
