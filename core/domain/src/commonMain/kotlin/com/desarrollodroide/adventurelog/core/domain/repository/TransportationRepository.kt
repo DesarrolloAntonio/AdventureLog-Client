@@ -24,7 +24,8 @@ interface TransportationRepository {
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Either<String, Transportation>
 
     suspend fun updateTransportation(
@@ -48,7 +49,8 @@ interface TransportationRepository {
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Either<String, Transportation>
     
     suspend fun getTransportation(transportationId: String): Either<String, Transportation>

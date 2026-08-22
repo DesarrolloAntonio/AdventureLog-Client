@@ -1,27 +1,42 @@
 package com.desarrollodroide.adventurelog.core.network.ktor.api
 
-import com.desarrollodroide.adventurelog.core.model.ContentImage
+import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.network.api.TransportationApi
+import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
+import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
+import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
+import com.desarrollodroide.adventurelog.core.network.model.request.TransportationRequest
+import com.desarrollodroide.adventurelog.core.network.model.response.TransportationDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import io.ktor.client.HttpClient
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.client.request.patch
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
+import kotlinx.serialization.json.Json
 
 /**
- * Mock implementation of TransportationApi for development
- * TODO: Replace with actual API calls when backend is ready
+ * Talks to the server's `/api/transportations/` endpoints.
+ *
+ * The form hands every unset text field over as an empty string; the server rejects those for
+ * nullable columns such as `date` and the timezone choices, so they are normalised to null here.
  */
 class KtorTransportationApi(
     private val httpClient: HttpClient,
-    private val sessionProvider: () -> SessionInfo
+    private val sessionProvider: () -> SessionInfo,
+    private val json: Json = defaultJson
 ) : TransportationApi {
-    
-    // In-memory storage for mock data
-    private val transportations = mutableMapOf<String, Transportation>()
-    private var nextId = 1
-    
-    @OptIn(ExperimentalTime::class)
+
+    private val logger = Logger.withTag("KtorTransportationApi")
+
     override suspend fun createTransportation(
         name: String,
         type: String,
@@ -42,52 +57,42 @@ class KtorTransportationApi(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String?
     ): Transportation {
-        val id = "transport_${nextId++}"
-        val now = Clock.System.now().toString()
-        
-        val transportation = Transportation(
-            id = id,
-            user = "current_user",
-            type = type,
-            name = name,
-            description = description.ifBlank { null },
-            rating = if (rating > 0) rating else null,
-            link = link.ifBlank { null },
-            date = departureDate.ifBlank { null },
-            endDate = arrivalDate.ifBlank { null },
-            flightNumber = flightNumber.ifBlank { null },
-            fromLocation = fromLocation.ifBlank { null },
-            toLocation = toLocation.ifBlank { null },
-            isPublic = isPublic,
-            collection = null,
-            createdAt = now,
-            updatedAt = now,
-            originLatitude = originLatitude,
-            originLongitude = originLongitude,
-            destinationLatitude = destinationLatitude,
-            destinationLongitude = destinationLongitude,
-            startTimezone = departureTimezone.ifBlank { null },
-            endTimezone = arrivalTimezone.ifBlank { null },
-            distance = distance.ifBlank { null },
-            images = images.mapIndexed { index, imageUrl ->
-                ContentImage(
-                    id = "${id}_img_$index",
-                    image = imageUrl,
-                    isPrimary = index == 0,
-                    user = "current_user",
-                    immichId = null
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/transportations/"
+
+        val response = httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            headers { commonHeaders(session.sessionToken) }
+            setBody(
+                buildRequest(
+                    name = name,
+                    type = type,
+                    description = description,
+                    rating = rating,
+                    link = link,
+                    fromLocation = fromLocation,
+                    toLocation = toLocation,
+                    departureDate = departureDate,
+                    arrivalDate = arrivalDate,
+                    departureTimezone = departureTimezone,
+                    arrivalTimezone = arrivalTimezone,
+                    flightNumber = flightNumber,
+                    originLatitude = originLatitude,
+                    originLongitude = originLongitude,
+                    destinationLatitude = destinationLatitude,
+                    destinationLongitude = destinationLongitude,
+                    isPublic = isPublic,
+                    collectionId = collectionId
                 )
-            }.ifEmpty { null },
-            attachments = emptyList()
-        )
-        
-        transportations[id] = transportation
-        return transportation
+            )
+        }
+
+        return response.parseAs("create transportation")
     }
-    
-    @OptIn(ExperimentalTime::class)
+
     override suspend fun updateTransportation(
         transportationId: String,
         name: String,
@@ -109,55 +114,128 @@ class KtorTransportationApi(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String?
     ): Transportation {
-        val existing = transportations[transportationId]
-            ?: throw IllegalArgumentException("Transportation not found: $transportationId")
-        
-        val updated = existing.copy(
-            type = type,
-            name = name,
-            description = description.ifBlank { null },
-            rating = if (rating > 0) rating else null,
-            link = link.ifBlank { null },
-            date = departureDate.ifBlank { null },
-            endDate = arrivalDate.ifBlank { null },
-            flightNumber = flightNumber.ifBlank { null },
-            fromLocation = fromLocation.ifBlank { null },
-            toLocation = toLocation.ifBlank { null },
-            isPublic = isPublic,
-            updatedAt = Clock.System.now().toString(),
-            originLatitude = originLatitude,
-            originLongitude = originLongitude,
-            destinationLatitude = destinationLatitude,
-            destinationLongitude = destinationLongitude,
-            startTimezone = departureTimezone.ifBlank { null },
-            endTimezone = arrivalTimezone.ifBlank { null },
-            distance = distance.ifBlank { null },
-            images = images.mapIndexed { index, imageUrl ->
-                ContentImage(
-                    id = "${transportationId}_img_$index",
-                    image = imageUrl,
-                    isPrimary = index == 0,
-                    user = existing.user,
-                    immichId = null
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/transportations/$transportationId/"
+
+        val response = httpClient.patch(url) {
+            contentType(ContentType.Application.Json)
+            headers { commonHeaders(session.sessionToken) }
+            setBody(
+                buildRequest(
+                    name = name,
+                    type = type,
+                    description = description,
+                    rating = rating,
+                    link = link,
+                    fromLocation = fromLocation,
+                    toLocation = toLocation,
+                    departureDate = departureDate,
+                    arrivalDate = arrivalDate,
+                    departureTimezone = departureTimezone,
+                    arrivalTimezone = arrivalTimezone,
+                    flightNumber = flightNumber,
+                    originLatitude = originLatitude,
+                    originLongitude = originLongitude,
+                    destinationLatitude = destinationLatitude,
+                    destinationLongitude = destinationLongitude,
+                    isPublic = isPublic,
+                    collectionId = collectionId
                 )
-            }.ifEmpty { null }
-        )
-        
-        transportations[transportationId] = updated
-        return updated
-    }
-    
-    override suspend fun getTransportation(transportationId: String): Transportation {
-        return transportations[transportationId]
-            ?: throw IllegalArgumentException("Transportation not found: $transportationId")
-    }
-    
-    override suspend fun deleteTransportation(transportationId: String) {
-        if (!transportations.containsKey(transportationId)) {
-            throw IllegalArgumentException("Transportation not found: $transportationId")
+            )
         }
-        transportations.remove(transportationId)
+
+        return response.parseAs("update transportation")
+    }
+
+    override suspend fun getTransportation(transportationId: String): Transportation {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/transportations/$transportationId/"
+
+        val response = httpClient.get(url) {
+            headers { commonHeaders(session.sessionToken) }
+        }
+
+        return response.parseAs("get transportation")
+    }
+
+    override suspend fun deleteTransportation(transportationId: String) {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/transportations/$transportationId/"
+
+        val response = httpClient.delete(url) {
+            headers { commonHeaders(session.sessionToken) }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to delete transportation with status: ${response.status}"
+            )
+        }
+    }
+
+    /**
+     * `distance` is deliberately not sent - the server derives it from the coordinates (or from an
+     * attached GPX track) and exposes it read-only.
+     */
+    private fun buildRequest(
+        name: String,
+        type: String,
+        description: String,
+        rating: Double,
+        link: String,
+        fromLocation: String,
+        toLocation: String,
+        departureDate: String,
+        arrivalDate: String,
+        departureTimezone: String,
+        arrivalTimezone: String,
+        flightNumber: String,
+        originLatitude: String?,
+        originLongitude: String?,
+        destinationLatitude: String?,
+        destinationLongitude: String?,
+        isPublic: Boolean,
+        collectionId: String?
+    ) = TransportationRequest(
+        type = type,
+        name = name,
+        description = description.ifBlank { null },
+        rating = rating.takeIf { it > 0 },
+        link = link.ifBlank { null },
+        date = departureDate.ifBlank { null },
+        endDate = arrivalDate.ifBlank { null },
+        startTimezone = departureTimezone.ifBlank { null },
+        endTimezone = arrivalTimezone.ifBlank { null },
+        flightNumber = flightNumber.ifBlank { null },
+        fromLocation = fromLocation.ifBlank { null },
+        toLocation = toLocation.ifBlank { null },
+        originLatitude = originLatitude?.toDoubleOrNull(),
+        originLongitude = originLongitude?.toDoubleOrNull(),
+        destinationLatitude = destinationLatitude?.toDoubleOrNull(),
+        destinationLongitude = destinationLongitude?.toDoubleOrNull(),
+        isPublic = isPublic,
+        collection = collectionId?.ifBlank { null }
+    )
+
+    private suspend fun io.ktor.client.statement.HttpResponse.parseAs(
+        action: String
+    ): Transportation {
+        val responseText = body<String>()
+
+        if (!status.isSuccess()) {
+            logger.e { "Failed to $action with status: $status. Body: $responseText" }
+            throw HttpException(status.value, "Failed to $action with status: $status")
+        }
+
+        return try {
+            json.decodeFromString<TransportationDTO>(responseText).toDomainModel()
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to parse $action response" }
+            throw e
+        }
     }
 }

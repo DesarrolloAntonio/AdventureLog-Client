@@ -51,9 +51,16 @@ class LogoutUseCaseTest {
             throw NotImplementedError()
         }
 
+        override fun setActiveSession(userDetails: UserDetails) {
+            throw NotImplementedError()
+        }
+
         override fun getUserSession(): Flow<UserDetails?> {
             throw NotImplementedError()
         }
+
+        override val activeSession: UserDetails?
+            get() = null
 
         override suspend fun getUserSessionOnce(): UserDetails? {
             throw NotImplementedError()
@@ -282,7 +289,8 @@ class LogoutUseCaseTest {
             destinationLongitude: String?,
             isPublic: Boolean,
             images: List<String>,
-            attachments: List<String>
+            attachments: List<String>,
+            collectionId: String?
         ): com.desarrollodroide.adventurelog.core.model.Transportation {
             throw NotImplementedError()
         }
@@ -308,7 +316,8 @@ class LogoutUseCaseTest {
             destinationLongitude: String?,
             isPublic: Boolean,
             images: List<String>,
-            attachments: List<String>
+            attachments: List<String>,
+            collectionId: String?
         ): com.desarrollodroide.adventurelog.core.model.Transportation {
             throw NotImplementedError()
         }
@@ -318,6 +327,15 @@ class LogoutUseCaseTest {
         }
         
         override suspend fun deleteTransportation(transportationId: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun uploadImage(
+            contentType: String,
+            objectId: String,
+            imageBytes: ByteArray,
+            fileName: String
+        ) {
             throw NotImplementedError()
         }
     }

@@ -28,7 +28,8 @@ class UpdateTransportationUseCase(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Either<String, Transportation> {
         return transportationRepository.updateTransportation(
             transportationId = transportationId,
@@ -51,7 +52,8 @@ class UpdateTransportationUseCase(
             destinationLongitude = destinationLongitude,
             isPublic = isPublic,
             images = images,
-            attachments = attachments
+            attachments = attachments,
+            collectionId = collectionId
         )
     }
 }

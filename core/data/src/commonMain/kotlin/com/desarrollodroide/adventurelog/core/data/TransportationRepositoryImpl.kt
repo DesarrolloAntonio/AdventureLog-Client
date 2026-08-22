@@ -29,7 +29,8 @@ class TransportationRepositoryImpl(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String?
     ): Either<String, Transportation> {
         return try {
             val transportation = networkDataSource.createTransportation(
@@ -52,7 +53,8 @@ class TransportationRepositoryImpl(
                 destinationLongitude = destinationLongitude,
                 isPublic = isPublic,
                 images = images,
-                attachments = attachments
+                attachments = attachments,
+                collectionId = collectionId
             )
             Either.Right(transportation)
         } catch (e: Exception) {
@@ -81,7 +83,8 @@ class TransportationRepositoryImpl(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String?
     ): Either<String, Transportation> {
         return try {
             val transportation = networkDataSource.updateTransportation(
@@ -105,7 +108,8 @@ class TransportationRepositoryImpl(
                 destinationLongitude = destinationLongitude,
                 isPublic = isPublic,
                 images = images,
-                attachments = attachments
+                attachments = attachments,
+                collectionId = collectionId
             )
             Either.Right(transportation)
         } catch (e: Exception) {

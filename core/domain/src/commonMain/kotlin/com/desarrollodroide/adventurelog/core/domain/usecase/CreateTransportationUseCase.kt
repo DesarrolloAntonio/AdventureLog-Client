@@ -27,7 +27,8 @@ class CreateTransportationUseCase(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Either<String, Transportation> {
         return transportationRepository.createTransportation(
             name = name,
@@ -49,7 +50,8 @@ class CreateTransportationUseCase(
             destinationLongitude = destinationLongitude,
             isPublic = isPublic,
             images = images,
-            attachments = attachments
+            attachments = attachments,
+            collectionId = collectionId
         )
     }
 }

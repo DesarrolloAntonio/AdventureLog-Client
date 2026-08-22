@@ -272,7 +272,8 @@ interface AdventureLogNetwork {
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Transportation
     
     /**
@@ -299,7 +300,8 @@ interface AdventureLogNetwork {
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Transportation
     
     /**

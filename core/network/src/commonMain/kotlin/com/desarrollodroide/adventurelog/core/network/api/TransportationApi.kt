@@ -23,7 +23,8 @@ interface TransportationApi {
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>, // Changed to List<String> for URLs only
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Transportation
 
     suspend fun updateTransportation(
@@ -47,7 +48,8 @@ interface TransportationApi {
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>, // Changed to List<String> for URLs only
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String? = null
     ): Transportation
     
     suspend fun getTransportation(transportationId: String): Transportation

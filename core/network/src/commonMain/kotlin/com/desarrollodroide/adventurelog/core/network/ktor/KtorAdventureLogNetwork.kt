@@ -450,7 +450,8 @@ class KtorAdventureLogNetwork(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String?
     ): Transportation {
         ensureInitialized()
         return transportationDataSource.createTransportation(
@@ -473,7 +474,8 @@ class KtorAdventureLogNetwork(
             destinationLongitude = destinationLongitude,
             isPublic = isPublic,
             images = images,
-            attachments = attachments
+            attachments = attachments,
+            collectionId = collectionId
         )
     }
     
@@ -498,7 +500,8 @@ class KtorAdventureLogNetwork(
         destinationLongitude: String?,
         isPublic: Boolean,
         images: List<String>,
-        attachments: List<String>
+        attachments: List<String>,
+        collectionId: String?
     ): Transportation {
         ensureInitialized()
         return transportationDataSource.updateTransportation(
@@ -522,7 +525,8 @@ class KtorAdventureLogNetwork(
             destinationLongitude = destinationLongitude,
             isPublic = isPublic,
             images = images,
-            attachments = attachments
+            attachments = attachments,
+            collectionId = collectionId
         )
     }
     

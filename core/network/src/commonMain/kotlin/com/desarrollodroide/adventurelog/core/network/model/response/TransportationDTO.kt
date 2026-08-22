@@ -72,8 +72,9 @@ data class TransportationDTO(
     @SerialName("end_timezone")
     val endTimezone: String? = null,
 
+    // The server computes this with geodesic() and returns a float (km), not a string.
     @SerialName("distance")
-    val distance: String? = null,
+    val distance: Double? = null,
 
     @SerialName("images")
     val images: List<ContentImageDTO>? = null,
@@ -105,7 +106,7 @@ fun TransportationDTO.toDomainModel(): Transportation = Transportation(
     destinationLongitude = destinationLongitude,
     startTimezone = startTimezone,
     endTimezone = endTimezone,
-    distance = distance,
+    distance = distance?.toString(),
     images = images?.map { it.toDomainModel() },
     attachments = attachments?.map { it.toDomainModel() }
 )
