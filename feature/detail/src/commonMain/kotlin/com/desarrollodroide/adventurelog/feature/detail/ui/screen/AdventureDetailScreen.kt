@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalUriHandler
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.AttachmentsSection
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.ContentImage
 import com.desarrollodroide.adventurelog.core.model.Category
@@ -40,6 +42,17 @@ fun AdventureDetailScreenRoute(
     
     val locationState by viewModel.locationState.collectAsStateWithLifecycle()
     val collections by viewModel.collections.collectAsStateWithLifecycle()
+    val openingAttachmentId by viewModel.openingAttachmentId.collectAsStateWithLifecycle()
+    val attachmentMessage by viewModel.attachmentMessage.collectAsStateWithLifecycle()
+    val uriHandler = LocalUriHandler.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(attachmentMessage) {
+        attachmentMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearAttachmentMessage()
+        }
+    }
 
     when (val state = locationState) {
         is LocationState.Loading -> {
@@ -51,14 +64,24 @@ fun AdventureDetailScreenRoute(
             }
         }
         is LocationState.Success -> {
-            AdventureDetailScreen(
-                location = state.location,
-                collections = collections,
-                onBackClick = onBackClick,
-                onEditClick = { viewModel.editAdventure(state.location.id) },
-                onOpenMap = { lat: String, long: String -> viewModel.openMap(lat, long) },
-                onOpenLink = { url: String -> viewModel.openLink(url) }
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                AdventureDetailScreen(
+                    location = state.location,
+                    collections = collections,
+                    onBackClick = onBackClick,
+                    onEditClick = { viewModel.editAdventure(state.location.id) },
+                    onOpenMap = { lat: String, long: String -> viewModel.openMap(lat, long) },
+                    // The link is a plain external URL, so the platform handler is enough - it
+                    // used to be routed to a view model method that only printed it.
+                    onOpenLink = { url: String -> uriHandler.openUri(url) },
+                    openingAttachmentId = openingAttachmentId,
+                    onOpenAttachment = viewModel::openAttachment
+                )
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+                )
+            }
         }
         is LocationState.Error -> {
             Box(
@@ -93,6 +116,8 @@ fun AdventureDetailScreen(
     onEditClick: () -> Unit,
     onOpenMap: (String, String) -> Unit,
     onOpenLink: (String) -> Unit,
+    openingAttachmentId: String? = null,
+    onOpenAttachment: (com.desarrollodroide.adventurelog.core.model.Attachment) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -180,6 +205,12 @@ fun AdventureDetailScreen(
                             LinkSection(link = link, onOpenLink = onOpenLink)
                         }
                     }
+
+                    AttachmentsSection(
+                        attachments = location.attachments,
+                        openingAttachmentId = openingAttachmentId,
+                        onOpenAttachment = onOpenAttachment
+                    )
 
                     if (location.visits.isNotEmpty()) {
                         VisitsSection(visits = location.visits)

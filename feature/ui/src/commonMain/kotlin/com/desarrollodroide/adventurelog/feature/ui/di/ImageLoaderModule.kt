@@ -19,6 +19,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.feature.ui.util.ImageBytesProvider
 import com.desarrollodroide.adventurelog.feature.ui.util.isSameOrigin
+import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
+import com.desarrollodroide.adventurelog.feature.ui.util.createAttachmentOpener
 import com.desarrollodroide.adventurelog.feature.ui.util.createImageBytesProvider
 
 class SessionTokenManager {
@@ -71,6 +73,10 @@ val imageLoaderModule = module {
     }
 
     single { createImageBytesProvider(get()) }
+
+    single { createAttachmentOpener(get()) }
+
+    single { AuthenticatedFileDownloader(client = get(named("imageClient"))) }
 }
 
 /**

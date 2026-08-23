@@ -11,6 +11,8 @@ val detailModule = module {
     viewModel { 
         AdventureDetailViewModel(
             getLocationUseCase = get(),
+            fileDownloader = get(),
+            attachmentOpener = get(),
             observeCollectionsUseCase = get()
         )
     }
