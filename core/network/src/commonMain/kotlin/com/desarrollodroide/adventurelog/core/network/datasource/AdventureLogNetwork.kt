@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network.datasource
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
@@ -192,6 +193,15 @@ interface AdventureLogNetwork {
      * Get everything the home screen shows in a single request.
      */
     suspend fun getDashboard(): DashboardDTO
+
+    /**
+     * Visits are a resource of their own - see [com.desarrollodroide.adventurelog.core.network.api.VisitApi].
+     */
+    suspend fun createVisit(locationId: String, visit: VisitFormData): VisitDTO
+
+    suspend fun updateVisit(visitId: String, locationId: String, visit: VisitFormData): VisitDTO
+
+    suspend fun deleteVisit(visitId: String)
 
     /**
      * Delete an adventure

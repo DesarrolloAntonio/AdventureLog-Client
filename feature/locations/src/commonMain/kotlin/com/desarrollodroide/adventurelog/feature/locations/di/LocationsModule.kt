@@ -36,6 +36,7 @@ val locationsModule = module {
             searchWikipediaImageUseCase = get(),
             createCategoryUseCase = get(),
             uploadImageUseCase = get(),
+            syncLocationVisitsUseCase = get(),
             imageBytesProvider = get(),
             adventureId = params.getOrNull(),
             existingLocation = params.getOrNull()

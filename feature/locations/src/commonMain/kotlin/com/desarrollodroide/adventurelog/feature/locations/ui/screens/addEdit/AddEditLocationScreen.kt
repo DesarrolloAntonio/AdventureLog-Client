@@ -81,6 +81,16 @@ private fun splitIsoDateTime(isoString: String?): SplitDateTime {
     }
 }
 
+/**
+ * True when this bound carries no meaningful time of day.
+ *
+ * Midnight is how an all-day visit is stored now; end-of-day is the older form the server still
+ * accepts and normalises. Both have to read as all-day, or a visit saved before the app started
+ * sending midnight comes back looking like it runs from 00:00 to 23:59.
+ */
+private fun SplitDateTime.isAllDayBound(): Boolean =
+    time == null || time == "00:00" || time == "23:59"
+
 @Composable
 fun AddEditLocationScreen(
     locationId: String?,
@@ -169,7 +179,7 @@ fun AddEditLocationContent(
     onClearLocationSearch: () -> Unit = {},
     onReverseGeocode: (Double, Double) -> Unit = { _, _ -> },
     reverseGeocodeResult: ReverseGeocodeResult? = null,
-    wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading,
+    wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
     onAddCategory: (name: String, icon: String) -> Unit = { _, _ -> },
@@ -190,14 +200,20 @@ fun AddEditLocationContent(
                     println("DEBUG: Parsed visit $index - startDate: ${startDateTime.date}, startTime: ${startDateTime.time}")
                     println("DEBUG: Parsed visit $index - endDate: ${endDateTime.date}, endTime: ${endDateTime.time}")
                     
+                    // An all-day visit is stored as midnight on both bounds, so a time of
+                    // 00:00 means "no time" rather than "one minute past midnight". Reading it
+                    // literally left the All day switch off on every visit ever saved.
+                    val allDay = startDateTime.isAllDayBound() && endDateTime.isAllDayBound()
+
                     VisitFormData(
+                        id = visit.id,
                         startDate = startDateTime.date,
                         endDate = endDateTime.date,
-                        startTime = startDateTime.time,
-                        endTime = endDateTime.time,
+                        startTime = startDateTime.time.takeUnless { allDay },
+                        endTime = endDateTime.time.takeUnless { allDay },
                         timezone = visit.timezone ?: "Europe/Madrid",
                         notes = visit.notes ?: "",
-                        isAllDay = startDateTime.time == null && endDateTime.time == null
+                        isAllDay = allDay
                     )
                 }
                 
@@ -298,15 +314,12 @@ fun AddEditLocationContent(
             onResetWikipediaState = onResetWikipediaState
         )
 
-        // TODO: Re-enable visits section when API supports nested visits creation
-        // Currently disabled because API returns 400: visits require 'location' field which doesn't exist during creation
-        // See: https://github.com/seanmorley15/AdventureLog/issues/915
-        /*
+        // Visits are saved after the location, against /api/visits/ - they cannot be nested in
+        // the location payload because each one needs a location id that does not exist yet.
         DateSection(
             formData = formData,
             onFormDataChange = { formData = it }
         )
-        */
 
         Column(
             modifier = Modifier

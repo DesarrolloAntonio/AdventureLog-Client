@@ -24,6 +24,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResul
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
+import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationVisitsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UploadImageUseCase
 import com.desarrollodroide.adventurelog.feature.ui.util.ImageBytesProvider
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
@@ -38,9 +39,10 @@ data class AddEditAdventureUiState(
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
     val reverseGeocodeResult: ReverseGeocodeResult? = null,
-    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading,
+    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
     val uploadingImagesCount: Int = 0,
-    val totalImagesToUpload: Int = 0
+    val totalImagesToUpload: Int = 0,
+    val isSavingLocation: Boolean = false
 )
 
 class AddEditAdventureViewModel(
@@ -54,6 +56,7 @@ class AddEditAdventureViewModel(
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
     private val createCategoryUseCase: CreateCategoryUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
+    private val syncLocationVisitsUseCase: SyncLocationVisitsUseCase,
     private val imageBytesProvider: ImageBytesProvider,
     private val adventureId: String? = null,
     private val existingLocation: Location? = null
@@ -116,7 +119,11 @@ class AddEditAdventureViewModel(
     
     fun saveLocation(formData: LocationFormData) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                isSavingLocation = true,
+                errorMessage = null
+            )
             
             val result = if (adventureId != null) {
                 updateLocationUseCase(
@@ -137,6 +144,7 @@ class AddEditAdventureViewModel(
                 if (category == null) {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
+                        isSavingLocation = false,
                         errorMessage = "Please select a category"
                     )
                     return@launch
@@ -161,22 +169,40 @@ class AddEditAdventureViewModel(
                 is Either.Left -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
+                        isSavingLocation = false,
                         errorMessage = result.value
                     )
                 }
                 is Either.Right -> {
-                    val createdLocation = result.value
-                    val localImages = formData.images.filter { it.type == ImageType.LOCAL_FILE }
+                    _uiState.value = _uiState.value.copy(
+                        isSavingLocation = false
+                    )
                     
-                    if (localImages.isNotEmpty()) {
+                    val createdLocation = result.value
+
+                    // Visits cannot ride along with the location: each one needs the id of a
+                    // location that does not exist yet while it is being created. They are
+                    // reconciled here, once there is an id, exactly as the web client does.
+                    val visitsResult = syncLocationVisitsUseCase(
+                        locationId = createdLocation.id,
+                        existing = _uiState.value.existingLocation?.visits.orEmpty(),
+                        edited = formData.visits
+                    )
+                    if (visitsResult is Either.Left) {
+                        // The location itself saved, so this is a warning rather than a failure -
+                        // silently dropping the dates would be worse than saying so.
+                        _uiState.value = _uiState.value.copy(errorMessage = visitsResult.value)
+                    }
+
+                    if (formData.images.isNotEmpty()) {
                         _uiState.value = _uiState.value.copy(
-                            totalImagesToUpload = localImages.size,
+                            totalImagesToUpload = formData.images.size,
                             uploadingImagesCount = 0
                         )
                         
                         uploadImages(
                             locationId = createdLocation.id,
-                            images = localImages
+                            images = formData.images
                         )
                     } else {
                         _uiState.value = _uiState.value.copy(
@@ -189,14 +215,25 @@ class AddEditAdventureViewModel(
         }
     }
     
-    private suspend fun uploadImages(locationId: String, images: List<com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData>) {
+    private suspend fun uploadImages(
+        locationId: String,
+        images: List<com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData>
+    ) {
         var uploadedCount = 0
         var hasError = false
         
         for (image in images) {
             if (hasError) break
             
-            val imageBytes = imageBytesProvider.getImageBytes(image.uri)
+            val imageBytes = when (image.type) {
+                ImageType.LOCAL_FILE -> {
+                    imageBytesProvider.getImageBytes(image.uri)
+                }
+                ImageType.URL, ImageType.WIKIPEDIA -> {
+                    imageBytesProvider.downloadImageFromUrl(image.uri)
+                }
+            }
+            
             if (imageBytes == null) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -206,7 +243,18 @@ class AddEditAdventureViewModel(
                 break
             }
             
-            val fileName = imageBytesProvider.getFileName(image.uri)
+            val fileName = when (image.type) {
+                ImageType.LOCAL_FILE -> imageBytesProvider.getFileName(image.uri)
+                ImageType.URL, ImageType.WIKIPEDIA -> {
+                    val url = image.uri
+                    val lastSegment = url.substringAfterLast('/')
+                    if (lastSegment.contains('.')) {
+                        lastSegment
+                    } else {
+                        "image.jpg"
+                    }
+                }
+            }
             
             when (uploadImageUseCase(
                 contentType = "location",
@@ -363,7 +411,7 @@ class AddEditAdventureViewModel(
     
     fun resetWikipediaImageState() {
         _uiState.value = _uiState.value.copy(
-            wikipediaImageState = WikipediaImageResult.Loading
+            wikipediaImageState = WikipediaImageResult.Idle
         )
     }
     

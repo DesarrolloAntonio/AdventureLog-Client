@@ -39,7 +39,11 @@ fun VisitFormData.toVisitRequest(): VisitRequest {
     
     val formattedEndDate = endDate?.takeIf { it.isNotEmpty() }?.let {
         if (isAllDay) {
-            "${it}T23:59:59Z"
+            // Midnight on both bounds, which is how the server stores an all-day visit and what
+            // the web sends. An end of 23:59:59 misses the server's end-of-day test - that
+            // compares against 23:59:59.999999 - so it is kept verbatim and the visit comes back
+            // looking like it has times on it.
+            "${it}T00:00:00Z"
         } else {
             val time = endTime ?: "12:00"
             "${it}T${time}:00Z"
@@ -78,8 +82,9 @@ fun createAdventureRequest(
         link = link.takeIf { it.isNotBlank() },
         longitude = longitude.toCoordinateString(),
         latitude = latitude.toCoordinateString(),
-        // TODO: API does not support nested visits creation. Remove this null and send visits when backend issue is fixed
-        // See: https://github.com/seanmorley15/AdventureLog/issues/915
+        // Visits are never nested here. Each one needs the id of a location that does not exist
+        // yet at this point, so they are posted to /api/visits/ once the location has been
+        // created - see SyncLocationVisitsUseCase.
         visits = null,
         category = category.toCategoryRequest()
     )

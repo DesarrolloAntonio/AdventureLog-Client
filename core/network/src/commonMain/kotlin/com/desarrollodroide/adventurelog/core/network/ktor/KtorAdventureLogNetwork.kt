@@ -1,6 +1,9 @@
 package com.desarrollodroide.adventurelog.core.network.ktor
 
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.core.network.api.VisitApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorVisitApi
+import com.desarrollodroide.adventurelog.core.network.model.response.VisitDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
@@ -84,6 +87,14 @@ class KtorAdventureLogNetwork(
         )
     }
     
+    private val visitDataSource: VisitApi by lazy {
+        KtorVisitApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            json = json
+        )
+    }
+
     private val userDataSource: UserApi by lazy {
         KtorUserApi(
             httpClient = adventurelogClient,
@@ -350,6 +361,25 @@ class KtorAdventureLogNetwork(
     override suspend fun getDashboard(): DashboardDTO {
         ensureInitialized()
         return userDataSource.getDashboard()
+    }
+
+    override suspend fun createVisit(locationId: String, visit: VisitFormData): VisitDTO {
+        ensureInitialized()
+        return visitDataSource.createVisit(locationId, visit)
+    }
+
+    override suspend fun updateVisit(
+        visitId: String,
+        locationId: String,
+        visit: VisitFormData
+    ): VisitDTO {
+        ensureInitialized()
+        return visitDataSource.updateVisit(visitId, locationId, visit)
+    }
+
+    override suspend fun deleteVisit(visitId: String) {
+        ensureInitialized()
+        visitDataSource.deleteVisit(visitId)
     }
     
     override suspend fun deleteAdventure(adventureId: String) {

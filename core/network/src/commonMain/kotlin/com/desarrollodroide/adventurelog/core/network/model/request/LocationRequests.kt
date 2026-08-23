@@ -52,6 +52,34 @@ data class VisitRequest(
     val notes: String?
 )
 
+/**
+ * Body of `POST /api/visits/`. `object_id` and `location` carry the same id - the server reads
+ * `location`, and the web client sends both, so this matches it rather than guessing.
+ */
+@Serializable
+data class CreateVisitRequest(
+    @SerialName("object_id")
+    val objectId: String,
+    val location: String,
+    @SerialName("start_date")
+    val startDate: String?,
+    @SerialName("end_date")
+    val endDate: String?,
+    val timezone: String?,
+    val notes: String?
+) {
+    companion object {
+        fun from(locationId: String, visit: VisitRequest) = CreateVisitRequest(
+            objectId = locationId,
+            location = locationId,
+            startDate = visit.startDate,
+            endDate = visit.endDate,
+            timezone = visit.timezone,
+            notes = visit.notes
+        )
+    }
+}
+
 @Serializable
 data class CategoryRequest(
     val name: String,
