@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
+import com.desarrollodroide.adventurelog.core.model.Currencies
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Collection
@@ -133,6 +134,16 @@ fun AdventureItem(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                }
+
+                location.price?.let { price ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "💰 ${Currencies.formatAmount(price)} " +
+                            (location.priceCurrency ?: Currencies.DEFAULT),
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 13.sp
+                    )
                 }
 
                 location.rating?.takeIf { it > 0 }?.let { rating ->
@@ -253,64 +264,25 @@ fun AdventureItem(
                         }
                     }
 
-                    DropdownMenu(
-                        expanded = showDropdownMenu,
-                        onDismissRequest = { showDropdownMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Open Details") },
-                            onClick = {
-                                onOpenDetails()
-                                showDropdownMenu = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Edit Location") },
-                            onClick = {
-                                onEdit()
-                                showDropdownMenu = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Duplicate") },
-                            onClick = {
-                                onDuplicate()
-                                showDropdownMenu = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Share Externally") },
-                            onClick = {
-                                onShare()
-                                showDropdownMenu = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Manage Collections") },
-                            onClick = {
-                                onManageCollections()
-                                showDropdownMenu = false
-                            }
-                        )
-                        HorizontalDivider()
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    "Delete",
-                                    color = Color(0xFFFF3B30)
-                                )
-                            },
-                            onClick = {
-                                showDeleteDialog = true
-                                showDropdownMenu = false
-                            }
-                        )
-                    }
                 }
             }
         }
     }
     
+    if (showDropdownMenu) {
+        LocationActionsSheet(
+            locationName = location.name,
+            locationPlace = location.location,
+            onDismiss = { showDropdownMenu = false },
+            onOpenDetails = { showDropdownMenu = false; onOpenDetails() },
+            onEdit = { showDropdownMenu = false; onEdit() },
+            onDuplicate = { showDropdownMenu = false; onDuplicate() },
+            onShare = { showDropdownMenu = false; onShare() },
+            onManageCollections = { showDropdownMenu = false; onManageCollections() },
+            onDelete = { showDropdownMenu = false; showDeleteDialog = true }
+        )
+    }
+
     // Delete confirmation dialog
     if (showDeleteDialog) {
         AlertDialog(

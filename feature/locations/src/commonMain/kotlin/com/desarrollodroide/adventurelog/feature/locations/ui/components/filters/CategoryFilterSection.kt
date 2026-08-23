@@ -195,7 +195,16 @@ fun CategoryFilterSection(
                                         }
                                     },
                                     label = {
-                                        Text(category.displayName)
+                                        // The web shows how many locations each category holds;
+                                        // without it the list is a wall of equal-looking chips.
+                                        val count = category.numAdventures.toIntOrNull()
+                                        Text(
+                                            if (count != null && count > 0) {
+                                                "${category.displayName} ($count)"
+                                            } else {
+                                                category.displayName
+                                            }
+                                        )
                                     },
                                     leadingIcon = if (selectedCategories.contains(category.name)) {
                                         {

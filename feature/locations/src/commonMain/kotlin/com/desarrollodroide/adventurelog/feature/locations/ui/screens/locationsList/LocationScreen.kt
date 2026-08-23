@@ -48,6 +48,7 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.LocationsFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel
@@ -82,6 +83,7 @@ fun LocationListScreen(
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
+    val libraryCounts by viewModel.libraryCounts.collectAsStateWithLifecycle()
 
     LaunchedEffect(actionMessage) {
         actionMessage?.let {
@@ -128,6 +130,7 @@ fun LocationListScreen(
         onDeleteAdventure = { adventure -> 
             viewModel.deleteAdventure(adventure.id)
         },
+        libraryCounts = libraryCounts,
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
@@ -231,6 +234,7 @@ private fun AdventureListContent(
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit,
     onRefresh: () -> Unit,
+    libraryCounts: UserStats? = null,
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -238,6 +242,24 @@ private fun AdventureListContent(
     Scaffold(
         modifier = modifier,
         topBar = {
+          Column {
+            // The whole library, not the page on screen - see LocationsViewModel.libraryCounts.
+            libraryCounts?.let { counts ->
+                Text(
+                    text = buildString {
+                        append(counts.locationCount)
+                        append(if (counts.locationCount == 1) " location" else " locations")
+                        if (counts.visitedLocationCount > 0) {
+                            append(" · ")
+                            append(counts.visitedLocationCount)
+                            append(" visited")
+                        }
+                    },
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 20.dp, top = 4.dp)
+                )
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -274,6 +296,7 @@ private fun AdventureListContent(
                     }
                 }
             }
+          }
         },
         floatingActionButton = {
             FloatingActionButton(

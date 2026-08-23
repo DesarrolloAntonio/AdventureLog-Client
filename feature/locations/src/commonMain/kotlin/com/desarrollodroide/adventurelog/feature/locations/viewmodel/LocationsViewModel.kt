@@ -13,6 +13,9 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsPagingU
 import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
 import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
+import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
+import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
@@ -51,7 +54,9 @@ class LocationsViewModel(
     private val updateLocationCollectionsUseCase: UpdateLocationCollectionsUseCase,
     private val duplicateLocationUseCase: DuplicateLocationUseCase,
     private val getShareImageUseCase: GetShareImageUseCase,
-    private val platformFiles: PlatformFiles
+    private val platformFiles: PlatformFiles,
+    private val getUserStatsUseCase: GetUserStatsUseCase,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _actionMessage = MutableStateFlow<String?>(null)
@@ -59,6 +64,14 @@ class LocationsViewModel(
 
     private val _busyLocationId = MutableStateFlow<String?>(null)
     val busyLocationId: StateFlow<String?> = _busyLocationId.asStateFlow()
+
+    /**
+     * Totals for the whole library, not for the page on screen. The web header counts only the
+     * locations it has loaded and labels them as if they were everything, which is why it reads
+     * "0 visited" for an account that has two.
+     */
+    private val _libraryCounts = MutableStateFlow<UserStats?>(null)
+    val libraryCounts: StateFlow<UserStats?> = _libraryCounts.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -140,6 +153,7 @@ class LocationsViewModel(
 
         init {
             loadCategories()
+            loadLibraryCounts()
             viewModelScope.launch {
                 if (observeCollectionsUseCase().value.isEmpty()) {
                     _collectionsLoading.value = true
@@ -256,6 +270,14 @@ class LocationsViewModel(
                     // The paging data will automatically refresh due to the repository updating the flow
                 }
             }
+        }
+    }
+
+    private fun loadLibraryCounts() {
+        viewModelScope.launch {
+            val username = userRepository.getUserSessionOnce()?.username ?: return@launch
+            val result = getUserStatsUseCase(username)
+            if (result is Either.Right) _libraryCounts.value = result.value
         }
     }
 

@@ -23,7 +23,9 @@ val locationsModule = module {
             updateLocationCollectionsUseCase = get(),
             duplicateLocationUseCase = get(),
             getShareImageUseCase = get(),
-            platformFiles = get()
+            platformFiles = get(),
+            getUserStatsUseCase = get(),
+            userRepository = get()
         ) 
     }
     
