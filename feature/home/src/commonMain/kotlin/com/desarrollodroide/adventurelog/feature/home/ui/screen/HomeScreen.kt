@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
@@ -69,7 +70,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Location
-import com.desarrollodroide.adventurelog.feature.home.model.StatsUiState
 import androidx.compose.ui.layout.ContentScale
 import com.desarrollodroide.adventurelog.resources.main_background
 
@@ -83,12 +83,10 @@ fun HomeScreenRoute(
     onNavigateToLogin: () -> Unit = { }
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val statsState by viewModel.statsState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
 
     HomeScreenContent(
         homeUiState = homeUiState,
-        statsState = statsState,
         userDetails = userDetails,
         onAdventureClick = { adventure ->
             viewModel.selectLocation(adventure)
@@ -118,7 +116,6 @@ private fun resetScrollBehavior(scrollBehavior: TopAppBarScrollBehavior) {
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
-    statsState: StatsUiState,
     userDetails: UserDetails? = null,
     onAdventureClick: (Location) -> Unit = { },
     onLogout: () -> Unit = {}
@@ -377,8 +374,15 @@ fun HomeScreenContent(
                             HomeContent(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,
-                                statsState = statsState,
-                                onAdventureClick = onAdventureClick
+                                onAdventureClick = onAdventureClick,
+                                onTripClick = { trip ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.createDetailRoute(
+                                            collectionId = trip.id,
+                                            collectionName = trip.name
+                                        )
+                                    )
+                                }
                             )
                         }
 
@@ -552,23 +556,10 @@ private fun PlaceholderScreen(title: String) {
 // Previews
 @org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
-private fun HomeScreenEmptyPreview() {
-    MaterialTheme {
-        HomeScreenContent(
-            homeUiState = HomeUiState.Empty,
-            statsState = StatsUiState.Loading,
-            userDetails = null
-        )
-    }
-}
-
-@org.jetbrains.compose.ui.tooling.preview.Preview
-@Composable
 private fun HomeScreenLoadingPreview() {
     MaterialTheme {
         HomeScreenContent(
             homeUiState = HomeUiState.Loading,
-            statsState = StatsUiState.Loading,
             userDetails = null
         )
     }
@@ -578,13 +569,13 @@ private fun HomeScreenLoadingPreview() {
 @Composable
 private fun HomeScreenSuccessPreview() {
     val sampleStats = UserStats(
-        locationCount = 12,
+        locationCount = 75,
         visitedLocationCount = 2,
-        tripsCount = 5,
+        tripsCount = 33,
         visitedCityCount = 0,
-        totalCities = 15020,
-        visitedRegionCount = 1,
-        totalRegions = 5062,
+        totalCities = 153728,
+        visitedRegionCount = 8,
+        totalRegions = 5322,
         visitedCountryCount = 1,
         totalCountries = 250
     )
@@ -593,14 +584,13 @@ private fun HomeScreenSuccessPreview() {
         HomeScreenContent(
             homeUiState = HomeUiState.Success(
                 userName = "Antonio",
-                recentLocations = emptyList()
+                dashboard = Dashboard(stats = sampleStats)
             ),
-            statsState = StatsUiState.Success(sampleStats),
             userDetails = UserDetails(
-                pk = 123, // Se cambia 'id' por 'pk'
+                pk = 123,
                 username = "antonio",
                 firstName = "Antonio",
-                lastName = "García",
+                lastName = "Garcia",
                 email = "antonio@example.com",
                 profilePic = null,
                 isStaff = false,
@@ -619,8 +609,7 @@ private fun HomeScreenSuccessPreview() {
 private fun HomeScreenErrorPreview() {
     MaterialTheme {
         HomeScreenContent(
-            homeUiState = HomeUiState.Error("Failed to load adventures"),
-            statsState = StatsUiState.Error("Failed to load stats"),
+            homeUiState = HomeUiState.Error("Could not load your dashboard. Please try again."),
             userDetails = null
         )
     }

@@ -49,8 +49,9 @@ fun HomeDrawer(
         else -> ""
     }
     
+    // The user's whole library, not the handful the home screen happens to show.
     val adventureCount = when (homeUiState) {
-        is HomeUiState.Success -> homeUiState.recentLocations.size
+        is HomeUiState.Success -> homeUiState.dashboard.stats.locationCount
         else -> 0
     }
     
