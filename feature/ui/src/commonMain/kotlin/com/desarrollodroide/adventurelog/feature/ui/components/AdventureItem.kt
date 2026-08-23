@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material3.*
@@ -108,7 +111,49 @@ fun AdventureItem(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                if (location.category != null || !location.isPublic || location.collections.isNotEmpty()) {
+                // Where the place actually is, and how it rated - both shown on the web card and
+                // the two things that tell near-identical entries apart at a glance.
+                location.location?.takeIf { it.isNotBlank() }?.let { label ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.75f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = label,
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                location.rating?.takeIf { it > 0 }?.let { rating ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        repeat(5) { index ->
+                            Icon(
+                                imageVector = if (index < rating.toInt()) {
+                                    Icons.Default.Star
+                                } else {
+                                    Icons.Default.StarBorder
+                                },
+                                contentDescription = null,
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+
+                if (location.category != null || !location.isPublic ||
+                    location.collections.isNotEmpty() || location.tags.isNotEmpty()
+                ) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     @OptIn(ExperimentalLayoutApi::class)
@@ -157,6 +202,25 @@ fun AdventureItem(
                                 text = "+$remainingCount",
                                 backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
                                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // The user's own tags, capped so a heavily tagged place does not push the
+                        // title off the card.
+                        val visibleTags = location.tags.take(3)
+                        visibleTags.forEach { tag ->
+                            TagChip(
+                                text = tag,
+                                backgroundColor = Color.White.copy(alpha = 0.22f),
+                                contentColor = Color.White
+                            )
+                        }
+                        val hiddenTags = location.tags.size - visibleTags.size
+                        if (hiddenTags > 0) {
+                            TagChip(
+                                text = "+$hiddenTags",
+                                backgroundColor = Color.White.copy(alpha = 0.22f),
+                                contentColor = Color.White
                             )
                         }
                     }

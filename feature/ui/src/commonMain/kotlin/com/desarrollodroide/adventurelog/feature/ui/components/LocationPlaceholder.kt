@@ -112,8 +112,9 @@ private fun CoordinateArtwork(
             y += spacing
         }
 
-        // The sight sits above centre: the lower third of the card is under the title scrim.
-        val centre = Offset(size.width / 2f, size.height * 0.30f)
+        // The sight sits high: the lower half of the card is under the title scrim, which now
+        // carries the place label, its rating and its tags as well as the name.
+        val centre = Offset(size.width / 2f, size.height * 0.22f)
         val unit = size.minDimension * 0.10f
         drawCircle(Color.White.copy(alpha = 0.20f), unit * 2f, centre, style = Stroke(1.5.dp.toPx()))
         drawCircle(Color.White.copy(alpha = 0.32f), unit, centre, style = Stroke(1.5.dp.toPx()))
@@ -122,7 +123,7 @@ private fun CoordinateArtwork(
 
     Column(
         // Sits clear of the sight above it and of the title scrim below.
-        modifier = Modifier.fillMaxSize().offset(y = 26.dp),
+        modifier = Modifier.fillMaxSize().offset(y = (-30).dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
