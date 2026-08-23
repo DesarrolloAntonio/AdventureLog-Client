@@ -171,6 +171,7 @@ private fun WorldScreenContent(
                         CompactProgressSection(
                             totalCountries = uiState.totalCountriesCount,
                             visitedCount = uiState.visitedCountriesCount,
+                            completeCount = uiState.completeCountriesCount,
                             partiallyVisitedCount = uiState.partiallyVisitedCount,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
@@ -322,10 +323,10 @@ private fun VisitStatusFilters(
                 label = {
                     Text(
                         text = when (filterMode) {
-                            FilterMode.ALL -> "Todo"
-                            FilterMode.COMPLETE -> "Completo"
-                            FilterMode.PARTIAL -> "Parcial"
-                            FilterMode.NOT_VISITED -> "No visitado"
+                            FilterMode.ALL -> "All"
+                            FilterMode.COMPLETE -> "Complete"
+                            FilterMode.PARTIAL -> "Partial"
+                            FilterMode.NOT_VISITED -> "Not visited"
                         },
                         style = MaterialTheme.typography.labelMedium,
                         maxLines = 1

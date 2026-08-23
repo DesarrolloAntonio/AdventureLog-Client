@@ -8,6 +8,7 @@ data class WorldUiState(
     val countries: List<Country> = emptyList(),
     val filteredCountries: List<Country> = emptyList(),
     val visitedCountriesCount: Int = 0,
+    val completeCountriesCount: Int = 0,
     val partiallyVisitedCount: Int = 0,
     val totalCountriesCount: Int = 250, // Default from API
     val selectedRegion: WorldRegion = WorldRegion.ALL,

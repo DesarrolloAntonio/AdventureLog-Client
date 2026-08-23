@@ -115,12 +115,16 @@ class WorldViewModel(
     }
     
     private fun calculateStatistics(countries: List<Country>) {
-        val visitedCount = countries.count { it.numVisits > 0 && it.numVisits == it.numRegions }
+        // Three separate figures, as the web has them. Visited used to be computed with the
+        // formula for complete, so an account that had set foot in one country read "Visited 0".
+        val visitedCount = countries.count { it.numVisits > 0 }
+        val completeCount = countries.count { it.numRegions > 0 && it.numVisits == it.numRegions }
         val partiallyVisitedCount = countries.count { it.numVisits > 0 && it.numVisits < it.numRegions }
-        
+
         _uiState.update { currentState ->
             currentState.copy(
                 visitedCountriesCount = visitedCount,
+                completeCountriesCount = completeCount,
                 partiallyVisitedCount = partiallyVisitedCount
             )
         }

@@ -15,11 +15,14 @@ import androidx.compose.ui.unit.dp
 fun CompactProgressSection(
     totalCountries: Int,
     visitedCount: Int,
+    completeCount: Int,
     partiallyVisitedCount: Int,
     modifier: Modifier = Modifier
 ) {
+    // Progress measures countries finished, not merely started - the same thing the web's bar
+    // shows, and the reason it reads 0% for an account with one partially visited country.
     val progressPercentage = if (totalCountries > 0) {
-        ((visitedCount.toFloat() / totalCountries) * 100).toInt()
+        ((completeCount.toFloat() / totalCountries) * 100).toInt()
     } else 0
 
     Card(
@@ -101,6 +104,22 @@ fun CompactProgressSection(
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Complete
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Complete",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = completeCount.toString(),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF43A047)
                     )
                 }
 
