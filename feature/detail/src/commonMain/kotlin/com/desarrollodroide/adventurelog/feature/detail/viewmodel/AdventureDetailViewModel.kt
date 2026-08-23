@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Attachment
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.toSafeFileName
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import com.desarrollodroide.adventurelog.feature.ui.util.AttachmentOpener
+import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
 import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
 import kotlinx.coroutines.launch
 
@@ -27,7 +29,8 @@ sealed class LocationState {
 class AdventureDetailViewModel(
     private val getLocationUseCase: GetLocationUseCase,
     private val fileDownloader: AuthenticatedFileDownloader,
-    private val attachmentOpener: AttachmentOpener,
+    private val platformFiles: PlatformFiles,
+    private val getShareImageUseCase: GetShareImageUseCase,
     observeCollectionsUseCase: ObserveCollectionsUseCase
 ) : ViewModel() {
 
@@ -104,11 +107,31 @@ class AdventureDetailViewModel(
 
             _attachmentMessage.value = when {
                 bytes == null -> "Could not download this attachment."
-                !attachmentOpener.open(bytes, attachment.displayFileName()) ->
+                !platformFiles.open(bytes, attachment.displayFileName()) ->
                     "Nothing on this device can open a .${attachment.extension} file."
                 else -> null
             }
             _openingAttachmentId.value = null
+        }
+    }
+
+    /**
+     * Shares the card the server renders, not a link: this server sits on a private network, so a
+     * URL would be useless to whoever receives it.
+     */
+    fun shareLocation(location: Location) {
+        viewModelScope.launch {
+            _attachmentMessage.value = when (val result = getShareImageUseCase(location.id)) {
+                is Either.Left -> result.value
+                is Either.Right -> {
+                    val fileName = location.name.toSafeFileName(extension = "png")
+                    if (platformFiles.share(result.value, fileName)) {
+                        null
+                    } else {
+                        "Nothing on this device can share an image."
+                    }
+                }
+            }
         }
     }
 

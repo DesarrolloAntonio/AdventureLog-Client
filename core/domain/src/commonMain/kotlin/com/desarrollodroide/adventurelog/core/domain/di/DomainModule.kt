@@ -30,6 +30,8 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCategoryUseCa
 import com.desarrollodroide.adventurelog.core.domain.usecase.GenerateDescriptionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetDashboardUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationTrailsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationVisitsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
@@ -79,6 +81,8 @@ val domainModule = module {
     factoryOf(::GetDashboardUseCase)
     factoryOf(::SyncLocationVisitsUseCase)
     factoryOf(::SyncLocationTrailsUseCase)
+    factoryOf(::DuplicateLocationUseCase)
+    factoryOf(::GetShareImageUseCase)
     factoryOf(::ObserveUserStatsUseCase)
     factoryOf(::SearchWikipediaImageUseCase)
     factoryOf(::GetVisitedRegionsUseCase)

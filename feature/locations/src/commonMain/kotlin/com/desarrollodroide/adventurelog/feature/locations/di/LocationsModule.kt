@@ -20,7 +20,10 @@ val locationsModule = module {
             createCategoryUseCase = get(),
             updateCategoryUseCase = get(),
             deleteCategoryUseCase = get(),
-            updateLocationCollectionsUseCase = get()
+            updateLocationCollectionsUseCase = get(),
+            duplicateLocationUseCase = get(),
+            getShareImageUseCase = get(),
+            platformFiles = get()
         ) 
     }
     

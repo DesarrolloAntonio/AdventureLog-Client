@@ -416,6 +416,16 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         trailDataSource.deleteTrail(trailId)
     }
+
+    override suspend fun duplicateLocation(locationId: String): LocationDTO {
+        ensureInitialized()
+        return adventureDataSource.duplicateLocation(locationId)
+    }
+
+    override suspend fun getShareImage(locationId: String, aspect: String): ByteArray {
+        ensureInitialized()
+        return adventureDataSource.getShareImage(locationId, aspect)
+    }
     
     override suspend fun deleteAdventure(adventureId: String) {
         ensureInitialized()

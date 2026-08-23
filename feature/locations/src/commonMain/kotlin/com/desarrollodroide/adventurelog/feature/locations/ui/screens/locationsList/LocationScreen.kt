@@ -81,6 +81,14 @@ fun LocationListScreen(
 
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
+
+    LaunchedEffect(actionMessage) {
+        actionMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearActionMessage()
+        }
+    }
 
         if (showFilters) {
             LocationsFilterBottomSheet(
@@ -115,6 +123,8 @@ fun LocationListScreen(
         onSearchSubmit = viewModel::executeSearch,
         onShowFilters = viewModel::showFilters,
         onEditAdventure = onEditAdventure,
+        onDuplicateAdventure = viewModel::duplicateLocation,
+        onShareAdventure = viewModel::shareLocation,
         onDeleteAdventure = { adventure -> 
             viewModel.deleteAdventure(adventure.id)
         },
@@ -216,6 +226,8 @@ private fun AdventureListContent(
     onSearchSubmit: () -> Unit,
     onShowFilters: () -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onDuplicateAdventure: (Location) -> Unit,
+    onShareAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit,
     onRefresh: () -> Unit,
@@ -295,6 +307,8 @@ private fun AdventureListContent(
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
+                        onDuplicateAdventure = onDuplicateAdventure,
+                        onShareAdventure = onShareAdventure,
                         onDeleteAdventure = onDeleteAdventure,
                         onManageCollections = onManageCollections
                     )
@@ -342,6 +356,8 @@ private fun AdventureListContent(
                                 collections = collections,
                                 onAdventureClick = onAdventureClick,
                                 onEditAdventure = onEditAdventure,
+                                onDuplicateAdventure = onDuplicateAdventure,
+                                onShareAdventure = onShareAdventure,
                                 onDeleteAdventure = onDeleteAdventure,
                                 onManageCollections = onManageCollections
                             )
@@ -359,6 +375,8 @@ private fun AdventuresPagingList(
     collections: List<UltraSlimCollection>,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onDuplicateAdventure: (Location) -> Unit,
+    onShareAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit
 ) {
@@ -382,6 +400,8 @@ private fun AdventuresPagingList(
                     location = adventure,
                     onClick = { onAdventureClick(adventure) },
                     onEdit = { onEditAdventure(adventure) },
+                    onDuplicate = { onDuplicateAdventure(adventure) },
+                    onShare = { onShareAdventure(adventure) },
                     onDelete = { onDeleteAdventure(adventure) },
                     onManageCollections = { onManageCollections(adventure) }
                 )

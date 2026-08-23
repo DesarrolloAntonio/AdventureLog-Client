@@ -20,6 +20,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.patch
@@ -246,6 +247,51 @@ internal class KtorAdventureApi(
         logger.d { "📦 Search Response - ${locations.size} of ${ids.size} hits loaded for '$searchQuery'" }
 
         return locations
+    }
+
+    override suspend fun duplicateLocation(locationId: String): LocationDTO {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/locations/$locationId/duplicate/"
+
+        logger.d { "🌐 API Request - POST $url" }
+
+        val response = httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            headers { commonHeaders(session.sessionToken) }
+            // The body may carry a collection_id to file the copy somewhere; nothing to say here.
+            setBody("{}")
+        }
+
+        if (!response.status.isSuccess()) {
+            val body = runCatching { response.body<String>() }.getOrDefault("")
+            logger.e { "Failed to duplicate location: ${response.status} $body" }
+            throw HttpException(
+                response.status.value,
+                "Failed to duplicate location: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<LocationDTO>(response.body<String>())
+    }
+
+    override suspend fun getShareImage(locationId: String, aspect: String): ByteArray {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/locations/$locationId/share-image/$aspect/"
+
+        logger.d { "🌐 API Request - GET $url" }
+
+        val response = httpClient.get(url) {
+            headers { commonHeaders(session.sessionToken) }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to build share image: ${response.status}"
+            )
+        }
+
+        return response.bodyAsBytes()
     }
 
     override suspend fun getAdventureDetail(objectId: String): LocationDTO {

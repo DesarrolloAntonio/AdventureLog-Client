@@ -3,19 +3,22 @@ package com.desarrollodroide.adventurelog.feature.ui.util
 import coil3.PlatformContext
 
 /**
- * Hands a downloaded attachment to whatever the platform uses to view it.
+ * Hands a downloaded file to whatever the platform uses to view or share it.
  *
- * Attachments live under the server's protected media paths, so the file cannot simply be opened
- * by URL: a viewer or a browser has no session and gets a 403. The bytes are fetched with the
- * signed-in client first and written somewhere the viewer can reach.
+ * Anything served from the user's own AdventureLog sits behind an auth check, so a file cannot
+ * simply be handed over by URL: a viewer or a browser has no session and gets a 403. The bytes
+ * are fetched with the signed-in client first and written somewhere the platform can reach.
  */
-interface AttachmentOpener {
+interface PlatformFiles {
 
     /** @return false when nothing on the device could open this kind of file. */
     suspend fun open(bytes: ByteArray, fileName: String): Boolean
+
+    /** Offers the file to the platform's share sheet. @return false when sharing is unavailable. */
+    suspend fun share(bytes: ByteArray, fileName: String): Boolean
 }
 
-expect fun createAttachmentOpener(platformContext: PlatformContext): AttachmentOpener
+expect fun createPlatformFiles(platformContext: PlatformContext): PlatformFiles
 
 /**
  * Best-effort media type from a file extension, for the handful the app actually attaches.

@@ -15,7 +15,12 @@ import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.posix.memcpy
 
-class IOSAttachmentOpener : AttachmentOpener {
+class IOSPlatformFiles : PlatformFiles {
+
+    // Opening and sharing are the same gesture on iOS: the share sheet previews a file and
+    // offers the apps that can take it.
+    override suspend fun share(bytes: ByteArray, fileName: String): Boolean =
+        open(bytes, fileName)
 
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun open(bytes: ByteArray, fileName: String): Boolean =
@@ -47,5 +52,5 @@ class IOSAttachmentOpener : AttachmentOpener {
         }
 }
 
-actual fun createAttachmentOpener(platformContext: PlatformContext): AttachmentOpener =
-    IOSAttachmentOpener()
+actual fun createPlatformFiles(platformContext: PlatformContext): PlatformFiles =
+    IOSPlatformFiles()

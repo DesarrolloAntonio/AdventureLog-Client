@@ -33,6 +33,12 @@ interface AdventureApi {
     suspend fun getAdventureDetail(
         objectId: String
     ): LocationDTO
+
+    /** Server-side copy. Everything but collections and visits, named "Copy of ...". */
+    suspend fun duplicateLocation(locationId: String): LocationDTO
+
+    /** A rendered PNG share card. [aspect] is one of square, story or landscape. */
+    suspend fun getShareImage(locationId: String, aspect: String): ByteArray
     
     /**
      * Create a new location

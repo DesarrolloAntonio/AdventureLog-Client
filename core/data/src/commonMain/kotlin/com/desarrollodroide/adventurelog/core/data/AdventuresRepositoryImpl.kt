@@ -214,6 +214,29 @@ class AdventuresRepositoryImpl(
         }
     }
 
+    override suspend fun duplicateLocation(locationId: String): Either<ApiResponse, Location> =
+        call { networkDataSource.duplicateLocation(locationId).toDomainModel() }
+
+    override suspend fun getShareImage(
+        locationId: String,
+        aspect: String
+    ): Either<ApiResponse, ByteArray> = call {
+        networkDataSource.getShareImage(locationId, aspect)
+    }
+
+    private inline fun <T> call(block: () -> T): Either<ApiResponse, T> = try {
+        Either.Right(block())
+    } catch (e: HttpException) {
+        when (e.code) {
+            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            else -> Either.Left(ApiResponse.HttpError)
+        }
+    } catch (e: IOException) {
+        Either.Left(ApiResponse.IOException)
+    } catch (e: Exception) {
+        Either.Left(ApiResponse.HttpError)
+    }
+
     override suspend fun generateDescription(
         name: String
     ): Either<ApiResponse, String> {

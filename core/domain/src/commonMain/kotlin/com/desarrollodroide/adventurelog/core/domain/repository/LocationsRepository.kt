@@ -52,6 +52,12 @@ interface LocationsRepository {
 
     suspend fun refreshLocations(): Either<ApiResponse, List<Location>>
 
+    /** Asks the server for a copy of a location. */
+    suspend fun duplicateLocation(locationId: String): Either<ApiResponse, Location>
+
+    /** The PNG the server renders for sharing a location. */
+    suspend fun getShareImage(locationId: String, aspect: String): Either<ApiResponse, ByteArray>
+
     suspend fun generateDescription(
         name: String
     ): Either<ApiResponse, String>

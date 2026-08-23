@@ -219,6 +219,14 @@ class LogoutUseCaseTest {
             throw NotImplementedError()
         }
 
+        override suspend fun duplicateLocation(locationId: String): LocationDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getShareImage(locationId: String, aspect: String): ByteArray {
+            throw NotImplementedError()
+        }
+
         override suspend fun getAdventuresFiltered(
             page: Int,
             pageSize: Int,

@@ -10,11 +10,15 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLocationUseCa
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCategoryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsPagingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
+import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.toSafeFileName
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.SortDirection
@@ -44,8 +48,17 @@ class LocationsViewModel(
     private val createCategoryUseCase: CreateCategoryUseCase,
     private val updateCategoryUseCase: UpdateCategoryUseCase,
     private val deleteCategoryUseCase: DeleteCategoryUseCase,
-    private val updateLocationCollectionsUseCase: UpdateLocationCollectionsUseCase
+    private val updateLocationCollectionsUseCase: UpdateLocationCollectionsUseCase,
+    private val duplicateLocationUseCase: DuplicateLocationUseCase,
+    private val getShareImageUseCase: GetShareImageUseCase,
+    private val platformFiles: PlatformFiles
 ) : ViewModel() {
+
+    private val _actionMessage = MutableStateFlow<String?>(null)
+    val actionMessage: StateFlow<String?> = _actionMessage.asStateFlow()
+
+    private val _busyLocationId = MutableStateFlow<String?>(null)
+    val busyLocationId: StateFlow<String?> = _busyLocationId.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -244,6 +257,49 @@ class LocationsViewModel(
                 }
             }
         }
+    }
+
+    fun duplicateLocation(location: Location) {
+        if (_busyLocationId.value != null) return
+
+        viewModelScope.launch {
+            _busyLocationId.value = location.id
+            _actionMessage.value = when (val result = duplicateLocationUseCase(location.id)) {
+                is Either.Left -> result.value
+                // The copy lands at the top of the list once the page reloads, named "Copy of ...".
+                is Either.Right -> "Duplicated as \"${result.value.name}\""
+            }
+            _busyLocationId.value = null
+            refresh()
+        }
+    }
+
+    /**
+     * Shares the card the server renders for a location, rather than a link: the server is on a
+     * private network, so a URL would be useless to whoever receives it.
+     */
+    fun shareLocation(location: Location) {
+        if (_busyLocationId.value != null) return
+
+        viewModelScope.launch {
+            _busyLocationId.value = location.id
+            _actionMessage.value = when (val result = getShareImageUseCase(location.id)) {
+                is Either.Left -> result.value
+                is Either.Right -> {
+                    val fileName = location.name.toSafeFileName(extension = "png")
+                    if (platformFiles.share(result.value, fileName)) {
+                        null
+                    } else {
+                        "Nothing on this device can share an image."
+                    }
+                }
+            }
+            _busyLocationId.value = null
+        }
+    }
+
+    fun clearActionMessage() {
+        _actionMessage.value = null
     }
 
     fun clearDeleteState() {

@@ -40,6 +40,8 @@ fun AdventureItem(
     onClick: () -> Unit = {},
     onOpenDetails: () -> Unit = { onClick() },
     onEdit: () -> Unit = {},
+    onDuplicate: () -> Unit = {},
+    onShare: () -> Unit = {},
     onManageCollections: () -> Unit = {},
     onDelete: () -> Unit = {},
     showMenu: Boolean = true
@@ -266,6 +268,20 @@ fun AdventureItem(
                             text = { Text("Edit Location") },
                             onClick = {
                                 onEdit()
+                                showDropdownMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Duplicate") },
+                            onClick = {
+                                onDuplicate()
+                                showDropdownMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Share Externally") },
+                            onClick = {
+                                onShare()
                                 showDropdownMenu = false
                             }
                         )

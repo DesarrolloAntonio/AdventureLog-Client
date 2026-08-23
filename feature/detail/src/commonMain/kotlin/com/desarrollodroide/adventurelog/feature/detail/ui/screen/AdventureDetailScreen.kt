@@ -77,7 +77,8 @@ fun AdventureDetailScreenRoute(
                     // used to be routed to a view model method that only printed it.
                     onOpenLink = { url: String -> uriHandler.openUri(url) },
                     openingAttachmentId = openingAttachmentId,
-                    onOpenAttachment = viewModel::openAttachment
+                    onOpenAttachment = viewModel::openAttachment,
+                    onShareLocation = { viewModel.shareLocation(state.location) }
                 )
                 SnackbarHost(
                     hostState = snackbarHostState,
@@ -120,6 +121,7 @@ fun AdventureDetailScreen(
     onOpenLink: (String) -> Unit,
     openingAttachmentId: String? = null,
     onOpenAttachment: (com.desarrollodroide.adventurelog.core.model.Attachment) -> Unit = {},
+    onShareLocation: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -136,7 +138,7 @@ fun AdventureDetailScreen(
                 imageUrl = location.images.firstOrNull()?.image,
                 adventureName = location.name,
                 onBackClick = onBackClick,
-                onShareClick = { /* TODO: Implement share */ }
+                onShareClick = onShareLocation
             )
 
             // Content container

@@ -78,6 +78,17 @@ class GetAdventuresUseCaseTest {
             return getAdventuresResult
         }
 
+        override suspend fun duplicateLocation(locationId: String): Either<ApiResponse, Location> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getShareImage(
+            locationId: String,
+            aspect: String
+        ): Either<ApiResponse, ByteArray> {
+            throw NotImplementedError()
+        }
+
         override suspend fun generateDescription(name: String): Either<ApiResponse, String> {
             return Either.Right("Generated description for $name")
         }

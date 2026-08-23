@@ -213,6 +213,10 @@ interface AdventureLogNetwork {
 
     suspend fun deleteTrail(trailId: String)
 
+    suspend fun duplicateLocation(locationId: String): LocationDTO
+
+    suspend fun getShareImage(locationId: String, aspect: String): ByteArray
+
     /**
      * Delete an adventure
      */
