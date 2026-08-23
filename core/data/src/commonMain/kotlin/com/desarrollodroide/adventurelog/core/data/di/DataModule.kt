@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.core.data.GeocodeRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.LoginRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.SettingsRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.TransportationRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.DashboardRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.UserRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.WikipediaRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.ImagesRepositoryImpl
@@ -21,6 +22,7 @@ import com.desarrollodroide.adventurelog.core.domain.repository.GeocodeRepositor
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.SettingsRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.TransportationRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.DashboardRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.WikipediaRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.ImagesRepository
@@ -48,6 +50,9 @@ val dataModule = module {
             settings = get(),
             networkDataSource = get()
         )
+    }
+    single<DashboardRepository> {
+        DashboardRepositoryImpl(networkDataSource = get())
     }
     single<LocationsRepository> {
         AdventuresRepositoryImpl(networkDataSource = get())

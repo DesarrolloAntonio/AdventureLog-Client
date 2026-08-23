@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.model.response
 
+import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -65,7 +66,15 @@ data class UltraSlimCollectionDTO(
     val locationCount: Int = 0,
     
     @SerialName("shared_with")
-    val sharedWith: List<String> = emptyList()
+    val sharedWith: List<String> = emptyList(),
+
+    // Derived server-side from start_date/end_date, so the client never has to compare dates
+    // itself and cannot drift from what the calendar considers an in-progress trip.
+    @SerialName("status")
+    val status: String? = null,
+
+    @SerialName("days_until_start")
+    val daysUntilStart: Int? = null
 )
 
 fun UltraSlimCollectionDTO.toDomainModel(): UltraSlimCollection {
@@ -86,6 +95,8 @@ fun UltraSlimCollectionDTO.toDomainModel(): UltraSlimCollection {
         endDate = endDate,
         adventureCount = locationCount,
         featuredImage = featuredImage,
-        link = link
+        link = link,
+        status = TripStatus.fromApi(status),
+        daysUntilStart = daysUntilStart
     )
 }

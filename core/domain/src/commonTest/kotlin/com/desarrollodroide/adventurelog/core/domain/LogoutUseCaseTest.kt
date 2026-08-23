@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
+import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
@@ -175,6 +176,10 @@ class LogoutUseCaseTest {
 
         override suspend fun getUserStats(username: String): UserStatsDTO {
             return UserStatsDTO()
+        }
+
+        override suspend fun getDashboard(): DashboardDTO {
+            return DashboardDTO()
         }
 
         override suspend fun getAdventuresFiltered(

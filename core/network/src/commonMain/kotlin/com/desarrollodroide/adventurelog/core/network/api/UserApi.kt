@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.api
 
+import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 
@@ -35,4 +36,9 @@ interface UserApi {
      * Get user statistics
      */
     suspend fun getUserStats(username: String): UserStatsDTO
+
+    /**
+     * Get everything the home screen shows in a single request.
+     */
+    suspend fun getDashboard(): DashboardDTO
 }

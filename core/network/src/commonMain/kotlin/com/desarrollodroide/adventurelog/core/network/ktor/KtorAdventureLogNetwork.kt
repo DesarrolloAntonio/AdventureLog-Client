@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network.ktor
 
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
@@ -344,6 +345,11 @@ class KtorAdventureLogNetwork(
     ): UserStatsDTO {
         ensureInitialized()
         return userDataSource.getUserStats(username)
+    }
+
+    override suspend fun getDashboard(): DashboardDTO {
+        ensureInitialized()
+        return userDataSource.getDashboard()
     }
     
     override suspend fun deleteAdventure(adventureId: String) {

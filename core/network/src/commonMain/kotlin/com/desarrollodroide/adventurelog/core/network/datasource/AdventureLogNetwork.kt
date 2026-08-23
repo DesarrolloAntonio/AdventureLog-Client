@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network.datasource
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
@@ -186,6 +187,11 @@ interface AdventureLogNetwork {
     suspend fun getUserStats(
         username: String
     ): UserStatsDTO
+
+    /**
+     * Get everything the home screen shows in a single request.
+     */
+    suspend fun getDashboard(): DashboardDTO
 
     /**
      * Delete an adventure

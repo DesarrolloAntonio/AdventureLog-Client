@@ -6,6 +6,7 @@ import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
+import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import io.ktor.client.HttpClient
@@ -148,5 +149,31 @@ internal class KtorUserApi(
         logger.d { "📦 API Response - User stats fetched successfully" }
         
         return statsDTO
+    }
+
+    override suspend fun getDashboard(): DashboardDTO {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/stats/dashboard/"
+
+        logger.d { "🌐 API Request - GET $url" }
+
+        val response = httpClient.get(url) {
+            headers {
+                commonHeaders(session.sessionToken)
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch dashboard with status: ${response.status}"
+            )
+        }
+
+        val dashboard = json.decodeFromString<DashboardDTO>(response.body<String>())
+
+        logger.d { "📦 API Response - Dashboard fetched successfully" }
+
+        return dashboard
     }
 }
