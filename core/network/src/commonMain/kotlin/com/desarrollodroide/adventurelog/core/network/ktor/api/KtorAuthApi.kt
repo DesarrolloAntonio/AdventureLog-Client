@@ -65,7 +65,10 @@ class KtorAuthApi(
             }
 
             if (sessionToken == null) {
-                logger.w { "No session token found in cookies" }
+                // Pointing the app at the web frontend instead of the backend lands here: the
+                // SvelteKit proxy strips set-cookie from everything it forwards, so login answers
+                // 200 with no session at all.
+                logger.w { "No session token found in cookies - is the server URL the backend?" }
             } else {
                 // Never log the token itself - it grants full account access.
                 logger.d { "Session token received (${sessionToken.length} chars)" }

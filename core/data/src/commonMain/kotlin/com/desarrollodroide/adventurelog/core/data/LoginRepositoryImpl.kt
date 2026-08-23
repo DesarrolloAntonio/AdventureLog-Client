@@ -30,7 +30,18 @@ class LoginRepositoryImpl(
                     username = username,
                     password = password
                 )
-                Either.Right(userDetailsDTO.toDomainModel(url))
+                // The login response omits first/last name, so the greeting would read as the
+                // username until the next app start. One extra GET buys a correct name now.
+                val details = userDetailsDTO.toDomainModel(url)
+                val named = try {
+                    adventureLogNetworkDataSource.getUserDetails()
+                        .toDomainModel(url)
+                        .copy(sessionToken = details.sessionToken)
+                } catch (e: Exception) {
+                    logger.w { "Could not load user metadata after login: ${e.message}" }
+                    details
+                }
+                Either.Right(named)
             } catch (e: HttpException) {
                 logger.e { "HTTP Error during login: ${e.code}" }
                 when (e.code) {

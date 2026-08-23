@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
+import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class InitializeSessionUseCaseTest {
@@ -48,8 +50,10 @@ class InitializeSessionUseCaseTest {
             throw NotImplementedError()
         }
 
+        var activeSessionSet: UserDetails? = null
+
         override fun setActiveSession(userDetails: UserDetails) {
-            throw NotImplementedError()
+            activeSessionSet = userDetails
         }
 
         override fun getUserSession(): Flow<UserDetails?> {
@@ -194,6 +198,10 @@ class InitializeSessionUseCaseTest {
 
         override suspend fun getUserStats(username: String): UserStatsDTO {
             return UserStatsDTO()
+        }
+
+        override suspend fun getDashboard(): DashboardDTO {
+            return DashboardDTO()
         }
 
         override suspend fun getAdventuresFiltered(
@@ -364,16 +372,47 @@ class InitializeSessionUseCaseTest {
     private val useCase = InitializeSessionUseCase(fakeRepository, fakeNetworkDataSource)
 
     @Test
-    fun `invoke returns user details and initializes network when session exists`() = runTest {
+    fun `invoke initializes the network from the stored session`() = runTest {
         val userDetails = createFakeUserDetails()
         fakeRepository.getUserSessionOnceResult = userDetails
 
         val result = useCase()
 
-        assertEquals(userDetails, result)
+        assertNotNull(result)
         assertEquals(true, fakeNetworkDataSource.initializeFromSessionCalled)
         assertEquals(userDetails.serverUrl, fakeNetworkDataSource.lastServerUrl)
         assertEquals(userDetails.sessionToken, fakeNetworkDataSource.lastSessionToken)
+    }
+
+    @Test
+    fun `invoke returns the freshly fetched profile rather than the stored copy`() = runTest {
+        // The stored session is written from the login response, which carries no name, so the
+        // profile fetched here is the only place the display name can come from.
+        fakeRepository.getUserSessionOnceResult = createFakeUserDetails().copy(
+            firstName = "",
+            lastName = "",
+            email = ""
+        )
+
+        val result = useCase()
+
+        assertEquals("Test", result?.firstName)
+        assertEquals("User", result?.lastName)
+        assertEquals("test@example.com", result?.email)
+        // Returning it is not enough - the greeting and drawer read the session from the
+        // repository, so the refreshed profile has to be published there too.
+        assertEquals("Test", fakeRepository.activeSessionSet?.firstName)
+    }
+
+    @Test
+    fun `invoke keeps the session token and server url from the stored session`() = runTest {
+        // Neither is part of the profile response, so both have to survive the merge.
+        fakeRepository.getUserSessionOnceResult = createFakeUserDetails()
+
+        val result = useCase()
+
+        assertEquals("test-session-token", result?.sessionToken)
+        assertEquals("https://test.com", result?.serverUrl)
     }
 
     @Test
