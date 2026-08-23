@@ -5,6 +5,9 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import coil3.PlatformContext
 import androidx.core.net.toUri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.URL
 
 class AndroidImageBytesProvider(
     private val context: Context
@@ -36,6 +39,19 @@ class AndroidImageBytesProvider(
         }
         
         return fileName
+    }
+
+    override suspend fun downloadImageFromUrl(url: String): ByteArray? {
+        return withContext(Dispatchers.IO) {
+            try {
+                URL(url).openStream().use { inputStream ->
+                    inputStream.readBytes()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
     }
 }
 

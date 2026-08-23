@@ -29,7 +29,7 @@ data class AddEditTransportationUiState(
     val isGeneratingDescription: Boolean = false,
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
-    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading
+    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle
 )
 
 class AddEditTransportationViewModel(
@@ -246,7 +246,7 @@ class AddEditTransportationViewModel(
     
     fun resetWikipediaImageState() {
         _uiState.value = _uiState.value.copy(
-            wikipediaImageState = WikipediaImageResult.Loading
+            wikipediaImageState = WikipediaImageResult.Idle
         )
     }
     

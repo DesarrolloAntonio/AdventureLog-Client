@@ -360,7 +360,7 @@ fun ImagesSection(
                             value = wikipediaQuery,
                             onValueChange = {
                                 wikipediaQuery = it
-                                if (wikipediaImageState !is WikipediaImageResult.Loading) {
+                                if (wikipediaImageState !is WikipediaImageResult.Idle) {
                                     onResetWikipediaState()
                                 }
                             },

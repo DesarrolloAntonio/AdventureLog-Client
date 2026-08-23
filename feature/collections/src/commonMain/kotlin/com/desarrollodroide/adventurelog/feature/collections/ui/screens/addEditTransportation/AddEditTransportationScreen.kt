@@ -119,7 +119,7 @@ fun AddEditTransportationContent(
     isSearchingLocation: Boolean = false,
     onSearchLocation: (String) -> Unit = {},
     onClearLocationSearch: () -> Unit = {},
-    wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Loading,
+    wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
     modifier: Modifier = Modifier

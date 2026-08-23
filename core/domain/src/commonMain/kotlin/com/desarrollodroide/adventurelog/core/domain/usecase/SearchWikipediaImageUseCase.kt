@@ -31,6 +31,7 @@ class SearchWikipediaImageUseCase(
 }
 
 sealed class WikipediaImageResult {
+    object Idle : WikipediaImageResult()
     object Loading : WikipediaImageResult()
     data class Success(val imageUrl: String) : WikipediaImageResult()
     object NotFound : WikipediaImageResult()

@@ -4,6 +4,9 @@ import coil3.PlatformContext
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import platform.Foundation.NSData
 import platform.Foundation.NSURL
 import platform.UIKit.UIImage
@@ -31,6 +34,25 @@ class IOSImageBytesProvider : ImageBytesProvider {
     override fun getFileName(uri: String): String {
         val nsUrl = NSURL.URLWithString(uri)
         return nsUrl?.lastPathComponent ?: "image.jpg"
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    override suspend fun downloadImageFromUrl(url: String): ByteArray? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val nsUrl = NSURL.URLWithString(url) ?: return@withContext null
+                val nsData = NSData.dataWithContentsOfURL(nsUrl) ?: return@withContext null
+                
+                val byteArray = ByteArray(nsData.length.toInt())
+                byteArray.usePinned { pinned ->
+                    memcpy(pinned.addressOf(0), nsData.bytes, nsData.length)
+                }
+                byteArray
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
     }
 }
 
