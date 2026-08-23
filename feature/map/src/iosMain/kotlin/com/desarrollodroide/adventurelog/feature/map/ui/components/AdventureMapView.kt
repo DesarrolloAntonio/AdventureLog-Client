@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.UIKitView
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
+import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreLocation.CLLocationCoordinate2D
 import platform.CoreLocation.CLLocationCoordinate2DMake
@@ -54,9 +55,9 @@ actual fun AdventureMapView(
                     if (lat != null && lng != null) {
                         val annotation = AdventureAnnotation(
                             adventureId = adventure.id,
-                            title = adventure.name,
-                            subtitle = adventure.location ?: "",
-                            coordinate = CLLocationCoordinate2DMake(lat, lng)
+                            annotationTitle = adventure.name,
+                            annotationSubtitle = adventure.location ?: "",
+                            annotationCoordinate = CLLocationCoordinate2DMake(lat, lng)
                         )
                         addAnnotation(annotation)
                     }
@@ -102,9 +103,9 @@ actual fun AdventureMapView(
                 if (lat != null && lng != null) {
                     val annotation = AdventureAnnotation(
                         adventureId = adventure.id,
-                        title = adventure.name,
-                        subtitle = adventure.location ?: "",
-                        coordinate = CLLocationCoordinate2DMake(lat, lng)
+                        annotationTitle = adventure.name,
+                        annotationSubtitle = adventure.location ?: "",
+                        annotationCoordinate = CLLocationCoordinate2DMake(lat, lng)
                     )
                     mapView.addAnnotation(annotation)
                 }
@@ -139,14 +140,18 @@ actual fun AdventureMapView(
 @OptIn(ExperimentalForeignApi::class)
 private class AdventureAnnotation(
     val adventureId: String,
-    private val title: String,
-    private val subtitle: String,
-    private val coordinate: CLLocationCoordinate2D
+    // Named apart from the protocol's members on purpose: a property called `title` would hide
+    // MKAnnotationProtocol.title rather than implement it, and the backing field would shadow the
+    // override's own body.
+    private val annotationTitle: String,
+    private val annotationSubtitle: String,
+    // A C struct crosses into Kotlin by value, so MapKit hands back CValue rather than the struct.
+    private val annotationCoordinate: CValue<CLLocationCoordinate2D>
 ) : NSObject(), MKAnnotationProtocol {
-    
-    override fun coordinate(): CLLocationCoordinate2D = coordinate
-    
-    override fun title(): String? = title
-    
-    override fun subtitle(): String? = subtitle
+
+    override fun coordinate(): CValue<CLLocationCoordinate2D> = annotationCoordinate
+
+    override fun title(): String? = annotationTitle
+
+    override fun subtitle(): String? = annotationSubtitle
 }

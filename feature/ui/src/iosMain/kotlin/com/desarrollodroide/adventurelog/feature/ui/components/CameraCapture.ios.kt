@@ -10,6 +10,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.launch
 import platform.UIKit.*
 import platform.Foundation.*
+// NSObject lives in platform.darwin, not Foundation - the wildcard imports above never brought it in.
+import platform.darwin.NSObject
 import platform.AVFoundation.*
 
 @OptIn(ExperimentalForeignApi::class)
@@ -67,7 +69,7 @@ actual fun CameraCapture(
         
         val authStatus = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo)
         when (authStatus) {
-            AVAuthorizationStatus.AVAuthorizationStatusAuthorized -> {
+            AVAuthorizationStatusAuthorized -> {
                 imagePickerController.delegate = delegate
                 UIApplication.sharedApplication.keyWindow?.rootViewController?.presentViewController(
                     imagePickerController,
@@ -75,7 +77,7 @@ actual fun CameraCapture(
                     completion = null
                 )
             }
-            AVAuthorizationStatus.AVAuthorizationStatusNotDetermined -> {
+            AVAuthorizationStatusNotDetermined -> {
                 AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo) { granted ->
                     if (granted) {
                         imagePickerController.delegate = delegate

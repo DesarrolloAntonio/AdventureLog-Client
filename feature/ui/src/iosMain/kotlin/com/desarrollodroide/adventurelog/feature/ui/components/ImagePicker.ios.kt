@@ -10,6 +10,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.launch
 import platform.UIKit.*
 import platform.Foundation.*
+// NSObject lives in platform.darwin, not Foundation - the wildcard imports above never brought it in.
+import platform.darwin.NSObject
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
