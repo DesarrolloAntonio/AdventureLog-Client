@@ -217,6 +217,16 @@ interface AdventureLogNetwork {
 
     suspend fun getShareImage(locationId: String, aspect: String): ByteArray
 
+    suspend fun duplicateCollection(collectionId: String): CollectionDTO
+
+    suspend fun setCollectionArchived(collectionId: String, archived: Boolean): CollectionDTO
+
+    suspend fun getCollectionShareImage(collectionId: String, aspect: String): ByteArray
+
+    suspend fun exportCollectionPdf(collectionId: String): ByteArray
+
+    suspend fun exportCollectionZip(collectionId: String): ByteArray
+
     /**
      * Delete an adventure
      */

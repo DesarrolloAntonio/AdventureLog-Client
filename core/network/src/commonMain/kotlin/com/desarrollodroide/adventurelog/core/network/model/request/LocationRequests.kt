@@ -159,3 +159,9 @@ data class RegionRequest(
     val latitude: String? = null,
     val country: Int? = null
 )
+/** A PATCH that moves a collection in or out of the archive and touches nothing else. */
+@Serializable
+data class ArchiveCollectionRequest(
+    @SerialName("is_archived")
+    val isArchived: Boolean
+)

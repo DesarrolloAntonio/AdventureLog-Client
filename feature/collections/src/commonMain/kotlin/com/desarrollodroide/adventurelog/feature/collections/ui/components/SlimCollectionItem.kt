@@ -51,6 +51,12 @@ fun SlimCollectionItem(
     onClick: () -> Unit,
     onEditCollection: () -> Unit = {},
     onDeleteCollection: () -> Unit = {},
+    onShareCollection: () -> Unit = {},
+    onDuplicateCollection: () -> Unit = {},
+    onArchiveCollection: () -> Unit = {},
+    onDownloadPdf: () -> Unit = {},
+    onExportZip: () -> Unit = {},
+    busyLabel: String? = null,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -178,39 +184,24 @@ fun SlimCollectionItem(
                     )
                 }
                 
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("View Collection") },
-                        onClick = {
-                            onClick()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Edit Collection") },
-                        onClick = {
-                            onEditCollection()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                "Delete Collection",
-                                color = Color(0xFFFF3B30)
-                            )
-                        },
-                        onClick = {
-                            onDeleteCollection()
-                            showMenu = false
-                        }
-                    )
-                }
             }
         }
+    }
+
+    if (showMenu) {
+        CollectionActionsSheet(
+            collection = collection,
+            busyLabel = busyLabel,
+            onDismiss = { showMenu = false },
+            onOpen = { showMenu = false; onClick() },
+            onEdit = { showMenu = false; onEditCollection() },
+            onShare = { showMenu = false; onShareCollection() },
+            onArchive = { showMenu = false; onArchiveCollection() },
+            onDownloadPdf = { showMenu = false; onDownloadPdf() },
+            onExportZip = { showMenu = false; onExportZip() },
+            onDuplicate = { showMenu = false; onDuplicateCollection() },
+            onDelete = { showMenu = false; onDeleteCollection() }
+        )
     }
 }
 

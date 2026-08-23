@@ -4,6 +4,7 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,16 @@ interface CollectionsRepository {
     suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>>
 
     suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit>
+
+    suspend fun duplicateCollection(collectionId: String): Either<ApiResponse, Collection>
+
+    suspend fun setArchived(collectionId: String, archived: Boolean): Either<ApiResponse, Collection>
+
+    /** [what] picks the file: a share card, a printable itinerary, or a full export. */
+    suspend fun exportCollection(
+        collectionId: String,
+        what: CollectionExport
+    ): Either<ApiResponse, ByteArray>
 
     suspend fun updateCollection(
         collectionId: String,

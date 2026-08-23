@@ -24,6 +24,12 @@ import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import com.desarrollodroide.adventurelog.core.domain.usecase.ArchiveCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ExportCollectionUseCase
+import com.desarrollodroide.adventurelog.core.model.CollectionExport
+import com.desarrollodroide.adventurelog.core.model.toSafeFileName
+import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -36,8 +42,19 @@ class CollectionsViewModel(
     private val getCollectionsPagingUseCase: GetCollectionsPagingUseCase,
     private val getAllCollectionsUseCase: GetAllCollectionsUseCase,
     private val deleteCollectionUseCase: DeleteCollectionUseCase,
-    private val observeCollectionsUseCase: ObserveCollectionsUseCase
+    private val observeCollectionsUseCase: ObserveCollectionsUseCase,
+    private val duplicateCollectionUseCase: DuplicateCollectionUseCase,
+    private val archiveCollectionUseCase: ArchiveCollectionUseCase,
+    private val exportCollectionUseCase: ExportCollectionUseCase,
+    private val platformFiles: PlatformFiles
 ) : ViewModel() {
+
+    private val _actionMessage = MutableStateFlow<String?>(null)
+    val actionMessage: StateFlow<String?> = _actionMessage.asStateFlow()
+
+    /** What the sheet is waiting for, so a slow server-side render does not look like nothing. */
+    private val _busyLabel = MutableStateFlow<String?>(null)
+    val busyLabel: StateFlow<String?> = _busyLabel.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -100,6 +117,71 @@ class CollectionsViewModel(
             if (observeCollectionsUseCase().value.isEmpty()) {
                 getAllCollectionsUseCase(forceRefresh = false)
             }
+        }
+    }
+
+    fun duplicateCollection(collection: UltraSlimCollection) {
+        run("Duplicating…") {
+            when (val result = duplicateCollectionUseCase(collection.id)) {
+                is Either.Left -> result.value
+                is Either.Right -> {
+                    refresh()
+                    "Duplicated as \"${result.value.name}\""
+                }
+            }
+        }
+    }
+
+    fun setArchived(collection: UltraSlimCollection, archived: Boolean) {
+        run(if (archived) "Archiving…" else "Restoring…") {
+            when (val result = archiveCollectionUseCase(collection.id, archived)) {
+                is Either.Left -> result.value
+                is Either.Right -> {
+                    refresh()
+                    if (archived) "Moved to the archive" else "Restored from the archive"
+                }
+            }
+        }
+    }
+
+    /**
+     * Shares or saves one of the files the server renders. All three go through the platform
+     * share sheet: the phone has nowhere useful to put a file otherwise, and the server is on a
+     * private network so a link would be no use to whoever receives it.
+     */
+    fun exportCollection(collection: UltraSlimCollection, what: CollectionExport) {
+        val label = when (what) {
+            CollectionExport.SHARE_CARD -> "Building the share image…"
+            CollectionExport.PDF -> "Building the PDF…"
+            CollectionExport.ZIP -> "Building the export…"
+        }
+
+        run(label) {
+            when (val result = exportCollectionUseCase(collection.id, what)) {
+                is Either.Left -> result.value
+                is Either.Right -> {
+                    val fileName = collection.name.toSafeFileName(extension = what.fileExtension)
+                    if (platformFiles.share(result.value, fileName)) {
+                        null
+                    } else {
+                        "Nothing on this device can open a .${what.fileExtension} file."
+                    }
+                }
+            }
+        }
+    }
+
+    fun clearActionMessage() {
+        _actionMessage.value = null
+    }
+
+    private fun run(busy: String, block: suspend () -> String?) {
+        if (_busyLabel.value != null) return
+
+        viewModelScope.launch {
+            _busyLabel.value = busy
+            _actionMessage.value = block()
+            _busyLabel.value = null
         }
     }
 

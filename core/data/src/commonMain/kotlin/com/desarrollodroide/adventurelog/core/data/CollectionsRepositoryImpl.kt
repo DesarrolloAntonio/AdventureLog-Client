@@ -8,6 +8,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.paging.CollectionsPagingSource
 import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepository
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.toUltraSlimCollection
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
@@ -226,6 +227,41 @@ class CollectionsRepositoryImpl(
             println("Unexpected error during deleteCollection: ${e.message}")
             Either.Left(ApiResponse.HttpError)
         }
+    }
+
+    override suspend fun duplicateCollection(collectionId: String): Either<ApiResponse, Collection> =
+        guard { networkDataSource.duplicateCollection(collectionId).toDomainModel() }
+
+    override suspend fun setArchived(
+        collectionId: String,
+        archived: Boolean
+    ): Either<ApiResponse, Collection> = guard {
+        networkDataSource.setCollectionArchived(collectionId, archived).toDomainModel()
+    }
+
+    override suspend fun exportCollection(
+        collectionId: String,
+        what: CollectionExport
+    ): Either<ApiResponse, ByteArray> = guard {
+        when (what) {
+            CollectionExport.SHARE_CARD ->
+                networkDataSource.getCollectionShareImage(collectionId, "square")
+            CollectionExport.PDF -> networkDataSource.exportCollectionPdf(collectionId)
+            CollectionExport.ZIP -> networkDataSource.exportCollectionZip(collectionId)
+        }
+    }
+
+    private inline fun <T> guard(block: () -> T): Either<ApiResponse, T> = try {
+        Either.Right(block())
+    } catch (e: HttpException) {
+        when (e.code) {
+            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            else -> Either.Left(ApiResponse.HttpError)
+        }
+    } catch (e: IOException) {
+        Either.Left(ApiResponse.IOException)
+    } catch (e: Exception) {
+        Either.Left(ApiResponse.HttpError)
     }
 
     override suspend fun updateCollection(

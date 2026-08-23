@@ -31,6 +31,9 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GenerateDescription
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetDashboardUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ArchiveCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateCollectionUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ExportCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationTrailsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationVisitsUseCase
@@ -83,6 +86,9 @@ val domainModule = module {
     factoryOf(::SyncLocationTrailsUseCase)
     factoryOf(::DuplicateLocationUseCase)
     factoryOf(::GetShareImageUseCase)
+    factoryOf(::DuplicateCollectionUseCase)
+    factoryOf(::ArchiveCollectionUseCase)
+    factoryOf(::ExportCollectionUseCase)
     factoryOf(::ObserveUserStatsUseCase)
     factoryOf(::SearchWikipediaImageUseCase)
     factoryOf(::GetVisitedRegionsUseCase)

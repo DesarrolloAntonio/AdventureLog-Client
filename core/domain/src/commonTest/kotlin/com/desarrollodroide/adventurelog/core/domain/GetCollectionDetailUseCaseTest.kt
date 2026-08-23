@@ -6,6 +6,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,6 +60,26 @@ class GetCollectionDetailUseCaseTest {
         }
 
         override suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun duplicateCollection(
+            collectionId: String
+        ): Either<ApiResponse, Collection> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun setArchived(
+            collectionId: String,
+            archived: Boolean
+        ): Either<ApiResponse, Collection> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun exportCollection(
+            collectionId: String,
+            what: CollectionExport
+        ): Either<ApiResponse, ByteArray> {
             throw NotImplementedError()
         }
 

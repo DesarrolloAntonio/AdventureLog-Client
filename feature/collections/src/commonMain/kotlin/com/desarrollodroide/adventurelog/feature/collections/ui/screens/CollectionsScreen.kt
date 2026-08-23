@@ -20,6 +20,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
+import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.TripStatus
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
@@ -79,9 +80,18 @@ fun CollectionsScreen(
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
     val collectionCount by viewModel.collectionCount.collectAsStateWithLifecycle()
     val statusFilter by viewModel.statusFilter.collectAsStateWithLifecycle()
+    val busyLabel by viewModel.busyLabel.collectAsStateWithLifecycle()
+    val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
 
     var collectionToDelete by remember { mutableStateOf<UltraSlimCollection?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(actionMessage) {
+        actionMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearActionMessage()
+        }
+    }
     
     // Notify when paging items are ready
     LaunchedEffect(pagingItems) {
@@ -113,6 +123,12 @@ fun CollectionsScreen(
             viewModel.refresh()
             pagingItems.refresh()
         },
+        onShareCollection = { viewModel.exportCollection(it, CollectionExport.SHARE_CARD) },
+        onDuplicateCollection = viewModel::duplicateCollection,
+        onArchiveCollection = { viewModel.setArchived(it, !it.isArchived) },
+        onDownloadPdf = { viewModel.exportCollection(it, CollectionExport.PDF) },
+        onExportZip = { viewModel.exportCollection(it, CollectionExport.ZIP) },
+        busyLabel = busyLabel,
         collectionCount = collectionCount,
         statusFilter = statusFilter,
         onStatusFilterChanged = viewModel::onStatusFilterChanged,
@@ -182,6 +198,12 @@ private fun CollectionsContent(
     onEditCollection: (UltraSlimCollection) -> Unit,
     onDeleteCollection: (UltraSlimCollection) -> Unit,
     onRefresh: () -> Unit,
+    onShareCollection: (UltraSlimCollection) -> Unit = {},
+    onDuplicateCollection: (UltraSlimCollection) -> Unit = {},
+    onArchiveCollection: (UltraSlimCollection) -> Unit = {},
+    onDownloadPdf: (UltraSlimCollection) -> Unit = {},
+    onExportZip: (UltraSlimCollection) -> Unit = {},
+    busyLabel: String? = null,
     collectionCount: Int = 0,
     statusFilter: TripStatus? = null,
     onStatusFilterChanged: (TripStatus?) -> Unit = {},
@@ -277,7 +299,13 @@ private fun CollectionsContent(
                         pagingItems = pagingItems,
                         onCollectionClick = onCollectionClick,
                         onEditCollection = onEditCollection,
-                        onDeleteCollection = onDeleteCollection
+                        onDeleteCollection = onDeleteCollection,
+                        onShareCollection = onShareCollection,
+                        onDuplicateCollection = onDuplicateCollection,
+                        onArchiveCollection = onArchiveCollection,
+                        onDownloadPdf = onDownloadPdf,
+                        onExportZip = onExportZip,
+                        busyLabel = busyLabel,
                     )
                 }
 
@@ -322,7 +350,13 @@ private fun CollectionsContent(
                                 pagingItems = pagingItems,
                                 onCollectionClick = onCollectionClick,
                                 onEditCollection = onEditCollection,
-                                onDeleteCollection = onDeleteCollection
+                                onDeleteCollection = onDeleteCollection,
+                                onShareCollection = onShareCollection,
+                                onDuplicateCollection = onDuplicateCollection,
+                                onArchiveCollection = onArchiveCollection,
+                                onDownloadPdf = onDownloadPdf,
+                                onExportZip = onExportZip,
+                                busyLabel = busyLabel,
                             )
                         }
                     }
@@ -337,7 +371,13 @@ private fun CollectionsPagingList(
     pagingItems: LazyPagingItems<UltraSlimCollection>,
     onCollectionClick: (String, String) -> Unit,
     onEditCollection: (UltraSlimCollection) -> Unit,
-    onDeleteCollection: (UltraSlimCollection) -> Unit
+    onDeleteCollection: (UltraSlimCollection) -> Unit,
+    onShareCollection: (UltraSlimCollection) -> Unit = {},
+    onDuplicateCollection: (UltraSlimCollection) -> Unit = {},
+    onArchiveCollection: (UltraSlimCollection) -> Unit = {},
+    onDownloadPdf: (UltraSlimCollection) -> Unit = {},
+    onExportZip: (UltraSlimCollection) -> Unit = {},
+    busyLabel: String? = null,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -359,7 +399,13 @@ private fun CollectionsPagingList(
                     collection = collection,
                     onClick = { onCollectionClick(collection.id, collection.name) },
                     onEditCollection = { onEditCollection(collection) },
-                    onDeleteCollection = { onDeleteCollection(collection) }
+                    onDeleteCollection = { onDeleteCollection(collection) },
+                    onShareCollection = { onShareCollection(collection) },
+                    onDuplicateCollection = { onDuplicateCollection(collection) },
+                    onArchiveCollection = { onArchiveCollection(collection) },
+                    onDownloadPdf = { onDownloadPdf(collection) },
+                    onExportZip = { onExportZip(collection) },
+                    busyLabel = busyLabel
                 )
             }
         }

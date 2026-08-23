@@ -426,6 +426,37 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return adventureDataSource.getShareImage(locationId, aspect)
     }
+
+    override suspend fun duplicateCollection(collectionId: String): CollectionDTO {
+        ensureInitialized()
+        return collectionDataSource.duplicateCollection(collectionId)
+    }
+
+    override suspend fun setCollectionArchived(
+        collectionId: String,
+        archived: Boolean
+    ): CollectionDTO {
+        ensureInitialized()
+        return collectionDataSource.setArchived(collectionId, archived)
+    }
+
+    override suspend fun getCollectionShareImage(
+        collectionId: String,
+        aspect: String
+    ): ByteArray {
+        ensureInitialized()
+        return collectionDataSource.getShareImage(collectionId, aspect)
+    }
+
+    override suspend fun exportCollectionPdf(collectionId: String): ByteArray {
+        ensureInitialized()
+        return collectionDataSource.exportPdf(collectionId)
+    }
+
+    override suspend fun exportCollectionZip(collectionId: String): ByteArray {
+        ensureInitialized()
+        return collectionDataSource.exportZip(collectionId)
+    }
     
     override suspend fun deleteAdventure(adventureId: String) {
         ensureInitialized()

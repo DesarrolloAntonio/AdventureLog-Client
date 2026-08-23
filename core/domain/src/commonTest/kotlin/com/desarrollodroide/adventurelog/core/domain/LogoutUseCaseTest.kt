@@ -227,6 +227,32 @@ class LogoutUseCaseTest {
             throw NotImplementedError()
         }
 
+        override suspend fun duplicateCollection(collectionId: String): CollectionDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun setCollectionArchived(
+            collectionId: String,
+            archived: Boolean
+        ): CollectionDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getCollectionShareImage(
+            collectionId: String,
+            aspect: String
+        ): ByteArray {
+            throw NotImplementedError()
+        }
+
+        override suspend fun exportCollectionPdf(collectionId: String): ByteArray {
+            throw NotImplementedError()
+        }
+
+        override suspend fun exportCollectionZip(collectionId: String): ByteArray {
+            throw NotImplementedError()
+        }
+
         override suspend fun getAdventuresFiltered(
             page: Int,
             pageSize: Int,

@@ -14,7 +14,9 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCo
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
+import com.desarrollodroide.adventurelog.core.network.model.request.ArchiveCollectionRequest
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.patch
@@ -248,5 +250,78 @@ internal class KtorCollectionApi(
         }
     }
 
+    override suspend fun duplicateCollection(collectionId: String): CollectionDTO {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/collections/$collectionId/duplicate/"
 
+        logger.d { "🌐 API Request - POST $url" }
+
+        val response = httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            headers { commonHeaders(session.sessionToken) }
+            setBody("{}")
+        }
+
+        if (!response.status.isSuccess()) {
+            val body = runCatching { response.body<String>() }.getOrDefault("")
+            logger.e { "Failed to duplicate collection: ${response.status} $body" }
+            throw HttpException(
+                response.status.value,
+                "Failed to duplicate collection: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<CollectionDTO>(response.body<String>())
+    }
+
+    override suspend fun setArchived(collectionId: String, archived: Boolean): CollectionDTO {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/collections/$collectionId/"
+
+        logger.d { "🌐 API Request - PATCH $url (archived=$archived)" }
+
+        // A PATCH carrying only this field: everything else the collection holds is left alone.
+        val response = httpClient.patch(url) {
+            contentType(ContentType.Application.Json)
+            headers { commonHeaders(session.sessionToken) }
+            setBody(ArchiveCollectionRequest(isArchived = archived))
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to archive collection: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<CollectionDTO>(response.body<String>())
+    }
+
+    override suspend fun getShareImage(collectionId: String, aspect: String): ByteArray =
+        download("${sessionProvider().baseUrl}/api/collections/$collectionId/share-image/$aspect/", "share image")
+
+    override suspend fun exportPdf(collectionId: String): ByteArray =
+        download("${sessionProvider().baseUrl}/api/collections/$collectionId/export-pdf/", "PDF")
+
+    override suspend fun exportZip(collectionId: String): ByteArray =
+        download("${sessionProvider().baseUrl}/api/collections/$collectionId/export/", "export")
+
+    private suspend fun download(url: String, what: String): ByteArray {
+        val session = sessionProvider()
+
+        logger.d { "🌐 API Request - GET $url" }
+
+        val response = httpClient.get(url) {
+            headers { commonHeaders(session.sessionToken) }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to build $what: ${response.status}"
+            )
+        }
+
+        return response.bodyAsBytes()
+    }
 }

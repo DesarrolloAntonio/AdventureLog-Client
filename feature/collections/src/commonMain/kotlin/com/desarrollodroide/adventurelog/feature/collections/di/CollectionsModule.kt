@@ -16,7 +16,11 @@ val collectionsModule = module {
             getCollectionsPagingUseCase = get(),
             getAllCollectionsUseCase = get(),
             deleteCollectionUseCase = get(),
-            observeCollectionsUseCase = get()
+            observeCollectionsUseCase = get(),
+            duplicateCollectionUseCase = get(),
+            archiveCollectionUseCase = get(),
+            exportCollectionUseCase = get(),
+            platformFiles = get()
         )
     }
 
