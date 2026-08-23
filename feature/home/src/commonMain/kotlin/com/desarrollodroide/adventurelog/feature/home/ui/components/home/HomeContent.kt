@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +43,7 @@ import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
+import kotlinx.datetime.LocalDate
 
 @Composable
 fun HomeContent(
@@ -65,6 +65,7 @@ fun HomeContent(
 
             is HomeUiState.Success -> DashboardList(
                 dashboard = homeUiState.dashboard,
+                today = homeUiState.today,
                 onAdventureClick = onAdventureClick,
                 onTripClick = onTripClick
             )
@@ -80,6 +81,7 @@ fun HomeContent(
 @Composable
 private fun DashboardList(
     dashboard: Dashboard,
+    today: LocalDate?,
     onAdventureClick: (Location) -> Unit,
     onTripClick: (UltraSlimCollection) -> Unit,
     modifier: Modifier = Modifier
@@ -108,7 +110,7 @@ private fun DashboardList(
                 SectionHeader("Coming up")
             }
             items(dashboard.upcomingEvents, key = { "event-${it.id}" }) { event ->
-                EventRow(event)
+                EventRow(event, today)
             }
         }
 
@@ -184,7 +186,8 @@ private fun TripCard(
             } else {
                 MaterialTheme.colorScheme.secondaryContainer
             }
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             Text(
@@ -228,9 +231,13 @@ private fun StatsCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
+        // The screen sits on a full-bleed photo of roughly the same luminance as the theme's
+        // container greys, so the cards need a brighter fill and a real shadow to read as
+        // surfaces rather than float.
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
@@ -314,45 +321,86 @@ private fun StatRow(
 @Composable
 private fun EventRow(
     event: CalendarEvent,
+    today: LocalDate?,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Text(text = event.icon, style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = event.title,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            val detail = listOfNotNull(
-                event.locationLabel.takeIf { it.isNotBlank() },
-                event.collectionName?.takeIf { it.isNotBlank() }
-            ).firstOrNull()
-            if (detail != null) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = event.icon, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = detail,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = event.title,
+                    style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                val detail = listOfNotNull(
+                    event.locationLabel.takeIf { it.isNotBlank() },
+                    event.collectionName?.takeIf { it.isNotBlank() }
+                ).firstOrNull()
+                if (detail != null) {
+                    Text(
+                        text = detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            EventWhen(event, today)
+        }
+    }
+}
+
+/**
+ * A multi-day event that has already begun is still "coming up" - it has not finished - but
+ * printing its start date reads as a date in the past. Say it is running, and when it ends.
+ */
+@Composable
+private fun EventWhen(
+    event: CalendarEvent,
+    today: LocalDate?,
+    modifier: Modifier = Modifier
+) {
+    val started = today != null && event.start.isNotBlank() &&
+        event.start.substringBefore('T') <= today.toString()
+    val ends = event.end.substringBefore('T')
+    val running = started && ends >= (today?.toString() ?: "")
+
+    if (running) {
+        Column(modifier = modifier, horizontalAlignment = Alignment.End) {
+            Text(
+                text = "NOW",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            if (ends != today?.toString()) {
+                Text(
+                    text = "to ${ends.toShortDate()}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
-        Spacer(Modifier.width(12.dp))
+    } else {
         Text(
             text = event.start.toShortDate(),
             style = MaterialTheme.typography.labelMedium,
             fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = modifier
         )
     }
 }

@@ -11,11 +11,14 @@ import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class HomeViewModel(
     private val getLocationsUseCase: GetLocationsUseCase,
@@ -57,6 +60,7 @@ class HomeViewModel(
         }
     }
 
+    @OptIn(kotlin.time.ExperimentalTime::class)
     fun loadDashboard() {
         viewModelScope.launch {
             _uiState.update { HomeUiState.Loading }
@@ -68,10 +72,13 @@ class HomeViewModel(
                 }
 
                 is Either.Right -> {
+                    val today = Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault()).date
                     _uiState.update {
                         HomeUiState.Success(
                             userName = _userDetails.value?.fullName ?: "User",
-                            dashboard = result.value
+                            dashboard = result.value,
+                            today = today
                         )
                     }
                 }
