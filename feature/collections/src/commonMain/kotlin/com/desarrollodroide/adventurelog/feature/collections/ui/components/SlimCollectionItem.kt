@@ -40,6 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
+import androidx.compose.foundation.layout.Arrangement
+import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 
@@ -123,24 +125,39 @@ fun SlimCollectionItem(
                 
                 Row(
                     modifier = Modifier.padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Tag showing number of adventures
-                    Surface(
-                        modifier = Modifier.height(24.dp),
-                        color = Color(0xFF6B4EFF),
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "${collection.adventureCount} ${if (collection.adventureCount == 1) "adventure" else "adventures"}",
-                                color = Color.White,
-                                fontSize = 12.sp
-                            )
-                        }
+                    CollectionChip(
+                        text = "${collection.adventureCount} " +
+                            if (collection.adventureCount == 1) "place" else "places",
+                        background = Color(0xFF6B4EFF)
+                    )
+
+                    // Where the trip sits relative to today. A collection with no dates is a
+                    // plain folder and says so, which is how the web labels it too.
+                    val status = collection.status
+                    if (status != TripStatus.FOLDER || collection.startDate == null) {
+                        CollectionChip(
+                            text = when (status) {
+                                TripStatus.IN_PROGRESS -> "🎯 In progress"
+                                TripStatus.UPCOMING -> collection.daysUntilStart?.let { days ->
+                                    when (days) {
+                                        0 -> "🚀 Starts today"
+                                        1 -> "🚀 Tomorrow"
+                                        else -> "🚀 In $days days"
+                                    }
+                                } ?: "🚀 Upcoming"
+                                TripStatus.COMPLETED -> "✓ Completed"
+                                TripStatus.FOLDER -> "📁 Folder"
+                            },
+                            background = when (status) {
+                                TripStatus.IN_PROGRESS -> Color(0xFF00897B)
+                                TripStatus.UPCOMING -> Color(0xFF1E88E5)
+                                TripStatus.COMPLETED -> Color(0xFF546E7A)
+                                TripStatus.FOLDER -> Color.White.copy(alpha = 0.25f)
+                            }
+                        )
                     }
                 }
             }
@@ -301,6 +318,26 @@ private fun EmptyCollectionDesign(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CollectionChip(
+    text: String,
+    background: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.height(24.dp),
+        color = background,
+        shape = RoundedCornerShape(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = text, color = Color.White, fontSize = 12.sp)
         }
     }
 }

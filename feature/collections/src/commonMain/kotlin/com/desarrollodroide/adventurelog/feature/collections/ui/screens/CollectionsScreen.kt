@@ -17,6 +17,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.FilterChip
+import com.desarrollodroide.adventurelog.core.model.TripStatus
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,6 +77,8 @@ fun CollectionsScreen(
     val pagingItems = viewModel.collectionsPagingData.collectAsLazyPagingItems()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
+    val collectionCount by viewModel.collectionCount.collectAsStateWithLifecycle()
+    val statusFilter by viewModel.statusFilter.collectAsStateWithLifecycle()
 
     var collectionToDelete by remember { mutableStateOf<UltraSlimCollection?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -107,6 +113,9 @@ fun CollectionsScreen(
             viewModel.refresh()
             pagingItems.refresh()
         },
+        collectionCount = collectionCount,
+        statusFilter = statusFilter,
+        onStatusFilterChanged = viewModel::onStatusFilterChanged,
         modifier = modifier
     )
 
@@ -173,6 +182,9 @@ private fun CollectionsContent(
     onEditCollection: (UltraSlimCollection) -> Unit,
     onDeleteCollection: (UltraSlimCollection) -> Unit,
     onRefresh: () -> Unit,
+    collectionCount: Int = 0,
+    statusFilter: TripStatus? = null,
+    onStatusFilterChanged: (TripStatus?) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -180,6 +192,16 @@ private fun CollectionsContent(
     Scaffold(
         modifier = modifier,
         topBar = {
+          Column {
+            if (collectionCount > 0) {
+                Text(
+                    text = "$collectionCount " +
+                        if (collectionCount == 1) "collection" else "collections",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 20.dp, top = 4.dp)
+                )
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -217,6 +239,12 @@ private fun CollectionsContent(
                     }
                 }
             }
+
+            StatusFilterRow(
+                selected = statusFilter,
+                onSelect = onStatusFilterChanged
+            )
+          }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -275,12 +303,18 @@ private fun CollectionsContent(
 
                 pagingItems.loadState.refresh is LoadStateNotLoading -> {
                     when {
-                        pagingItems.itemCount == 0 && searchQuery.isEmpty() -> {
+                        // "None at all" and "none matching" are different things to say. A
+                        // status filter that matches nothing used to read as an empty account.
+                        pagingItems.itemCount == 0 &&
+                            searchQuery.isEmpty() && statusFilter == null -> {
                             EmptyState()
                         }
 
-                        pagingItems.itemCount == 0 && searchQuery.isNotEmpty() -> {
-                            NoSearchResultsState(searchQuery = searchQuery)
+                        pagingItems.itemCount == 0 -> {
+                            NoSearchResultsState(
+                                searchQuery = searchQuery,
+                                statusFilter = statusFilter
+                            )
                         }
 
                         else -> {
@@ -395,7 +429,7 @@ private fun EmptyState() {
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Create your first collection to organize your adventures!",
+                text = "Create your first collection to group the places you visit.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -405,7 +439,15 @@ private fun EmptyState() {
 }
 
 @Composable
-private fun NoSearchResultsState(searchQuery: String) {
+private fun NoSearchResultsState(searchQuery: String, statusFilter: TripStatus? = null) {
+    val statusLabel = when (statusFilter) {
+        TripStatus.FOLDER -> "folders"
+        TripStatus.UPCOMING -> "upcoming trips"
+        TripStatus.IN_PROGRESS -> "trips in progress"
+        TripStatus.COMPLETED -> "completed trips"
+        null -> null
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -417,15 +459,60 @@ private fun NoSearchResultsState(searchQuery: String) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "No results for \"$searchQuery\"",
+                text = when {
+                    searchQuery.isNotEmpty() && statusLabel != null ->
+                        "No $statusLabel matching \"$searchQuery\""
+                    searchQuery.isNotEmpty() -> "No results for \"$searchQuery\""
+                    statusLabel != null -> "No $statusLabel"
+                    else -> "Nothing to show"
+                },
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
             )
             Text(
-                text = "Try searching with different keywords",
+                text = if (searchQuery.isNotEmpty()) {
+                    "Try searching with different keywords"
+                } else {
+                    "Nothing here has that status yet"
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+/**
+ * The status filter the web keeps in its sidebar. A phone has no sidebar, so it sits under the
+ * search field as a scrolling row of chips.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StatusFilterRow(
+    selected: TripStatus?,
+    onSelect: (TripStatus?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val options = listOf(
+        null to "All",
+        TripStatus.FOLDER to "📁 Folder",
+        TripStatus.UPCOMING to "🚀 Upcoming",
+        TripStatus.IN_PROGRESS to "🎯 In progress",
+        TripStatus.COMPLETED to "✓ Completed"
+    )
+
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(options) { (status, label) ->
+            FilterChip(
+                selected = selected == status,
+                onClick = { onSelect(status) },
+                label = { Text(label) }
             )
         }
     }

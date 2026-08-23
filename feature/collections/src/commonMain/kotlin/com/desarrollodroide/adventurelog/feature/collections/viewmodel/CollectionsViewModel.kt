@@ -20,6 +20,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.desarrollodroide.adventurelog.core.model.TripStatus
+import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -31,7 +35,8 @@ import kotlinx.coroutines.launch
 class CollectionsViewModel(
     private val getCollectionsPagingUseCase: GetCollectionsPagingUseCase,
     private val getAllCollectionsUseCase: GetAllCollectionsUseCase,
-    private val deleteCollectionUseCase: DeleteCollectionUseCase
+    private val deleteCollectionUseCase: DeleteCollectionUseCase,
+    private val observeCollectionsUseCase: ObserveCollectionsUseCase
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -39,6 +44,19 @@ class CollectionsViewModel(
 
     private val _sortOptions = MutableStateFlow(CollectionSortOptions())
     val sortOptions: StateFlow<CollectionSortOptions> = _sortOptions.asStateFlow()
+
+    /**
+     * Null means every collection. The server computes `status` but does not accept it as a
+     * query, so this filters what has been loaded - the same way search here already works, and
+     * the same way the web does it.
+     */
+    private val _statusFilter = MutableStateFlow<TripStatus?>(null)
+    val statusFilter: StateFlow<TripStatus?> = _statusFilter.asStateFlow()
+
+    /** How many collections the account holds, for the header. */
+    val collectionCount: StateFlow<Int> = observeCollectionsUseCase()
+        .map { it.size }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     private val _showSortSheet = MutableStateFlow(false)
     val showSortSheet: StateFlow<Boolean> = _showSortSheet.asStateFlow()
@@ -58,24 +76,36 @@ class CollectionsViewModel(
 
     val collectionsPagingData: Flow<PagingData<UltraSlimCollection>> = combine(
         _searchQuery.debounce(300).distinctUntilChanged(),
-        _sortOptions
-    ) { query, sortOptions ->
-        Pair(query, sortOptions)
-    }.flatMapLatest { (query, sortOptions) ->
+        _sortOptions,
+        _statusFilter
+    ) { query, sortOptions, status ->
+        Triple(query, sortOptions, status)
+    }.flatMapLatest { (query, sortOptions, status) ->
         getCollectionsPagingUseCase(
             sortField = sortOptions.sortField.name,
             sortDirection = sortOptions.sortDirection.name
         )
             .map { pagingData ->
-                if (query.isEmpty()) {
-                    pagingData
-                } else {
-                    pagingData.filter { collection ->
-                        collection.name.contains(query, ignoreCase = true)
-                    }
-                }
+                pagingData
+                    .filter { query.isEmpty() || it.name.contains(query, ignoreCase = true) }
+                    .filter { status == null || it.status == status }
             }
     }.cachedIn(viewModelScope)
+
+    init {
+        // The count comes from the shared collections flow, which nothing has filled if this is
+        // the first screen opened. Paging only ever loads a page at a time, so it cannot answer
+        // "how many are there" on its own.
+        viewModelScope.launch {
+            if (observeCollectionsUseCase().value.isEmpty()) {
+                getAllCollectionsUseCase(forceRefresh = false)
+            }
+        }
+    }
+
+    fun onStatusFilterChanged(status: TripStatus?) {
+        _statusFilter.value = status
+    }
 
 
     fun onSearchQueryChange(query: String) {
