@@ -4,6 +4,10 @@ import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.api.VisitApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorVisitApi
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitDTO
+import com.desarrollodroide.adventurelog.core.model.TrailFormData
+import com.desarrollodroide.adventurelog.core.network.api.TrailApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTrailApi
+import com.desarrollodroide.adventurelog.core.network.model.response.TrailDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
@@ -87,6 +91,14 @@ class KtorAdventureLogNetwork(
         )
     }
     
+    private val trailDataSource: TrailApi by lazy {
+        KtorTrailApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            json = json
+        )
+    }
+
     private val visitDataSource: VisitApi by lazy {
         KtorVisitApi(
             httpClient = adventurelogClient,
@@ -380,6 +392,25 @@ class KtorAdventureLogNetwork(
     override suspend fun deleteVisit(visitId: String) {
         ensureInitialized()
         visitDataSource.deleteVisit(visitId)
+    }
+
+    override suspend fun createTrail(locationId: String, trail: TrailFormData): TrailDTO {
+        ensureInitialized()
+        return trailDataSource.createTrail(locationId, trail)
+    }
+
+    override suspend fun updateTrail(
+        trailId: String,
+        locationId: String,
+        trail: TrailFormData
+    ): TrailDTO {
+        ensureInitialized()
+        return trailDataSource.updateTrail(trailId, locationId, trail)
+    }
+
+    override suspend fun deleteTrail(trailId: String) {
+        ensureInitialized()
+        trailDataSource.deleteTrail(trailId)
     }
     
     override suspend fun deleteAdventure(adventureId: String) {

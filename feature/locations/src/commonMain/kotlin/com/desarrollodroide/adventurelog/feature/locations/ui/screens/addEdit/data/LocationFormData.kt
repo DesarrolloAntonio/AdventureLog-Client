@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data
 
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 
@@ -16,5 +17,6 @@ data class LocationFormData(
     val isPublic: Boolean = false,
     val tags: List<String> = emptyList(),
     val visits: List<VisitFormData> = emptyList(),
+    val trails: List<TrailFormData> = emptyList(),
     val images: List<ImageFormData> = emptyList()
 )

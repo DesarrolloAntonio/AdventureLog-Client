@@ -37,9 +37,11 @@ import com.desarrollodroide.adventurelog.core.model.Region
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components.BasicInfoSection
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components.DateSection
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components.TrailsSection
 import com.desarrollodroide.adventurelog.feature.ui.components.ImagesSection
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components.LocationSection
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components.TagsSection
@@ -219,6 +221,14 @@ fun AddEditLocationContent(
                 
                 println("DEBUG: Total parsed visits: ${parsedVisits.size}")
                 
+                val parsedTrails = existingLocation.trails.map { trail ->
+                    TrailFormData(
+                        id = trail.id,
+                        name = trail.name,
+                        link = trail.link ?: trail.wandererLink.orEmpty()
+                    )
+                }
+
                 LocationFormData(
                     name = existingLocation.name,
                     description = existingLocation.description ?: "",
@@ -231,6 +241,7 @@ fun AddEditLocationContent(
                     isPublic = existingLocation.isPublic,
                     tags = existingLocation.tags,
                     visits = parsedVisits,
+                    trails = parsedTrails,
                     images = existingLocation.images.map { contentImage ->
                         ImageFormData(
                             uri = contentImage.image,
@@ -300,6 +311,11 @@ fun AddEditLocationContent(
         )
 
         TagsSection(
+            formData = formData,
+            onFormDataChange = { formData = it }
+        )
+
+        TrailsSection(
             formData = formData,
             onFormDataChange = { formData = it }
         )

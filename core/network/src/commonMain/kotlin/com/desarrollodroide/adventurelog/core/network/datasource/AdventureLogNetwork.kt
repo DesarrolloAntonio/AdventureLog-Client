@@ -4,6 +4,8 @@ import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitDTO
+import com.desarrollodroide.adventurelog.core.model.TrailFormData
+import com.desarrollodroide.adventurelog.core.network.model.response.TrailDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
@@ -202,6 +204,12 @@ interface AdventureLogNetwork {
     suspend fun updateVisit(visitId: String, locationId: String, visit: VisitFormData): VisitDTO
 
     suspend fun deleteVisit(visitId: String)
+
+    suspend fun createTrail(locationId: String, trail: TrailFormData): TrailDTO
+
+    suspend fun updateTrail(trailId: String, locationId: String, trail: TrailFormData): TrailDTO
+
+    suspend fun deleteTrail(trailId: String)
 
     /**
      * Delete an adventure

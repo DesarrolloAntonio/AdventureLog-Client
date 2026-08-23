@@ -8,9 +8,11 @@ import com.desarrollodroide.adventurelog.core.model.Account
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
+import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.TrailDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
@@ -218,6 +220,22 @@ class InitializeSessionUseCaseTest {
         }
 
         override suspend fun deleteVisit(visitId: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun createTrail(locationId: String, trail: TrailFormData): TrailDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun updateTrail(
+            trailId: String,
+            locationId: String,
+            trail: TrailFormData
+        ): TrailDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun deleteTrail(trailId: String) {
             throw NotImplementedError()
         }
 

@@ -80,6 +80,26 @@ data class CreateVisitRequest(
     }
 }
 
+/**
+ * Body of `POST /api/trails/`. The server wants either a link or a Wanderer id; this client only
+ * sends plain links, so the Wanderer fields are left out and default to null server-side.
+ */
+@Serializable
+data class TrailRequest(
+    val name: String,
+    val location: String,
+    val link: String?
+) {
+    companion object {
+        fun from(locationId: String, trail: com.desarrollodroide.adventurelog.core.model.TrailFormData) =
+            TrailRequest(
+                name = trail.name.trim(),
+                location = locationId,
+                link = trail.link.trim().takeIf { it.isNotBlank() }
+            )
+    }
+}
+
 @Serializable
 data class CategoryRequest(
     val name: String,

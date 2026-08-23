@@ -24,6 +24,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.WikipediaImageResul
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCategoryUseCase
 import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
+import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationTrailsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationVisitsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UploadImageUseCase
 import com.desarrollodroide.adventurelog.feature.ui.util.ImageBytesProvider
@@ -57,6 +58,7 @@ class AddEditAdventureViewModel(
     private val createCategoryUseCase: CreateCategoryUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val syncLocationVisitsUseCase: SyncLocationVisitsUseCase,
+    private val syncLocationTrailsUseCase: SyncLocationTrailsUseCase,
     private val imageBytesProvider: ImageBytesProvider,
     private val adventureId: String? = null,
     private val existingLocation: Location? = null
@@ -192,6 +194,16 @@ class AddEditAdventureViewModel(
                         // The location itself saved, so this is a warning rather than a failure -
                         // silently dropping the dates would be worse than saying so.
                         _uiState.value = _uiState.value.copy(errorMessage = visitsResult.value)
+                    }
+
+                    // Trails carry a location id too, so they follow the same after-the-fact path.
+                    val trailsResult = syncLocationTrailsUseCase(
+                        locationId = createdLocation.id,
+                        existing = _uiState.value.existingLocation?.trails.orEmpty(),
+                        edited = formData.trails
+                    )
+                    if (trailsResult is Either.Left) {
+                        _uiState.value = _uiState.value.copy(errorMessage = trailsResult.value)
                     }
 
                     if (formData.images.isNotEmpty()) {

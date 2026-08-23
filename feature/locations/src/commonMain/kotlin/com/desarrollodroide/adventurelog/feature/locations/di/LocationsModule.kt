@@ -37,6 +37,7 @@ val locationsModule = module {
             createCategoryUseCase = get(),
             uploadImageUseCase = get(),
             syncLocationVisitsUseCase = get(),
+            syncLocationTrailsUseCase = get(),
             imageBytesProvider = get(),
             adventureId = params.getOrNull(),
             existingLocation = params.getOrNull()
