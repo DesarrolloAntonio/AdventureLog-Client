@@ -14,6 +14,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCo
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionInviteDTO
 import com.desarrollodroide.adventurelog.core.network.model.request.ArchiveCollectionRequest
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsBytes
@@ -305,6 +306,78 @@ internal class KtorCollectionApi(
 
     override suspend fun exportZip(collectionId: String): ByteArray =
         download("${sessionProvider().baseUrl}/api/collections/$collectionId/export/", "export")
+
+    override suspend fun getArchivedCollections(): List<UltraSlimCollectionDTO> =
+        listOf("archived")
+
+    override suspend fun getSharedCollections(): List<UltraSlimCollectionDTO> =
+        listOf("shared")
+
+    /** Both of these answer a bare array rather than a paged envelope. */
+    private suspend fun listOf(action: String): List<UltraSlimCollectionDTO> {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/collections/$action/"
+
+        logger.d { "🌐 API Request - GET $url" }
+
+        val response = httpClient.get(url) {
+            headers { commonHeaders(session.sessionToken) }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch $action collections: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<List<UltraSlimCollectionDTO>>(response.body<String>())
+    }
+
+    override suspend fun getInvites(): List<CollectionInviteDTO> {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/collections/invites/"
+
+        logger.d { "🌐 API Request - GET $url" }
+
+        val response = httpClient.get(url) {
+            headers { commonHeaders(session.sessionToken) }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch invites: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<List<CollectionInviteDTO>>(response.body<String>())
+    }
+
+    override suspend fun acceptInvite(collectionId: String) = respondToInvite(collectionId, true)
+
+    override suspend fun declineInvite(collectionId: String) = respondToInvite(collectionId, false)
+
+    private suspend fun respondToInvite(collectionId: String, accept: Boolean) {
+        val session = sessionProvider()
+        val verb = if (accept) "accept-invite" else "decline-invite"
+        val url = "${session.baseUrl}/api/collections/$collectionId/$verb/"
+
+        logger.d { "🌐 API Request - POST $url" }
+
+        val response = httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            headers { commonHeaders(session.sessionToken) }
+            setBody("{}")
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to $verb: ${response.status}"
+            )
+        }
+    }
 
     private suspend fun download(url: String, what: String): ByteArray {
         val session = sessionProvider()

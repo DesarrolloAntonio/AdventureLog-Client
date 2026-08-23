@@ -20,7 +20,11 @@ val collectionsModule = module {
             duplicateCollectionUseCase = get(),
             archiveCollectionUseCase = get(),
             exportCollectionUseCase = get(),
-            platformFiles = get()
+            platformFiles = get(),
+            getArchivedCollectionsUseCase = get(),
+            getSharedCollectionsUseCase = get(),
+            getCollectionInvitesUseCase = get(),
+            respondToCollectionInviteUseCase = get()
         )
     }
 

@@ -22,6 +22,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.TripStatus
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.desarrollodroide.adventurelog.core.model.CollectionInvite
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTab
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTabContent
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -81,6 +92,8 @@ fun CollectionsScreen(
     val collectionCount by viewModel.collectionCount.collectAsStateWithLifecycle()
     val statusFilter by viewModel.statusFilter.collectAsStateWithLifecycle()
     val busyLabel by viewModel.busyLabel.collectAsStateWithLifecycle()
+    val tab by viewModel.tab.collectAsStateWithLifecycle()
+    val tabContent by viewModel.tabContent.collectAsStateWithLifecycle()
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
 
     var collectionToDelete by remember { mutableStateOf<UltraSlimCollection?>(null) }
@@ -123,6 +136,10 @@ fun CollectionsScreen(
             viewModel.refresh()
             pagingItems.refresh()
         },
+        tab = tab,
+        onTabSelected = viewModel::onTabSelected,
+        tabContent = tabContent,
+        onRespondToInvite = viewModel::respondToInvite,
         onShareCollection = { viewModel.exportCollection(it, CollectionExport.SHARE_CARD) },
         onDuplicateCollection = viewModel::duplicateCollection,
         onArchiveCollection = { viewModel.setArchived(it, !it.isArchived) },
@@ -198,6 +215,10 @@ private fun CollectionsContent(
     onEditCollection: (UltraSlimCollection) -> Unit,
     onDeleteCollection: (UltraSlimCollection) -> Unit,
     onRefresh: () -> Unit,
+    tab: CollectionsTab = CollectionsTab.MINE,
+    onTabSelected: (CollectionsTab) -> Unit = {},
+    tabContent: CollectionsTabContent = CollectionsTabContent(),
+    onRespondToInvite: (CollectionInvite, Boolean) -> Unit = { _, _ -> },
     onShareCollection: (UltraSlimCollection) -> Unit = {},
     onDuplicateCollection: (UltraSlimCollection) -> Unit = {},
     onArchiveCollection: (UltraSlimCollection) -> Unit = {},
@@ -262,10 +283,16 @@ private fun CollectionsContent(
                 }
             }
 
-            StatusFilterRow(
-                selected = statusFilter,
-                onSelect = onStatusFilterChanged
-            )
+            CollectionsTabRow(selected = tab, onSelect = onTabSelected)
+
+            // The status filter only means anything for the paged list of the user's own
+            // collections; the other tabs are short, whole lists.
+            if (tab == CollectionsTab.MINE) {
+                StatusFilterRow(
+                    selected = statusFilter,
+                    onSelect = onStatusFilterChanged
+                )
+            }
           }
         },
         floatingActionButton = {
@@ -293,6 +320,24 @@ private fun CollectionsContent(
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
             when {
+                // The other three tabs are whole lists from the server, not paged.
+                tab != CollectionsTab.MINE -> {
+                    TabContentList(
+                        tab = tab,
+                        content = tabContent,
+                        onCollectionClick = onCollectionClick,
+                        onRespondToInvite = onRespondToInvite,
+                        onEditCollection = onEditCollection,
+                        onDeleteCollection = onDeleteCollection,
+                        onShareCollection = onShareCollection,
+                        onDuplicateCollection = onDuplicateCollection,
+                        onArchiveCollection = onArchiveCollection,
+                        onDownloadPdf = onDownloadPdf,
+                        onExportZip = onExportZip,
+                        busyLabel = busyLabel
+                    )
+                }
+
                 // Show existing content during pull to refresh
                 isRefreshing && pagingItems.itemCount > 0 -> {
                     CollectionsPagingList(
@@ -560,6 +605,149 @@ private fun StatusFilterRow(
                 onClick = { onSelect(status) },
                 label = { Text(label) }
             )
+        }
+    }
+}
+
+@Composable
+private fun CollectionsTabRow(
+    selected: CollectionsTab,
+    onSelect: (CollectionsTab) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ScrollableTabRow(
+        selectedTabIndex = CollectionsTab.entries.indexOf(selected),
+        modifier = modifier.fillMaxWidth(),
+        edgePadding = 16.dp,
+        containerColor = Color.Transparent,
+        divider = {}
+    ) {
+        CollectionsTab.entries.forEach { entry ->
+            Tab(
+                selected = selected == entry,
+                onClick = { onSelect(entry) },
+                text = { Text(entry.label) }
+            )
+        }
+    }
+}
+
+/** Whole-list tabs: the archive, what others have shared, and pending invitations. */
+@Composable
+private fun TabContentList(
+    tab: CollectionsTab,
+    content: CollectionsTabContent,
+    onCollectionClick: (String, String) -> Unit,
+    onRespondToInvite: (CollectionInvite, Boolean) -> Unit,
+    onEditCollection: (UltraSlimCollection) -> Unit,
+    onDeleteCollection: (UltraSlimCollection) -> Unit,
+    onShareCollection: (UltraSlimCollection) -> Unit,
+    onDuplicateCollection: (UltraSlimCollection) -> Unit,
+    onArchiveCollection: (UltraSlimCollection) -> Unit,
+    onDownloadPdf: (UltraSlimCollection) -> Unit,
+    onExportZip: (UltraSlimCollection) -> Unit,
+    busyLabel: String?,
+    modifier: Modifier = Modifier
+) {
+    when {
+        content.isLoading -> Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+
+        content.error != null -> Box(
+            modifier.fillMaxSize().padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(content.error, textAlign = TextAlign.Center)
+        }
+
+        tab == CollectionsTab.INVITES && content.invites.isEmpty() ->
+            TabEmpty("No invitations", "Collections other people invite you to appear here.")
+
+        tab != CollectionsTab.INVITES && content.collections.isEmpty() -> TabEmpty(
+            title = if (tab == CollectionsTab.ARCHIVED) "Nothing archived" else "Nothing shared",
+            body = if (tab == CollectionsTab.ARCHIVED) {
+                "Collections you archive are kept here."
+            } else {
+                "Collections other people share with you appear here."
+            }
+        )
+
+        else -> LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (tab == CollectionsTab.INVITES) {
+                items(content.invites, key = { it.id }) { invite ->
+                    InviteCard(invite = invite, onRespond = onRespondToInvite)
+                }
+            } else {
+                items(content.collections, key = { it.id }) { collection ->
+                    // The same actions as the main list: restoring something from the archive is
+                    // only reachable from here, so these cannot be left inert.
+                    SlimCollectionItem(
+                        collection = collection,
+                        onClick = { onCollectionClick(collection.id, collection.name) },
+                        onEditCollection = { onEditCollection(collection) },
+                        onDeleteCollection = { onDeleteCollection(collection) },
+                        onShareCollection = { onShareCollection(collection) },
+                        onDuplicateCollection = { onDuplicateCollection(collection) },
+                        onArchiveCollection = { onArchiveCollection(collection) },
+                        onDownloadPdf = { onDownloadPdf(collection) },
+                        onExportZip = { onExportZip(collection) },
+                        busyLabel = busyLabel
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabEmpty(title: String, body: String) {
+    Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(title, style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun InviteCard(
+    invite: CollectionInvite,
+    onRespond: (CollectionInvite, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = invite.collectionName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Shared by ${invite.ownerDisplayName}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = { onRespond(invite, false) }) { Text("Decline") }
+                Spacer(Modifier.width(8.dp))
+                Button(onClick = { onRespond(invite, true) }) { Text("Accept") }
+            }
         }
     }
 }

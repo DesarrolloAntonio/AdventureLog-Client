@@ -7,6 +7,7 @@ import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepos
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.CollectionExport
+import com.desarrollodroide.adventurelog.core.model.CollectionInvite
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,6 +86,25 @@ class GetCollectionsUseCaseTest {
             collectionId: String,
             what: CollectionExport
         ): Either<ApiResponse, ByteArray> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getArchivedCollections(): Either<ApiResponse, List<UltraSlimCollection>> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getSharedCollections(): Either<ApiResponse, List<UltraSlimCollection>> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getInvites(): Either<ApiResponse, List<CollectionInvite>> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun respondToInvite(
+            collectionId: String,
+            accept: Boolean
+        ): Either<ApiResponse, Unit> {
             throw NotImplementedError()
         }
 

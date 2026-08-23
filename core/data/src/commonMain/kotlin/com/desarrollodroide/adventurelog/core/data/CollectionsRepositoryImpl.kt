@@ -8,6 +8,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.data.paging.CollectionsPagingSource
 import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepository
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.CollectionInvite
 import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.toUltraSlimCollection
@@ -248,6 +249,26 @@ class CollectionsRepositoryImpl(
                 networkDataSource.getCollectionShareImage(collectionId, "square")
             CollectionExport.PDF -> networkDataSource.exportCollectionPdf(collectionId)
             CollectionExport.ZIP -> networkDataSource.exportCollectionZip(collectionId)
+        }
+    }
+
+    override suspend fun getArchivedCollections(): Either<ApiResponse, List<UltraSlimCollection>> =
+        guard { networkDataSource.getArchivedCollections().map { it.toDomainModel() } }
+
+    override suspend fun getSharedCollections(): Either<ApiResponse, List<UltraSlimCollection>> =
+        guard { networkDataSource.getSharedCollections().map { it.toDomainModel() } }
+
+    override suspend fun getInvites(): Either<ApiResponse, List<CollectionInvite>> =
+        guard { networkDataSource.getCollectionInvites().map { it.toDomainModel() } }
+
+    override suspend fun respondToInvite(
+        collectionId: String,
+        accept: Boolean
+    ): Either<ApiResponse, Unit> = guard {
+        if (accept) {
+            networkDataSource.acceptCollectionInvite(collectionId)
+        } else {
+            networkDataSource.declineCollectionInvite(collectionId)
         }
     }
 

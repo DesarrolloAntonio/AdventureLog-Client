@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network.api
 
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionInviteDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
 
 interface CollectionApi {
@@ -65,6 +66,19 @@ interface CollectionApi {
 
     /** The collection and everything in it, as a ZIP. */
     suspend fun exportZip(collectionId: String): ByteArray
+
+    /** Collections the user has archived. Returned whole, not paged. */
+    suspend fun getArchivedCollections(): List<UltraSlimCollectionDTO>
+
+    /** Collections other people have shared with the user. Returned whole, not paged. */
+    suspend fun getSharedCollections(): List<UltraSlimCollectionDTO>
+
+    /** Invitations waiting for the user to accept or decline. */
+    suspend fun getInvites(): List<CollectionInviteDTO>
+
+    suspend fun acceptInvite(collectionId: String)
+
+    suspend fun declineInvite(collectionId: String)
     
     
 }

@@ -9,6 +9,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.TrailDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionInviteDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
@@ -226,6 +227,16 @@ interface AdventureLogNetwork {
     suspend fun exportCollectionPdf(collectionId: String): ByteArray
 
     suspend fun exportCollectionZip(collectionId: String): ByteArray
+
+    suspend fun getArchivedCollections(): List<UltraSlimCollectionDTO>
+
+    suspend fun getSharedCollections(): List<UltraSlimCollectionDTO>
+
+    suspend fun getCollectionInvites(): List<CollectionInviteDTO>
+
+    suspend fun acceptCollectionInvite(collectionId: String)
+
+    suspend fun declineCollectionInvite(collectionId: String)
 
     /**
      * Delete an adventure

@@ -4,6 +4,7 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.CollectionInvite
 import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +43,17 @@ interface CollectionsRepository {
         collectionId: String,
         what: CollectionExport
     ): Either<ApiResponse, ByteArray>
+
+    suspend fun getArchivedCollections(): Either<ApiResponse, List<UltraSlimCollection>>
+
+    suspend fun getSharedCollections(): Either<ApiResponse, List<UltraSlimCollection>>
+
+    suspend fun getInvites(): Either<ApiResponse, List<CollectionInvite>>
+
+    suspend fun respondToInvite(
+        collectionId: String,
+        accept: Boolean
+    ): Either<ApiResponse, Unit>
 
     suspend fun updateCollection(
         collectionId: String,

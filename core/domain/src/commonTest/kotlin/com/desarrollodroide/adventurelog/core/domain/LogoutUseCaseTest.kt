@@ -17,6 +17,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.VisitDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CategoryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionInviteDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
@@ -250,6 +251,26 @@ class LogoutUseCaseTest {
         }
 
         override suspend fun exportCollectionZip(collectionId: String): ByteArray {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getArchivedCollections(): List<com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getSharedCollections(): List<com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getCollectionInvites(): List<CollectionInviteDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun acceptCollectionInvite(collectionId: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun declineCollectionInvite(collectionId: String) {
             throw NotImplementedError()
         }
 

@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTrailApi
 import com.desarrollodroide.adventurelog.core.network.model.response.TrailDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CollectionInviteDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
@@ -456,6 +457,31 @@ class KtorAdventureLogNetwork(
     override suspend fun exportCollectionZip(collectionId: String): ByteArray {
         ensureInitialized()
         return collectionDataSource.exportZip(collectionId)
+    }
+
+    override suspend fun getArchivedCollections(): List<UltraSlimCollectionDTO> {
+        ensureInitialized()
+        return collectionDataSource.getArchivedCollections()
+    }
+
+    override suspend fun getSharedCollections(): List<UltraSlimCollectionDTO> {
+        ensureInitialized()
+        return collectionDataSource.getSharedCollections()
+    }
+
+    override suspend fun getCollectionInvites(): List<CollectionInviteDTO> {
+        ensureInitialized()
+        return collectionDataSource.getInvites()
+    }
+
+    override suspend fun acceptCollectionInvite(collectionId: String) {
+        ensureInitialized()
+        collectionDataSource.acceptInvite(collectionId)
+    }
+
+    override suspend fun declineCollectionInvite(collectionId: String) {
+        ensureInitialized()
+        collectionDataSource.declineInvite(collectionId)
     }
     
     override suspend fun deleteAdventure(adventureId: String) {

@@ -30,6 +30,13 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.ExportCollectionUse
 import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.toSafeFileName
 import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetArchivedCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetSharedCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionInvitesUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RespondToCollectionInviteUseCase
+import com.desarrollodroide.adventurelog.core.model.CollectionInvite
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTab
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTabContent
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -46,8 +53,22 @@ class CollectionsViewModel(
     private val duplicateCollectionUseCase: DuplicateCollectionUseCase,
     private val archiveCollectionUseCase: ArchiveCollectionUseCase,
     private val exportCollectionUseCase: ExportCollectionUseCase,
-    private val platformFiles: PlatformFiles
+    private val platformFiles: PlatformFiles,
+    private val getArchivedCollectionsUseCase: GetArchivedCollectionsUseCase,
+    private val getSharedCollectionsUseCase: GetSharedCollectionsUseCase,
+    private val getCollectionInvitesUseCase: GetCollectionInvitesUseCase,
+    private val respondToCollectionInviteUseCase: RespondToCollectionInviteUseCase
 ) : ViewModel() {
+
+    private val _tab = MutableStateFlow(CollectionsTab.MINE)
+    val tab: StateFlow<CollectionsTab> = _tab.asStateFlow()
+
+    /**
+     * The archived, shared and invite endpoints answer a whole list rather than pages, so those
+     * tabs are held here instead of going through paging.
+     */
+    private val _tabContent = MutableStateFlow(CollectionsTabContent())
+    val tabContent: StateFlow<CollectionsTabContent> = _tabContent.asStateFlow()
 
     private val _actionMessage = MutableStateFlow<String?>(null)
     val actionMessage: StateFlow<String?> = _actionMessage.asStateFlow()
@@ -138,6 +159,7 @@ class CollectionsViewModel(
                 is Either.Left -> result.value
                 is Either.Right -> {
                     refresh()
+                    if (_tab.value == CollectionsTab.ARCHIVED) loadTab(CollectionsTab.ARCHIVED)
                     if (archived) "Moved to the archive" else "Restored from the archive"
                 }
             }
@@ -182,6 +204,60 @@ class CollectionsViewModel(
             _busyLabel.value = busy
             _actionMessage.value = block()
             _busyLabel.value = null
+        }
+    }
+
+    fun onTabSelected(tab: CollectionsTab) {
+        if (_tab.value == tab) return
+        _tab.value = tab
+        if (tab != CollectionsTab.MINE) loadTab(tab)
+    }
+
+    private fun loadTab(tab: CollectionsTab) {
+        viewModelScope.launch {
+            _tabContent.value = _tabContent.value.copy(isLoading = true, error = null)
+
+            when (tab) {
+                CollectionsTab.MINE -> Unit
+
+                CollectionsTab.ARCHIVED -> when (val r = getArchivedCollectionsUseCase()) {
+                    is Either.Left -> _tabContent.value =
+                        CollectionsTabContent(error = r.value)
+                    is Either.Right -> _tabContent.value =
+                        CollectionsTabContent(collections = r.value)
+                }
+
+                CollectionsTab.SHARED -> when (val r = getSharedCollectionsUseCase()) {
+                    is Either.Left -> _tabContent.value =
+                        CollectionsTabContent(error = r.value)
+                    is Either.Right -> _tabContent.value =
+                        CollectionsTabContent(collections = r.value)
+                }
+
+                CollectionsTab.INVITES -> when (val r = getCollectionInvitesUseCase()) {
+                    is Either.Left -> _tabContent.value =
+                        CollectionsTabContent(error = r.value)
+                    is Either.Right -> _tabContent.value =
+                        CollectionsTabContent(invites = r.value)
+                }
+            }
+        }
+    }
+
+    fun respondToInvite(invite: CollectionInvite, accept: Boolean) {
+        run(if (accept) "Accepting…" else "Declining…") {
+            when (val r = respondToCollectionInviteUseCase(invite.collectionId, accept)) {
+                is Either.Left -> r.value
+                is Either.Right -> {
+                    loadTab(CollectionsTab.INVITES)
+                    refresh()
+                    if (accept) {
+                        "Joined \"${invite.collectionName}\""
+                    } else {
+                        "Declined \"${invite.collectionName}\""
+                    }
+                }
+            }
         }
     }
 
