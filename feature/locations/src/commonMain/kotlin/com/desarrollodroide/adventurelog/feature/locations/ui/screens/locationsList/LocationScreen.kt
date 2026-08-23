@@ -136,7 +136,7 @@ fun LocationListScreen(
         when (val state = deleteState) {
             is LocationsViewModel.DeleteState.Success -> {
                 pagingItems.refresh()
-                snackbarHostState.showSnackbar("Adventure deleted successfully")
+                snackbarHostState.showSnackbar("Location deleted successfully")
                 viewModel.clearDeleteState()
             }
 
@@ -271,7 +271,7 @@ private fun AdventureListContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add adventure"
+                    contentDescription = "Add location"
                 )
             }
         },
@@ -322,13 +322,16 @@ private fun AdventureListContent(
 
                 pagingItems.loadState.refresh is LoadStateNotLoading -> {
                     when {
-                        pagingItems.itemCount == 0 && searchQuery.isEmpty() && !hasActiveFilters -> {
+                        // The search that is actually in effect, not the text still in the box -
+                        // submitting clears the box, which used to make an empty result read as
+                        // "no locations yet, create your first one".
+                        pagingItems.itemCount == 0 && actualSearchQuery.isEmpty() && !hasActiveFilters -> {
                             EmptyState()
                         }
 
-                        pagingItems.itemCount == 0 && (searchQuery.isNotEmpty() || hasActiveFilters) -> {
+                        pagingItems.itemCount == 0 -> {
                             NoSearchResultsState(
-                                searchQuery = searchQuery,
+                                searchQuery = actualSearchQuery,
                                 hasFilters = hasActiveFilters
                             )
                         }
@@ -445,12 +448,12 @@ private fun EmptyState() {
                 tint = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "No adventures yet",
+                text = "No locations yet",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Start exploring and create your first adventure!",
+                text = "Start exploring and add your first location!",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

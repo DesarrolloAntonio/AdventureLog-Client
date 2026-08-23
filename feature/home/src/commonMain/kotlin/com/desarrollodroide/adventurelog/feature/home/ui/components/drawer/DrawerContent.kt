@@ -245,7 +245,7 @@ fun DrawerContentBody(
 
                 // Animate the Locations section title
                 AnimatedSectionTitle(
-                    title = "MY ADVENTURES",
+                    title = "MY TRAVELS",
                     visible = visible,
                     delayMillis = calculateDelayMillis(1, totalItems, drawerOpen)
                 )

@@ -84,7 +84,7 @@ class AddEditAdventureViewModel(
                 is Either.Left -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = "Failed to load adventure: ${result.value}"
+                        errorMessage = "Failed to load location: ${result.value}"
                     )
                 }
                 is Either.Right -> {
@@ -251,7 +251,7 @@ class AddEditAdventureViewModel(
     fun generateDescription(name: String, onDescriptionGenerated: (String) -> Unit) {
         if (name.isBlank()) {
             _uiState.value = _uiState.value.copy(
-                errorMessage = "Please enter an adventure name first"
+                errorMessage = "Please enter a location name first"
             )
             return
         }

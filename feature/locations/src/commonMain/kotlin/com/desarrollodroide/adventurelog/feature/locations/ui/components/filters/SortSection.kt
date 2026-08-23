@@ -190,9 +190,9 @@ fun SortSection(
                     onClick = { onSortFieldChanged(LocationSortField.NAME) }
                 )
                 SortFieldOption(
-                    label = "Creation Date",
-                    isSelected = sortField == LocationSortField.CREATED_AT,
-                    onClick = { onSortFieldChanged(LocationSortField.CREATED_AT) }
+                    label = "Visit Date",
+                    isSelected = sortField == LocationSortField.VISIT_DATE,
+                    onClick = { onSortFieldChanged(LocationSortField.VISIT_DATE) }
                 )
                 SortFieldOption(
                     label = "Rating",

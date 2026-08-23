@@ -199,7 +199,7 @@ fun AdventureItem(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Edit Adventure") },
+                            text = { Text("Edit Location") },
                             onClick = {
                                 onEdit()
                                 showDropdownMenu = false
@@ -235,7 +235,7 @@ fun AdventureItem(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Adventure") },
+            title = { Text("Delete Location") },
             text = { Text("Are you sure you want to delete \"${location.name}\"? This action cannot be undone.") },
             confirmButton = {
                 TextButton(

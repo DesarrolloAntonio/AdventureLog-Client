@@ -316,7 +316,7 @@ fun AddEditLocationContent(
         ) {
             PrimaryButton(
                 onClick = { onSave(formData) },
-                text = if (isEditMode) "Update Adventure" else "Create Adventure"
+                text = if (isEditMode) "Update Location" else "Create Location"
             )
 
             TextButton(

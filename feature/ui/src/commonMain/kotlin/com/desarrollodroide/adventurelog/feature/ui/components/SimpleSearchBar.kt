@@ -35,7 +35,7 @@ fun SimpleSearchBar(
     onSearchQueryChange: (String) -> Unit,
     onSearchSubmit: () -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Search adventures...",
+    placeholder: String = "Search locations...",
     enabled: Boolean = true,
     activeSearchQuery: String = "",
     showSearchButton: Boolean = true

@@ -109,7 +109,7 @@ internal class KtorAdventureApi(
 
         // If there's a search query, use the search endpoint
         if (!searchQuery.isNullOrBlank()) {
-            return searchLocations(searchQuery)
+            return searchLocations(searchQuery, page = page, pageSize = pageSize)
         }
 
         // Otherwise use the filtered endpoint
@@ -184,14 +184,27 @@ internal class KtorAdventureApi(
         }
     }
 
-    private suspend fun searchLocations(searchQuery: String): List<LocationDTO> {
+    /**
+     * Search is global and paged server-side, and returns ranked descriptors rather than whole
+     * locations, so the ids of this page are hydrated into full records afterwards. Asking for
+     * `types=location` keeps cities, collections and users out of the count, which is what makes
+     * `limit`/`offset` line up with the page the list is asking for.
+     */
+    private suspend fun searchLocations(
+        searchQuery: String,
+        page: Int,
+        pageSize: Int
+    ): List<LocationDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/search/"
 
-        logger.d { "🔍 API Request - GET $url with query: '$searchQuery'" }
+        logger.d { "🔍 API Request - GET $url with query: '$searchQuery' (page $page)" }
 
         val response = httpClient.get(url) {
             parameter("query", searchQuery)
+            parameter("types", "location")
+            parameter("limit", pageSize)
+            parameter("offset", (page - 1).coerceAtLeast(0) * pageSize)
             headers {
                 commonHeaders(session.sessionToken)
             }
@@ -211,21 +224,28 @@ internal class KtorAdventureApi(
         }
 
         val responseText = response.body<String>()
-        
-        try {
-            // The search endpoint returns a different format with multiple entity types
-            val searchResults = json.decodeFromString<SearchResultsDTO>(responseText)
 
-            logger.d {
-                "📦 Search Response - Found ${searchResults.getLocationsList().size} locations " +
-                        "for query: '$searchQuery'"
-            }
-
-            return searchResults.getLocationsList()
+        val ids = try {
+            json.decodeFromString<SearchResultsDTO>(responseText).locationIds()
         } catch (e: Exception) {
             logJsonError("Search locations JSON parse error", responseText, e)
             throw e
         }
+
+        // A hit whose location cannot be loaded is dropped rather than failing the page: the
+        // search index can outlive the record it points at.
+        val locations = ids.mapNotNull { id ->
+            try {
+                getAdventureDetail(id)
+            } catch (e: Exception) {
+                logger.w { "Skipping search hit $id: ${e.message}" }
+                null
+            }
+        }
+
+        logger.d { "📦 Search Response - ${locations.size} of ${ids.size} hits loaded for '$searchQuery'" }
+
+        return locations
     }
 
     override suspend fun getAdventureDetail(objectId: String): LocationDTO {
