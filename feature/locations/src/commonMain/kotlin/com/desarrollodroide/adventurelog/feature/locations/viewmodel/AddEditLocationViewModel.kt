@@ -139,7 +139,9 @@ class AddEditAdventureViewModel(
                     latitude = formData.latitude,
                     longitude = formData.longitude,
                     isPublic = formData.isPublic,
-                    tags = formData.tags
+                    tags = formData.tags,
+                    price = formData.price.toDoubleOrNull(),
+                    priceCurrency = formData.priceCurrency
                 )
             } else {
                 val category = formData.category
@@ -163,7 +165,9 @@ class AddEditAdventureViewModel(
                     longitude = formData.longitude,
                     isPublic = formData.isPublic,
                     tags = formData.tags,
-                    visits = formData.visits
+                    visits = formData.visits,
+                    price = formData.price.toDoubleOrNull(),
+                    priceCurrency = formData.priceCurrency
                 )
             }
             

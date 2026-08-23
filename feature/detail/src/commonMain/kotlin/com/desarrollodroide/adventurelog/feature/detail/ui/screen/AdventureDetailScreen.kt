@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalUriHandler
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.AttachmentsSection
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.PriceSection
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.TrailsSection
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.ContentImage
@@ -206,6 +207,8 @@ fun AdventureDetailScreen(
                             LinkSection(link = link, onOpenLink = onOpenLink)
                         }
                     }
+
+                    PriceSection(price = location.price, currency = location.priceCurrency)
 
                     TrailsSection(
                         trails = location.trails,

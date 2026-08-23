@@ -256,6 +256,8 @@ class KtorAdventureLogNetwork(
         longitude: String?,
         isPublic: Boolean,
         visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?,
         activityTypes: List<String>
     ): LocationDTO {
         ensureInitialized()
@@ -270,6 +272,8 @@ class KtorAdventureLogNetwork(
             longitude = longitude,
             isPublic = isPublic,
             visits = visits,
+            price = price,
+            priceCurrency = priceCurrency,
             activityTypes = activityTypes
         )
     }
@@ -431,7 +435,9 @@ class KtorAdventureLogNetwork(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String>,
-        visits: List<VisitFormData>
+        visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?
     ): LocationDTO {
         ensureInitialized()
         return adventureDataSource.updateAdventure(
@@ -447,7 +453,9 @@ class KtorAdventureLogNetwork(
             isPublic = isPublic,
             tags = tags,
             collections = collections,
-            visits = visits
+            visits = visits,
+            price = price,
+            priceCurrency = priceCurrency
         )
     }
     

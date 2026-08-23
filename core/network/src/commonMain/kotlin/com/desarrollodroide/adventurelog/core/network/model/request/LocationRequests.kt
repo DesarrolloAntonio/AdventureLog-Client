@@ -18,7 +18,10 @@ data class CreateLocationRequest(
     val longitude: String? = null,
     val latitude: String? = null,
     val visits: List<VisitRequest>? = null,
-    val category: CategoryRequest? = null
+    val category: CategoryRequest? = null,
+    val price: Double? = null,
+    @SerialName("price_currency")
+    val priceCurrency: String? = null
 )
 
 @Serializable
@@ -39,7 +42,12 @@ data class UpdateLocationRequest(
     val category: CategoryRequest? = null,
     val city: Map<String, String> = emptyMap(),
     val country: Map<String, String> = emptyMap(),
-    val region: Map<String, String> = emptyMap()
+    val region: Map<String, String> = emptyMap(),
+    // The client serialises nulls, so these are only safe to send because the form round-trips
+    // whatever the location already had: sending a bare null here would clear a stored price.
+    val price: Double? = null,
+    @SerialName("price_currency")
+    val priceCurrency: String? = null
 )
 
 @Serializable

@@ -154,6 +154,8 @@ class AdventuresRepositoryImpl(
         longitude: String?,
         isPublic: Boolean,
         visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?,
         activityTypes: List<String>
     ): Either<ApiResponse, Location> {
         return try {
@@ -168,6 +170,8 @@ class AdventuresRepositoryImpl(
                 longitude = longitude,
                 isPublic = isPublic,
                 visits = visits,
+            price = price,
+            priceCurrency = priceCurrency,
                 activityTypes = activityTypes
             ).toDomainModel()
             
@@ -271,7 +275,9 @@ class AdventuresRepositoryImpl(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String>,
-        visits: List<VisitFormData>
+        visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?
     ): Either<ApiResponse, Location> {
         return try {
             val adventure = networkDataSource.updateAdventure(
@@ -287,7 +293,9 @@ class AdventuresRepositoryImpl(
                 isPublic = isPublic,
                 tags = tags,
                 collections = collections,
-                visits = visits
+                visits = visits,
+            price = price,
+            priceCurrency = priceCurrency
             ).toDomainModel()
             
             // Increment version to invalidate paging

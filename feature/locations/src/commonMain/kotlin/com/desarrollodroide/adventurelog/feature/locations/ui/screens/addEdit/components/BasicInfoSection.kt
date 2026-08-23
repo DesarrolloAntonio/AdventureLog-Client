@@ -30,6 +30,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.Payments
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TextButton
+import com.desarrollodroide.adventurelog.core.model.Currencies
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -125,6 +132,13 @@ fun BasicInfoSection(
                     onFormDataChange(formData.copy(category = it))
                 },
                 onAddCategory = onAddCategory
+            )
+
+            PriceField(
+                price = formData.price,
+                currency = formData.priceCurrency,
+                onPriceChange = { onFormDataChange(formData.copy(price = it)) },
+                onCurrencyChange = { onFormDataChange(formData.copy(priceCurrency = it)) }
             )
 
             RatingBar(
@@ -234,6 +248,69 @@ fun BasicInfoSection(
                             checkedThumbColor = MaterialTheme.colorScheme.primary,
                             checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
                         )
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * What the place cost, and in which currency. The amount is typed rather than stepped, and only
+ * digits and a single separator are accepted so a stray character cannot reach the server.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PriceField(
+    price: String,
+    currency: String,
+    onPriceChange: (String) -> Unit,
+    onCurrencyChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var currencyMenuOpen by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        StyledTextField(
+            value = price,
+            onValueChange = { typed ->
+                val cleaned = typed.filter { it.isDigit() || it == '.' || it == ',' }
+                    .replace(',', '.')
+                if (cleaned.count { it == '.' } <= 1) onPriceChange(cleaned)
+            },
+            label = "Price",
+            icon = Icons.Outlined.Payments,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Next
+            ),
+            modifier = Modifier.weight(1f)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Box {
+            TextButton(onClick = { currencyMenuOpen = true }) {
+                Text(text = currency)
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Choose currency"
+                )
+            }
+            DropdownMenu(
+                expanded = currencyMenuOpen,
+                onDismissRequest = { currencyMenuOpen = false }
+            ) {
+                Currencies.options.forEach { (code, label) ->
+                    DropdownMenuItem(
+                        text = { Text("$code - $label") },
+                        onClick = {
+                            onCurrencyChange(code)
+                            currencyMenuOpen = false
+                        }
                     )
                 }
             }

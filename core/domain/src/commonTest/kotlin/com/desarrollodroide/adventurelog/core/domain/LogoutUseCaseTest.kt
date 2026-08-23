@@ -137,6 +137,8 @@ class LogoutUseCaseTest {
             longitude: String?,
             isPublic: Boolean,
             visits: List<VisitFormData>,
+            price: Double?,
+            priceCurrency: String?,
             activityTypes: List<String>
         ): LocationDTO {
             throw NotImplementedError()
@@ -272,7 +274,9 @@ class LogoutUseCaseTest {
             isPublic: Boolean,
             tags: List<String>,
             collections: List<String>,
-            visits: List<VisitFormData>
+            visits: List<VisitFormData>,
+            price: Double?,
+            priceCurrency: String?
         ): LocationDTO {
             throw NotImplementedError()
         }

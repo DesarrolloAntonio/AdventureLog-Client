@@ -45,6 +45,8 @@ interface LocationsRepository {
         longitude: String?,
         isPublic: Boolean,
         visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?,
         activityTypes: List<String> = emptyList()
     ): Either<ApiResponse, Location>
 
@@ -71,6 +73,8 @@ interface LocationsRepository {
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String> = emptyList(),
-        visits: List<VisitFormData> = emptyList()
+        visits: List<VisitFormData> = emptyList(),
+        price: Double? = null,
+        priceCurrency: String? = null
     ): Either<ApiResponse, Location>
 }

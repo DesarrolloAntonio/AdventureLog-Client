@@ -73,7 +73,13 @@ data class LocationDTO(
     val region: RegionDTO? = null,
 
     @SerialName("trails")
-    val trails: List<TrailDTO>? = null
+    val trails: List<TrailDTO>? = null,
+
+    @SerialName("price")
+    val price: Double? = null,
+
+    @SerialName("price_currency")
+    val priceCurrency: String? = null
 )
 
 fun LocationDTO.toDomainModel(): Location = Location(
@@ -99,5 +105,7 @@ fun LocationDTO.toDomainModel(): Location = Location(
     city = city?.toDomainModel(),
     country = country?.toDomainModel(),
     region = region?.toDomainModel(),
+    price = price,
+    priceCurrency = priceCurrency,
     trails = trails?.map { it.toDomainModel() } ?: emptyList()
 )

@@ -37,6 +37,7 @@ import com.desarrollodroide.adventurelog.core.model.Region
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.Currencies
 import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components.BasicInfoSection
@@ -234,6 +235,10 @@ fun AddEditLocationContent(
                     description = existingLocation.description ?: "",
                     category = existingLocation.category,
                     rating = existingLocation.rating?.toInt() ?: 0,
+                    // Round-tripping the stored price matters: the update serialises nulls, so a
+                    // form that forgot it would clear the value on the next save.
+                    price = existingLocation.price?.let(Currencies::formatAmount) ?: "",
+                    priceCurrency = existingLocation.priceCurrency ?: Currencies.DEFAULT,
                     link = existingLocation.link ?: "",
                     location = existingLocation.location ?: "",
                     latitude = existingLocation.latitude,

@@ -26,5 +26,8 @@ data class Location(
     val city: City? = null,
     val country: Country? = null,
     val region: Region? = null,
-    val trails: List<Trail> = emptyList()
+    val trails: List<Trail> = emptyList(),
+    /** What the place cost, in [priceCurrency]. Null when no price has been recorded. */
+    val price: Double? = null,
+    val priceCurrency: String? = null
 )

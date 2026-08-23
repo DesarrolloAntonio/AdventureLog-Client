@@ -67,6 +67,8 @@ class GetAdventuresUseCaseTest {
             longitude: String?,
             isPublic: Boolean,
             visits: List<VisitFormData>,
+            price: Double?,
+            priceCurrency: String?,
             activityTypes: List<String>
         ): Either<ApiResponse, Location> {
             throw NotImplementedError()
@@ -97,7 +99,9 @@ class GetAdventuresUseCaseTest {
             isPublic: Boolean,
             tags: List<String>,
             collections: List<String>,
-            visits: List<VisitFormData>
+            visits: List<VisitFormData>,
+            price: Double?,
+            priceCurrency: String?
         ): Either<ApiResponse, Location> {
             throw NotImplementedError()
         }

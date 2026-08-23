@@ -23,7 +23,9 @@ class UpdateLocationUseCase(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String> = emptyList(),
-        visits: List<VisitFormData> = emptyList()
+        visits: List<VisitFormData> = emptyList(),
+        price: Double? = null,
+        priceCurrency: String? = null
     ): Either<String, Location> {
         return when (val result = locationsRepository.updateLocation(
             adventureId = locationId,
@@ -38,7 +40,9 @@ class UpdateLocationUseCase(
             isPublic = isPublic,
             tags = tags,
             collections = collections,
-            visits = visits
+            visits = visits,
+            price = price,
+            priceCurrency = priceCurrency
         )) {
             is Either.Left -> {
                 when (result.value) {

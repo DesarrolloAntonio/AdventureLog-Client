@@ -21,7 +21,9 @@ class CreateLocationUseCase(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        visits: List<VisitFormData> = emptyList()
+        visits: List<VisitFormData> = emptyList(),
+        price: Double? = null,
+        priceCurrency: String? = null
     ): Either<String, Location> {
         if (name.isBlank()) {
             return Either.Left("Location name is required")
@@ -38,6 +40,8 @@ class CreateLocationUseCase(
             longitude = longitude,
             isPublic = isPublic,
             visits = visits,
+            price = price,
+            priceCurrency = priceCurrency,
             activityTypes = tags
         )) {
             is Either.Left -> {

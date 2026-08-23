@@ -69,6 +69,8 @@ fun createAdventureRequest(
     longitude: String?,
     isPublic: Boolean,
     visits: List<VisitFormData>,
+    price: Double? = null,
+    priceCurrency: String? = null,
     activityTypes: List<String> = emptyList()
 ): CreateLocationRequest {
     return CreateLocationRequest(
@@ -86,6 +88,8 @@ fun createAdventureRequest(
         // yet at this point, so they are posted to /api/visits/ once the location has been
         // created - see SyncLocationVisitsUseCase.
         visits = null,
-        category = category.toCategoryRequest()
+        category = category.toCategoryRequest(),
+        price = price,
+        priceCurrency = priceCurrency
     )
 }

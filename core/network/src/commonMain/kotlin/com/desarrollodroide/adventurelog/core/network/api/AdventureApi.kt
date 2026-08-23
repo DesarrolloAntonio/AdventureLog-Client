@@ -48,6 +48,8 @@ interface AdventureApi {
         longitude: String?,
         isPublic: Boolean,
         visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?,
         activityTypes: List<String> = emptyList()
     ): LocationDTO
     
@@ -67,7 +69,9 @@ interface AdventureApi {
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String> = emptyList(),
-        visits: List<VisitFormData> = emptyList()
+        visits: List<VisitFormData> = emptyList(),
+        price: Double? = null,
+        priceCurrency: String? = null
     ): LocationDTO
     
     /**

@@ -286,6 +286,8 @@ internal class KtorAdventureApi(
         longitude: String?,
         isPublic: Boolean,
         visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?,
         activityTypes: List<String>
     ): LocationDTO {
         val session = sessionProvider()
@@ -302,6 +304,8 @@ internal class KtorAdventureApi(
             longitude = longitude,
             isPublic = isPublic,
             visits = visits,
+            price = price,
+            priceCurrency = priceCurrency,
             activityTypes = activityTypes
         )
 
@@ -351,7 +355,9 @@ internal class KtorAdventureApi(
         isPublic: Boolean,
         tags: List<String>,
         collections: List<String>,
-        visits: List<VisitFormData>
+        visits: List<VisitFormData>,
+        price: Double?,
+        priceCurrency: String?
     ): LocationDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/$adventureId/"
@@ -375,7 +381,9 @@ internal class KtorAdventureApi(
                     displayName = cat.displayName,
                     icon = cat.icon
                 )
-            }
+            },
+            price = price,
+            priceCurrency = priceCurrency
         )
 
         logger.d { "Updating location $adventureId with ${collections.size} collections" }
