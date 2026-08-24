@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
+import com.desarrollodroide.adventurelog.core.model.Currencies
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GenerateDescriptionUseCase
@@ -60,12 +62,20 @@ class AddEditAdventureViewModel(
     private val syncLocationVisitsUseCase: SyncLocationVisitsUseCase,
     private val syncLocationTrailsUseCase: SyncLocationTrailsUseCase,
     private val imageBytesProvider: ImageBytesProvider,
+    private val userRepository: UserRepository,
     private val adventureId: String? = null,
     private val existingLocation: Location? = null
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddEditAdventureUiState())
     val uiState: StateFlow<AddEditAdventureUiState> = _uiState.asStateFlow()
+
+    /**
+     * The account's preferred currency, which the web uses to pre-fill the money field on a new
+     * item. Falls back to the shared default before the session has loaded.
+     */
+    val defaultCurrency: String
+        get() = userRepository.activeSession?.defaultCurrency ?: Currencies.DEFAULT
     
     init {
         loadCategories()

@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.core.data.di
 
 import com.desarrollodroide.adventurelog.core.common.di.AdventureLogDispatchers
 import com.desarrollodroide.adventurelog.core.common.di.commonModule
+import com.desarrollodroide.adventurelog.core.data.AccountRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.AdventuresRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.CategoriesRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.CollectionsRepositoryImpl
@@ -16,6 +17,7 @@ import com.desarrollodroide.adventurelog.core.data.VisitsRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.UserRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.WikipediaRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.ImagesRepositoryImpl
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.CategoriesRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepository
@@ -53,6 +55,13 @@ val dataModule = module {
         UserRepositoryImpl(
             settings = get(),
             networkDataSource = get()
+        )
+    }
+    single<AccountRepository> {
+        AccountRepositoryImpl(
+            networkDataSource = get(),
+            userRepository = get(),
+            ioDispatcher = get(named(AdventureLogDispatchers.IO))
         )
     }
     single<TrailsRepository> {

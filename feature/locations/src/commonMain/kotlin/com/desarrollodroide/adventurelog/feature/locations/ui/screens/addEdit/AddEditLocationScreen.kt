@@ -157,7 +157,8 @@ fun AddEditLocationScreen(
             },
             onAddCategory = { name, icon ->
                 viewModel.createCategory(name = name, icon = icon)
-            }
+            },
+            defaultCurrency = viewModel.defaultCurrency
         )
 
         SnackbarHost(
@@ -186,6 +187,7 @@ fun AddEditLocationContent(
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
     onAddCategory: (name: String, icon: String) -> Unit = { _, _ -> },
+    defaultCurrency: String = Currencies.DEFAULT,
     modifier: Modifier = Modifier
 ) {
     var formData by remember(existingLocation) {
@@ -257,7 +259,11 @@ fun AddEditLocationContent(
                 )
             } else {
                 LocationFormData(
-                    category = categories.firstOrNull()
+                    category = categories.firstOrNull(),
+                    // The web pre-fills money fields with the account's preferred currency; a new
+                    // location that always said USD would make every European price wrong by
+                    // default.
+                    priceCurrency = defaultCurrency
                 )
             }
         )

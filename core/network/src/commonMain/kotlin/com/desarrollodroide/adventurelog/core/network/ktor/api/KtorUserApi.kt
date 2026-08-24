@@ -7,6 +7,9 @@ import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressListDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import io.ktor.client.HttpClient
@@ -15,11 +18,21 @@ import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 internal class KtorUserApi(
     private val httpClient: HttpClient,
@@ -54,17 +67,29 @@ internal class KtorUserApi(
 
     override suspend fun updateUserProfile(
         username: String?,
-        email: String?,
-        displayName: String?
+        firstName: String?,
+        lastName: String?,
+        publicProfile: Boolean?,
+        measurementSystem: String?,
+        defaultCurrency: String?,
+        mapStyle: String?
     ): UserDetailsDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/auth/update-user/"
-        
-        val updates = buildMap {
-            username?.let { put("username", it) }
-            email?.let { put("email", it) }
-            displayName?.let { put("display_name", it) }
+
+        // A JsonObject rather than a Map<String, Any>: the values are of mixed types and Ktor's
+        // content negotiation cannot serialise a heterogeneous map.
+        val updates = buildJsonObject {
+            username?.let { put("username", JsonPrimitive(it)) }
+            firstName?.let { put("first_name", JsonPrimitive(it)) }
+            lastName?.let { put("last_name", JsonPrimitive(it)) }
+            publicProfile?.let { put("public_profile", JsonPrimitive(it)) }
+            measurementSystem?.let { put("measurement_system", JsonPrimitive(it)) }
+            defaultCurrency?.let { put("default_currency", JsonPrimitive(it)) }
+            mapStyle?.let { put("map_style", JsonPrimitive(it)) }
         }
+
+        logger.d { "🌐 API Request - PATCH $url (${updates.keys.joinToString()})" }
 
         val response = httpClient.patch(url) {
             contentType(ContentType.Application.Json)
@@ -74,15 +99,32 @@ internal class KtorUserApi(
             setBody(updates)
         }
 
+        val responseText = response.body<String>()
+
         if (!response.status.isSuccess()) {
-            throw HttpException(
-                response.status.value,
-                "Failed to update user profile with status: ${response.status}"
-            )
+            // DRF answers {"field": ["message"]} - surfacing the field's own message is the
+            // difference between "Update failed" and "A user with that username already exists."
+            throw HttpException(response.status.value, firstFieldError(responseText)
+                ?: "Failed to update user profile with status: ${response.status}")
         }
 
-        val responseText = response.body<String>()
         return json.decodeFromString<UserDetailsDTO>(responseText)
+    }
+
+    /**
+     * The first message out of a DRF field-error body, or null if the body is not one.
+     */
+    private fun firstFieldError(body: String): String? = try {
+        json.parseToJsonElement(body).jsonObject.values
+            .firstNotNullOfOrNull { value ->
+                when (value) {
+                    is JsonArray -> value.firstOrNull()?.jsonPrimitive?.contentOrNull
+                    is JsonPrimitive -> value.contentOrNull
+                    else -> null
+                }
+            }
+    } catch (e: Exception) {
+        null
     }
 
     override suspend fun changePassword(
@@ -122,6 +164,110 @@ internal class KtorUserApi(
     override suspend fun uploadAvatar(imageData: ByteArray): String {
         // TODO: Implement avatar upload
         throw NotImplementedError("Avatar upload not implemented yet")
+    }
+
+    override suspend fun getMediaUsage(): MediaUsageDTO {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/auth/user-media-usage/"
+
+        logger.d { "🌐 API Request - GET $url" }
+
+        val response = httpClient.get(url) {
+            headers {
+                commonHeaders(session.sessionToken)
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch media usage with status: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<MediaUsageDTO>(response.body<String>())
+    }
+
+    override suspend fun getEmailAddresses(): List<EmailAddressDTO> {
+        val response = httpClient.get(emailUrl()) {
+            headers {
+                commonHeaders(sessionProvider().sessionToken)
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch email addresses with status: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<EmailAddressListDTO>(response.body<String>()).data
+    }
+
+    override suspend fun addEmailAddress(email: String) {
+        emailRequest(HttpMethod.Post, buildJsonObject { put("email", JsonPrimitive(email)) })
+    }
+
+    override suspend fun requestEmailVerification(email: String) {
+        emailRequest(HttpMethod.Put, buildJsonObject { put("email", JsonPrimitive(email)) })
+    }
+
+    override suspend fun setPrimaryEmailAddress(email: String) {
+        emailRequest(
+            HttpMethod.Patch,
+            buildJsonObject {
+                put("email", JsonPrimitive(email))
+                put("primary", JsonPrimitive(true))
+            }
+        )
+    }
+
+    override suspend fun removeEmailAddress(email: String) {
+        emailRequest(HttpMethod.Delete, buildJsonObject { put("email", JsonPrimitive(email)) })
+    }
+
+    private fun emailUrl() = "${sessionProvider().baseUrl}/auth/browser/v1/account/email"
+
+    /**
+     * allauth's headless email endpoint is one URL that switches on the HTTP verb, and it rejects
+     * any session-bearing request without a same-origin Referer.
+     */
+    private suspend fun emailRequest(method: HttpMethod, body: JsonObject) {
+        val session = sessionProvider()
+        val url = emailUrl()
+
+        logger.d { "🌐 API Request - ${method.value} $url" }
+
+        val response = httpClient.request(url) {
+            this.method = method
+            contentType(ContentType.Application.Json)
+            headers {
+                commonHeaders(session.sessionToken)
+                append("Referer", session.baseUrl)
+            }
+            setBody(body)
+        }
+
+        if (!response.status.isSuccess()) {
+            val text = response.body<String>()
+            throw HttpException(
+                response.status.value,
+                firstAllAuthError(text) ?: "Request failed with status: ${response.status}"
+            )
+        }
+    }
+
+    /**
+     * allauth answers failures as {"status": 400, "errors": [{"code", "param", "message"}]}.
+     */
+    private fun firstAllAuthError(body: String): String? = try {
+        json.parseToJsonElement(body).jsonObject["errors"]
+            ?.jsonArray?.firstOrNull()
+            ?.jsonObject?.get("message")
+            ?.jsonPrimitive?.contentOrNull
+    } catch (e: Exception) {
+        null
     }
 
     override suspend fun getUserStats(username: String): UserStatsDTO {

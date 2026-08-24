@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network.model.response
 
+import com.desarrollodroide.adventurelog.core.model.Currencies
+import com.desarrollodroide.adventurelog.core.model.MapStyles
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,6 +22,12 @@ data class UserDetailsDTO(
 
     @SerialName("measurement_system")
     val measurementSystem: String? = null,
+
+    @SerialName("default_currency")
+    val defaultCurrency: String? = null,
+
+    @SerialName("map_style")
+    val mapStyle: String? = null,
 
     @SerialName("username")
     val username: String,
@@ -55,6 +63,8 @@ fun UserDetailsDTO.toDomainModel(serverUrl: String = ""): UserDetails = UserDeta
     uuid = uuid,
     publicProfile = publicProfile,
     measurementSystem = measurementSystem ?: "metric",
+    defaultCurrency = defaultCurrency ?: Currencies.DEFAULT,
+    mapStyle = mapStyle ?: MapStyles.DEFAULT,
     username = username,
     email = email,
     firstName = firstName ?: "",

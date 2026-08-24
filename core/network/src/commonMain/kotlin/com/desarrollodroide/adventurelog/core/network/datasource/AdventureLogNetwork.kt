@@ -16,6 +16,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
@@ -193,6 +195,34 @@ interface AdventureLogNetwork {
     suspend fun getUserStats(
         username: String
     ): UserStatsDTO
+
+    /**
+     * Update the writable half of the user's profile - see
+     * [com.desarrollodroide.adventurelog.core.network.api.UserApi.updateUserProfile].
+     */
+    suspend fun updateUserProfile(
+        username: String? = null,
+        firstName: String? = null,
+        lastName: String? = null,
+        publicProfile: Boolean? = null,
+        measurementSystem: String? = null,
+        defaultCurrency: String? = null,
+        mapStyle: String? = null
+    ): UserDetailsDTO
+
+    suspend fun changePassword(currentPassword: String, newPassword: String): Boolean
+
+    suspend fun getMediaUsage(): MediaUsageDTO
+
+    suspend fun getEmailAddresses(): List<EmailAddressDTO>
+
+    suspend fun addEmailAddress(email: String)
+
+    suspend fun requestEmailVerification(email: String)
+
+    suspend fun setPrimaryEmailAddress(email: String)
+
+    suspend fun removeEmailAddress(email: String)
 
     /**
      * Get everything the home screen shows in a single request.

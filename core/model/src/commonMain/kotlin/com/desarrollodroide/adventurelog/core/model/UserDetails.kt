@@ -9,6 +9,8 @@ data class UserDetails(
     val uuid: String,
     val publicProfile: Boolean = false,
     val measurementSystem: String = "metric",
+    val defaultCurrency: String = Currencies.DEFAULT,
+    val mapStyle: String = MapStyles.DEFAULT,
     val username: String,
     val email: String? = null,
     val firstName: String = "",

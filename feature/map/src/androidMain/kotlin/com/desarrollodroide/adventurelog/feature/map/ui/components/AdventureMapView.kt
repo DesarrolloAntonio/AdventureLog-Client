@@ -24,6 +24,8 @@ import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
+import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
 import com.google.maps.android.compose.*
 
 @Composable
@@ -94,10 +96,11 @@ actual fun AdventureMapView(
         }
     }
     
-    val mapProperties = remember {
+    val rendering = rememberMapRendering()
+    val mapProperties = remember(rendering) {
         MapProperties(
             isMyLocationEnabled = false,
-            mapType = MapType.NORMAL
+            mapType = rendering.toGoogleMapType()
         )
     }
     

@@ -8,7 +8,10 @@ import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
+import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -46,9 +49,12 @@ actual fun LocationMapSection(
         )
     }
     
+    val rendering = rememberMapRendering()
+
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
+        properties = MapProperties(mapType = rendering.toGoogleMapType()),
         onMapClick = { clickedLatLng ->
             onMapClick(clickedLatLng.latitude, clickedLatLng.longitude)
         }

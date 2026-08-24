@@ -1,6 +1,8 @@
 package com.desarrollodroide.adventurelog.core.network.api
 
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 
@@ -11,12 +13,21 @@ interface UserApi {
     suspend fun getUserDetails(): UserDetailsDTO
     
     /**
-     * Update user profile
+     * Update the writable half of the user's profile.
+     *
+     * Only the fields `CustomUserDetailsSerializer` accepts are sent; `email` is read-only there
+     * and is changed through the email endpoints instead. Every argument is optional because the
+     * server patches partially, and re-sending an unchanged username makes it answer
+     * "already taken".
      */
     suspend fun updateUserProfile(
         username: String? = null,
-        email: String? = null,
-        displayName: String? = null
+        firstName: String? = null,
+        lastName: String? = null,
+        publicProfile: Boolean? = null,
+        measurementSystem: String? = null,
+        defaultCurrency: String? = null,
+        mapStyle: String? = null
     ): UserDetailsDTO
     
     /**
@@ -32,6 +43,36 @@ interface UserApi {
      */
     suspend fun uploadAvatar(imageData: ByteArray): String
     
+    /**
+     * Media storage this account is using on the server.
+     */
+    suspend fun getMediaUsage(): MediaUsageDTO
+
+    /**
+     * Every address on the account, with its verified and primary flags.
+     */
+    suspend fun getEmailAddresses(): List<EmailAddressDTO>
+
+    /**
+     * Add an address. The server sends it a verification mail; it stays unverified until then.
+     */
+    suspend fun addEmailAddress(email: String)
+
+    /**
+     * Send the verification mail for an address again.
+     */
+    suspend fun requestEmailVerification(email: String)
+
+    /**
+     * Make an address the primary one. The server refuses if it is not verified.
+     */
+    suspend fun setPrimaryEmailAddress(email: String)
+
+    /**
+     * Remove an address. The primary address cannot be removed.
+     */
+    suspend fun removeEmailAddress(email: String)
+
     /**
      * Get user statistics
      */

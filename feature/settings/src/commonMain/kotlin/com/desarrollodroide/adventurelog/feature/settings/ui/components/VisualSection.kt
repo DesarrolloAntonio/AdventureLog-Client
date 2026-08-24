@@ -34,16 +34,15 @@ fun VisualSection(
     themeMode: StateFlow<ThemeMode>,
     dynamicColors: StateFlow<Boolean>,
     onThemeModeChanged: (ThemeMode) -> Unit = {},
-    onDynamicColorsChanged: (Boolean) -> Unit = {}
+    onDynamicColorsChanged: (Boolean) -> Unit = {},
+    /** False when the caller already draws a heading, as the settings cards do. */
+    showHeader: Boolean = true
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(top = 12.dp, bottom = 5.dp)
-    ) {
-        Text(text = "Visual", style = MaterialTheme.typography.titleSmall)
-        Spacer(modifier = Modifier.height(5.dp))
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (showHeader) {
+            Text(text = "Visual", style = MaterialTheme.typography.titleSmall)
+            Spacer(modifier = Modifier.height(5.dp))
+        }
         ThemeOption(
             item = Item("Theme", Icons.Filled.Palette, onClick = {}),
             themeMode = themeMode,

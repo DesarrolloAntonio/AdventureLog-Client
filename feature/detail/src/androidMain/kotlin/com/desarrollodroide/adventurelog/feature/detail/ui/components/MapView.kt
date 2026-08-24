@@ -6,7 +6,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
+import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -35,10 +38,13 @@ actual fun MapView(
         position = CameraPosition.fromLatLngZoom(latLng, 15f)
     }
     
+    val rendering = rememberMapRendering()
+
     // Create Google Map with a marker
     GoogleMap(
         modifier = modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(mapType = rendering.toGoogleMapType())
     ) {
         Marker(
             state = MarkerState(position = latLng),

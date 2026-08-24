@@ -13,6 +13,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionInviteDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CollectionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
 import com.desarrollodroide.adventurelog.core.model.Category
@@ -374,6 +376,43 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return userDataSource.getUserStats(username)
     }
+
+    override suspend fun updateUserProfile(
+        username: String?,
+        firstName: String?,
+        lastName: String?,
+        publicProfile: Boolean?,
+        measurementSystem: String?,
+        defaultCurrency: String?,
+        mapStyle: String?
+    ): UserDetailsDTO = userDataSource.updateUserProfile(
+        username = username,
+        firstName = firstName,
+        lastName = lastName,
+        publicProfile = publicProfile,
+        measurementSystem = measurementSystem,
+        defaultCurrency = defaultCurrency,
+        mapStyle = mapStyle
+    )
+
+    override suspend fun changePassword(currentPassword: String, newPassword: String): Boolean =
+        userDataSource.changePassword(currentPassword, newPassword)
+
+    override suspend fun getMediaUsage(): MediaUsageDTO = userDataSource.getMediaUsage()
+
+    override suspend fun getEmailAddresses(): List<EmailAddressDTO> =
+        userDataSource.getEmailAddresses()
+
+    override suspend fun addEmailAddress(email: String) = userDataSource.addEmailAddress(email)
+
+    override suspend fun requestEmailVerification(email: String) =
+        userDataSource.requestEmailVerification(email)
+
+    override suspend fun setPrimaryEmailAddress(email: String) =
+        userDataSource.setPrimaryEmailAddress(email)
+
+    override suspend fun removeEmailAddress(email: String) =
+        userDataSource.removeEmailAddress(email)
 
     override suspend fun getDashboard(): DashboardDTO {
         ensureInitialized()

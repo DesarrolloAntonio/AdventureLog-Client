@@ -44,6 +44,7 @@ val locationsModule = module {
             syncLocationVisitsUseCase = get(),
             syncLocationTrailsUseCase = get(),
             imageBytesProvider = get(),
+            userRepository = get(),
             adventureId = params.getOrNull(),
             existingLocation = params.getOrNull()
         )

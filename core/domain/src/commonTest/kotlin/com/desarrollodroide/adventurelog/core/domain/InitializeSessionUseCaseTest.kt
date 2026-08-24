@@ -22,6 +22,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.CountryDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
@@ -208,6 +210,46 @@ class InitializeSessionUseCaseTest {
 
         override suspend fun getDashboard(): DashboardDTO {
             return DashboardDTO()
+        }
+
+        override suspend fun updateUserProfile(
+            username: String?,
+            firstName: String?,
+            lastName: String?,
+            publicProfile: Boolean?,
+            measurementSystem: String?,
+            defaultCurrency: String?,
+            mapStyle: String?
+        ): UserDetailsDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun changePassword(currentPassword: String, newPassword: String): Boolean {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getMediaUsage(): MediaUsageDTO {
+            throw NotImplementedError()
+        }
+
+        override suspend fun getEmailAddresses(): List<EmailAddressDTO> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun addEmailAddress(email: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun requestEmailVerification(email: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun setPrimaryEmailAddress(email: String) {
+            throw NotImplementedError()
+        }
+
+        override suspend fun removeEmailAddress(email: String) {
+            throw NotImplementedError()
         }
 
         override suspend fun createVisit(locationId: String, visit: VisitFormData): VisitDTO {
