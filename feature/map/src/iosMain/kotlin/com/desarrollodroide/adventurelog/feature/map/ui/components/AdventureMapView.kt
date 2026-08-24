@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.UIKitView
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -22,6 +23,8 @@ import platform.darwin.NSObject
 actual fun AdventureMapView(
     locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
+    visitedCities: List<VisitedCity>,
+    showCities: Boolean,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
     modifier: Modifier

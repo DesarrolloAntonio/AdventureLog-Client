@@ -7,6 +7,7 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedCitiesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
 import com.desarrollodroide.adventurelog.feature.map.ui.state.MapUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ class MapViewModel(
     private val getAllLocationsUseCase: GetAllLocationsUseCase,
     private val observeUserStatsUseCase: ObserveUserStatsUseCase,
     private val getVisitedRegionsUseCase: GetVisitedRegionsUseCase,
+    private val getVisitedCitiesUseCase: GetVisitedCitiesUseCase,
     private val userRepository: UserRepository
 ) : ViewModel() {
     
@@ -30,6 +32,7 @@ class MapViewModel(
         loadAllAdventures()
         observeUserStats()
         loadVisitedRegions()
+        loadVisitedCities()
     }
     
     private fun observeUserStats() {
@@ -61,6 +64,30 @@ class MapViewModel(
         }
     }
     
+    private fun loadVisitedCities() {
+        viewModelScope.launch {
+            when (val result = getVisitedCitiesUseCase()) {
+                is Either.Left -> logger.e { "❌ Error loading visited cities: ${result.value}" }
+                is Either.Right -> {
+                    val cities = result.value
+                    logger.d { "✅ Loaded ${cities.size} visited cities" }
+                    _uiState.update { state ->
+                        state.copy(
+                            visitedCities = cities,
+                            filters = state.filters.copy(cityCount = cities.size)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun toggleShowCities() {
+        _uiState.update { state ->
+            state.copy(filters = state.filters.copy(showCities = !state.filters.showCities))
+        }
+    }
+
     private fun loadVisitedRegions() {
         viewModelScope.launch {
             logger.d { "📍 Loading visited regions for map..." }
@@ -233,6 +260,7 @@ class MapViewModel(
     fun refresh() {
         loadAllAdventures()
         loadVisitedRegions()
+        loadVisitedCities()
     }
 }
                 

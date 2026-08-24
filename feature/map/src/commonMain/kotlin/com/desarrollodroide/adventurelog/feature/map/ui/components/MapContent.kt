@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 
 @Composable
@@ -17,6 +18,8 @@ fun MapContent(
     locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
     showRegions: Boolean,
+    visitedCities: List<VisitedCity> = emptyList(),
+    showCities: Boolean = false,
     isLoading: Boolean,
     error: String?,
     onAdventureClick: (adventureId: String) -> Unit,
@@ -66,6 +69,8 @@ fun MapContent(
                 ) {
                     AdventureMapView(
                         locations = locations,
+                        visitedCities = visitedCities,
+                        showCities = showCities,
                         visitedRegions = visitedRegions,
                         showRegions = showRegions,
                         onAdventureClick = onAdventureClick,

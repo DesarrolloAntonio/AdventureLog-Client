@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.*
@@ -29,6 +30,8 @@ import com.google.maps.android.compose.*
 actual fun AdventureMapView(
     locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
+    visitedCities: List<VisitedCity>,
+    showCities: Boolean,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
     modifier: Modifier
@@ -144,6 +147,20 @@ actual fun AdventureMapView(
             }
         }
         
+        // Visited cities sit under the places, as a quieter layer.
+        if (showCities) {
+            visitedCities.forEach { city ->
+                val lat = city.latitude
+                val lng = city.longitude
+                if (lat != null && lng != null) {
+                    val cityState = rememberMarkerState(position = LatLng(lat, lng))
+                    MarkerComposable(state = cityState, title = city.name) {
+                        CityMarker()
+                    }
+                }
+            }
+        }
+
         // Clustered rather than one pin per place: two hundred markers over one country pile
         // into an unreadable blob, which is why the web clusters too. Zooming in splits them.
         val clusterItems = remember(adventuresWithLocation) {
@@ -223,6 +240,15 @@ private fun AdventureMarker(
     SimpleMapMarker(
         color = markerColor,
         emoji = location.category?.icon,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun CityMarker(modifier: Modifier = Modifier) {
+    SimpleMapMarker(
+        color = Color(0xFF7E57C2),
+        emoji = "🏙️",
         modifier = modifier
     )
 }

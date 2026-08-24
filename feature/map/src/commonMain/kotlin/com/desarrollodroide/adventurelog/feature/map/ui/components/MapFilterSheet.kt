@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Schedule
@@ -27,6 +28,7 @@ fun MapFilterSheet(
     onToggleVisited: () -> Unit,
     onTogglePlanned: () -> Unit,
     onToggleShowRegions: () -> Unit,
+    onToggleShowCities: () -> Unit = {},
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -92,6 +94,13 @@ fun MapFilterSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            Text(
+                text = "Layers",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+            )
+
             // Filter options section
             Column(
                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -123,11 +132,22 @@ fun MapFilterSheet(
                 // Regions filter
                 FilterOption(
                     icon = Icons.Default.Map,
-                    title = "Show Visited Regions",
+                    title = "Visited regions",
                     count = filters.regionCount,
                     isSelected = filters.showRegions,
                     onClick = onToggleShowRegions,
                     color = MaterialTheme.colorScheme.secondary
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                FilterOption(
+                    icon = Icons.Default.LocationCity,
+                    title = "Visited cities",
+                    count = filters.cityCount,
+                    isSelected = filters.showCities,
+                    onClick = onToggleShowCities,
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
 

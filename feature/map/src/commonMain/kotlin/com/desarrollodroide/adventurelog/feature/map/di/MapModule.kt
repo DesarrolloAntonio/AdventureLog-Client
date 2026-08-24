@@ -9,6 +9,7 @@ val mapModule = module {
         getAllLocationsUseCase = get(),
         observeUserStatsUseCase = get(),
         getVisitedRegionsUseCase = get(),
+        getVisitedCitiesUseCase = get(),
         userRepository = get())
     }
 }

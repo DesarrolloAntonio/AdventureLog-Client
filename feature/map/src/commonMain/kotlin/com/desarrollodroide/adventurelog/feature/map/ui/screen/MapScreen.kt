@@ -41,6 +41,8 @@ fun MapScreen(
             locations = filteredAdventures,
             visitedRegions = uiState.visitedRegions,
             showRegions = uiState.filters.showRegions,
+            visitedCities = uiState.visitedCities,
+            showCities = uiState.filters.showCities,
             isLoading = uiState.isLoading,
             error = uiState.error,
             onAdventureClick = onAdventureClick
@@ -65,6 +67,7 @@ fun MapScreen(
             onToggleVisited = viewModel::toggleVisitedFilter,
             onTogglePlanned = viewModel::togglePlannedFilter,
             onToggleShowRegions = viewModel::toggleShowRegions,
+            onToggleShowCities = viewModel::toggleShowCities,
             onDismiss = { showFilterSheet = false }
         )
     }

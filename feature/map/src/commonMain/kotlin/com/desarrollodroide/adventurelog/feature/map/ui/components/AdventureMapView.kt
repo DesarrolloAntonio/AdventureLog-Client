@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.map.ui.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 
 /**
@@ -13,6 +14,8 @@ import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 expect fun AdventureMapView(
     locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
+    visitedCities: List<VisitedCity>,
+    showCities: Boolean,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
     modifier: Modifier = Modifier
