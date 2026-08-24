@@ -115,6 +115,15 @@ class MapViewModel(
                     val visitedCount = adventuresWithLocation.count { it.isVisited }
                     val plannedCount = adventuresWithLocation.count { !it.isVisited }
                     
+                    // Counted over the places the map draws, so the numbers on the chips match
+                    // what selecting one actually leaves behind.
+                    val categoryCounts = adventuresWithLocation
+                        .mapNotNull { it.category?.displayName?.takeIf(String::isNotBlank) }
+                        .groupingBy { it }
+                        .eachCount()
+                        .toList()
+                        .sortedByDescending { it.second }
+
                     // Get unique activity types for filters
                     val activityTypes = adventuresWithLocation
                         .flatMap { it.tags }
@@ -135,6 +144,7 @@ class MapViewModel(
                         state.copy(
                             locations = adventuresWithLocation,
                             activityTypes = activityTypes,
+                            categoryCounts = categoryCounts,
                             filters = state.filters.copy(
                                 visitedCount = visitedCount,
                                 plannedCount = plannedCount
@@ -173,6 +183,21 @@ class MapViewModel(
             state.copy(
                 filters = state.filters.copy(
                     showRegions = !state.filters.showRegions
+                )
+            )
+        }
+    }
+
+    fun toggleCategory(category: String) {
+        _uiState.update { state ->
+            val selected = state.filters.selectedCategories
+            state.copy(
+                filters = state.filters.copy(
+                    selectedCategories = if (category in selected) {
+                        selected - category
+                    } else {
+                        selected + category
+                    }
                 )
             )
         }

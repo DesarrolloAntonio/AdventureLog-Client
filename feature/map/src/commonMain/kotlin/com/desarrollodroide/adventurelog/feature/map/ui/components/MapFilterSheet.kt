@@ -22,6 +22,8 @@ import com.desarrollodroide.adventurelog.feature.map.ui.state.MapFilters
 @Composable
 fun MapFilterSheet(
     filters: MapFilters,
+    categoryCounts: List<Pair<String, Int>> = emptyList(),
+    onToggleCategory: (String) -> Unit = {},
     onToggleVisited: () -> Unit,
     onTogglePlanned: () -> Unit,
     onToggleShowRegions: () -> Unit,
@@ -58,6 +60,35 @@ fun MapFilterSheet(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 24.dp)
             )
+
+            // Categories, as the web keeps them - with how many places each holds, so it is
+            // clear which are worth narrowing to.
+            if (categoryCounts.isNotEmpty()) {
+                Text(
+                    text = "Categories",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+
+                @OptIn(ExperimentalLayoutApi::class)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    categoryCounts.forEach { (name, count) ->
+                        FilterChip(
+                            selected = name in filters.selectedCategories,
+                            onClick = { onToggleCategory(name) },
+                            label = { Text("$name ($count)") }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 

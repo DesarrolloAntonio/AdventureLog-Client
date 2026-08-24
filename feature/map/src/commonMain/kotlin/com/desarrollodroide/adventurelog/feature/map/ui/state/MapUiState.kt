@@ -8,6 +8,8 @@ data class MapUiState(
     val locations: List<Location> = emptyList(),
     val visitedRegions: List<VisitedRegion> = emptyList(),
     val activityTypes: List<String> = emptyList(),
+    /** Category display name to how many of the mapped places carry it. */
+    val categoryCounts: List<Pair<String, Int>> = emptyList(),
     val error: String? = null,
     val filters: MapFilters = MapFilters()
 )
@@ -17,6 +19,8 @@ data class MapFilters(
     val showPlanned: Boolean = true,
     val showRegions: Boolean = false,
     val selectedActivityTypes: Set<String> = emptySet(),
+    /** Category names to keep. Empty means every category, as the web's "all" does. */
+    val selectedCategories: Set<String> = emptySet(),
     val visitedCount: Int = 0,
     val plannedCount: Int = 0,
     val regionCount: Int = 0

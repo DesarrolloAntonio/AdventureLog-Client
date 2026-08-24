@@ -28,8 +28,11 @@ fun MapScreen(
             
             val matchesActivityType = uiState.filters.selectedActivityTypes.isEmpty() ||
                                     adventure.tags.any { it in uiState.filters.selectedActivityTypes }
-            
-            matchesVisitFilter && matchesActivityType
+
+            val matchesCategory = uiState.filters.selectedCategories.isEmpty() ||
+                                    adventure.category?.displayName in uiState.filters.selectedCategories
+
+            matchesVisitFilter && matchesActivityType && matchesCategory
         }
     }
     
@@ -57,6 +60,8 @@ fun MapScreen(
     if (showFilterSheet) {
         MapFilterSheet(
             filters = uiState.filters,
+            categoryCounts = uiState.categoryCounts,
+            onToggleCategory = viewModel::toggleCategory,
             onToggleVisited = viewModel::toggleVisitedFilter,
             onTogglePlanned = viewModel::togglePlannedFilter,
             onToggleShowRegions = viewModel::toggleShowRegions,
