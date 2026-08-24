@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -32,7 +30,8 @@ import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
-import com.desarrollodroide.adventurelog.feature.home.ui.components.drawer.HomeDrawer
+import com.desarrollodroide.adventurelog.feature.home.ui.components.navigation.HomeBottomBar
+import com.desarrollodroide.adventurelog.feature.home.ui.components.navigation.ProfileMenu
 import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
@@ -64,7 +63,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.painterResource
 import com.desarrollodroide.adventurelog.resources.Res
-import com.desarrollodroide.adventurelog.resources.ic_hamburger_alt
 import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
@@ -120,7 +118,6 @@ fun HomeScreenContent(
     onAdventureClick: (Location) -> Unit = { },
     onLogout: () -> Unit = {}
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -218,35 +215,6 @@ fun HomeScreenContent(
             contentScale = ContentScale.Crop
         )
 
-        HomeDrawer(
-            drawerState = drawerState,
-            homeUiState = homeUiState,
-            userDetails = userDetails,
-            scope = scope,
-            currentScreen = currentScreen,
-            onHomeClick = {
-                navigateTo(CurrentScreen.HOME)
-            },
-            onAdventuresClick = {
-                navigateTo(CurrentScreen.ADVENTURES)
-            },
-            onCollectionsClick = {
-                navigateTo(CurrentScreen.COLLECTIONS)
-            },
-            onTravelClick = {
-                navigateTo(CurrentScreen.TRAVEL)
-            },
-            onMapClick = {
-                navigateTo(CurrentScreen.MAP)
-            },
-            onCalendarClick = {
-                navigateTo(CurrentScreen.CALENDAR)
-            },
-            onSettingsClick = {
-                navigateTo(CurrentScreen.SETTINGS)
-            },
-            onLogout = onLogout
-        ) {
             Scaffold(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -323,14 +291,12 @@ fun HomeScreenContent(
                                 }
                             }
                         },
-                        navigationIcon = {
-                            // Always show the drawer icon
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_hamburger_alt),
-                                    contentDescription = "Menu"
-                                )
-                            }
+                        actions = {
+                            ProfileMenu(
+                                userName = userName,
+                                onSettings = { navigateTo(CurrentScreen.SETTINGS) },
+                                onLogout = onLogout
+                            )
                         },
                         scrollBehavior = scrollBehavior,
                         colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -343,13 +309,22 @@ fun HomeScreenContent(
                         )
                     )
                 },
+                bottomBar = {
+                    HomeBottomBar(
+                        current = currentScreen,
+                        onSelect = { navigateTo(it) }
+                    )
+                },
                 // Make Scaffold content transparent
                 containerColor = Color.Transparent
             ) { innerPadding ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = innerPadding.calculateTopPadding())
+                        .padding(
+                            top = innerPadding.calculateTopPadding(),
+                            bottom = innerPadding.calculateBottomPadding()
+                        )
                 ) {
                     // NavHost to manage the content on each screen with animations
                     AnimatedDirectionalNavHost(
@@ -537,7 +512,6 @@ fun HomeScreenContent(
                     }
                 }
             }
-        }
     }
 }
 

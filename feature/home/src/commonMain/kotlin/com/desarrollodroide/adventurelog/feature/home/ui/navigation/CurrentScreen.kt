@@ -6,7 +6,7 @@ enum class CurrentScreen(val route: String, val index: Int, val title: String) {
     HOME(NavigationRoutes.Home.screen, 0, "Home"),
     ADVENTURES(NavigationRoutes.Locations.route, 1, "Locations"),
     COLLECTIONS(NavigationRoutes.Collections.route, 2, "Collections"),
-    TRAVEL(NavigationRoutes.Travel.route, 3, "Travel"),
+    TRAVEL(NavigationRoutes.Travel.route, 3, "World"),
     MAP(NavigationRoutes.Map.route, 4, "Map"),
     CALENDAR(NavigationRoutes.Calendar.route, 5, "Calendar"),
     SETTINGS(NavigationRoutes.Settings.route, 6, "Settings");
