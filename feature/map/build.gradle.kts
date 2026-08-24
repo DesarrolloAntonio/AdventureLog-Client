@@ -22,6 +22,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.ui.tooling)
             implementation(libs.maps.compose)
+            implementation(libs.maps.compose.utils)
             implementation(libs.play.services.maps)
             implementation(libs.coil.compose)
         }

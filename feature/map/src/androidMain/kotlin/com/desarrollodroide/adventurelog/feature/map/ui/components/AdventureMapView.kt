@@ -5,6 +5,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.font.FontWeight
+import com.google.maps.android.clustering.ClusterItem
+import com.google.maps.android.compose.clustering.Clustering
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -134,27 +144,67 @@ actual fun AdventureMapView(
             }
         }
         
-        // Draw adventure markers
-        adventuresWithLocation.forEach { adventure ->
-            val lat = adventure.latitude?.toDoubleOrNull() ?: return@forEach
-            val lng = adventure.longitude?.toDoubleOrNull() ?: return@forEach
-            val markerState = rememberMarkerState(position = LatLng(lat, lng))
-            
-            MarkerComposable(
-                state = markerState,
-                title = adventure.name,
-                snippet = adventure.location,
-                onClick = {
-                    onAdventureClick(adventure.id)
-                    false
-                }
-            ) {
-                AdventureMarker(
-                    location = adventure,
-                    isVisited = adventure.isVisited
-                )
+        // Clustered rather than one pin per place: two hundred markers over one country pile
+        // into an unreadable blob, which is why the web clusters too. Zooming in splits them.
+        val clusterItems = remember(adventuresWithLocation) {
+            adventuresWithLocation.mapNotNull { adventure ->
+                val lat = adventure.latitude?.toDoubleOrNull()
+                val lng = adventure.longitude?.toDoubleOrNull()
+                if (lat == null || lng == null) null else LocationClusterItem(adventure, lat, lng)
             }
         }
+
+        Clustering(
+            items = clusterItems,
+            onClusterItemClick = { item ->
+                onAdventureClick(item.location.id)
+                false
+            },
+            clusterContent = { cluster -> ClusterBubble(count = cluster.size) },
+            clusterItemContent = { item ->
+                AdventureMarker(
+                    location = item.location,
+                    isVisited = item.location.isVisited
+                )
+            }
+        )
+    }
+}
+
+/** Wraps a location so the clustering library can place it. */
+private data class LocationClusterItem(
+    val location: Location,
+    private val lat: Double,
+    private val lng: Double
+) : ClusterItem {
+    override fun getPosition(): LatLng = LatLng(lat, lng)
+    override fun getTitle(): String = location.name
+    override fun getSnippet(): String = location.location.orEmpty()
+}
+
+/** How many places are stacked at this point. Grows a little with the count, as the web's does. */
+@Composable
+private fun ClusterBubble(count: Int, modifier: Modifier = Modifier) {
+    val size = when {
+        count >= 100 -> 56.dp
+        count >= 25 -> 48.dp
+        else -> 40.dp
+    }
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .border(2.dp, Color.White, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = count.toString(),
+            color = MaterialTheme.colorScheme.onPrimary,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
