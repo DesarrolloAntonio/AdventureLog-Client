@@ -44,14 +44,15 @@ class MapViewModel(
             
             observeUserStatsUseCase(username).collect { stats ->
                 logger.d { "📊 User stats updated:" }
-                logger.d { "  - Trips (visited): ${stats.tripsCount}" }
                 logger.d { "  - Visited regions: ${stats.visitedRegionCount}" }
                 logger.d { "  - Visited countries: ${stats.visitedCountryCount}" }
-                
+
+                // Only the region count comes from here. Visited used to be filled with
+                // tripsCount - the number of collections - so the map reported 33 visited places
+                // for an account with two.
                 _uiState.update { state ->
                     state.copy(
                         filters = state.filters.copy(
-                            visitedCount = stats.tripsCount,
                             regionCount = stats.visitedRegionCount
                         )
                     )
@@ -94,7 +95,7 @@ class MapViewModel(
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            error = "Failed to load adventures"
+                            error = "Failed to load places"
                         )
                     }
                 }
@@ -108,7 +109,10 @@ class MapViewModel(
                         it.latitude != "0.0" && it.longitude != "0.0"
                     }
                     
-                    // Calculate planned count locally (adventures with location that are not visited)
+                    // Both counts come from the same set - the places the map actually draws -
+                    // so they add up to what is on screen, which is what the card's footnote
+                    // promises.
+                    val visitedCount = adventuresWithLocation.count { it.isVisited }
                     val plannedCount = adventuresWithLocation.count { !it.isVisited }
                     
                     // Get unique activity types for filters
@@ -120,7 +124,7 @@ class MapViewModel(
                     logger.d { "📊 Map statistics:" }
                     logger.d { "  - Total adventures: ${adventures.size}" }
                     logger.d { "  - Locations with location: ${adventuresWithLocation.size}" }
-                    logger.d { "  - Planned (with location): $plannedCount" }
+                    logger.d { "  - On the map: $visitedCount visited, $plannedCount planned" }
                     
                     val adventuresWithoutLocation = adventures.size - adventuresWithLocation.size
                     if (adventuresWithoutLocation > 0) {
@@ -132,6 +136,7 @@ class MapViewModel(
                             locations = adventuresWithLocation,
                             activityTypes = activityTypes,
                             filters = state.filters.copy(
+                                visitedCount = visitedCount,
                                 plannedCount = plannedCount
                             ),
                             isLoading = false,

@@ -101,7 +101,7 @@ fun ClearStatsSection(
             
             // Info text about location requirement
             Text(
-                text = "* Only showing adventures with location coordinates",
+                text = "* Only places with coordinates are shown",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
