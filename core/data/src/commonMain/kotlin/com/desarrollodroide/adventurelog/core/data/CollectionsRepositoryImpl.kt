@@ -22,6 +22,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("CollectionsRepositoryImpl")
 
 class CollectionsRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
@@ -84,17 +87,17 @@ class CollectionsRepositoryImpl(
 
             Either.Right(collections)
         } catch (e: HttpException) {
-            println("HTTP Error during getCollections: ${e.code}")
+            logger.e { "HTTP Error during getCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
                 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getCollections: ${e.message}")
+            logger.e { "IO Error during getCollections: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getCollections: ${e.message}")
+            logger.e { "Unexpected error during getCollections: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -111,17 +114,17 @@ class CollectionsRepositoryImpl(
             
             Either.Right(collections)
         } catch (e: HttpException) {
-            println("HTTP Error during getAllCollections: ${e.code}")
+            logger.e { "HTTP Error during getAllCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
                 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getAllCollections: ${e.message}")
+            logger.e { "IO Error during getAllCollections: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getAllCollections: ${e.message}")
+            logger.e { "Unexpected error during getAllCollections: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -131,17 +134,17 @@ class CollectionsRepositoryImpl(
             val collection = networkDataSource.getCollectionDetail(collectionId).toDomainModel()
             Either.Right(collection)
         } catch (e: HttpException) {
-            println("HTTP Error during getCollection: ${e.code}")
+            logger.e { "HTTP Error during getCollection: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
                 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getCollection: ${e.message}")
+            logger.e { "IO Error during getCollection: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getCollection: ${e.message}")
+            logger.e { "Unexpected error during getCollection: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -171,16 +174,16 @@ class CollectionsRepositoryImpl(
 
             Either.Right(collection)
         } catch (e: HttpException) {
-            println("HTTP Error during createCollection: ${e.code}")
+            logger.e { "HTTP Error during createCollection: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during createCollection: ${e.message}")
+            logger.e { "IO Error during createCollection: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during createCollection: ${e.message}")
+            logger.e { "Unexpected error during createCollection: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -191,17 +194,17 @@ class CollectionsRepositoryImpl(
             _collectionsFlow.value = collections
             Either.Right(collections)
         } catch (e: HttpException) {
-            println("HTTP Error during refreshCollections: ${e.code}")
+            logger.e { "HTTP Error during refreshCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
                 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during refreshCollections: ${e.message}")
+            logger.e { "IO Error during refreshCollections: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during refreshCollections: ${e.message}")
+            logger.e { "Unexpected error during refreshCollections: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -216,16 +219,16 @@ class CollectionsRepositoryImpl(
             
             Either.Right(Unit)
         } catch (e: HttpException) {
-            println("HTTP Error during deleteCollection: ${e.code}")
+            logger.e { "HTTP Error during deleteCollection: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during deleteCollection: ${e.message}")
+            logger.e { "IO Error during deleteCollection: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during deleteCollection: ${e.message}")
+            logger.e { "Unexpected error during deleteCollection: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -316,16 +319,16 @@ class CollectionsRepositoryImpl(
 
             Either.Right(collection)
         } catch (e: HttpException) {
-            println("HTTP Error during updateCollection: ${e.code}")
+            logger.e { "HTTP Error during updateCollection: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during updateCollection: ${e.message}")
+            logger.e { "IO Error during updateCollection: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during updateCollection: ${e.message}")
+            logger.e { "Unexpected error during updateCollection: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

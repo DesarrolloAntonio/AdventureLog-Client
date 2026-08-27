@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.io.IOException
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("CountriesRepositoryImpl")
 
 class CountriesRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
@@ -39,16 +42,16 @@ class CountriesRepositoryImpl(
             _countriesFlow.value = countries
             Either.Right(countries)
         } catch (e: HttpException) {
-            println("HTTP Error during getCountries: ${e.code}")
+            logger.e { "HTTP Error during getCountries: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getCountries: ${e.message}")
+            logger.e { "IO Error during getCountries: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getCountries: ${e.message}")
+            logger.e { "Unexpected error during getCountries: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -58,45 +61,45 @@ class CountriesRepositoryImpl(
             val regions = networkDataSource.getRegions(countryCode).map { it.toDomainModel() }
             Either.Right(regions)
         } catch (e: HttpException) {
-            println("HTTP Error during getRegions: ${e.code}")
+            logger.e { "HTTP Error during getRegions: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getRegions: ${e.message}")
+            logger.e { "IO Error during getRegions: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getRegions: ${e.message}")
+            logger.e { "Unexpected error during getRegions: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
     
     override suspend fun getVisitedRegions(): Either<ApiResponse, List<VisitedRegion>> {
         return try {
-            println("Fetching visited regions from network...")
+            logger.d { "Fetching visited regions from network..." }
             val visitedRegionsDTO = networkDataSource.getVisitedRegions()
-            println("Received ${visitedRegionsDTO.size} visited regions DTOs")
+            logger.d { "Received ${visitedRegionsDTO.size} visited regions DTOs" }
             
             val visitedRegions = visitedRegionsDTO.map { dto ->
-                println("Mapping DTO: id=${dto.id}, userId=${dto.userId}, region=${dto.region}, name=${dto.name}")
+                logger.d { "Mapping DTO: id=${dto.id}, userId=${dto.userId}, region=${dto.region}, name=${dto.name}" }
                 dto.toDomainModel()
             }
             
             _visitedRegionsFlow.value = visitedRegions
-            println("Successfully mapped ${visitedRegions.size} visited regions")
+            logger.d { "Successfully mapped ${visitedRegions.size} visited regions" }
             Either.Right(visitedRegions)
         } catch (e: HttpException) {
-            println("HTTP Error during getVisitedRegions: ${e.code}")
+            logger.e { "HTTP Error during getVisitedRegions: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getVisitedRegions: ${e.message}")
+            logger.e { "IO Error during getVisitedRegions: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getVisitedRegions: ${e.message}")
+            logger.e { "Unexpected error during getVisitedRegions: ${e.message}" }
             e.printStackTrace()
             Either.Left(ApiResponse.HttpError)
         }
@@ -108,16 +111,16 @@ class CountriesRepositoryImpl(
             _visitedCitiesFlow.value = visitedCities
             Either.Right(visitedCities)
         } catch (e: HttpException) {
-            println("HTTP Error during getVisitedCities: ${e.code}")
+            logger.e { "HTTP Error during getVisitedCities: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getVisitedCities: ${e.message}")
+            logger.e { "IO Error during getVisitedCities: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getVisitedCities: ${e.message}")
+            logger.e { "Unexpected error during getVisitedCities: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -131,27 +134,27 @@ class CountriesRepositoryImpl(
             try {
                 getVisitedRegions()
             } catch (e: Exception) {
-                println("Failed to refresh visited regions: ${e.message}")
+                logger.e { "Failed to refresh visited regions: ${e.message}" }
             }
             
             try {
                 getVisitedCities()
             } catch (e: Exception) {
-                println("Failed to refresh visited cities: ${e.message}")
+                logger.e { "Failed to refresh visited cities: ${e.message}" }
             }
             
             Either.Right(countries)
         } catch (e: HttpException) {
-            println("HTTP Error during refreshCountries: ${e.code}")
+            logger.e { "HTTP Error during refreshCountries: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during refreshCountries: ${e.message}")
+            logger.e { "IO Error during refreshCountries: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during refreshCountries: ${e.message}")
+            logger.e { "Unexpected error during refreshCountries: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

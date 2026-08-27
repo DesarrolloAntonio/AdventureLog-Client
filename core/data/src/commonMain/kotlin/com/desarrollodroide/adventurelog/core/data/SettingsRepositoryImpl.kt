@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("SettingsRepositoryImpl")
 
 /**
  * Implementation of SettingsRepository using multiplatform-settings
@@ -36,7 +39,7 @@ class SettingsRepositoryImpl(
             settings.putString(KEY_USER_DETAILS, json.encodeToString(userDetails))
         } catch (e: SerializationException) {
             // Log or handle serialization errors
-            println("Error serializing user details: ${e.message}")
+            logger.e { "Error serializing user details: ${e.message}" }
         }
     }
 
@@ -47,7 +50,7 @@ class SettingsRepositoryImpl(
             }
         } catch (e: SerializationException) {
             // Log or handle deserialization errors
-            println("Error deserializing user details: ${e.message}")
+            logger.e { "Error deserializing user details: ${e.message}" }
             null
         }
     }
@@ -61,7 +64,7 @@ class SettingsRepositoryImpl(
             }
         } catch (e: SerializationException) {
             // Log or handle serialization errors
-            println("Error serializing login credentials: ${e.message}")
+            logger.e { "Error serializing login credentials: ${e.message}" }
         }
     }
 
@@ -72,7 +75,7 @@ class SettingsRepositoryImpl(
             }
         } catch (e: SerializationException) {
             // Log or handle deserialization errors
-            println("Error deserializing login credentials: ${e.message}")
+            logger.e { "Error deserializing login credentials: ${e.message}" }
             null
         }
     }

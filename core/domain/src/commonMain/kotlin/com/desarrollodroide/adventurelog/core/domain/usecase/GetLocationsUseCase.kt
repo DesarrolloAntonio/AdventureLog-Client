@@ -4,6 +4,9 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.model.Location
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("GetLocationsUseCase")
 
 class GetLocationsUseCase(
     private val locationsRepository: LocationsRepository
@@ -21,8 +24,8 @@ class GetLocationsUseCase(
         }
 
     fun selectLocation(location: Location) {
-        println("🟡 [GetLocationsUseCase] Setting selectedLocation: ${location.id} - ${location.name}")
+        logger.d { "🟡 [GetLocationsUseCase] Setting selectedLocation: ${location.id} - ${location.name}" }
         locationsRepository.selectedLocation = location
-        println("🟡 [GetLocationsUseCase] selectedLocation is now: ${locationsRepository.selectedLocation?.name}")
+        logger.d { "🟡 [GetLocationsUseCase] selectedLocation is now: ${locationsRepository.selectedLocation?.name}" }
     }
 }

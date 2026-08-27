@@ -38,7 +38,6 @@ fun AdventureLogNavGraph(
     
     val homeNavigator = object : HomeNavigator {
         override fun goToDetail(location: Location) {
-            println("🚀 [NavGraph] Navigating to detail for: ${location.name} (id: ${location.id})")
             navController.navigate("detail/${location.id}")
         }
         

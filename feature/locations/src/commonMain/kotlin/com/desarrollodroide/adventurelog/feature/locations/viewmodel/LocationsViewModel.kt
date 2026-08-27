@@ -40,6 +40,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("LocationsViewModel")
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class LocationsViewModel(
@@ -437,7 +440,7 @@ class LocationsViewModel(
     }
     
     fun selectLocation(location: Location) {
-        println("🔵 [LocationsViewModel] Selecting location: ${location.id} - ${location.name}")
+        logger.d { "🔵 [LocationsViewModel] Selecting location: ${location.id} - ${location.name}" }
         getLocationsPagingUseCase.selectLocation(location)
     }
 }

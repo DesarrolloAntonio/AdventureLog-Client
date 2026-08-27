@@ -10,6 +10,9 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("KtorWikipediaNetwork")
 
 class KtorWikipediaNetwork(
     private val httpClient: HttpClient
@@ -17,7 +20,7 @@ class KtorWikipediaNetwork(
 
     override suspend fun searchImage(query: String): String? {
         try {
-            println("WikipediaDataSource: Searching for '$query'")
+            logger.d { "WikipediaDataSource: Searching for '$query'" }
 
             // First, search for the page
             val searchUrl = "https://en.wikipedia.org/w/api.php"
@@ -29,7 +32,7 @@ class KtorWikipediaNetwork(
                 "origin" to "*"
             )
 
-            println("WikipediaDataSource: Making search request to $searchUrl")
+            logger.d { "WikipediaDataSource: Making search request to $searchUrl" }
             val searchResponse = httpClient.get(searchUrl) {
                 searchParams.forEach { (key, value) ->
                     parameter(key, value)
@@ -37,20 +40,20 @@ class KtorWikipediaNetwork(
             }
 
             val searchText = searchResponse.body<String>()
-            println("WikipediaDataSource: Search response: ${searchText.take(200)}...")
+            logger.d { "WikipediaDataSource: Search response: ${searchText.take(200)}..." }
 
             val searchResult = Json.parseToJsonElement(searchText).jsonArray
             val titles = searchResult.getOrNull(1) as? JsonArray
 
             if (titles == null || titles.isEmpty()) {
-                println("WikipediaDataSource: No pages found for query")
+                logger.d { "WikipediaDataSource: No pages found for query" }
                 return null
             }
 
             // Try each result until we find one with an image
             for (i in 0 until titles.size) {
                 val pageTitle = titles[i].jsonPrimitive.content
-                println("WikipediaDataSource: Trying page: $pageTitle")
+                logger.d { "WikipediaDataSource: Trying page: $pageTitle" }
 
                 // Get the page info with images
                 val pageParams = mapOf(
@@ -64,7 +67,7 @@ class KtorWikipediaNetwork(
                     "origin" to "*"
                 )
 
-                println("WikipediaDataSource: Getting page info for '$pageTitle'")
+                logger.d { "WikipediaDataSource: Getting page info for '$pageTitle'" }
                 val pageResponse = httpClient.get(searchUrl) {
                     pageParams.forEach { (key, value) ->
                         parameter(key, value)
@@ -72,7 +75,7 @@ class KtorWikipediaNetwork(
                 }
 
                 val pageText = pageResponse.body<String>()
-                println("WikipediaDataSource: Page response: ${pageText.take(300)}...")
+                logger.d { "WikipediaDataSource: Page response: ${pageText.take(300)}..." }
 
                 val jsonResponse = Json.parseToJsonElement(pageText).jsonObject
                 val queryObj = jsonResponse["query"]?.jsonObject
@@ -80,13 +83,13 @@ class KtorWikipediaNetwork(
 
                 if (!pages.isNullOrEmpty()) {
                     val page = pages.values.firstOrNull()?.jsonObject
-                    println("WikipediaDataSource: Page data: $page")
+                    logger.d { "WikipediaDataSource: Page data: $page" }
 
                     // Try to get thumbnail first
                     val thumbnail = page?.get("thumbnail")?.jsonObject
                     val thumbnailUrl = thumbnail?.get("source")?.jsonPrimitive?.content
                     if (!thumbnailUrl.isNullOrEmpty()) {
-                        println("WikipediaDataSource: Found thumbnail URL: $thumbnailUrl")
+                        logger.d { "WikipediaDataSource: Found thumbnail URL: $thumbnailUrl" }
                         return thumbnailUrl
                     }
 
@@ -94,7 +97,7 @@ class KtorWikipediaNetwork(
                     val original = page?.get("original")?.jsonObject
                     val originalUrl = original?.get("source")?.jsonPrimitive?.content
                     if (!originalUrl.isNullOrEmpty()) {
-                        println("WikipediaDataSource: Found original URL: $originalUrl")
+                        logger.d { "WikipediaDataSource: Found original URL: $originalUrl" }
                         return originalUrl
                     }
 
@@ -103,16 +106,16 @@ class KtorWikipediaNetwork(
                     if (!pageImage.isNullOrEmpty()) {
                         // Construct Wikipedia image URL
                         val imageUrl = "https://en.wikipedia.org/wiki/Special:FilePath/$pageImage"
-                        println("WikipediaDataSource: Constructed URL from pageimage: $imageUrl")
+                        logger.d { "WikipediaDataSource: Constructed URL from pageimage: $imageUrl" }
                         return imageUrl
                     }
                 }
             }
 
-            println("WikipediaDataSource: No image found in any result")
+            logger.d { "WikipediaDataSource: No image found in any result" }
             return null
         } catch (e: Exception) {
-            println("WikipediaDataSource: Error searching Wikipedia image: ${e.message}")
+            logger.e { "WikipediaDataSource: Error searching Wikipedia image: ${e.message}" }
             e.printStackTrace()
             return null
         }

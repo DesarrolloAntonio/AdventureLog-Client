@@ -4,6 +4,9 @@ import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("InitializeSessionUseCase")
 
 /**
  * Use case to initialize user session if it exists
@@ -42,8 +45,8 @@ class InitializeSessionUseCase(
                     userRepository.setActiveSession(fresh)
                     fresh
                 } catch (e: Exception) {
-                    println("❌ Token validation failed: ${e.message}")
-                    println("🧹 Clearing corrupted session")
+                    logger.e { "❌ Token validation failed: ${e.message}" }
+                    logger.d { "🧹 Clearing corrupted session" }
                     userRepository.clearUserSession()
                     null
                 }
@@ -51,7 +54,7 @@ class InitializeSessionUseCase(
                 null
             }
         } catch (e: Exception) {
-            println("⚠️ Session initialization failed: ${e.message}")
+            logger.e { "⚠️ Session initialization failed: ${e.message}" }
             null
         }
     }

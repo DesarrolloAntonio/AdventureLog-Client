@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.home.ui.components.home
+package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,7 +46,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.datetime.LocalDate
 
 @Composable
-fun HomeContent(
+fun DashboardScreen(
     modifier: Modifier = Modifier,
     homeUiState: HomeUiState,
     onAdventureClick: (Location) -> Unit = { },

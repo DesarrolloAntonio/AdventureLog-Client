@@ -58,6 +58,9 @@ import coil3.compose.SubcomposeAsyncImage
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import androidx.compose.material3.CircularProgressIndicator
 import kotlin.collections.plus
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("ImagesSection")
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -667,7 +670,7 @@ private fun ImageItem(
                 ImageType.LOCAL_FILE -> {
                     // For local files
                     val context = LocalPlatformContext.current
-                    println("Loading local image with URI: ${image.uri}")
+                    logger.d { "Loading local image with URI: ${image.uri}" }
                     
                     AsyncImage(
                         model = ImageRequest.Builder(context)
@@ -678,10 +681,10 @@ private fun ImageItem(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                         onError = {
-                            println("Error loading local image: ${image.uri}")
+                            logger.e { "Error loading local image: ${image.uri}" }
                         },
                         onSuccess = {
-                            println("Successfully loaded local image: ${image.uri}")
+                            logger.d { "Successfully loaded local image: ${image.uri}" }
                         }
                     )
                 }

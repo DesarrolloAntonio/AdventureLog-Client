@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.home.ui.components.navigation
+package com.desarrollodroide.adventurelog.feature.home.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Collections

@@ -9,6 +9,9 @@ import app.cash.paging.PagingState
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("AdventuresPagingSource")
 
 class AdventuresPagingSource(
     private val networkDataSource: AdventureLogNetwork,
@@ -25,7 +28,7 @@ class AdventuresPagingSource(
         // Force our pageSize instead of using params.loadSize
         val size = pageSize
         
-        println("🔍 PagingSource - Requesting page: $page, pageSize: $size (params.loadSize was ${params.loadSize})")
+        logger.d { "🔍 PagingSource - Requesting page: $page, pageSize: $size (params.loadSize was ${params.loadSize})" }
         
         return try {
             val adventures = networkDataSource.getAdventures(
@@ -38,23 +41,23 @@ class AdventuresPagingSource(
             
             totalItemsLoaded += adventures.size
             
-            println("✅ PagingSource - Received ${adventures.size} adventures for page $page (total loaded: $totalItemsLoaded)")
+            logger.d { "✅ PagingSource - Received ${adventures.size} adventures for page $page (total loaded: $totalItemsLoaded)" }
             if (adventures.isNotEmpty()) {
-                println("   First adventure: ${adventures.first().name}")
-                println("   Last adventure: ${adventures.last().name}")
+                logger.d { "   First adventure: ${adventures.first().name}" }
+                logger.d { "   Last adventure: ${adventures.last().name}" }
             }
             
             val nextKey = when {
                 adventures.isEmpty() -> {
-                    println("🏁 PagingSource - No adventures returned, last page")
+                    logger.d { "🏁 PagingSource - No adventures returned, last page" }
                     null
                 }
                 adventures.size < size -> {
-                    println("🏁 PagingSource - Last page reached (received ${adventures.size} < $size)")
+                    logger.d { "🏁 PagingSource - Last page reached (received ${adventures.size} < $size)" }
                     null
                 }
                 else -> {
-                    println("➡️ PagingSource - Full page received, nextKey = ${page + 1}")
+                    logger.d { "➡️ PagingSource - Full page received, nextKey = ${page + 1}" }
                     page + 1
                 }
             }
@@ -65,7 +68,7 @@ class AdventuresPagingSource(
                 nextKey = nextKey
             ) as PagingSourceLoadResult<Int, Location>
         } catch (e: Exception) {
-            println("❌ PagingSource - Error loading page $page: ${e.message}")
+            logger.e { "❌ PagingSource - Error loading page $page: ${e.message}" }
             e.printStackTrace()
             PagingSourceLoadResultError<Int, Location>(e) as PagingSourceLoadResult<Int, Location>
         }
@@ -79,7 +82,7 @@ class AdventuresPagingSource(
             state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
-        println("🔄 PagingSource - getRefreshKey called, returning: $key")
+        logger.d { "🔄 PagingSource - getRefreshKey called, returning: $key" }
         return key
     }
 }

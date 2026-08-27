@@ -8,6 +8,9 @@ import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNet
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import kotlinx.io.IOException
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("CategoriesRepositoryImpl")
 
 class CategoriesRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
@@ -18,16 +21,16 @@ class CategoriesRepositoryImpl(
             val categories = networkDataSource.getCategories().map { it.toDomainModel() }
             Either.Right(categories)
         } catch (e: HttpException) {
-            println("HTTP Error during getCategories: ${e.code}")
+            logger.e { "HTTP Error during getCategories: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getCategories: ${e.message}")
+            logger.e { "IO Error during getCategories: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getCategories: ${e.message}")
+            logger.e { "Unexpected error during getCategories: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -37,17 +40,17 @@ class CategoriesRepositoryImpl(
             val category = networkDataSource.getCategoryById(categoryId).toDomainModel()
             Either.Right(category)
         } catch (e: HttpException) {
-            println("HTTP Error during getCategoryById: ${e.code}")
+            logger.e { "HTTP Error during getCategoryById: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 404 -> Either.Left(ApiResponse.HttpError)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getCategoryById: ${e.message}")
+            logger.e { "IO Error during getCategoryById: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getCategoryById: ${e.message}")
+            logger.e { "Unexpected error during getCategoryById: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -65,17 +68,17 @@ class CategoriesRepositoryImpl(
             ).toDomainModel()
             Either.Right(category)
         } catch (e: HttpException) {
-            println("HTTP Error during createCategory: ${e.code}")
+            logger.e { "HTTP Error during createCategory: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 400 -> Either.Left(ApiResponse.HttpError)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during createCategory: ${e.message}")
+            logger.e { "IO Error during createCategory: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during createCategory: ${e.message}")
+            logger.e { "Unexpected error during createCategory: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -95,7 +98,7 @@ class CategoriesRepositoryImpl(
             ).toDomainModel()
             Either.Right(category)
         } catch (e: HttpException) {
-            println("HTTP Error during updateCategory: ${e.code}")
+            logger.e { "HTTP Error during updateCategory: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 404 -> Either.Left(ApiResponse.HttpError)
@@ -103,10 +106,10 @@ class CategoriesRepositoryImpl(
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during updateCategory: ${e.message}")
+            logger.e { "IO Error during updateCategory: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during updateCategory: ${e.message}")
+            logger.e { "Unexpected error during updateCategory: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -116,17 +119,17 @@ class CategoriesRepositoryImpl(
             networkDataSource.deleteCategory(categoryId)
             Either.Right(Unit)
         } catch (e: HttpException) {
-            println("HTTP Error during deleteCategory: ${e.code}")
+            logger.e { "HTTP Error during deleteCategory: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 404 -> Either.Left(ApiResponse.HttpError)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during deleteCategory: ${e.message}")
+            logger.e { "IO Error during deleteCategory: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during deleteCategory: ${e.message}")
+            logger.e { "Unexpected error during deleteCategory: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

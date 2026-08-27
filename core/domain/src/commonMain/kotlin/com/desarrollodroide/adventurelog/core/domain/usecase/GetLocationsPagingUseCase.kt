@@ -4,6 +4,9 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.model.Location
 import kotlinx.coroutines.flow.Flow
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("GetLocationsPagingUseCase")
 
 class GetLocationsPagingUseCase(
     private val locationsRepository: LocationsRepository
@@ -38,8 +41,8 @@ class GetLocationsPagingUseCase(
     }
     
     fun selectLocation(location: Location) {
-        println("🟢 [GetLocationsPagingUseCase] Setting selectedLocation: ${location.id} - ${location.name}")
+        logger.d { "🟢 [GetLocationsPagingUseCase] Setting selectedLocation: ${location.id} - ${location.name}" }
         locationsRepository.selectedLocation = location
-        println("🟢 [GetLocationsPagingUseCase] selectedLocation is now: ${locationsRepository.selectedLocation?.name}")
+        logger.d { "🟢 [GetLocationsPagingUseCase] selectedLocation is now: ${locationsRepository.selectedLocation?.name}" }
     }
 }

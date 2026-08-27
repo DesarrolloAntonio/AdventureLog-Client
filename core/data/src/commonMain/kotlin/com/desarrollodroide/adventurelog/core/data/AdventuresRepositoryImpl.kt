@@ -18,6 +18,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("AdventuresRepositoryImpl")
 
 class AdventuresRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
@@ -79,17 +82,17 @@ class AdventuresRepositoryImpl(
             val adventures = networkDataSource.getAdventures(page, pageSize).map { it.toDomainModel() }
             Either.Right(adventures)
         } catch (e: HttpException) {
-            println("HTTP Error during getAdventures: ${e.code}")
+            logger.e { "HTTP Error during getAdventures: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
                 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getAdventures: ${e.message}")
+            logger.e { "IO Error during getAdventures: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getAdventures: ${e.message}")
+            logger.e { "Unexpected error during getAdventures: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -99,46 +102,46 @@ class AdventuresRepositoryImpl(
             val adventures = networkDataSource.getAdventures(page = 1, pageSize = 1000).map { it.toDomainModel() }
             Either.Right(adventures)
         } catch (e: HttpException) {
-            println("HTTP Error during getAllAdventuresForMap: ${e.code}")
+            logger.e { "HTTP Error during getAllAdventuresForMap: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
                 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getAllAdventuresForMap: ${e.message}")
+            logger.e { "IO Error during getAllAdventuresForMap: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getAllAdventuresForMap: ${e.message}")
+            logger.e { "Unexpected error during getAllAdventuresForMap: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
 
     override suspend fun getLocation(objectId: String): Either<ApiResponse, Location> {
         val cached = selectedLocation
-        println("🔍 [Repository] getLocation called for: $objectId")
-        println("🔍 [Repository] selectedLocation is: ${cached?.id} - ${cached?.name}")
+        logger.d { "🔍 [Repository] getLocation called for: $objectId" }
+        logger.d { "🔍 [Repository] selectedLocation is: ${cached?.id} - ${cached?.name}" }
         
         if (cached != null && cached.id == objectId) {
-            println("✨ Using selectedLocation for: $objectId")
+            logger.d { "✨ Using selectedLocation for: $objectId" }
             return Either.Right(cached)
         }
         
-        println("⚠️ selectedLocation not available, fetching from network: $objectId")
+        logger.e { "⚠️ selectedLocation not available, fetching from network: $objectId" }
         return try {
             val location = networkDataSource.getAdventureDetail(objectId).toDomainModel()
             Either.Right(location)
         } catch (e: HttpException) {
-            println("HTTP Error during getLocation: ${e.code}")
+            logger.e { "HTTP Error during getLocation: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during getLocation: ${e.message}")
+            logger.e { "IO Error during getLocation: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during getLocation: ${e.message}")
+            logger.e { "Unexpected error during getLocation: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -180,16 +183,16 @@ class AdventuresRepositoryImpl(
             
             Either.Right(adventure)
         } catch (e: HttpException) {
-            println("HTTP Error during createAdventure: ${e.code}")
+            logger.e { "HTTP Error during createAdventure: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during createAdventure: ${e.message}")
+            logger.e { "IO Error during createAdventure: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during createAdventure: ${e.message}")
+            logger.e { "Unexpected error during createAdventure: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -199,17 +202,17 @@ class AdventuresRepositoryImpl(
             val adventures = networkDataSource.getAdventures(1, 1000).map { it.toDomainModel() }
             Either.Right(adventures)
         } catch (e: HttpException) {
-            println("HTTP Error during refreshAdventures: ${e.code}")
+            logger.e { "HTTP Error during refreshAdventures: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
                 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during refreshAdventures: ${e.message}")
+            logger.e { "IO Error during refreshAdventures: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during refreshAdventures: ${e.message}")
+            logger.e { "Unexpected error during refreshAdventures: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -248,16 +251,16 @@ class AdventuresRepositoryImpl(
                 Either.Right(description)
             }
         } catch (e: HttpException) {
-            println("HTTP Error during generateDescription: ${e.code}")
+            logger.e { "HTTP Error during generateDescription: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during generateDescription: ${e.message}")
+            logger.e { "IO Error during generateDescription: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Error during generateDescription: ${e.message}")
+            logger.e { "Error during generateDescription: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -271,16 +274,16 @@ class AdventuresRepositoryImpl(
             
             Either.Right(Unit)
         } catch (e: HttpException) {
-            println("HTTP Error during deleteAdventure: ${e.code}")
+            logger.e { "HTTP Error during deleteAdventure: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during deleteAdventure: ${e.message}")
+            logger.e { "IO Error during deleteAdventure: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during deleteAdventure: ${e.message}")
+            logger.e { "Unexpected error during deleteAdventure: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -326,16 +329,16 @@ class AdventuresRepositoryImpl(
             
             Either.Right(adventure)
         } catch (e: HttpException) {
-            println("HTTP Error during updateAdventure: ${e.code}")
+            logger.e { "HTTP Error during updateAdventure: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error during updateAdventure: ${e.message}")
+            logger.e { "IO Error during updateAdventure: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error during updateAdventure: ${e.message}")
+            logger.e { "Unexpected error during updateAdventure: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

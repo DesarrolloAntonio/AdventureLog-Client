@@ -30,9 +30,8 @@ import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
-import com.desarrollodroide.adventurelog.feature.home.ui.components.navigation.HomeBottomBar
-import com.desarrollodroide.adventurelog.feature.home.ui.components.navigation.ProfileMenu
-import com.desarrollodroide.adventurelog.feature.home.ui.components.home.HomeContent
+import com.desarrollodroide.adventurelog.feature.home.ui.components.HomeBottomBar
+import com.desarrollodroide.adventurelog.feature.home.ui.components.ProfileMenu
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
 import com.desarrollodroide.adventurelog.feature.locations.ui.navigation.locationsScreen
@@ -74,7 +73,7 @@ import com.desarrollodroide.adventurelog.core.model.Location
  * Entry point composable that integrates with navigation
  */
 @Composable
-fun HomeScreenRoute(
+fun MainShellRoute(
     viewModel: HomeViewModel = koinViewModel(),
     onAdventureClick: (Location) -> Unit = { },
     onNavigateToLogin: () -> Unit = { }
@@ -361,7 +360,7 @@ fun HomeScreenContent(
                             enterTransition = NavigationAnimations.enterTransitionFade,
                             exitTransition = NavigationAnimations.exitTransitionFade
                         ) {
-                            HomeContent(
+                            DashboardScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,
                                 onAdventureClick = onAdventureClick,

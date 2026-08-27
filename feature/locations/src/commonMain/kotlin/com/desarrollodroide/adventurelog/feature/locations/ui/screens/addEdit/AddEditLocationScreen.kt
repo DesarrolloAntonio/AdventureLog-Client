@@ -55,6 +55,9 @@ import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("AddEditLocationScreen")
 
 private data class SplitDateTime(
     val date: String,
@@ -193,17 +196,17 @@ fun AddEditLocationContent(
     var formData by remember(existingLocation) {
         mutableStateOf(
             if (existingLocation != null) {
-                println("DEBUG: Loading existing location: ${existingLocation.name}")
-                println("DEBUG: Number of visits: ${existingLocation.visits.size}")
+                logger.d { "DEBUG: Loading existing location: ${existingLocation.name}" }
+                logger.d { "DEBUG: Number of visits: ${existingLocation.visits.size}" }
                 
                 val parsedVisits = existingLocation.visits.mapIndexed { index, visit ->
-                    println("DEBUG: Visit $index - startDate: ${visit.startDate}, endDate: ${visit.endDate}")
+                    logger.d { "DEBUG: Visit $index - startDate: ${visit.startDate}, endDate: ${visit.endDate}" }
                     
                     val startDateTime = splitIsoDateTime(visit.startDate)
                     val endDateTime = splitIsoDateTime(visit.endDate)
                     
-                    println("DEBUG: Parsed visit $index - startDate: ${startDateTime.date}, startTime: ${startDateTime.time}")
-                    println("DEBUG: Parsed visit $index - endDate: ${endDateTime.date}, endTime: ${endDateTime.time}")
+                    logger.d { "DEBUG: Parsed visit $index - startDate: ${startDateTime.date}, startTime: ${startDateTime.time}" }
+                    logger.d { "DEBUG: Parsed visit $index - endDate: ${endDateTime.date}, endTime: ${endDateTime.time}" }
                     
                     // An all-day visit is stored as midnight on both bounds, so a time of
                     // 00:00 means "no time" rather than "one minute past midnight". Reading it
@@ -222,7 +225,7 @@ fun AddEditLocationContent(
                     )
                 }
                 
-                println("DEBUG: Total parsed visits: ${parsedVisits.size}")
+                logger.d { "DEBUG: Total parsed visits: ${parsedVisits.size}" }
                 
                 val parsedTrails = existingLocation.trails.map { trail ->
                     TrailFormData(

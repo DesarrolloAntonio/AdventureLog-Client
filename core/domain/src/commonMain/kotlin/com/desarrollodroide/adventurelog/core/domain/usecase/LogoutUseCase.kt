@@ -2,6 +2,9 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("LogoutUseCase")
 
 /**
  * Use case to handle user logout
@@ -37,10 +40,10 @@ class LogoutUseCase(
 
         // Log warnings if any errors occurred
         userRepositoryError?.let {
-            println("Warning: Error during logout, but local data was cleared: ${it.message}")
+            logger.e { "Warning: Error during logout, but local data was cleared: ${it.message}" }
         }
         networkDataSourceError?.let {
-            println("Warning: Error during logout, but local data was cleared: ${it.message}")
+            logger.e { "Warning: Error during logout, but local data was cleared: ${it.message}" }
         }
     }
 }

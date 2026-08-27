@@ -16,6 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("UserRepositoryImpl")
 
 /**
  * Implementation of UserRepository using MultiPlatform-Settings
@@ -84,7 +87,7 @@ class UserRepositoryImpl(
                 }
             }
         } catch (e: Exception) {
-            println("Error deserializing user session: ${e.message}")
+            logger.e { "Error deserializing user session: ${e.message}" }
             settings.remove(Keys.USER_SESSION)
         }
     }
@@ -138,7 +141,7 @@ class UserRepositoryImpl(
             val userSessionJson = json.encodeToString(UserDetails.serializer(), userDetails)
             settings.putString(Keys.USER_SESSION, userSessionJson)
         } catch (e: Exception) {
-            println("Error saving user session: ${e.message}")
+            logger.e { "Error saving user session: ${e.message}" }
         }
         // Publish regardless of whether persistence succeeded - the running app still needs a
         // session, and a failed disk write should not log the user out of the current run.
@@ -182,16 +185,16 @@ class UserRepositoryImpl(
             userStatsFlow.value = stats
             Either.Right(stats)
         } catch (e: HttpException) {
-            println("HTTP Error getting user stats: ${e.code}")
+            logger.e { "HTTP Error getting user stats: ${e.code}" }
             when (e.code) {
                 401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
-            println("IO Error getting user stats: ${e.message}")
+            logger.e { "IO Error getting user stats: ${e.message}" }
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
-            println("Unexpected error getting user stats: ${e.message}")
+            logger.e { "Unexpected error getting user stats: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

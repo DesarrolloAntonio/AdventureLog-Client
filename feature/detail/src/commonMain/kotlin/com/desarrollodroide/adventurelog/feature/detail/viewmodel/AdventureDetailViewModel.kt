@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.stateIn
 import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
 import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
 import kotlinx.coroutines.launch
+import co.touchlab.kermit.Logger
+
+private val logger = Logger.withTag("AdventureDetailViewModel")
 
 sealed class LocationState {
     data object Loading : LocationState()
@@ -69,16 +72,16 @@ class AdventureDetailViewModel(
         viewModelScope.launch {
             _locationState.value = LocationState.Loading
             
-            println("📍 [ViewModel] Loading location: $locationId")
+            logger.d { "📍 [ViewModel] Loading location: $locationId" }
             
             when (val result = getLocationUseCase(locationId)) {
                 is Either.Right -> {
-                    println("✅ [ViewModel] Location loaded: ${result.value.name}")
+                    logger.d { "✅ [ViewModel] Location loaded: ${result.value.name}" }
                     _locationState.value = LocationState.Success(result.value)
                     getLocationUseCase.clearSelectedLocation()
                 }
                 is Either.Left -> {
-                    println("❌ [ViewModel] Error loading location: ${result.value}")
+                    logger.e { "❌ [ViewModel] Error loading location: ${result.value}" }
                     _locationState.value = LocationState.Error(result.value)
                 }
             }
@@ -86,11 +89,11 @@ class AdventureDetailViewModel(
     }
 
     fun editAdventure(adventureId: String) {
-        println("Edit adventure: $adventureId")
+        logger.d { "Edit adventure: $adventureId" }
     }
 
     fun openMap(latitude: String, longitude: String) {
-        println("Open map at: $latitude, $longitude")
+        logger.d { "Open map at: $latitude, $longitude" }
     }
 
     /**
