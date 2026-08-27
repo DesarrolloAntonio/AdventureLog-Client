@@ -37,7 +37,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class CollectionTab(val title: String, val isEnabled: Boolean = true) {
     ALL("All"),
-    LOCATIONS("Locations"),
+    LOCATIONS("Places"),
     TRANSPORTATIONS("Transportations"),
     LODGING("Lodging", false),
     NOTES("Notes", false),

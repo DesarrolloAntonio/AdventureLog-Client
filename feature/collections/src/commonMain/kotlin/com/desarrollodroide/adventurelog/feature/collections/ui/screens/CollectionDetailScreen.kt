@@ -213,7 +213,7 @@ fun CollectionDetailContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Locations",
+                            text = "Places",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -347,7 +347,7 @@ fun CollectionDetailContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Locations",
+                            text = "Places",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -560,45 +560,20 @@ fun CollectionHeader(
             )
         }
         
-        // Stats row - only visibility and status (adventures count is shown in the section header)
+        // The two facts about the collection itself, in the same chips the rest of the app uses.
+        // These were the last outlined AssistChips left standing.
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Visibility chip
-            AssistChip(
-                onClick = { },
-                label = { 
-                    Text(
-                        text = if (collection.isPublic) "Public" else "Private"
-                    ) 
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (collection.isPublic) Icons.Default.Public else Icons.Default.Lock,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
-                modifier = Modifier.padding(end = 8.dp)
+            MetaChip(
+                text = if (collection.isPublic) "\uD83C\uDF0D Public" else "\uD83D\uDD12 Private",
+                tone = if (collection.isPublic) ChipTone.NEUTRAL else ChipTone.WARNING
             )
-            
-            // Status chip
-            AssistChip(
-                onClick = { },
-                label = { 
-                    Text(
-                        text = if (collection.isArchived) "Archived" else "Active"
-                    ) 
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (collection.isArchived) Icons.Default.Archive else Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
+            MetaChip(
+                text = if (collection.isArchived) "\uD83D\uDCE6 Archived" else "\u2705 Active",
+                tone = if (collection.isArchived) ChipTone.NEUTRAL else ChipTone.POSITIVE
             )
         }
     }
