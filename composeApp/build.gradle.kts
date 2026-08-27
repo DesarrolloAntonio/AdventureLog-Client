@@ -60,6 +60,7 @@ kotlin {
             implementation(projects.feature.settings)
             implementation(projects.feature.detail)
             implementation(projects.feature.ui)
+            implementation(projects.feature.calendar)
             implementation(projects.feature.collections)
             implementation(projects.feature.world)
             implementation(projects.feature.map)

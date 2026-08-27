@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Dns
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +54,7 @@ fun ProfileMenu(
     userName: String,
     serverUrl: String,
     onSettings: () -> Unit,
+    onCalendar: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -89,6 +91,19 @@ fun ProfileMenu(
 
                 Spacer(Modifier.height(20.dp))
 
+                // The calendar is not a place you switch to constantly, so it does not earn one
+                // of the five slots in the bottom bar - but it does have to be reachable from
+                // more than the one link on Home.
+                SettingsRow(
+                    title = "Calendar",
+                    icon = Icons.Outlined.CalendarMonth,
+                    supporting = "Everything with a date on it",
+                    onClick = {
+                        open = false
+                        onCalendar()
+                    }
+                )
+                SettingsRowDivider()
                 SettingsRow(
                     title = "Settings",
                     icon = Icons.Outlined.Settings,

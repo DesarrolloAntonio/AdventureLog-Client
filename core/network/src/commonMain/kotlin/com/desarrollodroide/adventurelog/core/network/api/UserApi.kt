@@ -5,6 +5,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddres
 import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 
 interface UserApi {
     /**
@@ -82,4 +83,10 @@ interface UserApi {
      * Get everything the home screen shows in a single request.
      */
     suspend fun getDashboard(): DashboardDTO
+
+    /**
+     * Every dated entry between [start] and [end], as `YYYY-MM-DD`. Both are optional; without
+     * them the server answers with the whole calendar.
+     */
+    suspend fun getCalendarEvents(start: String? = null, end: String? = null): CalendarEventsDTO
 }

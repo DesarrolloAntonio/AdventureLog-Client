@@ -22,6 +22,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserDetails
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 
 interface AdventureLogNetwork {
 
@@ -228,6 +229,8 @@ interface AdventureLogNetwork {
      * Get everything the home screen shows in a single request.
      */
     suspend fun getDashboard(): DashboardDTO
+
+    suspend fun getCalendarEvents(start: String? = null, end: String? = null): CalendarEventsDTO
 
     /**
      * Visits are a resource of their own - see [com.desarrollodroide.adventurelog.core.network.api.VisitApi].

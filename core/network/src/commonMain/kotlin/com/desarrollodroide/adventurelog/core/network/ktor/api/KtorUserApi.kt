@@ -33,6 +33,8 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
+import io.ktor.client.request.parameter
 
 internal class KtorUserApi(
     private val httpClient: HttpClient,
@@ -321,5 +323,31 @@ internal class KtorUserApi(
         logger.d { "📦 API Response - Dashboard fetched successfully" }
 
         return dashboard
+    }
+
+    override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/calendar/events/"
+
+        logger.d { "🌐 API Request - GET $url (${start ?: "…"} to ${end ?: "…"})" }
+
+        val response = httpClient.get(url) {
+            headers { commonHeaders(session.sessionToken) }
+            start?.let { parameter("start", it) }
+            end?.let { parameter("end", it) }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch the calendar with status: ${response.status}"
+            )
+        }
+
+        val events = json.decodeFromString<CalendarEventsDTO>(response.body<String>())
+
+        logger.d { "📦 API Response - ${events.events.size} calendar events" }
+
+        return events
     }
 }

@@ -54,6 +54,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateTransportatio
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetTransportationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteTransportationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UploadImageUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCalendarEventsUseCase
 
 val domainModule = module {
     factoryOf(::LoginUseCase)
@@ -86,6 +87,7 @@ val domainModule = module {
     factoryOf(::ReverseGeocodeUseCase)
     factoryOf(::GetUserStatsUseCase)
     factoryOf(::GetDashboardUseCase)
+    factoryOf(::GetCalendarEventsUseCase)
     factoryOf(::SyncLocationVisitsUseCase)
     factoryOf(::SyncLocationTrailsUseCase)
     factoryOf(::DuplicateLocationUseCase)

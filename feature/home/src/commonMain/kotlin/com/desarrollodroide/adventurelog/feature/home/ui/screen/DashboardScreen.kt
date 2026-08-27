@@ -44,6 +44,7 @@ import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.datetime.LocalDate
+import androidx.compose.foundation.clickable
 
 @Composable
 fun DashboardScreen(
@@ -51,6 +52,7 @@ fun DashboardScreen(
     homeUiState: HomeUiState,
     onAdventureClick: (Location) -> Unit = { },
     onTripClick: (UltraSlimCollection) -> Unit = { },
+    onSeeCalendar: () -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (homeUiState) {
@@ -67,7 +69,8 @@ fun DashboardScreen(
                 dashboard = homeUiState.dashboard,
                 today = homeUiState.today,
                 onAdventureClick = onAdventureClick,
-                onTripClick = onTripClick
+                onTripClick = onTripClick,
+                onSeeCalendar = onSeeCalendar
             )
         }
     }
@@ -84,6 +87,7 @@ private fun DashboardList(
     today: LocalDate?,
     onAdventureClick: (Location) -> Unit,
     onTripClick: (UltraSlimCollection) -> Unit,
+    onSeeCalendar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // An in-progress trip outranks a future one: if the user is travelling right now, that is the
@@ -107,7 +111,13 @@ private fun DashboardList(
 
         if (dashboard.upcomingEvents.isNotEmpty()) {
             item(key = "events-header") {
-                SectionHeader("Coming up")
+                // Home shows the next few; the calendar has the rest, and this is where anyone
+                // looking at what is coming would think to ask for more of it.
+                SectionHeader(
+                    title = "Coming up",
+                    trailing = "See all",
+                    onTrailingClick = onSeeCalendar
+                )
             }
             items(dashboard.upcomingEvents, key = { "event-${it.id}" }) { event ->
                 EventRow(event, today)
@@ -136,6 +146,7 @@ private fun DashboardList(
 private fun SectionHeader(
     title: String,
     trailing: String? = null,
+    onTrailingClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -152,7 +163,19 @@ private fun SectionHeader(
             Text(
                 text = trailing,
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (onTrailingClick != null) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                modifier = if (onTrailingClick != null) {
+                    Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(onClick = onTrailingClick)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                } else {
+                    Modifier
+                }
             )
         }
     }

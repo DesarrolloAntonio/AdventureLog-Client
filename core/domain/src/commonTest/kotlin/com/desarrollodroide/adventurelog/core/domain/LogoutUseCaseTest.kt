@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 
 class LogoutUseCaseTest {
 
@@ -189,6 +190,10 @@ class LogoutUseCaseTest {
         override suspend fun getDashboard(): DashboardDTO {
             return DashboardDTO()
         }
+
+        override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO =
+            throw NotImplementedError()
+
 
         override suspend fun updateUserProfile(
             username: String?,

@@ -36,6 +36,8 @@ import com.desarrollodroide.adventurelog.core.network.di.networkModule
 import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import com.desarrollodroide.adventurelog.core.data.CalendarRepositoryImpl
+import com.desarrollodroide.adventurelog.core.domain.repository.CalendarRepository
 
 val dataModule = module {
     includes(commonModule, networkModule)
@@ -70,6 +72,10 @@ val dataModule = module {
     single<VisitsRepository> {
         VisitsRepositoryImpl(networkDataSource = get())
     }
+    single<CalendarRepository> {
+        CalendarRepositoryImpl(networkDataSource = get())
+    }
+
     single<DashboardRepository> {
         DashboardRepositoryImpl(networkDataSource = get())
     }

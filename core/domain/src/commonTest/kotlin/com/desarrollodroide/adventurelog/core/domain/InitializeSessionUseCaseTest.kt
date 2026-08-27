@@ -34,6 +34,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 
 class InitializeSessionUseCaseTest {
 
@@ -211,6 +212,10 @@ class InitializeSessionUseCaseTest {
         override suspend fun getDashboard(): DashboardDTO {
             return DashboardDTO()
         }
+
+        override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO =
+            throw NotImplementedError()
+
 
         override suspend fun updateUserProfile(
             username: String?,

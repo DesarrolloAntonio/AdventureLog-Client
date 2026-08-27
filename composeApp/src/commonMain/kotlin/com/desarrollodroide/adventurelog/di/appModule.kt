@@ -6,6 +6,7 @@ import coil3.network.NetworkFetcher
 import coil3.network.ktor3.asNetworkClient
 import com.desarrollodroide.adventurelog.core.data.di.dataModule
 import com.desarrollodroide.adventurelog.feature.locations.di.locationsModule
+import com.desarrollodroide.adventurelog.feature.calendar.di.calendarModule
 import com.desarrollodroide.adventurelog.feature.collections.di.collectionsModule
 import com.desarrollodroide.adventurelog.feature.detail.di.detailModule
 import com.desarrollodroide.adventurelog.feature.home.di.homeModule
@@ -29,6 +30,7 @@ val appModule = module {
         settingsModule,
         detailModule,
         collectionsModule,
+        calendarModule,
         worldModule,
         mapModule,
         imageLoaderModule

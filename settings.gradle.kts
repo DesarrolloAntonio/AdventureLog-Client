@@ -46,6 +46,7 @@ include(":core:permissions")
 
 include(":feature:login")
 include(":feature:locations")
+include(":feature:calendar")
 include(":feature:collections")
 include(":feature:home")
 include(":feature:settings")

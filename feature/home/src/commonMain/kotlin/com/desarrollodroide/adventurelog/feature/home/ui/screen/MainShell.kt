@@ -68,6 +68,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScreen
 
 /**
  * Entry point composable that integrates with navigation
@@ -309,6 +310,7 @@ fun HomeScreenContent(
                                 userName = userName,
                                 serverUrl = userDetails?.serverUrl.orEmpty(),
                                 onSettings = { navigateTo(CurrentScreen.SETTINGS) },
+                                onCalendar = { navigateTo(CurrentScreen.CALENDAR) },
                                 onLogout = onLogout
                             )
                         },
@@ -371,7 +373,8 @@ fun HomeScreenContent(
                                             collectionName = trip.name
                                         )
                                     )
-                                }
+                                },
+                                onSeeCalendar = { navigateTo(CurrentScreen.CALENDAR) }
                             )
                         }
 
@@ -516,24 +519,10 @@ fun HomeScreenContent(
                             }
                         )
 
-                        composable(NavigationRoutes.Calendar.route) {
-                            PlaceholderScreen("Calendar")
-                        }
+                        calendarScreen()
                     }
                 }
             }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(title: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("$title Screen")
     }
 }
 

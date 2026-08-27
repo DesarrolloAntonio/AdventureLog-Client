@@ -92,3 +92,18 @@ fun DashboardDTO.toDomainModel(): Dashboard = Dashboard(
     upcomingEvents = upcomingEvents.map { it.toDomainModel() },
     inviteCount = inviteCount
 )
+
+/**
+ * Response of `GET /api/calendar/events/`.
+ *
+ * The same event shape the dashboard returns - the server builds both from one place - so the
+ * calendar screen reads the model that already exists rather than a parallel one.
+ */
+@Serializable
+data class CalendarEventsDTO(
+    @SerialName("events")
+    val events: List<CalendarEventDTO> = emptyList(),
+
+    @SerialName("count")
+    val count: Int = 0
+)
