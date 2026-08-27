@@ -82,6 +82,9 @@ interface UserApi {
     /**
      * Get everything the home screen shows in a single request.
      */
+    /** Everyone on this server with a public profile, which is everyone who can be invited. */
+    suspend fun getPublicUsers(): List<UserDetailsDTO>
+
     suspend fun getDashboard(): DashboardDTO
 
     /**

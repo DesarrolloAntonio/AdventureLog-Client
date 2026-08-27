@@ -229,11 +229,19 @@ interface AdventureLogNetwork {
     /**
      * Get everything the home screen shows in a single request.
      */
+    suspend fun getPublicUsers(): List<UserDetailsDTO>
+
     suspend fun getDashboard(): DashboardDTO
 
     suspend fun getCalendarEvents(start: String? = null, end: String? = null): CalendarEventsDTO
 
     suspend fun globalSearch(query: String, limit: Int = 20): SearchResultsDTO
+
+    suspend fun shareCollection(collectionId: String, userUuid: String)
+
+    suspend fun unshareCollection(collectionId: String, userUuid: String)
+
+    suspend fun revokeInvite(collectionId: String, userUuid: String)
 
     /**
      * Visits are a resource of their own - see [com.desarrollodroide.adventurelog.core.network.api.VisitApi].

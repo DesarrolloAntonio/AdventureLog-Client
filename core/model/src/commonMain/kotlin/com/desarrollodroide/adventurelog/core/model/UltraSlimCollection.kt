@@ -14,7 +14,10 @@ data class UltraSlimCollection(
     val featuredImage: String?,
     val link: String?,
     val status: TripStatus = TripStatus.FOLDER,
-    val daysUntilStart: Int? = null
+    val daysUntilStart: Int? = null,
+
+    /** The uuids of the people this collection is already shared with. */
+    val sharedWith: List<String> = emptyList()
 )
 
 /**

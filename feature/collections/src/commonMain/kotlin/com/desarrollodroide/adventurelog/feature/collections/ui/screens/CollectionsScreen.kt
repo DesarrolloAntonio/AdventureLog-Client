@@ -85,6 +85,7 @@ import androidx.compose.foundation.background
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.Tune
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ShareCollectionSheet
 
 @Composable
 fun CollectionsScreen(
@@ -104,6 +105,7 @@ fun CollectionsScreen(
     val collectionCount by viewModel.collectionCount.collectAsStateWithLifecycle()
     val statusFilter by viewModel.statusFilter.collectAsStateWithLifecycle()
     val pendingInvites by viewModel.pendingInvites.collectAsStateWithLifecycle()
+    val sharing by viewModel.sharing.collectAsStateWithLifecycle()
     val busyLabel by viewModel.busyLabel.collectAsStateWithLifecycle()
     val tab by viewModel.tab.collectAsStateWithLifecycle()
     val tabContent by viewModel.tabContent.collectAsStateWithLifecycle()
@@ -125,6 +127,18 @@ fun CollectionsScreen(
     }
 
     // Show sort bottom sheet
+    sharing?.let { target ->
+        ShareCollectionSheet(
+            collectionName = target.collectionName,
+            state = target.state,
+            onInvite = viewModel::invite,
+            onRevoke = viewModel::revoke,
+            onUnshare = viewModel::unshare,
+            onRetry = { viewModel.retrySharing() },
+            onDismiss = viewModel::closeSharing
+        )
+    }
+
     if (showSortSheet) {
         CollectionsFilterSheet(
             tab = tab,
@@ -159,6 +173,7 @@ fun CollectionsScreen(
         tabContent = tabContent,
         onRespondToInvite = viewModel::respondToInvite,
         onShareCollection = { viewModel.exportCollection(it, CollectionExport.SHARE_CARD) },
+        onShareWithPeople = viewModel::openSharing,
         onDuplicateCollection = viewModel::duplicateCollection,
         onArchiveCollection = { viewModel.setArchived(it, !it.isArchived) },
         onDownloadPdf = { viewModel.exportCollection(it, CollectionExport.PDF) },
@@ -239,6 +254,7 @@ private fun CollectionsContent(
     tabContent: CollectionsTabContent = CollectionsTabContent(),
     onRespondToInvite: (CollectionInvite, Boolean) -> Unit = { _, _ -> },
     onShareCollection: (UltraSlimCollection) -> Unit = {},
+    onShareWithPeople: (UltraSlimCollection) -> Unit = {},
     onDuplicateCollection: (UltraSlimCollection) -> Unit = {},
     onArchiveCollection: (UltraSlimCollection) -> Unit = {},
     onDownloadPdf: (UltraSlimCollection) -> Unit = {},
@@ -350,6 +366,7 @@ private fun CollectionsContent(
                         onEditCollection = onEditCollection,
                         onDeleteCollection = onDeleteCollection,
                         onShareCollection = onShareCollection,
+                        onShareWithPeople = onShareWithPeople,
                         onDuplicateCollection = onDuplicateCollection,
                         onArchiveCollection = onArchiveCollection,
                         onDownloadPdf = onDownloadPdf,
@@ -366,6 +383,7 @@ private fun CollectionsContent(
                         onEditCollection = onEditCollection,
                         onDeleteCollection = onDeleteCollection,
                         onShareCollection = onShareCollection,
+                        onShareWithPeople = onShareWithPeople,
                         onDuplicateCollection = onDuplicateCollection,
                         onArchiveCollection = onArchiveCollection,
                         onDownloadPdf = onDownloadPdf,
@@ -417,6 +435,7 @@ private fun CollectionsContent(
                                 onEditCollection = onEditCollection,
                                 onDeleteCollection = onDeleteCollection,
                                 onShareCollection = onShareCollection,
+                                onShareWithPeople = onShareWithPeople,
                                 onDuplicateCollection = onDuplicateCollection,
                                 onArchiveCollection = onArchiveCollection,
                                 onDownloadPdf = onDownloadPdf,
@@ -438,6 +457,7 @@ private fun CollectionsPagingList(
     onEditCollection: (UltraSlimCollection) -> Unit,
     onDeleteCollection: (UltraSlimCollection) -> Unit,
     onShareCollection: (UltraSlimCollection) -> Unit = {},
+    onShareWithPeople: (UltraSlimCollection) -> Unit = {},
     onDuplicateCollection: (UltraSlimCollection) -> Unit = {},
     onArchiveCollection: (UltraSlimCollection) -> Unit = {},
     onDownloadPdf: (UltraSlimCollection) -> Unit = {},
@@ -466,6 +486,7 @@ private fun CollectionsPagingList(
                     onEditCollection = { onEditCollection(collection) },
                     onDeleteCollection = { onDeleteCollection(collection) },
                     onShareCollection = { onShareCollection(collection) },
+                    onShareWithPeople = { onShareWithPeople(collection) },
                     onDuplicateCollection = { onDuplicateCollection(collection) },
                     onArchiveCollection = { onArchiveCollection(collection) },
                     onDownloadPdf = { onDownloadPdf(collection) },
@@ -683,6 +704,7 @@ private fun TabContentList(
     onEditCollection: (UltraSlimCollection) -> Unit,
     onDeleteCollection: (UltraSlimCollection) -> Unit,
     onShareCollection: (UltraSlimCollection) -> Unit,
+    onShareWithPeople: (UltraSlimCollection) -> Unit,
     onDuplicateCollection: (UltraSlimCollection) -> Unit,
     onArchiveCollection: (UltraSlimCollection) -> Unit,
     onDownloadPdf: (UltraSlimCollection) -> Unit,
@@ -733,6 +755,7 @@ private fun TabContentList(
                         onEditCollection = { onEditCollection(collection) },
                         onDeleteCollection = { onDeleteCollection(collection) },
                         onShareCollection = { onShareCollection(collection) },
+                    onShareWithPeople = { onShareWithPeople(collection) },
                         onDuplicateCollection = { onDuplicateCollection(collection) },
                         onArchiveCollection = { onArchiveCollection(collection) },
                         onDownloadPdf = { onDownloadPdf(collection) },

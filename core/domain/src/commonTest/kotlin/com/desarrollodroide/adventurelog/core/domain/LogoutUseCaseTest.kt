@@ -198,6 +198,18 @@ class LogoutUseCaseTest {
         override suspend fun globalSearch(query: String, limit: Int): SearchResultsDTO =
             throw NotImplementedError()
 
+        override suspend fun getPublicUsers(): List<UserDetailsDTO> =
+            throw NotImplementedError()
+
+        override suspend fun shareCollection(collectionId: String, userUuid: String) =
+            throw NotImplementedError()
+
+        override suspend fun unshareCollection(collectionId: String, userUuid: String) =
+            throw NotImplementedError()
+
+        override suspend fun revokeInvite(collectionId: String, userUuid: String) =
+            throw NotImplementedError()
+
 
         override suspend fun updateUserProfile(
             username: String?,

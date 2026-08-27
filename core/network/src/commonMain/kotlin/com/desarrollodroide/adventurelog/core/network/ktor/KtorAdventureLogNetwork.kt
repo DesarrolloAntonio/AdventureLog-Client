@@ -416,9 +416,29 @@ class KtorAdventureLogNetwork(
     override suspend fun removeEmailAddress(email: String) =
         userDataSource.removeEmailAddress(email)
 
+    override suspend fun getPublicUsers(): List<UserDetailsDTO> {
+        ensureInitialized()
+        return userDataSource.getPublicUsers()
+    }
+
     override suspend fun getDashboard(): DashboardDTO {
         ensureInitialized()
         return userDataSource.getDashboard()
+    }
+
+    override suspend fun shareCollection(collectionId: String, userUuid: String) {
+        ensureInitialized()
+        collectionDataSource.shareCollection(collectionId, userUuid)
+    }
+
+    override suspend fun unshareCollection(collectionId: String, userUuid: String) {
+        ensureInitialized()
+        collectionDataSource.unshareCollection(collectionId, userUuid)
+    }
+
+    override suspend fun revokeInvite(collectionId: String, userUuid: String) {
+        ensureInitialized()
+        collectionDataSource.revokeInvite(collectionId, userUuid)
     }
 
     override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO {

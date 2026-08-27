@@ -40,6 +40,8 @@ import com.desarrollodroide.adventurelog.core.data.CalendarRepositoryImpl
 import com.desarrollodroide.adventurelog.core.domain.repository.CalendarRepository
 import com.desarrollodroide.adventurelog.core.data.SearchRepositoryImpl
 import com.desarrollodroide.adventurelog.core.domain.repository.SearchRepository
+import com.desarrollodroide.adventurelog.core.data.SharingRepositoryImpl
+import com.desarrollodroide.adventurelog.core.domain.repository.SharingRepository
 
 val dataModule = module {
     includes(commonModule, networkModule)
@@ -74,6 +76,13 @@ val dataModule = module {
     single<VisitsRepository> {
         VisitsRepositoryImpl(networkDataSource = get())
     }
+    single<SharingRepository> {
+        SharingRepositoryImpl(
+            networkDataSource = get(),
+            ioDispatcher = get(named(AdventureLogDispatchers.IO))
+        )
+    }
+
     single<SearchRepository> {
         SearchRepositoryImpl(networkDataSource = get())
     }

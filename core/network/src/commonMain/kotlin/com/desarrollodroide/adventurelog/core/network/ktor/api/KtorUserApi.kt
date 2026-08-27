@@ -299,6 +299,26 @@ internal class KtorUserApi(
         return statsDTO
     }
 
+    override suspend fun getPublicUsers(): List<UserDetailsDTO> {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/auth/users/"
+
+        logger.d { "🌐 API Request - GET $url" }
+
+        val response = httpClient.get(url) {
+            headers { commonHeaders(session.sessionToken) }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to fetch public users with status: ${response.status}"
+            )
+        }
+
+        return json.decodeFromString<List<UserDetailsDTO>>(response.body<String>())
+    }
+
     override suspend fun getDashboard(): DashboardDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/stats/dashboard/"

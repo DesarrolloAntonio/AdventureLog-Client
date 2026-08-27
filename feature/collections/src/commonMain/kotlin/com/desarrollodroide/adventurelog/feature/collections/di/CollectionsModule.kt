@@ -24,7 +24,8 @@ val collectionsModule = module {
             getArchivedCollectionsUseCase = get(),
             getSharedCollectionsUseCase = get(),
             getCollectionInvitesUseCase = get(),
-            respondToCollectionInviteUseCase = get()
+            respondToCollectionInviteUseCase = get(),
+            sharingRepository = get()
         )
     }
 

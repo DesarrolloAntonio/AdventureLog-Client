@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FolderZip
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PictureAsPdf
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Unarchive
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,6 +60,7 @@ fun CollectionActionsSheet(
     onOpen: () -> Unit,
     onEdit: () -> Unit,
     onShare: () -> Unit,
+    onShareWithPeople: () -> Unit,
     onArchive: () -> Unit,
     onDownloadPdf: () -> Unit,
     onExportZip: () -> Unit,
@@ -89,6 +91,7 @@ fun CollectionActionsSheet(
 
             ActionRow(Icons.Outlined.Info, "Open collection", onOpen)
             ActionRow(Icons.Outlined.Edit, "Edit collection", onEdit)
+            ActionRow(Icons.Outlined.PersonAdd, "Share with people", onShareWithPeople)
             ActionRow(Icons.Outlined.Share, "Share externally", onShare)
             ActionRow(Icons.Outlined.ContentCopy, "Duplicate", onDuplicate)
             ActionRow(Icons.Outlined.PictureAsPdf, "Download PDF", onDownloadPdf)

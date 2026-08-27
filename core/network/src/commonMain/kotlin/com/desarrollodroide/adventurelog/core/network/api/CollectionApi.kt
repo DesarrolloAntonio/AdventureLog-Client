@@ -79,6 +79,18 @@ interface CollectionApi {
     suspend fun acceptInvite(collectionId: String)
 
     suspend fun declineInvite(collectionId: String)
+
+    /**
+     * Invite someone to a collection by their uuid. The server creates an invitation rather than
+     * sharing outright, and refuses anyone whose profile is not public.
+     */
+    suspend fun shareCollection(collectionId: String, userUuid: String)
+
+    /** Take away access somebody already has. */
+    suspend fun unshareCollection(collectionId: String, userUuid: String)
+
+    /** Withdraw an invitation that has not been answered. */
+    suspend fun revokeInvite(collectionId: String, userUuid: String)
     
     
 }

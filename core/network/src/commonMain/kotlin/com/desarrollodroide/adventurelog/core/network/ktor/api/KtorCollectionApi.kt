@@ -27,6 +27,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 
 internal class KtorCollectionApi(
     private val httpClient: HttpClient,
@@ -357,6 +360,45 @@ internal class KtorCollectionApi(
     override suspend fun acceptInvite(collectionId: String) = respondToInvite(collectionId, true)
 
     override suspend fun declineInvite(collectionId: String) = respondToInvite(collectionId, false)
+
+    override suspend fun shareCollection(collectionId: String, userUuid: String) =
+        post("$collectionId/share/$userUuid", "share the collection")
+
+    override suspend fun unshareCollection(collectionId: String, userUuid: String) =
+        post("$collectionId/unshare/$userUuid", "stop sharing the collection")
+
+    override suspend fun revokeInvite(collectionId: String, userUuid: String) =
+        post("$collectionId/revoke-invite/$userUuid", "revoke the invitation")
+
+    /**
+     * The server answers these with its own message - "Invite already sent to this user", "Cannot
+     * share with yourself" - which is more use than anything this layer could invent, so it is
+     * carried out rather than replaced.
+     */
+    private suspend fun post(path: String, what: String) {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/collections/$path/"
+
+        logger.d { "🌐 API Request - POST $url" }
+
+        val response = httpClient.post(url) {
+            contentType(ContentType.Application.Json)
+            headers { commonHeaders(session.sessionToken) }
+            setBody("{}")
+        }
+
+        if (!response.status.isSuccess()) {
+            val body = try { response.body<String>() } catch (_: Exception) { "" }
+            throw HttpException(response.status.value, serverError(body) ?: "Could not $what.")
+        }
+    }
+
+    /** The `{"error": "..."}` these endpoints answer with, when they answer with one. */
+    private fun serverError(body: String): String? = try {
+        json.parseToJsonElement(body).jsonObject["error"]?.jsonPrimitive?.contentOrNull
+    } catch (_: Exception) {
+        null
+    }
 
     private suspend fun respondToInvite(collectionId: String, accept: Boolean) {
         val session = sessionProvider()

@@ -42,7 +42,11 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.desarrollodroide.adventurelog.core.domain.repository.SharingRepository
+import com.desarrollodroide.adventurelog.core.model.PublicUser
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ShareSheetState
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class CollectionsViewModel(
@@ -57,7 +61,8 @@ class CollectionsViewModel(
     private val getArchivedCollectionsUseCase: GetArchivedCollectionsUseCase,
     private val getSharedCollectionsUseCase: GetSharedCollectionsUseCase,
     private val getCollectionInvitesUseCase: GetCollectionInvitesUseCase,
-    private val respondToCollectionInviteUseCase: RespondToCollectionInviteUseCase
+    private val respondToCollectionInviteUseCase: RespondToCollectionInviteUseCase,
+    private val sharingRepository: SharingRepository
 ) : ViewModel() {
 
     private val _tab = MutableStateFlow(CollectionsTab.MINE)
@@ -104,6 +109,10 @@ class CollectionsViewModel(
      */
     private val _pendingInvites = MutableStateFlow<List<CollectionInvite>>(emptyList())
     val pendingInvites: StateFlow<List<CollectionInvite>> = _pendingInvites.asStateFlow()
+
+    /** The collection whose sharing is open, and what is known about who can see it. */
+    private val _sharing = MutableStateFlow<SharingTarget?>(null)
+    val sharing: StateFlow<SharingTarget?> = _sharing.asStateFlow()
 
     private val _showSortSheet = MutableStateFlow(false)
     val showSortSheet: StateFlow<Boolean> = _showSortSheet.asStateFlow()
@@ -281,6 +290,110 @@ class CollectionsViewModel(
         }
     }
 
+    fun openSharing(collection: UltraSlimCollection) {
+        _sharing.value = SharingTarget(
+            collectionId = collection.id,
+            collectionName = collection.name,
+            state = ShareSheetState(sharedWith = collection.sharedWith.toSet())
+        )
+        viewModelScope.launch {
+            val result = sharingRepository.getPublicUsers()
+            _sharing.update { target ->
+                target?.copy(
+                    state = when (result) {
+                        is Either.Left -> target.state.copy(isLoading = false, error = result.value)
+                        is Either.Right -> target.state.copy(
+                            isLoading = false,
+                            people = result.value,
+                            error = null
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    /** Ask again for the list of people, keeping the collection the sheet is already open for. */
+    fun retrySharing() {
+        val target = _sharing.value ?: return
+        _sharing.update { it?.copy(state = it.state.copy(isLoading = true, error = null)) }
+        viewModelScope.launch {
+            val result = sharingRepository.getPublicUsers()
+            _sharing.update { current ->
+                current?.copy(
+                    state = when (result) {
+                        is Either.Left -> current.state.copy(isLoading = false, error = result.value)
+                        is Either.Right -> current.state.copy(
+                            isLoading = false,
+                            people = result.value,
+                            error = null
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    fun closeSharing() {
+        _sharing.value = null
+    }
+
+    fun invite(person: PublicUser) = sharingAction(person) { target ->
+        sharingRepository.share(target.collectionId, person.uuid).also { result ->
+            if (result is Either.Right) {
+                _sharing.update {
+                    it?.copy(
+                        state = it.state.copy(
+                            invitedThisVisit = it.state.invitedThisVisit + person.uuid
+                        )
+                    )
+                }
+                _actionMessage.value = "Invitation sent to @${person.username}"
+            }
+        }
+    }
+
+    fun revoke(person: PublicUser) = sharingAction(person) { target ->
+        sharingRepository.revokeInvite(target.collectionId, person.uuid).also { result ->
+            if (result is Either.Right) {
+                _sharing.update {
+                    it?.copy(
+                        state = it.state.copy(
+                            invitedThisVisit = it.state.invitedThisVisit - person.uuid
+                        )
+                    )
+                }
+                _actionMessage.value = "Invitation to @${person.username} withdrawn"
+            }
+        }
+    }
+
+    fun unshare(person: PublicUser) = sharingAction(person) { target ->
+        sharingRepository.unshare(target.collectionId, person.uuid).also { result ->
+            if (result is Either.Right) {
+                _sharing.update {
+                    it?.copy(state = it.state.copy(sharedWith = it.state.sharedWith - person.uuid))
+                }
+                _actionMessage.value = "@${person.username} no longer has access"
+                refresh()
+            }
+        }
+    }
+
+    private fun sharingAction(
+        person: PublicUser,
+        block: suspend (SharingTarget) -> Either<String, Unit>
+    ) {
+        val target = _sharing.value ?: return
+        if (target.state.busyUuid != null) return
+        _sharing.update { it?.copy(state = it.state.copy(busyUuid = person.uuid)) }
+        viewModelScope.launch {
+            val result = block(target)
+            _sharing.update { it?.copy(state = it.state.copy(busyUuid = null)) }
+            if (result is Either.Left) _actionMessage.value = result.value
+        }
+    }
+
     fun onStatusFilterChanged(status: TripStatus?) {
         _statusFilter.value = status
     }
@@ -351,3 +464,10 @@ class CollectionsViewModel(
         _deleteState.value = DeleteState.Idle
     }
 }
+
+/** The collection a share sheet is open for. */
+data class SharingTarget(
+    val collectionId: String,
+    val collectionName: String,
+    val state: ShareSheetState
+)
