@@ -96,6 +96,15 @@ class CollectionsViewModel(
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    /**
+     * Invitations, fetched on entry rather than when a tab is opened.
+     *
+     * There is no tab any more: an invitation only announces itself when one exists, and the
+     * screen cannot know whether one exists without asking.
+     */
+    private val _pendingInvites = MutableStateFlow<List<CollectionInvite>>(emptyList())
+    val pendingInvites: StateFlow<List<CollectionInvite>> = _pendingInvites.asStateFlow()
+
     private val _showSortSheet = MutableStateFlow(false)
     val showSortSheet: StateFlow<Boolean> = _showSortSheet.asStateFlow()
 
@@ -138,6 +147,14 @@ class CollectionsViewModel(
             if (observeCollectionsUseCase().value.isEmpty()) {
                 getAllCollectionsUseCase(forceRefresh = false)
             }
+        }
+        loadPendingInvites()
+    }
+
+    private fun loadPendingInvites() {
+        viewModelScope.launch {
+            val result = getCollectionInvitesUseCase()
+            if (result is Either.Right) _pendingInvites.value = result.value
         }
     }
 
@@ -237,8 +254,10 @@ class CollectionsViewModel(
                 CollectionsTab.INVITES -> when (val r = getCollectionInvitesUseCase()) {
                     is Either.Left -> _tabContent.value =
                         CollectionsTabContent(error = r.value)
-                    is Either.Right -> _tabContent.value =
-                        CollectionsTabContent(invites = r.value)
+                    is Either.Right -> {
+                        _tabContent.value = CollectionsTabContent(invites = r.value)
+                        _pendingInvites.value = r.value
+                    }
                 }
             }
         }
@@ -249,7 +268,8 @@ class CollectionsViewModel(
             when (val r = respondToCollectionInviteUseCase(invite.collectionId, accept)) {
                 is Either.Left -> r.value
                 is Either.Right -> {
-                    loadTab(CollectionsTab.INVITES)
+                    loadPendingInvites()
+                    if (_tab.value == CollectionsTab.INVITES) loadTab(CollectionsTab.INVITES)
                     refresh()
                     if (accept) {
                         "Joined \"${invite.collectionName}\""
@@ -282,10 +302,27 @@ class CollectionsViewModel(
         _showSortSheet.value = false
     }
 
-    fun hasActiveSorting(): Boolean {
+    /**
+     * How many of the list's settings differ from the defaults, for the filter button's badge.
+     * With no controls left on the screen this number is the only thing saying the list has been
+     * narrowed at all.
+     */
+    fun activeFilterCount(): Int {
         val options = _sortOptions.value
-        return options.sortField != CollectionSortField.UPDATED_AT || 
-               options.sortDirection != SortDirection.DESCENDING
+        var count = 0
+        if (_tab.value != CollectionsTab.MINE) count++
+        if (_statusFilter.value != null) count++
+        if (options.sortField != CollectionSortField.UPDATED_AT ||
+            options.sortDirection != SortDirection.DESCENDING
+        ) count++
+        return count
+    }
+
+    /** Back to the default view: my own collections, every status, newest first. */
+    fun resetFilters() {
+        _tab.value = CollectionsTab.MINE
+        _statusFilter.value = null
+        _sortOptions.value = CollectionSortOptions()
     }
 
     fun refresh() {

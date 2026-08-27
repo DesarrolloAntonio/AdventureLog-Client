@@ -67,16 +67,24 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.SlimCollectionItem
-import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsSortBottomSheet
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsFilterSheet
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.SearchBarAction
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
-import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedTabs
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.StatusOptions
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.MarkEmailUnread
+import androidx.compose.material.icons.filled.Tune
 
 @Composable
 fun CollectionsScreen(
@@ -95,6 +103,7 @@ fun CollectionsScreen(
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
     val collectionCount by viewModel.collectionCount.collectAsStateWithLifecycle()
     val statusFilter by viewModel.statusFilter.collectAsStateWithLifecycle()
+    val pendingInvites by viewModel.pendingInvites.collectAsStateWithLifecycle()
     val busyLabel by viewModel.busyLabel.collectAsStateWithLifecycle()
     val tab by viewModel.tab.collectAsStateWithLifecycle()
     val tabContent by viewModel.tabContent.collectAsStateWithLifecycle()
@@ -117,9 +126,14 @@ fun CollectionsScreen(
 
     // Show sort bottom sheet
     if (showSortSheet) {
-        CollectionsSortBottomSheet(
+        CollectionsFilterSheet(
+            tab = tab,
+            onTabSelected = viewModel::onTabSelected,
+            statusFilter = statusFilter,
+            onStatusFilterChanged = viewModel::onStatusFilterChanged,
             sortOptions = sortOptions,
             onSortOptionsChanged = viewModel::onSortOptionsChanged,
+            onReset = viewModel::resetFilters,
             onDismiss = viewModel::hideSortSheet
         )
     }
@@ -127,7 +141,7 @@ fun CollectionsScreen(
     CollectionsContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
-        hasActiveSorting = viewModel.hasActiveSorting(),
+        activeFilterCount = viewModel.activeFilterCount(),
         isRefreshing = isRefreshing,
         snackbarHostState = snackbarHostState,
         onCollectionClick = onCollectionClick,
@@ -151,6 +165,7 @@ fun CollectionsScreen(
         onExportZip = { viewModel.exportCollection(it, CollectionExport.ZIP) },
         busyLabel = busyLabel,
         collectionCount = collectionCount,
+        pendingInvites = pendingInvites,
         statusFilter = statusFilter,
         onStatusFilterChanged = viewModel::onStatusFilterChanged,
         modifier = modifier
@@ -209,7 +224,7 @@ fun CollectionsScreen(
 private fun CollectionsContent(
     pagingItems: LazyPagingItems<UltraSlimCollection>,
     searchQuery: String,
-    hasActiveSorting: Boolean,
+    activeFilterCount: Int,
     isRefreshing: Boolean,
     snackbarHostState: SnackbarHostState,
     onCollectionClick: (String, String) -> Unit,
@@ -230,6 +245,7 @@ private fun CollectionsContent(
     onExportZip: (UltraSlimCollection) -> Unit = {},
     busyLabel: String? = null,
     collectionCount: Int = 0,
+    pendingInvites: List<CollectionInvite> = emptyList(),
     statusFilter: TripStatus? = null,
     onStatusFilterChanged: (TripStatus?) -> Unit = {},
     modifier: Modifier = Modifier
@@ -240,15 +256,23 @@ private fun CollectionsContent(
         modifier = modifier,
         topBar = {
           Column {
-            if (collectionCount > 0) {
-                Text(
-                    text = "$collectionCount " +
-                        if (collectionCount == 1) "collection" else "collections",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 20.dp, top = 4.dp)
-                )
+            // The count follows what is on screen. It used to report the whole library even on
+            // the archive, where nothing was.
+            val shownCount = if (tab == CollectionsTab.MINE) {
+                collectionCount
+            } else {
+                tabContent.collections.size
             }
+            Text(
+                text = buildString {
+                    append(shownCount)
+                    append(if (shownCount == 1) " collection" else " collections")
+                    if (tab != CollectionsTab.MINE) append(" · ${tab.label}")
+                },
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 20.dp, top = 4.dp)
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -263,21 +287,27 @@ private fun CollectionsContent(
                 )
                 Spacer(Modifier.width(10.dp))
                 SearchBarAction(
-                    icon = Icons.AutoMirrored.Filled.Sort,
-                    contentDescription = "Sorting",
-                    active = hasActiveSorting,
+                    icon = Icons.Default.Tune,
+                    contentDescription = "Filter and sort",
+                    active = activeFilterCount > 0,
+                    badgeCount = activeFilterCount,
                     onClick = onShowSort
                 )
             }
 
-            CollectionsTabRow(selected = tab, onSelect = onTabSelected)
+            // Nothing above the list unless something is actually narrowing it. Each chip says
+            // what is on and takes it off again.
+            ActiveFilters(
+                tab = tab,
+                statusFilter = statusFilter,
+                onClearTab = { onTabSelected(CollectionsTab.MINE) },
+                onClearStatus = { onStatusFilterChanged(null) }
+            )
 
-            // The status filter only means anything for the paged list of the user's own
-            // collections; the other tabs are short, whole lists.
-            if (tab == CollectionsTab.MINE) {
-                StatusFilterRow(
-                    selected = statusFilter,
-                    onSelect = onStatusFilterChanged
+            if (pendingInvites.isNotEmpty() && tab != CollectionsTab.INVITES) {
+                InvitesBanner(
+                    count = pendingInvites.size,
+                    onClick = { onTabSelected(CollectionsTab.INVITES) }
                 )
             }
           }
@@ -566,51 +596,81 @@ private fun NoSearchResultsState(searchQuery: String, statusFilter: TripStatus? 
 }
 
 /**
- * The status filter the web keeps in its sidebar. A phone has no sidebar, so it sits under the
- * search field as a scrolling row of chips.
+ * The filters that are on, and nothing when none are.
+ *
+ * A control that is always on screen costs its space whether or not it is doing anything. A chip
+ * that appears only while a filter is applied costs nothing at rest and says more when it is
+ * there - including how to undo it.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun StatusFilterRow(
-    selected: TripStatus?,
-    onSelect: (TripStatus?) -> Unit,
+private fun ActiveFilters(
+    tab: CollectionsTab,
+    statusFilter: TripStatus?,
+    onClearTab: () -> Unit,
+    onClearStatus: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val options = listOf(
-        null to "All",
-        TripStatus.FOLDER to "📁 Folder",
-        TripStatus.UPCOMING to "🚀 Upcoming",
-        TripStatus.IN_PROGRESS to "🎯 In progress",
-        TripStatus.COMPLETED to "✓ Completed"
-    )
+    if (tab == CollectionsTab.MINE && statusFilter == null) return
 
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    FlowRow(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(options) { (status, label) ->
-            MetaChip(
-                text = label,
-                tone = if (selected == status) ChipTone.ACCENT else ChipTone.NEUTRAL,
-                onClick = { onSelect(status) }
-            )
+        if (tab != CollectionsTab.MINE) {
+            MetaChip(text = tab.label, tone = ChipTone.ACCENT, onRemove = onClearTab)
+        }
+        statusFilter?.let { status ->
+            val label = StatusOptions.firstOrNull { it.first == status }?.second ?: status.name
+            MetaChip(text = label, tone = ChipTone.ACCENT, onRemove = onClearStatus)
         }
     }
 }
 
+/**
+ * An invitation announces itself. It used to sit behind a tab that was empty for everyone who had
+ * not been invited to anything, which is nearly always.
+ */
 @Composable
-private fun CollectionsTabRow(
-    selected: CollectionsTab,
-    onSelect: (CollectionsTab) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    SegmentedTabs(
-        options = CollectionsTab.entries.map { it.label },
-        selectedIndex = CollectionsTab.entries.indexOf(selected),
-        onSelect = { onSelect(CollectionsTab.entries[it]) },
-        modifier = modifier.padding(horizontal = 16.dp)
-    )
+private fun InvitesBanner(count: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.MarkEmailUnread,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.size(22.dp)
+        )
+        Spacer(Modifier.width(14.dp))
+        Text(
+            text = if (count == 1) {
+                "You have an invitation to a collection"
+            } else {
+                "You have $count invitations to collections"
+            },
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.size(20.dp)
+        )
+    }
 }
 
 /** Whole-list tabs: the archive, what others have shared, and pending invitations. */
