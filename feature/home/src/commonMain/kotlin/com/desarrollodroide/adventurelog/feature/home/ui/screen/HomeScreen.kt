@@ -216,17 +216,20 @@ fun HomeScreenContent(
             contentScale = ContentScale.Crop
         )
 
-        // The backdrop is a daylight photograph and stays one whatever the theme does. In the dark
-        // theme that left white text sitting on a white mountainside, so the photograph is dimmed
-        // to meet it. The light theme keeps the picture exactly as it was.
-        val backgroundColor = MaterialTheme.colorScheme.background
-        if (backgroundColor.luminance() < 0.5f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor.copy(alpha = 0.82f))
-            )
+        // The photograph is a snowfield, and a snowfield is the same white as the cards standing
+        // on it - so the two kept dissolving into each other. A wash in one of the theme's own
+        // tones pushes the whole picture off white and holds it there, which leaves the cards as
+        // the only white on the screen and gives the palette something to agree with.
+        //
+        // Dark needs the same treatment for the opposite reason: the photograph stays daylight
+        // whatever the theme does, and white text on a bright mountainside is unreadable.
+        val scheme = MaterialTheme.colorScheme
+        val wash = if (scheme.background.luminance() < 0.5f) {
+            scheme.background.copy(alpha = 0.82f)
+        } else {
+            scheme.surfaceVariant.copy(alpha = 0.38f)
         }
+        Box(modifier = Modifier.fillMaxSize().background(wash))
 
             Scaffold(
                 modifier = Modifier
