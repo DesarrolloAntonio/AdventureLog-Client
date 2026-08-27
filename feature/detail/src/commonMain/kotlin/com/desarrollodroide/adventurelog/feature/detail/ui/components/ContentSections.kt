@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.desarrollodroide.adventurelog.feature.ui.components.MarkdownText
 
 /**
  * The description, as the user wrote it.
@@ -37,8 +38,8 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun AboutBody(description: String, modifier: Modifier = Modifier) {
-    Text(
-        text = description,
+    MarkdownText(
+        markdown = description,
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurface,
         modifier = modifier

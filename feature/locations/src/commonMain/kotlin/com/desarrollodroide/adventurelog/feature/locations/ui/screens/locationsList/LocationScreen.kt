@@ -152,7 +152,7 @@ fun LocationListScreen(
         when (val state = deleteState) {
             is LocationsViewModel.DeleteState.Success -> {
                 pagingItems.refresh()
-                snackbarHostState.showSnackbar("Location deleted successfully")
+                snackbarHostState.showSnackbar("Place deleted")
                 viewModel.clearDeleteState()
             }
 
@@ -251,7 +251,7 @@ private fun AdventureListContent(
                 Text(
                     text = buildString {
                         append(counts.locationCount)
-                        append(if (counts.locationCount == 1) " location" else " locations")
+                        append(if (counts.locationCount == 1) " place" else " places")
                         if (counts.visitedLocationCount > 0) {
                             append(" · ")
                             append(counts.visitedLocationCount)
@@ -274,7 +274,7 @@ private fun AdventureListContent(
                     onSearchQueryChange = onSearchQueryChange,
                     onSearchSubmit = onSearchSubmit,
                     appliedQuery = actualSearchQuery,
-                    placeholder = "Search locations",
+                    placeholder = "Search places",
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(10.dp))
@@ -296,7 +296,7 @@ private fun AdventureListContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add location"
+                    contentDescription = "Add a place"
                 )
             }
         },

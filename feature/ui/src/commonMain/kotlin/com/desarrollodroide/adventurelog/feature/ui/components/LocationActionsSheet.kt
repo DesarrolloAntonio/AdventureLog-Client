@@ -73,7 +73,7 @@ fun LocationActionsSheet(
             )
 
             ActionRow(Icons.Outlined.Info, "Open details", onOpenDetails)
-            ActionRow(Icons.Outlined.Edit, "Edit location", onEdit)
+            ActionRow(Icons.Outlined.Edit, "Edit place", onEdit)
             ActionRow(Icons.Outlined.ContentCopy, "Duplicate", onDuplicate)
             ActionRow(Icons.Outlined.Share, "Share externally", onShare)
             ActionRow(Icons.Outlined.FolderOpen, "Manage collections", onManageCollections)

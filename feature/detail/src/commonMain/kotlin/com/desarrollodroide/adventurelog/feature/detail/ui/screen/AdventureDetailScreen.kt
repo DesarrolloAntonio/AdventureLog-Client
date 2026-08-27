@@ -164,7 +164,9 @@ fun AdventureDetailScreen(
                 CategoryTags(
                     category = location.category,
                     isPublic = location.isPublic,
-                    tags = location.tags.userTags()
+                    tags = location.tags.userTags(),
+                    isVisited = location.isVisited,
+                    visitCount = location.visits.size
                 )
             }
 

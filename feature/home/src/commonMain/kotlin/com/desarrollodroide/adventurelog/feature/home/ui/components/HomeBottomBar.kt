@@ -62,7 +62,7 @@ private enum class Destination(
     val selectedIcon: ImageVector
 ) {
     HOME(CurrentScreen.HOME, "Home", Icons.Outlined.Home, Icons.Filled.Home),
-    LOCATIONS(CurrentScreen.ADVENTURES, "Places", Icons.Outlined.Explore, Icons.Filled.Explore),
+    PLACES(CurrentScreen.PLACES, "Places", Icons.Outlined.Explore, Icons.Filled.Explore),
     COLLECTIONS(
         CurrentScreen.COLLECTIONS,
         "Collections",

@@ -161,6 +161,8 @@ fun CategoryTags(
     category: Category?,
     isPublic: Boolean,
     tags: List<String> = emptyList(),
+    isVisited: Boolean = false,
+    visitCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
     FlowRow(
@@ -173,6 +175,17 @@ fun CategoryTags(
         }
         if (!isPublic) {
             MetaChip(text = "🔒 Private", tone = ChipTone.WARNING)
+        }
+        // Both of these are on the web's header and were missing here: whether the place has been
+        // visited at all, and how many times.
+        if (isVisited) {
+            MetaChip(text = "✅ Visited", tone = ChipTone.POSITIVE)
+        }
+        if (visitCount > 0) {
+            MetaChip(
+                text = if (visitCount == 1) "🎯 1 visit" else "🎯 $visitCount visits",
+                tone = ChipTone.NEUTRAL
+            )
         }
         tags.forEach { tag ->
             MetaChip(text = tag, tone = ChipTone.NEUTRAL)

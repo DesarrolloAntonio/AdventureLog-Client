@@ -269,7 +269,7 @@ fun AdventureItem(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Location") },
+            title = { Text("Delete place") },
             text = { Text("Are you sure you want to delete \"${location.name}\"? This action cannot be undone.") },
             confirmButton = {
                 TextButton(
