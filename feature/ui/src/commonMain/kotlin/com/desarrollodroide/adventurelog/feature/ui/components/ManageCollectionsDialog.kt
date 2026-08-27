@@ -514,8 +514,8 @@ private fun CollectionSelectionItem(
                     
                     if (collection.adventureCount > 0) {
                         Text(
-                            "${collection.adventureCount} adventure${if (collection.adventureCount != 1) "s" else ""}",
-                            style = MaterialTheme.typography.labelSmall,
+                            "${collection.adventureCount} place${if (collection.adventureCount != 1) "s" else ""}",
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     }
