@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.desarrollodroide.adventurelog.core.model.userTags
 
 class MapViewModel(
     private val getAllLocationsUseCase: GetAllLocationsUseCase,
@@ -153,7 +154,7 @@ class MapViewModel(
 
                     // Get unique activity types for filters
                     val activityTypes = adventuresWithLocation
-                        .flatMap { it.tags }
+                        .flatMap { it.tags.userTags() }
                         .distinct()
                         .sorted()
                     

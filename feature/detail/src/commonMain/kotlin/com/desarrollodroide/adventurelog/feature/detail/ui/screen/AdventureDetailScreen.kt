@@ -30,6 +30,7 @@ import com.desarrollodroide.adventurelog.feature.detail.ui.components.*
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetailViewModel
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.LocationState
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.core.model.userTags
 
 @Composable
 fun AdventureDetailScreenRoute(
@@ -165,7 +166,7 @@ fun AdventureDetailScreen(
                     CategoryTags(
                         category = location.category,
                         isPublic = location.isPublic,
-                        tags = location.tags
+                        tags = location.tags.userTags()
                     )
 
                     // Collections section

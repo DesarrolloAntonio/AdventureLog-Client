@@ -302,7 +302,10 @@ private fun AdventureListContent(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color.Transparent,
-        contentWindowInsets = WindowInsets.systemBars
+        // The bottom bar's Scaffold has already inset this content, but plain padding does not
+        // consume a window inset - so asking for systemBars here counted the gesture bar a second
+        // time and floated the button a finger's width clear of where it belongs.
+        contentWindowInsets = WindowInsets(0)
     ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,

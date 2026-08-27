@@ -32,6 +32,7 @@ import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
+import com.desarrollodroide.adventurelog.core.model.userTags
 
 @Composable
 fun AdventureItem(
@@ -164,8 +165,9 @@ fun AdventureItem(
                     }
                 }
 
+                val tags = location.tags.userTags()
                 if (location.category != null || !location.isPublic ||
-                    location.collections.isNotEmpty() || location.tags.isNotEmpty()
+                    location.collections.isNotEmpty() || tags.isNotEmpty()
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -220,7 +222,7 @@ fun AdventureItem(
 
                         // The user's own tags, capped so a heavily tagged place does not push the
                         // title off the card.
-                        val visibleTags = location.tags.take(3)
+                        val visibleTags = tags.take(3)
                         visibleTags.forEach { tag ->
                             TagChip(
                                 text = tag,
@@ -228,7 +230,7 @@ fun AdventureItem(
                                 contentColor = Color.White
                             )
                         }
-                        val hiddenTags = location.tags.size - visibleTags.size
+                        val hiddenTags = tags.size - visibleTags.size
                         if (hiddenTags > 0) {
                             TagChip(
                                 text = "+$hiddenTags",
