@@ -13,6 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsSwitchRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRowDivider
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
 
 /**
  * The two settings on this screen the server knows nothing about. They stay on the phone, and the

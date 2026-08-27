@@ -34,6 +34,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.EmailAddress
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.EmailsSectionState
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRowDivider
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
 
 /**
  * Everything that decides how you get back into the account: the password, and the addresses the

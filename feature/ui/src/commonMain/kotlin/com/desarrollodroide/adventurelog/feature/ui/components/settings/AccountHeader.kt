@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.settings.ui.components
+package com.desarrollodroide.adventurelog.feature.ui.components.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,8 +46,10 @@ fun AccountHeader(
     user: UserDetails?,
     primaryEmail: String?,
     serverUrl: String,
-    onEdit: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    actionIcon: ImageVector = Icons.Outlined.Edit,
+    actionDescription: String = "Edit your name and username"
 ) {
     val displayName = listOfNotNull(
         user?.firstName?.takeIf { it.isNotBlank() },
@@ -59,7 +62,7 @@ fun AccountHeader(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = modifier.fillMaxWidth().clickable(onClick = onEdit)
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(20.dp),
@@ -101,8 +104,8 @@ fun AccountHeader(
             }
             Spacer(Modifier.width(8.dp))
             Icon(
-                imageVector = Icons.Outlined.Edit,
-                contentDescription = "Edit your name and username",
+                imageVector = actionIcon,
+                contentDescription = actionDescription,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                 modifier = Modifier.size(24.dp)
             )

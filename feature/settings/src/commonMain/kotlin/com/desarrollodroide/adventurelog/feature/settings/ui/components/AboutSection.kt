@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRowDivider
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
 
 /**
  * Where this account lives and what build is talking to it - the first questions anyone asks when

@@ -41,12 +41,10 @@ import com.desarrollodroide.adventurelog.core.constants.ThemeMode
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformActionsProvider
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.AboutSection
-import com.desarrollodroide.adventurelog.feature.settings.ui.components.AccountHeader
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.AppearanceGroup
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.EditProfileDialog
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.PreferencesGroup
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.PrivacyPolicyScreen
-import com.desarrollodroide.adventurelog.feature.settings.ui.components.SettingsRow
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.SignInGroup
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.StorageSection
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.TermsOfUseScreen
@@ -58,6 +56,8 @@ import com.desarrollodroide.adventurelog.feature.settings.viewmodel.StorageSecti
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.AccountHeader
 
 @Composable
 fun SettingsScreen(
@@ -146,7 +146,7 @@ fun SettingsContent(
                     user = user,
                     primaryEmail = primaryEmail,
                     serverUrl = serverUrl,
-                    onEdit = { editProfileOpen = true }
+                    onClick = { editProfileOpen = true }
                 )
             }
             item {

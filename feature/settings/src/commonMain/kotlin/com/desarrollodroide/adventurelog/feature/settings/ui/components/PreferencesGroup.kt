@@ -16,6 +16,10 @@ import com.desarrollodroide.adventurelog.core.model.Currencies
 import com.desarrollodroide.adventurelog.core.model.MapStyles
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.ProfileForm
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.ProfileSectionState
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsSwitchRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRowDivider
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
 
 private const val METRIC = "metric"
 private const val IMPERIAL = "imperial"

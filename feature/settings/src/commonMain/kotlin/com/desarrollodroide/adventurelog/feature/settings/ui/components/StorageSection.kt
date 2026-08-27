@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.MediaUsage
 import com.desarrollodroide.adventurelog.core.model.formatBytes
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.StorageSectionState
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
 
 @Composable
 fun StorageSection(

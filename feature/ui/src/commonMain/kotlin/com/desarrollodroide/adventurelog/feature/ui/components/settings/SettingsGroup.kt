@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.settings.ui.components
+package com.desarrollodroide.adventurelog.feature.ui.components.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

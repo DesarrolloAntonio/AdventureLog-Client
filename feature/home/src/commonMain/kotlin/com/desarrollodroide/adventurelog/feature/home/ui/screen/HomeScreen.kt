@@ -306,7 +306,9 @@ fun HomeScreenContent(
                         },
                         actions = {
                             ProfileMenu(
+                                user = userDetails,
                                 userName = userName,
+                                serverUrl = userDetails?.serverUrl.orEmpty(),
                                 onSettings = { navigateTo(CurrentScreen.SETTINGS) },
                                 onLogout = onLogout
                             )
