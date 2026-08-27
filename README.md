@@ -1,23 +1,33 @@
 # 🏕️ Adventure Log
 
 ![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=develop)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.2.0--RC2-blue.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.2-green.svg)
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-orange.svg)
 ![Modular](https://img.shields.io/badge/Design-Modular-yellow.svg)
 ![KMM](https://img.shields.io/badge/Platform-KMM-purple.svg)
+
+> ### 🚧 Under construction
+>
+> This client is being actively rebuilt against a live AdventureLog server, screen by screen, and
+> is **not ready for general use yet**. Expect things to move: screens are being redesigned,
+> wording is still settling, and some of what the web client does has no equivalent here yet -
+> the calendar, the user directory and global search are the known gaps.
+>
+> The screenshots below are from an earlier build and no longer match the app.
+>
+> A first release is the goal; there is no date on it.
 
 Adventure Log is a cross-platform travel journal application built with Kotlin Multiplatform Mobile (KMM) and Compose Multiplatform. The app allows users to document their journeys, organize adventures by collections, and explore their memories through rich visual interfaces.
 
 ## 🌟 Features
 
 - **Cross-Platform Experience**: Share code between Android & iOS with Kotlin Multiplatform
-- **Rich Adventure Management**: Track locations, add photos, and categorize your adventures
-- **Collections Organization**: Group and organize adventures into meaningful collections
+- **Rich Place Management**: Track places, add photos, and categorize them
+- **Collections Organization**: Group and organize places into meaningful collections
 - **World Exploration**: Track visited countries, regions, and cities with comprehensive statistics
-- **Interactive Map**: Visualize adventures on an interactive map with location markers
+- **Interactive Map**: Visualize places on an interactive map, clustered and filterable
 - **Beautiful UI**: Modern Material 3 design with fluid animations and transitions
-- **AI-Powered Features**: Generate descriptions and enrich content with AI assistance
 - **Modular Navigation**: Feature-based navigation system for scalable routing
 
 ## 📱 Screenshots
@@ -25,7 +35,6 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 ### Main Navigation
 <p align="center">
   <img src="docs/screenshots/login_screen.png" width="230" alt="Login Screen"/>
-  <img src="docs/screenshots/drawer_screen.png" width="230" alt="Navigation Drawer"/>
   <img src="docs/screenshots/home_screen.png" width="230" alt="Home Screen"/>
 </p>
 
@@ -62,21 +71,19 @@ AdventureLog/
 ├── core/                 # Shared core modules
 │   ├── common/           # Common utilities, extensions, base classes
 │   ├── data/             # Data layer implementation
-│   ├── designsystem/     # Design system components and theming
 │   ├── domain/           # Business logic and use cases
 │   ├── model/            # Domain models
 │   ├── network/          # Network communication
-│   ├── permissions/      # Permission handling
-│   └── ui/               # Core UI utilities
+│   └── permissions/      # Permission handling
 │
 └── feature/              # Feature modules
-    ├── adventures/       # Adventure listing and management
     ├── collections/      # Collections management and organization
-    ├── detail/           # Adventure details
-    ├── home/             # Home screen and dashboard
+    ├── detail/           # A place's own page
+    ├── home/             # App shell, bottom bar and dashboard
+    ├── locations/        # The places list, and adding or editing one
     ├── login/            # Authentication
     ├── map/              # Map visualization
-    ├── settings/         # Application settings
+    ├── settings/         # Account and application settings
     ├── ui/               # Shared UI components and utilities
     └── world/            # World exploration features
 ```
@@ -168,7 +175,7 @@ The app uses sealed classes to represent different UI states, providing type-saf
 - Android Studio Hedgehog or newer
 - Xcode 14 or newer (for iOS development)
 - JDK 11+
-- Kotlin 2.2.0+
+- Kotlin 2.2.21
 
 ### Setup & Build
 
