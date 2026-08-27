@@ -303,7 +303,7 @@ private fun StatRow(
             )
             Text(
                 text = " / ${total.grouped()}",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -350,7 +350,7 @@ private fun EventRow(
                 if (detail != null) {
                     Text(
                         text = detail,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -382,14 +382,14 @@ private fun EventWhen(
         Column(modifier = modifier, horizontalAlignment = Alignment.End) {
             Text(
                 text = "NOW",
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
             if (ends != today?.toString()) {
                 Text(
                     text = "to ${ends.toShortDate()}",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
