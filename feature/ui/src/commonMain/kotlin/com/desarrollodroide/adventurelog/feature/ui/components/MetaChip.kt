@@ -55,6 +55,7 @@ fun MetaChip(
     text: String,
     modifier: Modifier = Modifier,
     tone: ChipTone = ChipTone.NEUTRAL,
+    onClick: (() -> Unit)? = null,
     onRemove: (() -> Unit)? = null
 ) {
     val container = when (tone) {
@@ -73,7 +74,7 @@ fun MetaChip(
     }
 
     Surface(
-        modifier = modifier,
+        modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
         color = container,
         shape = RoundedCornerShape(percent = 50)
     ) {

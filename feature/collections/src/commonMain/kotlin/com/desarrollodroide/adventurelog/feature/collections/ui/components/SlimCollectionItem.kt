@@ -44,6 +44,8 @@ import androidx.compose.foundation.layout.Arrangement
 import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
+import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
 
 @Composable
 fun SlimCollectionItem(
@@ -134,17 +136,17 @@ fun SlimCollectionItem(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CollectionChip(
+                    MetaChip(
                         text = "${collection.adventureCount} " +
                             if (collection.adventureCount == 1) "place" else "places",
-                        background = Color(0xFF6B4EFF)
+                        tone = ChipTone.ON_IMAGE
                     )
 
                     // Where the trip sits relative to today. A collection with no dates is a
                     // plain folder and says so, which is how the web labels it too.
                     val status = collection.status
                     if (status != TripStatus.FOLDER || collection.startDate == null) {
-                        CollectionChip(
+                        MetaChip(
                             text = when (status) {
                                 TripStatus.IN_PROGRESS -> "🎯 In progress"
                                 TripStatus.UPCOMING -> collection.daysUntilStart?.let { days ->
@@ -157,11 +159,12 @@ fun SlimCollectionItem(
                                 TripStatus.COMPLETED -> "✓ Completed"
                                 TripStatus.FOLDER -> "📁 Folder"
                             },
-                            background = when (status) {
-                                TripStatus.IN_PROGRESS -> Color(0xFF00897B)
-                                TripStatus.UPCOMING -> Color(0xFF1E88E5)
-                                TripStatus.COMPLETED -> Color(0xFF546E7A)
-                                TripStatus.FOLDER -> Color.White.copy(alpha = 0.25f)
+                            // Where the trip stands is worth a colour; that it is a folder is not.
+                            tone = when (status) {
+                                TripStatus.IN_PROGRESS -> ChipTone.POSITIVE
+                                TripStatus.UPCOMING -> ChipTone.ACCENT
+                                TripStatus.COMPLETED -> ChipTone.NEUTRAL
+                                TripStatus.FOLDER -> ChipTone.ON_IMAGE
                             }
                         )
                     }
@@ -313,22 +316,3 @@ private fun EmptyCollectionDesign(
     }
 }
 
-@Composable
-private fun CollectionChip(
-    text: String,
-    background: Color,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.height(24.dp),
-        color = background,
-        shape = RoundedCornerShape(4.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = text, color = Color.White, fontSize = 12.sp)
-        }
-    }
-}

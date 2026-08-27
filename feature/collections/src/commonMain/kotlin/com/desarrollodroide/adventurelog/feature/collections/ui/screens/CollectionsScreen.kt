@@ -74,6 +74,9 @@ import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.SearchBarAction
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedTabs
+import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
+import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
 
 @Composable
 fun CollectionsScreen(
@@ -587,10 +590,10 @@ private fun StatusFilterRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(options) { (status, label) ->
-            FilterChip(
-                selected = selected == status,
-                onClick = { onSelect(status) },
-                label = { Text(label) }
+            MetaChip(
+                text = label,
+                tone = if (selected == status) ChipTone.ACCENT else ChipTone.NEUTRAL,
+                onClick = { onSelect(status) }
             )
         }
     }
@@ -602,21 +605,12 @@ private fun CollectionsTabRow(
     onSelect: (CollectionsTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ScrollableTabRow(
-        selectedTabIndex = CollectionsTab.entries.indexOf(selected),
-        modifier = modifier.fillMaxWidth(),
-        edgePadding = 16.dp,
-        containerColor = Color.Transparent,
-        divider = {}
-    ) {
-        CollectionsTab.entries.forEach { entry ->
-            Tab(
-                selected = selected == entry,
-                onClick = { onSelect(entry) },
-                text = { Text(entry.label) }
-            )
-        }
-    }
+    SegmentedTabs(
+        options = CollectionsTab.entries.map { it.label },
+        selectedIndex = CollectionsTab.entries.indexOf(selected),
+        onSelect = { onSelect(CollectionsTab.entries[it]) },
+        modifier = modifier.padding(horizontal = 16.dp)
+    )
 }
 
 /** Whole-list tabs: the archive, what others have shared, and pending invitations. */
