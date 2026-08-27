@@ -179,20 +179,16 @@ fun AdventureItem(
                     ) {
                         // Category tag
                         location.category?.let { category ->
-                            TagChip(
+                            MetaChip(
                                 text = "${category.icon} ${category.displayName}",
-                                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                tone = ChipTone.ON_IMAGE
                             )
                         }
 
                         // Private tag
                         if (!location.isPublic) {
-                            TagChip(
-                                text = "🔒 Private",
-                                backgroundColor = MaterialTheme.colorScheme.error.copy(alpha = 0.9f),
-                                contentColor = MaterialTheme.colorScheme.onError
-                            )
+                            // The one fact on the card worth a colour: everything else is a label.
+                            MetaChip(text = "🔒 Private", tone = ChipTone.WARNING)
                         }
 
                         // Collection tags
@@ -205,38 +201,22 @@ fun AdventureItem(
                         val remainingCount = collectionNames.size - visibleCollections.size
 
                         visibleCollections.forEach { collectionName ->
-                            TagChip(
-                                text = "📁 $collectionName",
-                                backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
+                            MetaChip(text = "📁 $collectionName", tone = ChipTone.ON_IMAGE)
                         }
 
                         if (remainingCount > 0) {
-                            TagChip(
-                                text = "+$remainingCount",
-                                backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            MetaChip(text = "+$remainingCount", tone = ChipTone.ON_IMAGE)
                         }
 
                         // The user's own tags, capped so a heavily tagged place does not push the
                         // title off the card.
                         val visibleTags = tags.take(3)
                         visibleTags.forEach { tag ->
-                            TagChip(
-                                text = tag,
-                                backgroundColor = Color.White.copy(alpha = 0.22f),
-                                contentColor = Color.White
-                            )
+                            MetaChip(text = tag, tone = ChipTone.ON_IMAGE)
                         }
                         val hiddenTags = tags.size - visibleTags.size
                         if (hiddenTags > 0) {
-                            TagChip(
-                                text = "+$hiddenTags",
-                                backgroundColor = Color.White.copy(alpha = 0.22f),
-                                contentColor = Color.White
-                            )
+                            MetaChip(text = "+$hiddenTags", tone = ChipTone.ON_IMAGE)
                         }
                     }
                 }

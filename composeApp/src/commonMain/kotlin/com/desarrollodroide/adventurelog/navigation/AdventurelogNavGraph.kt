@@ -53,6 +53,12 @@ fun AdventureLogNavGraph(
         override fun navigateUp() {
             navController.navigateUp()
         }
+
+        override fun navigateToCollection(collectionId: String, collectionName: String) {
+            navController.navigate(
+                NavigationRoutes.Collections.createDetailRoute(collectionId, collectionName)
+            )
+        }
     }
     
     AnimatedNavHost(

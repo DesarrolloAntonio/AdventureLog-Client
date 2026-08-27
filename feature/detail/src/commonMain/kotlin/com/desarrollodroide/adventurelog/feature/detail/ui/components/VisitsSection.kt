@@ -21,25 +21,6 @@ fun VisitsSection(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Header with icon
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
-            Text(
-                text = "🎯",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Visits",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
         // Visit items with timeline style
         Column(
             modifier = Modifier.fillMaxWidth()

@@ -1,66 +1,69 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+/**
+ * The description, as the user wrote it.
+ *
+ * Nothing is drawn for a place without one. The heading used to appear regardless, so half the
+ * library had an "About" with nothing under it.
+ */
 @Composable
-fun AboutSection(
-    description: String?,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "About",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        if (!description.isNullOrEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
+fun AboutBody(description: String, modifier: Modifier = Modifier) {
+    Text(
+        text = description,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier
+    )
 }
 
+/**
+ * The map, and the way out of it. The map itself is a still preview - the callback that hands the
+ * coordinates to a real maps app was already being passed in and was never called.
+ */
 @Composable
-fun MapSection(
+fun MapBody(
     latitude: String,
     longitude: String,
-    location: String?,
     onOpenMap: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Location",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
+    Column(modifier = modifier.fillMaxWidth()) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth().height(200.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-            )
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             MapView(
                 latitude = latitude,
@@ -68,76 +71,62 @@ fun MapSection(
                 modifier = Modifier.fillMaxSize()
             )
         }
-    }
-}
-
-@Composable
-fun LinkSection(
-    link: String,
-    onOpenLink: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Link",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+        Spacer(Modifier.height(8.dp))
+        ActionRow(
+            icon = Icons.Outlined.Map,
+            text = "Open in Maps",
+            onClick = { onOpenMap(latitude, longitude) }
         )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            onClick = { onOpenLink(link) },
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-            )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Link,
-                    contentDescription = "Link",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = link,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
     }
 }
 
 @Composable
-fun CreationInfo(
-    createdAt: String,
-    updatedAt: String,
+fun LinkBody(link: String, onOpenLink: (String) -> Unit, modifier: Modifier = Modifier) {
+    ActionRow(
+        icon = Icons.Outlined.Link,
+        text = link,
+        onClick = { onOpenLink(link) },
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ActionRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
-        Text(
-            text = "Created: ${createdAt.take(10)}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
         )
+        Spacer(Modifier.width(12.dp))
         Text(
-            text = "Updated: ${updatedAt.take(10)}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+            modifier = Modifier.size(18.dp)
         )
     }
 }

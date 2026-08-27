@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.desarrollodroide.adventurelog.core.model.Country
-import com.desarrollodroide.adventurelog.feature.ui.components.TagChip
+import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
+import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -88,38 +89,28 @@ fun CountryCard(
                 ) {
                     // Subregion tag
                     country.subregion?.let { subregion ->
-                        TagChip(
-                            text = subregion,
-                            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                        MetaChip(text = subregion, tone = ChipTone.ON_IMAGE)
                     }
 
                     // Capital tag
                     country.capital?.let { capital ->
-                        TagChip(
-                            text = capital,
-                            backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        )
+                        MetaChip(text = capital, tone = ChipTone.ON_IMAGE)
                     }
 
                     // Visit status tag
                     when (visitStatus) {
-                        VisitStatus.VISITED -> TagChip(
+                        // Only the state gets a colour; the flag behind is loud enough already.
+                        VisitStatus.VISITED -> MetaChip(
                             text = "Visited ${country.numVisits} Region${if (country.numVisits > 1) "s" else ""}",
-                            backgroundColor = Color(0xFF4CAF50).copy(alpha = 0.9f),
-                            contentColor = Color.White
+                            tone = ChipTone.POSITIVE
                         )
-                        VisitStatus.PARTIAL -> TagChip(
+                        VisitStatus.PARTIAL -> MetaChip(
                             text = "Visited ${country.numVisits}/${country.numRegions}",
-                            backgroundColor = Color(0xFFFFA726).copy(alpha = 0.9f),
-                            contentColor = Color.White
+                            tone = ChipTone.ACCENT
                         )
-                        VisitStatus.NOT_VISITED -> TagChip(
+                        VisitStatus.NOT_VISITED -> MetaChip(
                             text = "Not visited",
-                            backgroundColor = Color(0xFFFF5252).copy(alpha = 0.9f),
-                            contentColor = Color.White
+                            tone = ChipTone.WARNING
                         )
                     }
                 }

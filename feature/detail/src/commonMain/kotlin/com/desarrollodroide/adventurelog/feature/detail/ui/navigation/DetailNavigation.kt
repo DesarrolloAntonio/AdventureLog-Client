@@ -27,12 +27,13 @@ fun NavGraphBuilder.detailNavGraph(
             popExitTransition = NavigationAnimations.exitTransitionVertical
         ) { backStackEntry ->
             val locationId = backStackEntry.savedStateHandle.get<String>("locationId") ?: ""
-            
-            println("📥 [DetailNav] Received locationId: $locationId")
-            
+
             AdventureDetailScreenRoute(
                 locationId = locationId,
-                onBackClick = { navigator.navigateUp() }
+                onBackClick = { navigator.navigateUp() },
+                onCollectionClick = { collection ->
+                    navigator.navigateToCollection(collection.id, collection.name)
+                }
             )
         }
     }

@@ -32,7 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
-import com.desarrollodroide.adventurelog.feature.ui.components.TagChip
+import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
+import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -112,7 +113,7 @@ fun TagsSection(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     formData.tags.forEach { tag ->
-                        TagChip(
+                        MetaChip(
                             text = tag,
                             onRemove = {
                                 onFormDataChange(

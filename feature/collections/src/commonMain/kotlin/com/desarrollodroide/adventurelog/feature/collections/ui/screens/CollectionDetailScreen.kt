@@ -36,7 +36,8 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.UpdateCol
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
-import com.desarrollodroide.adventurelog.feature.ui.components.TagChip
+import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
+import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -689,18 +690,17 @@ fun TransportationItemCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     // Type tag
-                    TagChip(
-                        text = getTransportationIcon(transportation.type) + " " + transportation.type.replaceFirstChar { it.uppercase() },
-                        backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    MetaChip(
+                        text = getTransportationIcon(transportation.type) + " " +
+                            transportation.type.replaceFirstChar { it.uppercase() },
+                        tone = ChipTone.ACCENT
                     )
 
                     // Not in itinerary date range tag
                     if (transportation.isNotInItineraryDateRange) {
-                        TagChip(
+                        MetaChip(
                             text = "Not in itinerary date range",
-                            backgroundColor = MaterialTheme.colorScheme.error.copy(alpha = 0.9f),
-                            contentColor = MaterialTheme.colorScheme.onError
+                            tone = ChipTone.WARNING
                         )
                     }
                 }

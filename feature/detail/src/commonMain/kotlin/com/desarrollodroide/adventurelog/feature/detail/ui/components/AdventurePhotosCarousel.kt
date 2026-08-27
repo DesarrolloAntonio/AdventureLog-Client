@@ -57,19 +57,14 @@ fun AdventurePhotosCarousel(
     var selectedImageIndex by remember { mutableStateOf(0) }
     
     Column(modifier = modifier) {
-        // Header with title and add button
+        // Add button, when there is one to show
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(bottom = if (onAddPhoto != null) 8.dp else 0.dp),
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Photos (${images.size})",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
             
             // Add button - only show if callback is provided
             onAddPhoto?.let {

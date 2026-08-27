@@ -42,14 +42,6 @@ fun AttachmentsSection(
     if (attachments.isEmpty()) return
 
     Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = if (attachments.size == 1) "Attachment" else "Attachments",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             attachments.forEach { attachment ->
                 AttachmentRow(

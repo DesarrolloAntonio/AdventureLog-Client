@@ -14,7 +14,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalUriHandler
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.AttachmentsSection
-import com.desarrollodroide.adventurelog.feature.detail.ui.components.PriceSection
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.TrailsSection
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.ContentImage
@@ -31,11 +30,14 @@ import com.desarrollodroide.adventurelog.feature.detail.viewmodel.AdventureDetai
 import com.desarrollodroide.adventurelog.feature.detail.viewmodel.LocationState
 import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.core.model.userTags
+import com.desarrollodroide.adventurelog.core.model.Currencies
+import androidx.compose.foundation.layout.Arrangement
 
 @Composable
 fun AdventureDetailScreenRoute(
     locationId: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onCollectionClick: (UltraSlimCollection) -> Unit = {}
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
     
@@ -79,7 +81,8 @@ fun AdventureDetailScreenRoute(
                     onOpenLink = { url: String -> uriHandler.openUri(url) },
                     openingAttachmentId = openingAttachmentId,
                     onOpenAttachment = viewModel::openAttachment,
-                    onShareLocation = { viewModel.shareLocation(state.location) }
+                    onShareLocation = { viewModel.shareLocation(state.location) },
+                    onCollectionClick = onCollectionClick
                 )
                 SnackbarHost(
                     hostState = snackbarHostState,
@@ -123,120 +126,121 @@ fun AdventureDetailScreen(
     openingAttachmentId: String? = null,
     onOpenAttachment: (com.desarrollodroide.adventurelog.core.model.Attachment) -> Unit = {},
     onShareLocation: () -> Unit = {},
+    onCollectionClick: (UltraSlimCollection) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
 
-    Box(
-        modifier = modifier.fillMaxSize()
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
     ) {
+        CoverImageWithButtons(
+            imageUrl = location.images.firstOrNull()?.image,
+            adventureName = location.name,
+            onBackClick = onBackClick,
+            onShareClick = onShareLocation
+        )
+
+        // The page proper, lifted over the bottom of the photograph.
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
+                .fillMaxWidth()
+                .offset(y = (-24).dp)
+                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 24.dp)
+                .padding(top = 28.dp, bottom = 48.dp),
+            // One rhythm for the whole page, set here rather than by each section in turn.
+            verticalArrangement = Arrangement.spacedBy(28.dp)
         ) {
-            CoverImageWithButtons(
-                imageUrl = location.images.firstOrNull()?.image,
-                adventureName = location.name,
-                onBackClick = onBackClick,
-                onShareClick = onShareLocation
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                HeaderInfo(
+                    title = location.name,
+                    location = location.location,
+                    rating = location.rating
+                )
+                CategoryTags(
+                    category = location.category,
+                    isPublic = location.isPublic,
+                    tags = location.tags.userTags()
+                )
+            }
 
-            // Content container
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = (-20).dp)
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                // Content
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
+            location.description?.takeIf { it.isNotBlank() }?.let { description ->
+                DetailSection(title = "About") {
+                    AboutBody(description = description)
+                }
+            }
+
+            if (location.images.isNotEmpty()) {
+                DetailSection(title = "Photos (${location.images.size})") {
+                    AdventurePhotosCarousel(images = location.images)
+                }
+            }
+
+            val lat = location.latitude
+            val lon = location.longitude
+            if (!lat.isNullOrBlank() && !lon.isNullOrBlank()) {
+                DetailSection(title = "Where") {
+                    MapBody(latitude = lat, longitude = lon, onOpenMap = onOpenMap)
+                }
+            }
+
+            if (location.visits.isNotEmpty()) {
+                DetailSection(title = if (location.visits.size == 1) "Visit" else "Visits") {
+                    VisitsSection(visits = location.visits)
+                }
+            }
+
+            if (collections.isNotEmpty()) {
+                DetailSection(
+                    title = if (collections.size == 1) "Collection" else "Collections"
                 ) {
-                    HeaderInfo(
-                        title = location.name,
-                        location = location.location,
-                        rating = location.rating
+                    CollectionsSection(
+                        collections = collections,
+                        onCollectionClick = onCollectionClick
                     )
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CategoryTags(
-                        category = location.category,
-                        isPublic = location.isPublic,
-                        tags = location.tags.userTags()
-                    )
-
-                    // Collections section
-                    if (collections.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        CollectionsSection(
-                            collections = collections,
-                            onCollectionClick = { collection ->
-                                // TODO: Navigate to collection detail
-                                println("Navigate to collection: ${collection.name}")
-                            }
-                        )
-                    }
-
-                    if (location.images.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        AdventurePhotosCarousel(
-                            images = location.images,
-                            // Enable these when edit functionality is implemented
-                            // onAddPhoto = { /* TODO: Implement add photo */ },
-                            // onDeletePhoto = { image -> /* TODO: Implement delete photo */ }
-                        )
-                    }
-
-                    AboutSection(description = location.description)
-
-                    val lat = location.latitude
-                    val lon = location.longitude
-
-                    if (!lat.isNullOrBlank() && !lon.isNullOrBlank()) {
-                        MapSection(
-                            latitude = lat,
-                            longitude = lon,
-                            location = location.location,
-                            onOpenMap = onOpenMap
-                        )
-                    }
-
-                    location.link?.let { link ->
-                        if (link.isNotEmpty()) {
-                            LinkSection(link = link, onOpenLink = onOpenLink)
-                        }
-                    }
-
-                    PriceSection(price = location.price, currency = location.priceCurrency)
-
-                    TrailsSection(
-                        trails = location.trails,
-                        onOpenTrail = onOpenLink
-                    )
-
+            if (location.attachments.isNotEmpty()) {
+                DetailSection(
+                    title = if (location.attachments.size == 1) "Attachment" else "Attachments"
+                ) {
                     AttachmentsSection(
                         attachments = location.attachments,
                         openingAttachmentId = openingAttachmentId,
                         onOpenAttachment = onOpenAttachment
                     )
-
-                    if (location.visits.isNotEmpty()) {
-                        VisitsSection(visits = location.visits)
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CreationInfo(
-                        createdAt = location.createdAt,
-                        updatedAt = location.updatedAt
-                    )
-                    
-                    // Extra padding at the bottom to ensure background covers everything
-                    Spacer(modifier = Modifier.height(32.dp))
                 }
+            }
+
+            if (location.trails.isNotEmpty()) {
+                DetailSection(title = if (location.trails.size == 1) "Trail" else "Trails") {
+                    TrailsSection(trails = location.trails, onOpenTrail = onOpenLink)
+                }
+            }
+
+            location.link?.takeIf { it.isNotBlank() }?.let { link ->
+                DetailSection(title = "Link") {
+                    LinkBody(link = link, onOpenLink = onOpenLink)
+                }
+            }
+
+            // The short facts that never deserved a heading each: a price, and two dates.
+            DetailSection(title = "Details") {
+                location.price?.let { price ->
+                    val code = location.priceCurrency?.takeIf { it.isNotBlank() }
+                        ?: Currencies.DEFAULT
+                    FactRow(
+                        label = "Price",
+                        value = "${Currencies.formatAmount(price)} $code"
+                    )
+                }
+                FactRow(label = "Added", value = location.createdAt.take(10))
+                FactRow(label = "Last updated", value = location.updatedAt.take(10))
             }
         }
     }

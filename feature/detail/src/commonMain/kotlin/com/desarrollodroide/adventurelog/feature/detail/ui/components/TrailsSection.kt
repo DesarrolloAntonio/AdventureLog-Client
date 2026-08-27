@@ -39,13 +39,6 @@ fun TrailsSection(
     if (trails.isEmpty()) return
 
     Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = if (trails.size == 1) "Trail" else "Trails",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             trails.forEach { trail ->

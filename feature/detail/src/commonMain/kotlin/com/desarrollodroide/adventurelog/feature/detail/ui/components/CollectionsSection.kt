@@ -36,15 +36,6 @@ fun CollectionsSection(
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
-        Text(
-            text = if (collections.size == 1) "Collection" else "Collections",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
