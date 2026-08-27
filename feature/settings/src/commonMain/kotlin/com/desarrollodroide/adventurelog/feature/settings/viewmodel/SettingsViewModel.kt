@@ -77,21 +77,34 @@ class SettingsViewModel(
         }
     }
 
-    fun editProfile(transform: (ProfileForm) -> ProfileForm) {
+    /**
+     * Apply one change and send it immediately.
+     *
+     * Every control on the screen now applies on the spot, so there is no Update button to forget
+     * and nothing half-saved to leave behind. If the server refuses, the form goes back to what
+     * the server holds and the switch or row visibly returns - which is the only honest way to
+     * report it.
+     */
+    fun updateProfile(transform: (ProfileForm) -> ProfileForm) {
         _profile.update { it.copy(form = transform(it.form)) }
+        saveProfile()
     }
 
-    fun discardProfileChanges() {
-        _profile.update { it.copy(form = it.saved) }
+    /** The name and username, saved together from the edit dialog. */
+    fun saveIdentity(username: String, firstName: String, lastName: String) {
+        updateProfile {
+            it.copy(username = username, firstName = firstName, lastName = lastName)
+        }
     }
 
-    fun saveProfile() {
+    private fun saveProfile() {
         val state = _profile.value
         if (state.isSaving || !state.hasChanges) return
         val form = state.form
         val saved = state.saved
 
         if (form.username.isBlank()) {
+            _profile.update { it.copy(form = it.saved) }
             viewModelScope.launch { _messages.send("Username cannot be empty.") }
             return
         }
@@ -112,10 +125,14 @@ class SettingsViewModel(
                 mapStyle = form.mapStyle.takeIf { it != saved.mapStyle }
             )
             _profile.update { it.copy(isSaving = false) }
-            when (result) {
-                is Either.Right -> _messages.send("Profile updated.")
-                is Either.Left -> _messages.send(result.value)
+            if (result is Either.Left) {
+                _profile.update { it.copy(form = it.saved) }
+                _messages.send(result.value)
+                return@launch
             }
+            // Something flipped while this one was in flight - send that too rather than leaving
+            // the screen showing a value the server never received.
+            if (_profile.value.hasChanges) saveProfile()
         }
     }
 
@@ -149,17 +166,11 @@ class SettingsViewModel(
         }
     }
 
-    fun editNewEmail(value: String) {
-        _emails.update { it.copy(newAddress = value) }
-    }
-
-    fun addEmail() {
-        val address = _emails.value.newAddress.trim()
-        if (address.isEmpty() || _emails.value.isBusy) return
-        runEmailAction("Verification email sent to $address.") {
-            accountRepository.addEmailAddress(address).also {
-                if (it is Either.Right) _emails.update { state -> state.copy(newAddress = "") }
-            }
+    fun addEmail(address: String) {
+        val trimmed = address.trim()
+        if (trimmed.isEmpty() || _emails.value.isBusy) return
+        runEmailAction("Verification email sent to $trimmed.") {
+            accountRepository.addEmailAddress(trimmed)
         }
     }
 

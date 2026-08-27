@@ -10,9 +10,7 @@ import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimati
  * Extension function to add settings screen to a navigation graph
  */
 fun NavGraphBuilder.settingsScreen(
-    onNavigateToSourceCode: () -> Unit = {},
-    onNavigateToTermsOfUse: () -> Unit = {},
-    onNavigateToPrivacyPolicy: () -> Unit = {},
+    onLogout: () -> Unit = {},
 ) {
     composable(
         route = NavigationRoutes.Settings.route,
@@ -20,10 +18,6 @@ fun NavGraphBuilder.settingsScreen(
         enterTransition = NavigationAnimations.enterTransitionVertical,
         exitTransition = NavigationAnimations.exitTransitionVertical,
     ) {
-        SettingsScreen(
-            onNavigateToSourceCode = onNavigateToSourceCode,
-            onNavigateToTermsOfUse = onNavigateToTermsOfUse,
-            onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
-        )
+        SettingsScreen(onLogout = onLogout)
     }
 }

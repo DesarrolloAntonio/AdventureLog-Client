@@ -27,52 +27,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
+/**
+ * Changing the password is a single deliberate action, so it stays a dialog rather than three
+ * fields left lying open on the settings screen.
+ *
+ * The confirmation field is checked here rather than at the server: a mistyped password would
+ * otherwise be accepted and lock the account out.
+ */
 @Composable
-fun SecuritySection(
-    hasPassword: Boolean,
-    isChangingPassword: Boolean,
-    onChangePassword: (current: String, new: String, onSuccess: () -> Unit) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var dialogOpen by remember { mutableStateOf(false) }
-
-    SettingsCard(
-        emoji = "🔒",
-        title = "Security",
-        subtitle = "Update your account password",
-        modifier = modifier
-    ) {
-        Button(
-            onClick = { dialogOpen = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Change password")
-        }
-        if (!hasPassword) {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "This account signs in through an identity provider and has no password " +
-                    "yet. Setting one here will let you sign in with it as well.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-
-    if (dialogOpen) {
-        ChangePasswordDialog(
-            requiresCurrentPassword = hasPassword,
-            isSaving = isChangingPassword,
-            onDismiss = { dialogOpen = false },
-            onConfirm = { current, new ->
-                onChangePassword(current, new) { dialogOpen = false }
-            }
-        )
-    }
-}
-
-@Composable
-private fun ChangePasswordDialog(
+fun ChangePasswordDialog(
     requiresCurrentPassword: Boolean,
     isSaving: Boolean,
     onDismiss: () -> Unit,

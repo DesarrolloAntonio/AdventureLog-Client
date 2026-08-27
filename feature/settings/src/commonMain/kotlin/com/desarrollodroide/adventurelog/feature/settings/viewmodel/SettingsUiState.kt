@@ -7,8 +7,8 @@ import com.desarrollodroide.adventurelog.core.model.MediaUsage
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 
 /**
- * The editable profile, held apart from the session so a half-typed name never leaks into the
- * rest of the app before the user presses Update.
+ * The editable profile, held apart from the session so a name being typed in the edit dialog
+ * never leaks into the rest of the app before it is saved.
  */
 data class ProfileForm(
     val username: String = "",
@@ -43,7 +43,6 @@ data class ProfileSectionState(
 data class EmailsSectionState(
     val addresses: List<EmailAddress> = emptyList(),
     val isLoading: Boolean = true,
-    val newAddress: String = "",
     val isBusy: Boolean = false,
     val error: String? = null
 )

@@ -59,6 +59,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.painterResource
@@ -214,6 +215,18 @@ fun HomeScreenContent(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+
+        // The backdrop is a daylight photograph and stays one whatever the theme does. In the dark
+        // theme that left white text sitting on a white mountainside, so the photograph is dimmed
+        // to meet it. The light theme keeps the picture exactly as it was.
+        val backgroundColor = MaterialTheme.colorScheme.background
+        if (backgroundColor.luminance() < 0.5f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor.copy(alpha = 0.82f))
+            )
+        }
 
             Scaffold(
                 modifier = Modifier
@@ -491,11 +504,7 @@ fun HomeScreenContent(
                             }
                         )
 
-                        settingsScreen(
-                            onNavigateToSourceCode = { /* TODO */ },
-                            onNavigateToTermsOfUse = { /* TODO */ },
-                            onNavigateToPrivacyPolicy = { /* TODO */ },
-                        )
+                        settingsScreen(onLogout = onLogout)
 
                         worldGraph(navController)
 
