@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network.api
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
 
 interface AdventureApi {
     /**
@@ -83,5 +84,11 @@ interface AdventureApi {
     /**
      * Delete a location
      */
+    /**
+     * Search everything the account can see. The server rejects a term under two characters, so
+     * callers should not send one.
+     */
+    suspend fun globalSearch(query: String, limit: Int = 20): SearchResultsDTO
+
     suspend fun deleteLocation(adventureId: String)
 }

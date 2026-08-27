@@ -35,6 +35,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
 
 class InitializeSessionUseCaseTest {
 
@@ -214,6 +215,9 @@ class InitializeSessionUseCaseTest {
         }
 
         override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO =
+            throw NotImplementedError()
+
+        override suspend fun globalSearch(query: String, limit: Int): SearchResultsDTO =
             throw NotImplementedError()
 
 

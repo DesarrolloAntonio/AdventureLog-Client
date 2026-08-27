@@ -41,6 +41,10 @@ fun AdventureLogNavGraph(
             navController.navigate("detail/${location.id}")
         }
         
+        override fun goToDetailById(locationId: String) {
+            navController.navigate("detail/$locationId")
+        }
+
         override fun goToLogin() {
             navController.navigate(NavigationRoutes.Login.graph) {
                 popUpTo(0) { inclusive = true }

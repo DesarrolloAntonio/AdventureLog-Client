@@ -33,6 +33,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
 
 class LogoutUseCaseTest {
 
@@ -192,6 +193,9 @@ class LogoutUseCaseTest {
         }
 
         override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO =
+            throw NotImplementedError()
+
+        override suspend fun globalSearch(query: String, limit: Int): SearchResultsDTO =
             throw NotImplementedError()
 
 

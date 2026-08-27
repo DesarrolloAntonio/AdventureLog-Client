@@ -9,6 +9,13 @@ import com.desarrollodroide.adventurelog.core.model.Location
 
 interface HomeNavigator {
     fun goToDetail(location: Location)
+
+    /**
+     * A place's page from its id alone. Search returns descriptors rather than records, and the
+     * detail route lives in the root graph, outside the shell's own NavHost.
+     */
+    fun goToDetailById(locationId: String)
+
     fun goToLogin()
 }
 
@@ -26,6 +33,9 @@ fun NavGraphBuilder.homeNavGraph(
             MainShellRoute(
                 onAdventureClick = { adventure -> 
                     navigator.goToDetail(adventure)
+                },
+                onOpenLocationById = { locationId ->
+                    navigator.goToDetailById(locationId)
                 },
                 onNavigateToLogin = {
                     navigator.goToLogin()

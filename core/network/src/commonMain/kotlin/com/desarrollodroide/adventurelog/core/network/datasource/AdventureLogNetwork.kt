@@ -23,6 +23,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDT
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
 
 interface AdventureLogNetwork {
 
@@ -231,6 +232,8 @@ interface AdventureLogNetwork {
     suspend fun getDashboard(): DashboardDTO
 
     suspend fun getCalendarEvents(start: String? = null, end: String? = null): CalendarEventsDTO
+
+    suspend fun globalSearch(query: String, limit: Int = 20): SearchResultsDTO
 
     /**
      * Visits are a resource of their own - see [com.desarrollodroide.adventurelog.core.network.api.VisitApi].

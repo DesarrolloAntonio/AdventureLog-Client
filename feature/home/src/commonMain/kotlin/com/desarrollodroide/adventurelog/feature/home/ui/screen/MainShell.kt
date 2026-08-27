@@ -69,6 +69,8 @@ import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimati
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScreen
+import androidx.compose.material.icons.filled.Search
+import com.desarrollodroide.adventurelog.feature.home.ui.components.GlobalSearchSheet
 
 /**
  * Entry point composable that integrates with navigation
@@ -77,6 +79,7 @@ import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScr
 fun MainShellRoute(
     viewModel: HomeViewModel = koinViewModel(),
     onAdventureClick: (Location) -> Unit = { },
+    onOpenLocationById: (String) -> Unit = { },
     onNavigateToLogin: () -> Unit = { }
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -89,6 +92,7 @@ fun MainShellRoute(
             viewModel.selectLocation(adventure)
             onAdventureClick(adventure)
         },
+        onOpenLocationById = onOpenLocationById,
         onLogout = {
             viewModel.logout()
             onNavigateToLogin()
@@ -115,6 +119,7 @@ fun HomeScreenContent(
     homeUiState: HomeUiState,
     userDetails: UserDetails? = null,
     onAdventureClick: (Location) -> Unit = { },
+    onOpenLocationById: (String) -> Unit = { },
     onLogout: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -134,6 +139,7 @@ fun HomeScreenContent(
 
     // Track current screen
     var currentScreen by remember { mutableStateOf(CurrentScreen.HOME) }
+    var searchOpen by remember { mutableStateOf(false) }
 
     // Observer for navigation changes to keep currentScreen in sync
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -203,6 +209,23 @@ fun HomeScreenContent(
 
         // Update current screen
         currentScreen = screen
+    }
+
+    if (searchOpen) {
+        GlobalSearchSheet(
+            // A place's page lives in the root graph, not in this shell's NavHost, so it is
+            // reached through the navigator rather than the controller in hand.
+            onOpenLocation = onOpenLocationById,
+            onOpenCollection = { id, name ->
+                navController.navigate(
+                    NavigationRoutes.Collections.createDetailRoute(
+                        collectionId = id,
+                        collectionName = name
+                    )
+                )
+            },
+            onDismiss = { searchOpen = false }
+        )
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -305,6 +328,12 @@ fun HomeScreenContent(
                             }
                         },
                         actions = {
+                            IconButton(onClick = { searchOpen = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search everything"
+                                )
+                            }
                             ProfileMenu(
                                 user = userDetails,
                                 userName = userName,

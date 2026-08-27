@@ -191,6 +191,34 @@ internal class KtorAdventureApi(
      * `types=location` keeps cities, collections and users out of the count, which is what makes
      * `limit`/`offset` line up with the page the list is asking for.
      */
+    override suspend fun globalSearch(query: String, limit: Int): SearchResultsDTO {
+        val session = sessionProvider()
+        val url = "${session.baseUrl}/api/search/"
+
+        logger.d { "🔍 API Request - GET $url (everything) with query: '$query'" }
+
+        val response = httpClient.get(url) {
+            parameter("query", query)
+            parameter("limit", limit)
+            headers {
+                commonHeaders(session.sessionToken)
+            }
+        }
+
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Search failed with status: ${response.status}"
+            )
+        }
+
+        val results = json.decodeFromString<SearchResultsDTO>(response.body<String>())
+
+        logger.d { "📦 API Response - ${results.results.size} hits of ${results.total}" }
+
+        return results
+    }
+
     private suspend fun searchLocations(
         searchQuery: String,
         page: Int,

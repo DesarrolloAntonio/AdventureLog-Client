@@ -48,6 +48,7 @@ import com.desarrollodroide.adventurelog.core.network.api.TransportationApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTransportationApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
 
 class KtorAdventureLogNetwork(
     private val adventurelogClient: HttpClient
@@ -423,6 +424,11 @@ class KtorAdventureLogNetwork(
     override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO {
         ensureInitialized()
         return userDataSource.getCalendarEvents(start, end)
+    }
+
+    override suspend fun globalSearch(query: String, limit: Int): SearchResultsDTO {
+        ensureInitialized()
+        return adventureDataSource.globalSearch(query, limit)
     }
 
     override suspend fun createVisit(locationId: String, visit: VisitFormData): VisitDTO {

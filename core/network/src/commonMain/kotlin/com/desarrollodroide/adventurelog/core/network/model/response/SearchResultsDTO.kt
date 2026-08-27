@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.model.response
 
+import com.desarrollodroide.adventurelog.core.model.SearchHit
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -50,4 +51,11 @@ data class SearchHitDTO(
 
     @SerialName("url")
     val url: String = ""
+)
+
+fun SearchHitDTO.toDomainModel(): SearchHit = SearchHit(
+    id = id,
+    type = type,
+    title = title,
+    subtitle = subtitle
 )
