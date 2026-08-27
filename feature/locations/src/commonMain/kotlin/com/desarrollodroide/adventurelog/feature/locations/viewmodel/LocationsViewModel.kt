@@ -202,9 +202,13 @@ class LocationsViewModel(
         _searchQuery.value = query
     }
     
+    /**
+     * The field keeps what was searched for. Emptying it used to leave the query visible only as
+     * placeholder grey, which reads as a hint rather than as text, and made refining a search mean
+     * retyping it from the first letter.
+     */
     fun executeSearch() {
-        _actualSearchQuery.value = _searchQuery.value
-        _searchQuery.value = ""
+        _actualSearchQuery.value = _searchQuery.value.trim()
     }
 
     fun onFiltersChanged(filters: LocationFilters) {
@@ -231,13 +235,22 @@ class LocationsViewModel(
         _filters.value = LocationFilters()
     }
 
-    fun hasActiveFilters(): Boolean {
-        val currentFilters = _filters.value
-        return currentFilters.categoryNames.isNotEmpty() ||
-                currentFilters.sortField != LocationSortField.UPDATED_AT ||
-                currentFilters.sortDirection != SortDirection.DESCENDING ||
-                currentFilters.visitedFilter != VisitedFilter.ALL ||
-                currentFilters.includeCollections
+    /**
+     * How many choices differ from the defaults.
+     *
+     * `includeCollections` used to count here, and it defaults to true - so the filter button wore
+     * its badge from the first launch and never took it off, which told the user nothing. Only a
+     * departure from the default counts as a filter.
+     */
+    fun activeFilterCount(): Int {
+        val f = _filters.value
+        var count = f.categoryNames.size
+        if (f.visitedFilter != VisitedFilter.ALL) count++
+        if (f.sortField != LocationSortField.UPDATED_AT ||
+            f.sortDirection != SortDirection.DESCENDING
+        ) count++
+        if (!f.includeCollections) count++
+        return count
     }
 
     private fun loadCategories() {

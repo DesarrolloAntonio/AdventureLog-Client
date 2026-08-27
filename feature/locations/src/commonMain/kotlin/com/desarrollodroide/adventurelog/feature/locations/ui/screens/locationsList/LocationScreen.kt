@@ -56,8 +56,11 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.SearchBarAction
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
 
 @Composable
 fun LocationListScreen(
@@ -112,7 +115,7 @@ fun LocationListScreen(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
         actualSearchQuery = actualSearchQuery,
-        hasActiveFilters = viewModel.hasActiveFilters(),
+        activeFilterCount = viewModel.activeFilterCount(),
         collections = collections,
         isRefreshing = isRefreshing,
         snackbarHostState = snackbarHostState,
@@ -219,7 +222,7 @@ private fun AdventureListContent(
     pagingItems: LazyPagingItems<Location>,
     searchQuery: String,
     actualSearchQuery: String,
-    hasActiveFilters: Boolean,
+    activeFilterCount: Int,
     collections: List<UltraSlimCollection>,
     isRefreshing: Boolean,
     snackbarHostState: SnackbarHostState,
@@ -270,31 +273,18 @@ private fun AdventureListContent(
                     searchQuery = searchQuery,
                     onSearchQueryChange = onSearchQueryChange,
                     onSearchSubmit = onSearchSubmit,
-                    activeSearchQuery = actualSearchQuery,
+                    appliedQuery = actualSearchQuery,
+                    placeholder = "Search locations",
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(
-                    onClick = onShowFilters,
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Box {
-                        Icon(
-                            imageVector = Icons.Default.FilterList,
-                            contentDescription = "Filter",
-                            tint = if (hasActiveFilters) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        )
-                        if (hasActiveFilters) {
-                            Badge(
-                                modifier = Modifier.align(Alignment.TopEnd),
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
+                Spacer(Modifier.width(10.dp))
+                SearchBarAction(
+                    icon = Icons.Default.FilterList,
+                    contentDescription = "Filters",
+                    active = activeFilterCount > 0,
+                    badgeCount = activeFilterCount,
+                    onClick = onShowFilters
+                )
             }
           }
         },
@@ -362,14 +352,14 @@ private fun AdventureListContent(
                         // The search that is actually in effect, not the text still in the box -
                         // submitting clears the box, which used to make an empty result read as
                         // "no locations yet, create your first one".
-                        pagingItems.itemCount == 0 && actualSearchQuery.isEmpty() && !hasActiveFilters -> {
+                        pagingItems.itemCount == 0 && actualSearchQuery.isEmpty() && activeFilterCount == 0 -> {
                             EmptyState()
                         }
 
                         pagingItems.itemCount == 0 -> {
                             NoSearchResultsState(
                                 searchQuery = actualSearchQuery,
-                                hasFilters = hasActiveFilters
+                                hasFilters = activeFilterCount > 0
                             )
                         }
 

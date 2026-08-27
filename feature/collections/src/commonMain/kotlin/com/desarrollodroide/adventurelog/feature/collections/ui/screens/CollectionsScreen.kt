@@ -71,6 +71,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.components.Colle
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
+import com.desarrollodroide.adventurelog.feature.ui.components.SearchBarAction
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -254,33 +255,16 @@ private fun CollectionsContent(
                 SimpleSearchBar(
                     searchQuery = searchQuery,
                     onSearchQueryChange = onSearchQueryChange,
-                    onSearchSubmit = { },
-                    placeholder = "Search collections...",
-                    showSearchButton = false,
+                    placeholder = "Search collections",
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(
-                    onClick = onShowSort,
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Box {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Sort,
-                            contentDescription = "Sort",
-                            tint = if (hasActiveSorting) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
-                        )
-                        if (hasActiveSorting) {
-                            Badge(
-                                modifier = Modifier.align(Alignment.TopEnd),
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
+                Spacer(Modifier.width(10.dp))
+                SearchBarAction(
+                    icon = Icons.AutoMirrored.Filled.Sort,
+                    contentDescription = "Sorting",
+                    active = hasActiveSorting,
+                    onClick = onShowSort
+                )
             }
 
             CollectionsTabRow(selected = tab, onSelect = onTabSelected)

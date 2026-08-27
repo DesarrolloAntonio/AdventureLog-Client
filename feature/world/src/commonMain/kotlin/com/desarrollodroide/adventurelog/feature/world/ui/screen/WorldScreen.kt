@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
+import com.desarrollodroide.adventurelog.feature.ui.components.SearchBarAction
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import com.desarrollodroide.adventurelog.feature.world.ui.components.CompactProgressSection
 import com.desarrollodroide.adventurelog.feature.world.ui.components.CountryCard
@@ -147,22 +148,15 @@ private fun WorldScreenContent(
                             SimpleSearchBar(
                                 searchQuery = uiState.searchQuery,
                                 onSearchQueryChange = onSearchQueryChange,
-                                onSearchSubmit = { },
-                                placeholder = "Search countries...",
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(0.dp) // Remove default padding
+                                placeholder = "Search countries",
+                                modifier = Modifier.weight(1f)
                             )
-                            IconButton(
-                                onClick = onMapClick,
-                                modifier = Modifier.padding(start = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Map,
-                                    contentDescription = "Map view",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            Spacer(Modifier.width(10.dp))
+                            SearchBarAction(
+                                icon = Icons.Default.Map,
+                                contentDescription = "Map view",
+                                onClick = onMapClick
+                            )
                         }
                     }
 
@@ -232,10 +226,13 @@ private fun FilterChipsRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(26.dp),
+        // The same white as the search field directly above it. A grey pill under a white one
+        // reads as two unrelated controls that happen to be the same shape.
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         ExposedDropdownMenuBox(
             expanded = expanded,
