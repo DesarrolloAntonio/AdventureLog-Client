@@ -145,6 +145,9 @@ fun LocationListScreen(
     LaunchedEffect(pagingItems.loadState.refresh) {
         if (pagingItems.loadState.refresh is LoadStateNotLoading) {
             viewModel.onRefreshComplete()
+            // Adding or removing a place reloads the list; the header counts come from a
+            // different call and would otherwise still be reporting the number from before.
+            viewModel.loadLibraryCounts()
         }
     }
 

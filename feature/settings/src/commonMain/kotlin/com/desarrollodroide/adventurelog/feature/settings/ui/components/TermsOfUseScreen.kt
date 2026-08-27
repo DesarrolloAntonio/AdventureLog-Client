@@ -13,7 +13,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformBackHandler
+import com.desarrollodroide.adventurelog.feature.ui.platform.PlatformBackHandler
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

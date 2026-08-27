@@ -228,6 +228,9 @@ class LocationsViewModel(
 
     fun refresh() {
         _isRefreshing.value = true
+        // The header reads a separate stats call, so a list that has just gained or lost a place
+        // would otherwise keep reporting the old number.
+        loadLibraryCounts()
     }
 
     fun onRefreshComplete() {
@@ -289,7 +292,7 @@ class LocationsViewModel(
         }
     }
 
-    private fun loadLibraryCounts() {
+    fun loadLibraryCounts() {
         viewModelScope.launch {
             val username = userRepository.getUserSessionOnce()?.username ?: return@launch
             val result = getUserStatsUseCase(username)

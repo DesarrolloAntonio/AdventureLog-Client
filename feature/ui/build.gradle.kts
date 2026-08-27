@@ -32,6 +32,8 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.androidx.ui.tooling)
+            // BackHandler, for the discard guard on forms.
+            implementation(libs.androidx.activity.compose)
             // api, not implementation: toGoogleMapType() returns a MapType, so the type has to
             // stay on the compile classpath of the feature modules that call it.
             api(libs.maps.compose)

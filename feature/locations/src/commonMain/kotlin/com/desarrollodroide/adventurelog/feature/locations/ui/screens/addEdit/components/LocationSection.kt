@@ -47,7 +47,7 @@ fun LocationSection(
     }
 
     SectionCard(
-        title = "Location Information",
+        title = "Where it is",
         icon = Icons.Outlined.LocationOn,
         expanded = expanded,
         onExpandedChange = { expanded = it }

@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.settings.platform
+package com.desarrollodroide.adventurelog.feature.ui.platform
 
 import androidx.compose.runtime.Composable
 

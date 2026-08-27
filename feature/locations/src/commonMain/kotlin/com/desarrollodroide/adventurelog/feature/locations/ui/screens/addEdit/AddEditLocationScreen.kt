@@ -56,6 +56,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import co.touchlab.kermit.Logger
+import androidx.compose.material3.AlertDialog
+import com.desarrollodroide.adventurelog.feature.ui.platform.PlatformBackHandler
 
 private val logger = Logger.withTag("AddEditLocationScreen")
 
@@ -293,6 +295,47 @@ fun AddEditLocationContent(
         return
     }
 
+    // A filled-in form is worth something. Back used to throw it away without a word, which is
+    // the one thing a form must never do.
+    val initialFormData = remember(existingLocation) { formData }
+    var confirmDiscard by remember { mutableStateOf(false) }
+    val hasChanges = formData != initialFormData
+
+    fun leave() {
+        if (hasChanges) confirmDiscard = true else onNavigateBack()
+    }
+
+    PlatformBackHandler(enabled = hasChanges) { confirmDiscard = true }
+
+    if (confirmDiscard) {
+        AlertDialog(
+            onDismissRequest = { confirmDiscard = false },
+            title = { Text(if (isEditMode) "Discard changes?" else "Discard this place?") },
+            text = {
+                Text(
+                    if (isEditMode) {
+                        "The changes you have made will not be saved."
+                    } else {
+                        "Nothing has been created yet, and what you have typed will be lost."
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmDiscard = false
+                        onNavigateBack()
+                    }
+                ) {
+                    Text("Discard", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDiscard = false }) { Text("Keep editing") }
+            }
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -304,7 +347,7 @@ fun AddEditLocationContent(
             formData = formData,
             categories = categories,
             onFormDataChange = { formData = it },
-            onNavigateBack = onNavigateBack,
+            onNavigateBack = { leave() },
             onGenerateDescription = {
                 onGenerateDescription(formData.name) { generatedDescription ->
                     formData = formData.copy(description = generatedDescription)
@@ -359,11 +402,11 @@ fun AddEditLocationContent(
         ) {
             PrimaryButton(
                 onClick = { onSave(formData) },
-                text = if (isEditMode) "Update Location" else "Create Location"
+                text = if (isEditMode) "Save changes" else "Create place"
             )
 
             TextButton(
-                onClick = onNavigateBack,
+                onClick = { leave() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(

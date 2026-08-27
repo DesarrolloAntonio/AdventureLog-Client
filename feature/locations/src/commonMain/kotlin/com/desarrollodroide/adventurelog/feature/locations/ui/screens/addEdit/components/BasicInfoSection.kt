@@ -118,7 +118,7 @@ fun BasicInfoSection(
                 onValueChange = {
                     onFormDataChange(formData.copy(name = it))
                 },
-                label = "Location Name",
+                label = "Name of the place",
                 icon = Icons.Outlined.Title,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
@@ -234,7 +234,7 @@ fun BasicInfoSection(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "Public Location",
+                            text = "Public place",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
