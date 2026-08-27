@@ -59,18 +59,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import org.jetbrains.compose.resources.painterResource
 import com.desarrollodroide.adventurelog.resources.Res
 import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Location
-import androidx.compose.ui.layout.ContentScale
-import com.desarrollodroide.adventurelog.resources.main_background
 
 /**
  * Entry point composable that integrates with navigation
@@ -208,28 +206,27 @@ fun HomeScreenContent(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Background image that covers the entire screen
-        Image(
-            painter = painterResource(Res.drawable.main_background),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
-        // The photograph is a snowfield, and a snowfield is the same white as the cards standing
-        // on it - so the two kept dissolving into each other. A wash in one of the theme's own
-        // tones pushes the whole picture off white and holds it there, which leaves the cards as
-        // the only white on the screen and gives the palette something to agree with.
+        // The backdrop was a photograph, and a photograph fights the content it is behind: its
+        // bright bands were the same white as the cards, and it stayed daylight when the theme
+        // went dark, so it needed washing down one way and dimming the other before it behaved.
         //
-        // Dark needs the same treatment for the opposite reason: the photograph stays daylight
-        // whatever the theme does, and white text on a bright mountainside is unreadable.
+        // A gradient mixed from the theme's own containers has neither problem. It is never
+        // white, so a card always reads as a card; it follows the palette wherever the palette
+        // goes, dynamic colour included; and it needs no bitmap at all.
         val scheme = MaterialTheme.colorScheme
-        val wash = if (scheme.background.luminance() < 0.5f) {
-            scheme.background.copy(alpha = 0.82f)
-        } else {
-            scheme.surfaceVariant.copy(alpha = 0.38f)
-        }
-        Box(modifier = Modifier.fillMaxSize().background(wash))
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            lerp(scheme.surface, scheme.primaryContainer, 0.70f),
+                            lerp(scheme.surface, scheme.secondaryContainer, 0.55f),
+                            lerp(scheme.surface, scheme.tertiaryContainer, 0.40f)
+                        )
+                    )
+                )
+        )
 
             Scaffold(
                 modifier = Modifier
