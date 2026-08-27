@@ -187,7 +187,7 @@ private fun TripCard(
                 MaterialTheme.colorScheme.secondaryContainer
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
             Text(
@@ -231,13 +231,13 @@ private fun StatsCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        // The screen sits on a full-bleed photo of roughly the same luminance as the theme's
-        // container greys, so the cards need a brighter fill and a real shadow to read as
-        // surfaces rather than float.
+        // The screen sits on a full-bleed photo, so the cards take the brightest fill on the
+        // tonal scale. That alone separates them - no shadow needed, and a shadow on a flat
+        // white card over a photograph only ever looks like a sticker.
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
@@ -328,7 +328,7 @@ private fun EventRow(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
