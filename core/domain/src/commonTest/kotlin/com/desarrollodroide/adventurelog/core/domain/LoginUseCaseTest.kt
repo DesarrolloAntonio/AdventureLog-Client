@@ -74,6 +74,27 @@ class LoginUseCaseTest {
     }
 
     @Test
+    fun `a login that carries no session is a failure, not a success`() = runTest {
+        // What the web app's proxy produces: 200, the right username, and no set-cookie.
+        fakeRepository.sendLoginResult = Either.Right(createFakeUserDetails().copy(sessionToken = null))
+
+        val result = useCase("https://test.com", "testuser", "testpass")
+
+        assertTrue(result is Either.Left)
+        assertTrue(result.value.contains("no session"))
+    }
+
+    @Test
+    fun `a blank session token counts as no session`() = runTest {
+        // The DTO maps a missing cookie to "" rather than null, so both shapes reach here.
+        fakeRepository.sendLoginResult = Either.Right(createFakeUserDetails().copy(sessionToken = ""))
+
+        val result = useCase("https://test.com", "testuser", "testpass")
+
+        assertTrue(result is Either.Left)
+    }
+
+    @Test
     fun `invoke passes correct parameters to repository`() = runTest {
         val url = "https://example.com"
         val username = "john.doe"
