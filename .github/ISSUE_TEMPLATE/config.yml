@@ -1,8 +1,10 @@
-blank_issues_enabled: false
+# Blank issues stay open on purpose: there are only two templates and no Discussions, so
+# forcing every report into one of them would leave anything else with nowhere to go.
+blank_issues_enabled: true
 contact_links:
-  - name: 💬 Discussions
-    url: https://github.com/desarrollodroide/AdventureLog/discussions
-    about: For general questions and discussions about AdventureLog
-  - name: 📚 Documentation
-    url: https://github.com/desarrollodroide/AdventureLog/wiki
-    about: Check out our documentation for guides and FAQs
+  - name: 🌍 AdventureLog server (upstream project)
+    url: https://github.com/seanmorley15/AdventureLog/issues
+    about: This repo is only the mobile client. Problems with the server, the web app or the Docker images belong upstream.
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/DesarrolloAntonio/AdventureLog-Client/security/advisories/new
+    about: Please report privately through a draft advisory rather than opening a public issue.

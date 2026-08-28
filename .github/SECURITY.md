@@ -1,41 +1,49 @@
 # Security Policy
 
-## Supported Versions
+This repository is **AdventureLog Client** — an unofficial Android and iOS client for
+[AdventureLog](https://github.com/seanmorley15/AdventureLog). It talks to a server you host
+yourself, and it keeps your session and your server's address on your own device.
 
-We release patches for security vulnerabilities. Which versions are eligible for receiving such patches depends on the CVSS v3.0 Rating:
+## What this policy covers
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+The mobile client, and only the mobile client.
 
-## Reporting a Vulnerability
+A vulnerability in the AdventureLog **server** — the Django API, the web frontend, the published
+Docker images — belongs upstream, where the people who can fix it will see it:
+<https://github.com/seanmorley15/AdventureLog/security>
 
-Please report (suspected) security vulnerabilities to **[security@adventurelog.app]**. You will receive a response from us within 48 hours. If the issue is confirmed, we will release a patch as soon as possible depending on complexity but historically within a few days.
+How you have configured your own server is out of scope here.
 
-Please include the following information in your report:
+## Supported versions
 
-- Type of vulnerability (e.g., buffer overflow, SQL injection, cross-site scripting, etc.)
-- Full paths of source file(s) related to the manifestation of the vulnerability
-- The location of the affected source code (tag/branch/commit or direct URL)
-- Any special configuration required to reproduce the issue
-- Step-by-step instructions to reproduce the issue
-- Proof-of-concept or exploit code (if possible)
-- Impact of the issue, including how an attacker might exploit the issue
+The app is pre-release. There are no maintenance branches: fixes land on the latest build and
+nowhere else, and older alphas are not patched.
 
-## Preferred Languages
+| Version           | Supported          |
+| ----------------- | ------------------ |
+| Latest release    | :white_check_mark: |
+| Anything earlier  | :x:                |
 
-We prefer all communications to be in English.
+## Reporting a vulnerability
 
-## Disclosure Policy
+Please report privately rather than opening a public issue:
 
-When we receive a security bug report, we will:
+**[Open a draft security advisory](https://github.com/DesarrolloAntonio/AdventureLog-Client/security/advisories/new)**
 
-1. Confirm the problem and determine the affected versions.
-2. Audit code to find any potential similar problems.
-3. Prepare fixes for all releases still under maintenance.
-4. Release new security fix versions as soon as possible.
+Useful things to include:
 
-## Comments on this Policy
+- What kind of vulnerability it is, and what an attacker gets out of it
+- The affected file or screen, and the commit or release you saw it on
+- Steps to reproduce it, and a proof of concept if you have one
+- Anything unusual about the setup needed to trigger it
 
-If you have suggestions on how this process could be improved please submit a pull request.
+## What happens next
+
+This is a one-person project built in spare time, so please don't expect a service-level
+agreement. I will acknowledge your report as soon as I reasonably can, tell you whether I can
+reproduce it, and let you know when a fix ships. If you would like credit in the advisory, say
+so — and if you would rather stay anonymous, that is fine too.
+
+Please give me a chance to ship a fix before disclosing publicly.
+
+English and Spanish are both welcome.
