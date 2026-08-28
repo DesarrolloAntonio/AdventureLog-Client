@@ -60,7 +60,7 @@ fun LocationSearchModal(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Search Location",
+                        text = "Search the map",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -85,7 +85,7 @@ fun LocationSearchModal(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search for a location...") },
+                    placeholder = { Text("City, address or landmark...") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,

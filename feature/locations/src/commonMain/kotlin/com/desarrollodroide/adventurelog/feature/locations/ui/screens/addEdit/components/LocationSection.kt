@@ -79,7 +79,7 @@ fun LocationSection(
                             searchQuery = it
                             // Debounced search is handled by LaunchedEffect
                         },
-                        label = "Search location",
+                        label = "Search the map",
                         icon = Icons.Default.Search,
                         singleLine = true
                     )

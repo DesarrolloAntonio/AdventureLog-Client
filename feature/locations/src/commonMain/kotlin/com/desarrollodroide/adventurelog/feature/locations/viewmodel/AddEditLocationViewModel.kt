@@ -99,7 +99,7 @@ class AddEditAdventureViewModel(
                 is Either.Left -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = "Failed to load location: ${result.value}"
+                        errorMessage = "Could not load this place: ${result.value}"
                     )
                 }
                 is Either.Right -> {

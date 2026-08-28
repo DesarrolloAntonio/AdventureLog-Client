@@ -487,12 +487,12 @@ private fun EmptyState() {
                 tint = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "No locations yet",
+                text = "No places yet",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Start exploring and add your first location!",
+                text = "Tap + to add the first one - somewhere you have been, or somewhere you are going.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

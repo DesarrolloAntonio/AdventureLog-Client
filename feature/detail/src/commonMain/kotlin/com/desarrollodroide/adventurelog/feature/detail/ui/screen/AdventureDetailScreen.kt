@@ -97,7 +97,7 @@ fun AdventureDetailScreenRoute(
             ) {
                 Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
                     Text(
-                        text = "Error loading location",
+                        text = "Could not load this place",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
