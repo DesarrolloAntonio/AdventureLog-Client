@@ -60,8 +60,8 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
   </tr>
 </table>
 
-<sub>Android, taken on a Pixel 6a. Photos come from Wikimedia Commons through the server's own
-image search.</sub>
+<sub>Android, on a Pixel 6a - left column light, right column dark. Photos come from Wikimedia
+Commons through the server's own image search.</sub>
 
 ## 🏗️ Architecture
 
