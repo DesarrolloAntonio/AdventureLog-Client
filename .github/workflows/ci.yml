@@ -30,6 +30,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         
       - name: Create local.properties
+        if: steps.signing.outputs.ready == 'true'
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> local.properties
@@ -113,17 +114,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Signing is optional infrastructure, not a precondition for the repository being healthy.
+      # Without the keystore secret this job reports itself skipped instead of failing, so a fork
+      # builds green and this starts working on its own the day the secrets are added.
+      - name: Is signing configured?
+        id: signing
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+            echo "::notice::No keystore secret set - skipping the release. Add KEYSTORE_BASE64, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS and RELEASE_KEY_PASSWORD to publish signed builds."
+          fi
+
       - name: Set up JDK 17
+        if: steps.signing.outputs.ready == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Gradle
+        if: steps.signing.outputs.ready == 'true'
         uses: gradle/actions/setup-gradle@v3
 
       # Written from a secret and never committed. The workspace is discarded with the runner.
       - name: Decode keystore
+        if: steps.signing.outputs.ready == 'true'
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ${{ github.workspace }}/key_store.jks
 
       - name: Create local.properties
@@ -135,6 +152,7 @@ jobs:
       # developer already has, installs under a different application id, and can never be
       # upgraded to the real app.
       - name: Build signed release APK
+        if: steps.signing.outputs.ready == 'true'
         run: ./gradlew :composeApp:assembleRelease
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/key_store.jks
@@ -143,9 +161,11 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
 
       - name: Read version
+        if: steps.signing.outputs.ready == 'true'
         run: echo "APP_VERSION_NAME=$(grep '^versionName=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
 
       - name: Create Release
+        if: steps.signing.outputs.ready == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.APP_VERSION_NAME }}
