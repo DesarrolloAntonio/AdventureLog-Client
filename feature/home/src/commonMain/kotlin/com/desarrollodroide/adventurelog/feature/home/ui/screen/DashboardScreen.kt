@@ -448,10 +448,13 @@ private fun EventRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                // A collection whose only dated thing carries its own name printed it twice,
+                // one line under the other. The calendar already drops a label that repeats the
+                // title; home was the copy that did not.
                 val detail = listOfNotNull(
                     event.locationLabel.takeIf { it.isNotBlank() },
                     event.collectionName?.takeIf { it.isNotBlank() }
-                ).firstOrNull()
+                ).firstOrNull { it != event.title }
                 if (detail != null) {
                     Text(
                         text = detail,
