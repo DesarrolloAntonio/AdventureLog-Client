@@ -43,25 +43,25 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/home.png" width="270" alt="Home"/><br/><sub><b>Home</b> — what is coming up, and where you have been</sub></td>
-    <td align="center"><img src="docs/screenshots/places.png" width="270" alt="Places"/><br/><sub><b>Places</b> — everywhere you have logged, searchable</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/home.png" width="235" alt="Home"/><br/><sub><b>Home</b><br/>what is coming up, and where you have been</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/places.png" width="235" alt="Places"/><br/><sub><b>Places</b><br/>everywhere you have logged, searchable</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/place_detail.png" width="235" alt="A place"/><br/><sub><b>A place</b><br/>photos, notes, links and dates</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/place_detail.png" width="270" alt="A place"/><br/><sub><b>A place</b> — photos, notes, links and dates</sub></td>
-    <td align="center"><img src="docs/screenshots/calendar.png" width="270" alt="Calendar"/><br/><sub><b>Calendar</b> — the journal by date</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/collections.png" width="235" alt="Collections"/><br/><sub><b>Collections</b><br/>trips, each gathering its own places</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/collection_detail.png" width="235" alt="Inside a collection"/><br/><sub><b>Inside a collection</b><br/>places, transport and lodging</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/calendar.png" width="235" alt="Calendar"/><br/><sub><b>Calendar</b><br/>the journal by date</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/collections.png" width="270" alt="Collections"/><br/><sub><b>Collections</b> — trips, each gathering its own places</sub></td>
-    <td align="center"><img src="docs/screenshots/collection_detail.png" width="270" alt="Inside a collection"/><br/><sub><b>Inside a collection</b> — places, transport and lodging</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/map.png" width="270" alt="Map"/><br/><sub><b>Map</b> — everything with coordinates, clustered</sub></td>
-    <td align="center"><img src="docs/screenshots/world.png" width="270" alt="World"/><br/><sub><b>World</b> — countries, regions and cities visited</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/map.png" width="235" alt="Map"/><br/><sub><b>Map</b><br/>everything with coordinates, clustered</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/world.png" width="235" alt="World"/><br/><sub><b>World</b><br/>countries, regions and cities visited</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/search.png" width="235" alt="Search"/><br/><sub><b>Search</b><br/>one box for places, trips and regions</sub></td>
   </tr>
 </table>
 
-<sub>Android, on a Pixel 6a - left column light, right column dark. Photos come from Wikimedia
-Commons through the server's own image search.</sub>
+<sub>Android, on a Pixel 6a. Four of the nine are the dark theme - Places, inside a collection,
+the calendar and the world counters. Photos come from Wikimedia Commons through the server's own
+image search.</sub>
 
 ## 🏗️ Architecture
 
