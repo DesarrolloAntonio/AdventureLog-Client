@@ -20,3 +20,6 @@ AGENTS.md
 
 # Upstream web/server code kept locally for reference only (not versioned)
 reference/
+
+# Maestro UI-test flows: local scratch, rewritten per run
+.maestro/
