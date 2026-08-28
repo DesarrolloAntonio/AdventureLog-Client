@@ -20,9 +20,11 @@ import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Terrain
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.CalendarEvent
@@ -53,6 +56,8 @@ fun DashboardScreen(
     onAdventureClick: (Location) -> Unit = { },
     onTripClick: (UltraSlimCollection) -> Unit = { },
     onSeeCalendar: () -> Unit = { },
+    onAddPlace: () -> Unit = { },
+    onAddCollection: () -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (homeUiState) {
@@ -70,7 +75,9 @@ fun DashboardScreen(
                 today = homeUiState.today,
                 onAdventureClick = onAdventureClick,
                 onTripClick = onTripClick,
-                onSeeCalendar = onSeeCalendar
+                onSeeCalendar = onSeeCalendar,
+                onAddPlace = onAddPlace,
+                onAddCollection = onAddCollection
             )
         }
     }
@@ -88,11 +95,31 @@ private fun DashboardList(
     onAdventureClick: (Location) -> Unit,
     onTripClick: (UltraSlimCollection) -> Unit,
     onSeeCalendar: () -> Unit,
+    onAddPlace: () -> Unit,
+    onAddCollection: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // An in-progress trip outranks a future one: if the user is travelling right now, that is the
     // single most useful thing the screen can lead with.
     val featuredTrip = dashboard.activeTrip ?: dashboard.upcomingTrips.firstOrNull()
+
+    // Hiding empty sections is right until every section is empty, and then the first screen of a
+    // new account is a card of zeros above a blank half-page. A counter reading 0 / 250 is not an
+    // invitation; it is a scoreboard for a game nobody has started.
+    val nothingYet = dashboard.stats.locationCount == 0 &&
+        dashboard.stats.tripsCount == 0 &&
+        featuredTrip == null &&
+        dashboard.upcomingEvents.isEmpty() &&
+        dashboard.recentLocations.isEmpty()
+
+    if (nothingYet) {
+        FirstRun(
+            onAddPlace = onAddPlace,
+            onAddCollection = onAddCollection,
+            modifier = modifier
+        )
+        return
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -138,6 +165,61 @@ private fun DashboardList(
                     showMenu = false
                 )
             }
+        }
+    }
+}
+
+/**
+ * What a brand new account sees instead of its own emptiness.
+ *
+ * Both routes out are offered because both are real starting points: some people log the place
+ * they just came back from, others open a collection for a trip they are about to take.
+ */
+@Composable
+private fun FirstRun(
+    onAddPlace: () -> Unit,
+    onAddCollection: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize().padding(horizontal = 32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.Place,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(56.dp)
+        )
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = "Your journal starts here",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "Add somewhere you have been, or somewhere you are going. Once a trip takes " +
+                "shape, group its places into a collection.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(28.dp))
+        Button(
+            onClick = onAddPlace,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Add a place")
+        }
+        Spacer(Modifier.height(10.dp))
+        OutlinedButton(
+            onClick = onAddCollection,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Create a collection")
         }
     }
 }
