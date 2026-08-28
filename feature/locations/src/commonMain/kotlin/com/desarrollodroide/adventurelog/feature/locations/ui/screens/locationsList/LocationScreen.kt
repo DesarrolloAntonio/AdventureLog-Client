@@ -339,7 +339,7 @@ private fun AdventureListContent(
                         contentAlignment = Alignment.Center
                     ) {
                         LoadingCard(
-                            message = "Loading adventures...",
+                            message = "Loading places...",
                             showOverlay = false
                         )
                     }
