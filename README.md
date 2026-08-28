@@ -39,6 +39,29 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 - **Beautiful UI**: Modern Material 3 design with fluid animations and transitions
 - **Modular Navigation**: Feature-based navigation system for scalable routing
 
+## 🧪 Want to try it?
+
+Testers welcome - the app is alpha and being worked on daily, so this is the point where an
+outside pair of eyes is worth the most.
+
+**One thing first:** this is a *client*. It needs a
+[self-hosted AdventureLog server](https://github.com/seanmorley15/AdventureLog) to talk to, and
+there is no public demo instance. Without one you will get as far as the login screen and no
+further.
+
+Two ways in:
+
+- **Sideload the APK** from [Releases](https://github.com/DesarrolloAntonio/AdventureLog-Client/releases).
+  Android 7.0 and up.
+- **Join the Play internal test** - [open an issue](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/new)
+  saying you would like in and which Google account to add. Capped at 100 testers, and it means
+  updates arrive through Play like any other app.
+
+iOS builds and runs, but is not distributed yet - see Known Issues for what is missing there.
+
+What helps most is the specific kind of report: what you did, what happened instead, on which
+device and Android version. A screenshot beats a description.
+
 ## 📱 Screenshots
 
 <table>
