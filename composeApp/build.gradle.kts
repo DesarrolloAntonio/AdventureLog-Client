@@ -132,7 +132,14 @@ android {
             resValue("string", "app_name", "AdventureLog (Dev)")
         }
         getByName("release") {
-            isMinifyEnabled = false
+            // Play flagged both consequences of leaving this off: no mapping file for crash
+            // reports, and a download larger than it needs to be.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             if (keystorePath != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
