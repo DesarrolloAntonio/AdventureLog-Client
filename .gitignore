@@ -29,3 +29,7 @@ reference/
 *.keystore
 *.p12
 keystore.properties
+
+# Locally generated release artifacts - Android Studio writes the signed bundle here
+composeApp/release/
+*.aab
