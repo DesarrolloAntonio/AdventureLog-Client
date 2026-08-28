@@ -45,9 +45,13 @@ class LoginRepositoryImpl(
             } catch (e: HttpException) {
                 logger.e { "HTTP Error during login: ${e.code}" }
                 when (e.code) {
+                    // allauth answers a wrong username or password with 400 and the code
+                    // username_password_mismatch, not 401 - so the commonest mistake anyone can
+                    // make was landing on "try again later", which suggests waiting rather than
+                    // checking what you typed.
+                    400 -> Either.Left(ApiResponse.InvalidCredentials)
                     401 -> Either.Left(ApiResponse.InvalidCredentials)
                     403 -> Either.Left(ApiResponse.InvalidCredentials)
-                    404 -> Either.Left(ApiResponse.HttpError)
                     else -> Either.Left(ApiResponse.HttpError)
                 }
             } catch (e: IOException) {
