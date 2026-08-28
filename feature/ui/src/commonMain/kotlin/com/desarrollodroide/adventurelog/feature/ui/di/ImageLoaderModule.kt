@@ -72,9 +72,9 @@ val imageLoaderModule = module {
         }
     }
 
-    single { createImageBytesProvider(get()) }
+    single { createImageBytesProvider(resolvePlatformContext()) }
 
-    single { createPlatformFiles(get()) }
+    single { createPlatformFiles(resolvePlatformContext()) }
 
     single { AuthenticatedFileDownloader(client = get(named("imageClient"))) }
 }
