@@ -34,7 +34,10 @@ val httpLoggingEnabled = providers.gradleProperty("adventurelog.httpLogging")
     .getOrElse(false)
 
 buildConfig {
-    packageName = "com.desarrollodroide.adventurelog"
+    // Its own package, not the app's. Generating into com.desarrollodroide.adventurelog put this
+    // class at the same fully-qualified name as the one AGP generates for composeApp, and the two
+    // collided when dexing - which is why assembleRelease had never once succeeded.
+    packageName = "com.desarrollodroide.adventurelog.core.network"
     useKotlinOutput { internalVisibility = true }
     buildConfigField(
         "String",

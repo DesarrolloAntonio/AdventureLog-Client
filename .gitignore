@@ -23,3 +23,9 @@ reference/
 
 # Maestro UI-test flows: local scratch, rewritten per run
 .maestro/
+
+# Signing material - belongs in CI secrets, never here
+*.jks
+*.keystore
+*.p12
+keystore.properties

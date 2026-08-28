@@ -97,8 +97,8 @@ android {
         applicationId = "com.desarrollodroide.adventurelog"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 8
-        versionName = "0.0.8-alpha"
+        versionCode = (findProperty("versionCode") as String).toInt()
+        versionName = findProperty("versionName") as String
 
         // Set the Maps API Key as a BuildConfig field
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
@@ -109,6 +109,22 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    // The keystore never lives in this repository. CI writes it from a secret and passes the
+    // credentials as environment variables; a machine without them simply builds unsigned, so a
+    // clone still compiles for anyone who is not publishing.
+    val keystorePath: String? = System.getenv("KEYSTORE_PATH")
+
+    signingConfigs {
+        if (keystorePath != null) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("RELEASE_STORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
@@ -117,6 +133,9 @@ android {
         }
         getByName("release") {
             isMinifyEnabled = false
+            if (keystorePath != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     buildFeatures {

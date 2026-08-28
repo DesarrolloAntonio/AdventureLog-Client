@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.di
 
-import com.desarrollodroide.adventurelog.BuildConfig
+import com.desarrollodroide.adventurelog.core.network.BuildConfig
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.ktor.KtorAdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.datasource.WikipediaNetworkDataSource
