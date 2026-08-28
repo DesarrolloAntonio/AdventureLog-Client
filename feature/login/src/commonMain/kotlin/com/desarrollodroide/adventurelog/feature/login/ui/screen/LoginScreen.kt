@@ -33,7 +33,6 @@ import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreenRoute(
@@ -69,19 +68,21 @@ internal fun LoginScreen(
     clearErrors: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(loginUiState) {
         if (loginUiState is LoginUiState.Success) {
             onNavigateToHome.invoke()
         } else if (loginUiState is LoginUiState.Error) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = loginUiState.message,
-                    duration = SnackbarDuration.Short
-                )
-            }
             clearErrors()
+            // A login error is the reason you are still on this screen, so it waits to be read
+            // rather than timing out: four seconds is not enough for a sentence that explains
+            // which address to use. Shown from the effect's own scope so pressing Login again
+            // cancels it - the previous complaint should not outlive the attempt that caused it.
+            snackbarHostState.showSnackbar(
+                message = loginUiState.message,
+                withDismissAction = true,
+                duration = SnackbarDuration.Indefinite
+            )
         }
     }
     
@@ -111,10 +112,6 @@ internal fun LoginScreen(
                 isLoading = loginUiState is LoginUiState.Loading,
                 showMessage = false
             )
-
-            if (loginUiState is LoginUiState.Error) {
-                clearErrors()
-            }
 
             // SnackbarHost positioned at the bottom
             SnackbarHost(
