@@ -5,20 +5,27 @@
 ![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.2-green.svg)
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-orange.svg)
 ![Modular](https://img.shields.io/badge/Design-Modular-yellow.svg)
-![KMM](https://img.shields.io/badge/Platform-KMM-purple.svg)
+![KMP](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-purple.svg)
 
 > ### 🚧 Under construction
 >
 > This client is being actively rebuilt against a live AdventureLog server, screen by screen, and
-> is **not ready for general use yet**. Expect things to move: screens are being redesigned,
-> wording is still settling, and some of what the web client does has no equivalent here yet -
-> the calendar, the user directory and global search are the known gaps.
+> is **not ready for general use yet**. Expect things to move: screens are being redesigned and
+> the wording is still settling.
+>
+> **Android** is where the work happens and where everything is tested. **iOS** builds and runs -
+> sign-in, the dashboard, places, collections and a place's own page all work - but it has had far
+> less use, and a few things are Android-only for now (see Known Issues).
+>
+> Still missing against the web client: downloading the calendar as `.ics`, uploading a profile
+> picture, and the parts of Settings that cover MFA, API keys and third-party integrations. There
+> is no user directory and none is planned - sharing a collection has its own people picker.
 >
 > The screenshots below are from an earlier build and no longer match the app.
 >
 > A first release is the goal; there is no date on it.
 
-Adventure Log is a cross-platform travel journal application built with Kotlin Multiplatform Mobile (KMM) and Compose Multiplatform. The app allows users to document their journeys, organize adventures by collections, and explore their memories through rich visual interfaces.
+Adventure Log is a cross-platform travel journal application built with Kotlin Multiplatform and Compose Multiplatform. The app allows users to document their journeys, organize adventures by collections, and explore their memories through rich visual interfaces.
 
 ## 🌟 Features
 
@@ -27,6 +34,10 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 - **Collections Organization**: Group and organize places into meaningful collections
 - **World Exploration**: Track visited countries, regions, and cities with comprehensive statistics
 - **Interactive Map**: Visualize places on an interactive map, clustered and filterable
+- **Calendar**: Everything with a date on it, as an agenda you can scroll through and filter
+- **Search Everything**: One box for places, collections, cities and countries at once
+- **Sharing**: Invite someone with a public profile to a collection, or remove them again
+- **Markdown Descriptions**: Descriptions written on the web render as written, not as source
 - **Beautiful UI**: Modern Material 3 design with fluid animations and transitions
 - **Modular Navigation**: Feature-based navigation system for scalable routing
 
@@ -77,6 +88,7 @@ AdventureLog/
 │   └── permissions/      # Permission handling
 │
 └── feature/              # Feature modules
+    ├── calendar/         # Dated events as a scrollable agenda
     ├── collections/      # Collections management and organization
     ├── detail/           # A place's own page
     ├── home/             # App shell, bottom bar and dashboard
@@ -172,9 +184,9 @@ The app uses sealed classes to represent different UI states, providing type-saf
 
 ### Prerequisites
 
-- Android Studio Hedgehog or newer
-- Xcode 14 or newer (for iOS development)
-- JDK 11+
+- An Android Studio new enough for AGP 8.13
+- JDK 17 (what CI builds with; the compiled bytecode targets Java 11)
+- Xcode 26 (for iOS development) - the iOS deployment target is 15.3
 - Kotlin 2.2.21
 
 ### Setup & Build
@@ -245,6 +257,47 @@ The project uses a typical KMM setup with Gradle, supporting:
 - **Platform-Specific Adapters**: Native functionality wrapped in platform modules
 - **Expect/Actual Pattern**: For platform-specific implementations
 
+## 🔭 What's next
+
+Roughly in the order that makes sense, because several of these unblock each other.
+
+**Offline first.** The app is a thin client today: every screen is a round trip, and with nothing
+cached it shows a spinner on a train. Places, collections and the dashboard should persist
+locally, the server should become the thing that refreshes them rather than the only source, and
+writes made without a connection should queue until there is one.
+
+**Type-safe navigation routes.** Routes are plain strings right now, with serialized JSON passed
+inside them. That is fragile on its own terms, and it is also the prerequisite hiding behind two
+other items on this list - both Navigation 3 and the SwiftUI shell need routes that are objects
+with identity, not strings to be parsed.
+
+**Liquid Glass on iOS.** iOS 26 renders it through native `TabView`, `NavigationStack` and
+toolbars, so a Compose app only gets it by handing that chrome to SwiftUI and letting Compose draw
+the content inside each screen - the approach JetBrains documents in
+[Liquid Glass in Compose Multiplatform](https://kotlinlang.org/docs/multiplatform/ios-liquid-glass.html).
+Needs typed routes first, and a decision that the iOS tab bar stops being Compose's.
+
+**Toolchain upgrade.** Compose Multiplatform 1.9.0 first, on its own: it is built against
+kotlinx-datetime 0.7.1 and so fixes the iOS date picker outright. Kotlin, AGP 9 and compileSdk 36
+come after, as one piece - the Coil, Koin and Ktor updates are all gated behind them.
+
+**iOS parity.** `PlatformBackHandler` does nothing on iOS, which silently disables the
+"discard your changes?" prompt and anything else built on it. Related: there is no system back
+gesture, because the whole app is a single view controller.
+
+**Adaptive layouts.** `NavigationSuiteScaffold` turns the bottom bar into a navigation rail on
+tablets, foldables and landscape. The multiplatform artifact already matches the Compose version
+in use. If the SwiftUI shell happens, this becomes the Android and desktop answer only.
+
+**A signed release build.** There is no signing configuration in the project at all, and CI
+publishes a debug APK. This is the piece missing between here and a store listing.
+
+**The remaining gaps against the web client.** Downloading the calendar as `.ics`, uploading a
+profile picture, and the parts of Settings covering MFA, API keys and third-party integrations.
+
+**Wider tests.** The data layer and the ViewModels have no tests, and while there are Maestro
+flows, nothing runs them in CI.
+
 ## 🗺️ Roadmap
 
 For detailed roadmap and planned features, see [ROADMAP.md](ROADMAP.md).
@@ -252,10 +305,10 @@ For detailed roadmap and planned features, see [ROADMAP.md](ROADMAP.md).
 ## 🧪 Testing Strategy
 
 - **Unit Tests**:
-  - ✅ Domain layer: Use cases tests (8 test files)
-  - ✅ Model layer: Data models tests (12 test files)
+  - ✅ Model layer: models, mappers and the Markdown parser (20 test files)
+  - ✅ Domain layer: use cases (10 test files)
+  - ✅ Network layer: DTO mapping and session handling (4 test files)
   - 🚧 Data layer tests (Coming)
-  - 🚧 Network layer tests (Coming)
   - 🚧 ViewModel tests (Coming)
 - **Integration Tests**: Verify interactions between components (Coming)
 - **UI Tests**: Test user interfaces and workflows (Coming)
@@ -263,6 +316,17 @@ For detailed roadmap and planned features, see [ROADMAP.md](ROADMAP.md).
 ## ⚠️ Known Issues
 
 - **MockK Support**: MockK doesn't support Kotlin/Native targets in Kotlin Multiplatform. Tests use manual fakes instead of mocking libraries for cross-platform compatibility.
+
+- **Date picker on iOS**: Compose Multiplatform 1.8.2 is built against kotlinx-datetime 0.6.0
+  while this project uses 0.7.1, which moved `Instant`. Kotlin/Native's partial linkage lets the
+  framework link anyway and leaves the missing symbols throwing at runtime, so opening a date
+  picker on iOS fails. Android is unaffected. Fixed by moving to Compose Multiplatform 1.9.0,
+  which is built against 0.7.1.
+
+- **Back handling on iOS**: `PlatformBackHandler` has no iOS implementation, so anything relying
+  on it - such as the "discard your changes?" prompt when leaving a half-filled form - does
+  nothing there. The whole app is a single `ComposeUIViewController`, so there is no
+  `UINavigationController` to provide a system back gesture either.
 
 ## 🛠️ Development Workflow
 
