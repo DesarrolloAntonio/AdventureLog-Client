@@ -21,8 +21,6 @@
 > picture, and the parts of Settings that cover MFA, API keys and third-party integrations. There
 > is no user directory and none is planned - sharing a collection has its own people picker.
 >
-> The screenshots below are from an earlier build and no longer match the app.
->
 > A first release is the goal; there is no date on it.
 
 Adventure Log is a cross-platform travel journal application built with Kotlin Multiplatform and Compose Multiplatform. The app allows users to document their journeys, organize adventures by collections, and explore their memories through rich visual interfaces.
@@ -43,24 +41,21 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 
 ## 📱 Screenshots
 
-### Main Navigation
 <p align="center">
-  <img src="docs/screenshots/login_screen.png" width="230" alt="Login Screen"/>
-  <img src="docs/screenshots/home_screen.png" width="230" alt="Home Screen"/>
+  <img src="docs/screenshots/home.png" width="200" alt="Home"/>
+  <img src="docs/screenshots/places.png" width="200" alt="Places"/>
+  <img src="docs/screenshots/place_detail.png" width="200" alt="A place"/>
+  <img src="docs/screenshots/calendar.png" width="200" alt="Calendar"/>
+</p>
+<p align="center">
+  <img src="docs/screenshots/collections.png" width="200" alt="Collections"/>
+  <img src="docs/screenshots/collection_detail.png" width="200" alt="Inside a collection"/>
+  <img src="docs/screenshots/map.png" width="200" alt="Map"/>
+  <img src="docs/screenshots/world.png" width="200" alt="World"/>
 </p>
 
-### Collections Management
-<p align="center">
-  <img src="docs/screenshots/collections_screen.png" width="230" alt="Collections Screen"/>
-  <img src="docs/screenshots/collections_detail_screen.png" width="230" alt="Collection Detail"/>
-  <img src="docs/screenshots/add_collection_screen.png" width="230" alt="Add Collection"/>
-</p>
-
-### Adventure Features
-<p align="center">
-  <img src="docs/screenshots/detail_adventure_screen.png" width="230" alt="Adventure Detail"/>
-  <img src="docs/screenshots/add_adventure_screen.png" width="230" alt="Add Adventure"/>
-</p>
+<sub>Android, taken on a Pixel 6a. Photos come from Wikimedia Commons through the server's own
+image search.</sub>
 
 ## 🏗️ Architecture
 
