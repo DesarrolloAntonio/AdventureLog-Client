@@ -42,16 +42,16 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/home.png" width="200" alt="Home"/>
-  <img src="docs/screenshots/places.png" width="200" alt="Places"/>
-  <img src="docs/screenshots/place_detail.png" width="200" alt="A place"/>
-  <img src="docs/screenshots/calendar.png" width="200" alt="Calendar"/>
+  <img src="docs/screenshots/home.png" width="215" alt="Home"/>
+  <img src="docs/screenshots/places.png" width="215" alt="Places"/>
+  <img src="docs/screenshots/place_detail.png" width="215" alt="A place"/>
+  <img src="docs/screenshots/calendar.png" width="215" alt="Calendar"/>
 </p>
 <p align="center">
-  <img src="docs/screenshots/collections.png" width="200" alt="Collections"/>
-  <img src="docs/screenshots/collection_detail.png" width="200" alt="Inside a collection"/>
-  <img src="docs/screenshots/map.png" width="200" alt="Map"/>
-  <img src="docs/screenshots/world.png" width="200" alt="World"/>
+  <img src="docs/screenshots/collections.png" width="215" alt="Collections"/>
+  <img src="docs/screenshots/collection_detail.png" width="215" alt="Inside a collection"/>
+  <img src="docs/screenshots/map.png" width="215" alt="Map"/>
+  <img src="docs/screenshots/world.png" width="215" alt="World"/>
 </p>
 
 <sub>Android, taken on a Pixel 6a. Photos come from Wikimedia Commons through the server's own
