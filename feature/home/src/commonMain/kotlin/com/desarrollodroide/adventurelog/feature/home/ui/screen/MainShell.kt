@@ -360,8 +360,11 @@ fun HomeScreenContent(
                         onSelect = { navigateTo(it) }
                     )
                 },
-                // Make Scaffold content transparent
-                containerColor = Color.Transparent
+                // Transparent has no content colour of its own, so Material resolves it to
+                // unspecified and text falls back to black - invisible on the dark theme's
+                // backdrop. The gradient is the background here, so say what sits on it.
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ) { innerPadding ->
                 Box(
                     modifier = Modifier

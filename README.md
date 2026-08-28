@@ -41,18 +41,24 @@ Adventure Log is a cross-platform travel journal application built with Kotlin M
 
 ## 📱 Screenshots
 
-<p align="center">
-  <img src="docs/screenshots/home.png" width="215" alt="Home"/>
-  <img src="docs/screenshots/places.png" width="215" alt="Places"/>
-  <img src="docs/screenshots/place_detail.png" width="215" alt="A place"/>
-  <img src="docs/screenshots/calendar.png" width="215" alt="Calendar"/>
-</p>
-<p align="center">
-  <img src="docs/screenshots/collections.png" width="215" alt="Collections"/>
-  <img src="docs/screenshots/collection_detail.png" width="215" alt="Inside a collection"/>
-  <img src="docs/screenshots/map.png" width="215" alt="Map"/>
-  <img src="docs/screenshots/world.png" width="215" alt="World"/>
-</p>
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/home.png" width="270" alt="Home"/><br/><sub><b>Home</b> — what is coming up, and where you have been</sub></td>
+    <td align="center"><img src="docs/screenshots/places.png" width="270" alt="Places"/><br/><sub><b>Places</b> — everywhere you have logged, searchable</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/place_detail.png" width="270" alt="A place"/><br/><sub><b>A place</b> — photos, notes, links and dates</sub></td>
+    <td align="center"><img src="docs/screenshots/calendar.png" width="270" alt="Calendar"/><br/><sub><b>Calendar</b> — the journal by date</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/collections.png" width="270" alt="Collections"/><br/><sub><b>Collections</b> — trips, each gathering its own places</sub></td>
+    <td align="center"><img src="docs/screenshots/collection_detail.png" width="270" alt="Inside a collection"/><br/><sub><b>Inside a collection</b> — places, transport and lodging</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/map.png" width="270" alt="Map"/><br/><sub><b>Map</b> — everything with coordinates, clustered</sub></td>
+    <td align="center"><img src="docs/screenshots/world.png" width="270" alt="World"/><br/><sub><b>World</b> — countries, regions and cities visited</sub></td>
+  </tr>
+</table>
 
 <sub>Android, taken on a Pixel 6a. Photos come from Wikimedia Commons through the server's own
 image search.</sub>
