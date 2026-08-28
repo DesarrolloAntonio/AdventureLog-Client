@@ -298,10 +298,6 @@ profile picture, and the parts of Settings covering MFA, API keys and third-part
 **Wider tests.** The data layer and the ViewModels have no tests, and while there are Maestro
 flows, nothing runs them in CI.
 
-## 🗺️ Roadmap
-
-For detailed roadmap and planned features, see [ROADMAP.md](ROADMAP.md).
-
 ## 🧪 Testing Strategy
 
 - **Unit Tests**:
