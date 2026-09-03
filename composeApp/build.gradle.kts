@@ -148,6 +148,8 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        // AGP 9 turns this off by default; the debug build type sets app_name through it.
+        resValues = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
