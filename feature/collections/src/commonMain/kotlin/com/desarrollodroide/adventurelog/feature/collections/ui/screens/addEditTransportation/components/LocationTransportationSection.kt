@@ -127,16 +127,16 @@ fun LocationTransportationSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(300.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 MapView(
                     originLat = formData.originLatitude?.toDoubleOrNull(),
                     originLng = formData.originLongitude?.toDoubleOrNull(),
                     destinationLat = formData.destinationLatitude?.toDoubleOrNull(),
                     destinationLng = formData.destinationLongitude?.toDoubleOrNull(),
-                    onMapClick = { lat, lng ->
-                        // Handle map click if needed
-                    },
+                    // The two ends are set by searching above, not by pointing at the map: a tap
+                    // cannot say which of the two it means.
+                    onMapClick = { _, _ -> },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
