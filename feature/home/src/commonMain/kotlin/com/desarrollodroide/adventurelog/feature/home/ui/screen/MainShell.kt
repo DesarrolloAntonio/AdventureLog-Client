@@ -260,8 +260,10 @@ fun HomeScreenContent(
                 topBar = {
                     MediumTopAppBar(
                         title = {
+                            // No fillMaxHeight here: the app bar already centres its title, and
+                            // filling the height makes the bar grow to half the screen under
+                            // Compose 1.12's looser slot constraints - taking the content with it.
                             Box(
-                                modifier = Modifier.fillMaxHeight(),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 // If we're in a collection detail, show a simple breadcrumb
