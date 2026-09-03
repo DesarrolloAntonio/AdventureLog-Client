@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -25,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -110,58 +112,92 @@ fun CalendarScreen(
                 )
             }
 
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                if (state.availableTypes.size > 1) {
-                    item {
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            MetaChip(
-                                text = "All",
-                                tone = if (state.selectedTypes.isEmpty()) {
-                                    ChipTone.ACCENT
-                                } else {
-                                    ChipTone.NEUTRAL
-                                },
-                                onClick = onClearTypes
-                            )
-                            state.availableTypes.forEach { type ->
+            else -> {
+                val listState = rememberLazyListState()
+
+                // Web opens the calendar on today's month, not the start of everything the
+                // account has ever logged - land here the same way instead of making the user
+                // scroll past a year of past trips first.
+                LaunchedEffect(state.days, state.today) {
+                    val index = todayScrollIndex(state)
+                    if (index > 0) listState.scrollToItem(index)
+                }
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState,
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    if (state.availableTypes.size > 1) {
+                        item {
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 MetaChip(
-                                    text = type.replaceFirstChar { it.uppercase() },
-                                    tone = if (type in state.selectedTypes) {
+                                    text = "All",
+                                    tone = if (state.selectedTypes.isEmpty()) {
                                         ChipTone.ACCENT
                                     } else {
                                         ChipTone.NEUTRAL
                                     },
-                                    onClick = { onToggleType(type) }
+                                    onClick = onClearTypes
                                 )
+                                state.availableTypes.forEach { type ->
+                                    MetaChip(
+                                        text = type.replaceFirstChar { it.uppercase() },
+                                        tone = if (type in state.selectedTypes) {
+                                            ChipTone.ACCENT
+                                        } else {
+                                            ChipTone.NEUTRAL
+                                        },
+                                        onClick = { onToggleType(type) }
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                var lastMonth: String? = null
-                state.days.forEach { day ->
-                    val month = "${day.date.year}-${day.date.monthNumber}"
-                    if (month != lastMonth) {
-                        lastMonth = month
-                        item(key = "month-$month") {
-                            MonthHeading(day.date)
+                    var lastMonth: String? = null
+                    state.days.forEach { day ->
+                        val month = "${day.date.year}-${day.date.monthNumber}"
+                        if (month != lastMonth) {
+                            lastMonth = month
+                            item(key = "month-$month") {
+                                MonthHeading(day.date)
+                            }
                         }
-                    }
-                    item(key = "day-${day.date}") {
-                        DayRow(day = day, isToday = day.date == state.today)
+                        item(key = "day-${day.date}") {
+                            DayRow(day = day, isToday = day.date == state.today)
+                        }
                     }
                 }
             }
         }
     }
+}
+
+/**
+ * The LazyColumn item index of the first day at or after today, counting the header chip row
+ * and each month divider exactly as the list below builds them. 0 (the top) when there is no
+ * today - either the account has no dates at all, or every one of them is already in the past.
+ */
+private fun todayScrollIndex(state: CalendarUiState): Int {
+    val today = state.today ?: return 0
+    var index = if (state.availableTypes.size > 1) 1 else 0
+    var lastMonth: String? = null
+    state.days.forEach { day ->
+        val month = "${day.date.year}-${day.date.monthNumber}"
+        if (month != lastMonth) {
+            lastMonth = month
+            index++
+        }
+        if (day.date >= today) return index
+        index++
+    }
+    return 0
 }
 
 @Composable
