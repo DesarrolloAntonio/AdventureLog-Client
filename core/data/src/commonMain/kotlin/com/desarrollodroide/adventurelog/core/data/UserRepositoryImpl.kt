@@ -87,8 +87,12 @@ class UserRepositoryImpl(
                 }
             }
         } catch (e: Exception) {
-            logger.e { "Error deserializing user session: ${e.message}" }
-            settings.remove(Keys.USER_SESSION)
+            // Leave the stored session alone. This runs at construction, before anything has
+            // asked the server anything, so a failure here is local - a field this build no
+            // longer understands, a half-written value - and deleting the token would log the
+            // user out over a parse the next build might well manage. They start at the login
+            // screen either way; this way their session is still there to come back to.
+            logger.e { "Could not read the stored session, leaving it in place: ${e.message}" }
         }
     }
 
