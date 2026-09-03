@@ -19,6 +19,9 @@ kotlin {
 
             implementation(libs.koin.composeVM)
             implementation(libs.material3.adaptive.navigation.suite)
+            implementation(libs.navigation3.ui)
+            implementation(libs.navigation3.runtime)
+            implementation(libs.material3.adaptive.navigation3)
 
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)
