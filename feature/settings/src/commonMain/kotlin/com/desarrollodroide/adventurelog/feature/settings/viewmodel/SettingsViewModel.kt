@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountError
 import com.desarrollodroide.adventurelog.core.domain.repository.AccountRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.SettingsRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
@@ -126,8 +127,14 @@ class SettingsViewModel(
             )
             _profile.update { it.copy(isSaving = false) }
             if (result is Either.Left) {
-                _profile.update { it.copy(form = it.saved) }
-                _messages.send(result.value)
+                // A refusal is the server's verdict on this value - "that username is taken" -
+                // so the form goes back to what the server holds. Not having reached the server
+                // is not a verdict on anything: keep what was typed, or the message telling them
+                // to try again is asking them to type it a second time first.
+                if (result.value.serverRefused) {
+                    _profile.update { it.copy(form = it.saved) }
+                }
+                _messages.send(result.value.message)
                 return@launch
             }
             // Something flipped while this one was in flight - send that too rather than leaving
@@ -147,7 +154,7 @@ class SettingsViewModel(
                     _messages.send("Password changed.")
                     onSuccess()
                 }
-                is Either.Left -> _messages.send(result.value)
+                is Either.Left -> _messages.send(result.value.message)
             }
         }
     }
@@ -160,7 +167,7 @@ class SettingsViewModel(
                     it.copy(addresses = result.value, isLoading = false)
                 }
                 is Either.Left -> _emails.update {
-                    it.copy(isLoading = false, error = result.value)
+                    it.copy(isLoading = false, error = result.value.message)
                 }
             }
         }
@@ -193,7 +200,7 @@ class SettingsViewModel(
      * Every address action ends with a re-read: the server decides what "verified" and "primary"
      * mean, and guessing locally is how the two drift apart.
      */
-    private fun runEmailAction(success: String, action: suspend () -> Either<String, Unit>) {
+    private fun runEmailAction(success: String, action: suspend () -> Either<AccountError, Unit>) {
         if (_emails.value.isBusy) return
         _emails.update { it.copy(isBusy = true) }
         viewModelScope.launch {
@@ -204,7 +211,7 @@ class SettingsViewModel(
                     _messages.send(success)
                     loadEmails()
                 }
-                is Either.Left -> _messages.send(result.value)
+                is Either.Left -> _messages.send(result.value.message)
             }
         }
     }
@@ -217,7 +224,7 @@ class SettingsViewModel(
                     it.copy(usage = result.value, isLoading = false)
                 }
                 is Either.Left -> _storage.update {
-                    it.copy(isLoading = false, error = result.value)
+                    it.copy(isLoading = false, error = result.value.message)
                 }
             }
         }
