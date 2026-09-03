@@ -96,9 +96,13 @@ class CollectionsViewModel(
     private val _statusFilter = MutableStateFlow<TripStatus?>(null)
     val statusFilter: StateFlow<TripStatus?> = _statusFilter.asStateFlow()
 
-    /** How many collections the account holds, for the header. */
+    /**
+     * How many collections the account holds, for the header. Archived ones are excluded: the
+     * list this number sits above comes from /api/collections/, which leaves them out, while the
+     * flow behind this count comes from /api/collections/all/, which does not.
+     */
     val collectionCount: StateFlow<Int> = observeCollectionsUseCase()
-        .map { it.size }
+        .map { collections -> collections.count { !it.isArchived } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     /**

@@ -240,7 +240,18 @@ class CollectionsRepositoryImpl(
         collectionId: String,
         archived: Boolean
     ): Either<ApiResponse, Collection> = guard {
-        networkDataSource.setCollectionArchived(collectionId, archived).toDomainModel()
+        val collection = networkDataSource.setCollectionArchived(collectionId, archived)
+            .toDomainModel()
+
+        // Archiving changes which collections the paged list should show, so it has to invalidate
+        // paging and update the cached list the same way create and delete do. Without this the
+        // archived collection stayed on screen until the process died.
+        _collectionsFlow.value = _collectionsFlow.value.map {
+            if (it.id == collectionId) it.copy(isArchived = archived) else it
+        }
+        _version.value++
+
+        collection
     }
 
     override suspend fun exportCollection(
