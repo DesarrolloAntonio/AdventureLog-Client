@@ -56,6 +56,7 @@ fun DashboardScreen(
     onAdventureClick: (Location) -> Unit = { },
     onTripClick: (UltraSlimCollection) -> Unit = { },
     onSeeCalendar: () -> Unit = { },
+    onSeeAllPlaces: () -> Unit = { },
     onAddPlace: () -> Unit = { },
     onAddCollection: () -> Unit = { },
 ) {
@@ -76,6 +77,7 @@ fun DashboardScreen(
                 onAdventureClick = onAdventureClick,
                 onTripClick = onTripClick,
                 onSeeCalendar = onSeeCalendar,
+                onSeeAllPlaces = onSeeAllPlaces,
                 onAddPlace = onAddPlace,
                 onAddCollection = onAddCollection
             )
@@ -95,6 +97,7 @@ private fun DashboardList(
     onAdventureClick: (Location) -> Unit,
     onTripClick: (UltraSlimCollection) -> Unit,
     onSeeCalendar: () -> Unit,
+    onSeeAllPlaces: () -> Unit,
     onAddPlace: () -> Unit,
     onAddCollection: () -> Unit,
     modifier: Modifier = Modifier
@@ -102,6 +105,14 @@ private fun DashboardList(
     // An in-progress trip outranks a future one: if the user is travelling right now, that is the
     // single most useful thing the screen can lead with.
     val featuredTrip = dashboard.activeTrip ?: dashboard.upcomingTrips.firstOrNull()
+
+    // The featured card above already covers the soonest trip (or the one in progress); the rest
+    // of upcomingTrips would otherwise never be reachable from Home.
+    val otherTrips = if (dashboard.activeTrip != null) {
+        dashboard.upcomingTrips
+    } else {
+        dashboard.upcomingTrips.drop(1)
+    }
 
     // Hiding empty sections is right until every section is empty, and then the first screen of a
     // new account is a card of zeros above a blank half-page. A counter reading 0 / 250 is not an
@@ -136,6 +147,15 @@ private fun DashboardList(
             StatsCard(dashboard)
         }
 
+        if (otherTrips.isNotEmpty()) {
+            item(key = "trips-header") {
+                SectionHeader(title = "Upcoming trips")
+            }
+            items(otherTrips, key = { "trip-${it.id}" }) { trip ->
+                TripRow(trip = trip, onClick = { onTripClick(trip) })
+            }
+        }
+
         if (dashboard.upcomingEvents.isNotEmpty()) {
             item(key = "events-header") {
                 // Home shows the next few; the calendar has the rest, and this is where anyone
@@ -154,8 +174,9 @@ private fun DashboardList(
         if (dashboard.recentLocations.isNotEmpty()) {
             item(key = "recent-header") {
                 SectionHeader(
-                    title = "Recently updated",
-                    trailing = "${dashboard.stats.locationCount}"
+                    title = "Recently updated (${dashboard.stats.locationCount})",
+                    trailing = "See all",
+                    onTrailingClick = onSeeAllPlaces
                 )
             }
             items(dashboard.recentLocations, key = { "loc-${it.id}" }) { location ->
@@ -263,6 +284,14 @@ private fun SectionHeader(
     }
 }
 
+private fun tripSubtitle(trip: UltraSlimCollection): String = when {
+    trip.status == TripStatus.IN_PROGRESS -> "Happening now"
+    trip.daysUntilStart == 0 -> "Starts today"
+    trip.daysUntilStart == 1 -> "Starts tomorrow"
+    trip.daysUntilStart != null -> "In ${trip.daysUntilStart} days"
+    else -> "Upcoming"
+}
+
 /**
  * The trip the user is on, or the next one they will be on.
  */
@@ -273,13 +302,7 @@ private fun TripCard(
     modifier: Modifier = Modifier
 ) {
     val inProgress = trip.status == TripStatus.IN_PROGRESS
-    val subtitle = when {
-        inProgress -> "Happening now"
-        trip.daysUntilStart == 0 -> "Starts today"
-        trip.daysUntilStart == 1 -> "Starts tomorrow"
-        trip.daysUntilStart != null -> "In ${trip.daysUntilStart} days"
-        else -> "Upcoming"
-    }
+    val subtitle = tripSubtitle(trip)
 
     Card(
         onClick = onClick,
@@ -318,6 +341,53 @@ private fun TripCard(
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )
             }
+        }
+    }
+}
+
+/**
+ * A trip further out than the featured one - same information as TripCard, in the compact row
+ * shape the events list already uses, since a full-size card per trip would push everything else
+ * off the first screen.
+ */
+@Composable
+private fun TripRow(
+    trip: UltraSlimCollection,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = trip.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (trip.adventureCount > 0) {
+                    Text(
+                        text = if (trip.adventureCount == 1) "1 place" else "${trip.adventureCount} places",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = tripSubtitle(trip),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

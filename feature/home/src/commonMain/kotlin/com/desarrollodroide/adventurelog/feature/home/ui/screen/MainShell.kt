@@ -407,6 +407,7 @@ fun HomeScreenContent(
                                     )
                                 },
                                 onSeeCalendar = { navigateTo(CurrentScreen.CALENDAR) },
+                                onSeeAllPlaces = { navigateTo(CurrentScreen.PLACES) },
                                 onAddPlace = {
                                     navController.navigate(NavigationRoutes.Locations.add)
                                 },
