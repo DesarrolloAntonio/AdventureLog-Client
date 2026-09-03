@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
 import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
@@ -53,10 +53,17 @@ class AdventureDetailViewModel(
             initialValue = emptyList()
         )
 
-    val collections: StateFlow<List<UltraSlimCollection>> = _locationState.map { state ->
+    // combine, not map + allCollections.value: the location can finish loading before
+    // observeCollectionsUseCase()'s first emission lands, and a one-shot read of .value at that
+    // instant would freeze this on an empty list forever, since _locationState never emits again
+    // once it reaches Success.
+    val collections: StateFlow<List<UltraSlimCollection>> = combine(
+        _locationState,
+        allCollections
+    ) { state, all ->
         when (state) {
             is LocationState.Success -> {
-                allCollections.value.filter { collection ->
+                all.filter { collection ->
                     state.location.collections.contains(collection.id)
                 }
             }

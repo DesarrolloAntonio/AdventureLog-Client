@@ -9,6 +9,8 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeNavGraph
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.loginNavGraph
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.CollectionsNavigator
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.DetailNavigator
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.HomeNavigator
@@ -63,7 +65,45 @@ fun AdventureLogNavGraph(
             )
         }
     }
-    
+
+    // A place's detail screen lives on this top-level controller, not MainShell's own nested
+    // one, so its "belongs to" chip needs the collection screens registered here too - the
+    // Collections tab keeps its own copy of these same routes on MainShell's controller for the
+    // primary flow. Editing here is a rare side door (an unrelated adventure or transportation
+    // reached this way), so those actions fall back to going home rather than duplicating the
+    // add/edit destinations a second time.
+    val collectionsFromDetailNavigator = object : CollectionsNavigator {
+        override fun navigateToCollectionDetail(collectionId: String, collectionName: String) {
+            navController.navigate(
+                NavigationRoutes.Collections.createDetailRoute(collectionId, collectionName)
+            )
+        }
+        override fun navigateToAddCollection() {
+            navigateToHome()
+        }
+        override fun navigateToEditCollection(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToAdventure(location: Location) {
+            navController.navigate("detail/${location.id}")
+        }
+        override fun navigateToEditAdventure(adventure: Location) {
+            navigateToHome()
+        }
+        override fun navigateToAddTransportation(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToEditTransportation(transportationId: String, transportationJson: String) {
+            navigateToHome()
+        }
+        override fun navigateToHome() {
+            navController.popBackStack(NavigationRoutes.Home.graph, inclusive = false)
+        }
+        override fun navigateBack() {
+            navController.navigateUp()
+        }
+    }
+
     AnimatedNavHost(
         modifier = modifier,
         startDestination = NavigationRoutes.Login.graph,
@@ -72,5 +112,6 @@ fun AdventureLogNavGraph(
         loginNavGraph(navigator = loginNavigator)
         homeNavGraph(navigator = homeNavigator)
         detailNavGraph(navigator = detailNavigator)
+        collectionsScreen(navigator = collectionsFromDetailNavigator)
     }
 }
