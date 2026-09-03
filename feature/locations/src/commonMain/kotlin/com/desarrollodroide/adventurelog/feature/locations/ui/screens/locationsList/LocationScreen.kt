@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
@@ -400,7 +403,11 @@ private fun AdventuresPagingList(
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit
 ) {
-    LazyColumn(
+    // One card per row is right on a phone and absurd on a tablet, where it stretches a
+    // photograph across 1600px. A minimum width lets the window decide the column count: one on a
+    // phone, two or three on a tablet, without either having to name a device.
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 360.dp),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 16.dp,
@@ -408,7 +415,8 @@ private fun AdventuresPagingList(
             top = 16.dp,
             bottom = 80.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(
             count = pagingItems.itemCount,
@@ -430,7 +438,7 @@ private fun AdventuresPagingList(
 
         when (pagingItems.loadState.append) {
             is LoadStateLoading -> {
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -446,7 +454,7 @@ private fun AdventuresPagingList(
 
             is LoadStateError -> {
                 val error = pagingItems.loadState.append as LoadStateError
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

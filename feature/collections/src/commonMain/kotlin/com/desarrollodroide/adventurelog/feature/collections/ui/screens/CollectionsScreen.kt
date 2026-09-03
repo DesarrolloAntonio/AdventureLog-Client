@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Folder
@@ -465,7 +469,9 @@ private fun CollectionsPagingList(
     onExportZip: (UltraSlimCollection) -> Unit = {},
     busyLabel: String? = null,
 ) {
-    LazyColumn(
+    // Same reasoning as the places list: let the width decide the column count.
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 360.dp),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 16.dp,
@@ -473,7 +479,8 @@ private fun CollectionsPagingList(
             top = 16.dp,
             bottom = 80.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(
             count = pagingItems.itemCount,
@@ -499,7 +506,7 @@ private fun CollectionsPagingList(
 
         when (pagingItems.loadState.append) {
             is LoadStateLoading -> {
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -515,7 +522,7 @@ private fun CollectionsPagingList(
 
             is LoadStateError -> {
                 val error = pagingItems.loadState.append as LoadStateError
-                item {
+                item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

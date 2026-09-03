@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationCity
@@ -144,32 +146,36 @@ private fun DashboardList(
         return
     }
 
-    LazyColumn(
+    // Only the place cards at the bottom gain from a second column; everything above them is a
+    // full-width row that would read worse cut in half, so those span the whole line.
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 360.dp),
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (featuredTrip != null) {
-            item(key = "trip") {
+            item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
                 TripCard(trip = featuredTrip, onClick = { onTripClick(featuredTrip) })
             }
         }
 
-        item(key = "stats") {
+        item(key = "stats", span = { GridItemSpan(maxLineSpan) }) {
             StatsCard(dashboard)
         }
 
         if (otherTrips.isNotEmpty()) {
-            item(key = "trips-header") {
+            item(key = "trips-header", span = { GridItemSpan(maxLineSpan) }) {
                 SectionHeader(title = "Upcoming trips")
             }
-            items(otherTrips, key = { "trip-${it.id}" }) { trip ->
+            items(otherTrips, key = { "trip-${it.id}" }, span = { GridItemSpan(maxLineSpan) }) { trip ->
                 TripRow(trip = trip, onClick = { onTripClick(trip) })
             }
         }
 
         if (dashboard.upcomingEvents.isNotEmpty()) {
-            item(key = "events-header") {
+            item(key = "events-header", span = { GridItemSpan(maxLineSpan) }) {
                 // Home shows the next few; the calendar has the rest, and this is where anyone
                 // looking at what is coming would think to ask for more of it.
                 SectionHeader(
@@ -178,13 +184,13 @@ private fun DashboardList(
                     onTrailingClick = onSeeCalendar
                 )
             }
-            items(dashboard.upcomingEvents, key = { "event-${it.id}" }) { event ->
+            items(dashboard.upcomingEvents, key = { "event-${it.id}" }, span = { GridItemSpan(maxLineSpan) }) { event ->
                 EventRow(event, today)
             }
         }
 
         if (dashboard.recentLocations.isNotEmpty()) {
-            item(key = "recent-header") {
+            item(key = "recent-header", span = { GridItemSpan(maxLineSpan) }) {
                 SectionHeader(
                     title = "Recently updated (${dashboard.stats.locationCount})",
                     trailing = "See all",

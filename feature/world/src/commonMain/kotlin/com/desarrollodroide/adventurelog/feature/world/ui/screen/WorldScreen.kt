@@ -13,6 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -128,17 +132,21 @@ private fun WorldScreenContent(
             }
             
             else -> {
-                LazyColumn(
+                // 250 flag cards is the longest list in the app, and the one that gains most
+                // from a second column. The header rows above it span the full width.
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 340.dp),
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 16.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     // Search bar and filter button as first item
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -161,7 +169,7 @@ private fun WorldScreenContent(
                     }
 
                     // Progress section
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         CompactProgressSection(
                             totalCountries = uiState.totalCountriesCount,
                             visitedCount = uiState.visitedCountriesCount,
@@ -172,7 +180,7 @@ private fun WorldScreenContent(
                     }
 
                     // Filter chips
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -194,7 +202,7 @@ private fun WorldScreenContent(
 
                     // Countries or empty state
                     if (uiState.filteredCountries.isEmpty()) {
-                        item {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
                             EmptyState(
                                 searchQuery = uiState.searchQuery,
                                 hasFilters = hasActiveFilters || uiState.selectedRegion != WorldRegion.ALL
