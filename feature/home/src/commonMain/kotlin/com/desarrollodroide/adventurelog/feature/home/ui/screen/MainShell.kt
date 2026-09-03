@@ -69,6 +69,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScreen
 import androidx.compose.material.icons.filled.Search
 import com.desarrollodroide.adventurelog.feature.home.ui.components.GlobalSearchSheet
@@ -479,7 +480,52 @@ fun HomeScreenContent(
                         )
 
                         // Collections screen with navigator
+                        composable(route = NavigationRoutes.Collections.route) {
+                            CollectionsPane(
+                                onAddCollection = {
+                                    navController.navigate(NavigationRoutes.Collections.add)
+                                },
+                                onEditCollection = { collection ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.createEditRoute(collection.id)
+                                    )
+                                },
+                                onAdventureClick = onAdventureClick,
+                                onEditAdventure = { adventure ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            adventureId = adventure.id,
+                                            adventureJson = json.encodeToString(
+                                                serializer = Location.serializer(),
+                                                value = adventure
+                                            )
+                                        )
+                                    )
+                                },
+                                onAddTransportation = { collectionId ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createAddRoute(
+                                            collectionId = collectionId
+                                        )
+                                    )
+                                },
+                                onEditTransportation = { transportation ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createEditRoute(
+                                            transportationId = transportation.id,
+                                            transportationJson = json.encodeToString(
+                                                serializer = Transportation.serializer(),
+                                                value = transportation
+                                            )
+                                        )
+                                    )
+                                },
+                                onHomeClick = { navigateTo(CurrentScreen.HOME) }
+                            )
+                        }
+
                         collectionsScreen(
+                            registerListRoute = false,
                             navigator = object : CollectionsNavigator {
                                 override fun navigateToCollectionDetail(
                                     collectionId: String,

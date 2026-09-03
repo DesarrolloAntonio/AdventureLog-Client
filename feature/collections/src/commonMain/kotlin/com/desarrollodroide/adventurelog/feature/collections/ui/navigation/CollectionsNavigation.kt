@@ -46,7 +46,9 @@ interface CollectionsNavigator {
  * Extension function to add collections screens to a navigation graph
  */
 fun NavGraphBuilder.collectionsScreen(
-    navigator: CollectionsNavigator
+    navigator: CollectionsNavigator,
+    // The two-pane collections screen registers the list itself, so it can wrap it.
+    registerListRoute: Boolean = true
 ) {
     val json = Json {
         ignoreUnknownKeys = true
@@ -55,7 +57,7 @@ fun NavGraphBuilder.collectionsScreen(
     }
     
     // Collections List Screen
-    composable(route = NavigationRoutes.Collections.route) { backStackEntry ->
+    if (registerListRoute) composable(route = NavigationRoutes.Collections.route) { backStackEntry ->
         val pagingItems = remember { mutableStateOf<LazyPagingItems<UltraSlimCollection>?>(null) }
         
         // Listen for refresh flag
