@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,16 +60,27 @@ fun DashboardScreen(
     onSeeAllPlaces: () -> Unit = { },
     onAddPlace: () -> Unit = { },
     onAddCollection: () -> Unit = { },
+    onRetry: () -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (homeUiState) {
             is HomeUiState.Loading -> LoadingDialog(isLoading = true, showMessage = false)
 
-            is HomeUiState.Error -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            // The commonest reason to land here is no signal, which is over the moment it is
+            // over - so offer the retry rather than making someone restart the app to get it.
+            // The calendar has said "Try again" all along; this screen only stated the problem.
+            is HomeUiState.Error -> Column(
+                modifier = Modifier.fillMaxSize().padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(homeUiState.message, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = homeUiState.message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(8.dp))
+                TextButton(onClick = onRetry) { Text("Try again") }
             }
 
             is HomeUiState.Success -> DashboardList(

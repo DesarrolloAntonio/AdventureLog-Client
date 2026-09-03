@@ -93,6 +93,7 @@ fun MainShellRoute(
             onAdventureClick(adventure)
         },
         onOpenLocationById = onOpenLocationById,
+        onRetryDashboard = viewModel::loadDashboard,
         onLogout = {
             viewModel.logout()
             onNavigateToLogin()
@@ -120,6 +121,7 @@ fun HomeScreenContent(
     userDetails: UserDetails? = null,
     onAdventureClick: (Location) -> Unit = { },
     onOpenLocationById: (String) -> Unit = { },
+    onRetryDashboard: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -408,6 +410,7 @@ fun HomeScreenContent(
                                 },
                                 onSeeCalendar = { navigateTo(CurrentScreen.CALENDAR) },
                                 onSeeAllPlaces = { navigateTo(CurrentScreen.PLACES) },
+                                onRetry = onRetryDashboard,
                                 onAddPlace = {
                                     navController.navigate(NavigationRoutes.Locations.add)
                                 },
