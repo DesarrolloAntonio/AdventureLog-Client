@@ -553,9 +553,9 @@ fun HomeScreenContent(
 
                         mapScreen(
                             navController = navController,
-                            onAdventureClick = { adventureId ->
-                                // TODO: Navigate to adventure detail with adventureId
-                            }
+                            // The map only knows an id, which is what onOpenLocationById is for -
+                            // the same route the web's pin popup offers behind "Ver detalles".
+                            onAdventureClick = onOpenLocationById
                         )
 
                         calendarScreen()
