@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
+import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.model.response.toDomainModel
 import co.touchlab.kermit.Logger
 
@@ -45,10 +46,23 @@ class InitializeSessionUseCase(
                     userRepository.setActiveSession(fresh)
                     fresh
                 } catch (e: Exception) {
-                    logger.e { "❌ Token validation failed: ${e.message}" }
-                    logger.d { "🧹 Clearing corrupted session" }
-                    userRepository.clearUserSession()
-                    null
+                    // Only the server gets to end a session. Being unable to reach it is not the
+                    // same answer as being turned away by it: this call fails for a phone with no
+                    // signal, and clearing the session there logged people out for going through
+                    // a tunnel - on an app whose whole subject is being away from home.
+                    val rejected = e is HttpException && (e.code == 401 || e.code == 403)
+
+                    if (rejected) {
+                        logger.e { "❌ Session rejected by the server (${e.code}), clearing it" }
+                        userRepository.clearUserSession()
+                        null
+                    } else {
+                        // Keep the stored session and carry on with what was saved. Whatever the
+                        // screens need beyond this will fail on its own and show its own error,
+                        // which is recoverable; a logout is not.
+                        logger.w { "⚠️ Could not reach the server to check the session: ${e.message}" }
+                        existingSession
+                    }
                 }
             } else {
                 null
