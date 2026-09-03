@@ -425,7 +425,32 @@ fun HomeScreenContent(
                         }
 
                         // Locations screen with navigator
+                        composable(route = NavigationRoutes.Locations.route) {
+                            PlacesPane(
+                                onAddPlace = {
+                                    navController.navigate(NavigationRoutes.Locations.add)
+                                },
+                                onEditPlace = { location ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            location.id,
+                                            json.encodeToString(location)
+                                        )
+                                    )
+                                },
+                                onCollectionClick = { collection ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.createDetailRoute(
+                                            collectionId = collection.id,
+                                            collectionName = collection.name
+                                        )
+                                    )
+                                }
+                            )
+                        }
+
                         locationsScreen(
+                            registerListRoute = false,
                             navigator = object : LocationsNavigator {
                                 override fun navigateToLocationDetail(location: Location) {
                                     onAdventureClick(location)

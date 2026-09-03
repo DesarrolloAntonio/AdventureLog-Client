@@ -32,6 +32,9 @@ fun CoverImageWithButtons(
     adventureName: String = "Adventure",
     onBackClick: () -> Unit,
     onShareClick: () -> Unit,
+    // False when this page is a pane beside the list it came from: there is nothing to go back
+    // to, because the list never left.
+    showBack: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val imageLoader = LocalImageLoader.current
@@ -59,7 +62,7 @@ fun CoverImageWithButtons(
         }
 
         // Back button
-        Box(
+        if (showBack) Box(
             modifier = Modifier
                 .padding(16.dp)
                 .padding(top = 24.dp)

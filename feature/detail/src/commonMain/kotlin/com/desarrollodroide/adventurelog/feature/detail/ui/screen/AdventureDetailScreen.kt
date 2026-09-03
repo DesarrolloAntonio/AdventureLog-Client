@@ -37,7 +37,8 @@ import androidx.compose.foundation.layout.Arrangement
 fun AdventureDetailScreenRoute(
     locationId: String,
     onBackClick: () -> Unit,
-    onCollectionClick: (UltraSlimCollection) -> Unit = {}
+    onCollectionClick: (UltraSlimCollection) -> Unit = {},
+    showBack: Boolean = true
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
     
@@ -82,7 +83,8 @@ fun AdventureDetailScreenRoute(
                     openingAttachmentId = openingAttachmentId,
                     onOpenAttachment = viewModel::openAttachment,
                     onShareLocation = { viewModel.shareLocation(state.location) },
-                    onCollectionClick = onCollectionClick
+                    onCollectionClick = onCollectionClick,
+                    showBack = showBack
                 )
                 SnackbarHost(
                     hostState = snackbarHostState,
@@ -127,6 +129,7 @@ fun AdventureDetailScreen(
     onOpenAttachment: (com.desarrollodroide.adventurelog.core.model.Attachment) -> Unit = {},
     onShareLocation: () -> Unit = {},
     onCollectionClick: (UltraSlimCollection) -> Unit = {},
+    showBack: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -140,7 +143,8 @@ fun AdventureDetailScreen(
             imageUrl = location.images.firstOrNull()?.image,
             adventureName = location.name,
             onBackClick = onBackClick,
-            onShareClick = onShareLocation
+            onShareClick = onShareLocation,
+            showBack = showBack
         )
 
         // The page proper, lifted over the bottom of the photograph.

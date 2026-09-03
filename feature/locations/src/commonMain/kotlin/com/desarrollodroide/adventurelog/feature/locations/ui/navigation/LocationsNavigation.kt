@@ -25,7 +25,10 @@ interface LocationsNavigator {
  * Extension function to add location screens to a navigation graph
  */
 fun NavGraphBuilder.locationsScreen(
-    navigator: LocationsNavigator
+    navigator: LocationsNavigator,
+    // The list is registered by the caller when it wants to wrap it in something of its own -
+    // the two-pane places screen does, and needs to own that route rather than duplicate it.
+    registerListRoute: Boolean = true
 ) {
     val json = Json {
         ignoreUnknownKeys = true
@@ -34,7 +37,7 @@ fun NavGraphBuilder.locationsScreen(
     }
     
     // Locations List Screen
-    composable(route = NavigationRoutes.Locations.route) {
+    if (registerListRoute) composable(route = NavigationRoutes.Locations.route) {
         LocationListScreen(
             onAdventureClick = { adventure ->
                 navigator.navigateToLocationDetail(adventure)

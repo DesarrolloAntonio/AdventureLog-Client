@@ -16,6 +16,7 @@ kotlin {
             implementation(projects.feature.collections)
             implementation(projects.feature.world)
             implementation(projects.feature.map)
+            implementation(projects.feature.detail)
 
             implementation(libs.koin.composeVM)
             implementation(libs.material3.adaptive.navigation.suite)
