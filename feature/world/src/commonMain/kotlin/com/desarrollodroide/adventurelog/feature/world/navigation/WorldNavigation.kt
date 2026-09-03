@@ -20,8 +20,12 @@ fun NavGraphBuilder.worldGraph(
                 onCountryClick = { countryCode ->
                     navController.navigate("${NavigationRoutes.Travel.route}/$countryCode")
                 },
+                // The web puts an "Abrir mapa" button in the same corner of its country list,
+                // and it goes to the same map this tab sits beside.
                 onMapClick = {
-                    // TODO: Navigate to map view
+                    navController.navigate(NavigationRoutes.Map.route) {
+                        launchSingleTop = true
+                    }
                 }
             )
         }
