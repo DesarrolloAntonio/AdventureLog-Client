@@ -3,6 +3,13 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
+import kotlinx.datetime.TimeZone
+
+// The server's timezone choices don't include the bare "UTC" the app used to default to
+// (verified live: creating a transportation with it fails with a 400, '"UTC" is not a valid
+// choice'), so new transportations default to the device's own zone instead - always a real
+// IANA name, and the zone someone creating a trip is actually in.
+private val deviceTimezone: String get() = TimeZone.currentSystemDefault().id
 
 data class TransportationFormData(
     val name: String = "",
@@ -14,8 +21,8 @@ data class TransportationFormData(
     val toLocation: String = "",
     val departureDate: String = "",
     val arrivalDate: String = "",
-    val departureTimezone: String = "UTC",
-    val arrivalTimezone: String = "UTC",
+    val departureTimezone: String = deviceTimezone,
+    val arrivalTimezone: String = deviceTimezone,
     val isAllDay: Boolean = true,
     val constrainToCollectionDates: Boolean = false,
     val flightNumber: String = "",
@@ -40,8 +47,8 @@ data class TransportationFormData(
                 toLocation = transportation.toLocation ?: "",
                 departureDate = transportation.date ?: "",
                 arrivalDate = transportation.endDate ?: transportation.date ?: "",
-                departureTimezone = transportation.startTimezone ?: "UTC",
-                arrivalTimezone = transportation.endTimezone ?: "UTC",
+                departureTimezone = transportation.startTimezone ?: deviceTimezone,
+                arrivalTimezone = transportation.endTimezone ?: deviceTimezone,
                 isAllDay = true,
                 constrainToCollectionDates = false,
                 flightNumber = transportation.flightNumber ?: "",

@@ -29,7 +29,7 @@ data class CollectionDetailUiState(
 sealed class DeleteState {
     data object Idle : DeleteState()
     data object Loading : DeleteState()
-    data object Success : DeleteState()
+    data class Success(val message: String) : DeleteState()
     data class Error(val message: String) : DeleteState()
 }
 
@@ -119,7 +119,7 @@ class CollectionDetailViewModel(
                     _deleteState.update { DeleteState.Error(result.value) }
                 }
                 is Either.Right -> {
-                    _deleteState.update { DeleteState.Success }
+                    _deleteState.update { DeleteState.Success("Place deleted successfully") }
                     _uiState.value.collection?.let { collection ->
                         loadCollection(collection.id)
                     }
@@ -137,7 +137,7 @@ class CollectionDetailViewModel(
                     _deleteState.update { DeleteState.Error(result.value) }
                 }
                 is Either.Right -> {
-                    _deleteState.update { DeleteState.Success }
+                    _deleteState.update { DeleteState.Success("Transportation deleted successfully") }
                     _uiState.value.collection?.let { collection ->
                         loadCollection(collection.id)
                     }

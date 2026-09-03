@@ -71,7 +71,7 @@ fun CollectionDetailScreen(
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
             is DeleteState.Success -> {
-                snackbarHostState.showSnackbar("Adventure deleted successfully")
+                snackbarHostState.showSnackbar(state.message)
                 viewModel.clearDeleteState()
             }
             is DeleteState.Error -> {
