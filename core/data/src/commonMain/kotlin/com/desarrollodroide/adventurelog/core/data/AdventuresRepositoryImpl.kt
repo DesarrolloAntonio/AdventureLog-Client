@@ -218,7 +218,14 @@ class AdventuresRepositoryImpl(
     }
 
     override suspend fun duplicateLocation(locationId: String): Either<ApiResponse, Location> =
-        call { networkDataSource.duplicateLocation(locationId).toDomainModel() }
+        call {
+            val copy = networkDataSource.duplicateLocation(locationId).toDomainModel()
+            // A duplicate is a new place in the list, so the paged list has to be told, the same
+            // way create and delete tell it. Without this the snackbar named a copy that was not
+            // on screen until the screen was left and re-entered.
+            _version.value++
+            copy
+        }
 
     override suspend fun getShareImage(
         locationId: String,
@@ -268,10 +275,15 @@ class AdventuresRepositoryImpl(
     override suspend fun deleteLocation(adventureId: String): Either<ApiResponse, Unit> {
         return try {
             networkDataSource.deleteAdventure(adventureId)
-            
+
             // Increment version to invalidate paging
             _version.value++
-            
+
+            // Don't leave a deleted place in the cache getLocation() answers from.
+            if (selectedLocation?.id == adventureId) {
+                selectedLocation = null
+            }
+
             Either.Right(Unit)
         } catch (e: HttpException) {
             logger.e { "HTTP Error during deleteAdventure: ${e.code}" }
@@ -323,10 +335,17 @@ class AdventuresRepositoryImpl(
             price = price,
             priceCurrency = priceCurrency
             ).toDomainModel()
-            
+
             // Increment version to invalidate paging
             _version.value++
-            
+
+            // getLocation() answers from selectedLocation whenever the ids match, so leaving the
+            // pre-edit copy there means opening the place you just edited shows what it used to
+            // say. Replace it with what the server just returned.
+            if (selectedLocation?.id == adventure.id) {
+                selectedLocation = adventure
+            }
+
             Either.Right(adventure)
         } catch (e: HttpException) {
             logger.e { "HTTP Error during updateAdventure: ${e.code}" }

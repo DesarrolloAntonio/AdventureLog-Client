@@ -192,6 +192,14 @@ class CollectionsRepositoryImpl(
         return try {
             val collections = networkDataSource.getCollections(1, 1000).map { it.toDomainModel() }
             _collectionsFlow.value = collections
+
+            // An explicit refresh is a statement that what is on screen may be out of date, and
+            // the paged list is on screen too - it just reads from a different source than the
+            // cached flow above. Without this, anything that only calls refresh() (duplicating a
+            // collection, accepting an invitation) moved the header count and left the list
+            // alone: six collections above five cards.
+            _version.value++
+
             Either.Right(collections)
         } catch (e: HttpException) {
             logger.e { "HTTP Error during refreshCollections: ${e.code}" }
