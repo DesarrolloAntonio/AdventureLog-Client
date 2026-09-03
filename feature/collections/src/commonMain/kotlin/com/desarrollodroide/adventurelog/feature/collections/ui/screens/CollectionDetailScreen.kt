@@ -432,6 +432,12 @@ fun CollectionDetailContent(
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
+                        IconButton(onClick = onAddTransportation) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add transportation"
+                            )
+                        }
                     }
                 }
                 
