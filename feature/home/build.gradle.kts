@@ -18,6 +18,7 @@ kotlin {
             implementation(projects.feature.map)
 
             implementation(libs.koin.composeVM)
+            implementation(libs.material3.adaptive.navigation.suite)
 
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodel)

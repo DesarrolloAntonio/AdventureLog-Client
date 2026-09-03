@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +31,7 @@ import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
-import com.desarrollodroide.adventurelog.feature.home.ui.components.HomeBottomBar
+import com.desarrollodroide.adventurelog.feature.home.ui.components.homeNavigationItems
 import com.desarrollodroide.adventurelog.feature.home.ui.components.ProfileMenu
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
@@ -253,6 +254,13 @@ fun HomeScreenContent(
                 )
         )
 
+            // The five destinations become a bottom bar on a phone and a rail on a tablet.
+            // The suite draws whichever suits the window; nothing below it needs to know which.
+            NavigationSuiteScaffold(
+                navigationSuiteItems = { homeNavigationItems(currentScreen) { navigateTo(it) } },
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
             Scaffold(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -356,12 +364,6 @@ fun HomeScreenContent(
                             titleContentColor = MaterialTheme.colorScheme.onSurface,
                             actionIconContentColor = MaterialTheme.colorScheme.onSurface
                         )
-                    )
-                },
-                bottomBar = {
-                    HomeBottomBar(
-                        current = currentScreen,
-                        onSelect = { navigateTo(it) }
                     )
                 },
                 // Transparent has no content colour of its own, so Material resolves it to
@@ -566,6 +568,7 @@ fun HomeScreenContent(
                         calendarScreen()
                     }
                 }
+            }
             }
     }
 }
