@@ -28,6 +28,9 @@ enum class CurrentScreen(val route: String, val index: Int, val title: String) {
                 route.startsWith(NavigationRoutes.Collections.Transportations.addRoute.substringBefore('?')) -> COLLECTIONS
                 route.startsWith("transportations/edit") -> COLLECTIONS
                 route == NavigationRoutes.Travel.route -> TRAVEL
+                // A country sits under World. Without this it fell through to the else and the
+                // bar greeted you by name on a screen listing the regions of Afghanistan.
+                route.startsWith("${NavigationRoutes.Travel.route}/") -> TRAVEL
                 route == NavigationRoutes.Map.route -> MAP
                 route == NavigationRoutes.Calendar.route -> CALENDAR
                 route == NavigationRoutes.Settings.route -> SETTINGS

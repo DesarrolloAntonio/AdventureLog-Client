@@ -31,7 +31,12 @@ fun NavGraphBuilder.worldGraph(
         }
         
         composable("${NavigationRoutes.Travel.route}/{countryCode}") { backStackEntry ->
-            val countryCode = backStackEntry.savedStateHandle.get<String>("countryCode") ?: ""
+            // arguments, not savedStateHandle: a path parameter lands in the entry's arguments,
+            // and reading it from the handle returned null, which is how this screen was reached
+            // with an empty country code.
+            val countryCode = backStackEntry.arguments?.getString("countryCode")
+                ?: backStackEntry.savedStateHandle.get<String>("countryCode")
+                ?: ""
             CountryDetailScreen(
                 countryCode = countryCode,
                 onNavigateBack = {
