@@ -97,6 +97,8 @@ fun CollectionsScreen(
     onAddCollectionClick: () -> Unit = { },
     onEditCollection: (UltraSlimCollection) -> Unit = { },
     onPagingItemsReady: (LazyPagingItems<UltraSlimCollection>) -> Unit = { },
+    /** See LocationListScreen: two-pane callers use this to fill the empty detail side. */
+    onFirstLoaded: (UltraSlimCollection) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
@@ -114,6 +116,16 @@ fun CollectionsScreen(
     val tab by viewModel.tab.collectAsStateWithLifecycle()
     val tabContent by viewModel.tabContent.collectAsStateWithLifecycle()
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
+
+    var announcedFirst by remember { mutableStateOf(false) }
+    LaunchedEffect(pagingItems.itemCount, announcedFirst) {
+        if (!announcedFirst && pagingItems.itemCount > 0) {
+            pagingItems.peek(0)?.let {
+                announcedFirst = true
+                onFirstLoaded(it)
+            }
+        }
+    }
 
     var collectionToDelete by remember { mutableStateOf<UltraSlimCollection?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -471,7 +483,7 @@ private fun CollectionsPagingList(
 ) {
     // Same reasoning as the places list: let the width decide the column count.
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 360.dp),
+        columns = GridCells.Adaptive(minSize = 300.dp),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 16.dp,

@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -149,7 +151,7 @@ private fun DashboardList(
     // Only the place cards at the bottom gain from a second column; everything above them is a
     // full-width row that would read worse cut in half, so those span the whole line.
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 360.dp),
+        columns = GridCells.Adaptive(minSize = 300.dp),
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -157,7 +159,13 @@ private fun DashboardList(
     ) {
         if (featuredTrip != null) {
             item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
-                TripCard(trip = featuredTrip, onClick = { onTripClick(featuredTrip) })
+                // Spanned so it leads the screen, but capped: stretched over a tablet it stops
+                // being a card and becomes a letterbox band with a title floating in it.
+                TripCard(
+                    trip = featuredTrip,
+                    onClick = { onTripClick(featuredTrip) },
+                    modifier = Modifier.widthIn(max = 720.dp)
+                )
             }
         }
 
@@ -169,7 +177,7 @@ private fun DashboardList(
             item(key = "trips-header", span = { GridItemSpan(maxLineSpan) }) {
                 SectionHeader(title = "Upcoming trips")
             }
-            items(otherTrips, key = { "trip-${it.id}" }, span = { GridItemSpan(maxLineSpan) }) { trip ->
+            items(otherTrips, key = { "trip-${it.id}" }) { trip ->
                 TripRow(trip = trip, onClick = { onTripClick(trip) })
             }
         }
@@ -184,7 +192,7 @@ private fun DashboardList(
                     onTrailingClick = onSeeCalendar
                 )
             }
-            items(dashboard.upcomingEvents, key = { "event-${it.id}" }, span = { GridItemSpan(maxLineSpan) }) { event ->
+            items(dashboard.upcomingEvents, key = { "event-${it.id}" }) { event ->
                 EventRow(event, today)
             }
         }
@@ -432,34 +440,44 @@ private fun StatsCard(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            StatRow(
-                icon = Icons.Default.Public,
-                label = "Countries",
-                visited = stats.visitedCountryCount,
-                total = stats.totalCountries
-            )
-            StatRow(
-                icon = Icons.Default.Terrain,
-                label = "Regions",
-                visited = stats.visitedRegionCount,
-                total = stats.totalRegions
-            )
-            StatRow(
-                icon = Icons.Default.LocationCity,
-                label = "Cities",
-                visited = stats.visitedCityCount,
-                total = stats.totalCities
-            )
-            StatRow(
-                icon = Icons.Default.Place,
-                label = "Places visited",
-                visited = stats.visitedLocationCount,
-                total = stats.locationCount
-            )
+        val rows = listOf(
+            Triple(Icons.Default.Public, "Countries", stats.visitedCountryCount to stats.totalCountries),
+            Triple(Icons.Default.Terrain, "Regions", stats.visitedRegionCount to stats.totalRegions),
+            Triple(Icons.Default.LocationCity, "Cities", stats.visitedCityCount to stats.totalCities),
+            Triple(Icons.Default.Place, "Places visited", stats.visitedLocationCount to stats.locationCount)
+        )
+
+        // A progress bar says "how far along" by how much of it is filled, and past about 400dp
+        // the eye stops reading a proportion and starts reading a very long line. On a tablet the
+        // card is wider than that on its own, so the four stats pair off into columns instead of
+        // each one being stretched the full width of the window.
+        BoxWithConstraints {
+            val perRow = when {
+                maxWidth >= 1100.dp -> 4
+                maxWidth >= 560.dp -> 2
+                else -> 1
+            }
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                rows.chunked(perRow).forEach { chunk ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        chunk.forEach { (icon, label, counts) ->
+                            StatRow(
+                                icon = icon,
+                                label = label,
+                                visited = counts.first,
+                                total = counts.second,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        // Keep the last row's columns aligned with the one above when the count
+                        // is odd, rather than letting a lone stat stretch across both.
+                        repeat(perRow - chunk.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                }
+            }
         }
     }
 }

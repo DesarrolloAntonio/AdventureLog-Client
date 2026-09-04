@@ -70,6 +70,11 @@ fun LocationListScreen(
     onAdventureClick: (Location) -> Unit = { },
     onAddAdventureClick: () -> Unit = { },
     onEditAdventure: (Location) -> Unit = { },
+    /**
+     * Called once with the first place the list loads. Two-pane callers use it to fill the detail
+     * side, which otherwise sits empty until something is tapped.
+     */
+    onFirstLoaded: (Location) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: LocationsViewModel = koinViewModel()
 ) {
@@ -90,6 +95,16 @@ fun LocationListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
     val libraryCounts by viewModel.libraryCounts.collectAsStateWithLifecycle()
+
+    var announcedFirst by remember { mutableStateOf(false) }
+    LaunchedEffect(pagingItems.itemCount, announcedFirst) {
+        if (!announcedFirst && pagingItems.itemCount > 0) {
+            pagingItems.peek(0)?.let {
+                announcedFirst = true
+                onFirstLoaded(it)
+            }
+        }
+    }
 
     LaunchedEffect(actionMessage) {
         actionMessage?.let {
@@ -407,7 +422,7 @@ private fun AdventuresPagingList(
     // photograph across 1600px. A minimum width lets the window decide the column count: one on a
     // phone, two or three on a tablet, without either having to name a device.
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 360.dp),
+        columns = GridCells.Adaptive(minSize = 300.dp),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
             start = 16.dp,

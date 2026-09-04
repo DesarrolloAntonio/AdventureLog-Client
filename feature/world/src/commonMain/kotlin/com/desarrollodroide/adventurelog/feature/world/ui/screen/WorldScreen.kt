@@ -135,7 +135,7 @@ private fun WorldScreenContent(
                 // 250 flag cards is the longest list in the app, and the one that gains most
                 // from a second column. The header rows above it span the full width.
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 340.dp),
+                    columns = GridCells.Adaptive(minSize = 300.dp),
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
