@@ -57,7 +57,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.lerp
@@ -75,6 +75,11 @@ import androidx.compose.material.icons.filled.Search
 import com.desarrollodroide.adventurelog.feature.home.ui.components.GlobalSearchSheet
 import androidx.compose.foundation.layout.BoxWithConstraints
 import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 
 /**
  * Entry point composable that integrates with navigation
@@ -276,7 +281,7 @@ fun HomeScreenContent(
                     // this the greeting starts at the window edge while everything under it
                     // starts 120dp further in, which is one width too many for one screen.
                     val gutter = ((appBarWidth - MaxContentWidth) / 2).coerceAtLeast(0.dp)
-                    MediumTopAppBar(
+                    TopAppBar(
                         modifier = Modifier.padding(horizontal = gutter),
                         title = {
                             // No fillMaxHeight here: the app bar already centres its title, and
@@ -338,25 +343,49 @@ fun HomeScreenContent(
                                         )
                                     }
                                 } else {
-                                    // For other screens, show the normal title
-                                    val topBarTitle =
-                                        CurrentScreen.fromRoute(currentRoute).getTitle(userName)
-
-                                    Text(
-                                        text = topBarTitle,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    // Title and, under it, one line saying where you stand. The
+                                    // redesign puts it here rather than in the page, so the
+                                    // screen opens on content instead of on a caption.
+                                    val screen = CurrentScreen.fromRoute(currentRoute)
+                                    Column {
+                                        Text(
+                                            text = screen.getTitle(userName),
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        val subtitle = dashboardSubtitle(screen, homeUiState)
+                                        if (subtitle != null) {
+                                            Text(
+                                                text = subtitle,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         },
                         actions = {
-                            IconButton(onClick = { searchOpen = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search everything"
-                                )
+                            Surface(
+                                onClick = { searchOpen = true },
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                modifier = Modifier.size(38.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Search everything",
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
+                            Spacer(Modifier.width(10.dp))
                             ProfileMenu(
                                 user = userDetails,
                                 userName = userName,
@@ -367,7 +396,7 @@ fun HomeScreenContent(
                             )
                         },
                         scrollBehavior = scrollBehavior,
-                        colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        colors = TopAppBarDefaults.topAppBarColors(
                             // Make TopBar transparent to see the background
                             containerColor = Color.Transparent,
                             scrolledContainerColor = Color.Transparent,
@@ -715,4 +744,26 @@ private fun HomeScreenErrorPreview() {
             userDetails = null
         )
     }
+}
+
+
+/**
+ * The line under the screen's name: what the numbers say about you right now.
+ *
+ * Only home has one for the moment - the other screens print their own count inside the page,
+ * and two copies of "22 places" one above the other reads as a mistake.
+ */
+private fun dashboardSubtitle(screen: CurrentScreen, state: HomeUiState): String? {
+    if (screen != CurrentScreen.HOME) return null
+    val dashboard = (state as? HomeUiState.Success)?.dashboard ?: return null
+    val visited = dashboard.stats.visitedLocationCount
+    val trips = dashboard.upcomingTrips.size + if (dashboard.activeTrip != null) 1 else 0
+    return listOfNotNull(
+        "$visited places visited",
+        when {
+            trips == 0 -> null
+            trips == 1 -> "1 trip ahead"
+            else -> "$trips trips ahead"
+        }
+    ).joinToString(" \u00b7 ")
 }
