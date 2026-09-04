@@ -91,7 +91,7 @@ class SettingsRepositoryImpl(
     
     private fun resetStateFlows() {
         _themeMode.value = ThemeMode.AUTO
-        _useDynamicColors.value = true
+        _useDynamicColors.value = false
         _compactView.value = false
     }
 
@@ -114,8 +114,14 @@ class SettingsRepositoryImpl(
         _useDynamicColors.value = useDynamicColors
     }
     
+    /**
+     * Off unless asked for. Material You takes its palette from the phone's wallpaper, which means
+     * that with this on the app has no colour of its own: it was showing lavender on a device whose
+     * wallpaper was lavender, while #006973 - the colour of its own icon - never appeared. Someone
+     * who prefers the app to match their phone can still turn it on; the switch stays.
+     */
     private fun getUseDynamicColorsFromSettings(): Boolean {
-        return settings.getBoolean(KEY_USE_DYNAMIC_COLORS, true)
+        return settings.getBoolean(KEY_USE_DYNAMIC_COLORS, false)
     }
     
     override fun getCompactView(): StateFlow<Boolean> = _compactView

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -31,14 +32,24 @@ val MaxContentWidth = 1040.dp
 @Composable
 fun ContentColumn(
     modifier: Modifier = Modifier,
+    maxWidth: Dp = MaxContentWidth,
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ) {
-        Box(modifier = Modifier.widthIn(max = MaxContentWidth).fillMaxSize()) {
+        Box(modifier = Modifier.widthIn(max = maxWidth).fillMaxSize()) {
             content()
         }
     }
 }
+
+/**
+ * The dashboard is wider than the rest because it carries a second column: a main column and a
+ * 348dp data rail, which is what the leftover width on a tablet is actually for.
+ */
+val MaxDashboardWidth = 1240.dp
+
+/** The data rail's width, from the redesign: `minmax(0,1fr) 348px`. */
+val DataRailWidth = 348.dp
