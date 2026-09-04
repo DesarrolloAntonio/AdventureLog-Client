@@ -293,6 +293,43 @@ private fun DataRail(
             )
             comingUp.forEach { ComingUpRow(it) }
         }
+
+        // The next trip that still has room in it. A count of places is a fact; this is the one
+        // thing on the screen asking to be done, so it is the only tinted card in the rail.
+        val toPlan = otherTrips.firstOrNull { it.adventureCount in 1..4 }
+        if (toPlan != null) {
+            Card(
+                onClick = { onTripClick(toPlan) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                    Text(
+                        text = toPlan.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "${toPlan.adventureCount} places planned so far.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Plan the trip \u2192",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
     }
 }
 

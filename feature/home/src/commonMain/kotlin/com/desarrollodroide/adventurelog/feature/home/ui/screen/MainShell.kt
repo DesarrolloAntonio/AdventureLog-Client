@@ -80,6 +80,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 /**
  * Entry point composable that integrates with navigation
@@ -370,6 +374,26 @@ fun HomeScreenContent(
                             }
                         },
                         actions = {
+                            // The redesign puts adding a place in the bar on a wide window, where
+                            // there is room for a labelled button; on a phone the same action is
+                            // the floating button the list screens already carry.
+                            if (currentScreen == CurrentScreen.HOME && appBarWidth >= 1000.dp) {
+                                Button(
+                                    onClick = { navController.navigate(NavigationRoutes.Locations.add) },
+                                    shape = RoundedCornerShape(22.dp),
+                                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Add place", style = MaterialTheme.typography.labelLarge)
+                                }
+                                Spacer(Modifier.width(12.dp))
+                            }
+
                             Surface(
                                 onClick = { searchOpen = true },
                                 shape = CircleShape,
