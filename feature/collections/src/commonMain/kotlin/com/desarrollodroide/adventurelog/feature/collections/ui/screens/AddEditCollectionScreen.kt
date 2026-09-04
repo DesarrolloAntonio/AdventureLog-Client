@@ -27,6 +27,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components.DateSection
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun AddEditCollectionScreen(
@@ -39,8 +40,11 @@ fun AddEditCollectionScreen(
         mutableStateOf(initialData ?: CollectionFormData())
     }
 
+    // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
+    // box the length of the screen holding a place name, and the eye loses the line it is on.
+    ContentColumn(modifier) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
@@ -81,5 +85,6 @@ fun AddEditCollectionScreen(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
     }
 }

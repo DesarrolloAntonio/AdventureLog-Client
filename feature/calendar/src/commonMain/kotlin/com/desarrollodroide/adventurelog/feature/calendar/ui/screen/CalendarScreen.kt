@@ -44,6 +44,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 import kotlinx.datetime.LocalDate
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun CalendarScreenRoute(modifier: Modifier = Modifier) {
@@ -123,54 +124,57 @@ fun CalendarScreen(
                     if (index > 0) listState.scrollToItem(index)
                 }
 
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    if (state.availableTypes.size > 1) {
-                        item {
-                            FlowRow(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                MetaChip(
-                                    text = "All",
-                                    tone = if (state.selectedTypes.isEmpty()) {
-                                        ChipTone.ACCENT
-                                    } else {
-                                        ChipTone.NEUTRAL
-                                    },
-                                    onClick = onClearTypes
-                                )
-                                state.availableTypes.forEach { type ->
+                                // A calendar is a column of days; stretching a day across 1200dp reads worse.
+                ContentColumn {
+    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = listState,
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        if (state.availableTypes.size > 1) {
+                            item {
+                                FlowRow(
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     MetaChip(
-                                        text = type.replaceFirstChar { it.uppercase() },
-                                        tone = if (type in state.selectedTypes) {
+                                        text = "All",
+                                        tone = if (state.selectedTypes.isEmpty()) {
                                             ChipTone.ACCENT
                                         } else {
                                             ChipTone.NEUTRAL
                                         },
-                                        onClick = { onToggleType(type) }
+                                        onClick = onClearTypes
                                     )
+                                    state.availableTypes.forEach { type ->
+                                        MetaChip(
+                                            text = type.replaceFirstChar { it.uppercase() },
+                                            tone = if (type in state.selectedTypes) {
+                                                ChipTone.ACCENT
+                                            } else {
+                                                ChipTone.NEUTRAL
+                                            },
+                                            onClick = { onToggleType(type) }
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    var lastMonth: String? = null
-                    state.days.forEach { day ->
-                        val month = "${day.date.year}-${day.date.monthNumber}"
-                        if (month != lastMonth) {
-                            lastMonth = month
-                            item(key = "month-$month") {
-                                MonthHeading(day.date)
+                        var lastMonth: String? = null
+                        state.days.forEach { day ->
+                            val month = "${day.date.year}-${day.date.monthNumber}"
+                            if (month != lastMonth) {
+                                lastMonth = month
+                                item(key = "month-$month") {
+                                    MonthHeading(day.date)
+                                }
                             }
-                        }
-                        item(key = "day-${day.date}") {
-                            DayRow(day = day, isToday = day.date == state.today)
+                            item(key = "day-${day.date}") {
+                                DayRow(day = day, isToday = day.date == state.today)
+                            }
                         }
                     }
                 }

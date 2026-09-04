@@ -90,6 +90,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.Tune
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.ShareCollectionSheet
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun CollectionsScreen(
@@ -482,76 +483,79 @@ private fun CollectionsPagingList(
     busyLabel: String? = null,
 ) {
     // Same reasoning as the places list: let the width decide the column count.
+        // Same single content column as everywhere else.
+    ContentColumn {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 300.dp),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 16.dp,
-            bottom = 80.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey { it.id }
-        ) { index ->
-            val collection = pagingItems[index]
-            if (collection != null) {
-                SlimCollectionItem(
-                    collection = collection,
-                    onClick = { onCollectionClick(collection.id, collection.name) },
-                    onEditCollection = { onEditCollection(collection) },
-                    onDeleteCollection = { onDeleteCollection(collection) },
-                    onShareCollection = { onShareCollection(collection) },
-                    onShareWithPeople = { onShareWithPeople(collection) },
-                    onDuplicateCollection = { onDuplicateCollection(collection) },
-                    onArchiveCollection = { onArchiveCollection(collection) },
-                    onDownloadPdf = { onDownloadPdf(collection) },
-                    onExportZip = { onExportZip(collection) },
-                    busyLabel = busyLabel
-                )
-            }
-        }
-
-        when (pagingItems.loadState.append) {
-            is LoadStateLoading -> {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+            columns = GridCells.Adaptive(minSize = 300.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 80.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey { it.id }
+            ) { index ->
+                val collection = pagingItems[index]
+                if (collection != null) {
+                    SlimCollectionItem(
+                        collection = collection,
+                        onClick = { onCollectionClick(collection.id, collection.name) },
+                        onEditCollection = { onEditCollection(collection) },
+                        onDeleteCollection = { onDeleteCollection(collection) },
+                        onShareCollection = { onShareCollection(collection) },
+                        onShareWithPeople = { onShareWithPeople(collection) },
+                        onDuplicateCollection = { onDuplicateCollection(collection) },
+                        onArchiveCollection = { onArchiveCollection(collection) },
+                        onDownloadPdf = { onDownloadPdf(collection) },
+                        onExportZip = { onExportZip(collection) },
+                        busyLabel = busyLabel
+                    )
                 }
             }
 
-            is LoadStateError -> {
-                val error = pagingItems.loadState.append as LoadStateError
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error loading more: ${error.error.message}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
+            when (pagingItems.loadState.append) {
+                is LoadStateLoading -> {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            is LoadStateNotLoading -> {
-                // Nothing to do
+                is LoadStateError -> {
+                    val error = pagingItems.loadState.append as LoadStateError
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Error loading more: ${error.error.message}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+
+                is LoadStateNotLoading -> {
+                    // Nothing to do
+                }
             }
         }
     }

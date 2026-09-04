@@ -64,6 +64,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun LocationListScreen(
@@ -421,72 +422,76 @@ private fun AdventuresPagingList(
     // One card per row is right on a phone and absurd on a tablet, where it stretches a
     // photograph across 1600px. A minimum width lets the window decide the column count: one on a
     // phone, two or three on a tablet, without either having to name a device.
+        // Same single content column as everywhere else. In the two-pane layout the list side is
+    // narrower than the cap, so this changes nothing there.
+    ContentColumn {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 300.dp),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 16.dp,
-            bottom = 80.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey { it.id }
-        ) { index ->
-            val adventure = pagingItems[index]
-            if (adventure != null) {
-                AdventureItem(
-                    location = adventure,
-                    onClick = { onAdventureClick(adventure) },
-                    onEdit = { onEditAdventure(adventure) },
-                    onDuplicate = { onDuplicateAdventure(adventure) },
-                    onShare = { onShareAdventure(adventure) },
-                    onDelete = { onDeleteAdventure(adventure) },
-                    onManageCollections = { onManageCollections(adventure) }
-                )
-            }
-        }
-
-        when (pagingItems.loadState.append) {
-            is LoadStateLoading -> {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+            columns = GridCells.Adaptive(minSize = 300.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 80.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey { it.id }
+            ) { index ->
+                val adventure = pagingItems[index]
+                if (adventure != null) {
+                    AdventureItem(
+                        location = adventure,
+                        onClick = { onAdventureClick(adventure) },
+                        onEdit = { onEditAdventure(adventure) },
+                        onDuplicate = { onDuplicateAdventure(adventure) },
+                        onShare = { onShareAdventure(adventure) },
+                        onDelete = { onDeleteAdventure(adventure) },
+                        onManageCollections = { onManageCollections(adventure) }
+                    )
                 }
             }
 
-            is LoadStateError -> {
-                val error = pagingItems.loadState.append as LoadStateError
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error loading more: ${error.error.message}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
+            when (pagingItems.loadState.append) {
+                is LoadStateLoading -> {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            is LoadStateNotLoading -> {
-                // Nothing to do
+                is LoadStateError -> {
+                    val error = pagingItems.loadState.append as LoadStateError
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Error loading more: ${error.error.message}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+
+                is LoadStateNotLoading -> {
+                    // Nothing to do
+                }
             }
         }
     }

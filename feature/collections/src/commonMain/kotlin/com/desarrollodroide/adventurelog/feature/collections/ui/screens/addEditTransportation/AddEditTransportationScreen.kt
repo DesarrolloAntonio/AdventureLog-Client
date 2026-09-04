@@ -38,6 +38,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.ImagesSection
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun AddEditTransportationScreen(
@@ -144,8 +145,11 @@ fun AddEditTransportationContent(
         return
     }
 
+    // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
+    // box the length of the screen holding a place name, and the eye loses the line it is on.
+    ContentColumn(modifier) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
@@ -211,5 +215,6 @@ fun AddEditTransportationContent(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
     }
 }

@@ -58,6 +58,7 @@ import org.koin.core.parameter.parametersOf
 import co.touchlab.kermit.Logger
 import androidx.compose.material3.AlertDialog
 import com.desarrollodroide.adventurelog.feature.ui.platform.PlatformBackHandler
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 private val logger = Logger.withTag("AddEditLocationScreen")
 
@@ -336,8 +337,11 @@ fun AddEditLocationContent(
         )
     }
 
+    // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
+    // box the length of the screen holding a place name, and the eye loses the line it is on.
+    ContentColumn(modifier) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
@@ -417,6 +421,7 @@ fun AddEditLocationContent(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
     }
 }
 

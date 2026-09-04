@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.AccountHeader
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun SettingsScreen(
@@ -137,65 +138,68 @@ fun SettingsContent(
         ?: user?.email
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item {
-                AccountHeader(
-                    user = user,
-                    primaryEmail = primaryEmail,
-                    serverUrl = serverUrl,
-                    onClick = { editProfileOpen = true }
-                )
+                // Settings is a column of rows; on a tablet it was one row per 1200dp line.
+        ContentColumn {
+    LazyColumn(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                item {
+                    AccountHeader(
+                        user = user,
+                        primaryEmail = primaryEmail,
+                        serverUrl = serverUrl,
+                        onClick = { editProfileOpen = true }
+                    )
+                }
+                item {
+                    PreferencesGroup(state = profile, onChange = onChangeProfile)
+                }
+                item {
+                    AppearanceGroup(
+                        themeMode = themeMode,
+                        onThemeModeChanged = onThemeModeChanged,
+                        dynamicColors = dynamicColors,
+                        onDynamicColorsChanged = onDynamicColorsChanged
+                    )
+                }
+                item {
+                    SignInGroup(
+                        hasPassword = user?.hasPassword ?: true,
+                        isChangingPassword = isChangingPassword,
+                        onChangePassword = onChangePassword,
+                        emails = emails,
+                        onAddEmail = onAddEmail,
+                        onVerifyEmail = onVerifyEmail,
+                        onSetPrimaryEmail = onSetPrimaryEmail,
+                        onRemoveEmail = onRemoveEmail,
+                        onRetryEmails = onReloadEmails
+                    )
+                }
+                item {
+                    StorageSection(state = storage, onRetry = onReloadStorage)
+                }
+                item {
+                    AboutSection(
+                        user = user,
+                        serverUrl = serverUrl,
+                        appVersion = platformActions?.getAppVersion() ?: "",
+                        onNavigateToServerGuide = {
+                            platformActions?.openUrlInBrowser(ADVENTURELOG_GITHUB_URL)
+                        },
+                        onNavigateToSourceCode = {
+                            platformActions?.openUrlInBrowser(ADVENTURELOG_CLIENT_GITHUB_URL)
+                        },
+                        onSendFeedbackEmail = { platformActions?.sendFeedbackEmail() },
+                        onNavigateToTermsOfUse = { legalPage = LegalPage.TERMS },
+                        onNavigateToPrivacyPolicy = { legalPage = LegalPage.PRIVACY }
+                    )
+                }
+                item {
+                    SignOutCard(onClick = { confirmLogout = true })
+                }
+                item { Spacer(Modifier.height(24.dp)) }
             }
-            item {
-                PreferencesGroup(state = profile, onChange = onChangeProfile)
-            }
-            item {
-                AppearanceGroup(
-                    themeMode = themeMode,
-                    onThemeModeChanged = onThemeModeChanged,
-                    dynamicColors = dynamicColors,
-                    onDynamicColorsChanged = onDynamicColorsChanged
-                )
-            }
-            item {
-                SignInGroup(
-                    hasPassword = user?.hasPassword ?: true,
-                    isChangingPassword = isChangingPassword,
-                    onChangePassword = onChangePassword,
-                    emails = emails,
-                    onAddEmail = onAddEmail,
-                    onVerifyEmail = onVerifyEmail,
-                    onSetPrimaryEmail = onSetPrimaryEmail,
-                    onRemoveEmail = onRemoveEmail,
-                    onRetryEmails = onReloadEmails
-                )
-            }
-            item {
-                StorageSection(state = storage, onRetry = onReloadStorage)
-            }
-            item {
-                AboutSection(
-                    user = user,
-                    serverUrl = serverUrl,
-                    appVersion = platformActions?.getAppVersion() ?: "",
-                    onNavigateToServerGuide = {
-                        platformActions?.openUrlInBrowser(ADVENTURELOG_GITHUB_URL)
-                    },
-                    onNavigateToSourceCode = {
-                        platformActions?.openUrlInBrowser(ADVENTURELOG_CLIENT_GITHUB_URL)
-                    },
-                    onSendFeedbackEmail = { platformActions?.sendFeedbackEmail() },
-                    onNavigateToTermsOfUse = { legalPage = LegalPage.TERMS },
-                    onNavigateToPrivacyPolicy = { legalPage = LegalPage.PRIVACY }
-                )
-            }
-            item {
-                SignOutCard(onClick = { confirmLogout = true })
-            }
-            item { Spacer(Modifier.height(24.dp)) }
         }
 
         SnackbarHost(

@@ -185,6 +185,7 @@ private fun DashboardList(
                         onTripClick = onTripClick,
                         onAdventureClick = onAdventureClick,
                         onSeeAllPlaces = onSeeAllPlaces,
+                        onAddPlace = onAddPlace,
                         modifier = Modifier.weight(1f)
                     )
                     DataRail(
@@ -221,6 +222,7 @@ private fun MainColumn(
     onTripClick: (UltraSlimCollection) -> Unit,
     onAdventureClick: (Location) -> Unit,
     onSeeAllPlaces: () -> Unit,
+    onAddPlace: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -232,7 +234,11 @@ private fun MainColumn(
     ) {
         if (featuredTrip != null) {
             item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
-                TripCard(trip = featuredTrip, onClick = { onTripClick(featuredTrip) })
+                TripCard(
+                    trip = featuredTrip,
+                    onClick = { onTripClick(featuredTrip) },
+                    onAddPlace = onAddPlace
+                )
             }
         }
         if (dashboard.recentLocations.isNotEmpty()) {
