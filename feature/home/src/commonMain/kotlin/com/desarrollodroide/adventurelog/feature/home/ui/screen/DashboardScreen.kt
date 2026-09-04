@@ -53,6 +53,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.datetime.LocalDate
 import androidx.compose.foundation.clickable
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun DashboardScreen(
@@ -148,30 +149,20 @@ private fun DashboardList(
         return
     }
 
-    // Only the place cards at the bottom gain from a second column; everything above them is a
-    // full-width row that would read worse cut in half, so those span the whole line.
+    // Everything sits in the one content column, so the trip card, the stats and the place cards
+    // share a left and right edge instead of each finding its own width. Only the place cards gain
+    // from a second column; the rows above them read worse cut in half, so those span the line.
+    ContentColumn(modifier) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 300.dp),
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (featuredTrip != null) {
             item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
-                // Spanned so it leads the screen, but capped: stretched over a tablet it stops
-                // being a card and becomes a letterbox band with a title floating in it.
-                //
-                // The Box matters. A spanned grid item is measured at an exact width, and widthIn
-                // coerces its maximum back up into that fixed range - so the cap on its own is
-                // ignored. The Box absorbs the exact width and passes loose constraints down.
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    TripCard(
-                        trip = featuredTrip,
-                        onClick = { onTripClick(featuredTrip) },
-                        modifier = Modifier.widthIn(max = 720.dp)
-                    )
-                }
+                TripCard(trip = featuredTrip, onClick = { onTripClick(featuredTrip) })
             }
         }
 
@@ -219,6 +210,7 @@ private fun DashboardList(
                 )
             }
         }
+    }
     }
 }
 
@@ -459,7 +451,7 @@ private fun StatsCard(
         // each one being stretched the full width of the window.
         BoxWithConstraints {
             val perRow = when {
-                maxWidth >= 1100.dp -> 4
+                maxWidth >= 900.dp -> 4
                 maxWidth >= 560.dp -> 2
                 else -> 1
             }

@@ -73,6 +73,8 @@ import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScreen
 import androidx.compose.material.icons.filled.Search
 import com.desarrollodroide.adventurelog.feature.home.ui.components.GlobalSearchSheet
+import androidx.compose.foundation.layout.BoxWithConstraints
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
 
 /**
  * Entry point composable that integrates with navigation
@@ -262,12 +264,20 @@ fun HomeScreenContent(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
+            BoxWithConstraints {
+            val appBarWidth = maxWidth
             Scaffold(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .background(Color.Transparent),  // Ensure Scaffold is transparent
                 topBar = {
+                    // The bar is transparent, so insetting it simply moves the title and the
+                    // actions onto the same left and right edge as the content below. Without
+                    // this the greeting starts at the window edge while everything under it
+                    // starts 120dp further in, which is one width too many for one screen.
+                    val gutter = ((appBarWidth - MaxContentWidth) / 2).coerceAtLeast(0.dp)
                     MediumTopAppBar(
+                        modifier = Modifier.padding(horizontal = gutter),
                         title = {
                             // No fillMaxHeight here: the app bar already centres its title, and
                             // filling the height makes the bar grow to half the screen under
@@ -639,6 +649,7 @@ fun HomeScreenContent(
                         calendarScreen()
                     }
                 }
+            }
             }
             }
     }
