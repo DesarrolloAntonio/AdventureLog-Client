@@ -158,4 +158,47 @@ class CountriesRepositoryImpl(
             Either.Left(ApiResponse.HttpError)
         }
     }
+
+    override suspend fun markRegionVisited(regionId: String): Either<ApiResponse, VisitedRegion> {
+        return try {
+            val visited = networkDataSource.markRegionVisited(regionId).toDomainModel()
+            // Add it to the cached list rather than refetching: the country screen reads this flow
+            // and the tick should follow the tap, not a round trip.
+            _visitedRegionsFlow.value = _visitedRegionsFlow.value
+                .filterNot { it.regionId == regionId } + visited
+            Either.Right(visited)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error marking region visited: ${e.code}" }
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error marking region visited: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error marking region visited: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun unmarkRegionVisited(regionId: String): Either<ApiResponse, Unit> {
+        return try {
+            networkDataSource.unmarkRegionVisited(regionId)
+            _visitedRegionsFlow.value = _visitedRegionsFlow.value.filterNot { it.regionId == regionId }
+            Either.Right(Unit)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error removing visited region: ${e.code}" }
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error removing visited region: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error removing visited region: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
 }

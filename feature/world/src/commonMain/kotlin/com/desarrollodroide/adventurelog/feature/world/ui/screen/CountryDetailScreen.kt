@@ -45,6 +45,9 @@ import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.CountryDetailViewModel
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.RegionRow
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
 
 /**
  * One country's regions, and which of them have been visited.
@@ -63,6 +66,14 @@ fun CountryDetailScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(countryCode) { viewModel.load(countryCode) }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(state.message) {
+        state.message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearMessage()
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
@@ -126,12 +137,17 @@ fun CountryDetailScreen(
                         }
                     } else {
                         items(state.filtered, key = { it.region.id }) { row ->
-                            RegionCard(row)
+                            RegionCard(row, onClick = { viewModel.onRegionToggled(row.region.id) })
                         }
                     }
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
@@ -197,8 +213,9 @@ private fun CountryHeader(
 }
 
 @Composable
-private fun RegionCard(row: RegionRow) {
+private fun RegionCard(row: RegionRow, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(

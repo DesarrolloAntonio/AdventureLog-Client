@@ -22,7 +22,8 @@ val worldModule = module {
         CountryDetailViewModel(
             getRegionsUseCase = get(),
             getVisitedRegionsUseCase = get(),
-            getCountriesUseCase = get()
+            getCountriesUseCase = get(),
+            setRegionVisitedUseCase = get()
         )
     }
 }

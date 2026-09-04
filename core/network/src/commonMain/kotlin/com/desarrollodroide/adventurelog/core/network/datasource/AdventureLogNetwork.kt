@@ -345,6 +345,16 @@ interface AdventureLogNetwork {
      * Get visited cities for the current user
      */
     suspend fun getVisitedCities(): List<VisitedCityDTO>
+
+    /**
+     * Mark a region as visited
+     */
+    suspend fun markRegionVisited(regionId: String): VisitedRegionDTO
+
+    /**
+     * Remove a visited-region record, keyed by the region's code
+     */
+    suspend fun unmarkRegionVisited(regionId: String)
     
     /**
      * Create a new transportation

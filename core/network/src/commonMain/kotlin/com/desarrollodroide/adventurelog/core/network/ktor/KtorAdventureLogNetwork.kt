@@ -637,6 +637,16 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return countriesDataSource.getVisitedRegions()
     }
+
+    override suspend fun markRegionVisited(regionId: String): VisitedRegionDTO {
+        ensureInitialized()
+        return countriesDataSource.markRegionVisited(regionId)
+    }
+
+    override suspend fun unmarkRegionVisited(regionId: String) {
+        ensureInitialized()
+        countriesDataSource.unmarkRegionVisited(regionId)
+    }
     
     override suspend fun getVisitedCities(): List<VisitedCityDTO> {
         ensureInitialized()
