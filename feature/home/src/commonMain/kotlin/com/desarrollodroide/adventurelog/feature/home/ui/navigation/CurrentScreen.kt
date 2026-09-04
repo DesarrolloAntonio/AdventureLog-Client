@@ -26,6 +26,7 @@ enum class CurrentScreen(val route: String, val index: Int, val title: String) {
                 route.startsWith("edit_collection/") -> COLLECTIONS
                 route.startsWith("collection/") -> COLLECTIONS
                 route.startsWith(NavigationRoutes.Collections.Transportations.addRoute.substringBefore('?')) -> COLLECTIONS
+                route.startsWith("notes/") -> COLLECTIONS
                 route.startsWith("transportations/edit") -> COLLECTIONS
                 route == NavigationRoutes.Travel.route -> TRAVEL
                 // A country sits under World. Without this it fell through to the else and the

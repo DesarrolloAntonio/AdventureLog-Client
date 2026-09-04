@@ -40,6 +40,10 @@ import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.DeleteOutline
+import com.desarrollodroide.adventurelog.core.model.Note
 
 @Composable
 fun CollectionDetailScreen(
@@ -50,6 +54,8 @@ fun CollectionDetailScreen(
     onEditAdventure: (Location) -> Unit,
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
+    onAddNote: (String) -> Unit = {},
+    onEditNote: (String, Note) -> Unit = { _, _ -> },
     /**
      * Whether the screen has to name itself. Reached from Home it does not: the shell's breadcrumb
      * already says which collection this is. As the detail half of a two-pane screen there is no
@@ -142,6 +148,9 @@ fun CollectionDetailScreen(
                     onDeleteTransportation = { transportation ->
                         viewModel.deleteTransportation(transportation.id)
                     },
+                    onAddNote = { onAddNote(collectionId) },
+                    onEditNote = { note -> onEditNote(collectionId, note) },
+                    onDeleteNote = { note -> viewModel.deleteNote(note.id) },
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -184,6 +193,9 @@ fun CollectionDetailContent(
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     onDeleteTransportation: (Transportation) -> Unit,
+    onAddNote: () -> Unit = {},
+    onEditNote: (Note) -> Unit = {},
+    onDeleteNote: (Note) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -537,7 +549,7 @@ fun CollectionDetailContent(
             }
 
             CollectionTab.NOTES -> {
-                item { TabHeading("Notes") }
+                item { TabHeading("Notes", onAdd = onAddNote) }
                 if (collection.notes.isEmpty()) {
                     item { EmptyTab("No notes in this collection yet.") }
                 } else {
@@ -548,7 +560,9 @@ fun CollectionDetailContent(
                                 note.content?.takeIf { it.isNotBlank() },
                                 note.date?.substringBefore('T')?.takeIf { it.isNotBlank() }
                             ),
-                            badge = null
+                            badge = null,
+                            onClick = { onEditNote(note) },
+                            onDelete = { onDeleteNote(note) }
                         )
                     }
                 }
@@ -1060,13 +1074,23 @@ private fun parseDateTimeToComparable(dateString: String): Long {
 
 /** The heading each tab opens with, matching the one the Places tab already had. */
 @Composable
-private fun TabHeading(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.fillMaxWidth()
-    )
+private fun TabHeading(title: String, onAdd: (() -> Unit)? = null) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        if (onAdd != null) {
+            IconButton(onClick = onAdd) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add $title")
+            }
+        }
+    }
 }
 
 @Composable
@@ -1096,8 +1120,16 @@ private fun EmptyTab(message: String) {
  * been sending the whole objects all along and the mapper reduced each to `it.id`.
  */
 @Composable
-private fun SimpleEntryCard(title: String, lines: List<String>, badge: String?) {
+private fun SimpleEntryCard(
+    title: String,
+    lines: List<String>,
+    badge: String?,
+    onClick: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null
+) {
     Card(
+        onClick = onClick ?: {},
+        enabled = onClick != null,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
@@ -1118,6 +1150,15 @@ private fun SimpleEntryCard(title: String, lines: List<String>, badge: String?) 
                 if (badge != null) {
                     Spacer(Modifier.width(10.dp))
                     MetaChip(text = badge, tone = ChipTone.NEUTRAL)
+                }
+                if (onDelete != null) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             lines.forEach { line ->

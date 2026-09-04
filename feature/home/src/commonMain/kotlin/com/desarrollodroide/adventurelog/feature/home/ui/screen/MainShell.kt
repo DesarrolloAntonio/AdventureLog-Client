@@ -84,6 +84,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.notesScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.NotesNavigator
+import com.desarrollodroide.adventurelog.core.model.Note
 
 /**
  * Entry point composable that integrates with navigation
@@ -574,6 +577,23 @@ fun HomeScreenContent(
                                         )
                                     )
                                 },
+                                onAddNote = { id ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createAddRoute(id)
+                                    )
+                                },
+                                onEditNote = { id, note ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createEditRoute(
+                                            collectionId = id,
+                                            noteId = note.id,
+                                            noteJson = json.encodeToString(
+                                                serializer = Note.serializer(),
+                                                value = note
+                                            )
+                                        )
+                                    )
+                                },
                                 onHomeClick = { navigateTo(CurrentScreen.HOME) }
                             )
                         }
@@ -589,6 +609,24 @@ fun HomeScreenContent(
                                         NavigationRoutes.Collections.createDetailRoute(
                                             collectionId = collectionId,
                                             collectionName = collectionName
+                                        )
+                                    )
+                                }
+
+                                override fun navigateToAddNote(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditNote(
+                                    collectionId: String,
+                                    noteId: String,
+                                    noteJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createEditRoute(
+                                            collectionId, noteId, noteJson
                                         )
                                     )
                                 }
@@ -642,6 +680,32 @@ fun HomeScreenContent(
 
                                 override fun navigateToHome() {
                                     navigateToHome()
+                                }
+
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
+                        )
+
+                        notesScreen(
+                            navigator = object : NotesNavigator {
+                                override fun navigateToAddNote(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditNote(
+                                    collectionId: String,
+                                    noteId: String,
+                                    noteJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createEditRoute(
+                                            collectionId, noteId, noteJson
+                                        )
+                                    )
                                 }
 
                                 override fun navigateBack() {

@@ -36,6 +36,17 @@ object NavigationRoutes {
             return "collection/$collectionId/$collectionName"
         }
         
+        object Notes {
+            const val addRoute = "notes/add?collectionId={collectionId}"
+
+            fun createAddRoute(collectionId: String): String = "notes/add?collectionId=$collectionId"
+
+            const val editRoute = "notes/edit?collectionId={collectionId}&noteId={noteId}&noteJson={noteJson}"
+
+            fun createEditRoute(collectionId: String, noteId: String, noteJson: String): String =
+                "notes/edit?collectionId=$collectionId&noteId=$noteId&noteJson=$noteJson"
+        }
+
         object Transportations {
             const val addRoute = "transportations/add?collectionId={collectionId}"
 

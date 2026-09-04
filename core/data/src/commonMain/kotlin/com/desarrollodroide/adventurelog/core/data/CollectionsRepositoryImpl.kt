@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.core.model.Note
 
 private val logger = Logger.withTag("CollectionsRepositoryImpl")
 
@@ -348,6 +349,58 @@ class CollectionsRepositoryImpl(
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e { "Unexpected error during updateCollection: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun createNote(
+        collectionId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Note> = noteCall {
+        networkDataSource.createNote(name, content, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateNote(
+        noteId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Note> = noteCall {
+        networkDataSource.updateNote(noteId, name, content, date, isPublic)
+    }
+
+    override suspend fun deleteNote(noteId: String): Either<ApiResponse, Unit> = noteCall {
+        networkDataSource.deleteNote(noteId)
+    }
+
+    /**
+     * The three note calls differ only in the line that talks to the network; the twenty lines of
+     * error mapping around them are identical, and three copies of it is three places to fix the
+     * next time the shape changes.
+     *
+     * The version counter is bumped either way: a collection's note list is part of the collection
+     * the detail screen is showing, so it has to be re-read.
+     */
+    private inline fun <T> noteCall(block: () -> T): Either<ApiResponse, T> {
+        return try {
+            val result = block()
+            _version.value++
+            Either.Right(result)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error on a note call: ${e.code}" }
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error on a note call: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error on a note call: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

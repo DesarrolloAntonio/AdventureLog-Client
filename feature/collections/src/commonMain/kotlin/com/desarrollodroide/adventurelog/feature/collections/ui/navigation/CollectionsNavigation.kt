@@ -25,6 +25,7 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCo
 import kotlinx.serialization.json.Json
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import com.desarrollodroide.adventurelog.core.model.Note
 
 /**
  * Navigator interface for Collections feature
@@ -38,6 +39,8 @@ interface CollectionsNavigator {
     fun navigateToEditAdventure(adventure: Location)
     fun navigateToAddTransportation(collectionId: String)
     fun navigateToEditTransportation(transportationId: String, transportationJson: String)
+    fun navigateToAddNote(collectionId: String)
+    fun navigateToEditNote(collectionId: String, noteId: String, noteJson: String)
     fun navigateToHome()
     fun navigateBack()
 }
@@ -121,6 +124,14 @@ fun NavGraphBuilder.collectionsScreen(
                     value = transportation
                 )
                 navigator.navigateToEditTransportation(transportation.id, transportationJson)
+            },
+            onAddNote = { id -> navigator.navigateToAddNote(id) },
+            onEditNote = { id, note ->
+                navigator.navigateToEditNote(
+                    collectionId = id,
+                    noteId = note.id,
+                    noteJson = json.encodeToString(serializer = Note.serializer(), value = note)
+                )
             }
         )
     }

@@ -49,6 +49,9 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTransportationApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
+import com.desarrollodroide.adventurelog.core.network.api.NoteApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorNoteApi
+import com.desarrollodroide.adventurelog.core.model.Note
 
 class KtorAdventureLogNetwork(
     private val adventurelogClient: HttpClient
@@ -141,6 +144,13 @@ class KtorAdventureLogNetwork(
         )
     }
     
+    private val noteDataSource: NoteApi by lazy {
+        KtorNoteApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
     private val transportationDataSource: TransportationApi by lazy {
         KtorTransportationApi(
             httpClient = adventurelogClient,
@@ -636,6 +646,33 @@ class KtorAdventureLogNetwork(
     override suspend fun getVisitedRegions(): List<VisitedRegionDTO> {
         ensureInitialized()
         return countriesDataSource.getVisitedRegions()
+    }
+
+    override suspend fun createNote(
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): Note {
+        ensureInitialized()
+        return noteDataSource.createNote(name, content, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateNote(
+        noteId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Note {
+        ensureInitialized()
+        return noteDataSource.updateNote(noteId, name, content, date, isPublic)
+    }
+
+    override suspend fun deleteNote(noteId: String) {
+        ensureInitialized()
+        noteDataSource.deleteNote(noteId)
     }
 
     override suspend fun markRegionVisited(regionId: String): VisitedRegionDTO {

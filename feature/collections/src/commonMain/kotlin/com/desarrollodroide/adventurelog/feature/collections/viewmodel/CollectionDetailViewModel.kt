@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteNoteUseCase
 
 data class CollectionDetailUiState(
     val collection: Collection? = null,
@@ -46,7 +47,8 @@ class CollectionDetailViewModel(
     private val deleteTransportationUseCase: DeleteTransportationUseCase,
     private val updateLocationCollectionsUseCase: UpdateLocationCollectionsUseCase,  // cambiar aquí
     private val observeCollectionsUseCase: ObserveCollectionsUseCase,
-    private val getAllCollectionsUseCase: GetAllCollectionsUseCase
+    private val getAllCollectionsUseCase: GetAllCollectionsUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
@@ -128,6 +130,19 @@ class CollectionDetailViewModel(
         }
     }
     
+    fun deleteNote(noteId: String) {
+        viewModelScope.launch {
+            _deleteState.update { DeleteState.Loading }
+            when (val result = deleteNoteUseCase(noteId)) {
+                is Either.Left -> _deleteState.update { DeleteState.Error(result.value) }
+                is Either.Right -> {
+                    _deleteState.update { DeleteState.Success("Note deleted") }
+                    _uiState.value.collection?.let { loadCollection(it.id) }
+                }
+            }
+        }
+    }
+
     fun deleteTransportation(transportationId: String) {
         viewModelScope.launch {
             _deleteState.update { DeleteState.Loading }

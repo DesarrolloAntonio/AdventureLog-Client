@@ -347,6 +347,33 @@ interface AdventureLogNetwork {
     suspend fun getVisitedCities(): List<VisitedCityDTO>
 
     /**
+     * Create a note in a collection
+     */
+    suspend fun createNote(
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): com.desarrollodroide.adventurelog.core.model.Note
+
+    /**
+     * Update a note
+     */
+    suspend fun updateNote(
+        noteId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): com.desarrollodroide.adventurelog.core.model.Note
+
+    /**
+     * Delete a note
+     */
+    suspend fun deleteNote(noteId: String)
+
+    /**
      * Mark a region as visited
      */
     suspend fun markRegionVisited(regionId: String): VisitedRegionDTO

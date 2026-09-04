@@ -9,6 +9,7 @@ import com.desarrollodroide.adventurelog.core.model.CollectionExport
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import com.desarrollodroide.adventurelog.core.model.Note
 
 interface CollectionsRepository {
 
@@ -29,6 +30,25 @@ interface CollectionsRepository {
         startDate: String?,
         endDate: String?
     ): Either<ApiResponse, Collection>
+
+    /** Notes belong to a collection, so they live on this repository rather than one of their own. */
+    suspend fun createNote(
+        collectionId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Note>
+
+    suspend fun updateNote(
+        noteId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Note>
+
+    suspend fun deleteNote(noteId: String): Either<ApiResponse, Unit>
 
     suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>>
 
