@@ -26,6 +26,7 @@ import kotlinx.serialization.json.Json
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.model.Checklist
 
 /**
  * Navigator interface for Collections feature
@@ -41,6 +42,8 @@ interface CollectionsNavigator {
     fun navigateToEditTransportation(transportationId: String, transportationJson: String)
     fun navigateToAddNote(collectionId: String)
     fun navigateToEditNote(collectionId: String, noteId: String, noteJson: String)
+    fun navigateToAddChecklist(collectionId: String)
+    fun navigateToEditChecklist(collectionId: String, checklistId: String, checklistJson: String)
     fun navigateToHome()
     fun navigateBack()
 }
@@ -126,6 +129,17 @@ fun NavGraphBuilder.collectionsScreen(
                 navigator.navigateToEditTransportation(transportation.id, transportationJson)
             },
             onAddNote = { id -> navigator.navigateToAddNote(id) },
+            onAddChecklist = { id -> navigator.navigateToAddChecklist(id) },
+            onEditChecklist = { id, list ->
+                navigator.navigateToEditChecklist(
+                    collectionId = id,
+                    checklistId = list.id,
+                    checklistJson = json.encodeToString(
+                        serializer = Checklist.serializer(),
+                        value = list
+                    )
+                )
+            },
             onEditNote = { id, note ->
                 navigator.navigateToEditNote(
                     collectionId = id,

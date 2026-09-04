@@ -10,6 +10,7 @@ import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.model.Checklist
 
 interface CollectionsRepository {
 
@@ -49,6 +50,24 @@ interface CollectionsRepository {
     ): Either<ApiResponse, Note>
 
     suspend fun deleteNote(noteId: String): Either<ApiResponse, Unit>
+
+    suspend fun createChecklist(
+        collectionId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Checklist>
+
+    suspend fun updateChecklist(
+        checklistId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Checklist>
+
+    suspend fun deleteChecklist(checklistId: String): Either<ApiResponse, Unit>
 
     suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>>
 

@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.model.Checklist
 
 private val logger = Logger.withTag("CollectionsRepositoryImpl")
 
@@ -377,8 +378,32 @@ class CollectionsRepositoryImpl(
         networkDataSource.deleteNote(noteId)
     }
 
+    override suspend fun createChecklist(
+        collectionId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Checklist> = noteCall {
+        networkDataSource.createChecklist(name, items, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateChecklist(
+        checklistId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Checklist> = noteCall {
+        networkDataSource.updateChecklist(checklistId, name, items, date, isPublic)
+    }
+
+    override suspend fun deleteChecklist(checklistId: String): Either<ApiResponse, Unit> = noteCall {
+        networkDataSource.deleteChecklist(checklistId)
+    }
+
     /**
-     * The three note calls differ only in the line that talks to the network; the twenty lines of
+     * The note and checklist calls differ only in the line that talks to the network; the twenty lines of
      * error mapping around them are identical, and three copies of it is three places to fix the
      * next time the shape changes.
      *

@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.DeleteOutline
 import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.model.Checklist
 
 @Composable
 fun CollectionDetailScreen(
@@ -56,6 +57,8 @@ fun CollectionDetailScreen(
     onEditTransportation: (Transportation) -> Unit,
     onAddNote: (String) -> Unit = {},
     onEditNote: (String, Note) -> Unit = { _, _ -> },
+    onAddChecklist: (String) -> Unit = {},
+    onEditChecklist: (String, Checklist) -> Unit = { _, _ -> },
     /**
      * Whether the screen has to name itself. Reached from Home it does not: the shell's breadcrumb
      * already says which collection this is. As the detail half of a two-pane screen there is no
@@ -151,6 +154,9 @@ fun CollectionDetailScreen(
                     onAddNote = { onAddNote(collectionId) },
                     onEditNote = { note -> onEditNote(collectionId, note) },
                     onDeleteNote = { note -> viewModel.deleteNote(note.id) },
+                    onAddChecklist = { onAddChecklist(collectionId) },
+                    onEditChecklist = { list -> onEditChecklist(collectionId, list) },
+                    onDeleteChecklist = { list -> viewModel.deleteChecklist(list.id) },
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -196,6 +202,9 @@ fun CollectionDetailContent(
     onAddNote: () -> Unit = {},
     onEditNote: (Note) -> Unit = {},
     onDeleteNote: (Note) -> Unit = {},
+    onAddChecklist: () -> Unit = {},
+    onEditChecklist: (Checklist) -> Unit = {},
+    onDeleteChecklist: (Checklist) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -569,13 +578,15 @@ fun CollectionDetailContent(
             }
 
             CollectionTab.CHECKLISTS -> {
-                item { TabHeading("Checklists") }
+                item { TabHeading("Checklists", onAdd = onAddChecklist) }
                 if (collection.checklists.isEmpty()) {
                     item { EmptyTab("No checklists in this collection yet.") }
                 } else {
                     items(collection.checklists, key = { it.id }) { checklist ->
                         val done = checklist.items.count { it.isChecked }
                         SimpleEntryCard(
+                            onClick = { onEditChecklist(checklist) },
+                            onDelete = { onDeleteChecklist(checklist) },
                             title = checklist.name,
                             lines = checklist.items.take(4).map { item ->
                                 (if (item.isChecked) "\u2713 " else "\u25cb ") + item.name

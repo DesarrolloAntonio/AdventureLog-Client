@@ -30,6 +30,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.model.Checklist
 
 @Serializable
 private data object CollectionsList : NavKey
@@ -64,6 +65,8 @@ fun CollectionsPane(
     onEditTransportation: (Transportation) -> Unit,
     onAddNote: (String) -> Unit,
     onEditNote: (String, Note) -> Unit,
+    onAddChecklist: (String) -> Unit,
+    onEditChecklist: (String, Checklist) -> Unit,
     onHomeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -122,6 +125,8 @@ fun CollectionsPane(
                     onEditTransportation = onEditTransportation,
                     onAddNote = onAddNote,
                     onEditNote = onEditNote,
+                    onAddChecklist = onAddChecklist,
+                    onEditChecklist = onEditChecklist,
                     showTitle = true
                 )
             }

@@ -47,6 +47,8 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.ReverseGeocodeUseCa
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetRegionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteNoteUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteChecklistUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveChecklistUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveNoteUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SetRegionVisitedUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
@@ -110,6 +112,8 @@ val domainModule = module {
     factoryOf(::GetRegionsUseCase)
     factoryOf(::SetRegionVisitedUseCase)
     factoryOf(::SaveNoteUseCase)
+    factoryOf(::SaveChecklistUseCase)
+    factoryOf(::DeleteChecklistUseCase)
     factoryOf(::DeleteNoteUseCase)
     factoryOf(::GetVisitedRegionsUseCase)
     factoryOf(::GetCountriesUseCase)

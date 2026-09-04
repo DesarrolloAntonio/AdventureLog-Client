@@ -87,6 +87,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.notesScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.NotesNavigator
 import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.checklistsScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.ChecklistsNavigator
+import com.desarrollodroide.adventurelog.core.model.Checklist
 
 /**
  * Entry point composable that integrates with navigation
@@ -582,6 +585,23 @@ fun HomeScreenContent(
                                         NavigationRoutes.Collections.Notes.createAddRoute(id)
                                     )
                                 },
+                                onAddChecklist = { id ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createAddRoute(id)
+                                    )
+                                },
+                                onEditChecklist = { id, list ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createEditRoute(
+                                            collectionId = id,
+                                            checklistId = list.id,
+                                            checklistJson = json.encodeToString(
+                                                serializer = Checklist.serializer(),
+                                                value = list
+                                            )
+                                        )
+                                    )
+                                },
                                 onEditNote = { id, note ->
                                     navController.navigate(
                                         NavigationRoutes.Collections.Notes.createEditRoute(
@@ -627,6 +647,24 @@ fun HomeScreenContent(
                                     navController.navigate(
                                         NavigationRoutes.Collections.Notes.createEditRoute(
                                             collectionId, noteId, noteJson
+                                        )
+                                    )
+                                }
+
+                                override fun navigateToAddChecklist(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditChecklist(
+                                    collectionId: String,
+                                    checklistId: String,
+                                    checklistJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createEditRoute(
+                                            collectionId, checklistId, checklistJson
                                         )
                                     )
                                 }
@@ -680,6 +718,32 @@ fun HomeScreenContent(
 
                                 override fun navigateToHome() {
                                     navigateToHome()
+                                }
+
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
+                        )
+
+                        checklistsScreen(
+                            navigator = object : ChecklistsNavigator {
+                                override fun navigateToAddChecklist(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditChecklist(
+                                    collectionId: String,
+                                    checklistId: String,
+                                    checklistJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createEditRoute(
+                                            collectionId, checklistId, checklistJson
+                                        )
+                                    )
                                 }
 
                                 override fun navigateBack() {

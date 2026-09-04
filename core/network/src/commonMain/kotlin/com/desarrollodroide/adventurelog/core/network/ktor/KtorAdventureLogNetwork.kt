@@ -52,6 +52,9 @@ import com.desarrollodroide.adventurelog.core.network.model.response.SearchResul
 import com.desarrollodroide.adventurelog.core.network.api.NoteApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorNoteApi
 import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.network.api.ChecklistApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorChecklistApi
+import com.desarrollodroide.adventurelog.core.model.Checklist
 
 class KtorAdventureLogNetwork(
     private val adventurelogClient: HttpClient
@@ -144,6 +147,13 @@ class KtorAdventureLogNetwork(
         )
     }
     
+    private val checklistDataSource: ChecklistApi by lazy {
+        KtorChecklistApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
     private val noteDataSource: NoteApi by lazy {
         KtorNoteApi(
             httpClient = adventurelogClient,
@@ -646,6 +656,33 @@ class KtorAdventureLogNetwork(
     override suspend fun getVisitedRegions(): List<VisitedRegionDTO> {
         ensureInitialized()
         return countriesDataSource.getVisitedRegions()
+    }
+
+    override suspend fun createChecklist(
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): Checklist {
+        ensureInitialized()
+        return checklistDataSource.createChecklist(name, items, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateChecklist(
+        checklistId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Checklist {
+        ensureInitialized()
+        return checklistDataSource.updateChecklist(checklistId, name, items, date, isPublic)
+    }
+
+    override suspend fun deleteChecklist(checklistId: String) {
+        ensureInitialized()
+        checklistDataSource.deleteChecklist(checklistId)
     }
 
     override suspend fun createNote(

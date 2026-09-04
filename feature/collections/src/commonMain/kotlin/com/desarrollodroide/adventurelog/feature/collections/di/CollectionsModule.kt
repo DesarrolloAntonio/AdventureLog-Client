@@ -7,6 +7,7 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCo
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditTransportationViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditChecklistViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditNoteViewModel
 
 val collectionsModule = module {
@@ -39,6 +40,7 @@ val collectionsModule = module {
             updateLocationCollectionsUseCase = get(),
             getAllCollectionsUseCase = get(),
             deleteNoteUseCase = get(),
+            deleteChecklistUseCase = get(),
         )
     }
 
@@ -67,5 +69,9 @@ val collectionsModule = module {
 
     viewModel {
         AddEditNoteViewModel(saveNoteUseCase = get())
+    }
+
+    viewModel {
+        AddEditChecklistViewModel(saveChecklistUseCase = get())
     }
 }

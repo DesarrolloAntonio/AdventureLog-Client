@@ -374,6 +374,33 @@ interface AdventureLogNetwork {
     suspend fun deleteNote(noteId: String)
 
     /**
+     * Create a checklist in a collection
+     */
+    suspend fun createChecklist(
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): com.desarrollodroide.adventurelog.core.model.Checklist
+
+    /**
+     * Update a checklist, items included
+     */
+    suspend fun updateChecklist(
+        checklistId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): com.desarrollodroide.adventurelog.core.model.Checklist
+
+    /**
+     * Delete a checklist
+     */
+    suspend fun deleteChecklist(checklistId: String)
+
+    /**
      * Mark a region as visited
      */
     suspend fun markRegionVisited(regionId: String): VisitedRegionDTO

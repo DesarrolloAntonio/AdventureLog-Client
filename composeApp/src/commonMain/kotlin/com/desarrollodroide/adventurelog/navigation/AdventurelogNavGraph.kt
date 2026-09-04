@@ -96,6 +96,22 @@ fun AdventureLogNavGraph(
         override fun navigateToEditTransportation(transportationId: String, transportationJson: String) {
             navigateToHome()
         }
+        override fun navigateToAddNote(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToEditNote(collectionId: String, noteId: String, noteJson: String) {
+            navigateToHome()
+        }
+        override fun navigateToAddChecklist(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToEditChecklist(
+            collectionId: String,
+            checklistId: String,
+            checklistJson: String
+        ) {
+            navigateToHome()
+        }
         override fun navigateToHome() {
             navController.popBackStack(NavigationRoutes.Home.graph, inclusive = false)
         }
