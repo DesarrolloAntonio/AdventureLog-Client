@@ -65,6 +65,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import androidx.compose.foundation.layout.IntrinsicSize
+import com.desarrollodroide.adventurelog.feature.ui.components.LocationPlaceholder
+import androidx.compose.foundation.horizontalScroll
 
 @Composable
 fun DashboardScreen(
@@ -195,6 +198,7 @@ private fun DashboardList(
                 }
             } else {
                 StackedDashboard(
+                    onAddPlace = onAddPlace,
                     featuredTrip = featuredTrip,
                     dashboard = dashboard,
                     otherTrips = otherTrips,
@@ -274,24 +278,14 @@ private fun DataRail(
     ) {
         StatsCard(dashboard, title = "YOUR MAP SO FAR")
 
-        if (dashboard.upcomingEvents.isNotEmpty()) {
-            RailCard {
-                SectionHeader(
-                    title = "Coming up",
-                    trailing = "See all",
-                    onTrailingClick = onSeeCalendar
-                )
-                dashboard.upcomingEvents.forEach { event -> EventRow(event, today) }
-            }
-        }
-
-        if (otherTrips.isNotEmpty()) {
-            RailCard {
-                SectionHeader(title = "Upcoming trips")
-                otherTrips.forEach { trip ->
-                    TripRow(trip = trip, onClick = { onTripClick(trip) })
-                }
-            }
+        val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick)
+        if (comingUp.isNotEmpty()) {
+            SectionHeader(
+                title = "Coming up",
+                trailing = "See all",
+                onTrailingClick = onSeeCalendar
+            )
+            comingUp.forEach { ComingUpRow(it) }
         }
     }
 }
@@ -325,61 +319,56 @@ private fun StackedDashboard(
     onTripClick: (UltraSlimCollection) -> Unit,
     onAdventureClick: (Location) -> Unit,
     onSeeCalendar: () -> Unit,
-    onSeeAllPlaces: () -> Unit
+    onSeeAllPlaces: () -> Unit,
+    onAddPlace: () -> Unit
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 300.dp),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (featuredTrip != null) {
-            item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
-                TripCard(trip = featuredTrip, onClick = { onTripClick(featuredTrip) })
-            }
+            TripCard(
+                trip = featuredTrip,
+                onClick = { onTripClick(featuredTrip) },
+                onAddPlace = onAddPlace
+            )
         }
 
-        item(key = "stats", span = { GridItemSpan(maxLineSpan) }) {
-            StatsCard(dashboard)
-        }
+        StatsCard(dashboard)
 
-        if (otherTrips.isNotEmpty()) {
-            item(key = "trips-header", span = { GridItemSpan(maxLineSpan) }) {
-                SectionHeader(title = "Upcoming trips")
-            }
-            items(otherTrips, key = { "trip-${it.id}" }) { trip ->
-                TripRow(trip = trip, onClick = { onTripClick(trip) })
-            }
-        }
-
-        if (dashboard.upcomingEvents.isNotEmpty()) {
-            item(key = "events-header", span = { GridItemSpan(maxLineSpan) }) {
+        if (comingUp.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SectionHeader(
                     title = "Coming up",
                     trailing = "See all",
                     onTrailingClick = onSeeCalendar
                 )
-            }
-            items(dashboard.upcomingEvents, key = { "event-${it.id}" }) { event ->
-                EventRow(event, today)
+                comingUp.forEach { ComingUpRow(it) }
             }
         }
 
         if (dashboard.recentLocations.isNotEmpty()) {
-            item(key = "recent-header", span = { GridItemSpan(maxLineSpan) }) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SectionHeader(
                     title = "Recently updated (${dashboard.stats.locationCount})",
                     trailing = "See all",
                     onTrailingClick = onSeeAllPlaces
                 )
-            }
-            items(dashboard.recentLocations, key = { "loc-${it.id}" }) { location ->
-                AdventureItem(
-                    location = location,
-                    onClick = { onAdventureClick(location) },
-                    showMenu = false
-                )
+                // A strip that runs off the edge, so the photographs stay photographs instead of
+                // becoming a column of thumbnails a phone screen deep.
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    dashboard.recentLocations.forEach { location ->
+                        PlaceMiniCard(location, onClick = { onAdventureClick(location) })
+                    }
+                }
             }
         }
     }
@@ -494,6 +483,7 @@ private fun tripSubtitle(trip: UltraSlimCollection): String = when {
 private fun TripCard(
     trip: UltraSlimCollection,
     onClick: () -> Unit,
+    onAddPlace: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val inProgress = trip.status == TripStatus.IN_PROGRESS
@@ -504,49 +494,32 @@ private fun TripCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (inProgress) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.secondaryContainer
-            }
+            // Always the primary container. The featured trip used the secondary one unless it
+            // had already started, which is why the hero read as washed-out grey-green instead of
+            // the cyan the redesign leads with.
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        // The photograph is the reason to look at the card. Beside the text when the card is wide
-        // enough for both, above it when it is not - a 220dp photo on a 380dp phone card leaves a
-        // column too narrow to hold "Cinque Terre" on one line, which is how this first went out.
         val image = trip.featuredImage?.takeIf { it.isNotBlank() }
-        // The shared loader, not Coil's default: these are private photos behind the user's
-        // session, and the default loader has no credentials, so it silently draws nothing.
         val imageLoader = LocalImageLoader.current
 
-        BoxWithConstraints {
-            val sideBySide = image != null && maxWidth >= 520.dp
-
-            if (sideBySide) {
-                // A fixed height, not IntrinsicSize.Min: left to itself the photograph asks for
-                // its own full height and the card grows to a thousand dp, pushing everything
-                // below it off the screen.
-                Row(modifier = Modifier.height(170.dp)) {
-                    TripCardText(trip, subtitle, Modifier.weight(1f))
+        // The photograph sits beside the text at every size - a narrow strip on a phone, a third
+        // of the card on a tablet. Stacking it above pushed the trip's name and its two actions
+        // below the fold, which is the opposite of what a hero card is for.
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            TripCardText(trip, subtitle, onClick, onAddPlace, Modifier.weight(1f))
+            if (image != null) {
+                // The Box is what keeps the card the height of its text. An Image inside a
+                // height(IntrinsicSize.Min) row reports its own natural height, and the card grows
+                // to the full size of the photograph - nine hundred dp of Cinque Terre.
+                Box(modifier = Modifier.fillMaxHeight().weight(0.37f)) {
                     Image(
                         painter = rememberAsyncImagePainter(model = image, imageLoader = imageLoader),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxHeight().weight(0.62f)
+                        modifier = Modifier.matchParentSize()
                     )
-                }
-            } else {
-                Column {
-                    if (image != null) {
-                        Image(
-                            painter = rememberAsyncImagePainter(model = image, imageLoader = imageLoader),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxWidth().height(150.dp)
-                        )
-                    }
-                    TripCardText(trip, subtitle)
                 }
             }
         }
@@ -557,16 +530,18 @@ private fun TripCard(
 private fun TripCardText(
     trip: UltraSlimCollection,
     subtitle: String,
+    onOpen: () -> Unit,
+    onAddPlace: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+    Column(modifier = modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
         Text(
             text = subtitle.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
         )
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(2.dp))
         Text(
             text = trip.name,
             style = MaterialTheme.typography.headlineSmall,
@@ -575,15 +550,50 @@ private fun TripCardText(
             overflow = TextOverflow.Ellipsis,
             color = MaterialTheme.colorScheme.onPrimaryContainer
         )
-        if (trip.adventureCount > 0) {
-            Spacer(Modifier.height(4.dp))
+
+        // Places and dates on one line, the way the trip would be described out loud.
+        val places = when {
+            trip.adventureCount == 1 -> "1 place"
+            trip.adventureCount > 1 -> "${trip.adventureCount} places"
+            else -> null
+        }
+        val dates = tripDates(trip)
+        val line = listOfNotNull(places, dates).joinToString(" · ")
+        if (line.isNotEmpty()) {
+            Spacer(Modifier.height(3.dp))
             Text(
-                text = if (trip.adventureCount == 1) "1 place" else "${trip.adventureCount} places",
+                text = line,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
             )
         }
+
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onOpen,
+                shape = RoundedCornerShape(22.dp),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
+            ) {
+                Text("Open trip", style = MaterialTheme.typography.labelLarge)
+            }
+            OutlinedButton(
+                onClick = onAddPlace,
+                shape = RoundedCornerShape(22.dp),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
+            ) {
+                Text("Add a place", style = MaterialTheme.typography.labelLarge)
+            }
+        }
     }
+}
+
+/** "05/09 - 09/09", or nothing when the trip has no dates on it. */
+private fun tripDates(trip: UltraSlimCollection): String? {
+    val from = trip.startDate?.substringBefore('T')?.takeIf { it.isNotBlank() } ?: return null
+    val to = trip.endDate?.substringBefore('T')?.takeIf { it.isNotBlank() }
+    val short = { d: String -> d.split("-").let { if (it.size == 3) "${it[2]}/${it[1]}" else d } }
+    return if (to != null && to != from) "${short(from)} \u2013 ${short(to)}" else short(from)
 }
 
 /**
@@ -644,29 +654,23 @@ private fun StatsCard(
     title: String? = null
 ) {
     val stats = dashboard.stats
+    val rows = listOf(
+        Triple("Countries", stats.visitedCountryCount, stats.totalCountries),
+        Triple("Regions", stats.visitedRegionCount, stats.totalRegions),
+        Triple("Cities", stats.visitedCityCount, stats.totalCities),
+        Triple("Places visited", stats.visitedLocationCount, stats.locationCount)
+    )
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        // The screen sits on a full-bleed photo, so the cards take the brightest fill on the
-        // tonal scale. That alone separates them - no shadow needed, and a shadow on a flat
-        // white card over a photograph only ever looks like a sticker.
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        val rows = listOf(
-            Triple(Icons.Default.Public, "Countries", stats.visitedCountryCount to stats.totalCountries),
-            Triple(Icons.Default.Terrain, "Regions", stats.visitedRegionCount to stats.totalRegions),
-            Triple(Icons.Default.LocationCity, "Cities", stats.visitedCityCount to stats.totalCities),
-            Triple(Icons.Default.Place, "Places visited", stats.visitedLocationCount to stats.locationCount)
-        )
-
-        // A progress bar says "how far along" by how much of it is filled, and past about 400dp
-        // the eye stops reading a proportion and starts reading a very long line. On a tablet the
-        // card is wider than that on its own, so the four stats pair off into columns instead of
-        // each one being stretched the full width of the window.
+        // No icons. Four of them down the left edge added a column of decoration and pushed the
+        // numbers - the only part anyone reads - into the middle of the card.
         BoxWithConstraints {
             val perRow = when {
                 maxWidth >= 900.dp -> 4
@@ -674,8 +678,8 @@ private fun StatsCard(
                 else -> 1
             }
             Column(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 13.dp),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
             ) {
                 if (title != null) {
                     Text(
@@ -686,18 +690,10 @@ private fun StatsCard(
                     )
                 }
                 rows.chunked(perRow).forEach { chunk ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                        chunk.forEach { (icon, label, counts) ->
-                            StatRow(
-                                icon = icon,
-                                label = label,
-                                visited = counts.first,
-                                total = counts.second,
-                                modifier = Modifier.weight(1f)
-                            )
+                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        chunk.forEach { (label, visited, total) ->
+                            StatRow(label, visited, total, Modifier.weight(1f))
                         }
-                        // Keep the last row's columns aligned with the one above when the count
-                        // is odd, rather than letting a lone stat stretch across both.
                         repeat(perRow - chunk.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
@@ -708,7 +704,6 @@ private fun StatsCard(
 
 @Composable
 private fun StatRow(
-    icon: ImageVector,
     label: String,
     visited: Int,
     total: Int,
@@ -717,28 +712,25 @@ private fun StatRow(
     val fraction = if (total > 0) (visited.toFloat() / total).coerceIn(0f, 1f) else 0f
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.width(10.dp))
+        Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )
+            // Monospaced, so four rows of counts line up as a column of figures rather than
+            // drifting with the width of each number.
             Text(
                 text = visited.grouped(),
                 style = MaterialTheme.typography.titleMedium,
+                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = " / ${total.grouped()}",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
+                fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -855,4 +847,198 @@ private fun String.toShortDate(): String {
     val date = substringBefore('T')
     val parts = date.split('-')
     return if (parts.size == 3) "${parts[2]}/${parts[1]}" else date
+}
+
+
+/**
+ * One dated thing, whether it came from a trip or from the calendar.
+ *
+ * The redesign folds "Upcoming trips" and "Coming up" into a single list, and it is right to: a
+ * trip that starts on the 5th and an event on the 5th are the same kind of fact to whoever is
+ * looking, and two separate lists made the reader merge them by eye.
+ */
+private data class ComingUp(
+    val key: String,
+    val date: String,
+    val title: String,
+    val detail: String,
+    val onClick: (() -> Unit)?
+)
+
+private fun comingUpEntries(
+    trips: List<UltraSlimCollection>,
+    events: List<CalendarEvent>,
+    today: LocalDate?,
+    onTripClick: (UltraSlimCollection) -> Unit
+): List<ComingUp> {
+    val fromTrips = trips.map { trip ->
+        ComingUp(
+            key = "trip-${trip.id}",
+            date = trip.startDate.orEmpty(),
+            title = trip.name,
+            detail = listOfNotNull(
+                tripSubtitle(trip),
+                trip.adventureCount.takeIf { it > 0 }
+                    ?.let { if (it == 1) "1 place" else "$it places" }
+            ).joinToString(" \u00b7 "),
+            onClick = { onTripClick(trip) }
+        )
+    }
+    val fromEvents = events.map { event ->
+        val detail = listOfNotNull(
+            event.locationLabel.takeIf { it.isNotBlank() },
+            event.collectionName?.takeIf { it.isNotBlank() }
+        ).firstOrNull { it != event.title }.orEmpty()
+        ComingUp("event-${event.id}", event.start, event.title, detail, null)
+    }
+    return (fromTrips + fromEvents).sortedBy { it.date.substringBefore('T') }
+}
+
+private val MONTHS = listOf(
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+)
+
+/** A dated row: the day and month in a narrow column, then what happens on it. */
+@Composable
+private fun ComingUpRow(entry: ComingUp, modifier: Modifier = Modifier) {
+    val parts = entry.date.substringBefore('T').split("-")
+    val day = parts.getOrNull(2).orEmpty()
+    val month = parts.getOrNull(1)?.toIntOrNull()?.let { MONTHS.getOrNull(it - 1) }.orEmpty()
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        // Clickable only when there is somewhere to go. A disabled Card is not "not clickable",
+        // it is greyed out and faded, and a calendar entry that leads nowhere was reading as
+        // switched off next to a trip that does.
+        val clickable = entry.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier
+        Row(
+            modifier = clickable.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.width(38.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = day, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    text = month,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = entry.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (entry.detail.isNotBlank()) {
+                    Text(
+                        text = entry.detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A place in the home strip: photograph on top, its four facts underneath on white.
+ *
+ * Not the card the places list uses. Text laid over a photograph disappears whenever the
+ * photograph is pale - the name of a white village against a bright sky - and at this size there
+ * is no room to darken it enough to fix that without losing the photograph too.
+ */
+@Composable
+private fun PlaceMiniCard(
+    location: Location,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val imageLoader = LocalImageLoader.current
+    val photo = location.images.firstOrNull()?.image?.takeIf { it.isNotBlank() }
+
+    Card(
+        onClick = onClick,
+        modifier = modifier.width(150.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        if (photo != null) {
+            Image(
+                painter = rememberAsyncImagePainter(model = photo, imageLoader = imageLoader),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().height(72.dp)
+            )
+        } else {
+            LocationPlaceholder(
+                name = location.name,
+                latitude = location.latitude,
+                longitude = location.longitude,
+                modifier = Modifier.fillMaxWidth().height(72.dp)
+            )
+        }
+        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 10.dp)) {
+            Text(
+                text = location.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            val where = listOfNotNull(
+                location.location?.takeIf { it.isNotBlank() }
+            ).firstOrNull()
+            if (where != null) {
+                Text(
+                    text = where,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            val rating = location.rating?.toInt() ?: 0
+            val category = location.category?.displayName?.uppercase().orEmpty()
+            if (rating > 0 || category.isNotBlank()) {
+                Spacer(Modifier.height(5.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (rating > 0) {
+                        Text(
+                            text = "\u2605".repeat(rating),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.width(6.dp))
+                    }
+                    if (category.isNotBlank()) {
+                        Text(
+                            text = category,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

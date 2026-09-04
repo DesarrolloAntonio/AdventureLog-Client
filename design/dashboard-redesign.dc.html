@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Flex:opsz,wght@8..144,400..800&family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #EDF1F2; color: #171D1E; }
+  a { color: #006973; text-decoration: none; }
+  a:hover { color: #004F57; }
+</style>
+</helmet>
+
+<section style="padding: 56px 56px 40px; font-family: Figtree, system-ui, sans-serif;">
+  <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px;">
+    <h1 style="font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.02em;">2a con Material 3 Expressive</h1>
+    <span style="font-size: 14px; color: #3F484A;">Roboto Flex, formas XL, color tonal, nav flexible</span>
+  </div>
+  <p style="max-width: 760px; margin: 0 0 40px; font-size: 15px; line-height: 1.6; color: #3F484A; text-wrap: pretty;"><a href="#5a">5a</a> es el mismo contenido de <a href="#2a">2a</a> con el lenguaje expressive: titular en tamaño display, radios de 28–36px con formas asimétricas, las stats convertidas en cuatro bloques tonales (primary / secondary / tertiary), grupo de botones conectado y barra inferior con indicador pastilla.</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-start;">
+    <div id="5a" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">5a</span>
+        <span style="font-size: 15px; font-weight: 600;">Home, M3 Expressive</span>
+      </div>
+      <div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F5FAFB; border-radius: 34px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35); font-family: 'Roboto Flex', Roboto, system-ui, sans-serif;">
+        <div style="flex: none; display: flex; align-items: center; justify-content: space-between; padding: 14px 22px 2px; font-size: 13px; font-weight: 600;">
+          <span>7:33</span><span style="letter-spacing: .06em;">5G ▮▮▮</span>
+        </div>
+
+        <div style="flex: 1; min-height: 0; padding: 6px 16px 0; display: flex; flex-direction: column; gap: 12px;">
+          <div style="flex: none; display: flex; align-items: flex-start; gap: 10px;">
+            <div style="flex: 1; min-width: 0;">
+              <h3 style="margin: 0; font-size: 30px; font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;">Hi, John Doe!</h3>
+              <p style="margin: 4px 0 0; font-size: 14px; font-weight: 500; color: #3F484A;">17 places visited · 2 trips ahead</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex: none;">
+              <div style="width: 44px; height: 44px; border-radius: 22px; background: #E3E9EA; display: grid; place-items: center;">
+                <svg width="20" height="20" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#3F484A" stroke-width="1.8"></circle><path d="M11.5 11.5 16 16" stroke="#3F484A" stroke-width="1.8"></path></svg>
+              </div>
+              <div style="width: 44px; height: 44px; border-radius: 22px; background: #CDE7EC; color: #334B4F; display: grid; place-items: center; font-weight: 700; font-size: 15px;">J</div>
+            </div>
+          </div>
+
+          <div style="flex: none; display: flex; border-radius: 32px 32px 32px 12px; background: #9EEFFC; overflow: hidden;">
+            <div style="flex: 1; min-width: 0; padding: 18px 14px 16px 20px;">
+              <span style="font-size: 11px; font-weight: 800; letter-spacing: .14em; color: #004F57;">STARTS TOMORROW</span>
+              <h4 style="margin: 6px 0 2px; font-size: 27px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; color: #00363C;">Cinque Terre</h4>
+              <p style="margin: 0 0 14px; font-size: 13.5px; font-weight: 500; color: #004F57;">2 places · 05/09 – 09/09</p>
+              <div style="display: flex; gap: 3px;">
+                <span style="padding: 11px 18px; border-radius: 22px 8px 8px 22px; background: #006973; color: #fff; font-size: 14px; font-weight: 700;">Open trip</span>
+                <span style="padding: 11px 16px; border-radius: 8px 22px 22px 8px; background: #CDE7EC; color: #004F57; font-size: 14px; font-weight: 700;">Add</span>
+              </div>
+            </div>
+            <div style="width: 96px; flex: none; margin: 10px 10px 10px 0; border-radius: 24px 24px 8px 24px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+          </div>
+
+          <div style="flex: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div style="border-radius: 24px 12px 24px 24px; background: #CDE7EC; padding: 14px 16px;">
+              <div style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: #334B4F;">COUNTRIES</div>
+              <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 4px;">
+                <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: #223A3E;">6</span>
+                <span style="font-size: 13px; font-weight: 500; color: #334B4F;">/ 250</span>
+              </div>
+            </div>
+            <div style="border-radius: 12px 24px 24px 24px; background: #D9E2FF; padding: 14px 16px;">
+              <div style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: #3A4664;">REGIONS</div>
+              <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 4px;">
+                <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: #2A3653;">13</span>
+                <span style="font-size: 13px; font-weight: 500; color: #3A4664;">/ 5,322</span>
+              </div>
+            </div>
+            <div style="border-radius: 24px 24px 24px 12px; background: #E3E9EA; padding: 14px 16px;">
+              <div style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: #3F484A;">CITIES</div>
+              <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 4px;">
+                <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: #171D1E;">4</span>
+                <span style="font-size: 13px; font-weight: 500; color: #3F484A;">/ 153,728</span>
+              </div>
+            </div>
+            <div style="border-radius: 24px 24px 12px 24px; background: #006973; padding: 14px 16px;">
+              <div style="font-size: 11px; font-weight: 800; letter-spacing: .1em; color: #9EEFFC;">PLACES VISITED</div>
+              <div style="display: flex; align-items: baseline; gap: 5px; margin-top: 4px;">
+                <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: #fff;">17</span>
+                <span style="font-size: 13px; font-weight: 500; color: #9EEFFC;">/ 22</span>
+              </div>
+              <div style="height: 5px; border-radius: 3px; background: rgba(158,239,252,.3); margin-top: 8px;"><div style="width: 77%; height: 100%; border-radius: 3px; background: #9EEFFC;"></div></div>
+            </div>
+          </div>
+
+          <div style="flex: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 17px; font-weight: 800; letter-spacing: -0.02em;">Coming up</span>
+              <span style="padding: 6px 14px; border-radius: 16px; background: #E3E9EA; font-size: 12.5px; font-weight: 700; color: #3F484A;">See all</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 24px 8px 8px 24px; padding: 10px 16px 10px 10px;">
+                <div style="width: 46px; height: 46px; flex: none; border-radius: 16px; background: #9EEFFC; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #004F57;">
+                  <span style="font-size: 15px; font-weight: 800; line-height: 1;">05</span>
+                  <span style="font-size: 10px; font-weight: 700;">SEP</span>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 15px; font-weight: 700;">Cinque Terre</div>
+                  <div style="font-size: 12.5px; font-weight: 500; color: #3F484A;">Trip starts · 2 places</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 8px 24px 24px 8px; padding: 10px 16px 10px 10px;">
+                <div style="width: 46px; height: 46px; flex: none; border-radius: 16px; background: #E3E9EA; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #3F484A;">
+                  <span style="font-size: 15px; font-weight: 800; line-height: 1;">11</span>
+                  <span style="font-size: 10px; font-weight: 700;">OCT</span>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 15px; font-weight: 700;">Peru</div>
+                  <div style="font-size: 12.5px; font-weight: 500; color: #3F484A;">In 36 days · 3 places</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 17px; font-weight: 800; letter-spacing: -0.02em;">Recently updated</span>
+              <span style="font-size: 12.5px; font-weight: 700; color: #6F797A;">22</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <div style="position: relative; width: 148px; height: 72px; flex: none; border-radius: 24px 24px 8px 24px; overflow: hidden; background: url('assets/fushimi.png') center/cover;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,20,22,.82) 100%);"></div>
+                <div style="position: absolute; bottom: 8px; left: 12px; right: 12px; color: #fff; font-size: 13px; font-weight: 700;">Fushimi Inari</div>
+              </div>
+              <div style="position: relative; width: 148px; height: 72px; flex: none; border-radius: 24px 24px 24px 8px; overflow: hidden; background: url('assets/seljalandsfoss.png') center/cover;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,20,22,.82) 100%);"></div>
+                <div style="position: absolute; bottom: 8px; left: 12px; right: 12px; color: #fff; font-size: 13px; font-weight: 700;">Seljalandsfoss</div>
+              </div>
+              <div style="width: 70px; height: 72px; flex: none; border-radius: 24px 8px 8px 24px; background: url('assets/chefchaouen.png') center/cover;"></div>
+            </div>
+          </div>
+        </div>
+
+        <nav style="flex: none; margin: 10px 12px 14px; border-radius: 28px; background: #E9EFF0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 6px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <div style="padding: 6px 18px; border-radius: 16px; background: #9EEFFC;"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" fill="#004F57"></path></svg></div>
+            <span style="font-size: 11px; font-weight: 800; color: #004F57;">Home</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 6px;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.8"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#3F484A"></path></svg>
+            <span style="font-size: 11px; font-weight: 600; color: #3F484A;">Places</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 6px;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="3" stroke="#3F484A" stroke-width="1.8"></rect><circle cx="8" cy="10" r="1.7" fill="#3F484A"></circle></svg>
+            <span style="font-size: 11px; font-weight: 600; color: #3F484A;">Collections</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 6px;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#3F484A" stroke-width="1.8" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; font-weight: 600; color: #3F484A;">Map</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 6px;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.8"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#3F484A" stroke-width="1.8"></ellipse><path d="M3.4 11h15.2" stroke="#3F484A" stroke-width="1.8"></path></svg>
+            <span style="font-size: 11px; font-weight: 600; color: #3F484A;">World</span>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding: 16px 56px 40px; font-family: Figtree, system-ui, sans-serif;">
+  <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px;">
+    <h1 style="font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.02em;">Las dos tarjetas, en pantalla completa</h1>
+    <span style="font-size: 14px; color: #3F484A;">Pantalla Places, 390 × 844</span>
+  </div>
+  <p style="max-width: 760px; margin: 0 0 40px; font-size: 15px; line-height: 1.6; color: #3F484A; text-wrap: pretty;"><a href="#4a">4a</a> usa la tarjeta en fila de <a href="#3a">3a</a>; <a href="#4b">4b</a> usa la de foto grande de <a href="#3b">3b</a>. Mismo listado, misma cabecera y mismos filtros, para que se vea la diferencia real: cuántos lugares ves sin desplazarte.</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-start;">
+
+    <div id="4a" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">4a</span>
+        <span style="font-size: 15px; font-weight: 600;">Tarjeta en fila</span>
+        <span style="font-size: 14px; color: #3F484A;">5 lugares visibles</span>
+      </div>
+      <div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F5FAFB; border-radius: 34px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35);">
+        <div style="flex: none; display: flex; align-items: center; justify-content: space-between; padding: 14px 22px 4px; font-size: 13px; font-weight: 600;">
+          <span>7:33</span><span style="letter-spacing: .06em;">5G ▮▮▮</span>
+        </div>
+        <div style="flex: none; padding: 10px 18px 12px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="flex: 1; min-width: 0;">
+              <h3 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Places</h3>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #3F484A;">22 saved · 17 visited</p>
+            </div>
+            <div style="width: 36px; height: 36px; border-radius: 18px; background: #fff; display: grid; place-items: center;">
+              <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#3F484A" stroke-width="1.6"></circle><path d="M11.5 11.5 16 16" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            </div>
+            <div style="width: 36px; height: 36px; border-radius: 18px; background: #006973; color: #fff; display: grid; place-items: center; font-size: 20px; font-weight: 400;">+</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span style="padding: 7px 14px; border-radius: 16px; background: #006973; color: #fff; font-size: 12.5px; font-weight: 600;">All</span>
+            <span style="padding: 7px 14px; border-radius: 16px; background: #fff; color: #3F484A; font-size: 12.5px; font-weight: 600;">Visited</span>
+            <span style="padding: 7px 14px; border-radius: 16px; background: #fff; color: #3F484A; font-size: 12.5px; font-weight: 600;">Planned</span>
+            <span style="padding: 7px 14px; border-radius: 16px; background: #fff; color: #3F484A; font-size: 12.5px; font-weight: 600;">Nature</span>
+          </div>
+        </div>
+        <div style="flex: 1; min-height: 0; padding: 0 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="flex: none; display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/fushimi.png') center/cover;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Fushimi Inari Taisha</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Kyoto, Japan
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>General</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex: none; display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Seljalandsfoss</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Southern Region, Iceland
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #4A6267;"></span>Nature</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex: none; display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/chefchaouen.png') center/cover;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Chefchaouen</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Tanger-Tetouan, Morocco
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #BFC8CA;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #525E7D;"></span>City</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex: none; display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/seljalandsfoss.png') center/cover; filter: saturate(.75);"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Vernazza</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Liguria, Italy
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #BFC8CA;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>Planned</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex: none; display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/fushimi.png') center/cover; filter: saturate(.8);"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Monterosso al Mare</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Liguria, Italy
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #BFC8CA;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>Planned</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <nav style="flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: #E9EFF0; padding: 8px 4px 16px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" stroke="#3F484A" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Home</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <div style="padding: 4px 16px; border-radius: 12px; background: #9EEFFC;"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#004F57" stroke-width="1.7"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#004F57"></path></svg></div>
+            <span style="font-size: 11px; font-weight: 600; color: #004F57;">Places</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2.5" stroke="#3F484A" stroke-width="1.6"></rect><circle cx="8" cy="10" r="1.6" fill="#3F484A"></circle></svg>
+            <span style="font-size: 11px; color: #3F484A;">Collections</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#3F484A" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Map</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#3F484A" stroke-width="1.6"></ellipse><path d="M3.4 11h15.2" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">World</span>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    <div id="4b" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">4b</span>
+        <span style="font-size: 15px; font-weight: 600;">Tarjeta de foto grande</span>
+        <span style="font-size: 14px; color: #3F484A;">2 lugares visibles</span>
+      </div>
+      <div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F5FAFB; border-radius: 34px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35);">
+        <div style="flex: none; display: flex; align-items: center; justify-content: space-between; padding: 14px 22px 4px; font-size: 13px; font-weight: 600;">
+          <span>7:33</span><span style="letter-spacing: .06em;">5G ▮▮▮</span>
+        </div>
+        <div style="flex: none; padding: 10px 18px 12px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="flex: 1; min-width: 0;">
+              <h3 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Places</h3>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #3F484A;">22 saved · 17 visited</p>
+            </div>
+            <div style="width: 36px; height: 36px; border-radius: 18px; background: #fff; display: grid; place-items: center;">
+              <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#3F484A" stroke-width="1.6"></circle><path d="M11.5 11.5 16 16" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            </div>
+            <div style="width: 36px; height: 36px; border-radius: 18px; background: #006973; color: #fff; display: grid; place-items: center; font-size: 20px; font-weight: 400;">+</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span style="padding: 7px 14px; border-radius: 16px; background: #006973; color: #fff; font-size: 12.5px; font-weight: 600;">All</span>
+            <span style="padding: 7px 14px; border-radius: 16px; background: #fff; color: #3F484A; font-size: 12.5px; font-weight: 600;">Visited</span>
+            <span style="padding: 7px 14px; border-radius: 16px; background: #fff; color: #3F484A; font-size: 12.5px; font-weight: 600;">Planned</span>
+            <span style="padding: 7px 14px; border-radius: 16px; background: #fff; color: #3F484A; font-size: 12.5px; font-weight: 600;">Nature</span>
+          </div>
+        </div>
+        <div style="flex: 1; min-height: 0; padding: 0 18px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="flex: none; position: relative; height: 230px; border-radius: 20px; overflow: hidden; background: url('assets/fushimi.png') center/cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 38%, rgba(0,20,22,.82) 100%);"></div>
+            <span style="position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.92); font-size: 11.5px; font-weight: 600; color: #171D1E;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>General</span>
+            <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; color: #fff;">
+              <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em;">Fushimi Inari Taisha</div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; opacity: .92;">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#fff" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#fff"></circle></svg>
+                  Kyoto, Japan
+                </span>
+                <span style="font-size: 12px; letter-spacing: .12em;">★★★★★</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex: none; position: relative; height: 230px; border-radius: 20px; overflow: hidden; background: url('assets/seljalandsfoss.png') center/cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 38%, rgba(0,20,22,.82) 100%);"></div>
+            <span style="position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.92); font-size: 11.5px; font-weight: 600; color: #171D1E;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #4A6267;"></span>Nature</span>
+            <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; color: #fff;">
+              <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em;">Seljalandsfoss</div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; opacity: .92;">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#fff" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#fff"></circle></svg>
+                  Southern Region, Iceland
+                </span>
+                <span style="font-size: 12px; letter-spacing: .12em;">★★★★★</span>
+              </div>
+            </div>
+          </div>
+          <div style="flex: none; position: relative; height: 230px; border-radius: 20px; overflow: hidden; background: url('assets/chefchaouen.png') center/cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 38%, rgba(0,20,22,.82) 100%);"></div>
+          </div>
+        </div>
+        <nav style="flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: #E9EFF0; padding: 8px 4px 16px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" stroke="#3F484A" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Home</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <div style="padding: 4px 16px; border-radius: 12px; background: #9EEFFC;"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#004F57" stroke-width="1.7"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#004F57"></path></svg></div>
+            <span style="font-size: 11px; font-weight: 600; color: #004F57;">Places</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2.5" stroke="#3F484A" stroke-width="1.6"></rect><circle cx="8" cy="10" r="1.6" fill="#3F484A"></circle></svg>
+            <span style="font-size: 11px; color: #3F484A;">Collections</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#3F484A" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Map</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#3F484A" stroke-width="1.6"></ellipse><path d="M3.4 11h15.2" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">World</span>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 16px 56px 40px; font-family: Figtree, system-ui, sans-serif;">
+  <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px;">
+    <h1 style="font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.02em;">Tus items reales (lugar, rating, categoría)</h1>
+    <span style="font-size: 14px; color: #3F484A;">390px de ancho</span>
+  </div>
+  <p style="max-width: 760px; margin: 0 0 40px; font-size: 15px; line-height: 1.6; color: #3F484A; text-wrap: pretty;">Tus tarjetas llevan cuatro datos además de la foto: nombre, ubicación, valoración y categoría. <a href="#3a">3a</a> los pone en fila para que quepan cuatro o cinco en pantalla; <a href="#3b">3b</a> mantiene la foto grande y ordena los datos encima.</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-start;">
+
+    <div id="3a" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">3a</span>
+        <span style="font-size: 15px; font-weight: 600;">Fila: 5 lugares por pantalla</span>
+      </div>
+      <div style="width: 390px; background: #F5FAFB; border-radius: 24px; padding: 20px 18px; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35);">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+          <span style="font-size: 17px; font-weight: 700;">Recently updated <span style="color: #6F797A; font-weight: 500;">22</span></span>
+          <a href="#3a" style="font-size: 13.5px; font-weight: 600;">See all</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/fushimi.png') center/cover;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Fushimi Inari Taisha</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Kyoto, Japan
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>General</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Seljalandsfoss</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Southern Region, Iceland
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #4A6267;"></span>Nature</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; background: #fff; border-radius: 16px; padding: 10px; align-items: center;">
+            <div style="width: 78px; height: 78px; flex: none; border-radius: 12px; background: url('assets/chefchaouen.png') center/cover;"></div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em;">Chefchaouen</div>
+              <div style="display: flex; align-items: center; gap: 5px; margin-top: 3px; font-size: 12.5px; color: #3F484A;">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                Tanger-Tetouan, Morocco
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px;">
+                <span style="font-size: 12px; letter-spacing: .12em; color: #BFC8CA;">★★★★★</span>
+                <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #525E7D;"></span>City</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="3b" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">3b</span>
+        <span style="font-size: 15px; font-weight: 600;">Foto grande, datos ordenados encima</span>
+      </div>
+      <div style="width: 390px; background: #F5FAFB; border-radius: 24px; padding: 20px 18px; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35);">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+          <span style="font-size: 17px; font-weight: 700;">Recently updated <span style="color: #6F797A; font-weight: 500;">22</span></span>
+          <a href="#3b" style="font-size: 13.5px; font-weight: 600;">See all</a>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="position: relative; height: 200px; border-radius: 20px; overflow: hidden; background: url('assets/fushimi.png') center/cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 38%, rgba(0,20,22,.82) 100%);"></div>
+            <span style="position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.92); font-size: 11.5px; font-weight: 600; color: #171D1E;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>General</span>
+            <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; color: #fff;">
+              <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em;">Fushimi Inari Taisha</div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; opacity: .92;">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#fff" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#fff"></circle></svg>
+                  Kyoto, Japan
+                </span>
+                <span style="font-size: 12px; letter-spacing: .12em;">★★★★★</span>
+              </div>
+            </div>
+          </div>
+          <div style="position: relative; height: 200px; border-radius: 20px; overflow: hidden; background: url('assets/seljalandsfoss.png') center/cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 38%, rgba(0,20,22,.82) 100%);"></div>
+            <span style="position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.92); font-size: 11.5px; font-weight: 600; color: #171D1E;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #4A6267;"></span>Nature</span>
+            <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; color: #fff;">
+              <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em;">Seljalandsfoss</div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; opacity: .92;">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#fff" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#fff"></circle></svg>
+                  Southern Region, Iceland
+                </span>
+                <span style="font-size: 12px; letter-spacing: .12em;">★★★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 16px 56px 40px; font-family: Figtree, system-ui, sans-serif;">
+  <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px;">
+    <h1 style="font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.02em;">Móvil, las mismas tres direcciones</h1>
+    <span style="font-size: 14px; color: #3F484A;">390 × 844</span>
+  </div>
+  <p style="max-width: 760px; margin: 0 0 40px; font-size: 15px; line-height: 1.6; color: #3F484A; text-wrap: pretty;">Cada una es la versión de una columna de su hermana de escritorio: <a href="#2a">2a</a> ↔ <a href="#1a">1a</a>, <a href="#2b">2b</a> ↔ <a href="#1b">1b</a>, <a href="#2c">2c</a> ↔ <a href="#1c">1c</a>.</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-start;">
+
+    <div id="2a" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">2a</span>
+        <span style="font-size: 15px; font-weight: 600;">Raíl de datos, en columna</span>
+      </div>
+      <div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F5FAFB; border-radius: 34px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35);">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 22px 4px; font-size: 13px; font-weight: 600;">
+          <span>7:33</span>
+          <span style="letter-spacing: .06em;">5G ▮▮▮</span>
+        </div>
+        <div style="flex: 1; min-height: 0; padding: 8px 18px 0; display: flex; flex-direction: column; gap: 12px;">
+          <div style="flex: none; display: flex; align-items: center; gap: 12px;">
+            <div style="flex: 1; min-width: 0;">
+              <h3 style="margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.02em;">Hi, John Doe!</h3>
+              <p style="margin: 2px 0 0; font-size: 13.5px; color: #3F484A;">17 places visited · 2 trips ahead</p>
+            </div>
+            <div style="width: 38px; height: 38px; border-radius: 19px; background: #fff; display: grid; place-items: center;">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#3F484A" stroke-width="1.6"></circle><path d="M11.5 11.5 16 16" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            </div>
+            <div style="width: 38px; height: 38px; border-radius: 19px; background: #CDE7EC; color: #334B4F; display: grid; place-items: center; font-weight: 700; font-size: 14px;">J</div>
+          </div>
+
+          <div style="flex: none; display: flex; border-radius: 20px; background: #9EEFFC; overflow: hidden;">
+            <div style="flex: 1; min-width: 0; padding: 16px 16px 16px 18px;">
+              <span style="font-size: 11.5px; font-weight: 700; letter-spacing: .1em; color: #004F57;">STARTS TOMORROW</span>
+              <h4 style="margin: 4px 0 2px; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: #00363C;">Cinque Terre</h4>
+              <p style="margin: 0 0 14px; font-size: 13.5px; color: #004F57;">2 places · 05/09 – 09/09</p>
+              <div style="display: flex; gap: 8px;">
+                <span style="padding: 9px 16px; border-radius: 20px; background: #006973; color: #fff; font-size: 13.5px; font-weight: 600;">Open trip</span>
+                <span style="padding: 9px 14px; border-radius: 20px; border: 1px solid #4A8F97; color: #004F57; font-size: 13.5px; font-weight: 600;">Add a place</span>
+              </div>
+            </div>
+            <div style="width: 104px; flex: none; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+          </div>
+
+          <div style="flex: none; background: #fff; border-radius: 18px; padding: 13px 18px; display: flex; flex-direction: column; gap: 9px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <span style="font-size: 14px;">Countries</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3F484A;"><b style="font-size: 16px; color: #006973;">6</b> / 250</span>
+              </div>
+              <div style="height: 4px; border-radius: 2px; background: #DBE4E6;"><div style="width: 2.4%; height: 100%; background: #006973; border-radius: 2px;"></div></div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <span style="font-size: 14px;">Regions</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3F484A;"><b style="font-size: 16px; color: #006973;">13</b> / 5,322</span>
+              </div>
+              <div style="height: 4px; border-radius: 2px; background: #DBE4E6;"><div style="width: 1.5%; height: 100%; background: #006973; border-radius: 2px;"></div></div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <span style="font-size: 14px;">Cities</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3F484A;"><b style="font-size: 16px; color: #006973;">4</b> / 153,728</span>
+              </div>
+              <div style="height: 4px; border-radius: 2px; background: #DBE4E6;"><div style="width: 1.2%; height: 100%; background: #006973; border-radius: 2px;"></div></div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <span style="font-size: 14px;">Places visited</span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3F484A;"><b style="font-size: 16px; color: #006973;">17</b> / 22</span>
+              </div>
+              <div style="height: 4px; border-radius: 2px; background: #DBE4E6;"><div style="width: 77%; height: 100%; background: #006973; border-radius: 2px;"></div></div>
+            </div>
+          </div>
+
+          <div style="flex: none;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 16px; font-weight: 700;">Coming up</span>
+              <a href="#2a" style="font-size: 13.5px; font-weight: 600;">See all</a>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 14px; padding: 10px 14px;">
+                <div style="width: 38px; flex: none; text-align: center;">
+                  <div style="font-size: 14px; font-weight: 700; line-height: 1.1;">05</div>
+                  <div style="font-size: 10.5px; color: #3F484A;">SEP</div>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 14px; font-weight: 600;">Cinque Terre</div>
+                  <div style="font-size: 12.5px; color: #3F484A;">Trip starts · 2 places</div>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 14px; padding: 10px 14px;">
+                <div style="width: 38px; flex: none; text-align: center;">
+                  <div style="font-size: 14px; font-weight: 700; line-height: 1.1;">11</div>
+                  <div style="font-size: 10.5px; color: #3F484A;">OCT</div>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                  <div style="font-size: 14px; font-weight: 600;">Peru</div>
+                  <div style="font-size: 12.5px; color: #3F484A;">In 36 days · 3 places</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="min-height: 0;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 16px; font-weight: 700;">Recently updated <span style="color: #6F797A; font-weight: 500;">22</span></span>
+              <a href="#2a" style="font-size: 13.5px; font-weight: 600;">See all</a>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <div style="width: 150px; flex: none; border-radius: 14px; overflow: hidden; background: #fff;">
+                <div style="height: 72px; background: url('assets/fushimi.png') center/cover;"></div>
+                <div style="padding: 8px 10px 10px;">
+                  <div style="font-size: 13px; font-weight: 600;">Fushimi Inari</div>
+                  <div style="font-size: 11.5px; color: #6F797A;">Kyoto, Japan</div>
+                  <div style="display: flex; align-items: center; gap: 6px; margin-top: 5px;">
+                    <span style="font-size: 10.5px; letter-spacing: .1em; color: #006973;">★★★★★</span>
+                    <span style="font-size: 10.5px; letter-spacing: .05em; color: #6F797A;">GENERAL</span>
+                  </div>
+                </div>
+              </div>
+              <div style="width: 150px; flex: none; border-radius: 14px; overflow: hidden; background: #fff;">
+                <div style="height: 72px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+                <div style="padding: 8px 10px 10px;">
+                  <div style="font-size: 13px; font-weight: 600;">Seljalandsfoss</div>
+                  <div style="font-size: 11.5px; color: #6F797A;">Southern Region</div>
+                  <div style="display: flex; align-items: center; gap: 6px; margin-top: 5px;">
+                    <span style="font-size: 10.5px; letter-spacing: .1em; color: #006973;">★★★★★</span>
+                    <span style="font-size: 10.5px; letter-spacing: .05em; color: #6F797A;">NATURE</span>
+                  </div>
+                </div>
+              </div>
+              <div style="width: 90px; flex: none; border-radius: 14px; overflow: hidden; background: url('assets/chefchaouen.png') center/cover;"></div>
+            </div>
+          </div>
+        </div>
+
+        <nav style="flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: #E9EFF0; padding: 8px 4px 16px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <div style="padding: 4px 16px; border-radius: 12px; background: #9EEFFC;"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" stroke="#004F57" stroke-width="1.8" stroke-linejoin="round"></path></svg></div>
+            <span style="font-size: 11px; font-weight: 600; color: #004F57;">Home</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#3F484A"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Places</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2.5" stroke="#3F484A" stroke-width="1.6"></rect><circle cx="8" cy="10" r="1.6" fill="#3F484A"></circle></svg>
+            <span style="font-size: 11px; color: #3F484A;">Collections</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#3F484A" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Map</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#3F484A" stroke-width="1.6"></ellipse><path d="M3.4 11h15.2" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">World</span>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    <div id="2b" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">2b</span>
+        <span style="font-size: 15px; font-weight: 600;">El progreso, primero</span>
+      </div>
+      <div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F5FAFB; border-radius: 34px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35); font-family: Archivo, system-ui, sans-serif;">
+        <div style="background: #004F57; color: #E6FBFF; padding: 14px 20px 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 14px;">
+            <span>7:33</span><span style="letter-spacing: .06em;">5G ▮▮▮</span>
+          </div>
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 600; letter-spacing: .12em; color: #81D3E0;">JOHN DOE</div>
+              <h3 style="margin: 6px 0 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; font-weight: 400; line-height: 1.1;">6 countries,<br>17 places logged.</h3>
+            </div>
+            <div style="display: flex; gap: 8px; flex: none;">
+              <div style="width: 36px; height: 36px; border-radius: 18px; background: rgba(230,251,255,.18); display: grid; place-items: center;">
+                <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#E6FBFF" stroke-width="1.6"></circle><path d="M11.5 11.5 16 16" stroke="#E6FBFF" stroke-width="1.6"></path></svg>
+              </div>
+              <div style="width: 36px; height: 36px; border-radius: 18px; background: rgba(230,251,255,.22); display: grid; place-items: center; font-weight: 700; font-size: 13px;">J</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; margin-top: 22px;">
+            <div>
+              <div style="display: flex; align-items: baseline; gap: 5px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 1;">6</span><span style="font-size: 12.5px; color: #81D3E0;">/ 250</span></div>
+              <div style="font-size: 11px; letter-spacing: .06em; color: #B1CBD0; margin: 4px 0 6px;">COUNTRIES</div>
+              <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 2.4%; height: 100%; background: #9EEFFC;"></div></div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: baseline; gap: 5px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 1;">13</span><span style="font-size: 12.5px; color: #81D3E0;">/ 5,322</span></div>
+              <div style="font-size: 11px; letter-spacing: .06em; color: #B1CBD0; margin: 4px 0 6px;">REGIONS</div>
+              <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 1.5%; height: 100%; background: #9EEFFC;"></div></div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: baseline; gap: 5px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 1;">4</span><span style="font-size: 12.5px; color: #81D3E0;">/ 153,728</span></div>
+              <div style="font-size: 11px; letter-spacing: .06em; color: #B1CBD0; margin: 4px 0 6px;">CITIES</div>
+              <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 1.2%; height: 100%; background: #9EEFFC;"></div></div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: baseline; gap: 5px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 30px; line-height: 1;">17</span><span style="font-size: 12.5px; color: #81D3E0;">/ 22</span></div>
+              <div style="font-size: 11px; letter-spacing: .06em; color: #B1CBD0; margin: 4px 0 6px;">PLACES VISITED</div>
+              <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 77%; height: 100%; background: #9EEFFC;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-height: 0; padding: 18px 20px 0; display: flex; flex-direction: column; gap: 18px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: .12em; color: #6F797A; margin-bottom: 8px;">NEXT TRIP</div>
+            <div style="display: flex; gap: 14px; background: #fff; border: 1px solid #DBE4E6; border-radius: 16px; padding: 12px;">
+              <div style="width: 84px; height: 84px; flex: none; border-radius: 12px; background: url('assets/chefchaouen.png') center/cover;"></div>
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px;">
+                <span style="font-size: 11px; font-weight: 600; letter-spacing: .1em; color: #006973;">STARTS TOMORROW</span>
+                <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 25px; line-height: 1.05;">Cinque Terre</div>
+                <div style="font-size: 12.5px; color: #3F484A;">2 places · 05/09 – 09/09</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-size: 11px; font-weight: 600; letter-spacing: .12em; color: #6F797A;">COMING UP</span>
+              <a href="#2b" style="font-size: 13px; font-weight: 600;">See all</a>
+            </div>
+            <div style="display: flex; gap: 14px; padding: 11px 0; border-bottom: 1px solid #DBE4E6;">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #006973; width: 44px; flex: none;">05/09</div>
+              <div style="flex: 1; min-width: 0;"><div style="font-size: 14px; font-weight: 600;">Cinque Terre</div><div style="font-size: 12.5px; color: #3F484A;">Trip starts</div></div>
+            </div>
+            <div style="display: flex; gap: 14px; padding: 11px 0; border-bottom: 1px solid #DBE4E6;">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #006973; width: 44px; flex: none;">11/10</div>
+              <div style="flex: 1; min-width: 0;"><div style="font-size: 14px; font-weight: 600;">Peru</div><div style="font-size: 12.5px; color: #3F484A;">In 36 days · 3 places</div></div>
+            </div>
+          </div>
+
+          <div style="min-height: 0;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px;">
+              <span style="font-size: 11px; font-weight: 600; letter-spacing: .12em; color: #6F797A;">RECENTLY UPDATED · 22</span>
+              <a href="#2b" style="font-size: 13px; font-weight: 600;">See all</a>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <div style="height: 96px; border-radius: 14px; background: url('assets/fushimi.png') center/cover;"></div>
+                <div style="font-size: 13.5px; font-weight: 600; margin-top: 7px;">Fushimi Inari Taisha</div>
+                <div style="font-size: 12px; color: #6F797A;">Kyoto, Japan</div>
+                <div style="display: flex; align-items: center; gap: 7px; margin-top: 5px;">
+                  <span style="font-size: 11px; letter-spacing: .1em; color: #006973;">★★★★★</span>
+                  <span style="font-size: 10.5px; letter-spacing: .05em; color: #6F797A;">GENERAL</span>
+                </div>
+              </div>
+              <div>
+                <div style="height: 96px; border-radius: 14px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+                <div style="font-size: 13.5px; font-weight: 600; margin-top: 7px;">Seljalandsfoss</div>
+                <div style="font-size: 12px; color: #6F797A;">Southern Region, Iceland</div>
+                <div style="display: flex; align-items: center; gap: 7px; margin-top: 5px;">
+                  <span style="font-size: 11px; letter-spacing: .1em; color: #006973;">★★★★★</span>
+                  <span style="font-size: 10.5px; letter-spacing: .05em; color: #6F797A;">NATURE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav style="flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: #00363C; padding: 10px 4px 16px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" stroke="#9EEFFC" stroke-width="1.8" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; font-weight: 600; color: #9EEFFC;">Home</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#81D3E0" stroke-width="1.6"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#81D3E0"></path></svg>
+            <span style="font-size: 11px; color: #81D3E0;">Places</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2.5" stroke="#81D3E0" stroke-width="1.6"></rect><circle cx="8" cy="10" r="1.6" fill="#81D3E0"></circle></svg>
+            <span style="font-size: 11px; color: #81D3E0;">Collections</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#81D3E0" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; color: #81D3E0;">Map</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#81D3E0" stroke-width="1.6"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#81D3E0" stroke-width="1.6"></ellipse><path d="M3.4 11h15.2" stroke="#81D3E0" stroke-width="1.6"></path></svg>
+            <span style="font-size: 11px; color: #81D3E0;">World</span>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    <div id="2c" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">2c</span>
+        <span style="font-size: 15px; font-weight: 600;">Foto primero</span>
+      </div>
+      <div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #FFFFFF; border-radius: 34px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35);">
+        <div style="flex: none; height: 300px; position: relative; display: flex; flex-direction: column; color: #fff;">
+          <div style="position: absolute; inset: 0; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+          <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,54,60,.6) 0%, rgba(0,54,60,.2) 40%, rgba(0,54,60,.9) 100%);"></div>
+          <div style="position: relative; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 0; font-size: 13px; font-weight: 600;">
+            <span>7:33</span><span style="letter-spacing: .06em;">5G ▮▮▮</span>
+          </div>
+          <div style="position: relative; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px 0;">
+            <div style="width: 36px; height: 36px; border-radius: 18px; background: rgba(255,255,255,.2); display: grid; place-items: center;">
+              <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#fff" stroke-width="1.7"></circle><path d="M11.5 11.5 16 16" stroke="#fff" stroke-width="1.7"></path></svg>
+            </div>
+            <div style="width: 36px; height: 36px; border-radius: 18px; background: #CDE7EC; color: #334B4F; display: grid; place-items: center; font-weight: 700; font-size: 13px;">J</div>
+          </div>
+          <div style="position: relative; margin-top: auto; padding: 0 20px 18px;">
+            <span style="display: inline-block; padding: 4px 11px; border-radius: 13px; background: #9EEFFC; color: #00363C; font-size: 11px; font-weight: 700; letter-spacing: .08em;">STARTS TOMORROW</span>
+            <h3 style="margin: 10px 0 4px; font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1;">Cinque Terre</h3>
+            <p style="margin: 0 0 12px; font-size: 13.5px; opacity: .9;">2 places · Liguria, Italy</p>
+            <div style="display: flex; gap: 8px;">
+              <span style="padding: 10px 18px; border-radius: 21px; background: #fff; color: #00363C; font-size: 13.5px; font-weight: 600;">Open trip</span>
+              <span style="padding: 10px 18px; border-radius: 21px; border: 1px solid rgba(255,255,255,.55); font-size: 13.5px; font-weight: 600;">Add a place</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-height: 0; padding: 16px 20px 0; display: flex; flex-direction: column; gap: 16px;">
+          <div style="padding: 12px 16px; border-radius: 16px; background: #F5FAFB;">
+            <div style="font-size: 14.5px;"><b>Hi, John Doe!</b> · 17 of 22 places visited</div>
+            <div style="display: flex; gap: 16px; margin-top: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #3F484A;">
+              <span><b style="font-family: Figtree, sans-serif; font-size: 14px; color: #006973;">6</b> / 250 countries</span>
+              <span><b style="font-family: Figtree, sans-serif; font-size: 14px; color: #006973;">13</b> / 5,322 regions</span>
+              <span><b style="font-family: Figtree, sans-serif; font-size: 14px; color: #006973;">4</b> / 153,728 cities</span>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 16px; font-weight: 700;">Coming up</span>
+              <a href="#2c" style="font-size: 13.5px; font-weight: 600;">See all</a>
+            </div>
+            <div style="border-left: 2px solid #9EEFFC; padding: 0 0 12px 14px; margin-left: 3px;">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #006973;">05/09 · TOMORROW</div>
+              <div style="font-size: 14px; font-weight: 600;">Cinque Terre</div>
+              <div style="font-size: 12.5px; color: #3F484A;">Trip starts · 2 places</div>
+            </div>
+            <div style="border-left: 2px solid #DBE4E6; padding: 0 0 4px 14px; margin-left: 3px;">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #6F797A;">11/10 · IN 36 DAYS</div>
+              <div style="font-size: 14px; font-weight: 600;">Peru</div>
+              <div style="font-size: 12.5px; color: #3F484A;">3 places</div>
+            </div>
+          </div>
+
+          <div style="min-height: 0;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 16px; font-weight: 700;">Recently updated <span style="color: #6F797A; font-weight: 500;">22</span></span>
+              <a href="#2c" style="font-size: 13.5px; font-weight: 600;">See all</a>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <div style="position: relative; width: 160px; height: 108px; flex: none; border-radius: 16px; overflow: hidden; background: url('assets/fushimi.png') center/cover;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,20,22,.82) 100%);"></div>
+                <span style="position: absolute; top: 9px; left: 10px; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 10px; background: rgba(255,255,255,.92); font-size: 10px; font-weight: 600; color: #171D1E;"><span style="width: 5px; height: 5px; border-radius: 3px; background: #006973;"></span>General</span>
+                <div style="position: absolute; bottom: 9px; left: 12px; right: 12px; color: #fff;">
+                  <div style="font-size: 13px; font-weight: 600;">Fushimi Inari Taisha</div>
+                  <div style="display: flex; align-items: center; gap: 7px; margin-top: 1px;">
+                    <span style="font-size: 11px; opacity: .85;">Kyoto, Japan</span>
+                    <span style="font-size: 10px; letter-spacing: .1em;">★★★★★</span>
+                  </div>
+                </div>
+              </div>
+              <div style="position: relative; width: 160px; height: 108px; flex: none; border-radius: 16px; overflow: hidden; background: url('assets/chefchaouen.png') center/cover;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,20,22,.82) 100%);"></div>
+                <span style="position: absolute; top: 9px; left: 10px; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 10px; background: rgba(255,255,255,.92); font-size: 10px; font-weight: 600; color: #171D1E;"><span style="width: 5px; height: 5px; border-radius: 3px; background: #525E7D;"></span>City</span>
+                <div style="position: absolute; bottom: 9px; left: 12px; right: 12px; color: #fff;">
+                  <div style="font-size: 13px; font-weight: 600;">Chefchaouen</div>
+                  <div style="display: flex; align-items: center; gap: 7px; margin-top: 1px;">
+                    <span style="font-size: 11px; opacity: .85;">Tanger-Tetouan</span>
+                    <span style="font-size: 10px; letter-spacing: .1em; opacity: .55;">★★★★★</span>
+                  </div>
+                </div>
+              </div>
+              <div style="width: 60px; height: 108px; flex: none; border-radius: 16px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+            </div>
+          </div>
+        </div>
+
+        <nav style="flex: none; display: grid; grid-template-columns: repeat(5, 1fr); background: #F5FAFB; border-top: 1px solid #E3E9EA; padding: 8px 4px 16px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px;">
+            <div style="padding: 4px 16px; border-radius: 12px; background: #9EEFFC;"><svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" stroke="#004F57" stroke-width="1.8" stroke-linejoin="round"></path></svg></div>
+            <span style="font-size: 11px; font-weight: 600; color: #004F57;">Home</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#3F484A"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Places</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2.5" stroke="#3F484A" stroke-width="1.6"></rect><circle cx="8" cy="10" r="1.6" fill="#3F484A"></circle></svg>
+            <span style="font-size: 11px; color: #3F484A;">Collections</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#3F484A" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">Map</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 4px;">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#3F484A" stroke-width="1.6"></ellipse><path d="M3.4 11h15.2" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            <span style="font-size: 11px; color: #3F484A;">World</span>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 16px 56px 96px; font-family: Figtree, system-ui, sans-serif;">
+  <div style="display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px;">
+    <h1 style="font-size: 26px; font-weight: 700; margin: 0; letter-spacing: -0.02em;">Home / dashboard, tres direcciones</h1>
+    <span style="font-size: 14px; color: #3F484A;">Paleta teal del tema real de la app (primary #006973). Texto y datos del pantallazo, sin cambios.</span>
+  </div>
+  <p style="max-width: 760px; margin: 0 0 40px; font-size: 15px; line-height: 1.6; color: #3F484A; text-wrap: pretty;">Las tres usan el ancho completo en dos o tres columnas, así que la mitad derecha deja de estar vacía. <a href="#1a">1a</a> es la más conservadora, <a href="#1b">1b</a> pone el progreso de viajes por delante, <a href="#1c">1c</a> arranca con la foto del próximo viaje.</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 64px; align-items: flex-start;">
+
+    <div id="1a" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">1a</span>
+        <span style="font-size: 15px; font-weight: 600;">Columna principal + raíl de datos</span>
+        <span style="font-size: 14px; color: #3F484A;">Misma estructura, jerarquía arreglada</span>
+      </div>
+      <div style="width: 1240px; height: 840px; display: flex; background: #F5FAFB; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35); font-size: 15px;">
+        <nav style="width: 92px; flex: none; background: #FFFFFF; border-right: 1px solid #E3E9EA; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 20px 0;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 12px; width: 100%;">
+            <img src="docs/icon-512.png" alt="AdventureLog" style="width: 32px; height: 32px; border-radius: 9px; display: block;">
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 68px; padding: 10px 0; border-radius: 14px; background: #9EEFFC;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" stroke="#004F57" stroke-width="1.8" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11.5px; font-weight: 600; color: #004F57;">Home</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 68px; padding: 10px 0;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#3F484A"></path></svg>
+            <span style="font-size: 11.5px; color: #3F484A;">Places</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 68px; padding: 10px 0;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2.5" stroke="#3F484A" stroke-width="1.6"></rect><circle cx="8" cy="10" r="1.6" fill="#3F484A"></circle></svg>
+            <span style="font-size: 11.5px; color: #3F484A;">Collections</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 68px; padding: 10px 0;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#3F484A" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+            <span style="font-size: 11.5px; color: #3F484A;">Map</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 68px; padding: 10px 0;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#3F484A" stroke-width="1.6"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#3F484A" stroke-width="1.6"></ellipse><path d="M3.4 11h15.2" stroke="#3F484A" stroke-width="1.6"></path></svg>
+            <span style="font-size: 11.5px; color: #3F484A;">World</span>
+          </div>
+        </nav>
+
+        <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+          <header style="display: flex; align-items: center; gap: 20px; padding: 26px 34px 18px;">
+            <div style="flex: 1; min-width: 0;">
+              <h2 style="margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.02em;">Hi, John Doe!</h2>
+              <p style="margin: 4px 0 0; font-size: 14.5px; color: #3F484A;">17 places visited · 1 trip starting tomorrow</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 22px; background: #FFFFFF; border: 1px solid #DBE4E6; width: 260px; color: #6F797A;">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#6F797A" stroke-width="1.6"></circle><path d="M11.5 11.5 16 16" stroke="#6F797A" stroke-width="1.6"></path></svg>
+              <span style="font-size: 14.5px;">Search places, trips…</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px 0 14px; border-radius: 22px; background: #006973; color: #FFFFFF; font-weight: 600; font-size: 14.5px;">
+              <span style="font-size: 19px; line-height: 1; font-weight: 400;">+</span> Add place
+            </div>
+            <div style="width: 44px; height: 44px; flex: none; border-radius: 22px; background: #CDE7EC; color: #334B4F; display: grid; place-items: center; font-weight: 700;">J</div>
+          </header>
+
+          <div style="flex: 1; display: grid; grid-template-columns: minmax(0,1fr) 348px; gap: 24px; padding: 6px 34px 30px; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
+              <div style="display: flex; background: #9EEFFC; border-radius: 22px; overflow: hidden; min-height: 176px;">
+                <div style="flex: 1; padding: 24px 26px; display: flex; flex-direction: column; justify-content: center; gap: 10px;">
+                  <span style="font-size: 12px; font-weight: 700; letter-spacing: .1em; color: #004F57;">STARTS TOMORROW</span>
+                  <h3 style="margin: 0; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; color: #00363C;">Cinque Terre</h3>
+                  <p style="margin: 0; font-size: 15px; color: #004F57;">2 places · 05/09 – 09/09</p>
+                  <div style="display: flex; gap: 10px; margin-top: 8px;">
+                    <span style="padding: 9px 16px; border-radius: 20px; background: #006973; color: #fff; font-size: 14px; font-weight: 600;">Open trip</span>
+                    <span style="padding: 9px 16px; border-radius: 20px; border: 1px solid #4A8F97; color: #004F57; font-size: 14px; font-weight: 600;">Add a place</span>
+                  </div>
+                </div>
+                <div style="width: 230px; flex: none; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+                <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                  <h4 style="margin: 0; font-size: 18px; font-weight: 700;">Recently updated <span style="color: #6F797A; font-weight: 500;">22</span></h4>
+                  <a href="#1a" style="font-size: 14px; font-weight: 600;">See all</a>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px;">
+                  <div style="border-radius: 16px; overflow: hidden; background: #fff;">
+                    <div style="height: 132px; background: url('assets/fushimi.png') center/cover;"></div>
+                    <div style="padding: 12px 14px 14px;">
+                      <div style="font-size: 15px; font-weight: 600;">Fushimi Inari Taisha</div>
+                      <div style="display: flex; align-items: center; gap: 5px; font-size: 13px; color: #3F484A; margin-top: 3px;">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                        Kyoto, Japan
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <span style="font-size: 12px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                        <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>General</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="border-radius: 16px; overflow: hidden; background: #fff;">
+                    <div style="height: 132px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+                    <div style="padding: 12px 14px 14px;">
+                      <div style="font-size: 15px; font-weight: 600;">Seljalandsfoss</div>
+                      <div style="display: flex; align-items: center; gap: 5px; font-size: 13px; color: #3F484A; margin-top: 3px;">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                        Southern Region, Iceland
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <span style="font-size: 12px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                        <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #4A6267;"></span>Nature</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="border-radius: 16px; overflow: hidden; background: #fff;">
+                    <div style="height: 132px; background: url('assets/chefchaouen.png') center/cover;"></div>
+                    <div style="padding: 12px 14px 14px;">
+                      <div style="font-size: 15px; font-weight: 600;">Chefchaouen</div>
+                      <div style="display: flex; align-items: center; gap: 5px; font-size: 13px; color: #3F484A; margin-top: 3px;">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5c1.9 0 3.4 1.5 3.4 3.4C9.4 7.3 6 10.5 6 10.5S2.6 7.3 2.6 4.9C2.6 3 4.1 1.5 6 1.5z" stroke="#6F797A" stroke-width="1.2"></path><circle cx="6" cy="4.9" r="1.1" fill="#6F797A"></circle></svg>
+                        Tanger-Tetouan, Morocco
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                        <span style="font-size: 12px; letter-spacing: .12em; color: #BFC8CA;">★★★★★</span>
+                        <span style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 11px; background: #E9EFF0; font-size: 11.5px; font-weight: 600; color: #3F484A;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #525E7D;"></span>City</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside style="display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+              <div style="background: #FFFFFF; border-radius: 20px; padding: 20px 22px;">
+                <div style="font-size: 12px; font-weight: 700; letter-spacing: .08em; color: #6F797A; margin-bottom: 16px;">YOUR MAP SO FAR</div>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <div>
+                    <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px;">
+                      <span style="font-size: 14.5px;">Countries</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #3F484A;"><b style="font-size: 17px; color: #006973;">6</b> / 250</span>
+                    </div>
+                    <div style="height: 5px; border-radius: 3px; background: #DBE4E6; overflow: hidden;"><div style="width: 2.4%; height: 100%; background: #006973;"></div></div>
+                  </div>
+                  <div>
+                    <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px;">
+                      <span style="font-size: 14.5px;">Regions</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #3F484A;"><b style="font-size: 17px; color: #006973;">13</b> / 5,322</span>
+                    </div>
+                    <div style="height: 5px; border-radius: 3px; background: #DBE4E6; overflow: hidden;"><div style="width: 1.5%; height: 100%; background: #006973;"></div></div>
+                  </div>
+                  <div>
+                    <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px;">
+                      <span style="font-size: 14.5px;">Cities</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #3F484A;"><b style="font-size: 17px; color: #006973;">4</b> / 153,728</span>
+                    </div>
+                    <div style="height: 5px; border-radius: 3px; background: #DBE4E6; overflow: hidden;"><div style="width: 1.2%; height: 100%; background: #006973;"></div></div>
+                  </div>
+                  <div>
+                    <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 7px;">
+                      <span style="font-size: 14.5px;">Places visited</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #3F484A;"><b style="font-size: 17px; color: #006973;">17</b> / 22</span>
+                    </div>
+                    <div style="height: 5px; border-radius: 3px; background: #DBE4E6; overflow: hidden;"><div style="width: 77%; height: 100%; background: #006973;"></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="background: #FFFFFF; border-radius: 20px; padding: 18px 22px 20px;">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+                  <span style="font-size: 16px; font-weight: 700;">Coming up</span>
+                  <a href="#1a" style="font-size: 13.5px; font-weight: 600;">See all</a>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 42px; flex: none; text-align: center; border-radius: 10px; background: #E9EFF0; padding: 6px 0;">
+                      <div style="font-size: 15px; font-weight: 700; line-height: 1.1;">05</div>
+                      <div style="font-size: 11px; color: #3F484A;">SEP</div>
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: 14.5px; font-weight: 600;">Cinque Terre</div>
+                      <div style="font-size: 13px; color: #3F484A;">Trip starts · 2 places</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 42px; flex: none; text-align: center; border-radius: 10px; background: #E9EFF0; padding: 6px 0;">
+                      <div style="font-size: 15px; font-weight: 700; line-height: 1.1;">11</div>
+                      <div style="font-size: 11px; color: #3F484A;">OCT</div>
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-size: 14.5px; font-weight: 600;">Peru</div>
+                      <div style="font-size: 13px; color: #3F484A;">In 36 days · 3 places</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="background: #CDE7EC; border-radius: 20px; padding: 18px 22px;">
+                <div style="font-size: 14px; font-weight: 700; color: #334B4F;">Peru</div>
+                <p style="margin: 4px 0 12px; font-size: 13.5px; color: #334B4F;">3 places planned. Añade el resto antes de salir.</p>
+                <span style="font-size: 13.5px; font-weight: 600; color: #004F57;">Plan the trip →</span>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1b" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">1b</span>
+        <span style="font-size: 15px; font-weight: 600;">El progreso, primero</span>
+        <span style="font-size: 14px; color: #3F484A;">Banda oscura con las cifras grandes, tono editorial</span>
+      </div>
+      <div style="width: 1240px; height: 840px; display: flex; background: #F5FAFB; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35); font-family: Archivo, system-ui, sans-serif;">
+        <nav style="width: 78px; flex: none; background: #00363C; display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 22px 0;">
+          <img src="docs/icon-512.png" alt="AdventureLog" style="width: 32px; height: 32px; border-radius: 9px; display: block;">
+          <div style="width: 46px; height: 46px; border-radius: 14px; background: rgba(158,239,252,.16); display: grid; place-items: center;">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9.5 11 3.5l8 6V19H3z" stroke="#9EEFFC" stroke-width="1.8" stroke-linejoin="round"></path></svg>
+          </div>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#81D3E0" stroke-width="1.6"></circle><path d="M14 8l-2.2 6L8 15.5l2.2-6z" fill="#81D3E0"></path></svg>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="12" rx="2.5" stroke="#81D3E0" stroke-width="1.6"></rect><circle cx="8" cy="10" r="1.6" fill="#81D3E0"></circle></svg>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 6l5.5-2L14 6l5-2v12l-5 2-5.5-2L3 18z" stroke="#81D3E0" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="#81D3E0" stroke-width="1.6"></circle><ellipse cx="11" cy="11" rx="3.4" ry="8" stroke="#81D3E0" stroke-width="1.6"></ellipse><path d="M3.4 11h15.2" stroke="#81D3E0" stroke-width="1.6"></path></svg>
+        </nav>
+
+        <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+          <div style="background: #004F57; color: #E6FBFF; padding: 28px 36px 30px;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;">
+              <div>
+                <div style="font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #81D3E0;">JOHN DOE · SINCE 2021</div>
+                <h2 style="margin: 8px 0 0; font-family: 'Instrument Serif', Georgia, serif; font-size: 44px; font-weight: 400; line-height: 1.05; letter-spacing: -0.01em;">6 countries, 4 cities,<br>17 places logged.</h2>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid rgba(230,251,255,.35); display: flex; align-items: center; font-size: 14px;">Search</div>
+                <div style="height: 40px; padding: 0 16px; border-radius: 20px; background: #9EEFFC; color: #00363C; display: flex; align-items: center; font-size: 14px; font-weight: 600;">+ Add place</div>
+                <div style="width: 40px; height: 40px; border-radius: 20px; background: rgba(230,251,255,.2); display: grid; place-items: center; font-weight: 700; font-size: 14px;">J</div>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 30px;">
+              <div>
+                <div style="display: flex; align-items: baseline; gap: 6px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 40px; line-height: 1;">6</span><span style="font-size: 14px; color: #81D3E0;">/ 250</span></div>
+                <div style="font-size: 13px; letter-spacing: .06em; color: #B1CBD0; margin: 6px 0 8px;">COUNTRIES</div>
+                <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 2.4%; height: 100%; background: #9EEFFC;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; align-items: baseline; gap: 6px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 40px; line-height: 1;">13</span><span style="font-size: 14px; color: #81D3E0;">/ 5,322</span></div>
+                <div style="font-size: 13px; letter-spacing: .06em; color: #B1CBD0; margin: 6px 0 8px;">REGIONS</div>
+                <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 1.5%; height: 100%; background: #9EEFFC;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; align-items: baseline; gap: 6px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 40px; line-height: 1;">4</span><span style="font-size: 14px; color: #81D3E0;">/ 153,728</span></div>
+                <div style="font-size: 13px; letter-spacing: .06em; color: #B1CBD0; margin: 6px 0 8px;">CITIES</div>
+                <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 1.2%; height: 100%; background: #9EEFFC;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; align-items: baseline; gap: 6px;"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 40px; line-height: 1;">17</span><span style="font-size: 14px; color: #81D3E0;">/ 22</span></div>
+                <div style="font-size: 13px; letter-spacing: .06em; color: #B1CBD0; margin: 6px 0 8px;">PLACES VISITED</div>
+                <div style="height: 3px; background: rgba(158,239,252,.25);"><div style="width: 77%; height: 100%; background: #9EEFFC;"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex: 1; display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 26px; padding: 26px 36px 30px; min-height: 0;">
+            <div style="display: flex; flex-direction: column; gap: 22px; min-width: 0;">
+              <div>
+                <div style="font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #6F797A; margin-bottom: 10px;">NEXT TRIP</div>
+                <div style="display: flex; align-items: stretch; gap: 18px; background: #fff; border-radius: 18px; padding: 16px; border: 1px solid #DBE4E6;">
+                  <div style="width: 150px; flex: none; border-radius: 12px; background: url('assets/chefchaouen.png') center/cover;"></div>
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 6px;">
+                    <span style="font-size: 12px; font-weight: 600; letter-spacing: .1em; color: #006973;">STARTS TOMORROW</span>
+                    <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 32px; line-height: 1.05;">Cinque Terre</div>
+                    <div style="font-size: 14px; color: #3F484A;">2 places · 05/09 – 09/09</div>
+                  </div>
+                  <div style="align-self: center; padding: 10px 18px; border-radius: 22px; background: #006973; color: #fff; font-size: 14px; font-weight: 600;">Open</div>
+                </div>
+              </div>
+
+              <div style="min-height: 0;">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+                  <span style="font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #6F797A;">RECENTLY UPDATED · 22</span>
+                  <a href="#1b" style="font-size: 13.5px; font-weight: 600;">See all</a>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px;">
+                  <div>
+                    <div style="height: 116px; border-radius: 14px; background: url('assets/fushimi.png') center/cover;"></div>
+                    <div style="font-size: 14.5px; font-weight: 600; margin-top: 9px;">Fushimi Inari Taisha</div>
+                    <div style="font-size: 12.5px; color: #6F797A;">Kyoto, Japan</div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                      <span style="font-size: 11.5px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                      <span style="font-size: 11px; letter-spacing: .06em; color: #6F797A;">GENERAL</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="height: 116px; border-radius: 14px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+                    <div style="font-size: 14.5px; font-weight: 600; margin-top: 9px;">Seljalandsfoss</div>
+                    <div style="font-size: 12.5px; color: #6F797A;">Southern Region, Iceland</div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                      <span style="font-size: 11.5px; letter-spacing: .12em; color: #006973;">★★★★★</span>
+                      <span style="font-size: 11px; letter-spacing: .06em; color: #6F797A;">NATURE</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="height: 116px; border-radius: 14px; background: url('assets/chefchaouen.png') center/cover;"></div>
+                    <div style="font-size: 14.5px; font-weight: 600; margin-top: 9px;">Chefchaouen</div>
+                    <div style="font-size: 12.5px; color: #6F797A;">Tanger-Tetouan, Morocco</div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                      <span style="font-size: 11.5px; letter-spacing: .12em; color: #BFC8CA;">★★★★★</span>
+                      <span style="font-size: 11px; letter-spacing: .06em; color: #6F797A;">CITY</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">
+              <div style="font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #6F797A;">COMING UP</div>
+              <div style="display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #DBE4E6;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #006973; width: 46px; flex: none;">05/09</div>
+                <div>
+                  <div style="font-size: 14.5px; font-weight: 600;">Cinque Terre</div>
+                  <div style="font-size: 13px; color: #3F484A;">Trip starts</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #DBE4E6;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #006973; width: 46px; flex: none;">09/09</div>
+                <div>
+                  <div style="font-size: 14.5px; font-weight: 600;">Vernazza</div>
+                  <div style="font-size: 13px; color: #3F484A;">Cinque Terre</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid #DBE4E6;">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #006973; width: 46px; flex: none;">11/10</div>
+                <div>
+                  <div style="font-size: 14.5px; font-weight: 600;">Peru</div>
+                  <div style="font-size: 13px; color: #3F484A;">In 36 days · 3 places</div>
+                </div>
+              </div>
+              <div style="margin-top: 14px; padding: 18px; border-radius: 16px; background: #D9E2FF;">
+                <div style="font-size: 14px; font-weight: 600; color: #3A4664;">5 regions sin visitar en Italia</div>
+                <p style="margin: 6px 0 10px; font-size: 13px; line-height: 1.5; color: #3A4664;">Cinque Terre suma Liguria a tu mapa.</p>
+                <span style="font-size: 13px; font-weight: 600; color: #3A4664;">Ver el mundo →</span>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="1c" style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; background: #171D1E; color: #F5FAFB; padding: 3px 9px; border-radius: 6px;">1c</span>
+        <span style="font-size: 15px; font-weight: 600;">Foto primero</span>
+        <span style="font-size: 14px; color: #3F484A;">El próximo viaje ocupa el ancho completo; datos abajo, compactos</span>
+      </div>
+      <div style="width: 1240px; height: 840px; position: relative; display: flex; flex-direction: column; background: #FFFFFF; border-radius: 20px; overflow: hidden; box-shadow: 0 24px 60px -30px rgba(23,29,30,.35); font-family: Figtree, system-ui, sans-serif;">
+        <div style="position: absolute; inset: 0 0 auto 0; height: 340px; background: url('assets/seljalandsfoss.png') center/cover;"></div>
+        <div style="position: absolute; inset: 0 0 auto 0; height: 340px; background: linear-gradient(180deg, rgba(0,54,60,.72) 0%, rgba(0,54,60,.25) 45%, rgba(0,54,60,.85) 100%);"></div>
+
+        <div style="position: relative; height: 340px; flex: none; display: flex; flex-direction: column; color: #FFFFFF;">
+          <header style="display: flex; align-items: center; gap: 26px; padding: 22px 34px;">
+            <img src="docs/icon-512.png" alt="AdventureLog" style="width: 30px; height: 30px; border-radius: 8px; display: block;">
+            <div style="display: flex; gap: 26px; font-size: 14.5px; font-weight: 600; flex: 1;">
+              <span style="padding-bottom: 5px; border-bottom: 2px solid #9EEFFC;">Home</span>
+              <span style="opacity: .8;">Places</span>
+              <span style="opacity: .8;">Collections</span>
+              <span style="opacity: .8;">Map</span>
+              <span style="opacity: .8;">World</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border-radius: 19px; background: rgba(255,255,255,.16); font-size: 14px;">
+              <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="7.5" cy="7.5" r="5.2" stroke="#fff" stroke-width="1.7"></circle><path d="M11.5 11.5 16 16" stroke="#fff" stroke-width="1.7"></path></svg> Search
+            </div>
+            <div style="width: 38px; height: 38px; border-radius: 19px; background: #CDE7EC; color: #334B4F; display: grid; place-items: center; font-weight: 700; font-size: 14px;">J</div>
+          </header>
+
+          <div style="margin-top: auto; padding: 0 34px 26px; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px;">
+            <div>
+              <span style="display: inline-block; padding: 5px 12px; border-radius: 14px; background: #9EEFFC; color: #00363C; font-size: 12px; font-weight: 700; letter-spacing: .08em;">STARTS TOMORROW</span>
+              <h2 style="margin: 14px 0 6px; font-size: 52px; font-weight: 700; letter-spacing: -0.03em; line-height: 1;">Cinque Terre</h2>
+              <p style="margin: 0; font-size: 16px; opacity: .9;">2 places · Liguria, Italy · 05/09 – 09/09</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="padding: 11px 20px; border-radius: 22px; background: #FFFFFF; color: #00363C; font-size: 14.5px; font-weight: 600;">Open trip</span>
+              <span style="padding: 11px 20px; border-radius: 22px; border: 1px solid rgba(255,255,255,.55); font-size: 14.5px; font-weight: 600;">Add a place</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="position: relative; flex: 1; min-height: 0; padding: 26px 34px 30px; display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 30px; box-sizing: border-box;">
+          <div style="display: flex; flex-direction: column; gap: 20px; min-width: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-radius: 16px; background: #F5FAFB;">
+              <div style="font-size: 15px;"><b style="font-size: 17px;">Hi, John Doe!</b> · 17 of 22 places visited</div>
+              <div style="display: flex; gap: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 13.5px; color: #3F484A;">
+                <span><b style="font-family: Figtree, sans-serif; font-size: 16px; color: #006973;">6</b> / 250 countries</span>
+                <span><b style="font-family: Figtree, sans-serif; font-size: 16px; color: #006973;">13</b> / 5,322 regions</span>
+                <span><b style="font-family: Figtree, sans-serif; font-size: 16px; color: #006973;">4</b> / 153,728 cities</span>
+              </div>
+            </div>
+
+            <div style="min-height: 0;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px;">
+                <h4 style="margin: 0; font-size: 19px; font-weight: 700;">Recently updated <span style="color: #6F797A; font-weight: 500;">22</span></h4>
+                <a href="#1c" style="font-size: 14px; font-weight: 600;">See all</a>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
+                <div style="position: relative; height: 190px; border-radius: 18px; overflow: hidden; background: url('assets/fushimi.png') center/cover;">
+                  <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 42%, rgba(0,20,22,.8) 100%);"></div>
+                  <span style="position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.92); font-size: 11px; font-weight: 600; color: #171D1E;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #006973;"></span>General</span>
+                  <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; color: #fff;">
+                    <div style="font-size: 15.5px; font-weight: 600;">Fushimi Inari Taisha</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 3px;">
+                      <span style="font-size: 12.5px; opacity: .85;">Kyoto, Japan</span>
+                      <span style="font-size: 11.5px; letter-spacing: .12em;">★★★★★</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="position: relative; height: 190px; border-radius: 18px; overflow: hidden; background: url('assets/chefchaouen.png') center/cover;">
+                  <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 42%, rgba(0,20,22,.8) 100%);"></div>
+                  <span style="position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.92); font-size: 11px; font-weight: 600; color: #171D1E;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #525E7D;"></span>City</span>
+                  <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; color: #fff;">
+                    <div style="font-size: 15.5px; font-weight: 600;">Chefchaouen</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 3px;">
+                      <span style="font-size: 12.5px; opacity: .85;">Tanger-Tetouan, Morocco</span>
+                      <span style="font-size: 11.5px; letter-spacing: .12em; opacity: .55;">★★★★★</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="position: relative; height: 190px; border-radius: 18px; overflow: hidden; background: url('assets/seljalandsfoss.png') center/cover;">
+                  <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 42%, rgba(0,20,22,.8) 100%);"></div>
+                  <span style="position: absolute; top: 12px; left: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.92); font-size: 11px; font-weight: 600; color: #171D1E;"><span style="width: 6px; height: 6px; border-radius: 3px; background: #4A6267;"></span>Nature</span>
+                  <div style="position: absolute; bottom: 14px; left: 16px; right: 16px; color: #fff;">
+                    <div style="font-size: 15.5px; font-weight: 600;">Seljalandsfoss</div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 3px;">
+                      <span style="font-size: 12.5px; opacity: .85;">Southern Region, Iceland</span>
+                      <span style="font-size: 11.5px; letter-spacing: .12em;">★★★★★</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside style="display: flex; flex-direction: column; gap: 18px; min-width: 0;">
+            <div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+                <h4 style="margin: 0; font-size: 16px; font-weight: 700;">Coming up</h4>
+                <a href="#1c" style="font-size: 13.5px; font-weight: 600;">See all</a>
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <div style="display: flex; gap: 14px; padding-bottom: 16px; border-left: 2px solid #9EEFFC; padding-left: 16px; margin-left: 4px; position: relative;">
+                  <div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #006973;">05/09 · TOMORROW</div>
+                    <div style="font-size: 14.5px; font-weight: 600; margin-top: 2px;">Cinque Terre</div>
+                    <div style="font-size: 13px; color: #3F484A;">Trip starts · 2 places</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 14px; padding-bottom: 16px; border-left: 2px solid #DBE4E6; padding-left: 16px; margin-left: 4px;">
+                  <div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #6F797A;">11/10 · IN 36 DAYS</div>
+                    <div style="font-size: 14.5px; font-weight: 600; margin-top: 2px;">Peru</div>
+                    <div style="font-size: 13px; color: #3F484A;">3 places</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="padding: 18px 20px; border-radius: 18px; background: #F5FAFB;">
+              <div style="font-size: 13px; font-weight: 700; letter-spacing: .06em; color: #6F797A;">PLACES VISITED</div>
+              <div style="display: flex; align-items: baseline; gap: 8px; margin: 8px 0 10px;">
+                <span style="font-size: 34px; font-weight: 700; letter-spacing: -0.02em; color: #006973;">17</span>
+                <span style="font-size: 15px; color: #3F484A;">of 22</span>
+              </div>
+              <div style="height: 6px; border-radius: 3px; background: #DBE4E6; overflow: hidden;"><div style="width: 77%; height: 100%; background: #006973;"></div></div>
+              <p style="margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: #3F484A;">5 lugares guardados siguen pendientes de visitar.</p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+</body>
+</html>
