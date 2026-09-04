@@ -33,6 +33,8 @@ import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import com.desarrollodroide.adventurelog.core.model.userTags
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun AdventureItem(
@@ -54,169 +56,139 @@ fun AdventureItem(
     val imageLoader = LocalImageLoader.current
 
     Card(
-        modifier = modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp),
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
         onClick = onClick,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Box {
-            val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
-            
-            if (hasImage) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = location.images.first().image,
-                        imageLoader = imageLoader
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                LocationPlaceholder(
-                    name = location.name,
-                    latitude = location.latitude,
-                    longitude = location.longitude,
+            Column {
+                val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
 
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.6f),
-                                Color.Black.copy(alpha = 0.9f)
-                            ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
+                // A ratio, not a height. A fixed 250dp against a column that is 380dp wide on a
+                // phone and 340dp on a tablet gave a tall card in one place and a square in the
+                // other; a photograph asked to be square is a photograph with its ends cut off.
+                val photo = Modifier.fillMaxWidth().aspectRatio(3f / 2f)
+                if (hasImage) {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            model = location.images.first().image,
+                            imageLoader = imageLoader
+                        ),
+                        contentDescription = null,
+                        modifier = photo,
+                        contentScale = ContentScale.Crop
                     )
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = location.name,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                // Where the place actually is, and how it rated - both shown on the web card and
-                // the two things that tell near-identical entries apart at a glance.
-                location.location?.takeIf { it.isNotBlank() }?.let { label ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Place,
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.75f),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = label,
-                            color = Color.White.copy(alpha = 0.85f),
-                            fontSize = 13.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                } else {
+                    LocationPlaceholder(
+                        name = location.name,
+                        latitude = location.latitude,
+                        longitude = location.longitude,
+                        modifier = photo
+                    )
                 }
 
-                location.price?.let { price ->
-                    Spacer(modifier = Modifier.height(4.dp))
+                // Under the photograph, not over it. White text on a photograph is legible until
+                // the photograph is a bright sky, and then the name of the place is simply gone.
+                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
                     Text(
-                        text = "💰 ${Currencies.formatAmount(price)} " +
-                            (location.priceCurrency ?: Currencies.DEFAULT),
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 13.sp
+                        text = location.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
-                }
 
-                location.rating?.takeIf { it > 0 }?.let { rating ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        repeat(5) { index ->
+                    location.location?.takeIf { it.isNotBlank() }?.let { label ->
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = if (index < rating.toInt()) {
-                                    Icons.Default.Star
-                                } else {
-                                    Icons.Default.StarBorder
-                                },
+                                imageVector = Icons.Default.Place,
                                 contentDescription = null,
-                                tint = Color(0xFFFFC107),
-                                modifier = Modifier.size(14.dp)
+                                tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
-                }
 
-                val tags = location.tags.userTags()
-                if (location.category != null || !location.isPublic ||
-                    location.collections.isNotEmpty() || tags.isNotEmpty()
-                ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    @OptIn(ExperimentalLayoutApi::class)
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Category tag
-                        location.category?.let { category ->
-                            MetaChip(
-                                text = "${category.icon} ${category.displayName}",
-                                tone = ChipTone.ON_IMAGE
-                            )
+                    val rating = location.rating?.toInt() ?: 0
+                    val category = location.category
+                    if (rating > 0 || category != null) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (rating > 0) {
+                                Text(
+                                    text = "\u2605".repeat(rating.coerceAtMost(5)),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
+                            if (category != null) {
+                                Text(
+                                    text = category.displayName.uppercase(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
+                    }
 
-                        // Private tag
-                        if (!location.isPublic) {
-                            // The one fact on the card worth a colour: everything else is a label.
-                            MetaChip(text = "🔒 Private", tone = ChipTone.WARNING)
-                        }
+                    location.price?.let { price ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "\uD83D\uDCB0 ${Currencies.formatAmount(price)} " +
+                                (location.priceCurrency ?: Currencies.DEFAULT),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
-                        // Collection tags
-                        val collectionNames = location.collections.mapNotNull { id ->
-                            collections.find { it.id == id }?.name
-                        }
+                    val tags = location.tags.userTags()
+                    val collectionNames = location.collections.mapNotNull { id ->
+                        collections.find { it.id == id }?.name
+                    }
+                    if (!location.isPublic || collectionNames.isNotEmpty() || tags.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        // Show first 2 collections and a +N indicator if there are more
-                        val visibleCollections = collectionNames.take(2)
-                        val remainingCount = collectionNames.size - visibleCollections.size
-
-                        visibleCollections.forEach { collectionName ->
-                            MetaChip(text = "📁 $collectionName", tone = ChipTone.ON_IMAGE)
-                        }
-
-                        if (remainingCount > 0) {
-                            MetaChip(text = "+$remainingCount", tone = ChipTone.ON_IMAGE)
-                        }
-
-                        // The user's own tags, capped so a heavily tagged place does not push the
-                        // title off the card.
-                        val visibleTags = tags.take(3)
-                        visibleTags.forEach { tag ->
-                            MetaChip(text = tag, tone = ChipTone.ON_IMAGE)
-                        }
-                        val hiddenTags = tags.size - visibleTags.size
-                        if (hiddenTags > 0) {
-                            MetaChip(text = "+$hiddenTags", tone = ChipTone.ON_IMAGE)
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (!location.isPublic) {
+                                MetaChip(text = "\uD83D\uDD12 Private", tone = ChipTone.WARNING)
+                            }
+                            val visibleCollections = collectionNames.take(2)
+                            visibleCollections.forEach { name ->
+                                MetaChip(text = "\uD83D\uDCC1 $name", tone = ChipTone.NEUTRAL)
+                            }
+                            val remainingCollections = collectionNames.size - visibleCollections.size
+                            if (remainingCollections > 0) {
+                                MetaChip(text = "+$remainingCollections", tone = ChipTone.NEUTRAL)
+                            }
+                            val visibleTags = tags.take(3)
+                            visibleTags.forEach { tag ->
+                                MetaChip(text = tag, tone = ChipTone.NEUTRAL)
+                            }
+                            val hiddenTags = tags.size - visibleTags.size
+                            if (hiddenTags > 0) {
+                                MetaChip(text = "+$hiddenTags", tone = ChipTone.NEUTRAL)
+                            }
                         }
                     }
                 }
