@@ -244,26 +244,17 @@ fun HomeScreenContent(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // The backdrop was a photograph, and a photograph fights the content it is behind: its
-        // bright bands were the same white as the cards, and it stayed daylight when the theme
-        // went dark, so it needed washing down one way and dimming the other before it behaved.
+        // Flat, the redesign's #F5FAFB - the theme's own surface.
         //
-        // A gradient mixed from the theme's own containers has neither problem. It is never
-        // white, so a card always reads as a card; it follows the palette wherever the palette
-        // goes, dynamic colour included; and it needs no bitmap at all.
-        val scheme = MaterialTheme.colorScheme
+        // This was a gradient mixed from the palette's containers, which was the right answer when
+        // the palette came from the wallpaper and could be anything. It is the wrong one now: the
+        // cards are surfaceContainerLowest, a hair off white, and a background that drifts through
+        // three container tones leaves them reading as cards in some corners and as nothing in
+        // others. One ground, and the cards sit on it.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            lerp(scheme.surface, scheme.primaryContainer, 0.70f),
-                            lerp(scheme.surface, scheme.secondaryContainer, 0.55f),
-                            lerp(scheme.surface, scheme.tertiaryContainer, 0.40f)
-                        )
-                    )
-                )
+                .background(MaterialTheme.colorScheme.surface)
         )
 
             // The five destinations become a bottom bar on a phone and a rail on a tablet.
