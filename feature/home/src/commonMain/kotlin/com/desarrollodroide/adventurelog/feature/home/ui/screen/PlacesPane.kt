@@ -98,7 +98,13 @@ fun PlacesPane(
                         backStack.add(PlaceDetail(location.id))
                     },
                     onAddAdventureClick = onAddPlace,
-                    onEditAdventure = onEditPlace
+                    onEditAdventure = onEditPlace,
+                    // A detail pane holding one sentence of apology is a worse use of half a
+                    // tablet than simply showing the first place. On a phone there is no second
+                    // pane to fill, so nothing opens by itself.
+                    onFirstLoaded = { first ->
+                        if (twoPanes && backStack.size == 1) backStack.add(PlaceDetail(first.id))
+                    }
                 )
             }
 

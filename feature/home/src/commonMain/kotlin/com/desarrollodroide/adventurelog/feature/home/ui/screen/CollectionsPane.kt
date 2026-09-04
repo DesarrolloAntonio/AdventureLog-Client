@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -65,6 +67,9 @@ fun CollectionsPane(
     val backStack = rememberNavBackStack(collectionsNavConfiguration, CollectionsList)
     val listDetail = rememberListDetailSceneStrategy<NavKey>()
 
+    val twoPanes = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass !=
+        WindowWidthSizeClass.COMPACT
+
     NavDisplay(
         modifier = modifier,
         backStack = backStack,
@@ -96,7 +101,10 @@ fun CollectionsPane(
                         backStack.add(CollectionDetail(id))
                     },
                     onAddCollectionClick = onAddCollection,
-                    onEditCollection = onEditCollection
+                    onEditCollection = onEditCollection,
+                    onFirstLoaded = { first ->
+                        if (twoPanes && backStack.size == 1) backStack.add(CollectionDetail(first.id))
+                    }
                 )
             }
 
