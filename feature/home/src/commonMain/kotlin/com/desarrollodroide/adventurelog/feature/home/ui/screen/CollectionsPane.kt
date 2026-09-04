@@ -116,7 +116,8 @@ fun CollectionsPane(
                     onAdventureClick = onAdventureClick,
                     onEditAdventure = onEditAdventure,
                     onAddTransportation = { onAddTransportation(key.collectionId) },
-                    onEditTransportation = onEditTransportation
+                    onEditTransportation = onEditTransportation,
+                    showTitle = true
                 )
             }
         }

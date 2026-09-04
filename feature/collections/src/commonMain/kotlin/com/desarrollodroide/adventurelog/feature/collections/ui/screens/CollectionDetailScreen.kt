@@ -50,6 +50,12 @@ fun CollectionDetailScreen(
     onEditAdventure: (Location) -> Unit,
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
+    /**
+     * Whether the screen has to name itself. Reached from Home it does not: the shell's breadcrumb
+     * already says which collection this is. As the detail half of a two-pane screen there is no
+     * breadcrumb, and without this the pane opens on a description with nothing to attach it to.
+     */
+    showTitle: Boolean = false,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = koinViewModel()
 ) {
@@ -120,6 +126,7 @@ fun CollectionDetailScreen(
             uiState.collection != null -> {
                 CollectionDetailContent(
                     collection = uiState.collection!!,
+                    showTitle = showTitle,
                     selectedTab = selectedTab,
                     onTabSelected = viewModel::onTabSelected,
                     onAdventureClick = onAdventureClick,
@@ -167,6 +174,7 @@ fun CollectionDetailScreen(
 @Composable
 fun CollectionDetailContent(
     collection: Collection,
+    showTitle: Boolean = false,
     selectedTab: CollectionTab,
     onTabSelected: (CollectionTab) -> Unit,
     onAdventureClick: (Location) -> Unit,
@@ -189,7 +197,7 @@ fun CollectionDetailContent(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
-            CollectionHeader(collection)
+            CollectionHeader(collection, showTitle = showTitle)
         }
         
         item {
@@ -551,12 +559,21 @@ fun CollectionDetailContent(
 @Composable
 fun CollectionHeader(
     collection: Collection,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showTitle: Boolean = false
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        if (showTitle) {
+            Text(
+                text = collection.name,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         // Description (only if not blank)
         if (collection.description.isNotBlank()) {
             Text(

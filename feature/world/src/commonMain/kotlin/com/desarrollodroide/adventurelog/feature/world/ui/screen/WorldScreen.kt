@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -147,12 +149,14 @@ private fun WorldScreenContent(
                 ) {
                     // Search bar and filter button as first item
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        // A search field drawn the full width of a tablet is a 1700dp box holding
+                        // three words. Capped, it stays the size of the thing it is for.
+                        //
+                        // The Box is not decoration: a spanned grid item is measured at an exact
+                        // width, and widthIn coerces its own maximum back up into that fixed
+                        // range, so a cap applied directly to the Row does nothing at all. The
+                        // Box takes the exact width and hands its child loose constraints.
+                        CappedRow {
                             SimpleSearchBar(
                                 searchQuery = uiState.searchQuery,
                                 onSearchQueryChange = onSearchQueryChange,
@@ -181,6 +185,7 @@ private fun WorldScreenContent(
 
                     // Filter chips
                     item(span = { GridItemSpan(maxLineSpan) }) {
+                        Capped {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -197,6 +202,7 @@ private fun WorldScreenContent(
                                     viewModel.onFilterModeChanged(filterMode)
                                 }
                             )
+                        }
                         }
                     }
 
@@ -405,5 +411,24 @@ private fun EmptyState(
                 textAlign = TextAlign.Center
             )
         }
+    }
+}
+/** Content at a readable width inside a lazy-grid item that is measured at an exact full width. */
+@Composable
+private fun Capped(content: @Composable () -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth()) { content() }
+    }
+}
+
+/** [Capped], for a row that also needs its children laid out side by side. */
+@Composable
+private fun CappedRow(content: @Composable RowScope.() -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            content = content
+        )
     }
 }

@@ -161,11 +161,17 @@ private fun DashboardList(
             item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
                 // Spanned so it leads the screen, but capped: stretched over a tablet it stops
                 // being a card and becomes a letterbox band with a title floating in it.
-                TripCard(
-                    trip = featuredTrip,
-                    onClick = { onTripClick(featuredTrip) },
-                    modifier = Modifier.widthIn(max = 720.dp)
-                )
+                //
+                // The Box matters. A spanned grid item is measured at an exact width, and widthIn
+                // coerces its maximum back up into that fixed range - so the cap on its own is
+                // ignored. The Box absorbs the exact width and passes loose constraints down.
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    TripCard(
+                        trip = featuredTrip,
+                        onClick = { onTripClick(featuredTrip) },
+                        modifier = Modifier.widthIn(max = 720.dp)
+                    )
+                }
             }
         }
 
