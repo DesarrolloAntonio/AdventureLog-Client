@@ -11,13 +11,13 @@ data class Collection(
     val startDate: String?,
     val endDate: String?,
     val transportations: List<Transportation>,
-    val notes: List<String>,
+    val notes: List<Note>,
     val updatedAt: String,
-    val checklists: List<String>,
+    val checklists: List<Checklist>,
     val isArchived: Boolean,
     val sharedWith: List<String>,
     val link: String,
-    val lodging: List<String>
+    val lodging: List<Lodging>
 )
 
 /**

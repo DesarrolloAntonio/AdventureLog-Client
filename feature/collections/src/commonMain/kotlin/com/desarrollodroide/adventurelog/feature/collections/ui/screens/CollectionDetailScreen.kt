@@ -516,6 +516,69 @@ fun CollectionDetailContent(
                 }
             }
             
+            CollectionTab.LODGING -> {
+                item { TabHeading("Lodging") }
+                if (collection.lodging.isEmpty()) {
+                    item { EmptyTab("No lodging in this collection yet.") }
+                } else {
+                    items(collection.lodging, key = { it.id }) { stay ->
+                        SimpleEntryCard(
+                            title = stay.name,
+                            lines = listOfNotNull(
+                                stay.location?.takeIf { it.isNotBlank() },
+                                lodgingDates(stay.checkIn, stay.checkOut),
+                                stay.reservationNumber?.takeIf { it.isNotBlank() }
+                                    ?.let { "Reservation $it" }
+                            ),
+                            badge = stay.type.replaceFirstChar { c -> c.uppercase() }
+                        )
+                    }
+                }
+            }
+
+            CollectionTab.NOTES -> {
+                item { TabHeading("Notes") }
+                if (collection.notes.isEmpty()) {
+                    item { EmptyTab("No notes in this collection yet.") }
+                } else {
+                    items(collection.notes, key = { it.id }) { note ->
+                        SimpleEntryCard(
+                            title = note.name,
+                            lines = listOfNotNull(
+                                note.content?.takeIf { it.isNotBlank() },
+                                note.date?.substringBefore('T')?.takeIf { it.isNotBlank() }
+                            ),
+                            badge = null
+                        )
+                    }
+                }
+            }
+
+            CollectionTab.CHECKLISTS -> {
+                item { TabHeading("Checklists") }
+                if (collection.checklists.isEmpty()) {
+                    item { EmptyTab("No checklists in this collection yet.") }
+                } else {
+                    items(collection.checklists, key = { it.id }) { checklist ->
+                        val done = checklist.items.count { it.isChecked }
+                        SimpleEntryCard(
+                            title = checklist.name,
+                            lines = checklist.items.take(4).map { item ->
+                                (if (item.isChecked) "\u2713 " else "\u25cb ") + item.name
+                            } + listOfNotNull(
+                                "and ${checklist.items.size - 4} more"
+                                    .takeIf { checklist.items.size > 4 }
+                            ),
+                            badge = if (checklist.items.isEmpty()) {
+                                null
+                            } else {
+                                "$done / ${checklist.items.size}"
+                            }
+                        )
+                    }
+                }
+            }
+
             else -> {
                 item {
                     Card(
@@ -991,5 +1054,97 @@ private fun parseDateTimeToComparable(dateString: String): Long {
         cleanDate.toLongOrNull() ?: 0L
     } catch (e: Exception) {
         0L
+    }
+}
+
+
+/** The heading each tab opens with, matching the one the Places tab already had. */
+@Composable
+private fun TabHeading(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun EmptyTab(message: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(28.dp)
+        )
+    }
+}
+
+/**
+ * One entry in the lodging, notes or checklists tab.
+ *
+ * These three were greyed out because the collection model kept only their ids - the server had
+ * been sending the whole objects all along and the mapper reduced each to `it.id`.
+ */
+@Composable
+private fun SimpleEntryCard(title: String, lines: List<String>, badge: String?) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (badge != null) {
+                    Spacer(Modifier.width(10.dp))
+                    MetaChip(text = badge, tone = ChipTone.NEUTRAL)
+                }
+            }
+            lines.forEach { line ->
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = line,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/** "12/09 - 15/09", or one of the two when only one is set. */
+private fun lodgingDates(checkIn: String?, checkOut: String?): String? {
+    val short = { d: String? ->
+        d?.substringBefore('T')?.split("-")?.takeIf { it.size == 3 }?.let { "${it[2]}/${it[1]}" }
+    }
+    val a = short(checkIn)
+    val b = short(checkOut)
+    return when {
+        a != null && b != null && a != b -> "$a \u2013 $b"
+        a != null -> a
+        b != null -> b
+        else -> null
     }
 }

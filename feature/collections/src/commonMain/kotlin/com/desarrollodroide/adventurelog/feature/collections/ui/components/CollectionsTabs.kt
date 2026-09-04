@@ -39,9 +39,9 @@ enum class CollectionTab(val title: String, val isEnabled: Boolean = true) {
     ALL("All"),
     LOCATIONS("Places"),
     TRANSPORTATIONS("Transportations"),
-    LODGING("Lodging", false),
-    NOTES("Notes", false),
-    CHECKLISTS("Checklists", false)
+    LODGING("Lodging"),
+    NOTES("Notes"),
+    CHECKLISTS("Checklists")
 }
 
 @Composable
