@@ -1,8 +1,8 @@
 # 🏕️ Adventure Log
 
 ![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=develop)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg)
-![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.2-green.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-blue.svg)
+![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.12.0-green.svg)
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-orange.svg)
 ![Modular](https://img.shields.io/badge/Design-Modular-yellow.svg)
 ![KMP](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-purple.svg)
@@ -208,10 +208,10 @@ The app uses sealed classes to represent different UI states, providing type-saf
 
 ### Prerequisites
 
-- An Android Studio new enough for AGP 8.13
+- An Android Studio new enough for AGP 9.3
 - JDK 17 (what CI builds with; the compiled bytecode targets Java 11)
 - Xcode 26 (for iOS development) - the iOS deployment target is 15.3
-- Kotlin 2.2.21
+- Kotlin 2.4.10
 
 ### Setup & Build
 
@@ -290,8 +290,8 @@ cached it shows a spinner on a train. Places, collections and the dashboard shou
 locally, the server should become the thing that refreshes them rather than the only source, and
 writes made without a connection should queue until there is one.
 
-**Type-safe navigation routes.** Routes are plain strings right now, with serialized JSON passed
-inside them. That is fragile on its own terms, and it is also the prerequisite hiding behind two
+**Type-safe navigation routes.** Places and Collections run on Navigation 3 with typed keys; every
+other screen is still plain strings with serialized JSON passed inside them. That is fragile on its own terms, and it is also the prerequisite hiding behind two
 other items on this list - both Navigation 3 and the SwiftUI shell need routes that are objects
 with identity, not strings to be parsed.
 
@@ -301,17 +301,9 @@ the content inside each screen - the approach JetBrains documents in
 [Liquid Glass in Compose Multiplatform](https://kotlinlang.org/docs/multiplatform/ios-liquid-glass.html).
 Needs typed routes first, and a decision that the iOS tab bar stops being Compose's.
 
-**Toolchain upgrade.** Compose Multiplatform 1.9.0 first, on its own: it is built against
-kotlinx-datetime 0.7.1 and so fixes the iOS date picker outright. Kotlin, AGP 9 and compileSdk 36
-come after, as one piece - the Coil, Koin and Ktor updates are all gated behind them.
-
 **iOS parity.** `PlatformBackHandler` does nothing on iOS, which silently disables the
 "discard your changes?" prompt and anything else built on it. Related: there is no system back
 gesture, because the whole app is a single view controller.
-
-**Adaptive layouts.** `NavigationSuiteScaffold` turns the bottom bar into a navigation rail on
-tablets, foldables and landscape. The multiplatform artifact already matches the Compose version
-in use. If the SwiftUI shell happens, this becomes the Android and desktop answer only.
 
 **A signed release build.** There is no signing configuration in the project at all, and CI
 publishes a debug APK. This is the piece missing between here and a store listing.
