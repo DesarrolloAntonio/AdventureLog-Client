@@ -1,6 +1,17 @@
+@file:OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+
 plugins {
     alias(libs.plugins.adventurelog.kotlinMultiplatform)
     alias(libs.plugins.adventurelog.composeMultiplatform)
+}
+
+android {
+    namespace = "com.desarrollodroide.adventurelog.feature.home"
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    defaultConfig {
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 }
 
 kotlin {
@@ -36,6 +47,21 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.coil.compose)
             implementation(libs.androidx.ui.tooling)
+        }
+        // Screen tests run on a device: this project has no JVM target, so there is nowhere
+        // else for a Compose test to execute.
+        androidInstrumentedTest.dependencies {
+            // compose.uiTest, not the androidx artifact by name: Compose Multiplatform resolves
+            // the version, and naming androidx.compose.ui:ui-test-junit4-android directly asks
+            // for a version nothing here declares.
+            implementation(compose.uiTest)
+            implementation(libs.androidx.test.runner)
+            implementation(libs.junit)
+            // compose.uiTest drags in Espresso 3.5.0, whose input injection calls
+            // InputManager.getInstance - gone in Android 17, so every test dies before it runs.
+            implementation(libs.androidx.espresso.core)
+            // Declares the ComponentActivity the test host launches into.
+            implementation(libs.compose.ui.test.manifest)
         }
     }
 }
