@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+
 import java.util.Properties
 
 plugins {
@@ -50,4 +52,22 @@ buildConfig {
     packageName = "com.desarrollodroide.adventurelog.feature.ui"
     useKotlinOutput { internalVisibility = true }
     buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+}
+
+kotlin {
+    sourceSets {
+        androidInstrumentedTest.dependencies {
+            implementation(compose.uiTest)
+            implementation(libs.androidx.test.runner)
+            implementation(libs.junit)
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.compose.ui.test.manifest)
+        }
+    }
+}
+
+android {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 }

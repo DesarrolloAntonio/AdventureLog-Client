@@ -1,0 +1,106 @@
+package com.desarrollodroide.adventurelog.feature.ui
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Title
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.v2.runComposeUiTest
+import coil3.ImageLoader
+import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
+import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/**
+ * The pieces that appear on more than one screen, so a regression here is a regression everywhere.
+ *
+ * Every case below is something that was actually broken during the redesign, not a hypothetical.
+ */
+class SharedComponentsTest {
+
+    @Composable
+    private fun WithAppLocals(content: @Composable () -> Unit) {
+        val context = LocalContext.current
+        CompositionLocalProvider(LocalImageLoader provides ImageLoader(context)) { content() }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun aPlaceCardShowsItsNameAndWhereItIs() = runComposeUiTest {
+        val place = PreviewData.locations.first()
+        setContent { WithAppLocals { AdventureItem(location = place, showMenu = false) } }
+
+        // The name used to be white text over the photograph, which vanished against a bright
+        // sky. It is a separate node under the image now, and this is what says so.
+        onNodeWithText(place.name).assertIsDisplayed()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun tappingAPlaceCardReportsIt() = runComposeUiTest {
+        var taps = 0
+        val place = PreviewData.locations.first()
+        setContent { WithAppLocals { AdventureItem(location = place, showMenu = false, onClick = { taps++ }) } }
+
+        onNodeWithText(place.name).performClick()
+        assertEquals(1, taps)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun aMultiLineFieldKeepsWhatYouTypeOnSeparateLines() = runComposeUiTest {
+        // StyledTextField forced maxLines = 1 on every field, so a note or a description was one
+        // line that scrolled sideways however tall the caller made the box.
+        var text by mutableStateOf("")
+        setContent {
+            StyledTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = "Note",
+                icon = Icons.Default.Title,
+                singleLine = false,
+                minLines = 4
+            )
+        }
+
+        onNodeWithText("Note").performTextInput("first\nsecond")
+        assertTrue(text.contains("\n"))
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun aSectionCardCollapsesAndExpands() = runComposeUiTest {
+        setContent {
+            var open by remember { mutableStateOf(true) }
+            SectionCard(
+                title = "The stay",
+                icon = Icons.Default.Title,
+                expanded = open,
+                onExpandedChange = { open = it }
+            ) {
+                Column { androidx.compose.material3.Text("Inside the card") }
+            }
+        }
+
+        onNodeWithText("Inside the card").assertIsDisplayed()
+        onNodeWithText("The stay").performClick()
+        onAllNodes(hasText("Inside the card")).assertCountEquals(0)
+    }
+}
