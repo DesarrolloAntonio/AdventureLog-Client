@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.world.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import coil3.compose.AsyncImage
 import com.desarrollodroide.adventurelog.core.model.Country
 import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
+import androidx.compose.ui.draw.clip
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -34,86 +36,72 @@ fun CountryCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp),
+        shape = RoundedCornerShape(18.dp),
         onClick = onClick,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Box {
-            // Flag image
+        // A row, not a poster. This list is 250 long, and a flag given the full width of the
+        // column put one country on the screen at a time. The flag is decoration here; the name
+        // and how much of the country has been seen are the content.
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             AsyncImage(
                 model = country.flagUrl,
                 contentDescription = "${country.name} flag",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
+                    .width(60.dp)
+                    .aspectRatio(3f / 2f)
+                    .clip(RoundedCornerShape(6.dp)),
                 contentScale = ContentScale.Crop
             )
 
-            // Gradient overlay and content
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.6f),
-                                Color.Black.copy(alpha = 0.9f)
-                            ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
-                    )
-                    .padding(16.dp)
-            ) {
-                // Country name
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = country.name,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Tags row
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Subregion tag
-                    country.subregion?.let { subregion ->
-                        MetaChip(text = subregion, tone = ChipTone.ON_IMAGE)
-                    }
-
-                    // Capital tag
-                    country.capital?.let { capital ->
-                        MetaChip(text = capital, tone = ChipTone.ON_IMAGE)
-                    }
-
-                    // Visit status tag
-                    when (visitStatus) {
-                        // Only the state gets a colour; the flag behind is loud enough already.
-                        VisitStatus.VISITED -> MetaChip(
-                            text = "Visited ${country.numVisits} Region${if (country.numVisits > 1) "s" else ""}",
-                            tone = ChipTone.POSITIVE
-                        )
-                        VisitStatus.PARTIAL -> MetaChip(
-                            text = "Visited ${country.numVisits}/${country.numRegions}",
-                            tone = ChipTone.ACCENT
-                        )
-                        VisitStatus.NOT_VISITED -> MetaChip(
-                            text = "Not visited",
-                            tone = ChipTone.WARNING
-                        )
-                    }
+                val where = listOfNotNull(
+                    country.subregion?.takeIf { it.isNotBlank() },
+                    country.capital?.takeIf { it.isNotBlank() }
+                ).joinToString(" \u00b7 ")
+                if (where.isNotEmpty()) {
+                    Text(
+                        text = where,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            when (visitStatus) {
+                // Only the state gets a colour; 250 tinted rows would be noise.
+                VisitStatus.VISITED -> MetaChip(
+                    text = "${country.numRegions}/${country.numRegions}",
+                    tone = ChipTone.POSITIVE
+                )
+                VisitStatus.PARTIAL -> MetaChip(
+                    text = "${country.numVisits}/${country.numRegions}",
+                    tone = ChipTone.ACCENT
+                )
+                VisitStatus.NOT_VISITED -> MetaChip(
+                    text = "\u2013",
+                    tone = ChipTone.NEUTRAL
+                )
             }
         }
     }
