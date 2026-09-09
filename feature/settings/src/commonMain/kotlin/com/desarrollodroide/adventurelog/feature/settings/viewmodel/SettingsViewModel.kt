@@ -17,12 +17,56 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshVisitedRegionsUseCase
+import kotlinx.coroutines.flow.StateFlow
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val refreshVisitedRegionsUseCase: RefreshVisitedRegionsUseCase
 ) : ViewModel() {
+
+    private val _regionsRefreshing = MutableStateFlow(false)
+    val regionsRefreshing: StateFlow<Boolean> = _regionsRefreshing.asStateFlow()
+
+    private val _regionsMessage = MutableStateFlow<String?>(null)
+    val regionsMessage: StateFlow<String?> = _regionsMessage.asStateFlow()
+
+    /**
+     * Asks the server to work out which regions and cities the saved places actually fall in.
+     * Places added before their coordinates were known never got counted, which is why the World
+     * tab can read lower than the map looks.
+     */
+    fun refreshVisitedRegions() {
+        if (_regionsRefreshing.value) return
+        _regionsRefreshing.value = true
+        viewModelScope.launch {
+            when (val result = refreshVisitedRegionsUseCase()) {
+                is Either.Right -> {
+                    val (regions, cities) = result.value
+                    _regionsMessage.value = when {
+                        regions == 0 && cities == 0 -> "Everything was already up to date"
+                        else -> buildString {
+                            append(regions)
+                            append(if (regions == 1) " new region" else " new regions")
+                            if (cities > 0) {
+                                append(", ")
+                                append(cities)
+                                append(if (cities == 1) " new city" else " new cities")
+                            }
+                        }
+                    }
+                }
+                is Either.Left -> _regionsMessage.value = result.value
+            }
+            _regionsRefreshing.value = false
+        }
+    }
+
+    fun clearRegionsMessage() {
+        _regionsMessage.value = null
+    }
 
     val themeMode = settingsRepository.getThemeMode()
         .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.AUTO)

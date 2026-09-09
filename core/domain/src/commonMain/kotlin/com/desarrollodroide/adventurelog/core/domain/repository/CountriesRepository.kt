@@ -22,6 +22,9 @@ interface CountriesRepository {
     
     suspend fun getVisitedCities(): Either<ApiResponse, List<VisitedCity>>
     
+    /** Sweeps every location server-side; returns new regions and new cities. */
+    suspend fun refreshVisitedRegions(): Either<ApiResponse, Pair<Int, Int>>
+
     /** Marks a region visited and keeps [visitedRegionsFlow] in step. */
     suspend fun markRegionVisited(regionId: String): Either<ApiResponse, VisitedRegion>
 

@@ -59,6 +59,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.AccountHeader
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
+import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisitedRegionsCard
 
 @Composable
 fun SettingsScreen(
@@ -71,6 +72,8 @@ fun SettingsScreen(
     val user by viewModel.user.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val dynamicColors by viewModel.useDynamicColors.collectAsState()
+    val regionsRefreshing by viewModel.regionsRefreshing.collectAsState()
+    val regionsMessage by viewModel.regionsMessage.collectAsState()
     val isChangingPassword by viewModel.isChangingPassword.collectAsState()
 
     SettingsContent(
@@ -93,6 +96,10 @@ fun SettingsScreen(
         onReloadEmails = viewModel::loadEmails,
         storage = storage,
         onReloadStorage = viewModel::loadStorage,
+        regionsRefreshing = regionsRefreshing,
+        onRefreshRegions = viewModel::refreshVisitedRegions,
+        regionsMessage = regionsMessage,
+        onRegionsMessageShown = viewModel::clearRegionsMessage,
         onLogout = onLogout,
         messages = viewModel.messages
     )
@@ -119,6 +126,10 @@ fun SettingsContent(
     onReloadEmails: () -> Unit,
     storage: StorageSectionState,
     onReloadStorage: () -> Unit,
+    regionsRefreshing: Boolean = false,
+    onRefreshRegions: () -> Unit = {},
+    regionsMessage: String? = null,
+    onRegionsMessageShown: () -> Unit = {},
     onLogout: () -> Unit,
     messages: Flow<String>,
 ) {
@@ -131,6 +142,13 @@ fun SettingsContent(
 
     LaunchedEffect(messages) {
         messages.collect { snackbarHostState.showSnackbar(it) }
+    }
+
+    LaunchedEffect(regionsMessage) {
+        regionsMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            onRegionsMessageShown()
+        }
     }
 
     val primaryEmail = emails.addresses.firstOrNull { it.primary }?.email
@@ -174,6 +192,12 @@ fun SettingsContent(
                         onSetPrimaryEmail = onSetPrimaryEmail,
                         onRemoveEmail = onRemoveEmail,
                         onRetryEmails = onReloadEmails
+                    )
+                }
+                item {
+                    VisitedRegionsCard(
+                        isRefreshing = regionsRefreshing,
+                        onRefresh = onRefreshRegions
                     )
                 }
                 item {

@@ -201,4 +201,25 @@ class CountriesRepositoryImpl(
             Either.Left(ApiResponse.HttpError)
         }
     }
+
+    override suspend fun refreshVisitedRegions(): Either<ApiResponse, Pair<Int, Int>> {
+        return try {
+            val found = networkDataSource.refreshVisitedRegions()
+            // The sweep may have added records, so the cached list is stale either way.
+            getVisitedRegions()
+            Either.Right(found)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error refreshing visited regions: ${e.code}" }
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error refreshing visited regions: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error refreshing visited regions: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
 }

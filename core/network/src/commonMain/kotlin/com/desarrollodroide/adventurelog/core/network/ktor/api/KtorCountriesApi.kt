@@ -21,6 +21,7 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import com.desarrollodroide.adventurelog.core.network.model.response.MarkVisitedRegionResponse
 
 class KtorCountriesApi(
     private val httpClient: HttpClient,
@@ -169,5 +170,29 @@ class KtorCountriesApi(
                 "Failed to remove the visit: ${response.status}"
             )
         }
+    }
+
+    override suspend fun refreshVisitedRegions(): Pair<Int, Int> {
+        val sessionInfo = sessionProvider()
+        // The name says one region, but posting an empty body sweeps every location the account
+        // has and reports what it found. That is what the web's "update visited regions" does.
+        val url = "${sessionInfo.baseUrl}/api/reverse-geocode/mark_visited_region/"
+        logger.d { "Refreshing visited regions at: $url" }
+
+        val response = httpClient.post(url) {
+            headers { commonHeaders(sessionInfo.sessionToken) }
+            contentType(ContentType.Application.Json)
+            setBody("{}")
+        }
+
+        if (response.status.isSuccess()) {
+            val body = response.body<MarkVisitedRegionResponse>()
+            return body.newRegions to body.newCities
+        }
+        logger.e { "Failed to refresh visited regions: ${response.status}" }
+        throw HttpException(
+            response.status.value,
+            "Failed to update the visited regions: ${response.status}"
+        )
     }
 }

@@ -442,6 +442,11 @@ interface AdventureLogNetwork {
     suspend fun deleteChecklist(checklistId: String)
 
     /**
+     * Sweep every location and mark the regions and cities they fall in
+     */
+    suspend fun refreshVisitedRegions(): Pair<Int, Int>
+
+    /**
      * Mark a region as visited
      */
     suspend fun markRegionVisited(regionId: String): VisitedRegionDTO

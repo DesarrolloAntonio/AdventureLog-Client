@@ -769,6 +769,11 @@ class KtorAdventureLogNetwork(
         noteDataSource.deleteNote(noteId)
     }
 
+    override suspend fun refreshVisitedRegions(): Pair<Int, Int> {
+        ensureInitialized()
+        return countriesDataSource.refreshVisitedRegions()
+    }
+
     override suspend fun markRegionVisited(regionId: String): VisitedRegionDTO {
         ensureInitialized()
         return countriesDataSource.markRegionVisited(regionId)
