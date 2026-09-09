@@ -416,6 +416,7 @@ fun HomeScreenContent(
                                 serverUrl = userDetails?.serverUrl.orEmpty(),
                                 onSettings = { navigateTo(CurrentScreen.SETTINGS) },
                                 onCalendar = { navigateTo(CurrentScreen.CALENDAR) },
+                                onUsers = { navController.navigate(NavigationRoutes.Users.route) },
                                 onLogout = onLogout
                             )
                         },

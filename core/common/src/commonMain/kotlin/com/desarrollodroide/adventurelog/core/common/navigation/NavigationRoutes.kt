@@ -95,6 +95,10 @@ object NavigationRoutes {
         }
     }
 
+    object Users {
+        const val route = "users"
+    }
+
     object Settings {
         const val route = "settings"
     }

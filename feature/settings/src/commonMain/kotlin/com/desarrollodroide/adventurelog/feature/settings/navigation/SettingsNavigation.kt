@@ -5,6 +5,7 @@ import androidx.navigation.compose.composable
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsScreen
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
+import com.desarrollodroide.adventurelog.feature.settings.ui.screen.UsersScreen
 
 /**
  * Extension function to add settings screen to a navigation graph
@@ -19,5 +20,13 @@ fun NavGraphBuilder.settingsScreen(
         exitTransition = NavigationAnimations.exitTransitionVertical,
     ) {
         SettingsScreen(onLogout = onLogout)
+    }
+
+    composable(
+        route = NavigationRoutes.Users.route,
+        enterTransition = NavigationAnimations.enterTransitionVertical,
+        exitTransition = NavigationAnimations.exitTransitionVertical,
+    ) {
+        UsersScreen()
     }
 }

@@ -12,7 +12,8 @@ enum class CurrentScreen(val route: String, val index: Int, val title: String) {
     TRAVEL(NavigationRoutes.Travel.route, 3, "World"),
     MAP(NavigationRoutes.Map.route, 4, "Map"),
     CALENDAR(NavigationRoutes.Calendar.route, 5, "Calendar"),
-    SETTINGS(NavigationRoutes.Settings.route, 6, "Settings");
+    SETTINGS(NavigationRoutes.Settings.route, 6, "Settings"),
+    USERS(NavigationRoutes.Users.route, 7, "People");
 
     companion object {
         fun fromRoute(route: String): CurrentScreen {
@@ -37,6 +38,7 @@ enum class CurrentScreen(val route: String, val index: Int, val title: String) {
                 route == NavigationRoutes.Map.route -> MAP
                 route == NavigationRoutes.Calendar.route -> CALENDAR
                 route == NavigationRoutes.Settings.route -> SETTINGS
+                route == NavigationRoutes.Users.route -> USERS
                 else -> HOME
             }
         }

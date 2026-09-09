@@ -4,8 +4,10 @@ import com.desarrollodroide.adventurelog.core.domain.di.domainModule
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsViewModel
+import com.desarrollodroide.adventurelog.feature.settings.viewmodel.UsersViewModel
 
 val settingsModule = module {
     includes(domainModule)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::UsersViewModel)
 }
