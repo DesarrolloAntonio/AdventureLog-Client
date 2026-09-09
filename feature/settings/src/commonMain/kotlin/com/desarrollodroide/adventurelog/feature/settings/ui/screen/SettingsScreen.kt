@@ -74,6 +74,7 @@ fun SettingsScreen(
     val dynamicColors by viewModel.useDynamicColors.collectAsState()
     val regionsRefreshing by viewModel.regionsRefreshing.collectAsState()
     val regionsMessage by viewModel.regionsMessage.collectAsState()
+    val backupInProgress by viewModel.backupInProgress.collectAsState()
     val isChangingPassword by viewModel.isChangingPassword.collectAsState()
 
     SettingsContent(
@@ -98,6 +99,8 @@ fun SettingsScreen(
         onReloadStorage = viewModel::loadStorage,
         regionsRefreshing = regionsRefreshing,
         onRefreshRegions = viewModel::refreshVisitedRegions,
+        backupInProgress = backupInProgress,
+        onDownloadBackup = viewModel::downloadBackup,
         regionsMessage = regionsMessage,
         onRegionsMessageShown = viewModel::clearRegionsMessage,
         onLogout = onLogout,
@@ -128,6 +131,8 @@ fun SettingsContent(
     onReloadStorage: () -> Unit,
     regionsRefreshing: Boolean = false,
     onRefreshRegions: () -> Unit = {},
+    backupInProgress: Boolean = false,
+    onDownloadBackup: () -> Unit = {},
     regionsMessage: String? = null,
     onRegionsMessageShown: () -> Unit = {},
     onLogout: () -> Unit,
@@ -197,7 +202,9 @@ fun SettingsContent(
                 item {
                     VisitedRegionsCard(
                         isRefreshing = regionsRefreshing,
-                        onRefresh = onRefreshRegions
+                        onRefresh = onRefreshRegions,
+                        isBackingUp = backupInProgress,
+                        onDownloadBackup = onDownloadBackup
                     )
                 }
                 item {

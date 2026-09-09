@@ -19,13 +19,51 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshVisitedRegionsUseCase
 import kotlinx.coroutines.flow.StateFlow
+import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
+import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
+import kotlin.time.Clock
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
     private val accountRepository: AccountRepository,
-    private val refreshVisitedRegionsUseCase: RefreshVisitedRegionsUseCase
+    private val refreshVisitedRegionsUseCase: RefreshVisitedRegionsUseCase,
+    private val fileDownloader: AuthenticatedFileDownloader,
+    private val platformFiles: PlatformFiles
 ) : ViewModel() {
+
+    private val _backupInProgress = MutableStateFlow(false)
+    val backupInProgress: StateFlow<Boolean> = _backupInProgress.asStateFlow()
+
+    /**
+     * Downloads the account's backup zip and hands it to the share sheet.
+     *
+     * The endpoint is behind the same auth check as everything else, so the bytes are fetched with
+     * the signed-in client and offered as a file - a plain URL would come back 403, and on a
+     * server reachable only over Tailscale a link is no use to anyone anyway.
+     */
+    fun downloadBackup() {
+        if (_backupInProgress.value) return
+        val server = getServerUrl().trimEnd('/')
+        if (server.isEmpty()) return
+
+        _backupInProgress.value = true
+        viewModelScope.launch {
+            val bytes = fileDownloader.download("$server/api/backup/export/")
+            _regionsMessage.value = when {
+                bytes == null -> "Could not download the backup"
+                !platformFiles.share(bytes, backupFileName()) -> "Nothing on this device can take the file"
+                else -> null
+            }
+            _backupInProgress.value = false
+        }
+    }
+
+    // The date, without pulling kotlinx-datetime into this module for one filename.
+    private fun backupFileName(): String {
+        val stamp = Clock.System.now().toString().substringBefore('T')
+        return "adventurelog-backup-$stamp.zip"
+    }
 
     private val _regionsRefreshing = MutableStateFlow(false)
     val regionsRefreshing: StateFlow<Boolean> = _regionsRefreshing.asStateFlow()

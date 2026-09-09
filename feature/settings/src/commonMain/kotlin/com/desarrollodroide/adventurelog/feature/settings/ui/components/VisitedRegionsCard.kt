@@ -22,6 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material3.HorizontalDivider
 
 /**
  * The web's "update visited regions", under Advanced.
@@ -33,13 +35,15 @@ import androidx.compose.ui.text.font.FontWeight
 fun VisitedRegionsCard(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
+    isBackingUp: Boolean,
+    onDownloadBackup: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
     // Every other block on this screen opens with a heading; without one this card floated
     // between two named groups looking like it belonged to neither.
     Text(
-        text = "Your map",
+        text = "Your data",
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.primary,
@@ -76,6 +80,39 @@ fun VisitedRegionsCard(
                 )
             }
             if (isRefreshing) {
+                Spacer(Modifier.width(12.dp))
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+            }
+        }
+
+        HorizontalDivider(
+            modifier = Modifier.padding(start = 52.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !isBackingUp, onClick = onDownloadBackup)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.CloudDownload,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Download a backup", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = "Places, visits, collections, media and trails, as one zip",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (isBackingUp) {
                 Spacer(Modifier.width(12.dp))
                 CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
             }
