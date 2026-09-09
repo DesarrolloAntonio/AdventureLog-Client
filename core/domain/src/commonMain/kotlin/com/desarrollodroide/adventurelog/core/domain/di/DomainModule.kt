@@ -48,7 +48,9 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImag
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetRegionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteNoteUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteChecklistUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLodgingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveChecklistUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveLodgingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveNoteUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SetRegionVisitedUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
@@ -113,6 +115,8 @@ val domainModule = module {
     factoryOf(::SetRegionVisitedUseCase)
     factoryOf(::SaveNoteUseCase)
     factoryOf(::SaveChecklistUseCase)
+    factoryOf(::SaveLodgingUseCase)
+    factoryOf(::DeleteLodgingUseCase)
     factoryOf(::DeleteChecklistUseCase)
     factoryOf(::DeleteNoteUseCase)
     factoryOf(::GetVisitedRegionsUseCase)

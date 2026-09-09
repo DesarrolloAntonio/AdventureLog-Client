@@ -45,6 +45,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.DeleteOutline
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 @Composable
 fun CollectionDetailScreen(
@@ -59,6 +60,8 @@ fun CollectionDetailScreen(
     onEditNote: (String, Note) -> Unit = { _, _ -> },
     onAddChecklist: (String) -> Unit = {},
     onEditChecklist: (String, Checklist) -> Unit = { _, _ -> },
+    onAddLodging: (String) -> Unit = {},
+    onEditLodging: (String, Lodging) -> Unit = { _, _ -> },
     /**
      * Whether the screen has to name itself. Reached from Home it does not: the shell's breadcrumb
      * already says which collection this is. As the detail half of a two-pane screen there is no
@@ -157,6 +160,9 @@ fun CollectionDetailScreen(
                     onAddChecklist = { onAddChecklist(collectionId) },
                     onEditChecklist = { list -> onEditChecklist(collectionId, list) },
                     onDeleteChecklist = { list -> viewModel.deleteChecklist(list.id) },
+                    onAddLodging = { onAddLodging(collectionId) },
+                    onEditLodging = { stay -> onEditLodging(collectionId, stay) },
+                    onDeleteLodging = { stay -> viewModel.deleteLodging(stay.id) },
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -205,6 +211,9 @@ fun CollectionDetailContent(
     onAddChecklist: () -> Unit = {},
     onEditChecklist: (Checklist) -> Unit = {},
     onDeleteChecklist: (Checklist) -> Unit = {},
+    onAddLodging: () -> Unit = {},
+    onEditLodging: (Lodging) -> Unit = {},
+    onDeleteLodging: (Lodging) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -538,12 +547,14 @@ fun CollectionDetailContent(
             }
             
             CollectionTab.LODGING -> {
-                item { TabHeading("Lodging") }
+                item { TabHeading("Lodging", onAdd = onAddLodging) }
                 if (collection.lodging.isEmpty()) {
                     item { EmptyTab("No lodging in this collection yet.") }
                 } else {
                     items(collection.lodging, key = { it.id }) { stay ->
                         SimpleEntryCard(
+                            onClick = { onEditLodging(stay) },
+                            onDelete = { onDeleteLodging(stay) },
                             title = stay.name,
                             lines = listOfNotNull(
                                 stay.location?.takeIf { it.isNotBlank() },

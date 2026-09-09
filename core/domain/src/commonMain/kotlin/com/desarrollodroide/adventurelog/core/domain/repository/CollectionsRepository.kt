@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 interface CollectionsRepository {
 
@@ -68,6 +69,38 @@ interface CollectionsRepository {
     ): Either<ApiResponse, Checklist>
 
     suspend fun deleteChecklist(checklistId: String): Either<ApiResponse, Unit>
+
+    suspend fun createLodging(
+        collectionId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Either<ApiResponse, Lodging>
+
+    suspend fun updateLodging(
+        lodgingId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Either<ApiResponse, Lodging>
+
+    suspend fun deleteLodging(lodgingId: String): Either<ApiResponse, Unit>
 
     suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>>
 

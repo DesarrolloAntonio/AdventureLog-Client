@@ -55,6 +55,9 @@ import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.network.api.ChecklistApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorChecklistApi
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.network.api.LodgingApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorLodgingApi
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 class KtorAdventureLogNetwork(
     private val adventurelogClient: HttpClient
@@ -147,6 +150,13 @@ class KtorAdventureLogNetwork(
         )
     }
     
+    private val lodgingDataSource: LodgingApi by lazy {
+        KtorLodgingApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
     private val checklistDataSource: ChecklistApi by lazy {
         KtorChecklistApi(
             httpClient = adventurelogClient,
@@ -656,6 +666,53 @@ class KtorAdventureLogNetwork(
     override suspend fun getVisitedRegions(): List<VisitedRegionDTO> {
         ensureInitialized()
         return countriesDataSource.getVisitedRegions()
+    }
+
+    override suspend fun createLodging(
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean,
+        collectionId: String
+    ): Lodging {
+        ensureInitialized()
+        return lodgingDataSource.createLodging(
+            name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, link, location, isPublic, collectionId
+        )
+    }
+
+    override suspend fun updateLodging(
+        lodgingId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Lodging {
+        ensureInitialized()
+        return lodgingDataSource.updateLodging(
+            lodgingId, name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, link, location, isPublic
+        )
+    }
+
+    override suspend fun deleteLodging(lodgingId: String) {
+        ensureInitialized()
+        lodgingDataSource.deleteLodging(lodgingId)
     }
 
     override suspend fun createChecklist(

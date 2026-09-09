@@ -90,6 +90,9 @@ import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.checklistsScreen
 import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.ChecklistsNavigator
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.lodgingScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.LodgingNavigator
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 /**
  * Entry point composable that integrates with navigation
@@ -585,6 +588,23 @@ fun HomeScreenContent(
                                         NavigationRoutes.Collections.Notes.createAddRoute(id)
                                     )
                                 },
+                                onAddLodging = { id ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createAddRoute(id)
+                                    )
+                                },
+                                onEditLodging = { id, stay ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createEditRoute(
+                                            collectionId = id,
+                                            lodgingId = stay.id,
+                                            lodgingJson = json.encodeToString(
+                                                serializer = Lodging.serializer(),
+                                                value = stay
+                                            )
+                                        )
+                                    )
+                                },
                                 onAddChecklist = { id ->
                                     navController.navigate(
                                         NavigationRoutes.Collections.Checklists.createAddRoute(id)
@@ -647,6 +667,24 @@ fun HomeScreenContent(
                                     navController.navigate(
                                         NavigationRoutes.Collections.Notes.createEditRoute(
                                             collectionId, noteId, noteJson
+                                        )
+                                    )
+                                }
+
+                                override fun navigateToAddLodging(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditLodging(
+                                    collectionId: String,
+                                    lodgingId: String,
+                                    lodgingJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createEditRoute(
+                                            collectionId, lodgingId, lodgingJson
                                         )
                                     )
                                 }
@@ -718,6 +756,32 @@ fun HomeScreenContent(
 
                                 override fun navigateToHome() {
                                     navigateToHome()
+                                }
+
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
+                        )
+
+                        lodgingScreen(
+                            navigator = object : LodgingNavigator {
+                                override fun navigateToAddLodging(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditLodging(
+                                    collectionId: String,
+                                    lodgingId: String,
+                                    lodgingJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createEditRoute(
+                                            collectionId, lodgingId, lodgingJson
+                                        )
+                                    )
                                 }
 
                                 override fun navigateBack() {

@@ -105,6 +105,16 @@ fun AdventureLogNavGraph(
         override fun navigateToAddChecklist(collectionId: String) {
             navigateToHome()
         }
+        override fun navigateToAddLodging(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToEditLodging(
+            collectionId: String,
+            lodgingId: String,
+            lodgingJson: String
+        ) {
+            navigateToHome()
+        }
         override fun navigateToEditChecklist(
             collectionId: String,
             checklistId: String,

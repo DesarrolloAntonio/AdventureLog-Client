@@ -64,6 +64,23 @@ object NavigationRoutes {
                 "checklists/edit?collectionId=$collectionId&checklistId=$checklistId&checklistJson=$checklistJson"
         }
 
+        object Lodgings {
+            const val addRoute = "lodging/add?collectionId={collectionId}"
+
+            fun createAddRoute(collectionId: String): String =
+                "lodging/add?collectionId=$collectionId"
+
+            const val editRoute =
+                "lodging/edit?collectionId={collectionId}&lodgingId={lodgingId}&lodgingJson={lodgingJson}"
+
+            fun createEditRoute(
+                collectionId: String,
+                lodgingId: String,
+                lodgingJson: String
+            ): String =
+                "lodging/edit?collectionId=$collectionId&lodgingId=$lodgingId&lodgingJson=$lodgingJson"
+        }
+
         object Transportations {
             const val addRoute = "transportations/add?collectionId={collectionId}"
 

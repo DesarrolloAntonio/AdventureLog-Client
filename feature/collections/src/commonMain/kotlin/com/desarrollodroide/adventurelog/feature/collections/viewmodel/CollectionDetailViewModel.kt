@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteChecklistUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLodgingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteNoteUseCase
 
 data class CollectionDetailUiState(
@@ -50,7 +51,8 @@ class CollectionDetailViewModel(
     private val observeCollectionsUseCase: ObserveCollectionsUseCase,
     private val getAllCollectionsUseCase: GetAllCollectionsUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
-    private val deleteChecklistUseCase: DeleteChecklistUseCase
+    private val deleteChecklistUseCase: DeleteChecklistUseCase,
+    private val deleteLodgingUseCase: DeleteLodgingUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
@@ -132,6 +134,19 @@ class CollectionDetailViewModel(
         }
     }
     
+    fun deleteLodging(lodgingId: String) {
+        viewModelScope.launch {
+            _deleteState.update { DeleteState.Loading }
+            when (val result = deleteLodgingUseCase(lodgingId)) {
+                is Either.Left -> _deleteState.update { DeleteState.Error(result.value) }
+                is Either.Right -> {
+                    _deleteState.update { DeleteState.Success("Lodging deleted") }
+                    _uiState.value.collection?.let { loadCollection(it.id) }
+                }
+            }
+        }
+    }
+
     fun deleteChecklist(checklistId: String) {
         viewModelScope.launch {
             _deleteState.update { DeleteState.Loading }

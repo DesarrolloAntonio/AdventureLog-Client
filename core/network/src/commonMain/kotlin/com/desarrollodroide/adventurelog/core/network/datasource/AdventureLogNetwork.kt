@@ -374,6 +374,47 @@ interface AdventureLogNetwork {
     suspend fun deleteNote(noteId: String)
 
     /**
+     * Create lodging in a collection
+     */
+    suspend fun createLodging(
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean,
+        collectionId: String
+    ): com.desarrollodroide.adventurelog.core.model.Lodging
+
+    /**
+     * Update lodging
+     */
+    suspend fun updateLodging(
+        lodgingId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): com.desarrollodroide.adventurelog.core.model.Lodging
+
+    /**
+     * Delete lodging
+     */
+    suspend fun deleteLodging(lodgingId: String)
+
+    /**
      * Create a checklist in a collection
      */
     suspend fun createChecklist(

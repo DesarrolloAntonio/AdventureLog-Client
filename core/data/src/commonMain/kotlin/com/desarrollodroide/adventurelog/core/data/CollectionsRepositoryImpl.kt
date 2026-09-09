@@ -25,6 +25,7 @@ import kotlinx.io.IOException
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 private val logger = Logger.withTag("CollectionsRepositoryImpl")
 
@@ -402,8 +403,52 @@ class CollectionsRepositoryImpl(
         networkDataSource.deleteChecklist(checklistId)
     }
 
+    override suspend fun createLodging(
+        collectionId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Either<ApiResponse, Lodging> = noteCall {
+        networkDataSource.createLodging(
+            name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, link, location, isPublic, collectionId
+        )
+    }
+
+    override suspend fun updateLodging(
+        lodgingId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Either<ApiResponse, Lodging> = noteCall {
+        networkDataSource.updateLodging(
+            lodgingId, name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, link, location, isPublic
+        )
+    }
+
+    override suspend fun deleteLodging(lodgingId: String): Either<ApiResponse, Unit> = noteCall {
+        networkDataSource.deleteLodging(lodgingId)
+    }
+
     /**
-     * The note and checklist calls differ only in the line that talks to the network; the twenty lines of
+     * The note, checklist and lodging calls differ only in the line that talks to the network; the twenty lines of
      * error mapping around them are identical, and three copies of it is three places to fix the
      * next time the shape changes.
      *

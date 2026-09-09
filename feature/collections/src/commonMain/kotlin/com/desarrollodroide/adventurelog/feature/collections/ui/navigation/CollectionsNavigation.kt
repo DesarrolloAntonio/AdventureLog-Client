@@ -27,6 +27,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 /**
  * Navigator interface for Collections feature
@@ -44,6 +45,8 @@ interface CollectionsNavigator {
     fun navigateToEditNote(collectionId: String, noteId: String, noteJson: String)
     fun navigateToAddChecklist(collectionId: String)
     fun navigateToEditChecklist(collectionId: String, checklistId: String, checklistJson: String)
+    fun navigateToAddLodging(collectionId: String)
+    fun navigateToEditLodging(collectionId: String, lodgingId: String, lodgingJson: String)
     fun navigateToHome()
     fun navigateBack()
 }
@@ -130,6 +133,14 @@ fun NavGraphBuilder.collectionsScreen(
             },
             onAddNote = { id -> navigator.navigateToAddNote(id) },
             onAddChecklist = { id -> navigator.navigateToAddChecklist(id) },
+            onAddLodging = { id -> navigator.navigateToAddLodging(id) },
+            onEditLodging = { id, stay ->
+                navigator.navigateToEditLodging(
+                    collectionId = id,
+                    lodgingId = stay.id,
+                    lodgingJson = json.encodeToString(serializer = Lodging.serializer(), value = stay)
+                )
+            },
             onEditChecklist = { id, list ->
                 navigator.navigateToEditChecklist(
                     collectionId = id,
