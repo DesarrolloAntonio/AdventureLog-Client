@@ -32,6 +32,10 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.core.model.userTags
 import com.desarrollodroide.adventurelog.core.model.Currencies
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.desarrollodroide.adventurelog.feature.ui.components.OpenInMapsSheet
 
 @Composable
 fun AdventureDetailScreenRoute(
@@ -52,6 +56,9 @@ fun AdventureDetailScreenRoute(
     val attachmentMessage by viewModel.attachmentMessage.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Which place's coordinates the maps sheet is showing, or null when it is closed.
+    var mapsFor by remember { mutableStateOf<Location?>(null) }
 
     LaunchedEffect(attachmentMessage) {
         attachmentMessage?.let {
@@ -76,7 +83,9 @@ fun AdventureDetailScreenRoute(
                     collections = collections,
                     onBackClick = onBackClick,
                     onEditClick = { viewModel.editAdventure(state.location.id) },
-                    onOpenMap = { lat: String, long: String -> viewModel.openMap(lat, long) },
+                    // The old callback reached a view model method that only wrote a log line,
+                    // so the row had never opened anything.
+                    onOpenMap = { _: String, _: String -> mapsFor = state.location },
                     // The link is a plain external URL, so the platform handler is enough - it
                     // used to be routed to a view model method that only printed it.
                     onOpenLink = { url: String -> uriHandler.openUri(url) },
@@ -86,6 +95,16 @@ fun AdventureDetailScreenRoute(
                     onCollectionClick = onCollectionClick,
                     showBack = showBack
                 )
+                mapsFor?.let { place ->
+                    OpenInMapsSheet(
+                        latitude = place.latitude.orEmpty(),
+                        longitude = place.longitude.orEmpty(),
+                        placeName = place.name,
+                        shareUrl = place.link?.takeIf { it.isNotBlank() },
+                        onDismiss = { mapsFor = null }
+                    )
+                }
+
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
