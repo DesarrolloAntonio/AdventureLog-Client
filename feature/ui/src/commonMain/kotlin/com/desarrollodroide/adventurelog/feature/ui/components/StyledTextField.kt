@@ -25,6 +25,12 @@ fun StyledTextField(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     singleLine: Boolean = true,
+    /**
+     * How tall a multi-line field starts. The caller's height modifier lands on the wrapping
+     * Column, not on the field, so setting it there gave a one-line box with an empty gap
+     * underneath it.
+     */
+    minLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     isError: Boolean = false,
     errorMessage: String = ""
@@ -33,30 +39,38 @@ fun StyledTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { 
+            placeholder = {
                 Text(
                     text = label,
-                    color = Color.Gray
-                ) 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(55.dp),
+            // Only a single-line field gets a fixed height. It used to be forced on every field
+            // together with maxLines = 1, so asking for a multi-line one - a note, a description -
+            // still gave one 55dp line that scrolled sideways.
+            modifier = if (singleLine) {
+                Modifier.fillMaxWidth().height(55.dp)
+            } else {
+                Modifier.fillMaxWidth()
+            },
             singleLine = singleLine,
-            maxLines = 1,
+            minLines = if (singleLine) 1 else minLines,
+            maxLines = if (singleLine) 1 else Int.MAX_VALUE,
             keyboardOptions = keyboardOptions,
             leadingIcon = {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             isError = isError,
             shape = RoundedCornerShape(30.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                // A solid container tone, not a 30% wash. Against the flat surface the redesign
+                // uses, a translucent fill left the field barely distinguishable from the page.
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 focusedBorderColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = if (isError) MaterialTheme.colorScheme.error else Color.Transparent
             )

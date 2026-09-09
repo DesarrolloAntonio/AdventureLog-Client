@@ -48,6 +48,10 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.LodgingTy
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Hotel
 
 /** Somewhere to sleep: the dates, the booking, and where it is. */
 @Composable
@@ -61,6 +65,7 @@ fun AddEditLodgingScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var stayOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingLodging?.id) { viewModel.prefill(existingLodging) }
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
@@ -86,6 +91,13 @@ fun AddEditLodgingScreen(
                     fontWeight = FontWeight.Bold
                 )
 
+                SectionCard(
+                    title = "The stay",
+                    icon = Icons.Default.Hotel,
+                    expanded = stayOpen,
+                    onExpandedChange = { stayOpen = it }
+                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 StyledTextField(
                     value = state.name,
                     onValueChange = viewModel::onNameChange,
@@ -161,13 +173,17 @@ fun AddEditLodgingScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                }
+                }
+
                 StyledTextField(
                     value = state.description,
                     onValueChange = viewModel::onDescriptionChange,
                     label = "Notes",
                     icon = Icons.Default.Notes,
                     singleLine = false,
-                    modifier = Modifier.fillMaxWidth().height(140.dp)
+                    minLines = 4,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Card(

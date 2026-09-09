@@ -40,6 +40,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.automirrored.filled.Notes
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 /**
  * Writing a note into a collection.
@@ -58,6 +61,7 @@ fun AddEditNoteScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var detailsOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingNote?.id) { viewModel.prefill(existingNote) }
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
@@ -83,6 +87,13 @@ fun AddEditNoteScreen(
                     fontWeight = FontWeight.Bold
                 )
 
+                SectionCard(
+                    title = "Note",
+                    icon = Icons.AutoMirrored.Filled.Notes,
+                    expanded = detailsOpen,
+                    onExpandedChange = { detailsOpen = it }
+                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 StyledTextField(
                     value = state.name,
                     onValueChange = viewModel::onNameChange,
@@ -97,7 +108,8 @@ fun AddEditNoteScreen(
                     label = "Note",
                     icon = Icons.AutoMirrored.Filled.Notes,
                     singleLine = false,
-                    modifier = Modifier.fillMaxWidth().height(200.dp)
+                    minLines = 6,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 StyledTextField(
@@ -107,6 +119,9 @@ fun AddEditNoteScreen(
                     icon = Icons.Default.CalendarMonth,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                }
+                }
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),

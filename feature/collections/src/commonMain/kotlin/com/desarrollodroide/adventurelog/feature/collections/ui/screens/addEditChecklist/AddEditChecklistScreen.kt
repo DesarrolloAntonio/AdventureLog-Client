@@ -48,6 +48,10 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCh
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Checklist
 
 /**
  * A checklist and its lines.
@@ -66,6 +70,7 @@ fun AddEditChecklistScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var listOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingChecklist?.id) { viewModel.prefill(existingChecklist) }
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
@@ -102,6 +107,13 @@ fun AddEditChecklistScreen(
                     }
                 }
 
+                SectionCard(
+                    title = "The list",
+                    icon = Icons.Default.Checklist,
+                    expanded = listOpen,
+                    onExpandedChange = { listOpen = it }
+                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 StyledTextField(
                     value = state.name,
                     onValueChange = viewModel::onNameChange,
@@ -183,6 +195,9 @@ fun AddEditChecklistScreen(
                     ) {
                         Text("Add")
                     }
+                }
+
+                }
                 }
 
                 StyledTextField(
