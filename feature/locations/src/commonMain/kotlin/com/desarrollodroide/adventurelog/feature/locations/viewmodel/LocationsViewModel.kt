@@ -175,13 +175,15 @@ class LocationsViewModel(
     ) { query, filters ->
         Pair(query, filters)
     }.flatMapLatest { (query, filters) ->
-        // Only pass non-default values to avoid using the filtered endpoint unnecessarily
+        // Only pass non-default values to avoid using the filtered endpoint unnecessarily.
+        // includeCollections is true by default, so testing it for truth made this always true
+        // and the plain endpoint below unreachable: what counts is a departure from the default.
         val hasActiveFilters = filters.categoryNames.isNotEmpty() ||
                 filters.sortField != LocationSortField.UPDATED_AT ||
                 filters.sortDirection != SortDirection.DESCENDING ||
                 filters.visitedFilter != VisitedFilter.ALL ||
                 query.isNotEmpty() ||
-                filters.includeCollections
+                !filters.includeCollections
         
         if (hasActiveFilters) {
             getLocationsPagingUseCase(
