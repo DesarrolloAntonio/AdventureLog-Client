@@ -139,10 +139,21 @@ class CollectionTabsTest {
     fun choosingATabReportsIt() = runComposeUiTest {
         var chosen: CollectionTab? = null
         setContent { Content(CollectionTab.ALL) { chosen = it } }
-        // Places, not Notes: the tab row scrolls sideways and the later tabs sit off-screen on a
-        // phone, where a click lands on nothing. And onFirst, because the All tab prints "Places"
-        // twice - once as the tab, once as the heading over the list.
+        // onFirst, because the All tab prints "Places" twice: once as the tab, once as the
+        // heading over the list.
         onAllNodesWithText("Places").onFirst().performClick()
         assertEquals(CollectionTab.LOCATIONS, chosen)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun everyTabIsReachableWithoutScrolling() = runComposeUiTest {
+        var chosen: CollectionTab? = null
+        setContent { Content(CollectionTab.ALL) { chosen = it } }
+
+        // The last tab of six. It used to sit off the right edge of a phone behind a sideways
+        // scroll nothing announced, and a click on it landed on whatever was underneath.
+        onNodeWithText("Checklists").performClick()
+        assertEquals(CollectionTab.CHECKLISTS, chosen)
     }
 }

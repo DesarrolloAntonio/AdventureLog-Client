@@ -1,164 +1,132 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class CollectionTab(val title: String, val isEnabled: Boolean = true) {
     ALL("All"),
     LOCATIONS("Places"),
-    TRANSPORTATIONS("Transportations"),
+
+    /**
+     * "Transportations" is what the API calls it. Nobody says that, and at six tabs the length
+     * was what pushed the row past the width of a phone.
+     */
+    TRANSPORTATIONS("Transport"),
     LODGING("Lodging"),
     NOTES("Notes"),
     CHECKLISTS("Checklists")
 }
 
+/**
+ * The six things a collection holds.
+ *
+ * A row that scrolls sideways, which is what this was, cuts words in half at both edges - a tab
+ * reading "ations" - and hides whichever tabs do not fit behind a gesture nothing announces. Six
+ * short labels wrap onto two lines on a phone and sit on one on a tablet, and then every tab is
+ * legible and reachable without discovering anything.
+ *
+ * The counts are the other half of it: which tabs have something in them was previously only
+ * discoverable by opening all six.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CollectionsTabs(
     selectedTab: CollectionTab,
     onTabSelected: (CollectionTab) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    counts: Map<CollectionTab, Int> = emptyMap()
 ) {
-    Surface(
+    FlowRow(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(28.dp),
-        shadowElevation = 1.dp
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box(
-            modifier = Modifier.height(IntrinsicSize.Min)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(2.dp),
-                horizontalArrangement = Arrangement.Start
-            ) {
-                CollectionTab.entries.forEach { tab ->
-                    CollectionTabItem(
-                        text = tab.title,
-                        isSelected = selectedTab == tab,
-                        isEnabled = tab.isEnabled,
-                        onClick = { 
-                            if (tab.isEnabled) {
-                                onTabSelected(tab)
-                            }
-                        }
-                    )
-                }
-                
-                // Extra padding at the end
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-
-            // Fade gradient on the right edge
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .width(30.dp)
-                    .fillMaxHeight()
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.surface
-                            )
-                        )
-                    )
+        CollectionTab.entries.forEach { tab ->
+            CollectionTabChip(
+                text = tab.title,
+                count = counts[tab],
+                isSelected = selectedTab == tab,
+                isEnabled = tab.isEnabled,
+                onClick = { if (tab.isEnabled) onTabSelected(tab) }
             )
         }
     }
 }
 
 @Composable
-private fun CollectionTabItem(
+private fun CollectionTabChip(
     text: String,
+    count: Int?,
     isSelected: Boolean,
     isEnabled: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected && isEnabled) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            Color.Transparent
-        },
-        animationSpec = tween(200),
-        label = "tab_background"
-    )
-
-    val textColor by animateColorAsState(
-        targetValue = when {
-            !isEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-            isSelected -> MaterialTheme.colorScheme.onPrimary
-            else -> MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        animationSpec = tween(200),
-        label = "tab_text_color"
-    )
+    val container = when {
+        !isEnabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        isSelected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+    val content = when {
+        !isEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+        isSelected -> MaterialTheme.colorScheme.onPrimary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     Surface(
-        modifier = Modifier
-            .padding(3.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .then(
-                if (isEnabled) {
-                    Modifier.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = ripple(bounded = true),
-                        onClick = onClick
-                    )
-                } else {
-                    Modifier // No clickable modifier for disabled tabs
-                }
-            ),
-        shape = RoundedCornerShape(24.dp),
-        color = backgroundColor
+        modifier = if (isEnabled) Modifier.clickable(onClick = onClick) else Modifier,
+        color = container,
+        shape = RoundedCornerShape(percent = 50)
     ) {
         Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = text,
-                fontSize = 14.sp,
-                fontWeight = if (isSelected && isEnabled) FontWeight.Medium else FontWeight.Normal,
-                color = textColor
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                color = content
             )
+            // Nothing rather than a zero: an empty tab is still worth opening, to put the first
+            // thing in it, but it does not need a badge saying so.
+            if (count != null && count > 0) {
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = content.copy(alpha = if (isSelected) 0.85f else 0.6f)
+                )
+            }
         }
     }
+}
+
+@Preview
+@Composable
+private fun CollectionsTabsPreview() {
+    CollectionsTabs(
+        selectedTab = CollectionTab.ALL,
+        onTabSelected = {},
+        counts = mapOf(
+            CollectionTab.LOCATIONS to 3,
+            CollectionTab.NOTES to 2,
+            CollectionTab.CHECKLISTS to 1
+        )
+    )
 }

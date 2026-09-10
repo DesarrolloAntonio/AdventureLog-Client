@@ -231,14 +231,19 @@ fun CollectionDetailContent(
         }
         
         item {
-            Box(
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                CollectionsTabs(
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected
+            // No inset of its own: the list already pads, and 16 on top of 16 made this the one
+            // element on the screen narrower than everything around it.
+            CollectionsTabs(
+                selectedTab = selectedTab,
+                onTabSelected = onTabSelected,
+                counts = mapOf(
+                    CollectionTab.LOCATIONS to collection.locations.size,
+                    CollectionTab.TRANSPORTATIONS to collection.transportations.size,
+                    CollectionTab.LODGING to collection.lodging.size,
+                    CollectionTab.NOTES to collection.notes.size,
+                    CollectionTab.CHECKLISTS to collection.checklists.size
                 )
-            }
+            )
         }
         
         when (selectedTab) {
