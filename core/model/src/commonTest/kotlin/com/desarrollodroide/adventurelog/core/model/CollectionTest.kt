@@ -30,11 +30,20 @@ class CollectionTest : BaseModelTest<Collection>() {
             startDate = "2024-06-01",
             endDate = "2024-08-31",
             transportations = emptyList(),
-            notes = listOf("Remember sunscreen", "Book hotels early"),
-            checklists = listOf("Packing list", "Documents"),
+            notes = listOf(
+                TestDataFactory.createNote(id = "n-1", name = "Remember sunscreen"),
+                TestDataFactory.createNote(id = "n-2", name = "Book hotels early")
+            ),
+            checklists = listOf(
+                TestDataFactory.createChecklist(id = "c-1", name = "Packing list"),
+                TestDataFactory.createChecklist(id = "c-2", name = "Documents")
+            ),
             sharedWith = listOf("user-2", "user-3"),
             link = "https://example.com/collection/1",
-            lodging = listOf("Hotel California", "Camping Site A")
+            lodging = listOf(
+                TestDataFactory.createLodging(id = "l-1", name = "Hotel California"),
+                TestDataFactory.createLodging(id = "l-2", name = "Camping Site A", type = "camping")
+            )
         )
 
         assertEquals("col-1", collection.id)
@@ -49,6 +58,8 @@ class CollectionTest : BaseModelTest<Collection>() {
         assertEquals(2, collection.checklists.size)
         assertEquals(2, collection.sharedWith.size)
         assertEquals(2, collection.lodging.size)
+        assertEquals("Remember sunscreen", collection.notes[0].name)
+        assertEquals("camping", collection.lodging[1].type)
     }
 
     @Test
@@ -115,8 +126,8 @@ class CollectionTest : BaseModelTest<Collection>() {
             locations = locations
         ).copy(
             transportations = emptyList(),
-            notes = listOf("Note 1", "Note 2", "Note 3"),
-            lodging = listOf("Hotel A", "Hotel B", "Camping")
+            notes = List(3) { TestDataFactory.createNote(id = "n-$it", name = "Note $it") },
+            lodging = List(3) { TestDataFactory.createLodging(id = "l-$it", name = "Stay $it") }
         )
 
         assertEquals(5, collection.locations.size)
