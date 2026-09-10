@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.navigation
 
+import com.desarrollodroide.adventurelog.feature.ui.navigation.routeArgument
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -22,9 +23,6 @@ fun NavGraphBuilder.checklistsScreen(navigator: ChecklistsNavigator) {
         isLenient = true
     }
 
-    fun androidx.navigation.NavBackStackEntry.arg(name: String): String =
-        arguments?.getString(name) ?: savedStateHandle.get<String>(name) ?: ""
-
     composable(
         route = NavigationRoutes.Collections.Checklists.addRoute,
         arguments = listOf(
@@ -35,7 +33,7 @@ fun NavGraphBuilder.checklistsScreen(navigator: ChecklistsNavigator) {
         )
     ) { entry ->
         AddEditChecklistScreen(
-            collectionId = entry.arg("collectionId"),
+            collectionId = entry.routeArgument("collectionId"),
             existingChecklist = null,
             onDone = { navigator.navigateBack() },
             onCancel = { navigator.navigateBack() }
@@ -50,7 +48,7 @@ fun NavGraphBuilder.checklistsScreen(navigator: ChecklistsNavigator) {
             navArgument("checklistJson") { type = NavType.StringType }
         )
     ) { entry ->
-        val checklistJson = entry.arg("checklistJson")
+        val checklistJson = entry.routeArgument("checklistJson")
         val checklist = if (checklistJson.isNotEmpty()) {
             runCatching { json.decodeFromString<Checklist>(checklistJson) }.getOrNull()
         } else {
@@ -58,7 +56,7 @@ fun NavGraphBuilder.checklistsScreen(navigator: ChecklistsNavigator) {
         }
 
         AddEditChecklistScreen(
-            collectionId = entry.arg("collectionId"),
+            collectionId = entry.routeArgument("collectionId"),
             existingChecklist = checklist,
             onDone = { navigator.navigateBack() },
             onCancel = { navigator.navigateBack() }

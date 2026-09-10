@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.navigation
 
+import com.desarrollodroide.adventurelog.feature.ui.navigation.routeArgument
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -22,11 +23,6 @@ fun NavGraphBuilder.notesScreen(navigator: NotesNavigator) {
         isLenient = true
     }
 
-    // arguments first, savedStateHandle second: the country screen was reached with an empty code
-    // because only the handle was read, and a route parameter does not always land there.
-    fun androidx.navigation.NavBackStackEntry.arg(name: String): String =
-        arguments?.getString(name) ?: savedStateHandle.get<String>(name) ?: ""
-
     composable(
         route = NavigationRoutes.Collections.Notes.addRoute,
         arguments = listOf(
@@ -37,7 +33,7 @@ fun NavGraphBuilder.notesScreen(navigator: NotesNavigator) {
         )
     ) { entry ->
         AddEditNoteScreen(
-            collectionId = entry.arg("collectionId"),
+            collectionId = entry.routeArgument("collectionId"),
             existingNote = null,
             onDone = { navigator.navigateBack() },
             onCancel = { navigator.navigateBack() }
@@ -52,7 +48,7 @@ fun NavGraphBuilder.notesScreen(navigator: NotesNavigator) {
             navArgument("noteJson") { type = NavType.StringType }
         )
     ) { entry ->
-        val noteJson = entry.arg("noteJson")
+        val noteJson = entry.routeArgument("noteJson")
         val note = if (noteJson.isNotEmpty()) {
             runCatching { json.decodeFromString<Note>(noteJson) }.getOrNull()
         } else {
@@ -60,7 +56,7 @@ fun NavGraphBuilder.notesScreen(navigator: NotesNavigator) {
         }
 
         AddEditNoteScreen(
-            collectionId = entry.arg("collectionId"),
+            collectionId = entry.routeArgument("collectionId"),
             existingNote = note,
             onDone = { navigator.navigateBack() },
             onCancel = { navigator.navigateBack() }

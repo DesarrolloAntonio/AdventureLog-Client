@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.navigation
 
+import com.desarrollodroide.adventurelog.feature.ui.navigation.routeArgument
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -22,9 +23,6 @@ fun NavGraphBuilder.lodgingScreen(navigator: LodgingNavigator) {
         isLenient = true
     }
 
-    fun androidx.navigation.NavBackStackEntry.arg(name: String): String =
-        arguments?.getString(name) ?: savedStateHandle.get<String>(name) ?: ""
-
     composable(
         route = NavigationRoutes.Collections.Lodgings.addRoute,
         arguments = listOf(
@@ -35,7 +33,7 @@ fun NavGraphBuilder.lodgingScreen(navigator: LodgingNavigator) {
         )
     ) { entry ->
         AddEditLodgingScreen(
-            collectionId = entry.arg("collectionId"),
+            collectionId = entry.routeArgument("collectionId"),
             existingLodging = null,
             onDone = { navigator.navigateBack() },
             onCancel = { navigator.navigateBack() }
@@ -50,7 +48,7 @@ fun NavGraphBuilder.lodgingScreen(navigator: LodgingNavigator) {
             navArgument("lodgingJson") { type = NavType.StringType }
         )
     ) { entry ->
-        val lodgingJson = entry.arg("lodgingJson")
+        val lodgingJson = entry.routeArgument("lodgingJson")
         val lodging = if (lodgingJson.isNotEmpty()) {
             runCatching { json.decodeFromString<Lodging>(lodgingJson) }.getOrNull()
         } else {
@@ -58,7 +56,7 @@ fun NavGraphBuilder.lodgingScreen(navigator: LodgingNavigator) {
         }
 
         AddEditLodgingScreen(
-            collectionId = entry.arg("collectionId"),
+            collectionId = entry.routeArgument("collectionId"),
             existingLodging = lodging,
             onDone = { navigator.navigateBack() },
             onCancel = { navigator.navigateBack() }
