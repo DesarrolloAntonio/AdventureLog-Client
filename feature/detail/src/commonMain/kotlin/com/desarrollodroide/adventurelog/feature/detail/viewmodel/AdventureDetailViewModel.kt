@@ -16,10 +16,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
-import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
 import kotlinx.coroutines.launch
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.feature.detail.domain.FileHandoff
+import com.desarrollodroide.adventurelog.feature.detail.domain.Handoff
 
 private val logger = Logger.withTag("AdventureDetailViewModel")
 
@@ -31,8 +31,7 @@ sealed class LocationState {
 
 class AdventureDetailViewModel(
     private val getLocationUseCase: GetLocationUseCase,
-    private val fileDownloader: AuthenticatedFileDownloader,
-    private val platformFiles: PlatformFiles,
+    private val fileHandoff: FileHandoff,
     private val getShareImageUseCase: GetShareImageUseCase,
     observeCollectionsUseCase: ObserveCollectionsUseCase
 ) : ViewModel() {
@@ -113,13 +112,14 @@ class AdventureDetailViewModel(
 
         viewModelScope.launch {
             _openingAttachmentId.value = attachment.id
-            val bytes = fileDownloader.download(attachment.file)
 
-            _attachmentMessage.value = when {
-                bytes == null -> "Could not download this attachment."
-                !platformFiles.open(bytes, attachment.displayFileName()) ->
+            _attachmentMessage.value = when (
+                fileHandoff.open(attachment.file, attachment.displayFileName())
+            ) {
+                Handoff.COULD_NOT_FETCH -> "Could not download this attachment."
+                Handoff.NOTHING_TAKES_IT ->
                     "Nothing on this device can open a .${attachment.extension} file."
-                else -> null
+                Handoff.DONE -> null
             }
             _openingAttachmentId.value = null
         }
@@ -135,10 +135,9 @@ class AdventureDetailViewModel(
                 is Either.Left -> result.value
                 is Either.Right -> {
                     val fileName = location.name.toSafeFileName(extension = "png")
-                    if (platformFiles.share(result.value, fileName)) {
-                        null
-                    } else {
-                        "Nothing on this device can share an image."
+                    when (fileHandoff.share(result.value, fileName)) {
+                        Handoff.DONE -> null
+                        else -> "Nothing on this device can share an image."
                     }
                 }
             }
