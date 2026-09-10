@@ -29,6 +29,10 @@ kotlin {
 
 kotlin {
     sourceSets {
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
         androidInstrumentedTest.dependencies {
             implementation(compose.uiTest)
             implementation(libs.androidx.test.runner)
