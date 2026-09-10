@@ -19,17 +19,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshVisitedRegionsUseCase
 import kotlinx.coroutines.flow.StateFlow
-import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
-import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
 import kotlin.time.Clock
+import com.desarrollodroide.adventurelog.feature.settings.domain.BackupExporter
+import com.desarrollodroide.adventurelog.feature.settings.domain.BackupResult
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
     private val accountRepository: AccountRepository,
     private val refreshVisitedRegionsUseCase: RefreshVisitedRegionsUseCase,
-    private val fileDownloader: AuthenticatedFileDownloader,
-    private val platformFiles: PlatformFiles
+    private val backupExporter: BackupExporter
 ) : ViewModel() {
 
     private val _backupInProgress = MutableStateFlow(false)
@@ -49,11 +48,10 @@ class SettingsViewModel(
 
         _backupInProgress.value = true
         viewModelScope.launch {
-            val bytes = fileDownloader.download("$server/api/backup/export/")
-            _regionsMessage.value = when {
-                bytes == null -> "Could not download the backup"
-                !platformFiles.share(bytes, backupFileName()) -> "Nothing on this device can take the file"
-                else -> null
+            _regionsMessage.value = when (backupExporter.export(server, backupFileName())) {
+                BackupResult.CouldNotDownload -> "Could not download the backup"
+                BackupResult.NowhereToPutIt -> "Nothing on this device can take the file"
+                BackupResult.Handed -> null
             }
             _backupInProgress.value = false
         }
