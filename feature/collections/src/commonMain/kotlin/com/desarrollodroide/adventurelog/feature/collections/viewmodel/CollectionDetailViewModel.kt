@@ -12,6 +12,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationColle
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -89,6 +90,9 @@ class CollectionDetailViewModel(
     
     private val _selectedTab = MutableStateFlow(CollectionTab.ALL)
     val selectedTab: StateFlow<CollectionTab> = _selectedTab.asStateFlow()
+
+    private val _selectedView = MutableStateFlow(CollectionView.ITEMS)
+    val selectedView: StateFlow<CollectionView> = _selectedView.asStateFlow()
     
     fun loadCollection(collectionId: String) {
         viewModelScope.launch {
@@ -228,6 +232,10 @@ class CollectionDetailViewModel(
         }
     }
     
+    fun onViewSelected(view: CollectionView) {
+        _selectedView.value = view
+    }
+
     fun onTabSelected(tab: CollectionTab) {
         _selectedTab.value = tab
     }

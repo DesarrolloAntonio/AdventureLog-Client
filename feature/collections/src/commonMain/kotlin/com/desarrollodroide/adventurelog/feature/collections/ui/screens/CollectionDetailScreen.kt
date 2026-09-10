@@ -35,7 +35,14 @@ import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionView
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionViewSwitcher
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsTabs
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.agenda
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.stats
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionCalendarView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionMapView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionStatsView
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.DeleteState
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.UpdateCollectionsState
@@ -81,6 +88,7 @@ fun CollectionDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
+    val selectedView by viewModel.selectedView.collectAsStateWithLifecycle()
     val allCollections by viewModel.allCollections.collectAsStateWithLifecycle()
     val collectionsLoading by viewModel.collectionsLoading.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
@@ -151,6 +159,8 @@ fun CollectionDetailScreen(
                     onHomeClick = onHomeClick,
                     selectedTab = selectedTab,
                     onTabSelected = viewModel::onTabSelected,
+                    selectedView = selectedView,
+                    onViewSelected = viewModel::onViewSelected,
                     onAdventureClick = onAdventureClick,
                     onEditAdventure = onEditAdventure,
                     onDeleteAdventure = { adventure -> 
@@ -210,6 +220,8 @@ fun CollectionDetailContent(
     onHomeClick: () -> Unit = {},
     selectedTab: CollectionTab,
     onTabSelected: (CollectionTab) -> Unit,
+    selectedView: CollectionView = CollectionView.ITEMS,
+    onViewSelected: (CollectionView) -> Unit = {},
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -252,21 +264,51 @@ fun CollectionDetailContent(
             // element on the screen narrower than everything around it. The extra space above is
             // the break between what the collection is and how you move around inside it -
             // without it the tabs read as a fourth row of the header's chips.
-            CollectionsTabs(
+            CollectionViewSwitcher(
                 modifier = Modifier.padding(top = 8.dp),
-                selectedTab = selectedTab,
-                onTabSelected = onTabSelected,
-                counts = mapOf(
-                    CollectionTab.LOCATIONS to collection.locations.size,
-                    CollectionTab.TRANSPORTATIONS to collection.transportations.size,
-                    CollectionTab.LODGING to collection.lodging.size,
-                    CollectionTab.NOTES to collection.notes.size,
-                    CollectionTab.CHECKLISTS to collection.checklists.size
-                )
+                selectedView = selectedView,
+                onViewSelected = onViewSelected,
+                // Itinerary is the one view backed by its own server resource
+                // (/api/itineraries/) rather than by the collection's own contents, and it is
+                // not built yet. Offering the chip and showing an empty page would be worse
+                // than not offering it.
+                views = CollectionView.entries - CollectionView.ITINERARY
             )
         }
-        
-        when (selectedTab) {
+
+        // The item tabs belong to the Items view and only to it: they choose which of a
+        // collection's things to list, which is a question the map and the figures do not ask.
+        if (selectedView == CollectionView.ITEMS) {
+            item {
+                CollectionsTabs(
+                    selectedTab = selectedTab,
+                    onTabSelected = onTabSelected,
+                    counts = mapOf(
+                        CollectionTab.LOCATIONS to collection.locations.size,
+                        CollectionTab.TRANSPORTATIONS to collection.transportations.size,
+                        CollectionTab.LODGING to collection.lodging.size,
+                        CollectionTab.NOTES to collection.notes.size,
+                        CollectionTab.CHECKLISTS to collection.checklists.size
+                    )
+                )
+            }
+        }
+
+        when (selectedView) {
+            CollectionView.STATS -> item { CollectionStatsView(stats = collection.stats()) }
+            CollectionView.CALENDAR -> item { CollectionCalendarView(days = collection.agenda()) }
+            CollectionView.MAP -> item {
+                CollectionMapView(
+                    locations = collection.locations,
+                    onLocationClick = { id ->
+                        collection.locations.find { it.id == id }?.let(onAdventureClick)
+                    }
+                )
+            }
+            CollectionView.ITEMS, CollectionView.ITINERARY -> Unit
+        }
+
+        if (selectedView == CollectionView.ITEMS) when (selectedTab) {
             CollectionTab.ALL -> {
                 // Show Locations section
                 item {

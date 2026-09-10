@@ -12,6 +12,7 @@ kotlin {
             implementation(projects.core.model)
             api(projects.core.domain)
             implementation(projects.feature.detail)
+            implementation(projects.feature.map)
             implementation(projects.feature.ui)
             implementation(libs.koin.composeVM)
             implementation(libs.navigation.compose)
