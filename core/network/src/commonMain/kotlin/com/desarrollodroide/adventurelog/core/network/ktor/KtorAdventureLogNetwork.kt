@@ -55,8 +55,12 @@ import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.network.api.ChecklistApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorChecklistApi
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.network.api.ItineraryApi
 import com.desarrollodroide.adventurelog.core.network.api.LodgingApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorItineraryApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorLodgingApi
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Lodging
 
 class KtorAdventureLogNetwork(
@@ -152,6 +156,13 @@ class KtorAdventureLogNetwork(
     
     private val lodgingDataSource: LodgingApi by lazy {
         KtorLodgingApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
+    private val itineraryDataSource: ItineraryApi by lazy {
+        KtorItineraryApi(
             httpClient = adventurelogClient,
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
         )
@@ -713,6 +724,27 @@ class KtorAdventureLogNetwork(
     override suspend fun deleteLodging(lodgingId: String) {
         ensureInitialized()
         lodgingDataSource.deleteLodging(lodgingId)
+    }
+
+    override suspend fun autoGenerateItinerary(collectionId: String): List<ItineraryEntry> {
+        ensureInitialized()
+        return itineraryDataSource.autoGenerateItinerary(collectionId)
+    }
+
+    override suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): ItineraryEntry {
+        ensureInitialized()
+        return itineraryDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
+    }
+
+    override suspend fun deleteItineraryEntry(entryId: String) {
+        ensureInitialized()
+        itineraryDataSource.deleteItineraryEntry(entryId)
     }
 
     override suspend fun createChecklist(

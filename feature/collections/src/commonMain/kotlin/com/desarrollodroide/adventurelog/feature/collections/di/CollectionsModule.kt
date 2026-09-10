@@ -43,6 +43,9 @@ val collectionsModule = module {
             deleteNoteUseCase = get(),
             deleteChecklistUseCase = get(),
             deleteLodgingUseCase = get(),
+            autoGenerateItineraryUseCase = get(),
+            addItineraryEntryUseCase = get(),
+            deleteItineraryEntryUseCase = get(),
         )
     }
 

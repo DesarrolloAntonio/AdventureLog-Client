@@ -38,9 +38,12 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.components.Colle
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionView
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionViewSwitcher
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsTabs
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ItineraryItemPicker
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.agenda
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.itinerary
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.stats
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionCalendarView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionItineraryView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionMapView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionStatsView
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
@@ -89,6 +92,8 @@ fun CollectionDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val selectedView by viewModel.selectedView.collectAsStateWithLifecycle()
+    val itineraryWorking by viewModel.itineraryWorking.collectAsStateWithLifecycle()
+    val itineraryTarget by viewModel.itineraryTarget.collectAsStateWithLifecycle()
     val allCollections by viewModel.allCollections.collectAsStateWithLifecycle()
     val collectionsLoading by viewModel.collectionsLoading.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
@@ -161,6 +166,10 @@ fun CollectionDetailScreen(
                     onTabSelected = viewModel::onTabSelected,
                     selectedView = selectedView,
                     onViewSelected = viewModel::onViewSelected,
+                    itineraryWorking = itineraryWorking,
+                    onAutoGenerateItinerary = viewModel::autoGenerateItinerary,
+                    onAddToItineraryDay = viewModel::openItineraryPicker,
+                    onRemoveFromItinerary = viewModel::removeFromItinerary,
                     onAdventureClick = onAdventureClick,
                     onEditAdventure = onEditAdventure,
                     onDeleteAdventure = { adventure -> 
@@ -194,6 +203,19 @@ fun CollectionDetailScreen(
         )
     }
     
+    itineraryTarget?.let { target ->
+        uiState.collection?.let { collection ->
+            ItineraryItemPicker(
+                collection = collection,
+                dayLabel = target.label,
+                onPick = { kind, itemId ->
+                    viewModel.addToItinerary(kind, itemId, target.date)
+                },
+                onDismiss = viewModel::dismissItineraryPicker
+            )
+        }
+    }
+
     // Manage Collections dialog
     locationToManageCollections?.let { adventure ->
         ManageCollectionsDialog(
@@ -222,6 +244,10 @@ fun CollectionDetailContent(
     onTabSelected: (CollectionTab) -> Unit,
     selectedView: CollectionView = CollectionView.ITEMS,
     onViewSelected: (CollectionView) -> Unit = {},
+    itineraryWorking: Boolean = false,
+    onAutoGenerateItinerary: () -> Unit = {},
+    onAddToItineraryDay: (String?, String) -> Unit = { _, _ -> },
+    onRemoveFromItinerary: (String) -> Unit = {},
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -268,11 +294,7 @@ fun CollectionDetailContent(
                 modifier = Modifier.padding(top = 8.dp),
                 selectedView = selectedView,
                 onViewSelected = onViewSelected,
-                // Itinerary is the one view backed by its own server resource
-                // (/api/itineraries/) rather than by the collection's own contents, and it is
-                // not built yet. Offering the chip and showing an empty page would be worse
-                // than not offering it.
-                views = CollectionView.entries - CollectionView.ITINERARY
+                views = CollectionView.entries
             )
         }
 
@@ -305,7 +327,16 @@ fun CollectionDetailContent(
                     }
                 )
             }
-            CollectionView.ITEMS, CollectionView.ITINERARY -> Unit
+            CollectionView.ITINERARY -> item {
+                CollectionItineraryView(
+                    itinerary = collection.itinerary(),
+                    isWorking = itineraryWorking,
+                    onAutoGenerate = onAutoGenerateItinerary,
+                    onAddToDay = onAddToItineraryDay,
+                    onRemoveEntry = onRemoveFromItinerary
+                )
+            }
+            CollectionView.ITEMS -> Unit
         }
 
         if (selectedView == CollectionView.ITEMS) when (selectedTab) {

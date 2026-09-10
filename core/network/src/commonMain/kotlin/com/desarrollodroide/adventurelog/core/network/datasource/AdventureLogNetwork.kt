@@ -415,6 +415,26 @@ interface AdventureLogNetwork {
     suspend fun deleteLodging(lodgingId: String)
 
     /**
+     * Build a whole itinerary from the dates already on a collection's records. The server only
+     * allows it on a collection whose itinerary is empty.
+     */
+    suspend fun autoGenerateItinerary(
+        collectionId: String
+    ): List<com.desarrollodroide.adventurelog.core.model.ItineraryEntry>
+
+    /** Place one of a collection's items on a day, or in the trip-context bucket when null. */
+    suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: com.desarrollodroide.adventurelog.core.model.ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+
+    /** Take an entry off its day, leaving the item itself alone. */
+    suspend fun deleteItineraryEntry(entryId: String)
+
+    /**
      * Create a checklist in a collection
      */
     suspend fun createChecklist(

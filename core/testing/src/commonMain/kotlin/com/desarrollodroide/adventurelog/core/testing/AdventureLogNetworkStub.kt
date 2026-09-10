@@ -1,6 +1,8 @@
 package com.desarrollodroide.adventurelog.core.testing
 
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitDTO
@@ -223,6 +225,15 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         isPublic: Boolean
     ): com.desarrollodroide.adventurelog.core.model.Lodging = unused()
     override suspend fun deleteLodging(lodgingId: String): Unit = unused()
+    override suspend fun autoGenerateItinerary(collectionId: String): List<ItineraryEntry> = unused()
+    override suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): ItineraryEntry = unused()
+    override suspend fun deleteItineraryEntry(entryId: String): Unit = unused()
     override suspend fun createChecklist(
         name: String,
         items: List<Pair<String, Boolean>>,

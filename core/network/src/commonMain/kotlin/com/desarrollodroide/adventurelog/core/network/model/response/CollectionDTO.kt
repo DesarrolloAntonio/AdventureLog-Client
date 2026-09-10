@@ -55,7 +55,13 @@ data class CollectionDTO(
     val link: String? = null,
 
     @SerialName("lodging")
-    val lodging: List<LodgingDTO>? = null
+    val lodging: List<LodgingDTO>? = null,
+
+    @SerialName("itinerary")
+    val itinerary: List<ItineraryEntryDTO>? = null,
+
+    @SerialName("itinerary_days")
+    val itineraryDays: List<ItineraryDayDTO>? = null
 )
 
 fun CollectionDTO.toDomainModel(): Collection = Collection(
@@ -75,5 +81,7 @@ fun CollectionDTO.toDomainModel(): Collection = Collection(
     isArchived = isArchived,
     sharedWith = sharedWith ?: emptyList(),
     link = link ?: "",
-    lodging = lodging?.map { it.toDomainModel() } ?: emptyList()
+    lodging = lodging?.map { it.toDomainModel() } ?: emptyList(),
+    itinerary = itinerary?.mapNotNull { it.toDomainModel() } ?: emptyList(),
+    itineraryDays = itineraryDays?.map { it.toDomainModel() } ?: emptyList()
 )

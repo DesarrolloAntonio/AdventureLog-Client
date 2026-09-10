@@ -4,6 +4,9 @@ import com.desarrollodroide.adventurelog.core.model.CalendarEvent
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Checklist
 import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.model.ItineraryDayNote
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Lodging
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Transportation
@@ -145,7 +148,9 @@ fun testCollection(
     lodging: List<Lodging> = emptyList(),
     notes: List<Note> = emptyList(),
     checklists: List<Checklist> = emptyList(),
-    sharedWith: List<String> = emptyList()
+    sharedWith: List<String> = emptyList(),
+    itinerary: List<ItineraryEntry> = emptyList(),
+    itineraryDays: List<ItineraryDayNote> = emptyList()
 ) = Collection(
     id = id,
     description = "",
@@ -163,7 +168,40 @@ fun testCollection(
     isArchived = false,
     sharedWith = sharedWith,
     link = "",
-    lodging = lodging
+    lodging = lodging,
+    itinerary = itinerary,
+    itineraryDays = itineraryDays
+)
+
+fun testItineraryEntry(
+    itemId: String,
+    date: String?,
+    kind: ItineraryItemKind = ItineraryItemKind.LOCATION,
+    id: String = "entry-$itemId-$date",
+    order: Int = 0,
+    collectionId: String = "Trip"
+) = ItineraryEntry(
+    id = id,
+    collectionId = collectionId,
+    kind = kind,
+    itemId = itemId,
+    date = date,
+    isGlobal = date == null,
+    order = order
+)
+
+fun testItineraryDayNote(
+    date: String,
+    name: String = "",
+    description: String = "",
+    id: String = "day-$date",
+    collectionId: String = "Trip"
+) = ItineraryDayNote(
+    id = id,
+    collectionId = collectionId,
+    date = date,
+    name = name,
+    description = description
 )
 
 fun testLodging(

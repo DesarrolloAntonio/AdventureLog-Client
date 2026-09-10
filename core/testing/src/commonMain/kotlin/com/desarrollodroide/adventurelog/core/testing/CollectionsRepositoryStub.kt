@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Lodging
 // The interface's own package, wholesale: some of these declare their error types beside
 // themselves rather than in core:model.
@@ -99,6 +101,15 @@ abstract class CollectionsRepositoryStub : CollectionsRepository {
         isPublic: Boolean
     ): Either<ApiResponse, Lodging> = unused()
     override suspend fun deleteLodging(lodgingId: String): Either<ApiResponse, Unit> = unused()
+    override suspend fun autoGenerateItinerary(collectionId: String): Either<ApiResponse, List<ItineraryEntry>> = unused()
+    override suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): Either<ApiResponse, ItineraryEntry> = unused()
+    override suspend fun deleteItineraryEntry(entryId: String): Either<ApiResponse, Unit> = unused()
     override suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>> = unused()
     override suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit> = unused()
     override suspend fun duplicateCollection(collectionId: String): Either<ApiResponse, Collection> = unused()

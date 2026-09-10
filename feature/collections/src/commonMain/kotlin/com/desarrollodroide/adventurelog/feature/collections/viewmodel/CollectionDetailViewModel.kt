@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteChecklistUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLodgingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteNoteUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.AddItineraryEntryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.AutoGenerateItineraryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteItineraryEntryUseCase
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 
 data class CollectionDetailUiState(
     val collection: Collection? = null,
@@ -36,6 +40,15 @@ sealed class DeleteState {
     data class Success(val message: String) : DeleteState()
     data class Error(val message: String) : DeleteState()
 }
+
+/**
+ * The day the itinerary item picker is adding to.
+ *
+ * A null [date] is the trip-context bucket. [label] is what the sheet calls that day - the day's
+ * own name where it has one, "Day 5" where it has not - because "Add to 2025-09-16" is the
+ * database's way of saying it, not a person's.
+ */
+data class ItineraryTarget(val date: String?, val label: String)
 
 sealed class UpdateCollectionsState {
     data object Idle : UpdateCollectionsState()
@@ -53,7 +66,10 @@ class CollectionDetailViewModel(
     private val getAllCollectionsUseCase: GetAllCollectionsUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
     private val deleteChecklistUseCase: DeleteChecklistUseCase,
-    private val deleteLodgingUseCase: DeleteLodgingUseCase
+    private val deleteLodgingUseCase: DeleteLodgingUseCase,
+    private val autoGenerateItineraryUseCase: AutoGenerateItineraryUseCase,
+    private val addItineraryEntryUseCase: AddItineraryEntryUseCase,
+    private val deleteItineraryEntryUseCase: DeleteItineraryEntryUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
@@ -93,6 +109,73 @@ class CollectionDetailViewModel(
 
     private val _selectedView = MutableStateFlow(CollectionView.ITEMS)
     val selectedView: StateFlow<CollectionView> = _selectedView.asStateFlow()
+
+    /**
+     * Whether an itinerary call is in flight. Separate from [_deleteState] because these are the
+     * one set of actions that both add and remove, and the screen disables its buttons on it
+     * rather than showing a snackbar for the happy path.
+     */
+    private val _itineraryWorking = MutableStateFlow(false)
+    val itineraryWorking: StateFlow<Boolean> = _itineraryWorking.asStateFlow()
+
+    /**
+     * Which day the item picker is adding to: the date as `yyyy-MM-dd`, or null for the
+     * trip-context bucket. [ItineraryTarget] rather than a bare `String?` because null already
+     * means "no picker open" in the outer nullability.
+     */
+    private val _itineraryTarget = MutableStateFlow<ItineraryTarget?>(null)
+    val itineraryTarget: StateFlow<ItineraryTarget?> = _itineraryTarget.asStateFlow()
+
+    fun openItineraryPicker(date: String?, label: String) {
+        _itineraryTarget.value = ItineraryTarget(date, label)
+    }
+
+    fun dismissItineraryPicker() {
+        _itineraryTarget.value = null
+    }
+
+    fun autoGenerateItinerary() {
+        val collection = _uiState.value.collection ?: return
+        viewModelScope.launch {
+            _itineraryWorking.value = true
+            when (val result = autoGenerateItineraryUseCase(collection.id)) {
+                is Either.Left -> _deleteState.update { DeleteState.Error(result.value) }
+                is Either.Right -> loadCollection(collection.id)
+            }
+            _itineraryWorking.value = false
+        }
+    }
+
+    fun addToItinerary(kind: ItineraryItemKind, itemId: String, date: String?) {
+        val collection = _uiState.value.collection ?: return
+        // After everything already on that day, which is what the server means by order.
+        val order = collection.itinerary.count {
+            if (date == null) it.isGlobal else it.date?.take(10) == date
+        }
+        _itineraryTarget.value = null
+        viewModelScope.launch {
+            _itineraryWorking.value = true
+            when (
+                val result = addItineraryEntryUseCase(collection.id, kind, itemId, date, order)
+            ) {
+                is Either.Left -> _deleteState.update { DeleteState.Error(result.value) }
+                is Either.Right -> loadCollection(collection.id)
+            }
+            _itineraryWorking.value = false
+        }
+    }
+
+    fun removeFromItinerary(entryId: String) {
+        val collection = _uiState.value.collection ?: return
+        viewModelScope.launch {
+            _itineraryWorking.value = true
+            when (val result = deleteItineraryEntryUseCase(entryId)) {
+                is Either.Left -> _deleteState.update { DeleteState.Error(result.value) }
+                is Either.Right -> loadCollection(collection.id)
+            }
+            _itineraryWorking.value = false
+        }
+    }
     
     fun loadCollection(collectionId: String) {
         viewModelScope.launch {

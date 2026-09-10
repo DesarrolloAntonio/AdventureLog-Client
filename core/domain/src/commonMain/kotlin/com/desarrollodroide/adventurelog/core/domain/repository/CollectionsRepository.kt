@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Lodging
 
 interface CollectionsRepository {
@@ -101,6 +103,26 @@ interface CollectionsRepository {
     ): Either<ApiResponse, Lodging>
 
     suspend fun deleteLodging(lodgingId: String): Either<ApiResponse, Unit>
+
+    /**
+     * Build a whole itinerary from the dates already on the collection's records. The server only
+     * allows it while the collection's itinerary is empty.
+     */
+    suspend fun autoGenerateItinerary(
+        collectionId: String
+    ): Either<ApiResponse, List<ItineraryEntry>>
+
+    /** Place one of the collection's items on a day, or in the trip-context bucket when null. */
+    suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): Either<ApiResponse, ItineraryEntry>
+
+    /** Take an entry off its day. The item itself stays in the collection. */
+    suspend fun deleteItineraryEntry(entryId: String): Either<ApiResponse, Unit>
 
     suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>>
 

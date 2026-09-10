@@ -17,7 +17,11 @@ data class Collection(
     val isArchived: Boolean,
     val sharedWith: List<String>,
     val link: String,
-    val lodging: List<Lodging>
+    val lodging: List<Lodging>,
+    /** The trip laid out day by day. Empty until someone builds one; see [ItineraryEntry]. */
+    val itinerary: List<ItineraryEntry> = emptyList(),
+    /** What the days of the trip are called, for the days that have been given a name. */
+    val itineraryDays: List<ItineraryDayNote> = emptyList()
 )
 
 /**

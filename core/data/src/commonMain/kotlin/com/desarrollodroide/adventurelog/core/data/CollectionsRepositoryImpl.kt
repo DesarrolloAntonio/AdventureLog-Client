@@ -25,6 +25,8 @@ import kotlinx.io.IOException
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Lodging
 
 private val logger = Logger.withTag("CollectionsRepositoryImpl")
@@ -446,6 +448,27 @@ class CollectionsRepositoryImpl(
     override suspend fun deleteLodging(lodgingId: String): Either<ApiResponse, Unit> = noteCall {
         networkDataSource.deleteLodging(lodgingId)
     }
+
+    override suspend fun autoGenerateItinerary(
+        collectionId: String
+    ): Either<ApiResponse, List<ItineraryEntry>> = noteCall {
+        networkDataSource.autoGenerateItinerary(collectionId)
+    }
+
+    override suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): Either<ApiResponse, ItineraryEntry> = noteCall {
+        networkDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
+    }
+
+    override suspend fun deleteItineraryEntry(entryId: String): Either<ApiResponse, Unit> =
+        noteCall {
+            networkDataSource.deleteItineraryEntry(entryId)
+        }
 
     /**
      * The note, checklist and lodging calls differ only in the line that talks to the network; the twenty lines of
