@@ -74,7 +74,7 @@ class LoginUseCaseTest {
     }
 
     @Test
-    fun `a login that carries no session is a failure, not a success`() = runTest {
+    fun `a login that carries no session is a failure rather than a success`() = runTest {
         // What the web app's proxy produces: 200, the right username, and no set-cookie.
         fakeRepository.sendLoginResult = Either.Right(createFakeUserDetails().copy(sessionToken = null))
 

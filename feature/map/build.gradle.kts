@@ -20,6 +20,7 @@ kotlin {
         }
         
         commonTest.dependencies {
+            implementation(projects.core.testing)
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             // The stub has to name PagingData to satisfy LocationsRepository, even though the

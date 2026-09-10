@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.locations
 
+import com.desarrollodroide.adventurelog.core.testing.CategoriesRepositoryStub
+import com.desarrollodroide.adventurelog.core.testing.CollectionsRepositoryStub
+import com.desarrollodroide.adventurelog.core.testing.FakeUserRepository
+import com.desarrollodroide.adventurelog.core.testing.LocationsRepositoryStub
+import com.desarrollodroide.adventurelog.core.testing.testUser
 import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
@@ -176,8 +181,8 @@ class LocationsViewModelTest {
             duplicateLocationUseCase = DuplicateLocationUseCase(locations),
             getShareImageUseCase = GetShareImageUseCase(locations),
             platformFiles = files,
-            getUserStatsUseCase = GetUserStatsUseCase(UserRepositoryStub(stats = stats)),
-            userRepository = UserRepositoryStub(stats = stats)
+            getUserStatsUseCase = GetUserStatsUseCase(FakeUserRepository(stats = stats)),
+            userRepository = FakeUserRepository(stats = stats)
         )
     }
 

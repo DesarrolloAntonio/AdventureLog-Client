@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.detail
 
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.core.testing.CollectionsRepositoryStub
+import com.desarrollodroide.adventurelog.core.testing.LocationsRepositoryStub
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationUseCase
@@ -52,6 +57,12 @@ class AdventureDetailViewModelTest {
         }
     }
 
+    /** ObserveCollectionsUseCase hands collectionsFlow straight through; nothing else is read. */
+    private class NoCollections : CollectionsRepositoryStub() {
+        override val collectionsFlow: StateFlow<List<UltraSlimCollection>> =
+            MutableStateFlow(emptyList())
+    }
+
     private class Repo(
         private val share: Either<ApiResponse, ByteArray> = Either.Right(ByteArray(4))
     ) : LocationsRepositoryStub() {
@@ -73,7 +84,7 @@ class AdventureDetailViewModelTest {
         getLocationUseCase = GetLocationUseCase(repo),
         fileHandoff = handoff,
         getShareImageUseCase = GetShareImageUseCase(repo),
-        observeCollectionsUseCase = ObserveCollectionsUseCase(CollectionsStub())
+        observeCollectionsUseCase = ObserveCollectionsUseCase(NoCollections())
     )
 
     @Test

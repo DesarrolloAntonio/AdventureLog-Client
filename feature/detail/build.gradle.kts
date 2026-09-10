@@ -6,6 +6,7 @@ plugins {
 kotlin {
     sourceSets {
         commonTest.dependencies {
+            implementation(projects.core.testing)
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             // The repository stub has to name PagingData to override two of its methods.

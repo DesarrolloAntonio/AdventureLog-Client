@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.map
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.UserDetails
+import com.desarrollodroide.adventurelog.core.testing.testUser
 import com.desarrollodroide.adventurelog.feature.map.ui.state.MapFilters
 import com.desarrollodroide.adventurelog.feature.map.ui.state.mapMarkers
 import kotlin.test.Test

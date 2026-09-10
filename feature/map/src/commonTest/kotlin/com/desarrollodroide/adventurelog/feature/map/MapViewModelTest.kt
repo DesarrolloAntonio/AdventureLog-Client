@@ -11,6 +11,10 @@ import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
+import com.desarrollodroide.adventurelog.core.testing.CountriesRepositoryStub
+import com.desarrollodroide.adventurelog.core.testing.LocationsRepositoryStub
+import com.desarrollodroide.adventurelog.core.testing.FakeUserRepository
+import com.desarrollodroide.adventurelog.core.testing.testUser
 import com.desarrollodroide.adventurelog.feature.map.viewmodel.MapViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -62,6 +66,14 @@ class MapViewModelTest {
         user = testUser
     )
 
+    private class Countries(
+        private val regions: Either<ApiResponse, List<VisitedRegion>> = Either.Right(emptyList()),
+        private val cities: Either<ApiResponse, List<VisitedCity>> = Either.Right(emptyList())
+    ) : CountriesRepositoryStub() {
+        override suspend fun getVisitedRegions() = regions
+        override suspend fun getVisitedCities() = cities
+    }
+
     private fun viewModel(
         locations: Either<ApiResponse, List<Location>> = Either.Right(emptyList()),
         regions: Either<ApiResponse, List<VisitedRegion>> = Either.Right(emptyList()),
@@ -72,8 +84,8 @@ class MapViewModelTest {
         val locationsRepo = object : LocationsRepositoryStub() {
             override suspend fun getAllLocations() = locations
         }
-        val countries = CountriesRepositoryStub(regions = regions, cities = cities)
-        val users = UserRepositoryStub(session = session, stats = stats)
+        val countries = Countries(regions = regions, cities = cities)
+        val users = FakeUserRepository(session = session, stats = stats)
         return MapViewModel(
             getAllLocationsUseCase = GetAllLocationsUseCase(locationsRepo),
             observeUserStatsUseCase = ObserveUserStatsUseCase(users),
@@ -299,8 +311,8 @@ class MapViewModelTest {
                 return Either.Right(listOf(place("Prado")))
             }
         }
-        val countries = CountriesRepositoryStub()
-        val users = UserRepositoryStub()
+        val countries = Countries()
+        val users = FakeUserRepository()
         val vm = MapViewModel(
             getAllLocationsUseCase = GetAllLocationsUseCase(locationsRepo),
             observeUserStatsUseCase = ObserveUserStatsUseCase(users),

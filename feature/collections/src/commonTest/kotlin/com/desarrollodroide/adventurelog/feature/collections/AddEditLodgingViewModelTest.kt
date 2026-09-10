@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections
 
+import com.desarrollodroide.adventurelog.core.testing.CollectionsRepositoryStub
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveLodgingUseCase

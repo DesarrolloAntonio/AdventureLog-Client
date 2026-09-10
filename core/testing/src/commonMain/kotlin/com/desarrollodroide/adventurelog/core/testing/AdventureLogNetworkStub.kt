@@ -1,6 +1,5 @@
-package com.desarrollodroide.adventurelog.core.domain.fakes
+package com.desarrollodroide.adventurelog.core.testing
 
-import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
@@ -25,17 +24,16 @@ import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCity
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
+// The interface's own package, wholesale: some of these declare their error types beside
+// themselves rather than in core:model.
+import com.desarrollodroide.adventurelog.core.network.datasource.*
 
 /**
  * Every call the network makes available, refusing by default.
  *
- * These tests each care about two or three calls, and used to spell out all seventy-nine to say
- * so - which is why they stopped compiling the moment the interface grew. A test overrides what
- * it is about; reaching anything else is a mistake, and throwing says so.
+ * Seventy-nine of them: spelling them all out to say a test cares about two is what made these
+ * fakes break every time the interface grew.
  */
-private fun unused(): Nothing =
-    throw AssertionError("This test reached a network call it does not override")
-
 abstract class AdventureLogNetworkStub : AdventureLogNetwork {
     override suspend fun getAdventures(page: Int, pageSize: Int): List<LocationDTO> = unused()
     override suspend fun getAdventuresFiltered(
