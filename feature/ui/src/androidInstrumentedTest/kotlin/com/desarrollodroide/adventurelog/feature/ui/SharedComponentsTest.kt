@@ -47,9 +47,11 @@ class SharedComponentsTest {
         val place = PreviewData.locations.first()
         setContent { WithAppLocals { AdventureItem(location = place, showMenu = false) } }
 
-        // The name used to be white text over the photograph, which vanished against a bright
-        // sky. It is a separate node under the image now, and this is what says so.
+        // The name sits over the photograph, on a scrim. It has moved out and back again once
+        // already - the legibility problem is real and the scrim is what answers it - so this
+        // holds the one thing that must be true either way: the name is on the card.
         onNodeWithText(place.name).assertIsDisplayed()
+        place.location?.let { onNodeWithText(it).assertIsDisplayed() }
     }
 
     @OptIn(ExperimentalTestApi::class)

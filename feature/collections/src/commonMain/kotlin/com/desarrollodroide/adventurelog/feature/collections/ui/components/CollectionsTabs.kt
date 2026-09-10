@@ -1,12 +1,15 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -105,13 +108,23 @@ private fun CollectionTabChip(
             )
             // Nothing rather than a zero: an empty tab is still worth opening, to put the first
             // thing in it, but it does not need a badge saying so.
+            //
+            // In its own pill, because a bare number beside a word reads as part of the label -
+            // "Places 3" as a phrase rather than a count. This is the shape the section
+            // headings below already use for the same number.
             if (count != null && count > 0) {
-                Text(
-                    text = count.toString(),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = content.copy(alpha = if (isSelected) 0.85f else 0.6f)
-                )
+                Box(
+                    modifier = Modifier
+                        .background(content.copy(alpha = 0.18f), CircleShape)
+                        .padding(horizontal = 6.dp, vertical = 1.dp)
+                ) {
+                    Text(
+                        text = count.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = content
+                    )
+                }
             }
         }
     }

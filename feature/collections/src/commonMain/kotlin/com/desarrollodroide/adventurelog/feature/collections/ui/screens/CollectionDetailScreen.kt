@@ -1,5 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -63,9 +69,11 @@ fun CollectionDetailScreen(
     onAddLodging: (String) -> Unit = {},
     onEditLodging: (String, Lodging) -> Unit = { _, _ -> },
     /**
-     * Whether the screen has to name itself. Reached from Home it does not: the shell's breadcrumb
-     * already says which collection this is. As the detail half of a two-pane screen there is no
-     * breadcrumb, and without this the pane opens on a description with nothing to attach it to.
+     * Whether the screen has to say where it is. Reached from Home it does not: that route puts a
+     * breadcrumb in the shell's app bar. Reached from the Collections tab it does - that pane
+     * keeps its own back stack, so the shell's route never changes and its breadcrumb never
+     * appears. Without this the screen opened on a description, with no name on it and no way
+     * back but the system gesture.
      */
     showTitle: Boolean = false,
     modifier: Modifier = Modifier,
@@ -139,6 +147,8 @@ fun CollectionDetailScreen(
                 CollectionDetailContent(
                     collection = uiState.collection!!,
                     showTitle = showTitle,
+                    onBackClick = onBackClick,
+                    onHomeClick = onHomeClick,
                     selectedTab = selectedTab,
                     onTabSelected = viewModel::onTabSelected,
                     onAdventureClick = onAdventureClick,
@@ -196,6 +206,8 @@ fun CollectionDetailScreen(
 fun CollectionDetailContent(
     collection: Collection,
     showTitle: Boolean = false,
+    onBackClick: () -> Unit = {},
+    onHomeClick: () -> Unit = {},
     selectedTab: CollectionTab,
     onTabSelected: (CollectionTab) -> Unit,
     onAdventureClick: (Location) -> Unit,
@@ -227,13 +239,21 @@ fun CollectionDetailContent(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
-            CollectionHeader(collection, showTitle = showTitle)
+            CollectionHeader(
+                collection,
+                showTitle = showTitle,
+                onBackClick = onBackClick,
+                onHomeClick = onHomeClick
+            )
         }
         
         item {
             // No inset of its own: the list already pads, and 16 on top of 16 made this the one
-            // element on the screen narrower than everything around it.
+            // element on the screen narrower than everything around it. The extra space above is
+            // the break between what the collection is and how you move around inside it -
+            // without it the tabs read as a fourth row of the header's chips.
             CollectionsTabs(
+                modifier = Modifier.padding(top = 8.dp),
                 selectedTab = selectedTab,
                 onTabSelected = onTabSelected,
                 counts = mapOf(
@@ -664,18 +684,50 @@ fun CollectionDetailContent(
 fun CollectionHeader(
     collection: Collection,
     modifier: Modifier = Modifier,
-    showTitle: Boolean = false
+    showTitle: Boolean = false,
+    onBackClick: () -> Unit = {},
+    onHomeClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         if (showTitle) {
-            Text(
-                text = collection.name,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Back",
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(onClick = onBackClick)
+                        .padding(4.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = "Home",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(onClick = onHomeClick)
+                        .padding(4.dp)
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(12.dp)
+                )
+                Text(
+                    text = collection.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
 
         // Description (only if not blank)
