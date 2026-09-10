@@ -362,7 +362,8 @@ internal class KtorAdventureApi(
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String>
+        activityTypes: List<String>,
+        collectionIds: List<String>
     ): LocationDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/locations/"
@@ -380,7 +381,8 @@ internal class KtorAdventureApi(
             visits = visits,
             price = price,
             priceCurrency = priceCurrency,
-            activityTypes = activityTypes
+            activityTypes = activityTypes,
+            collectionIds = collectionIds
         )
 
         logger.d { "Creating location with request: name=$name, categoryId=${category.id}, isPublic=$isPublic, visits=${visits.size}" }

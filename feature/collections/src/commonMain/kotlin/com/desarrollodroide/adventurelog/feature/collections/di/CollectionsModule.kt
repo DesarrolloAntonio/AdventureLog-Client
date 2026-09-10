@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.collections.di
 
 import com.desarrollodroide.adventurelog.core.domain.di.domainModule
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditTransportationViewModel
@@ -46,6 +47,14 @@ val collectionsModule = module {
             autoGenerateItineraryUseCase = get(),
             addItineraryEntryUseCase = get(),
             deleteItineraryEntryUseCase = get(),
+        )
+    }
+
+    viewModel {
+        RecommendationsViewModel(
+            getRecommendationsUseCase = get(),
+            createLocationUseCase = get(),
+            getCategoriesUseCase = get()
         )
     }
 

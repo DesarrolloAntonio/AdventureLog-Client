@@ -56,10 +56,14 @@ import com.desarrollodroide.adventurelog.core.network.api.ChecklistApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorChecklistApi
 import com.desarrollodroide.adventurelog.core.model.Checklist
 import com.desarrollodroide.adventurelog.core.network.api.ItineraryApi
+import com.desarrollodroide.adventurelog.core.network.api.RecommendationApi
 import com.desarrollodroide.adventurelog.core.network.api.LodgingApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorItineraryApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorRecommendationApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorLodgingApi
 import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Lodging
 
@@ -163,6 +167,13 @@ class KtorAdventureLogNetwork(
 
     private val itineraryDataSource: ItineraryApi by lazy {
         KtorItineraryApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
+    private val recommendationDataSource: RecommendationApi by lazy {
+        KtorRecommendationApi(
             httpClient = adventurelogClient,
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
         )
@@ -304,7 +315,8 @@ class KtorAdventureLogNetwork(
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String>
+        activityTypes: List<String>,
+        collectionIds: List<String>
     ): LocationDTO {
         ensureInitialized()
         return adventureDataSource.createLocation(
@@ -320,7 +332,8 @@ class KtorAdventureLogNetwork(
             visits = visits,
             price = price,
             priceCurrency = priceCurrency,
-            activityTypes = activityTypes
+            activityTypes = activityTypes,
+            collectionIds = collectionIds
         )
     }
     
@@ -745,6 +758,19 @@ class KtorAdventureLogNetwork(
     override suspend fun deleteItineraryEntry(entryId: String) {
         ensureInitialized()
         itineraryDataSource.deleteItineraryEntry(entryId)
+    }
+
+    override suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: RecommendationCategory,
+        radiusMetres: Int
+    ): List<Recommendation> {
+        ensureInitialized()
+        return recommendationDataSource.getRecommendations(
+            latitude, longitude, place, category, radiusMetres
+        )
     }
 
     override suspend fun createChecklist(

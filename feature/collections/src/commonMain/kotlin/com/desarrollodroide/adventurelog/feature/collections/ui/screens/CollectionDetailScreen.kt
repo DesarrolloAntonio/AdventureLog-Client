@@ -33,6 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionView
@@ -44,6 +46,9 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.state.itinerary
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.stats
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionCalendarView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionItineraryView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionRecommendationsView
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsUiState
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionMapView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionStatsView
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
@@ -87,13 +92,15 @@ fun CollectionDetailScreen(
      */
     showTitle: Boolean = false,
     modifier: Modifier = Modifier,
-    viewModel: CollectionDetailViewModel = koinViewModel()
+    viewModel: CollectionDetailViewModel = koinViewModel(),
+    recommendationsViewModel: RecommendationsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val selectedView by viewModel.selectedView.collectAsStateWithLifecycle()
     val itineraryWorking by viewModel.itineraryWorking.collectAsStateWithLifecycle()
     val itineraryTarget by viewModel.itineraryTarget.collectAsStateWithLifecycle()
+    val recommendations by recommendationsViewModel.uiState.collectAsStateWithLifecycle()
     val allCollections by viewModel.allCollections.collectAsStateWithLifecycle()
     val collectionsLoading by viewModel.collectionsLoading.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
@@ -170,6 +177,20 @@ fun CollectionDetailScreen(
                     onAutoGenerateItinerary = viewModel::autoGenerateItinerary,
                     onAddToItineraryDay = viewModel::openItineraryPicker,
                     onRemoveFromItinerary = viewModel::removeFromItinerary,
+                    recommendations = recommendations,
+                    onRecommendationAnchor = recommendationsViewModel::onAnchorSelected,
+                    onRecommendationQuery = recommendationsViewModel::onQueryChanged,
+                    onRecommendationCategory = recommendationsViewModel::onCategorySelected,
+                    onRecommendationRadius = recommendationsViewModel::onRadiusSelected,
+                    onRecommendationSearch = { anchor ->
+                        recommendationsViewModel.search(anchor)
+                    },
+                    onRecommendationAdd = { recommendation ->
+                        recommendationsViewModel.addAsPlace(
+                            recommendation = recommendation,
+                            collectionId = collectionId
+                        ) { viewModel.loadCollection(collectionId) }
+                    },
                     onAdventureClick = onAdventureClick,
                     onEditAdventure = onEditAdventure,
                     onDeleteAdventure = { adventure -> 
@@ -248,6 +269,13 @@ fun CollectionDetailContent(
     onAutoGenerateItinerary: () -> Unit = {},
     onAddToItineraryDay: (String?, String) -> Unit = { _, _ -> },
     onRemoveFromItinerary: (String) -> Unit = {},
+    recommendations: RecommendationsUiState = RecommendationsUiState(),
+    onRecommendationAnchor: (String?) -> Unit = {},
+    onRecommendationQuery: (String) -> Unit = {},
+    onRecommendationCategory: (RecommendationCategory) -> Unit = {},
+    onRecommendationRadius: (Int) -> Unit = {},
+    onRecommendationSearch: (Pair<Double, Double>?) -> Unit = {},
+    onRecommendationAdd: (Recommendation) -> Unit = {},
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -334,6 +362,32 @@ fun CollectionDetailContent(
                     onAutoGenerate = onAutoGenerateItinerary,
                     onAddToDay = onAddToItineraryDay,
                     onRemoveEntry = onRemoveFromItinerary
+                )
+            }
+            CollectionView.RECOMMENDATIONS -> item {
+                // Only places with coordinates can anchor a search; one without them would send
+                // the server nothing to look around.
+                val anchors = collection.locations.filter {
+                    !it.latitude.isNullOrBlank() && !it.longitude.isNullOrBlank()
+                }
+                CollectionRecommendationsView(
+                    state = recommendations,
+                    anchors = anchors,
+                    onAnchorSelected = onRecommendationAnchor,
+                    onQueryChanged = onRecommendationQuery,
+                    onCategorySelected = onRecommendationCategory,
+                    onRadiusSelected = onRecommendationRadius,
+                    onSearch = {
+                        val anchor = anchors
+                            .firstOrNull { it.id == recommendations.anchorLocationId }
+                            ?.let { place ->
+                                val lat = place.latitude?.toDoubleOrNull()
+                                val lon = place.longitude?.toDoubleOrNull()
+                                if (lat != null && lon != null) lat to lon else null
+                            }
+                        onRecommendationSearch(anchor)
+                    },
+                    onAdd = onRecommendationAdd
                 )
             }
             CollectionView.ITEMS -> Unit

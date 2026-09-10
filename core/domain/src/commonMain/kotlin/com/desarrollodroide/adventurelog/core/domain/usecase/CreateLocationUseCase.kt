@@ -23,7 +23,13 @@ class CreateLocationUseCase(
         tags: List<String>,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
-        priceCurrency: String? = null
+        priceCurrency: String? = null,
+        /**
+         * Collections the new place joins on creation. The server takes them in the same POST, so
+         * a place added from inside a collection needs one call rather than a create followed by
+         * a membership update that can fail on its own.
+         */
+        collectionIds: List<String> = emptyList()
     ): Either<String, Location> {
         if (name.isBlank()) {
             return Either.Left("Location name is required")
@@ -42,7 +48,8 @@ class CreateLocationUseCase(
             visits = visits,
             price = price,
             priceCurrency = priceCurrency,
-            activityTypes = tags
+            activityTypes = tags,
+            collectionIds = collectionIds
         )) {
             is Either.Left -> {
                 when (result.value) {

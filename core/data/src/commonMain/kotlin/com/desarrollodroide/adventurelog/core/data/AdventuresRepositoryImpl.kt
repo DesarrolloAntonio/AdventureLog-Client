@@ -9,6 +9,8 @@ import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSource
 import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSourceFiltered
 import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
@@ -159,7 +161,8 @@ class AdventuresRepositoryImpl(
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String>
+        activityTypes: List<String>,
+        collectionIds: List<String>
     ): Either<ApiResponse, Location> {
         return try {
             val adventure = networkDataSource.createAdventure(
@@ -175,7 +178,8 @@ class AdventuresRepositoryImpl(
                 visits = visits,
             price = price,
             priceCurrency = priceCurrency,
-                activityTypes = activityTypes
+                activityTypes = activityTypes,
+                collectionIds = collectionIds
             ).toDomainModel()
             
             // Increment version to invalidate paging
@@ -193,6 +197,34 @@ class AdventuresRepositoryImpl(
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e { "Unexpected error during createAdventure: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: RecommendationCategory,
+        radiusMetres: Int
+    ): Either<ApiResponse, List<Recommendation>> {
+        return try {
+            Either.Right(
+                networkDataSource.getRecommendations(
+                    latitude, longitude, place, category, radiusMetres
+                )
+            )
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error during getRecommendations: ${e.code}" }
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error during getRecommendations: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error during getRecommendations: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

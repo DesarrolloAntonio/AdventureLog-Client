@@ -2,6 +2,8 @@ package com.desarrollodroide.adventurelog.core.testing
 
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
@@ -73,7 +75,8 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String>
+        activityTypes: List<String>,
+        collectionIds: List<String>
     ): LocationDTO = unused()
     override suspend fun createCollection(
         name: String,
@@ -234,6 +237,13 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         order: Int
     ): ItineraryEntry = unused()
     override suspend fun deleteItineraryEntry(entryId: String): Unit = unused()
+    override suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: RecommendationCategory,
+        radiusMetres: Int
+    ): List<Recommendation> = unused()
     override suspend fun createChecklist(
         name: String,
         items: List<Pair<String, Boolean>>,

@@ -4,6 +4,8 @@ import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import kotlinx.coroutines.flow.Flow
@@ -45,8 +47,16 @@ abstract class LocationsRepositoryStub : LocationsRepository {
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String>
+        activityTypes: List<String>,
+        collectionIds: List<String>
     ): Either<ApiResponse, Location> = unused()
+    override suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: RecommendationCategory,
+        radiusMetres: Int
+    ): Either<ApiResponse, List<Recommendation>> = unused()
     override suspend fun refreshLocations(): Either<ApiResponse, List<Location>> = unused()
     override suspend fun duplicateLocation(locationId: String): Either<ApiResponse, Location> = unused()
     override suspend fun getShareImage(locationId: String, aspect: String): Either<ApiResponse, ByteArray> = unused()

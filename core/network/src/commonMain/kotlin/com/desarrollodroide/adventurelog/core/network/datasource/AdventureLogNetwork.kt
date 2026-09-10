@@ -120,7 +120,9 @@ interface AdventureLogNetwork {
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String> = emptyList()
+        activityTypes: List<String> = emptyList(),
+        /** Collections the new place joins straight away, so no second call is needed. */
+        collectionIds: List<String> = emptyList()
     ): LocationDTO
 
     /**
@@ -433,6 +435,18 @@ interface AdventureLogNetwork {
 
     /** Take an entry off its day, leaving the item itself alone. */
     suspend fun deleteItineraryEntry(entryId: String)
+
+    /**
+     * Places near a point that are not in the account yet. Either the coordinates or [place] must
+     * be given; the server geocodes the latter.
+     */
+    suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: com.desarrollodroide.adventurelog.core.model.RecommendationCategory,
+        radiusMetres: Int
+    ): List<com.desarrollodroide.adventurelog.core.model.Recommendation>
 
     /**
      * Create a checklist in a collection

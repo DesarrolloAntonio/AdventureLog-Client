@@ -57,7 +57,9 @@ interface AdventureApi {
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String> = emptyList()
+        activityTypes: List<String> = emptyList(),
+        /** Collections the new place joins straight away, so no second call is needed. */
+        collectionIds: List<String> = emptyList()
     ): LocationDTO
     
     /**

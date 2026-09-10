@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ enum class CollectionView(val title: String, val icon: ImageVector) {
     ITINERARY("Itinerary", Icons.Default.Timeline),
     MAP("Map", Icons.Default.Map),
     CALENDAR("Calendar", Icons.Default.CalendarMonth),
+    RECOMMENDATIONS("Nearby", Icons.Default.Explore),
     STATS("Stats", Icons.Default.BarChart)
 }
 

@@ -49,6 +49,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetRegionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteNoteUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteChecklistUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.AddItineraryEntryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetRecommendationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.AutoGenerateItineraryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteItineraryEntryUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLodgingUseCase
@@ -125,6 +126,7 @@ val domainModule = module {
     factoryOf(::AutoGenerateItineraryUseCase)
     factoryOf(::AddItineraryEntryUseCase)
     factoryOf(::DeleteItineraryEntryUseCase)
+    factoryOf(::GetRecommendationsUseCase)
     factoryOf(::DeleteChecklistUseCase)
     factoryOf(::DeleteNoteUseCase)
     factoryOf(::GetVisitedRegionsUseCase)

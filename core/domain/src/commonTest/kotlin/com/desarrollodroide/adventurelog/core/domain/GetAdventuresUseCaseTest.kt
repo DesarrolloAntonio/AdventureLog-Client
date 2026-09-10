@@ -12,110 +12,40 @@ import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import com.desarrollodroide.adventurelog.core.testing.LocationsRepositoryStub
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class GetAdventuresUseCaseTest {
 
-    private class FakeAdventuresRepository : LocationsRepository {
+    /**
+     * Only the three members this use case reaches. Everything else comes from the shared stub and
+     * throws if a test wanders into it - which is the point: a hand-written fake spelling out
+     * every member of the interface is a copy that rots the next time the interface moves, and
+     * this one did.
+     */
+    private class FakeAdventuresRepository : LocationsRepositoryStub() {
         var getAdventuresResult: Either<ApiResponse, List<Location>> = Either.Right(emptyList())
         var getAdventuresCallCount = 0
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
 
-        override var selectedLocation: Location? = null
+        override suspend fun getAllLocations(): Either<ApiResponse, List<Location>> =
+            getAdventuresResult
 
-        override fun getLocationsPagingData(): Flow<PagingData<Location>> {
-            return flowOf(PagingData.empty())
-        }
-
-        override fun getLocationsPagingDataFiltered(
-            categoryNames: List<String>?,
-            sortBy: String?,
-            sortOrder: String?,
-            isVisited: Boolean?,
-            searchQuery: String?,
-            includeCollections: Boolean
-        ): Flow<PagingData<Location>> {
-            return flowOf(PagingData.empty())
-        }
-
-        override suspend fun getAllLocations(): Either<ApiResponse, List<Location>> {
-            return getAdventuresResult
-        }
-
-        override suspend fun getLocations(page: Int, pageSize: Int): Either<ApiResponse, List<Location>> {
+        override suspend fun getLocations(
+            page: Int,
+            pageSize: Int
+        ): Either<ApiResponse, List<Location>> {
             getAdventuresCallCount++
             lastPageParam = page
             lastPageSizeParam = pageSize
             return getAdventuresResult
         }
 
-        override suspend fun getLocation(objectId: String): Either<ApiResponse, Location> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun createLocation(
-            name: String,
-            description: String,
-            category: Category,
-            rating: Double,
-            link: String,
-            location: String,
-            latitude: String?,
-            longitude: String?,
-            isPublic: Boolean,
-            visits: List<VisitFormData>,
-            price: Double?,
-            priceCurrency: String?,
-            activityTypes: List<String>
-        ): Either<ApiResponse, Location> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun refreshLocations(): Either<ApiResponse, List<Location>> {
-            return getAdventuresResult
-        }
-
-        override suspend fun duplicateLocation(locationId: String): Either<ApiResponse, Location> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getShareImage(
-            locationId: String,
-            aspect: String
-        ): Either<ApiResponse, ByteArray> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun generateDescription(name: String): Either<ApiResponse, String> {
-            return Either.Right("Generated description for $name")
-        }
-
-        override suspend fun deleteLocation(adventureId: String): Either<ApiResponse, Unit> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun updateLocation(
-            adventureId: String,
-            name: String,
-            description: String,
-            category: Category?,
-            rating: Double,
-            link: String,
-            location: String,
-            latitude: String?,
-            longitude: String?,
-            isPublic: Boolean,
-            tags: List<String>,
-            collections: List<String>,
-            visits: List<VisitFormData>,
-            price: Double?,
-            priceCurrency: String?
-        ): Either<ApiResponse, Location> {
-            throw NotImplementedError()
-        }
+        override suspend fun refreshLocations(): Either<ApiResponse, List<Location>> =
+            getAdventuresResult
     }
 
     private val fakeRepository = FakeAdventuresRepository()
