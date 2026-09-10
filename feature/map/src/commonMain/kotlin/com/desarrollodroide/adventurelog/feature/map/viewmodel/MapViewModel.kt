@@ -248,16 +248,20 @@ class MapViewModel(
         }
     }
     
+    /** Back to showing everything, which is not the same as every switch off. */
     fun clearFilters() {
         _uiState.update { state ->
             state.copy(
                 filters = state.filters.copy(
-                    selectedActivityTypes = emptySet()
+                    selectedActivityTypes = emptySet(),
+                    selectedCategories = emptySet(),
+                    showVisited = true,
+                    showPlanned = true
                 )
             )
         }
     }
-    
+
     fun refresh() {
         loadAllAdventures()
         loadVisitedRegions()

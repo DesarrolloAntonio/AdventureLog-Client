@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.feature.map.ui.components.MapContent
+import com.desarrollodroide.adventurelog.feature.map.ui.state.mapMarkers
 import com.desarrollodroide.adventurelog.feature.map.ui.components.MapFilterSheet
 import com.desarrollodroide.adventurelog.feature.map.ui.components.ClearStatsSection
 import com.desarrollodroide.adventurelog.feature.map.viewmodel.MapViewModel
@@ -22,20 +23,9 @@ fun MapScreen(
     var showFilterSheet by remember { mutableStateOf(false) }
     
     val filteredAdventures = remember(uiState.locations, uiState.filters) {
-        uiState.locations.filter { adventure ->
-            val matchesVisitFilter = (adventure.isVisited && uiState.filters.showVisited) || 
-                                    (!adventure.isVisited && uiState.filters.showPlanned)
-            
-            val matchesActivityType = uiState.filters.selectedActivityTypes.isEmpty() ||
-                                    adventure.tags.any { it in uiState.filters.selectedActivityTypes }
-
-            val matchesCategory = uiState.filters.selectedCategories.isEmpty() ||
-                                    adventure.category?.displayName in uiState.filters.selectedCategories
-
-            matchesVisitFilter && matchesActivityType && matchesCategory
-        }
+        uiState.locations.mapMarkers(uiState.filters)
     }
-    
+
     Box(modifier = Modifier.fillMaxSize()) {
         MapContent(
             locations = filteredAdventures,

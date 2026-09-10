@@ -188,7 +188,7 @@ fun CalendarScreen(
  * and each month divider exactly as the list below builds them. 0 (the top) when there is no
  * today - either the account has no dates at all, or every one of them is already in the past.
  */
-private fun todayScrollIndex(state: CalendarUiState): Int {
+internal fun todayScrollIndex(state: CalendarUiState): Int {
     val today = state.today ?: return 0
     var index = if (state.availableTypes.size > 1) 1 else 0
     var lastMonth: String? = null
