@@ -40,3 +40,6 @@ qa.credentials.json
 qa-shots/
 qa.tokens.json
 __pycache__/
+
+# QA campaign notes stay local (owner, 2026-09-15)
+docs/qa/
