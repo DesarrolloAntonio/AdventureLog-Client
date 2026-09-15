@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.navigation
 
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -28,8 +33,12 @@ fun NavGraphBuilder.locationsScreen(
     navigator: LocationsNavigator,
     // The list is registered by the caller when it wants to wrap it in something of its own -
     // the two-pane places screen does, and needs to own that route rather than duplicate it.
-    registerListRoute: Boolean = true
+    registerListRoute: Boolean = true,
+    // Outside the shell - the root graph, where a place's page opened from Home or search lives -
+    // nothing keeps the form off the status and gesture bars, so the form keeps itself inside them.
+    standalone: Boolean = false
 ) {
+    val formModifier = if (standalone) Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding() else Modifier
     val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
@@ -54,13 +63,15 @@ fun NavGraphBuilder.locationsScreen(
     
     // Add Adventure Screen
     composable(route = NavigationRoutes.Locations.add) {
-        AddEditLocationScreen(
-            locationId = null,
-            location = null,
-            onNavigateBack = {
-                navigator.navigateBack()
-            }
-        )
+        Box(formModifier) {
+            AddEditLocationScreen(
+                locationId = null,
+                location = null,
+                onNavigateBack = {
+                    navigator.navigateBack()
+                }
+            )
+        }
     }
     
     // Edit Adventure Screen
@@ -84,12 +95,14 @@ fun NavGraphBuilder.locationsScreen(
             null
         }
         
-        AddEditLocationScreen(
-            locationId = adventureId,
-            location = location,
-            onNavigateBack = {
-                navigator.navigateBack()
-            }
-        )
+        Box(formModifier) {
+            AddEditLocationScreen(
+                locationId = adventureId,
+                location = location,
+                onNavigateBack = {
+                    navigator.navigateBack()
+                }
+            )
+        }
     }
 }

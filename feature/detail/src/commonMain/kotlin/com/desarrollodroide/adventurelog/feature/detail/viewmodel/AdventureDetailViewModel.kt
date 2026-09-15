@@ -94,13 +94,7 @@ class AdventureDetailViewModel(
         }
     }
 
-    fun editAdventure(adventureId: String) {
-        logger.d { "Edit adventure: $adventureId" }
-    }
 
-    fun openMap(latitude: String, longitude: String) {
-        logger.d { "Open map at: $latitude, $longitude" }
-    }
 
     /**
      * Attachments are served behind the same auth check as photos, so the file is fetched with

@@ -5,7 +5,9 @@ import com.desarrollodroide.adventurelog.core.model.Currencies
 import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class LocationFormData(
     val name: String = "",
     val description: String = "",
@@ -22,5 +24,5 @@ data class LocationFormData(
     val tags: List<String> = emptyList(),
     val visits: List<VisitFormData> = emptyList(),
     val trails: List<TrailFormData> = emptyList(),
-    val images: List<ImageFormData> = emptyList()
+    val images: List<@Serializable(with = ImageFormDataSerializer::class) ImageFormData> = emptyList()
 )

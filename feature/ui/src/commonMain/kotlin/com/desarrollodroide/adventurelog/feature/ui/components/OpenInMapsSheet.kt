@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.util.tryOpenUri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,7 +46,9 @@ fun OpenInMapsSheet(
     longitude: String,
     placeName: String,
     shareUrl: String?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** Called when no app on the device takes the map link. */
+    onCannotOpen: () -> Unit = {}
 ) {
     val uriHandler = LocalUriHandler.current
     val clipboard = LocalClipboardManager.current
@@ -70,21 +73,22 @@ fun OpenInMapsSheet(
 
             if (isApplePlatform) {
                 MapAction(Icons.Outlined.Map, "Apple Maps") {
-                    uriHandler.openUri("https://maps.apple.com/?ll=$query&q=$placeName")
+                    if (!uriHandler.tryOpenUri("https://maps.apple.com/?ll=$query&q=$placeName")) onCannotOpen()
                     onDismiss()
                 }
             }
 
             MapAction(Icons.Outlined.Map, "Google Maps") {
-                uriHandler.openUri("https://www.google.com/maps/search/?api=1&query=$query")
+                if (!uriHandler.tryOpenUri("https://www.google.com/maps/search/?api=1&query=$query")) onCannotOpen()
                 onDismiss()
             }
 
             MapAction(Icons.Outlined.Place, "OpenStreetMap") {
-                uriHandler.openUri(
+                val opened = uriHandler.tryOpenUri(
                     "https://www.openstreetmap.org/?mlat=$latitude&mlon=$longitude" +
                         "#map=16/$latitude/$longitude"
                 )
+                if (!opened) onCannotOpen()
                 onDismiss()
             }
 

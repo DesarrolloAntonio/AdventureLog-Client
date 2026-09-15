@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.navigation
 
+import com.desarrollodroide.adventurelog.feature.locations.ui.navigation.locationsScreen
+import com.desarrollodroide.adventurelog.feature.locations.ui.navigation.LocationsNavigator
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -63,6 +65,31 @@ fun AdventureLogNavGraph(
             navController.navigate(
                 NavigationRoutes.Collections.createDetailRoute(collectionId, collectionName)
             )
+        }
+
+        override fun navigateToEditLocation(location: Location) {
+            navController.navigate(
+                NavigationRoutes.Locations.createEditRoute(location.id, json.encodeToString(location))
+            ) { launchSingleTop = true }
+        }
+    }
+
+    // The place form, registered here too so a place's page on this controller can open it. The
+    // form loads the place from the server by id, so this copy and the shell's show the same thing.
+    val locationsFromDetailNavigator = object : LocationsNavigator {
+        override fun navigateToLocationDetail(location: Location) {
+            navController.navigate("detail/${location.id}")
+        }
+        override fun navigateToAddLocation() {
+            navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
+        }
+        override fun navigateToEditLocation(locationId: String, locationJson: String) {
+            navController.navigate(NavigationRoutes.Locations.createEditRoute(locationId, locationJson)) {
+                launchSingleTop = true
+            }
+        }
+        override fun navigateBack() {
+            navController.popBackStack()
         }
     }
 
@@ -142,5 +169,6 @@ fun AdventureLogNavGraph(
         homeNavGraph(navigator = homeNavigator)
         detailNavGraph(navigator = detailNavigator)
         collectionsScreen(navigator = collectionsFromDetailNavigator, standalone = true)
+        locationsScreen(navigator = locationsFromDetailNavigator, registerListRoute = false, standalone = true)
     }
 }

@@ -7,6 +7,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.CreateLocationUseCa
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationUseCase
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.visitFormOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -135,17 +136,36 @@ class AddEditAdventureViewModel(
         }
     }
     
+    /**
+     * The place a Create in this form has already made. Set, a later Save updates it: a photo that
+     * failed to upload left the form open, and Create again would have posted a second place.
+     */
+    private var createdLocationId: String? = null
+    private val uploadedImageUris = mutableSetOf<String>()
+
     fun saveLocation(formData: LocationFormData) {
+        // One save at a time: a double tap on Create made two places (measured).
+        if (_uiState.value.isSavingLocation) return
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            isSavingLocation = true,
+            errorMessage = null
+        )
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                isSavingLocation = true,
-                errorMessage = null
-            )
-            
-            val result = if (adventureId != null) {
+            try {
+                save(formData)
+            } finally {
+                _uiState.value = _uiState.value.copy(isSavingLocation = false)
+            }
+        }
+    }
+
+    private suspend fun save(formData: LocationFormData) {
+            val targetId = adventureId ?: createdLocationId
+            val retryOfCreate = adventureId == null && createdLocationId != null
+            val result = if (targetId != null) {
                 updateLocationUseCase(
-                    locationId = adventureId,
+                    locationId = targetId,
                     name = formData.name,
                     description = formData.description,
                     category = formData.category,
@@ -164,10 +184,9 @@ class AddEditAdventureViewModel(
                 if (category == null) {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        isSavingLocation = false,
                         errorMessage = "Please select a category"
                     )
-                    return@launch
+                    return
                 }
                 
                 createLocationUseCase(
@@ -191,24 +210,23 @@ class AddEditAdventureViewModel(
                 is Either.Left -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        isSavingLocation = false,
                         errorMessage = result.value
                     )
                 }
                 is Either.Right -> {
-                    _uiState.value = _uiState.value.copy(
-                        isSavingLocation = false
-                    )
-                    
                     val createdLocation = result.value
+                    if (adventureId == null) createdLocationId = createdLocation.id
 
                     // Visits cannot ride along with the location: each one needs the id of a
                     // location that does not exist yet while it is being created. They are
                     // reconciled here, once there is an id, exactly as the web client does.
-                    val visitsResult = syncLocationVisitsUseCase(
+                    // A retried Create already sent its visits and trails the first time.
+                    val existingVisits = _uiState.value.existingLocation?.visits.orEmpty()
+                    val visitsResult = if (retryOfCreate) Either.Right(Unit) else syncLocationVisitsUseCase(
                         locationId = createdLocation.id,
-                        existing = _uiState.value.existingLocation?.visits.orEmpty(),
-                        edited = formData.visits
+                        existing = existingVisits,
+                        edited = formData.visits,
+                        original = existingVisits.map(::visitFormOf)
                     )
                     if (visitsResult is Either.Left) {
                         // The location itself saved, so this is a warning rather than a failure -
@@ -217,7 +235,7 @@ class AddEditAdventureViewModel(
                     }
 
                     // Trails carry a location id too, so they follow the same after-the-fact path.
-                    val trailsResult = syncLocationTrailsUseCase(
+                    val trailsResult = if (retryOfCreate) Either.Right(Unit) else syncLocationTrailsUseCase(
                         locationId = createdLocation.id,
                         existing = _uiState.value.existingLocation?.trails.orEmpty(),
                         edited = formData.trails
@@ -241,7 +259,7 @@ class AddEditAdventureViewModel(
                     // the server again doubled every photo of a public place on each save, and on
                     // a private one the download was refused, holding the form open with "Failed to
                     // read image file" after the place had already saved (measured).
-                    val newImages = formData.images.filter { it.serverId == null }
+                    val newImages = formData.images.filter { it.serverId == null && it.uri !in uploadedImageUris }
                     if (newImages.isNotEmpty()) {
                         _uiState.value = _uiState.value.copy(
                             totalImagesToUpload = newImages.size,
@@ -260,7 +278,6 @@ class AddEditAdventureViewModel(
                     }
                 }
             }
-        }
     }
     
     private suspend fun uploadImages(
@@ -318,6 +335,7 @@ class AddEditAdventureViewModel(
                     hasError = true
                 }
                 is Either.Right -> {
+                    uploadedImageUris += image.uri
                     uploadedCount++
                     _uiState.value = _uiState.value.copy(
                         uploadingImagesCount = uploadedCount

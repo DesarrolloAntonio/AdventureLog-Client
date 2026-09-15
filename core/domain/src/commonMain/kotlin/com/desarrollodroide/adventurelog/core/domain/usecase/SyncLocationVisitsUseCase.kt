@@ -21,12 +21,16 @@ class SyncLocationVisitsUseCase(
 
     /**
      * @param existing what the server currently holds for this location, empty when creating.
+     * @param original the form's visits as they were loaded; one left as it was is not sent.
+     *   Sending every visit on every save rewrote ones nobody touched - their seconds dropped, a
+     *   missing timezone filled in (measured).
      * @return the first failure, or Unit when every change went through.
      */
     suspend operator fun invoke(
         locationId: String,
         existing: List<Visit>,
-        edited: List<VisitFormData>
+        edited: List<VisitFormData>,
+        original: List<VisitFormData> = emptyList()
     ): Either<String, Unit> {
         val keptIds = edited.mapNotNull { it.id }.toSet()
 
@@ -40,6 +44,7 @@ class SyncLocationVisitsUseCase(
             if (visit.startDate.isBlank()) continue
 
             val visitId = visit.id
+            if (visitId != null && original.any { it.id == visitId && it == visit }) continue
             val result = if (visitId == null) {
                 visitsRepository.createVisit(locationId, visit)
             } else {

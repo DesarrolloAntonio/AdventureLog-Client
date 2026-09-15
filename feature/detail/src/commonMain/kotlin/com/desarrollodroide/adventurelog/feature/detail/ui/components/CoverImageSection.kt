@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,6 +33,8 @@ fun CoverImageWithButtons(
     adventureName: String = "Adventure",
     onBackClick: () -> Unit,
     onShareClick: () -> Unit,
+    /** Null where this page has nowhere to edit the place from. */
+    onEditClick: (() -> Unit)? = null,
     // False when this page is a pane beside the list it came from: there is nothing to go back
     // to, because the list never left.
     showBack: Boolean = true,
@@ -81,25 +84,38 @@ fun CoverImageWithButtons(
             )
         }
 
-        // Share button
-        Box(
+        // Edit and Share. The page had no way to edit the place: the callback existed and was never
+        // attached to anything.
+        Row(
             modifier = Modifier
                 .padding(16.dp)
                 .padding(top = 24.dp)
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.7f))
-                .align(Alignment.TopEnd)
-                .clickable { onShareClick() },
-            contentAlignment = Alignment.Center
+                .align(Alignment.TopEnd),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "Share",
-                tint = Color.Black,
-                modifier = Modifier.size(24.dp)
-            )
+            if (onEditClick != null) {
+                CoverButton(icon = Icons.Default.Edit, description = "Edit place", onClick = onEditClick)
+            }
+            CoverButton(icon = Icons.Default.Share, description = "Share", onClick = onShareClick)
         }
     }
 }
 
+@Composable
+private fun CoverButton(icon: androidx.compose.ui.graphics.vector.ImageVector, description: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.7f))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = description,
+            tint = Color.Black,
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}

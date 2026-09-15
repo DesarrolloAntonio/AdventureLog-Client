@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.util.CANNOT_OPEN_LINK
+import com.desarrollodroide.adventurelog.feature.ui.util.tryOpenUri
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -42,7 +46,9 @@ fun AdventureDetailScreenRoute(
     locationId: String,
     onBackClick: () -> Unit,
     onCollectionClick: (UltraSlimCollection) -> Unit = {},
-    showBack: Boolean = true
+    showBack: Boolean = true,
+    /** Opens the edit form for the place; null hides Edit. */
+    onEditClick: ((Location) -> Unit)? = null
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
     
@@ -56,6 +62,8 @@ fun AdventureDetailScreenRoute(
     val attachmentMessage by viewModel.attachmentMessage.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val cannotOpen: () -> Unit = { scope.launch { snackbarHostState.showSnackbar(CANNOT_OPEN_LINK) } }
 
     // Which place's coordinates the maps sheet is showing, or null when it is closed.
     var mapsFor by remember { mutableStateOf<Location?>(null) }
@@ -82,13 +90,13 @@ fun AdventureDetailScreenRoute(
                     location = state.location,
                     collections = collections,
                     onBackClick = onBackClick,
-                    onEditClick = { viewModel.editAdventure(state.location.id) },
+                    onEditClick = onEditClick?.let { edit -> { edit(state.location) } },
                     // The old callback reached a view model method that only wrote a log line,
                     // so the row had never opened anything.
                     onOpenMap = { _: String, _: String -> mapsFor = state.location },
                     // The link is a plain external URL, so the platform handler is enough - it
                     // used to be routed to a view model method that only printed it.
-                    onOpenLink = { url: String -> uriHandler.openUri(url) },
+                    onOpenLink = { url: String -> if (!uriHandler.tryOpenUri(url)) cannotOpen() },
                     openingAttachmentId = openingAttachmentId,
                     onOpenAttachment = viewModel::openAttachment,
                     onShareLocation = { viewModel.shareLocation(state.location) },
@@ -101,7 +109,8 @@ fun AdventureDetailScreenRoute(
                         longitude = place.longitude.orEmpty(),
                         placeName = place.name,
                         shareUrl = place.link?.takeIf { it.isNotBlank() },
-                        onDismiss = { mapsFor = null }
+                        onDismiss = { mapsFor = null },
+                        onCannotOpen = cannotOpen
                     )
                 }
 
@@ -141,7 +150,7 @@ fun AdventureDetailScreen(
     location: Location,
     collections: List<UltraSlimCollection> = emptyList(),
     onBackClick: () -> Unit,
-    onEditClick: () -> Unit,
+    onEditClick: (() -> Unit)? = null,
     onOpenMap: (String, String) -> Unit,
     onOpenLink: (String) -> Unit,
     openingAttachmentId: String? = null,
@@ -163,6 +172,7 @@ fun AdventureDetailScreen(
             adventureName = location.name,
             onBackClick = onBackClick,
             onShareClick = onShareLocation,
+            onEditClick = onEditClick,
             showBack = showBack
         )
 

@@ -113,7 +113,8 @@ fun PlacesPane(
                     locationId = key.locationId,
                     onBackClick = { backStack.removeLastOrNull() },
                     onCollectionClick = onCollectionClick,
-                    showBack = !twoPanes
+                    showBack = !twoPanes,
+                    onEditClick = onEditPlace
                 )
             }
         }

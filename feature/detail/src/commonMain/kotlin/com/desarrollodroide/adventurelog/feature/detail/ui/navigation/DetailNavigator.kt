@@ -11,4 +11,6 @@ interface DetailNavigator {
      * printed the collection's name to stdout.
      */
     fun navigateToCollection(collectionId: String, collectionName: String)
+
+    fun navigateToEditLocation(location: com.desarrollodroide.adventurelog.core.model.Location)
 }

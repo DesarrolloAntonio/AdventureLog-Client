@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network.ktor.api
 
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonNull
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.network.api.AdventureApi
@@ -459,8 +461,9 @@ internal class KtorAdventureApi(
                     icon = cat.icon
                 )
             },
-            price = price,
-            priceCurrency = priceCurrency
+            // A cleared price goes out as null for both, as the web sends it.
+            price = price?.let(::JsonPrimitive) ?: JsonNull,
+            priceCurrency = if (price == null) JsonNull else priceCurrency?.let(::JsonPrimitive) ?: JsonNull
         )
 
         logger.d { "Updating location $adventureId, collections ${collections?.size ?: "unchanged"}" }

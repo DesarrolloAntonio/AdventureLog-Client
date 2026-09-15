@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.adventurelog.kotlinMultiplatform)
     alias(libs.plugins.adventurelog.composeMultiplatform)
     alias(libs.plugins.androidLibrary)
+    // The add/edit form is saved as JSON across a process death.
+    alias(libs.plugins.kotlin.serialization)
 }
 
 /**

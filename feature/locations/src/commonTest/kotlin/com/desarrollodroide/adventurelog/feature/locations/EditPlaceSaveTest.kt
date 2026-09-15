@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.locations
 
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.locationFormOf
+import com.desarrollodroide.adventurelog.core.testing.testCategory
+import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateCategoryUseCase
@@ -34,6 +37,7 @@ import com.desarrollodroide.adventurelog.feature.locations.viewmodel.AddEditAdve
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 import com.desarrollodroide.adventurelog.feature.ui.util.ImageBytesProvider
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -63,20 +67,39 @@ class EditPlaceSaveTest {
     ) : LocationsRepositoryStub() {
         override suspend fun getLocation(objectId: String): Either<ApiResponse, Location> = Either.Right(listCopy)
         override suspend fun fetchLocation(objectId: String): Either<ApiResponse, Location> = onServer
+        val updated = mutableListOf<String>()
+        var created = 0
+        /** Holds a create on the wire, as the network does, until the test lets it through. */
+        var createGate: CompletableDeferred<Unit>? = null
         override suspend fun updateLocation(
             adventureId: String, name: String, description: String, category: Category?, rating: Double,
             link: String, location: String, latitude: String?, longitude: String?, isPublic: Boolean,
             tags: List<String>, collections: List<String>?, visits: List<VisitFormData>, price: Double?,
             priceCurrency: String?
-        ): Either<ApiResponse, Location> = Either.Right(testLocation(name, id = adventureId))
+        ): Either<ApiResponse, Location> = Either.Right(testLocation(name, id = adventureId)).also { updated += adventureId }
+        override suspend fun createLocation(
+            name: String, description: String, category: Category, rating: Double, link: String,
+            location: String, latitude: String?, longitude: String?, isPublic: Boolean,
+            visits: List<VisitFormData>, price: Double?, priceCurrency: String?,
+            activityTypes: List<String>, collectionIds: List<String>
+        ): Either<ApiResponse, Location> {
+            createGate?.await()
+            return Either.Right(testLocation(name, id = "new${++created}"))
+        }
     }
 
-    private class Photos : ImagesRepositoryStub() {
+    private class Visits : VisitsRepositoryStub() {
+        val updated = mutableListOf<String>()
+        override suspend fun updateVisit(visitId: String, locationId: String, visit: VisitFormData) =
+            Either.Right(Visit(id = visitId, location = locationId, createdAt = "", updatedAt = "")).also { updated += visitId }
+    }
+
+    private class Photos(private val failOnce: MutableSet<String> = mutableSetOf()) : ImagesRepositoryStub() {
         val uploaded = mutableListOf<String>()
         val deleted = mutableListOf<String>()
         val madePrimary = mutableListOf<String>()
         override suspend fun uploadImage(contentType: String, objectId: String, imageBytes: ByteArray, fileName: String) =
-            Either.Right(Unit).also { uploaded += fileName }
+            if (failOnce.remove(fileName)) Either.Left(ApiResponse.HttpError) else Either.Right(Unit).also { uploaded += fileName }
         override suspend fun deleteImage(imageId: String) = Either.Right(Unit).also { deleted += imageId }
         override suspend fun setPrimaryImage(imageId: String) = Either.Right(Unit).also { madePrimary += imageId }
     }
@@ -88,7 +111,12 @@ class EditPlaceSaveTest {
         override suspend fun downloadImageFromUrl(url: String): ByteArray? = null
     }
 
-    private fun viewModel(server: Server, photos: Photos = Photos()) = AddEditAdventureViewModel(
+    private fun viewModel(
+        server: Server,
+        photos: Photos = Photos(),
+        adventureId: String? = "p1",
+        visits: Visits = Visits()
+    ) = AddEditAdventureViewModel(
         createLocationUseCase = CreateLocationUseCase(server),
         updateLocationUseCase = UpdateLocationUseCase(server),
         getLocationUseCase = GetLocationUseCase(server),
@@ -101,13 +129,13 @@ class EditPlaceSaveTest {
         searchWikipediaImageUseCase = SearchWikipediaImageUseCase(object : WikipediaRepositoryStub() {}),
         createCategoryUseCase = CreateCategoryUseCase(object : CategoriesRepositoryStub() {}),
         uploadImageUseCase = UploadImageUseCase(photos),
-        syncLocationVisitsUseCase = SyncLocationVisitsUseCase(object : VisitsRepositoryStub() {}),
+        syncLocationVisitsUseCase = SyncLocationVisitsUseCase(visits),
         syncLocationTrailsUseCase = SyncLocationTrailsUseCase(object : TrailsRepositoryStub() {}),
         syncLocationImagesUseCase = SyncLocationImagesUseCase(photos),
         imageBytesProvider = Device,
         userRepository = FakeUserRepository(),
-        adventureId = "p1",
-        existingLocation = server.listCopy
+        adventureId = adventureId,
+        existingLocation = server.listCopy.takeIf { adventureId != null }
     )
 
     private fun formWithPhotos(vararg images: ImageFormData) = LocationFormData(name = "QA_Place", images = images.toList())
@@ -180,5 +208,79 @@ class EditPlaceSaveTest {
 
         assertEquals(listOf("i2"), photos.madePrimary)
         assertEquals(emptyList(), photos.deleted)
+    }
+
+    @Test
+    fun `a second tap while a place is being created does not create another`() = runTest(dispatcher) {
+        val server = Server(Either.Left(ApiResponse.HttpError), testLocation("unused"))
+        server.createGate = CompletableDeferred()
+        val vm = viewModel(server, adventureId = null)
+        testScheduler.advanceUntilIdle()
+        val form = LocationFormData(name = "QA_Place_New", category = testCategory("Nature"))
+
+        vm.saveLocation(form)
+        testScheduler.advanceUntilIdle()   // the first create is on its way
+        vm.saveLocation(form)
+        testScheduler.advanceUntilIdle()
+        server.createGate?.complete(Unit)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, server.created)
+    }
+
+    @Test
+    fun `Create again after a photo failed updates the place it made`() = runTest(dispatcher) {
+        val server = Server(Either.Left(ApiResponse.HttpError), testLocation("unused"))
+        val photos = Photos(failOnce = mutableSetOf("b.jpg"))
+        val vm = viewModel(server, photos, adventureId = null)
+        testScheduler.advanceUntilIdle()
+        val form = formWithPhotos(
+            ImageFormData("content://picked/a.jpg", ImageType.LOCAL_FILE),
+            ImageFormData("content://picked/b.jpg", ImageType.LOCAL_FILE)
+        ).copy(category = testCategory("Nature"))
+
+        vm.saveLocation(form)
+        testScheduler.advanceUntilIdle()
+        vm.saveLocation(form)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, server.created, "a second place was created")
+        assertEquals(listOf("new1"), server.updated)
+        assertEquals(listOf("a.jpg", "b.jpg"), photos.uploaded)
+        assertTrue(vm.uiState.value.isSaved)
+    }
+
+    private val loadedVisits = listOf(
+        Visit(id = "v1", location = "p1", startDate = "2025-07-01T10:30:15Z", endDate = "2025-07-01T18:45:30Z",
+            timezone = "America/New_York", notes = "QA timed NY", createdAt = "", updatedAt = ""),
+        Visit(id = "v2", location = "p1", startDate = "2025-08-02T09:00:00Z", endDate = "2025-08-02T23:59:00Z",
+            timezone = null, notes = "QA no tz", createdAt = "", updatedAt = "")
+    )
+
+    @Test
+    fun `saving leaves the visits nobody touched alone`() = runTest(dispatcher) {
+        val place = testLocation("QA_Place", id = "p1", visits = loadedVisits)
+        val visits = Visits()
+        val vm = viewModel(Server(Either.Right(place), place), visits = visits)
+        testScheduler.advanceUntilIdle()
+
+        vm.saveLocation(locationFormOf(place, defaultCurrency = "EUR"))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(emptyList(), visits.updated)
+    }
+
+    @Test
+    fun `saving sends the visit that was changed`() = runTest(dispatcher) {
+        val place = testLocation("QA_Place", id = "p1", visits = loadedVisits)
+        val visits = Visits()
+        val vm = viewModel(Server(Either.Right(place), place), visits = visits)
+        testScheduler.advanceUntilIdle()
+        val form = locationFormOf(place, defaultCurrency = "EUR")
+
+        vm.saveLocation(form.copy(visits = form.visits.map { if (it.id == "v2") it.copy(notes = "changed") else it }))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf("v2"), visits.updated)
     }
 }

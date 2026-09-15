@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.ktor
 
+import kotlinx.serialization.json.JsonNull
 import com.desarrollodroide.adventurelog.core.network.di.apiJson
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -34,11 +35,11 @@ class LocationUpdateBodyTest {
         }) { install(ContentNegotiation) { json(apiJson) } }
     ).apply { initializeFromSession(serverUrl = "https://qa.test", sessionToken = "session-token") }
 
-    private suspend fun bodySentFor(collections: List<String>?): JsonObject {
+    private suspend fun bodySentFor(collections: List<String>?, price: Double? = 25.0): JsonObject {
         network().updateAdventure(
             adventureId = "p1", name = "QA_Place", description = "", category = null, rating = 4.0,
             link = "", location = "", latitude = null, longitude = null, isPublic = false,
-            tags = emptyList(), collections = collections, visits = emptyList(), price = 25.0,
+            tags = emptyList(), collections = collections, visits = emptyList(), price = price,
             priceCurrency = "EUR"
         )
         return apiJson.parseToJsonElement(sent).jsonObject
@@ -59,6 +60,22 @@ class LocationUpdateBodyTest {
         network().updateLocationCollections(locationId = "p1", collections = listOf("c1"))
 
         assertEquals(setOf("collections"), apiJson.parseToJsonElement(sent).jsonObject.keys)
+    }
+
+    @Test
+    fun `a price cleared in the form is sent as null`() = runTest {
+        val body = bodySentFor(collections = null, price = null)
+
+        assertEquals(JsonNull, body["price"], "price was not cleared: ${body["price"]}")
+        assertEquals(JsonNull, body["price_currency"])
+    }
+
+    @Test
+    fun `a price kept in the form is sent with its currency`() = runTest {
+        val body = bodySentFor(collections = null, price = 25.0)
+
+        assertEquals("25.0", body["price"]?.jsonPrimitive?.content)
+        assertEquals("EUR", body["price_currency"]?.jsonPrimitive?.content)
     }
 
     @Test

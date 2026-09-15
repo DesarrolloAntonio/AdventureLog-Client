@@ -162,11 +162,16 @@ fun LocationListScreen(
     )
 
     LaunchedEffect(pagingItems.loadState.refresh) {
-        if (pagingItems.loadState.refresh is LoadStateNotLoading) {
-            viewModel.onRefreshComplete()
+        val refresh = pagingItems.loadState.refresh
+        if (refreshHasEnded(refresh)) viewModel.onRefreshComplete()
+        if (refresh is LoadStateNotLoading) {
             // Adding or removing a place reloads the list; the header counts come from a
             // different call and would otherwise still be reporting the number from before.
             viewModel.loadLibraryCounts()
+        }
+        if (refresh is LoadStateError && pagingItems.itemCount > 0) {
+            // The places already shown stay; say why they weren't refreshed.
+            snackbarHostState.showSnackbar(placesLoadErrorMessage(refresh.error))
         }
     }
 
@@ -365,10 +370,24 @@ private fun AdventureListContent(
                     }
                 }
 
+                // A failed refresh over places already shown keeps them on screen.
+                pagingItems.loadState.refresh is LoadStateError && pagingItems.itemCount > 0 -> {
+                    AdventuresPagingList(
+                        pagingItems = pagingItems,
+                        collections = collections,
+                        onAdventureClick = onAdventureClick,
+                        onEditAdventure = onEditAdventure,
+                        onDuplicateAdventure = onDuplicateAdventure,
+                        onShareAdventure = onShareAdventure,
+                        onDeleteAdventure = onDeleteAdventure,
+                        onManageCollections = onManageCollections
+                    )
+                }
+
                 pagingItems.loadState.refresh is LoadStateError -> {
                     val error = pagingItems.loadState.refresh as LoadStateError
                     ErrorState(
-                        message = error.error.message ?: "Unknown error",
+                        message = placesLoadErrorMessage(error.error),
                         onRetry = { pagingItems.retry() }
                     )
                 }
@@ -481,7 +500,7 @@ private fun AdventuresPagingList(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Error loading more: ${error.error.message}",
+                                text = placesLoadErrorMessage(error.error),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.error
                             )
