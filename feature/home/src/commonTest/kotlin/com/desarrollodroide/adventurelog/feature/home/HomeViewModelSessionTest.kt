@@ -50,6 +50,7 @@ class HomeViewModelSessionTest {
         override val sessionRejections: Flow<Unit> = rejections
         override fun initializeFromSession(serverUrl: String, sessionToken: String?) = Unit
         override fun clearSession() = Unit
+        override fun endServerSession() = Unit
         override suspend fun getUserDetails(): UserDetailsDTO = userDetails()
     }
 

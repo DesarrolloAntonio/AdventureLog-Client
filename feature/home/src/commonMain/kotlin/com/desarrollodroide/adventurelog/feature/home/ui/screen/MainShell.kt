@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Dispatchers
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
@@ -109,8 +113,15 @@ fun MainShellRoute(
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
     val signedOut by viewModel.signedOut.collectAsStateWithLifecycle()
 
+    val imageLoader = LocalImageLoader.current
     LaunchedEffect(signedOut) {
-        if (signedOut) onNavigateToLogin()
+        if (signedOut) {
+            // The account's photos stay in the image cache otherwise, for the next person to sign
+            // in on this phone. Before navigating: leaving cancels this effect.
+            imageLoader.memoryCache?.clear()
+            withContext(Dispatchers.IO) { imageLoader.diskCache?.clear() }
+            onNavigateToLogin()
+        }
     }
 
     LifecycleStartEffect(Unit) {
@@ -212,6 +223,10 @@ fun HomeScreenContent(
         currentBackStackEntry?.destination?.route?.let { route ->
             currentScreen = CurrentScreen.fromRoute(route)
         }
+        // One collapsing app bar serves every destination. Left as it was, a long scroll in
+        // Settings opened Home with the bar still folded away - no greeting, no search, no
+        // account button - until the user thought to drag the page down (measured).
+        resetScrollBehavior(scrollBehavior)
     }
 
     // Navigation actions
@@ -295,6 +310,27 @@ fun HomeScreenContent(
                     val gutter = ((appBarWidth - MaxContentWidth) / 2).coerceAtLeast(0.dp)
                     TopAppBar(
                         modifier = Modifier.padding(horizontal = gutter),
+                        // Back sits in the bar's own navigation slot. Inside the title it was a
+                        // clickable icon 28dp wide, and as an IconButton the title's inset still
+                        // clipped it to 38dp (measured) - under the 48dp a finger needs.
+                        navigationIcon = {
+                            if (isCollectionDetail) {
+                                IconButton(
+                                    onClick = {
+                                        // Reset scroll behavior when navigating back from collection detail
+                                        // This fixes the issue where the breadcrumb gets stuck as title
+                                        // when user has scrolled up and then clicks to go back
+                                        resetScrollBehavior(scrollBehavior)
+                                        navController.navigateUp()
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ChevronLeft,
+                                        contentDescription = "Back"
+                                    )
+                                }
+                            }
+                        },
                         title = {
                             // No fillMaxHeight here: the app bar already centres its title, and
                             // filling the height makes the bar grow to half the screen under
@@ -307,21 +343,9 @@ fun HomeScreenContent(
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        // Chevron Left icon for going back
-                                        Icon(
-                                            imageVector = Icons.Default.ChevronLeft,
-                                            contentDescription = "Back",
-                                            modifier = Modifier
-                                                .clickable {
-                                                    // Reset scroll behavior when navigating back from collection detail
-                                                    // This fixes the issue where the breadcrumb gets stuck as title
-                                                    // when user has scrolled up and then clicks to go back
-                                                    resetScrollBehavior(scrollBehavior)
-                                                    navController.navigateUp()
-                                                }
-                                                .padding(end = 4.dp)
-                                        )
-
+                                        // Clear of Back's 48dp touch target, which reached 6dp into
+                                        // this icon's.
+                                        Spacer(Modifier.width(8.dp))
                                         // Home icon instead of text
                                         Icon(
                                             imageVector = Icons.Default.Home,
@@ -424,7 +448,9 @@ fun HomeScreenContent(
                                 serverUrl = userDetails?.serverUrl.orEmpty(),
                                 onSettings = { navigateTo(CurrentScreen.SETTINGS) },
                                 onCalendar = { navigateTo(CurrentScreen.CALENDAR) },
-                                onUsers = { navController.navigate(NavigationRoutes.Users.route) },
+                                onUsers = {
+                                    navController.navigate(NavigationRoutes.Users.route) { launchSingleTop = true }
+                                },
                                 onLogout = onLogout
                             )
                         },

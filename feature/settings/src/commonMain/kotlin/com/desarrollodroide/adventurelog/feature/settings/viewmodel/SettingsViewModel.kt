@@ -110,9 +110,6 @@ class SettingsViewModel(
     val useDynamicColors = settingsRepository.getUseDynamicColors()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
-    val compactView = settingsRepository.getCompactView()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
     val user = userRepository.getUserSession()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
@@ -171,22 +168,40 @@ class SettingsViewModel(
         saveProfile()
     }
 
-    /** The name and username, saved together from the edit dialog. */
-    fun saveIdentity(username: String, firstName: String, lastName: String) {
-        updateProfile {
-            it.copy(username = username, firstName = firstName, lastName = lastName)
+    /**
+     * The name and username, saved together from the edit dialog.
+     *
+     * [onResult] hears null once the server has them, or the reason it refused. The dialog waits
+     * for it: it used to close on Save, so a refused username vanished along with everything typed,
+     * and the reason went to a snackbar behind the dialog's scrim (measured).
+     */
+    fun saveIdentity(
+        username: String,
+        firstName: String,
+        lastName: String,
+        onResult: (refusal: String?) -> Unit = {}
+    ) {
+        _profile.update {
+            it.copy(form = it.form.copy(username = username, firstName = firstName, lastName = lastName))
         }
+        saveProfile(onResult)
     }
 
-    private fun saveProfile() {
+    /** [onResult], when given, takes the outcome instead of the snackbar. */
+    private fun saveProfile(onResult: ((String?) -> Unit)? = null) {
         val state = _profile.value
-        if (state.isSaving || !state.hasChanges) return
+        if (state.isSaving) return
+        if (!state.hasChanges) {
+            onResult?.invoke(null)
+            return
+        }
         val form = state.form
         val saved = state.saved
 
         if (form.username.isBlank()) {
             _profile.update { it.copy(form = it.saved) }
-            viewModelScope.launch { _messages.send("Username cannot be empty.") }
+            val message = "Username cannot be empty."
+            if (onResult != null) onResult(message) else viewModelScope.launch { _messages.send(message) }
             return
         }
 
@@ -214,9 +229,14 @@ class SettingsViewModel(
                 if (result.value.serverRefused) {
                     _profile.update { it.copy(form = it.saved) }
                 }
-                _messages.send(result.value.message)
+                if (onResult != null) onResult(result.value.message) else _messages.send(result.value.message)
                 return@launch
             }
+            // The server has what was sent, whether or not the session it republishes has reached
+            // this ViewModel yet. Waiting for that echo to clear hasChanges re-sent the same PATCH
+            // until it arrived - forever, in a test where it never did (measured: a hung build).
+            _profile.update { it.copy(saved = form) }
+            onResult?.invoke(null)
             // Something flipped while this one was in flight - send that too rather than leaving
             // the screen showing a value the server never received.
             if (_profile.value.hasChanges) saveProfile()
@@ -319,12 +339,6 @@ class SettingsViewModel(
     fun setUseDynamicColors(useDynamic: Boolean) {
         viewModelScope.launch {
             settingsRepository.setUseDynamicColors(useDynamic)
-        }
-    }
-
-    fun setCompactView(isCompact: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setCompactView(isCompact)
         }
     }
 

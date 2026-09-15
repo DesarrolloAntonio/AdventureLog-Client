@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -35,6 +36,7 @@ import com.desarrollodroide.adventurelog.feature.settings.viewmodel.ProfileForm
 fun EditProfileDialog(
     initial: ProfileForm,
     isSaving: Boolean,
+    error: String? = null,
     onDismiss: () -> Unit,
     onConfirm: (username: String, firstName: String, lastName: String) -> Unit
 ) {
@@ -52,6 +54,14 @@ fun EditProfileDialog(
         title = { Text("Edit profile") },
         text = {
             Column {
+                if (error != null) {
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },

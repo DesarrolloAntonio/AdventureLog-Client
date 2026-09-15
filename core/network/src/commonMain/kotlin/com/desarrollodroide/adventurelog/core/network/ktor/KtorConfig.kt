@@ -11,6 +11,9 @@ data class SessionInfo(
 
 internal const val SESSION_TOKEN_HEADER = "X-Session-Token"
 
+/** allauth's browser session: GET is the session, DELETE is signing out. */
+internal const val SESSION_PATH = "/auth/browser/v1/auth/session"
+
 internal fun HeadersBuilder.commonHeaders(sessionToken: String?) {
     append(HttpHeaders.Accept, "application/json")
     append("X-Is-Mobile", "true")

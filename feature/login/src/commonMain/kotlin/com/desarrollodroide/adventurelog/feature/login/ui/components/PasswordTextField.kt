@@ -38,7 +38,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun PasswordTextField(
     password: String,
     passwordError: Boolean,
-    onPasswordChange: (String) -> Unit
+    onPasswordChange: (String) -> Unit,
+    onDone: () -> Unit = {}
 ) {
     val passwordVisibility = remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
@@ -88,7 +89,10 @@ fun PasswordTextField(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
-            )
+            ),
+            // The keyboard's Done key is the last field's way of saying "log in"; without an
+            // action it only closed the keyboard and sent nothing (measured: 0 login requests).
+            keyboardActions = KeyboardActions(onDone = { onDone() })
         )
         Crossfade(
             targetState = passwordError,

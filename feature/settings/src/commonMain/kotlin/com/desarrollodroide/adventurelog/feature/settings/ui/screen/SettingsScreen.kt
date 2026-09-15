@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.settings.platform.FEEDBACK_ADDRESS
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -118,7 +121,7 @@ fun SettingsContent(
     user: UserDetails?,
     profile: ProfileSectionState,
     onChangeProfile: ((ProfileForm) -> ProfileForm) -> Unit,
-    onSaveIdentity: (username: String, firstName: String, lastName: String) -> Unit,
+    onSaveIdentity: (username: String, firstName: String, lastName: String, onResult: (String?) -> Unit) -> Unit,
     isChangingPassword: Boolean,
     onChangePassword: (String, String, () -> Unit) -> Unit,
     emails: EmailsSectionState,
@@ -140,8 +143,10 @@ fun SettingsContent(
 ) {
     val platformActions by PlatformActionsProvider.platformActions.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     var editProfileOpen by remember { mutableStateOf(false) }
+    var editProfileError by remember { mutableStateOf<String?>(null) }
     var legalPage by remember { mutableStateOf<LegalPage?>(null) }
     var confirmLogout by remember { mutableStateOf(false) }
 
@@ -221,7 +226,13 @@ fun SettingsContent(
                         onNavigateToSourceCode = {
                             platformActions?.openUrlInBrowser(ADVENTURELOG_CLIENT_GITHUB_URL)
                         },
-                        onSendFeedbackEmail = { platformActions?.sendFeedbackEmail() },
+                        onSendFeedbackEmail = {
+                            if (platformActions?.sendFeedbackEmail() == false) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("No email app found. Write to $FEEDBACK_ADDRESS")
+                                }
+                            }
+                        },
                         onNavigateToTermsOfUse = { legalPage = LegalPage.TERMS },
                         onNavigateToPrivacyPolicy = { legalPage = LegalPage.PRIVACY }
                     )
@@ -243,10 +254,16 @@ fun SettingsContent(
         EditProfileDialog(
             initial = profile.form,
             isSaving = profile.isSaving,
-            onDismiss = { editProfileOpen = false },
-            onConfirm = { username, firstName, lastName ->
+            error = editProfileError,
+            onDismiss = {
                 editProfileOpen = false
-                onSaveIdentity(username, firstName, lastName)
+                editProfileError = null
+            },
+            onConfirm = { username, firstName, lastName ->
+                editProfileError = null
+                onSaveIdentity(username, firstName, lastName) { refusal ->
+                    if (refusal == null) editProfileOpen = false else editProfileError = refusal
+                }
             }
         )
     }
@@ -349,7 +366,7 @@ private fun SettingsPreviewContent(mode: ThemeMode, dynamicColors: Boolean) {
         user = null,
         profile = ProfileSectionState(),
         onChangeProfile = {},
-        onSaveIdentity = { _, _, _ -> },
+        onSaveIdentity = { _, _, _, _ -> },
         isChangingPassword = false,
         onChangePassword = { _, _, _ -> },
         emails = EmailsSectionState(isLoading = false),

@@ -19,7 +19,12 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserDetails
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -75,7 +80,8 @@ import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.model.Lodging
 
 class KtorAdventureLogNetwork(
-    private val adventurelogClient: HttpClient
+    private val adventurelogClient: HttpClient,
+    private val backgroundScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) : AdventureLogNetwork {
 
     private val logger = Logger.withTag("KtorAdventurelogNetwork")
@@ -94,7 +100,8 @@ class KtorAdventureLogNetwork(
         // list, and Places told a signed-out user "No places yet" over 22 of them (measured).
         adventurelogClient.plugin(HttpSend).intercept { request ->
             val call = execute(request)
-            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER)) {
+            val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_PATH)
+            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut) {
                 logger.w { "Server rejected the session (401 on ${call.request.url.encodedPath})" }
                 rejections.tryEmit(Unit)
             }
@@ -237,6 +244,18 @@ class KtorAdventureLogNetwork(
         logger.d {
             "Network initialized from existing session - BaseURL: ${this.baseUrl}, " +
                 "SessionToken: ${if (sessionToken.isNullOrEmpty()) "absent" else "present"}"
+        }
+    }
+
+    override fun endServerSession() {
+        val server = baseUrl ?: return
+        val token = sessionToken ?: return
+        backgroundScope.launch {
+            try {
+                authDataSource.logout(server, token)
+            } catch (e: Exception) {
+                logger.w { "Could not end the session on the server: ${e.message}" }
+            }
         }
     }
 

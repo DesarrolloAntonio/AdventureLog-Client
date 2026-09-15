@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.di
 
+import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
+import com.desarrollodroide.adventurelog.core.domain.repository.LocalAccountCopies
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.compose.LocalPlatformContext
@@ -75,6 +77,9 @@ val imageLoaderModule = module {
     single { createImageBytesProvider(resolvePlatformContext()) }
 
     single { createPlatformFiles(resolvePlatformContext()) }
+
+    // Sign-out deletes what the files above wrote (LogoutUseCase).
+    single<LocalAccountCopies> { get<PlatformFiles>() }
 
     single { AuthenticatedFileDownloader(client = get(named("imageClient"))) }
 }

@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.repository.LocalAccountCopies
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.Account
@@ -95,15 +96,51 @@ class LogoutUseCaseTest {
 
     private open class FakeNetworkDataSource : AdventureLogNetworkStub() {
         var clearSessionCalled = false
+        var endServerSessionCalledWithSessionStillSet = false
 
         override fun clearSession() {
             clearSessionCalled = true
+        }
+
+        override fun endServerSession() {
+            endServerSessionCalledWithSessionStillSet = !clearSessionCalled
         }
     }
 
     private val fakeUserRepository = FakeUserRepository()
     private val fakeNetworkDataSource = FakeNetworkDataSource()
     private val useCase = LogoutUseCase(fakeUserRepository, fakeNetworkDataSource)
+
+    @Test
+    fun `signing out ends the session on the server before forgetting it`() = runTest {
+        useCase()
+
+        // Before clearSession: after it, the network no longer holds the token to send.
+        assertTrue(fakeNetworkDataSource.endServerSessionCalledWithSessionStillSet)
+    }
+
+    @Test
+    fun `signing out deletes the account files on the device`() = runTest {
+        var deleted = false
+        val useCase = LogoutUseCase(fakeUserRepository, fakeNetworkDataSource, LocalAccountCopies { deleted = true })
+
+        useCase()
+
+        assertTrue(deleted)
+    }
+
+    @Test
+    fun `a server that cannot be asked and files that cannot be deleted still sign out`() = runTest {
+        val unreachable = object : FakeNetworkDataSource() {
+            override fun endServerSession() = throw RuntimeException("no route to host")
+        }
+        val useCase = LogoutUseCase(fakeUserRepository, unreachable, LocalAccountCopies { throw RuntimeException("disk") })
+
+        runCatching { useCase() }
+
+        assertTrue(fakeUserRepository.clearUserSessionCalled)
+        assertTrue(unreachable.clearSessionCalled)
+    }
 
     @Test
     fun `invoke clears user session and network session`() = runTest {

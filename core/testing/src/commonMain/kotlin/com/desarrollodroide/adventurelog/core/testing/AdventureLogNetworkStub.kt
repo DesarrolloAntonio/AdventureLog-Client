@@ -62,6 +62,7 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
     override suspend fun getUserDetails(): UserDetailsDTO = unused()
     override fun initializeFromSession(serverUrl: String, sessionToken: String?): Unit = unused()
     override fun clearSession(): Unit = unused()
+    override fun endServerSession(): Unit = unused()
     override suspend fun createAdventure(
         name: String,
         description: String,

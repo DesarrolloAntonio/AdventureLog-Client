@@ -18,8 +18,9 @@
 > less use, and a few things are Android-only for now (see Known Issues).
 >
 > Still missing against the web client: downloading the calendar as `.ics`, uploading a profile
-> picture, and the parts of Settings that cover MFA, API keys and third-party integrations. There
-> is no user directory and none is planned - sharing a collection has its own people picker.
+> picture, restoring a backup (downloading one works), and the parts of Settings that cover MFA,
+> API keys and third-party integrations. People - the travellers with a public profile - is in the
+> account menu, and sharing a collection has its own people picker.
 >
 > A first release is the goal; there is no date on it.
 

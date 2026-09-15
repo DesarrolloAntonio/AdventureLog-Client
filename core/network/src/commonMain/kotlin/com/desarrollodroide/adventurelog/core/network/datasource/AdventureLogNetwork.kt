@@ -107,6 +107,13 @@ interface AdventureLogNetwork {
     fun clearSession()
 
     /**
+     * Asks the server to end the current session, in the background: a sign-out must not wait on a
+     * server that may not answer. Sign-out used to leave the token valid on the server (measured:
+     * it still answered 200 after the app had signed out).
+     */
+    fun endServerSession()
+
+    /**
      * Fires every time the server answers **401** to a request that carried the session token:
      * the session is over, whatever screen asked.
      *

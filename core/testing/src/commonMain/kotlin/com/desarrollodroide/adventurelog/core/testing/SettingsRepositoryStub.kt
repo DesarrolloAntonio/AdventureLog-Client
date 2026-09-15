@@ -25,6 +25,4 @@ abstract class SettingsRepositoryStub : SettingsRepository {
     override suspend fun setThemeMode(themeMode: ThemeMode): Unit = unused()
     override fun getUseDynamicColors(): StateFlow<Boolean> = unused()
     override suspend fun setUseDynamicColors(useDynamicColors: Boolean): Unit = unused()
-    override fun getCompactView(): StateFlow<Boolean> = unused()
-    override suspend fun setCompactView(compactView: Boolean): Unit = unused()
 }

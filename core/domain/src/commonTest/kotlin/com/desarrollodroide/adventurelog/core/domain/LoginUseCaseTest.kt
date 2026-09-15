@@ -44,13 +44,13 @@ class LoginUseCaseTest {
     }
 
     @Test
-    fun `invoke returns network error message when repository returns IOException`() = runTest {
+    fun `an unreachable server is reported as the server and not as the network`() = runTest {
         fakeRepository.sendLoginResult = Either.Left(ApiResponse.IOException)
 
         val result = useCase("https://test.com", "testuser", "testpass")
 
         assertTrue(result is Either.Left)
-        assertEquals("Network unavailable", result.value)
+        assertEquals("Can't reach the server. Check the address and your connection.", result.value)
     }
 
     @Test

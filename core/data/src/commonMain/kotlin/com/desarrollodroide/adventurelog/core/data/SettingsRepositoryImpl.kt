@@ -32,8 +32,13 @@ class SettingsRepositoryImpl(
     // Lazy initialization of StateFlows
     private val _themeMode by lazy { MutableStateFlow(getThemeModeFromSettings()) }
     private val _useDynamicColors by lazy { MutableStateFlow(getUseDynamicColorsFromSettings()) }
-    private val _compactView by lazy { MutableStateFlow(getCompactViewFromSettings()) }
-    
+
+    init {
+        // A "compact view" setting was stored and exposed for years and never read by any screen.
+        // It is gone; this deletes the value an older build left behind.
+        settings.remove(KEY_LEGACY_COMPACT_VIEW)
+    }
+
     override suspend fun saveUserDetails(userDetails: UserDetails) {
         try {
             settings.putString(KEY_USER_DETAILS, json.encodeToString(userDetails))
@@ -92,7 +97,6 @@ class SettingsRepositoryImpl(
     private fun resetStateFlows() {
         _themeMode.value = ThemeMode.AUTO
         _useDynamicColors.value = false
-        _compactView.value = false
     }
 
     override fun getThemeMode(): StateFlow<ThemeMode> = _themeMode
@@ -124,17 +128,6 @@ class SettingsRepositoryImpl(
         return settings.getBoolean(KEY_USE_DYNAMIC_COLORS, false)
     }
     
-    override fun getCompactView(): StateFlow<Boolean> = _compactView
-    
-    override suspend fun setCompactView(compactView: Boolean) {
-        settings.putBoolean(KEY_COMPACT_VIEW, compactView)
-        _compactView.value = compactView
-    }
-    
-    private fun getCompactViewFromSettings(): Boolean {
-        return settings.getBoolean(KEY_COMPACT_VIEW, false)
-    }
-    
     /**
      * Extension function to get a String value or null if not present
      */
@@ -162,6 +155,6 @@ class SettingsRepositoryImpl(
         private const val KEY_CREDENTIALS = "login_credentials"
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_USE_DYNAMIC_COLORS = "use_dynamic_colors"
-        private const val KEY_COMPACT_VIEW = "compact_view"
+        private const val KEY_LEGACY_COMPACT_VIEW = "compact_view"
     }
 }

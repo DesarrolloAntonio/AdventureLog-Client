@@ -7,6 +7,7 @@ import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import platform.Foundation.NSData
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
 import platform.Foundation.create
@@ -16,6 +17,16 @@ import platform.UIKit.UIApplication
 import platform.posix.memcpy
 
 class IOSPlatformFiles : PlatformFiles {
+
+    /** Everything [open] wrote went into the app's temporary directory, so that is what goes. */
+    @OptIn(ExperimentalForeignApi::class)
+    override suspend fun delete() {
+        val manager = NSFileManager.defaultManager
+        val directory = NSTemporaryDirectory()
+        manager.contentsOfDirectoryAtPath(directory, error = null)?.forEach { name ->
+            manager.removeItemAtPath(directory + name, error = null)
+        }
+    }
 
     // Opening and sharing are the same gesture on iOS: the share sheet previews a file and
     // offers the apps that can take it.

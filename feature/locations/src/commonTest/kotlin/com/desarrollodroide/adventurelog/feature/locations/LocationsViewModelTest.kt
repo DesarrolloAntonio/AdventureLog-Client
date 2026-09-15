@@ -150,6 +150,7 @@ class LocationsViewModelTest {
     private class RefusingFiles : PlatformFiles {
         override suspend fun open(bytes: ByteArray, fileName: String) = false
         override suspend fun share(bytes: ByteArray, fileName: String) = false
+        override suspend fun delete() = Unit
     }
 
     private class AcceptingFiles : PlatformFiles {
@@ -159,6 +160,7 @@ class LocationsViewModelTest {
             sharedAs = fileName
             return true
         }
+        override suspend fun delete() = Unit
     }
 
     private fun viewModel(

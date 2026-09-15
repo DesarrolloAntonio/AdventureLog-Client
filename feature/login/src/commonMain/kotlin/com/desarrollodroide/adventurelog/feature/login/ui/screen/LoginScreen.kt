@@ -2,6 +2,8 @@ package com.desarrollodroide.adventurelog.feature.login.ui.screen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,8 +88,17 @@ internal fun LoginScreen(
         }
     }
     
-    // Don't show login form while checking session or navigating
-    if (loginUiState is LoginUiState.Loading || loginUiState is LoginUiState.Success) {
+    // No form while the stored session is checked or once login has succeeded - but a spinner for
+    // the check: it can take as long as the server takes to answer, and a blank screen for that
+    // long reads as a frozen app. A login the user started keeps its form, under the LoadingDialog
+    // below, which this early return used to make unreachable (measured: 72 s of blank screen).
+    if (loginUiState is LoginUiState.CheckingSession) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+    if (loginUiState is LoginUiState.Success) {
         return
     }
 
@@ -103,8 +114,7 @@ internal fun LoginScreen(
                 onPasswordChange = onPasswordChange,
                 onServerUrlChange = onServerUrlChange,
                 onCheckedRememberSessionChange = onCheckedRememberSessionChange,
-                onClickLoginButton = onClickLoginButton,
-                onClickTestButton = { }
+                onClickLoginButton = onClickLoginButton
             )
 
             // Use the reusable LoadingDialog component for login action
@@ -129,8 +139,7 @@ fun ContentViews(
     onPasswordChange: (String) -> Unit,
     onServerUrlChange: (String) -> Unit,
     onCheckedRememberSessionChange: (Boolean) -> Unit,
-    onClickLoginButton: () -> Unit,
-    onClickTestButton: () -> Unit
+    onClickLoginButton: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val backgroundPrimary = getAdjustedPrimary()
@@ -142,10 +151,18 @@ fun ContentViews(
     ) {
         BubbleBackground(Modifier.fillMaxWidth(), maxHeightFactor = 0.45f)
 
+        // Scrolls, and keeps clear of the status bar (and, inside the card, the keyboard): in landscape the Login
+        // button sat below the bottom of the screen with no way to reach it (measured). At least
+        // the window's height, so the form still sits at the bottom when it fits.
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+        val windowHeight = maxHeight
         Column(
             modifier = Modifier
                 .background(Color.Transparent)
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = windowHeight)
+                .statusBarsPadding(),
             verticalArrangement = Arrangement.Bottom
         ) {
             Text(
@@ -181,7 +198,10 @@ fun ContentViews(
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 24.dp, vertical = 16.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        // Inside the card, so the card's colour runs down behind the keyboard
+                        // rather than leaving a strip of the backdrop between the two.
+                        .imePadding(),
                     verticalArrangement = Arrangement.Bottom,
                 ) {
                     Text(
@@ -207,7 +227,8 @@ fun ContentViews(
                     PasswordTextField(
                         password = loginFormState.password,
                         passwordError = loginFormState.passwordError,
-                        onPasswordChange = onPasswordChange
+                        onPasswordChange = onPasswordChange,
+                        onDone = onClickLoginButton
                     )
                     Spacer(Modifier.size(10.dp))
                     LoginButton(
@@ -236,6 +257,7 @@ fun ContentViews(
                     }
                 }
             }
+        }
         }
     }
 }
