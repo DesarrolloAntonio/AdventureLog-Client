@@ -21,7 +21,13 @@ Server quirks, each of which produced a wrong conclusion once:
 - DELETE /api/visitedregion/<numeric id>/ is 404 — it is keyed by region code (AF-BDS).
 - Date and decimal fields reject "" — send null or omit. `timezone` must be an IANA zone; "UTC" is 400.
 - /api/recommendations/ has no list action (404); only /api/recommendations/query/.
-- /api/stats/counts/<username>/ has no permission class: it answers anonymous callers.
+- /api/stats/counts/<username>/ answered 404 "No CustomUser matches" for `claude` (private profile),
+  with or without a session, slash or not (2026-09-15).
+- A missing or ended session is NOT one answer: /api/locations/ gives 200 with an EMPTY list,
+  /api/collections/ gives 400 {"error":"User is not authenticated"}, /api/stats/dashboard/ and
+  /api/countries/ give 401. Only /auth/user-metadata/ is a reliable "is this session alive?".
+- DELETE /auth/browser/v1/auth/session with X-Session-Token revokes that session (answers 401 by
+  allauth's convention). The adapter's cached token then answers 401 and `request` logs in again.
 """
 import json
 import os

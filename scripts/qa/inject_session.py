@@ -51,10 +51,13 @@ def main():
     prefs = cfg["android"]["files"]["prefs"]
 
     if not a.clear:
-        token = adapter.token(a.account)
+        # The request first: it logs in again when the cached token is dead (a revoked session
+        # answers 401), and only then is the cached token the one to hand to the app. Reading the
+        # token first injected a revoked one once, and the app went straight to Login (measured).
         status, me = adapter.request("GET", "/auth/user-metadata/", a.account)
         if status != 200 or not isinstance(me, dict):
             raise SystemExit(f"/auth/user-metadata/ as {a.account} answered {status}")
+        token = adapter.token(a.account)
         session = {  # UserDetails (core/model), as UserDetailsDTO.toDomainModel maps it
             "pk": me.get("id"), "profilePic": me.get("profile_pic"), "uuid": me["uuid"],
             "publicProfile": bool(me.get("public_profile")),
