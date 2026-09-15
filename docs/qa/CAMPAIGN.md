@@ -115,7 +115,7 @@ Run once at setup, on `13bb122`, from the code. **Every row is a candidate until
 |---|---|---|---|---|---|
 | 1 | ~~Test device~~ | — | **resolved 2026-09-15:** the owner chose the existing `Resizable_Experimental` AVD | 00 | if the other campaign needs that AVD back |
 | 2 | ~~Account A~~ | — | **resolved 2026-09-15:** `claude`, credentials in `qa.credentials.json` by the owner | 00 | — |
-| 7 | **One real login by hand** on `qa`, with Remember me **checked**, on the fixed build | the only part of login that can't be injected (R11); proves SH-04 on a real login (no `remember_password` in STORE) | log in once; I read the store with values hidden | 01 (SH-04 verified by upgrade + tests, not by a real login) | 01 if the password appears |
+| 7 | ~~One real login by hand, Remember me checked, on the fixed build~~ | — | **resolved 2026-09-15:** done by the owner; STORE has no password, the stored token answers 200 | 01 (SH-04) | — |
 | 8 | **P2s from 01, fix or accept** (SH-05…SH-12, SH-14…SH-19) | fix mode is *fix severe*: P2s wait for you | see the list put to you at gate 01 | 01 | the module that owns each fix |
 | 3 | Accounts B and C | sharing exists (collections), R7 needs a recipient and a negative control; the agent never creates accounts | two accounts on the NAS, before process 09 | — | 09 |
 | 4 | Terms of use (Shiori's) and privacy policy placeholder date | legal content | rewrite both for AdventureLog before any store upload | — | 10 |
