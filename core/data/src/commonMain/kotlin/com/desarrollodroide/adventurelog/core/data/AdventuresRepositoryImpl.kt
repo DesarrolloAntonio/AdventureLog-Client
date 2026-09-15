@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingData
@@ -26,9 +27,14 @@ private val logger = Logger.withTag("AdventuresRepositoryImpl")
 
 class AdventuresRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
-) : LocationsRepository {
+) : LocationsRepository, AccountDataCache {
 
     override var selectedLocation: Location? = null
+
+    override fun clearAccountData() {
+        selectedLocation = null
+        _version.value++
+    }
 
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)

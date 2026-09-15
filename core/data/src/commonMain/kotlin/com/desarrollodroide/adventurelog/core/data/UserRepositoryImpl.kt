@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
@@ -26,7 +27,7 @@ private val logger = Logger.withTag("UserRepositoryImpl")
 class UserRepositoryImpl(
     private val settings: Settings,
     private val networkDataSource: AdventureLogNetwork
-) : UserRepository {
+) : UserRepository, AccountDataCache {
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -180,6 +181,11 @@ class UserRepositoryImpl(
 
     override val activeSession: UserDetails?
         get() = userSessionFlow.value
+
+    /** The stats; the session itself is [clearUserSession]'s. */
+    override fun clearAccountData() {
+        userStatsFlow.value = null
+    }
 
     override suspend fun clearUserSession() {
         settings.remove(Keys.USER_SESSION)

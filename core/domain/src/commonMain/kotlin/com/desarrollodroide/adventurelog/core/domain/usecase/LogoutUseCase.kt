@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.domain.usecase
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import com.desarrollodroide.adventurelog.core.domain.repository.LocalAccountCopies
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
@@ -14,7 +15,8 @@ private val logger = Logger.withTag("LogoutUseCase")
 class LogoutUseCase(
     private val userRepository: UserRepository,
     private val networkDataSource: AdventureLogNetwork,
-    private val localAccountCopies: LocalAccountCopies = LocalAccountCopies.None
+    private val localAccountCopies: LocalAccountCopies = LocalAccountCopies.None,
+    private val accountCaches: List<AccountDataCache> = emptyList()
 ) {
 
     /**
@@ -40,6 +42,14 @@ class LogoutUseCase(
             localAccountCopies.delete()
         } catch (e: Exception) {
             logger.e { "Could not delete the account's files on this device: ${e.message}" }
+        }
+
+        accountCaches.forEach { cache ->
+            try {
+                cache.clearAccountData()
+            } catch (e: Exception) {
+                logger.e { "Could not empty an account cache: ${e.message}" }
+            }
         }
 
         // Try to clear user session

@@ -84,7 +84,7 @@ val domainModule = module {
     factoryOf(::GetCollectionDetailUseCase)
     factoryOf(::InitializeSessionUseCase)
     factoryOf(::SaveSessionUseCase)
-    factoryOf(::LogoutUseCase)
+    factory { LogoutUseCase(get(), get(), get(), getAll()) }
     factoryOf(::EndRejectedSessionsUseCase)
     factoryOf(::RememberMeCredentialsUseCase)
     factoryOf(::CreateLocationUseCase)

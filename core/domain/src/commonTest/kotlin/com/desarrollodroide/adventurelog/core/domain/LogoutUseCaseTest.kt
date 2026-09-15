@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import com.desarrollodroide.adventurelog.core.domain.repository.LocalAccountCopies
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
@@ -33,6 +34,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
@@ -127,6 +129,34 @@ class LogoutUseCaseTest {
         useCase()
 
         assertTrue(deleted)
+    }
+
+    @Test
+    fun `signing out empties every account cache in memory`() = runTest {
+        val emptied = mutableListOf<String>()
+        val caches = listOf("countries", "collections").map { name ->
+            object : AccountDataCache {
+                override fun clearAccountData() { emptied += name }
+            }
+        }
+
+        LogoutUseCase(fakeUserRepository, fakeNetworkDataSource, LocalAccountCopies.None, caches)()
+
+        assertEquals(listOf("countries", "collections"), emptied)
+    }
+
+    @Test
+    fun `a cache that fails to empty does not stop the others or the sign-out`() = runTest {
+        var secondEmptied = false
+        val caches = listOf(
+            object : AccountDataCache { override fun clearAccountData() = throw IllegalStateException("boom") },
+            object : AccountDataCache { override fun clearAccountData() { secondEmptied = true } }
+        )
+
+        runCatching { LogoutUseCase(fakeUserRepository, fakeNetworkDataSource, LocalAccountCopies.None, caches)() }
+
+        assertTrue(secondEmptied)
+        assertTrue(fakeUserRepository.clearUserSessionCalled)
     }
 
     @Test

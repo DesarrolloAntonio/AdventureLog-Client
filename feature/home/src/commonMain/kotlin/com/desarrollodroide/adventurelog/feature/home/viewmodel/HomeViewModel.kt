@@ -86,6 +86,35 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * Reloads the dashboard behind what is on screen, for each time Home comes back into view.
+     *
+     * Home loaded once per ViewModel and never again: a place added from its own hero, a trip
+     * created elsewhere, a visit marked on another tab - it kept the old counts until the app was
+     * restarted (measured: 22 places on screen, 23 on the server, after switching tabs and after
+     * coming back from the background). Unlike [loadDashboard] this keeps the dashboard showing
+     * while it asks, and keeps it if the server can't be reached - a stale screen is better than a
+     * spinner followed by an error over data that was fine a moment ago.
+     */
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    fun refreshDashboard() {
+        // Nothing shown yet (first load in flight, or its error on screen): that has its own path.
+        if (_uiState.value !is HomeUiState.Success) return
+        viewModelScope.launch {
+            when (val result = getDashboardUseCase()) {
+                is Either.Left -> logger.w { "Could not refresh the dashboard, keeping what is shown: ${result.value}" }
+                is Either.Right -> {
+                    val today = Clock.System.now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    _uiState.update { current ->
+                        if (current is HomeUiState.Success) current.copy(dashboard = result.value, today = today)
+                        else current
+                    }
+                }
+            }
+        }
+    }
+
     @OptIn(kotlin.time.ExperimentalTime::class)
     fun loadDashboard() {
         viewModelScope.launch {

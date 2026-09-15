@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data.di
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import com.desarrollodroide.adventurelog.core.common.di.AdventureLogDispatchers
 import com.desarrollodroide.adventurelog.core.common.di.commonModule
 import com.desarrollodroide.adventurelog.core.data.AccountRepositoryImpl
@@ -35,6 +36,7 @@ import com.desarrollodroide.adventurelog.core.domain.repository.ImagesRepository
 import com.desarrollodroide.adventurelog.core.network.di.networkModule
 import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named
+import org.koin.dsl.binds
 import org.koin.dsl.module
 import com.desarrollodroide.adventurelog.core.data.CalendarRepositoryImpl
 import com.desarrollodroide.adventurelog.core.domain.repository.CalendarRepository
@@ -60,12 +62,12 @@ val dataModule = module {
     // Built when Koin starts, not when a screen first asks: loading it hands the stored session to
     // the network, and a restored app can open a place's page - whose screen never asks for the
     // user - before anything else runs.
-    single<UserRepository>(createdAtStart = true) {
+    single(createdAtStart = true) {
         UserRepositoryImpl(
             settings = get(),
             networkDataSource = get()
         )
-    }
+    } binds arrayOf(UserRepository::class, AccountDataCache::class)
     single<AccountRepository> {
         AccountRepositoryImpl(
             networkDataSource = get(),
@@ -97,18 +99,20 @@ val dataModule = module {
     single<DashboardRepository> {
         DashboardRepositoryImpl(networkDataSource = get())
     }
-    single<LocationsRepository> {
+    // `binds … AccountDataCache::class`: LogoutUseCase empties every repository that keeps the
+    // account's data in memory, so a new binding here is how a new cache gets emptied too.
+    single {
         AdventuresRepositoryImpl(networkDataSource = get())
-    }
-    single<CollectionsRepository> {
+    } binds arrayOf(LocationsRepository::class, AccountDataCache::class)
+    single {
         CollectionsRepositoryImpl(networkDataSource = get())
-    }
+    } binds arrayOf(CollectionsRepository::class, AccountDataCache::class)
     single<CategoriesRepository> {
         CategoriesRepositoryImpl(networkDataSource = get())
     }
-    single<CountriesRepository> {
+    single {
         CountriesRepositoryImpl(networkDataSource = get())
-    }
+    } binds arrayOf(CountriesRepository::class, AccountDataCache::class)
     single<GeocodeRepository> {
         GeocodeRepositoryImpl(
             networkDataSource = get(),

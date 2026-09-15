@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.CountriesRepository
@@ -20,7 +21,7 @@ private val logger = Logger.withTag("CountriesRepositoryImpl")
 
 class CountriesRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
-) : CountriesRepository {
+) : CountriesRepository, AccountDataCache {
 
     private val _countriesFlow = MutableStateFlow<List<Country>>(emptyList())
     override val countriesFlow: StateFlow<List<Country>> = _countriesFlow.asStateFlow()
@@ -31,6 +32,13 @@ class CountriesRepositoryImpl(
     private val _visitedCitiesFlow = MutableStateFlow<List<VisitedCity>>(emptyList())
     override val visitedCitiesFlow: StateFlow<List<VisitedCity>> = _visitedCitiesFlow.asStateFlow()
     
+    /** Countries carry the account's own visit counts, and the regions and cities are its visits. */
+    override fun clearAccountData() {
+        _countriesFlow.value = emptyList()
+        _visitedRegionsFlow.value = emptyList()
+        _visitedCitiesFlow.value = emptyList()
+    }
+
     override suspend fun getCountries(): Either<ApiResponse, List<Country>> {
         // If we already have countries cached, return them
         if (_countriesFlow.value.isNotEmpty()) {

@@ -138,6 +138,7 @@ fun MainShellRoute(
         },
         onOpenLocationById = onOpenLocationById,
         onRetryDashboard = viewModel::loadDashboard,
+        onRefreshDashboard = viewModel::refreshDashboard,
         onLogout = viewModel::logout
     )
 }
@@ -163,6 +164,7 @@ fun HomeScreenContent(
     onAdventureClick: (Location) -> Unit = { },
     onOpenLocationById: (String) -> Unit = { },
     onRetryDashboard: () -> Unit = {},
+    onRefreshDashboard: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -499,6 +501,12 @@ fun HomeScreenContent(
                             enterTransition = NavigationAnimations.enterTransitionFade,
                             exitTransition = NavigationAnimations.exitTransitionFade
                         ) {
+                            // This entry's lifecycle: started again on returning from another tab, a
+                            // place's page, an add screen or the background.
+                            LifecycleStartEffect(Unit) {
+                                onRefreshDashboard()
+                                onStopOrDispose { }
+                            }
                             DashboardScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,

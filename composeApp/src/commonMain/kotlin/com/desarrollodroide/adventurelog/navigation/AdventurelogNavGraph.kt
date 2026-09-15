@@ -123,7 +123,10 @@ fun AdventureLogNavGraph(
             navigateToHome()
         }
         override fun navigateToHome() {
-            navController.popBackStack(NavigationRoutes.Home.graph, inclusive = false)
+            // The Home screen, not its graph: popping to the graph route left only the graph's own
+            // entry, which draws nothing - a blank white screen whose only exit was leaving the app
+            // (measured: Edit place in a collection opened from a place's page).
+            navController.popBackStack(NavigationRoutes.Home.screen, inclusive = false)
         }
         override fun navigateBack() {
             navController.navigateUp()

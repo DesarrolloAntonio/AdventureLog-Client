@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingData
@@ -33,13 +34,18 @@ private val logger = Logger.withTag("CollectionsRepositoryImpl")
 
 class CollectionsRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
-) : CollectionsRepository {
+) : CollectionsRepository, AccountDataCache {
 
     private val _collectionsFlow = MutableStateFlow<List<UltraSlimCollection>>(emptyList())
     override val collectionsFlow: StateFlow<List<UltraSlimCollection>> = _collectionsFlow.asStateFlow()
 
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
+
+    override fun clearAccountData() {
+        _collectionsFlow.value = emptyList()
+        _version.value++
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCollectionsPagingData(
