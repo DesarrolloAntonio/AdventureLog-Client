@@ -34,6 +34,8 @@ abstract class LocationsRepositoryStub : LocationsRepository {
     override suspend fun getLocations(page: Int, pageSize: Int): Either<ApiResponse, List<Location>> = unused()
     override suspend fun getAllLocations(): Either<ApiResponse, List<Location>> = unused()
     override suspend fun getLocation(objectId: String): Either<ApiResponse, Location> = unused()
+    override suspend fun fetchLocation(objectId: String): Either<ApiResponse, Location> = unused()
+    override suspend fun updateLocationCollections(locationId: String, collections: List<String>): Either<ApiResponse, Location> = unused()
     override suspend fun createLocation(
         name: String,
         description: String,
@@ -74,7 +76,7 @@ abstract class LocationsRepositoryStub : LocationsRepository {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>,
+        collections: List<String>?,
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?

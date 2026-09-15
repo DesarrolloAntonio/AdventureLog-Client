@@ -307,6 +307,9 @@ interface AdventureLogNetwork {
      * Delete an adventure
      */
     suspend fun deleteAdventure(adventureId: String)
+
+    /** PATCH with `collections` alone. */
+    suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO
     
     /**
      * Update an existing adventure
@@ -323,7 +326,7 @@ interface AdventureLogNetwork {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList(),
+        collections: List<String>? = null,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
         priceCurrency: String? = null
@@ -583,4 +586,8 @@ interface AdventureLogNetwork {
         imageBytes: ByteArray,
         fileName: String
     )
+
+    suspend fun deleteImage(imageId: String)
+
+    suspend fun setPrimaryImage(imageId: String)
 }

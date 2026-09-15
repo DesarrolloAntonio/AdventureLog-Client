@@ -136,6 +136,10 @@ class AdventuresRepositoryImpl(
         }
         
         logger.e { "⚠️ selectedLocation not available, fetching from network: $objectId" }
+        return fetchLocation(objectId)
+    }
+
+    override suspend fun fetchLocation(objectId: String): Either<ApiResponse, Location> {
         return try {
             val location = networkDataSource.getAdventureDetail(objectId).toDomainModel()
             Either.Right(location)
@@ -350,7 +354,7 @@ class AdventuresRepositoryImpl(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>,
+        collections: List<String>?,
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?
@@ -396,6 +400,32 @@ class AdventuresRepositoryImpl(
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e { "Unexpected error during updateAdventure: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun updateLocationCollections(
+        locationId: String,
+        collections: List<String>
+    ): Either<ApiResponse, Location> {
+        return try {
+            val location = networkDataSource.updateLocationCollections(locationId, collections).toDomainModel()
+            _version.value++
+            if (selectedLocation?.id == location.id) {
+                selectedLocation = location
+            }
+            Either.Right(location)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error during updateLocationCollections: ${e.code}" }
+            when (e.code) {
+                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error during updateLocationCollections: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error during updateLocationCollections: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

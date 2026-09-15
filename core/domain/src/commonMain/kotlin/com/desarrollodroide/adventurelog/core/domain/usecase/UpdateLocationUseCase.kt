@@ -22,7 +22,10 @@ class UpdateLocationUseCase(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList(),
+        // Null leaves the place's collections as they are. Editing a place doesn't show them, and an
+        // empty list took every edited place out of all its collections (measured) - they change from
+        // Manage collections, which passes them.
+        collections: List<String>? = null,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
         priceCurrency: String? = null

@@ -34,7 +34,9 @@ data class UpdateLocationRequest(
     val location: String,
     @SerialName("is_public")
     val isPublic: Boolean,
-    val collections: List<String>,
+    // Null is left out of the body, and the server only replaces a place's collections when the
+    // key is there. `[]` took the place out of every collection.
+    val collections: List<String>? = null,
     val link: String,
     val longitude: String? = null,
     val latitude: String? = null,
@@ -48,6 +50,12 @@ data class UpdateLocationRequest(
     val price: Double? = null,
     @SerialName("price_currency")
     val priceCurrency: String? = null
+)
+
+/** A PATCH that changes which collections a place is in and nothing else about it. */
+@Serializable
+data class LocationCollectionsRequest(
+    val collections: List<String>
 )
 
 @Serializable

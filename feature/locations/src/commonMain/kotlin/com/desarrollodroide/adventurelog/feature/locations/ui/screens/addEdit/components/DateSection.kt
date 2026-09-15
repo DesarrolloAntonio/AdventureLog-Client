@@ -210,14 +210,9 @@ fun DateSection(
             PrimaryButton(
                 onClick = {
                     if (isFormValid) {
-                        val updatedVisits = if (editingVisitIndex != null) {
-                            formData.visits.toMutableList().apply {
-                                set(editingVisitIndex!!, tempVisitData)
-                            }
-                        } else {
-                            formData.visits + tempVisitData
-                        }
-                        onFormDataChange(formData.copy(visits = updatedVisits))
+                        onFormDataChange(
+                            formData.copy(visits = formData.visits.withVisitSaved(editingVisitIndex, tempVisitData))
+                        )
 
                         // Reset form
                         tempVisitData = VisitFormData(
@@ -267,6 +262,12 @@ fun DateSection(
                                     val updatedVisits = formData.visits.toMutableList().apply {
                                         removeAt(index)
                                     }
+                                    val stillEditing = editingVisitIndex?.let { editingIndexAfterDelete(it, index) }
+                                    if (editingVisitIndex != null && stillEditing == null) {
+                                        // The visit open above is gone: Update would bring it back.
+                                        tempVisitData = VisitFormData(timezone = TimeZone.currentSystemDefault().id)
+                                    }
+                                    editingVisitIndex = stillEditing
                                     onFormDataChange(formData.copy(visits = updatedVisits))
                                 }
                             )

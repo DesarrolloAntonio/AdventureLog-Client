@@ -166,7 +166,7 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>,
+        collections: List<String>?,
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?
@@ -318,4 +318,7 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         imageBytes: ByteArray,
         fileName: String
     ): Unit = unused()
+    override suspend fun deleteImage(imageId: String): Unit = unused()
+    override suspend fun setPrimaryImage(imageId: String): Unit = unused()
+    override suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO = unused()
 }

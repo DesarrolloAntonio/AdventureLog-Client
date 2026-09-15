@@ -19,4 +19,6 @@ abstract class ImagesRepositoryStub : ImagesRepository {
         imageBytes: ByteArray,
         fileName: String
     ): Either<ApiResponse, Unit> = unused()
+    override suspend fun deleteImage(imageId: String): Either<ApiResponse, Unit> = unused()
+    override suspend fun setPrimaryImage(imageId: String): Either<ApiResponse, Unit> = unused()
 }

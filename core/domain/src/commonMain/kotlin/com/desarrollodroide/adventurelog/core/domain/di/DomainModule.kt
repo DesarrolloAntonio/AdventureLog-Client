@@ -41,6 +41,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetSharedCollection
 import com.desarrollodroide.adventurelog.core.domain.usecase.RespondToCollectionInviteUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationTrailsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationImagesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationVisitsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
@@ -107,6 +108,7 @@ val domainModule = module {
     factoryOf(::SearchEverythingUseCase)
     factoryOf(::SyncLocationVisitsUseCase)
     factoryOf(::SyncLocationTrailsUseCase)
+    factoryOf(::SyncLocationImagesUseCase)
     factoryOf(::DuplicateLocationUseCase)
     factoryOf(::GetShareImageUseCase)
     factoryOf(::DuplicateCollectionUseCase)

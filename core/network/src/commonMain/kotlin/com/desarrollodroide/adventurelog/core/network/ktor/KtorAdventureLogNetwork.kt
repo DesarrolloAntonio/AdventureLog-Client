@@ -656,6 +656,11 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return adventureDataSource.deleteLocation(adventureId)
     }
+
+    override suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO {
+        ensureInitialized()
+        return adventureDataSource.updateLocationCollections(locationId, collections)
+    }
     
     override suspend fun updateAdventure(
         adventureId: String,
@@ -669,7 +674,7 @@ class KtorAdventureLogNetwork(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>,
+        collections: List<String>?,
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?
@@ -1013,5 +1018,15 @@ class KtorAdventureLogNetwork(
             imageBytes = imageBytes,
             fileName = fileName
         )
+    }
+
+    override suspend fun deleteImage(imageId: String) {
+        ensureInitialized()
+        contentDataSource.deleteImage(imageId)
+    }
+
+    override suspend fun setPrimaryImage(imageId: String) {
+        ensureInitialized()
+        contentDataSource.setPrimaryImage(imageId)
     }
 }

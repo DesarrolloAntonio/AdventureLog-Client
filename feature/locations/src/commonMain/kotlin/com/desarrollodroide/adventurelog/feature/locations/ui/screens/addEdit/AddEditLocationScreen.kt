@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit
 
+import com.desarrollodroide.adventurelog.core.model.ContentImage
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -100,6 +105,14 @@ private fun splitIsoDateTime(isoString: String?): SplitDateTime {
 private fun SplitDateTime.isAllDayBound(): Boolean =
     time == null || time == "00:00" || time == "23:59"
 
+/** A photo the place already has, as the form holds it: known by its server id, never uploaded again. */
+internal fun formImageOf(image: ContentImage) = ImageFormData(
+    uri = image.image,
+    type = ImageType.URL,
+    isPrimary = image.isPrimary,
+    serverId = image.id
+)
+
 @Composable
 fun AddEditLocationScreen(
     locationId: String?,
@@ -134,6 +147,8 @@ fun AddEditLocationScreen(
             existingLocation = uiState.existingLocation,
             categories = uiState.categories,
             isLoading = uiState.isLoading,
+            loadError = uiState.loadError,
+            onRetryLoad = viewModel::retryLoad,
             onNavigateBack = onNavigateBack,
             onSave = { formData ->
                 viewModel.saveLocation(formData)
@@ -179,6 +194,8 @@ fun AddEditLocationContent(
     existingLocation: Location? = null,
     categories: List<Category>,
     isLoading: Boolean = false,
+    loadError: String? = null,
+    onRetryLoad: () -> Unit = {},
     onNavigateBack: () -> Unit,
     onSave: (adventureData: LocationFormData) -> Unit,
     onGenerateDescription: (name: String, onDescriptionGenerated: (String) -> Unit) -> Unit,
@@ -255,13 +272,7 @@ fun AddEditLocationContent(
                     tags = existingLocation.tags,
                     visits = parsedVisits,
                     trails = parsedTrails,
-                    images = existingLocation.images.map { contentImage ->
-                        ImageFormData(
-                            uri = contentImage.image,
-                            type = ImageType.URL,
-                            isPrimary = contentImage.isPrimary
-                        )
-                    }
+                    images = existingLocation.images.map(::formImageOf)
                 )
             } else {
                 LocationFormData(
@@ -285,13 +296,31 @@ fun AddEditLocationContent(
     }
 
 
-    if (isLoading && existingLocation == null && isEditMode) {
-        // Show loading state while loading adventure for edit
+    if (isEditMode && existingLocation == null) {
+        // Editing needs the place as the server has it. Until it arrives there is no form: an
+        // empty one could be saved over the place.
         Box(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize().padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            if (loadError == null) {
+                CircularProgressIndicator()
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = loadError,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = onNavigateBack) { Text("Go back") }
+                        Button(onClick = onRetryLoad) { Text("Try again") }
+                    }
+                }
+            }
         }
         return
     }

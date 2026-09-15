@@ -28,6 +28,7 @@ import com.desarrollodroide.adventurelog.core.model.GeocodeSearchResult
 import com.desarrollodroide.adventurelog.core.model.ReverseGeocodeResult
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationTrailsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationVisitsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationImagesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UploadImageUseCase
 import com.desarrollodroide.adventurelog.feature.ui.util.ImageBytesProvider
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
@@ -45,7 +46,9 @@ data class AddEditAdventureUiState(
     val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
     val uploadingImagesCount: Int = 0,
     val totalImagesToUpload: Int = 0,
-    val isSavingLocation: Boolean = false
+    val isSavingLocation: Boolean = false,
+    /** Editing: the place could not be loaded from the server, so there is no form to show. */
+    val loadError: String? = null
 )
 
 class AddEditAdventureViewModel(
@@ -61,6 +64,7 @@ class AddEditAdventureViewModel(
     private val uploadImageUseCase: UploadImageUseCase,
     private val syncLocationVisitsUseCase: SyncLocationVisitsUseCase,
     private val syncLocationTrailsUseCase: SyncLocationTrailsUseCase,
+    private val syncLocationImagesUseCase: SyncLocationImagesUseCase,
     private val imageBytesProvider: ImageBytesProvider,
     private val userRepository: UserRepository,
     private val adventureId: String? = null,
@@ -79,27 +83,29 @@ class AddEditAdventureViewModel(
     
     init {
         loadCategories()
-        if (existingLocation != null) {
-            _uiState.value = _uiState.value.copy(existingLocation = existingLocation)
-        } else if (adventureId != null) {
+        if (adventureId != null) {
+            // The form is filled from the server, not from the copy the list handed over: saving
+            // that copy put back every field as the list had loaded it, over a description changed
+            // on the web in the meantime (measured).
             loadAdventure(adventureId)
+        } else if (existingLocation != null) {
+            _uiState.value = _uiState.value.copy(existingLocation = existingLocation)
         }
+    }
+
+    fun retryLoad() {
+        adventureId?.let(::loadAdventure)
     }
     
     private fun loadAdventure(adventureId: String) {
-        // Only load from server if we don't already have the adventure
-        if (_uiState.value.existingLocation != null) {
-            return
-        }
-        
+        // Set before the coroutine starts, so the screen never shows an empty form in between.
+        _uiState.value = _uiState.value.copy(isLoading = true, loadError = null)
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            
-            when (val result = getLocationUseCase(adventureId)) {
+            when (val result = getLocationUseCase(adventureId, fromServer = true)) {
                 is Either.Left -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = "Could not load this place: ${result.value}"
+                        loadError = result.value
                     )
                 }
                 is Either.Right -> {
@@ -220,15 +226,31 @@ class AddEditAdventureViewModel(
                         _uiState.value = _uiState.value.copy(errorMessage = trailsResult.value)
                     }
 
-                    if (formData.images.isNotEmpty()) {
+                    if (adventureId != null) {
+                        val imagesResult = syncLocationImagesUseCase(
+                            existing = _uiState.value.existingLocation?.images.orEmpty(),
+                            keptIds = formData.images.mapNotNull { it.serverId },
+                            primaryId = formData.images.firstOrNull { it.isPrimary }?.serverId
+                        )
+                        if (imagesResult is Either.Left) {
+                            _uiState.value = _uiState.value.copy(errorMessage = imagesResult.value)
+                        }
+                    }
+
+                    // Only photos added in this form are uploaded. Uploading the ones already on
+                    // the server again doubled every photo of a public place on each save, and on
+                    // a private one the download was refused, holding the form open with "Failed to
+                    // read image file" after the place had already saved (measured).
+                    val newImages = formData.images.filter { it.serverId == null }
+                    if (newImages.isNotEmpty()) {
                         _uiState.value = _uiState.value.copy(
-                            totalImagesToUpload = formData.images.size,
+                            totalImagesToUpload = newImages.size,
                             uploadingImagesCount = 0
                         )
                         
                         uploadImages(
                             locationId = createdLocation.id,
-                            images = formData.images
+                            images = newImages
                         )
                     } else {
                         _uiState.value = _uiState.value.copy(

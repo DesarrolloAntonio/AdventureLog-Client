@@ -36,4 +36,24 @@ class ImagesRepositoryImpl(
             Either.Left(ApiResponse.HttpError)
         }
     }
+
+    override suspend fun deleteImage(imageId: String): Either<ApiResponse, Unit> =
+        call { networkDataSource.deleteImage(imageId) }
+
+    override suspend fun setPrimaryImage(imageId: String): Either<ApiResponse, Unit> =
+        call { networkDataSource.setPrimaryImage(imageId) }
+
+    private suspend fun call(block: suspend () -> Unit): Either<ApiResponse, Unit> = try {
+        block()
+        Either.Right(Unit)
+    } catch (e: IOException) {
+        Either.Left(ApiResponse.IOException)
+    } catch (e: HttpException) {
+        when (e.code) {
+            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            else -> Either.Left(ApiResponse.HttpError)
+        }
+    } catch (e: Exception) {
+        Either.Left(ApiResponse.HttpError)
+    }
 }

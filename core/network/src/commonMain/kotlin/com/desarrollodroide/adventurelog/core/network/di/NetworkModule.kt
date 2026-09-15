@@ -18,6 +18,17 @@ import org.koin.dsl.module
 
 const val KEY = "key"
 
+/**
+ * What the API client writes request bodies with. A null property is left out of the body rather
+ * than sent as null - an update then only touches what it names.
+ */
+internal val apiJson = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+    explicitNulls = false
+    prettyPrint = true
+}
+
 val networkModule = module {
     single<AdventureLogNetwork> {
         KtorAdventureLogNetwork(
@@ -31,14 +42,7 @@ val networkModule = module {
         )
     }
 
-    single {
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            explicitNulls = false
-            prettyPrint = true
-        }
-    }
+    single { apiJson }
 
     single(named(BuildConfig.APP_NAME)) {
         HttpClient {

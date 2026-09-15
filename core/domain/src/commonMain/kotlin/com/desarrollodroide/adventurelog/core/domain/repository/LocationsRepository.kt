@@ -36,6 +36,12 @@ interface LocationsRepository {
         objectId: String
     ): Either<ApiResponse, Location>
 
+    /** The place as the server has it now - never a copy kept from a list. */
+    suspend fun fetchLocation(objectId: String): Either<ApiResponse, Location>
+
+    /** Changes which collections the place is in and nothing else. */
+    suspend fun updateLocationCollections(locationId: String, collections: List<String>): Either<ApiResponse, Location>
+
     suspend fun createLocation(
         name: String,
         description: String,
@@ -94,7 +100,7 @@ interface LocationsRepository {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList(),
+        collections: List<String>? = null,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
         priceCurrency: String? = null

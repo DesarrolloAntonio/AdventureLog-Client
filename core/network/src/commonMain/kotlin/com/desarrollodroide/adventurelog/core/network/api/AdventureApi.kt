@@ -77,7 +77,7 @@ interface AdventureApi {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList(),
+        collections: List<String>? = null,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
         priceCurrency: String? = null
@@ -93,4 +93,7 @@ interface AdventureApi {
     suspend fun globalSearch(query: String, limit: Int = 20): SearchResultsDTO
 
     suspend fun deleteLocation(adventureId: String)
+
+    /** Sends only `collections`, so nothing else about the place is rewritten from a stale copy. */
+    suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO
 }

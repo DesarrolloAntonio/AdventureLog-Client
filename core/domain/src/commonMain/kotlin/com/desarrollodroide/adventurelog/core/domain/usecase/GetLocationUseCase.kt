@@ -8,12 +8,21 @@ import com.desarrollodroide.adventurelog.core.model.Location
 class GetLocationUseCase(
     private val locationsRepository: LocationsRepository
 ) {
-    suspend operator fun invoke(locationId: String): Either<String, Location> {
-        return when (val result = locationsRepository.getLocation(locationId)) {
+    /**
+     * [fromServer] skips the copy kept from the list the place was opened from. An edit form
+     * seeded from that copy saved it back over whatever had changed on the server since (measured).
+     */
+    suspend operator fun invoke(locationId: String, fromServer: Boolean = false): Either<String, Location> {
+        val result = if (fromServer) {
+            locationsRepository.fetchLocation(locationId)
+        } else {
+            locationsRepository.getLocation(locationId)
+        }
+        return when (result) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.HttpError -> Either.Left("Network error. Please check your connection.")
-                    is ApiResponse.IOException -> Either.Left("Connection error. Please try again.")
+                    is ApiResponse.HttpError -> Either.Left("The server could not load this place. Please try again.")
+                    is ApiResponse.IOException -> Either.Left("Can't reach the server. Check your connection.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Authentication error. Please login again.")
                 }
             }

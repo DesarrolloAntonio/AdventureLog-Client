@@ -9,6 +9,7 @@ import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.model.mappers.createAdventureRequest
 import com.desarrollodroide.adventurelog.core.network.model.mappers.toVisitRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.LocationCollectionsRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.UpdateLocationRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.LocationDTO
@@ -430,7 +431,7 @@ internal class KtorAdventureApi(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>,
+        collections: List<String>?,
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?
@@ -462,7 +463,7 @@ internal class KtorAdventureApi(
             priceCurrency = priceCurrency
         )
 
-        logger.d { "Updating location $adventureId with ${collections.size} collections" }
+        logger.d { "Updating location $adventureId, collections ${collections?.size ?: "unchanged"}" }
 
         val response = httpClient.patch(url) {
             contentType(ContentType.Application.Json)
@@ -493,6 +494,24 @@ internal class KtorAdventureApi(
             logJsonError("Location detail JSON parse error", responseText, e)
             throw e
         }
+    }
+
+    override suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO {
+        val session = sessionProvider()
+        val response = httpClient.patch("${session.baseUrl}/api/locations/$locationId/") {
+            contentType(ContentType.Application.Json)
+            headers {
+                commonHeaders(session.sessionToken)
+            }
+            setBody(LocationCollectionsRequest(collections = collections))
+        }
+        if (!response.status.isSuccess()) {
+            throw HttpException(
+                response.status.value,
+                "Failed to update the collections of location $locationId with status: ${response.status}"
+            )
+        }
+        return json.decodeFromString<LocationDTO>(response.body<String>())
     }
 
     override suspend fun deleteLocation(adventureId: String) {

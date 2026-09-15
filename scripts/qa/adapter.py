@@ -144,6 +144,29 @@ def request(method, path, account="A", params=None, json=None, headers=None):
     return status, _parse(raw)
 
 
+def upload(path, fields, files, account="A"):
+    """multipart/form-data POST: `fields` {name: str}, `files` {name: (filename, bytes, mime)}.
+    Returns (status, body). For fixtures only the API can make (images, attachments)."""
+    import uuid
+    boundary = uuid.uuid4().hex
+    parts = []
+    for k, v in fields.items():
+        parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode())
+    for k, (fname, data, mime) in files.items():
+        parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"; filename="{fname}"\r\n'
+                     f'Content-Type: {mime}\r\n\r\n'.encode() + data + b"\r\n")
+    body = b"".join(parts) + f"--{boundary}--\r\n".encode()
+    req = urllib.request.Request(base_url() + path, data=body, method="POST")
+    req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
+    req.add_header("Accept", "application/json")
+    req.add_header("X-Session-Token", token(account))
+    try:
+        with urllib.request.urlopen(req, timeout=60, context=ssl.create_default_context()) as res:
+            return res.status, _parse(res.read())
+    except urllib.error.HTTPError as e:
+        return e.code, _parse(e.read())
+
+
 def redact(value):
     """For printing only: hides values under secret-looking keys."""
     if isinstance(value, dict):
