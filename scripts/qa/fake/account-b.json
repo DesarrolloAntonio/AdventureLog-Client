@@ -1,0 +1,174 @@
+{
+ "default": {
+  "status": 404,
+  "body": {
+   "detail": "Not found."
+  }
+ },
+ "routes": {
+  "POST /auth/browser/v1/auth/login": {
+   "status": 200,
+   "headers": {
+    "Set-Cookie": "sessionid=qafakesessionb00000000000000000b; Path=/; HttpOnly"
+   },
+   "body": {
+    "status": 200,
+    "data": {
+     "user": {
+      "id": 990,
+      "uuid": "00000000-0000-4000-8000-0000000000b0",
+      "display": "QA_B",
+      "has_usable_password": true,
+      "email": "qa-b@example.invalid",
+      "username": "QA_B"
+     },
+     "methods": []
+    },
+    "meta": {
+     "is_authenticated": true
+    }
+   }
+  },
+  "DELETE /auth/browser/v1/auth/session": {
+   "status": 401,
+   "body": {
+    "status": 401,
+    "meta": {
+     "is_authenticated": false
+    }
+   }
+  },
+  "GET /auth/user-metadata/": {
+   "status": 200,
+   "body": {
+    "id": 990,
+    "uuid": "00000000-0000-4000-8000-0000000000b0",
+    "username": "QA_B",
+    "email": "qa-b@example.invalid",
+    "first_name": "QA",
+    "last_name": "Bee",
+    "profile_pic": null,
+    "public_profile": false,
+    "measurement_system": "metric",
+    "date_joined": "2026-09-15T00:00:00Z",
+    "is_staff": false,
+    "disable_password": false,
+    "has_password": true,
+    "default_currency": "USD",
+    "map_style": "default"
+   }
+  },
+  "GET /api/stats/dashboard/": {
+   "status": 200,
+   "body": {
+    "stats": {
+     "location_count": 0,
+     "visited_location_count": 0,
+     "trips_count": 0,
+     "visited_city_count": 0,
+     "total_cities": 153728,
+     "visited_region_count": 0,
+     "total_regions": 5322,
+     "visited_country_count": 0,
+     "total_countries": 250,
+     "activities_overall": {
+      "total_count": 0,
+      "total_distance": 0,
+      "total_moving_time": 0,
+      "total_elevation_gain": 0,
+      "total_elevation_loss": 0,
+      "total_calories": 0,
+      "record_holders": {
+       "max_distance": null,
+       "max_speed": null,
+       "max_elevation_gain": null,
+       "max_calories": null
+      }
+     },
+     "activity_distance": 0,
+     "activity_moving_time": 0,
+     "activity_elevation": 0,
+     "activity_count": 0
+    },
+    "recent_locations": [],
+    "upcoming_trips": [],
+    "active_trip": null,
+    "upcoming_events": [],
+    "invite_count": 0
+   }
+  },
+  "GET /api/collections/": {
+   "status": 200,
+   "body": {
+    "count": 0,
+    "next": null,
+    "previous": null,
+    "results": []
+   }
+  },
+  "GET /api/collections/archived/": {
+   "status": 200,
+   "body": {
+    "count": 0,
+    "next": null,
+    "previous": null,
+    "results": []
+   }
+  },
+  "GET /api/collections/shared/": {
+   "status": 200,
+   "body": {
+    "count": 0,
+    "next": null,
+    "previous": null,
+    "results": []
+   }
+  },
+  "GET /api/collections/all/": {
+   "status": 200,
+   "body": []
+  },
+  "GET /api/collections/invites/": {
+   "status": 200,
+   "body": []
+  },
+  "GET /api/locations/": {
+   "status": 200,
+   "body": {
+    "count": 0,
+    "next": null,
+    "previous": null,
+    "results": []
+   }
+  },
+  "GET /api/locations/filtered/": {
+   "status": 200,
+   "body": {
+    "count": 0,
+    "next": null,
+    "previous": null,
+    "results": []
+   }
+  },
+  "GET /api/categories/": {
+   "status": 200,
+   "body": []
+  },
+  "GET /api/countries/": {
+   "status": 200,
+   "body": []
+  },
+  "GET /api/visitedregion/": {
+   "status": 200,
+   "body": []
+  },
+  "GET /api/visitedcity/": {
+   "status": 200,
+   "body": []
+  },
+  "GET /api/calendar/events/": {
+   "status": 200,
+   "body": []
+  }
+ }
+}

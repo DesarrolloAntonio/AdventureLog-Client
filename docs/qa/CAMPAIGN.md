@@ -1,6 +1,6 @@
 # QA campaign — AdventureLog (Android)
 
-**Started:** 2026-09-14 · **Build at start:** `13bb122` (branch `qa/2026-09-14`, cut from `feat/adaptive-tablet`) · **Skill at start:** qa-campaign `8940b4d` · **Status:** paused after gate 01 (2026-09-15), as scoped — next is 02 Home
+**Started:** 2026-09-14 · **Build at start:** `13bb122` (branch `qa/2026-09-14`, cut from `feat/adaptive-tablet`) · **Skill at start:** qa-campaign `8940b4d` · **Status:** paused after gate 02 (2026-09-15), as scoped — next is 03 Places · **Skill now:** `cc914b8` (resumed per §2.1 at process 02)
 
 **Offline depth:** **short** — the app talks to a server and keeps no data of its own: no database, no WorkManager, no pending/dirty/syncStatus field; every repository but User/Settings depends only on the network source, writes go to the server first and only in-memory caches are updated afterwards (`core/data/.../di/DataModule.kt:73-129`, `CountriesRepositoryImpl.kt:162-168`). Local storage is the session and preferences in one SharedPreferences file, plus Coil's image cache (SKILL.md R1) ·
 **Fix mode:** fix severe · **Commits:** at each gate, on `qa/2026-09-14` ·
@@ -38,14 +38,14 @@ No offline gate (depth short): each module checks that it says it can't reach th
 
 | Alias | What | Notes |
 |---|---|---|
-| `qa` | emulator-5560 — AVD `Resizable_Experimental`, API 37 (Android 17), 1080×2400 @ 420 dpi, Google Play image | the only entry in `devices`; resized for process 08. emulator-5554 is never added |
+| `qa` | `avd:Resizable_Experimental` (started with `-port 5560`), API 37 (Android 17), 1080×2400 @ 420 dpi, Google Play image | listed by AVD since 02 (a serial is only the port it got at boot); the PageKeeper campaign that shared the AVD has finished. `ui.py release` whenever the campaign stops |
 
 ## 3. Accounts
 
 | Alias | Role |
 |---|---|
 | A | owner — `claude` / John Doe |
-| B | recipient of a shared collection — **does not exist yet** (queue #3; needed at 09) |
+| B | recipient of a shared collection — **not on the NAS yet** (queue #3; needed at 09). At 02 an **invented** B on `scripts/qa/fake_adventurelog.py` (routes in `scripts/qa/fake/account-b.json`) did the in-process account switch (R11) |
 | C | negative control — **does not exist yet** (queue #3; needed at 09) |
 
 What signs each account in lives in `qa.credentials.json` (gitignored). **No password is ever typed by the agent** (R11): the session is the server's `sessionid`, obtained by `scripts/qa/adapter.py` from those credentials and cached in `qa.tokens.json` (gitignored), and injected by `scripts/qa/inject_session.py` — it force-stops the app and writes the `user_session` JSON into `shared_prefs/<package>_preferences.xml` through `run-as`, via stdin. **App under test:** `com.desarrollodroide.adventurelog.debug` — it was **not installed** on `qa` before the campaign (checked with `ui.py installed`), so no real session could be overwritten; the other apps on that AVD belong to the other campaign.
@@ -80,7 +80,7 @@ Run once at setup, on `13bb122`, from the code. **Every row is a candidate until
 | ABS-04 | shell | S2 | P1? | Route arguments are not URL-encoded: a collection named with `/`, `?`, `#` or `%` should fail to navigate or crash | `NavigationRoutes.kt:20-93`, `MainShell.kt:243-250` | ✅ fixed at 01 (SH-02) |
 | ABS-05 | shell | S4 | P2? | No app-wide 401 handling: an expired session leaves "Session expired" on every screen; only Sign out escapes | `NetworkModule.kt:42-54`, `GetDashboardUseCase.kt:17` | ✅ fixed at 01 (SH-03) |
 | ABS-06 | shell | S3 | P1? | Terms of use are **Shiori's** (another app) and the privacy policy reads "Effective as of [Insert Date Here]" — a store blocker | `TermsOfUseScreen.kt:61-86`, `PrivacyPolicyScreen.kt:70` | confirmed at 01 — SH-13, queue #4 |
-| ABS-07 | shell | S4 | P2? | Logout keeps in-memory repository caches (collections, countries, stats) — a second account could see the first's data | `DataModule.kt:60-129`, `CollectionsRepositoryImpl.kt:75-83` | not reproducible with one account — 09 (B) |
+| ABS-07 | shell | S4 | P2? | Logout keeps in-memory repository caches (collections, countries, stats) — a second account could see the first's data | `DataModule.kt:60-129`, `CollectionsRepositoryImpl.kt:75-83` | ✅ confirmed and fixed at 02 (HM-01, a P0) |
 | ABS-08 | shell | S3 | P2 | Sign out never revokes the server session (web DELETEs it) | `LogoutUseCase.kt:23-48` vs REF `routes/+page.server.ts:45` | ✅ fixed at 01 (SH-14) |
 | ABS-09 | shell | S4 | P2 | Settings' sign-out dialog says "You will need your password to sign back in" while remember-me pre-fills it | `SettingsScreen.kt:271`, `LoginViewModel.kt:59-89` | ✅ resolved by SH-04 |
 | ABS-10 | shell | S1 | P2 | `compactView` is persisted and exposed but shown and used nowhere | `SettingsViewModel.kt:113,325-329` | ✅ fixed at 01 (SH-19) |
@@ -92,7 +92,7 @@ Run once at setup, on `13bb122`, from the code. **Every row is a candidate until
 | ABS-16 | shell | S3 | — | English only; the web ships 24 locales | REF `routes/+layout.svelte` | queue #5 (scope) |
 | ABS-17 | shell | S3 | — | README and commit `9bc65f0` say Users directory and backup are out of scope; commits `3c32f51` and `dbb8dcb` built the Users screen and backup export | `README.md`, `UsersScreen.kt:55`, `VisitedRegionsCard.kt:108` | ✅ README corrected at 01 (queue #6) |
 | ABS-18 | shell | S1 | P2 | `UserDetails.disablePassword` never shown (SSO accounts in Settings → Sign-in) | `UserDetails.kt:20` | not testable with `claude` (has a password) |
-| ABS-19 | home | S1 | P2 | Pending-invite count (`Dashboard.inviteCount`) not shown on Home; the web shows it | `Dashboard.kt:15` | 02 |
+| ABS-19 | home | S1 | P2 | Pending-invite count (`Dashboard.inviteCount`) not shown on Home; the web shows it | `Dashboard.kt:15` | confirmed at 02 — HM-09, queue #9 |
 | ABS-20 | places | S4 | P2? | Pull-to-refresh spinner never stops after a failed refresh or failed duplicate; the error and Retry never show when places are listed | `LocationsViewModel.kt:232,316`, `LocationScreen.kt:164-166,343` | suspect — 03 |
 | ABS-21 | places | S1 | P2 | Place detail doesn't show city / region / country; saving with photos shows no progress (`isSavingLocation`, upload counts unused) | `Location.kt:26-28`, `AddEditLocationViewModel.kt:46-48` | 03 |
 | ABS-22 | places | S1/S3 | — | Visit activities (Strava/GPX) never shown or imported; image set-primary/delete and attachment upload absent; no locate-me, copy link, sunrise/sunset | `Visit.kt:13`, `AdventureDetailScreen.kt:204` | 03 — queue #5 (scope) |
@@ -107,7 +107,7 @@ Run once at setup, on `13bb122`, from the code. **Every row is a candidate until
 | ABS-31 | map / calendar | S3 | — | Map: no search, tap-to-add, locate-me, activity layers; Calendar: agenda only, no month grid, no ICS | REF `routes/map`, `routes/calendar` | 06/07 — queue #5 |
 | ABS-32 | settings | S4 | P2 | After an email action, a failed list reload leaves stale verified/primary badges silently | `SettingsViewModel.kt:283-297` | not driven at 01 (email actions send real email) |
 | ABS-33 | shell | sec | P2 | `FileProvider` exposes the whole root of every declared storage (`path="."` ×5) | `composeApp/src/androidMain/res/xml/file_paths.xml` | read at 01, not driven |
-| ABS-34 | home | a11y | P2 | Home's two "See all" buttons are 47 dp tall (harness `a11y`, not clipped) | `ui.py a11y` on Home, `[874,1215][1038,1339]` | 02 |
+| ABS-34 | home | a11y | P2 | Home's two "See all" buttons are 47 dp tall (harness `a11y`, not clipped) | `ui.py a11y` on Home, `[874,1215][1038,1339]` | confirmed at 02 — queue #9 |
 
 ## 7. User queue (R2)
 
@@ -117,6 +117,7 @@ Run once at setup, on `13bb122`, from the code. **Every row is a candidate until
 | 2 | ~~Account A~~ | — | **resolved 2026-09-15:** `claude`, credentials in `qa.credentials.json` by the owner | 00 | — |
 | 7 | ~~One real login by hand, Remember me checked, on the fixed build~~ | — | **resolved 2026-09-15:** done by the owner; STORE has no password, the stored token answers 200 | 01 (SH-04) | — |
 | 8 | ~~P2s from 01~~ | — | **resolved 2026-09-15:** the owner said fix all but SH-13; fixed and verified (01-shell.md) | 01 | — |
+| 9 | **P2s from 02, fix or accept** (HM-04…HM-09, ABS-34) | fix mode is *fix severe* | put to you at gate 02 | 02 | the module that owns each fix |
 | 3 | Accounts B and C | sharing exists (collections), R7 needs a recipient and a negative control; the agent never creates accounts | two accounts on the NAS, before process 09 | — | 09 |
 | 4 | Terms of use (Shiori's) and privacy policy placeholder date | legal content | rewrite both for AdventureLog before any store upload | — | 10 |
 | 5 | Scope of the REF features the app lacks (ABS-15/16/22/29/31) | product decisions | one list at gate 01 | — | the module that owns each |
@@ -129,6 +130,7 @@ Run once at setup, on `13bb122`, from the code. **Every row is a candidate until
 | 00 | `13bb122` | 2026-09-14/15 | [`00-setup.md`](00-setup.md) | config, adapter, session injection, harness smoke on `qa`, 33 sweep rows; suite 688 host + 32 instrumented, 0 failures | ✅ closed 2026-09-15 |
 | 01 | `13bb122` + fixes | 2026-09-15 | [`01-shell.md`](01-shell.md) | 45 controls + launcher entry point; 4 severe fixed with 17 tests seen red (process death, `/` crash, ended session, plain-text password); 14 P2 queued; suite 722 host + 32 instrumented, 0 failures; `QA_` fixture deleted | ✅ closed 2026-09-15 |
 | 01 (P2 round) | `584b4e1` + P2 fixes | 2026-09-15 | [`01-shell.md`](01-shell.md) | 14 P2s fixed (SH-05…SH-12, SH-14…SH-19) + SH-20 found and fixed; 20 new tests seen red; APK sha256 `69ed4bda…`; suite 754 host + 32 instrumented, 0 failures (the first run failed to compile two stale test fakes in feature/locations — R13) | ✅ |
+| 02 | `df3b9c5` + fixes | 2026-09-15 | [`02-home.md`](02-home.md) | resumed on skill `cc914b8`; R11 real-login comparison equal; 1 P0 (account data left in memory for the next account) and 2 P1 (blank screen from a collection's add/edit; Home never refreshing) fixed with 9 tests seen red; 6 P2 queued; suite 405 run + 32 instrumented, 0 failures; fixtures deleted | ✅ closed 2026-09-15 |
 
 ## 9. Close-out
 

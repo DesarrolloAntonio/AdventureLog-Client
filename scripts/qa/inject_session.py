@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writes a logged-in session into the debug app WITHOUT typing a password (R11, route 2).
 
-    scripts/qa/inject_session.py --device qa [--account A]
+    scripts/qa/inject_session.py --device qa [--account A]       # qa = avd:… in qa.config.json
     scripts/qa/inject_session.py --device qa --clear      # removes the session key only
 
 Why this route: the app keeps its session as JSON under `user_session` in a plain SharedPreferences
@@ -47,7 +47,13 @@ def main():
     devices = {k: v for k, v in cfg.get("devices", {}).items() if not k.startswith("_")}
     if a.device not in devices:
         raise SystemExit(f"unknown device alias {a.device!r}; devices: {', '.join(sorted(devices)) or 'nothing'}")
-    serial, pkg = devices[a.device], cfg["android"]["package"]
+    # An emulator is listed as avd:<name>; the harness knows which serial that means right now.
+    ui = os.path.expanduser("~/.claude/skills/qa-campaign/harness/android/ui.py")
+    serial = subprocess.run(["python3", ui, "serial", a.device], capture_output=True, text=True,
+                            cwd=os.path.dirname(adapter.CONFIG)).stdout.strip()
+    if not serial:
+        raise SystemExit(f"no serial for device alias {a.device!r} (is the emulator running?)")
+    pkg = cfg["android"]["package"]
     prefs = cfg["android"]["files"]["prefs"]
 
     if not a.clear:
