@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.navigation
 
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,7 +58,11 @@ interface CollectionsNavigator {
 fun NavGraphBuilder.collectionsScreen(
     navigator: CollectionsNavigator,
     // The two-pane collections screen registers the list itself, so it can wrap it.
-    registerListRoute: Boolean = true
+    registerListRoute: Boolean = true,
+    // Outside the shell - a collection opened from a place's page, on the root graph - no app bar
+    // names the collection or offers a way back, and nothing keeps the content off the status bar.
+    // The screen then draws its own title row and stays below the status bar.
+    standalone: Boolean = false
 ) {
     val json = Json {
         ignoreUnknownKeys = true
@@ -109,6 +114,8 @@ fun NavGraphBuilder.collectionsScreen(
         val collectionId = backStackEntry.savedStateHandle.get<String>("collectionId") ?: ""
         CollectionDetailScreen(
             collectionId = collectionId,
+            showTitle = standalone,
+            modifier = if (standalone) Modifier.statusBarsPadding() else Modifier,
             onBackClick = { 
                 navigator.navigateBack()
             },

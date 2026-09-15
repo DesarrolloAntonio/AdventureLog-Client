@@ -511,22 +511,24 @@ fun HomeScreenContent(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,
                                 onAdventureClick = onAdventureClick,
+                                // launchSingleTop on each: a double tap opened the trip twice, and Back
+                                // returned to the same trip (measured).
                                 onTripClick = { trip ->
                                     navController.navigate(
                                         NavigationRoutes.Collections.createDetailRoute(
                                             collectionId = trip.id,
                                             collectionName = trip.name
                                         )
-                                    )
+                                    ) { launchSingleTop = true }
                                 },
                                 onSeeCalendar = { navigateTo(CurrentScreen.CALENDAR) },
                                 onSeeAllPlaces = { navigateTo(CurrentScreen.PLACES) },
                                 onRetry = onRetryDashboard,
                                 onAddPlace = {
-                                    navController.navigate(NavigationRoutes.Locations.add)
+                                    navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
                                 },
                                 onAddCollection = {
-                                    navController.navigate(NavigationRoutes.Collections.add)
+                                    navController.navigate(NavigationRoutes.Collections.add) { launchSingleTop = true }
                                 }
                             )
                         }
@@ -1003,11 +1005,13 @@ private fun HomeScreenErrorPreview() {
  * Only home has one for the moment - the other screens print their own count inside the page,
  * and two copies of "22 places" one above the other reads as a mistake.
  */
-private fun dashboardSubtitle(screen: CurrentScreen, state: HomeUiState): String? {
+internal fun dashboardSubtitle(screen: CurrentScreen, state: HomeUiState): String? {
     if (screen != CurrentScreen.HOME) return null
     val dashboard = (state as? HomeUiState.Success)?.dashboard ?: return null
     val visited = dashboard.stats.visitedLocationCount
-    val trips = dashboard.upcomingTrips.size + if (dashboard.activeTrip != null) 1 else 0
+    // Ahead means not started: the trip under way is on the card below, not ahead of anyone
+    // (measured: "3 trips ahead" with one in progress and two to come).
+    val trips = dashboard.upcomingTrips.size
     return listOfNotNull(
         "$visited places visited",
         when {

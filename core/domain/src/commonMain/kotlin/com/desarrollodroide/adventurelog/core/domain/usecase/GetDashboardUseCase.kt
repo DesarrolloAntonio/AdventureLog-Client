@@ -12,7 +12,9 @@ class GetDashboardUseCase(
         return when (val result = dashboardRepository.getDashboard()) {
             is Either.Left -> Either.Left(
                 when (result.value) {
-                    is ApiResponse.IOException -> "No internet connection."
+                    // A timeout is an IOException too, and "No internet connection." over a slow
+                    // server sent people to check a network that was fine (measured).
+                    is ApiResponse.IOException -> "Can't reach the server. Check your connection."
                     is ApiResponse.HttpError -> "Could not load your dashboard. Please try again."
                     is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."
                 }

@@ -824,23 +824,17 @@ fun CollectionHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.ChevronLeft,
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable(onClick = onBackClick)
-                        .padding(4.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "Home",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable(onClick = onHomeClick)
-                        .padding(4.dp)
-                )
+                // IconButtons, for their 48dp touch targets (the clickable icons measured 32dp).
+                IconButton(onClick = onBackClick) {
+                    Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "Back")
+                }
+                IconButton(onClick = onHomeClick) {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = "Home",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,

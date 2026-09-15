@@ -141,6 +141,6 @@ fun AdventureLogNavGraph(
         loginNavGraph(navigator = loginNavigator)
         homeNavGraph(navigator = homeNavigator)
         detailNavGraph(navigator = detailNavigator)
-        collectionsScreen(navigator = collectionsFromDetailNavigator)
+        collectionsScreen(navigator = collectionsFromDetailNavigator, standalone = true)
     }
 }

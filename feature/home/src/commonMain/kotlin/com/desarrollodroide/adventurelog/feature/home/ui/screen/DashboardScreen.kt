@@ -190,6 +190,7 @@ private fun DashboardList(
                     )
                     DataRail(
                         dashboard = dashboard,
+                        featuredTripId = featuredTrip?.id,
                         otherTrips = otherTrips,
                         today = today,
                         onTripClick = onTripClick,
@@ -269,6 +270,7 @@ private fun MainColumn(
 @Composable
 private fun DataRail(
     dashboard: Dashboard,
+    featuredTripId: String?,
     otherTrips: List<UltraSlimCollection>,
     today: LocalDate?,
     onTripClick: (UltraSlimCollection) -> Unit,
@@ -284,7 +286,7 @@ private fun DataRail(
     ) {
         StatsCard(dashboard, title = "YOUR MAP SO FAR")
 
-        val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick)
+        val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTripId)
         if (comingUp.isNotEmpty()) {
             SectionHeader(
                 title = "Coming up",
@@ -365,7 +367,7 @@ private fun StackedDashboard(
     onSeeAllPlaces: () -> Unit,
     onAddPlace: () -> Unit
 ) {
-    val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick)
+    val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTrip?.id)
 
     Column(
         modifier = Modifier
@@ -489,23 +491,16 @@ private fun SectionHeader(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
-        if (trailing != null) {
+        if (trailing != null && onTrailingClick != null) {
+            // A TextButton, for its 48dp: the padded text it replaces measured 47dp tall.
+            TextButton(onClick = onTrailingClick) {
+                Text(text = trailing, style = MaterialTheme.typography.labelLarge)
+            }
+        } else if (trailing != null) {
             Text(
                 text = trailing,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (onTrailingClick != null) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                modifier = if (onTrailingClick != null) {
-                    Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable(onClick = onTrailingClick)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                } else {
-                    Modifier
-                }
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -900,7 +895,7 @@ private fun String.toShortDate(): String {
  * trip that starts on the 5th and an event on the 5th are the same kind of fact to whoever is
  * looking, and two separate lists made the reader merge them by eye.
  */
-private data class ComingUp(
+internal data class ComingUp(
     val key: String,
     val date: String,
     val title: String,
@@ -908,12 +903,17 @@ private data class ComingUp(
     val onClick: (() -> Unit)?
 )
 
-private fun comingUpEntries(
+internal fun comingUpEntries(
     trips: List<UltraSlimCollection>,
     events: List<CalendarEvent>,
     today: LocalDate?,
-    onTripClick: (UltraSlimCollection) -> Unit
+    onTripClick: (UltraSlimCollection) -> Unit,
+    featuredTripId: String? = null
 ): List<ComingUp> {
+    // The calendar sends every dated collection as an event of its own. A trip already listed here,
+    // or already on the card above, came back a second time as that event - each trip twice, and
+    // the one in progress again under its past start date (measured).
+    val tripsShown = trips.map { it.id }.toSet() + listOfNotNull(featuredTripId)
     val fromTrips = trips.map { trip ->
         ComingUp(
             key = "trip-${trip.id}",
@@ -927,7 +927,7 @@ private fun comingUpEntries(
             onClick = { onTripClick(trip) }
         )
     }
-    val fromEvents = events.map { event ->
+    val fromEvents = events.filterNot { it.type == "collection" && it.collectionId in tripsShown }.map { event ->
         val detail = listOfNotNull(
             event.locationLabel.takeIf { it.isNotBlank() },
             event.collectionName?.takeIf { it.isNotBlank() }

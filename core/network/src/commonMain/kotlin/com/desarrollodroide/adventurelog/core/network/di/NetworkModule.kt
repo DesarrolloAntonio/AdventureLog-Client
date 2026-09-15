@@ -45,12 +45,15 @@ val networkModule = module {
             install(ContentNegotiation) {
                 json(get())
             }
-            // Only the connection gets a limit. An address that silently drops traffic - a home
-            // server seen from outside, a VPN that is off - held the login screen for 72 s on the
-            // engine's default (measured). Requests and sockets stay unlimited: a backup export or
-            // a photo upload over a slow link can legitimately take minutes once connected.
+            // An address that silently drops traffic - a home server seen from outside, a VPN that is
+            // off - held the login screen for 72 s on the engine's default (measured), so connecting
+            // gets 15 s. A server that accepts and then says nothing held Home on a spinner for two
+            // minutes (measured), so a silence of 30 s between bytes ends a request too. There is no
+            // limit on a whole request: a photo upload over a slow link can take minutes while bytes
+            // keep moving - and backup and file downloads go through the image client, not this one.
             install(HttpTimeout) {
                 connectTimeoutMillis = 15_000
+                socketTimeoutMillis = 30_000
             }
             install(Logging) {
                 // Bodies are only printed when explicitly opted in at build time, and even then
