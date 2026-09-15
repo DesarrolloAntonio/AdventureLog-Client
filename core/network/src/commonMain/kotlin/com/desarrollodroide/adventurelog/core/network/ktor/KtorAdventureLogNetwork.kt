@@ -17,6 +17,13 @@ import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddres
 import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.plugin
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
@@ -77,6 +84,23 @@ class KtorAdventureLogNetwork(
 
     private var sessionToken: String? = null
     private var baseUrl: String? = null
+
+    private val rejections = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    override val sessionRejections: Flow<Unit> = rejections.asSharedFlow()
+
+    init {
+        // One place sees every answer, so no screen has to recognise an ended session on its own.
+        // Most of them could not: /api/locations/ answers an anonymous caller 200 with an empty
+        // list, and Places told a signed-out user "No places yet" over 22 of them (measured).
+        adventurelogClient.plugin(HttpSend).intercept { request ->
+            val call = execute(request)
+            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER)) {
+                logger.w { "Server rejected the session (401 on ${call.request.url.encodedPath})" }
+                rejections.tryEmit(Unit)
+            }
+            call
+        }
+    }
     
     private val authDataSource: AuthApi by lazy {
         KtorAuthApi(

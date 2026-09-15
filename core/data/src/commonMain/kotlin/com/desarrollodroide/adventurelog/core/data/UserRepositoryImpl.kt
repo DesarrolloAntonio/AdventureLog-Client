@@ -44,8 +44,12 @@ class UserRepositoryImpl(
         // Remember Me keys
         const val REMEMBER_USER_ID = "remember_user_id"
         const val REMEMBER_USERNAME = "remember_username"
-        const val REMEMBER_PASSWORD = "remember_password"
         const val REMEMBER_URL = "remember_url"
+
+        // Written in plain text by every build before 2026-09-15, next to a session token that
+        // already keeps the user signed in, and carried into device backups. Nothing writes it any
+        // more; it is only named so that loading can delete what an older build left behind.
+        const val LEGACY_REMEMBER_PASSWORD = "remember_password"
 
         // User Session key (stored as JSON)
         const val USER_SESSION = "user_session"
@@ -57,11 +61,13 @@ class UserRepositoryImpl(
     }
 
     private fun loadInitialData() {
+        settings.remove(Keys.LEGACY_REMEMBER_PASSWORD)
+
         if (hasKey(Keys.REMEMBER_USERNAME)) {
             rememberMeFlow.value = Account(
                 id = settings.getInt(Keys.REMEMBER_USER_ID, -1),
                 userName = settings.getString(Keys.REMEMBER_USERNAME, ""),
-                password = settings.getString(Keys.REMEMBER_PASSWORD, ""),
+                password = "",
                 serverUrl = settings.getString(Keys.REMEMBER_URL, "")
             )
         }
@@ -86,6 +92,16 @@ class UserRepositoryImpl(
                     userSessionFlow.value = userDetails
                 }
             }
+            // The network keeps the server and token in memory, and only the login screen used to
+            // put them there. Android restores a killed app straight onto Home without
+            // passing through it, and every screen then failed with "Base URL is not initialized"
+            // over a session the server still accepted (measured).
+            userSessionFlow.value?.let { session ->
+                networkDataSource.initializeFromSession(
+                    serverUrl = session.serverUrl ?: "",
+                    sessionToken = session.sessionToken
+                )
+            }
         } catch (e: Exception) {
             // Leave the stored session alone. This runs at construction, before anything has
             // asked the server anything, so a failure here is local - a field this build no
@@ -109,20 +125,18 @@ class UserRepositoryImpl(
 
     override suspend fun saveRememberMeCredentials(
         url: String,
-        username: String,
-        password: String
+        username: String
     ) {
         val id = settings.getInt(Keys.REMEMBER_USER_ID, 1)
 
         settings.putInt(Keys.REMEMBER_USER_ID, id)
         settings.putString(Keys.REMEMBER_USERNAME, username)
-        settings.putString(Keys.REMEMBER_PASSWORD, password)
         settings.putString(Keys.REMEMBER_URL, url)
 
         rememberMeFlow.value = Account(
             id = id,
             userName = username,
-            password = password,
+            password = "",
             serverUrl = url
         )
     }
@@ -134,7 +148,7 @@ class UserRepositoryImpl(
     override suspend fun clearRememberMeCredentials() {
         settings.remove(Keys.REMEMBER_USER_ID)
         settings.remove(Keys.REMEMBER_USERNAME)
-        settings.remove(Keys.REMEMBER_PASSWORD)
+        settings.remove(Keys.LEGACY_REMEMBER_PASSWORD)
         settings.remove(Keys.REMEMBER_URL)
 
         rememberMeFlow.value = null

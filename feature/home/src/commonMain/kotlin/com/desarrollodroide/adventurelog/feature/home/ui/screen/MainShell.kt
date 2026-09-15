@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.Dashboard
@@ -106,6 +107,16 @@ fun MainShellRoute(
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
+    val signedOut by viewModel.signedOut.collectAsStateWithLifecycle()
+
+    LaunchedEffect(signedOut) {
+        if (signedOut) onNavigateToLogin()
+    }
+
+    LifecycleStartEffect(Unit) {
+        viewModel.recheckSession()
+        onStopOrDispose { }
+    }
 
     HomeScreenContent(
         homeUiState = homeUiState,
@@ -116,10 +127,7 @@ fun MainShellRoute(
         },
         onOpenLocationById = onOpenLocationById,
         onRetryDashboard = viewModel::loadDashboard,
-        onLogout = {
-            viewModel.logout()
-            onNavigateToLogin()
-        }
+        onLogout = viewModel::logout
     )
 }
 

@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
+import com.desarrollodroide.adventurelog.core.domain.usecase.EndRejectedSessionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetDashboardUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.UserDetails
@@ -13,8 +15,11 @@ import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -24,7 +29,9 @@ class HomeViewModel(
     private val getLocationsUseCase: GetLocationsUseCase,
     private val getDashboardUseCase: GetDashboardUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val initializeSessionUseCase: InitializeSessionUseCase,
+    private val endRejectedSessionsUseCase: EndRejectedSessionsUseCase
 ) : ViewModel() {
 
     private val logger = co.touchlab.kermit.Logger.withTag("HomeViewModel")
@@ -35,9 +42,28 @@ class HomeViewModel(
     private val _userDetails = MutableStateFlow<UserDetails?>(null)
     val userDetails: StateFlow<UserDetails?> = _userDetails.asStateFlow()
 
+    /**
+     * True once there is no session, however it ended: Sign out, the server rejecting it, or an app
+     * restored after process death that never had one to keep. The shell takes the user to Login
+     * on it, so no screen is left talking to a server as nobody.
+     */
+    val signedOut: StateFlow<Boolean> = userRepository.getUserSession()
+        .map { it == null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, userRepository.activeSession == null)
+
     init {
         observeUserSession()
+        viewModelScope.launch { endRejectedSessionsUseCase() }
         loadDashboard()
+    }
+
+    /**
+     * Asks the server whether the session still stands. Called each time the app comes back to the
+     * foreground: a session can expire, or be signed out from the web, while the app waits in the
+     * background, and nothing else would notice until a screen misread the answer.
+     */
+    fun recheckSession() {
+        viewModelScope.launch { initializeSessionUseCase() }
     }
 
     /**
@@ -87,8 +113,8 @@ class HomeViewModel(
     }
 
     /**
-     * Performs user logout
-     * Clears all session data and navigates back to login
+     * Performs user logout. Clearing the session is what takes the user to Login, through
+     * [signedOut] - navigating here as well raced the clearing against the next screen reading it.
      */
     fun logout() {
         viewModelScope.launch {

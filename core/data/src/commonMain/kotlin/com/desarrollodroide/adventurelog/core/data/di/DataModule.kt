@@ -57,7 +57,10 @@ val dataModule = module {
             ioDispatcher =  get(named(AdventureLogDispatchers.IO))
         )
     }
-    single<UserRepository> {
+    // Built when Koin starts, not when a screen first asks: loading it hands the stored session to
+    // the network, and a restored app can open a place's page - whose screen never asks for the
+    // user - before anything else runs.
+    single<UserRepository>(createdAtStart = true) {
         UserRepositoryImpl(
             settings = get(),
             networkDataSource = get()

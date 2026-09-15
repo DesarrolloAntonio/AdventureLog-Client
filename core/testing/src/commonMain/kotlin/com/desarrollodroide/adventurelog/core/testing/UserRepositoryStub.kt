@@ -19,8 +19,7 @@ import com.desarrollodroide.adventurelog.core.domain.repository.*
 abstract class UserRepositoryStub : UserRepository {
     override suspend fun saveRememberMeCredentials(
         url: String,
-        username: String,
-        password: String
+        username: String
     ): Unit = unused()
     override fun getRememberMeCredentials(): Flow<Account?> = unused()
     override suspend fun clearRememberMeCredentials(): Unit = unused()

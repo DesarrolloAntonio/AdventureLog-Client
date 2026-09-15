@@ -19,7 +19,7 @@ open class FakeUserRepository(
     private val session: UserDetails? = testUser,
     private val stats: Either<ApiResponse, UserStats> = Either.Right(UserStats())
 ) : UserRepositoryStub() {
-    override suspend fun saveRememberMeCredentials(url: String, username: String, password: String) = Unit
+    override suspend fun saveRememberMeCredentials(url: String, username: String) = Unit
     override fun getRememberMeCredentials(): Flow<com.desarrollodroide.adventurelog.core.model.Account?> = flowOf(null)
     override suspend fun clearRememberMeCredentials() = Unit
     override suspend fun saveUserSession(userDetails: UserDetails) = Unit

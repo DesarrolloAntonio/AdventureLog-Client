@@ -15,6 +15,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetail
 import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.EndRejectedSessionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationUseCase
@@ -84,6 +85,7 @@ val domainModule = module {
     factoryOf(::InitializeSessionUseCase)
     factoryOf(::SaveSessionUseCase)
     factoryOf(::LogoutUseCase)
+    factoryOf(::EndRejectedSessionsUseCase)
     factoryOf(::RememberMeCredentialsUseCase)
     factoryOf(::CreateLocationUseCase)
     factoryOf(::UpdateLocationUseCase)

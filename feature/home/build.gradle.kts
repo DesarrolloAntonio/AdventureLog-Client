@@ -44,6 +44,11 @@ kotlin {
             implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.datetime)
         }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
         androidMain.dependencies {
             implementation(libs.coil.compose)
             implementation(libs.androidx.ui.tooling)

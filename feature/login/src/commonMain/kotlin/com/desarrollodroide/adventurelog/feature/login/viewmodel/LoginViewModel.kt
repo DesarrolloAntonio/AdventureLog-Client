@@ -65,7 +65,7 @@ class LoginViewModel(
                 _loginFormState.update {
                     LoginFormState(
                         userName = account.userName,
-                        password = account.password,
+                        password = "",
                         serverUrl = account.serverUrl,
                         rememberSession = true,
                         userNameError = false,
@@ -187,10 +187,9 @@ class LoginViewModel(
                         if (rememberSession) {
                             rememberMeCredentialsUseCase.save(
                                 url = url,
-                                username = username,
-                                password = password
+                                username = username
                             )
-                            logger.d { "Saved persistent session and credentials - will auto-login next time" }
+                            logger.d { "Saved persistent session, server and username - will auto-login next time" }
                         } else {
                             rememberMeCredentialsUseCase.clear()
                             logger.d { "Remember me not checked - session is active for this run only" }

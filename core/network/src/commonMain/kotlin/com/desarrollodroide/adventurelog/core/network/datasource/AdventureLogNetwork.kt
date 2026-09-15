@@ -24,6 +24,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCity
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 interface AdventureLogNetwork {
 
@@ -103,6 +105,16 @@ interface AdventureLogNetwork {
      * Used during logout to reset network state
      */
     fun clearSession()
+
+    /**
+     * Fires every time the server answers **401** to a request that carried the session token:
+     * the session is over, whatever screen asked.
+     *
+     * A 403 is not in it - that is a refusal of one object (a collection shared read-only), not of
+     * the session - and neither is a 401 to a request with no token, such as a failed login.
+     */
+    val sessionRejections: Flow<Unit>
+        get() = emptyFlow()
 
     /**
      * Create a new adventure

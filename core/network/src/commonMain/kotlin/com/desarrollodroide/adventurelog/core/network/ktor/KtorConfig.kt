@@ -9,11 +9,13 @@ data class SessionInfo(
     val sessionToken: String?
 )
 
+internal const val SESSION_TOKEN_HEADER = "X-Session-Token"
+
 internal fun HeadersBuilder.commonHeaders(sessionToken: String?) {
     append(HttpHeaders.Accept, "application/json")
     append("X-Is-Mobile", "true")
     sessionToken?.let { 
-        append("X-Session-Token", it)
+        append(SESSION_TOKEN_HEADER, it)
     }
 }
 

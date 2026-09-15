@@ -45,7 +45,7 @@ class LogoutUseCaseTest {
             clearUserSessionCalled = true
         }
 
-        override suspend fun saveRememberMeCredentials(url: String, username: String, password: String) {
+        override suspend fun saveRememberMeCredentials(url: String, username: String) {
             throw NotImplementedError()
         }
 
