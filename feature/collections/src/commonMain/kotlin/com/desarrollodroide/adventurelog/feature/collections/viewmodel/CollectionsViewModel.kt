@@ -130,7 +130,8 @@ class CollectionsViewModel(
     sealed class DeleteState {
         data object Idle : DeleteState()
         data object Loading : DeleteState()
-        data object Success : DeleteState()
+        /** Carries the id, for the same reason as in the places list. */
+        data class Success(val collectionId: String) : DeleteState()
         data class Error(val message: String) : DeleteState()
     }
 
@@ -458,7 +459,7 @@ class CollectionsViewModel(
                     _deleteState.value = DeleteState.Error(result.value)
                 }
                 is Either.Right -> {
-                    _deleteState.value = DeleteState.Success
+                    _deleteState.value = DeleteState.Success(collectionId)
                 }
             }
         }

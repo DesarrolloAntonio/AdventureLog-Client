@@ -136,7 +136,8 @@ class LocationsViewModel(
     sealed class DeleteState {
         data object Idle : DeleteState()
         data object Loading : DeleteState()
-        data object Success : DeleteState()
+        /** Carries the id: a two-pane caller has to know which place left. */
+        data class Success(val locationId: String) : DeleteState()
         data class Error(val message: String) : DeleteState()
     }
     
@@ -287,7 +288,7 @@ class LocationsViewModel(
                     _deleteState.value = DeleteState.Error(result.value)
                 }
                 is Either.Right -> {
-                    _deleteState.value = DeleteState.Success
+                    _deleteState.value = DeleteState.Success(adventureId)
                     // The paging data will automatically refresh due to the repository updating the flow
                 }
             }

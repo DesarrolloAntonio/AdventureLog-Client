@@ -37,7 +37,11 @@ import com.desarrollodroide.adventurelog.core.model.Lodging
 private data object CollectionsList : NavKey
 
 @Serializable
-private data class CollectionDetail(val collectionId: String) : NavKey
+internal data class CollectionDetail(val collectionId: String) : NavKey
+
+/** The back stack once [deletedId] no longer exists - see PlacesPane.backStackWithoutDeleted. */
+internal fun collectionsBackStackWithoutDeleted(stack: List<NavKey>, deletedId: String): List<NavKey> =
+    stack.filterNot { it is CollectionDetail && it.collectionId == deletedId }
 
 /** See the note in PlacesPane: NavKey is open, so its subclasses have to be declared. */
 private val collectionsNavConfiguration = SavedStateConfiguration {
@@ -113,6 +117,13 @@ fun CollectionsPane(
                     onEditCollection = onEditCollection,
                     onFirstLoaded = { first ->
                         if (twoPanes && backStack.size == 1) backStack.add(CollectionDetail(first.id))
+                    },
+                    onCollectionDeleted = { deletedId ->
+                        val kept = collectionsBackStackWithoutDeleted(backStack.toList(), deletedId)
+                        if (kept.size != backStack.size) {
+                            backStack.clear()
+                            backStack.addAll(kept)
+                        }
                     }
                 )
             }

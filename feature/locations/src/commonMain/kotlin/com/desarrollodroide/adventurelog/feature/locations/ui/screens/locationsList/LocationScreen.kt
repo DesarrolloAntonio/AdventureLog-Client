@@ -76,6 +76,11 @@ fun LocationListScreen(
      * side, which otherwise sits empty until something is tapped.
      */
     onFirstLoaded: (Location) -> Unit = { },
+    /**
+     * Called with the id of a place that has just been deleted. A two-pane caller showing that
+     * place has to drop it: the pane kept a place that no longer existed (measured).
+     */
+    onPlaceDeleted: (String) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: LocationsViewModel = koinViewModel()
 ) {
@@ -178,6 +183,7 @@ fun LocationListScreen(
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
             is LocationsViewModel.DeleteState.Success -> {
+                onPlaceDeleted(state.locationId)
                 pagingItems.refresh()
                 snackbarHostState.showSnackbar("Place deleted")
                 viewModel.clearDeleteState()

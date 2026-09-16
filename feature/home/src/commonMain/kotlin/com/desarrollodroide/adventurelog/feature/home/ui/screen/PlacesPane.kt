@@ -33,7 +33,16 @@ import kotlinx.serialization.modules.subclass
 private data object PlacesList : NavKey
 
 @Serializable
-private data class PlaceDetail(val locationId: String) : NavKey
+internal data class PlaceDetail(val locationId: String) : NavKey
+
+/**
+ * The back stack once [deletedId] no longer exists.
+ *
+ * On a phone the deleted place's page closes with the list refresh; in two panes the pane kept
+ * showing it, Edit and Share and all, until something else was chosen (measured).
+ */
+internal fun backStackWithoutDeleted(stack: List<NavKey>, deletedId: String): List<NavKey> =
+    stack.filterNot { it is PlaceDetail && it.locationId == deletedId }
 
 /**
  * The back stack is persisted by serialising its keys, and NavKey is an open type, so the keys
@@ -104,6 +113,13 @@ fun PlacesPane(
                     // pane to fill, so nothing opens by itself.
                     onFirstLoaded = { first ->
                         if (twoPanes && backStack.size == 1) backStack.add(PlaceDetail(first.id))
+                    },
+                    onPlaceDeleted = { deletedId ->
+                        val kept = backStackWithoutDeleted(backStack.toList(), deletedId)
+                        if (kept.size != backStack.size) {
+                            backStack.clear()
+                            backStack.addAll(kept)
+                        }
                     }
                 )
             }

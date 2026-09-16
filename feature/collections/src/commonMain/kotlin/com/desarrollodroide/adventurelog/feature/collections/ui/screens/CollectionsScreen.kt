@@ -100,6 +100,8 @@ fun CollectionsScreen(
     onPagingItemsReady: (LazyPagingItems<UltraSlimCollection>) -> Unit = { },
     /** See LocationListScreen: two-pane callers use this to fill the empty detail side. */
     onFirstLoaded: (UltraSlimCollection) -> Unit = { },
+    /** The id of a collection just deleted, so a two-pane caller can drop it from its detail side. */
+    onCollectionDeleted: (String) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
@@ -212,6 +214,7 @@ fun CollectionsScreen(
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
             is CollectionsViewModel.DeleteState.Success -> {
+                onCollectionDeleted(state.collectionId)
                 pagingItems.refresh()
                 snackbarHostState.showSnackbar("Collection deleted successfully")
                 viewModel.clearDeleteState()
