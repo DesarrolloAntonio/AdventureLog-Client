@@ -84,7 +84,8 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): CollectionDTO = unused()
     override suspend fun getCategories(): List<CategoryDTO> = unused()
     override suspend fun getCategoryById(categoryId: String): CategoryDTO = unused()

@@ -165,7 +165,8 @@ class CollectionsRepositoryImpl(
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): Either<ApiResponse, Collection> {
         return try {
             val collection = networkDataSource.createCollection(
@@ -173,7 +174,8 @@ class CollectionsRepositoryImpl(
                 description = description,
                 isPublic = isPublic,
                 startDate = startDate,
-                endDate = endDate
+                endDate = endDate,
+                link = link
             ).toDomainModel()
 
             // Convert created collection to UltraSlimCollection for the list

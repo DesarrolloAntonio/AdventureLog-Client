@@ -29,6 +29,10 @@ data class ChecklistFormState(
 ) {
     val canSave: Boolean get() = name.isNotBlank() && !isSaving
     val doneCount: Int get() = lines.count { it.checked }
+
+    /** What a save would send is the same. A half-typed line that was never added is not sent. */
+    fun sameContentAs(other: ChecklistFormState): Boolean =
+        name.trim() == other.name.trim() && lines == other.lines && date == other.date && isPublic == other.isPublic
 }
 
 class AddEditChecklistViewModel(
@@ -40,6 +44,9 @@ class AddEditChecklistViewModel(
     val state: StateFlow<ChecklistFormState> = _state.asStateFlow()
 
     private var checklistId: String? = null
+
+    /** The checklist as it was read, to tell a save that changes something from one that does not. */
+    private var asLoaded: ChecklistFormState? = null
 
     /** The checklist as the server has it now - see AddEditNoteViewModel.load. */
     fun load(collectionId: String, id: String?) {
@@ -56,7 +63,7 @@ class AddEditChecklistViewModel(
                         lines = checklist.items.map { ChecklistLine(it.name, it.isChecked) },
                         date = checklist.date?.substringBefore('T').orEmpty(),
                         isPublic = checklist.isPublic
-                    )
+                    ).also { asLoaded = it }
                 }
             }
         }
@@ -97,6 +104,15 @@ class AddEditChecklistViewModel(
     fun save(collectionId: String) {
         val form = _state.value
         if (!form.canSave) return
+
+        // The server throws every item away and makes new ones on any save - it ignores the ids it
+        // is sent, and a body without items empties the list (measured, QA 04 CO-04). Nothing the
+        // app sends can keep them, so a save that changes nothing sends nothing.
+        val before = asLoaded
+        if (checklistId != null && before != null && form.sameContentAs(before)) {
+            _state.update { it.copy(saved = true) }
+            return
+        }
         _state.update { it.copy(isSaving = true, error = null) }
 
         viewModelScope.launch {

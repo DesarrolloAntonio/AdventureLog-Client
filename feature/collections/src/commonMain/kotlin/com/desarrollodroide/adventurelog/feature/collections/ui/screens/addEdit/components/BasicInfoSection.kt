@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -98,6 +100,12 @@ fun BasicInfoSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // The row is the switch (QA 04, CO-11): a tap on the words did nothing.
+                        .toggleable(
+                            value = formData.isPublic,
+                            role = Role.Switch,
+                            onValueChange = { onFormDataChange(formData.copy(isPublic = it)) }
+                        )
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -121,9 +129,7 @@ fun BasicInfoSection(
                     }
                     Switch(
                         checked = formData.isPublic,
-                        onCheckedChange = {
-                            onFormDataChange(formData.copy(isPublic = it))
-                        },
+                        onCheckedChange = null,
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.primary,
                             checkedTrackColor = MaterialTheme.colorScheme.primaryContainer

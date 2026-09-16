@@ -40,7 +40,8 @@ abstract class CollectionsRepositoryStub : CollectionsRepository {
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): Either<ApiResponse, Collection> = unused()
     override suspend fun createNote(
         collectionId: String,

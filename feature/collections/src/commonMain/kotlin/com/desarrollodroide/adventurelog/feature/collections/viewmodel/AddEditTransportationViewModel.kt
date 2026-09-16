@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportDates
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
@@ -29,7 +31,10 @@ data class AddEditTransportationUiState(
     val isGeneratingDescription: Boolean = false,
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
-    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle
+    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
+    /** The collection's own dates, for "Constrain to Collection Dates"; null when it has none. */
+    val collectionStart: String? = null,
+    val collectionEnd: String? = null
 )
 
 class AddEditTransportationViewModel(
@@ -39,6 +44,7 @@ class AddEditTransportationViewModel(
     private val generateDescriptionUseCase: GenerateDescriptionUseCase,
     private val searchLocationsUseCase: SearchLocationsUseCase,
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
+    private val getCollectionDetailUseCase: GetCollectionDetailUseCase,
     private val transportationId: String? = null,
     private val existingTransportation: Transportation? = null,
     // Transportations belong to a collection; created without one they are orphaned and never
@@ -56,6 +62,21 @@ class AddEditTransportationViewModel(
             loadTransportation(transportationId)
         } else if (existingTransportation != null) {
             _uiState.value = _uiState.value.copy(existingTransportation = existingTransportation)
+        }
+        collectionId?.takeIf { it.isNotBlank() }?.let(::loadCollectionDates)
+    }
+
+    /**
+     * "Constrain to Collection Dates" was a switch that nothing read (QA 04). The web limits the
+     * pickers to the collection's dates, so the form needs them.
+     */
+    private fun loadCollectionDates(id: String) {
+        viewModelScope.launch {
+            val collection = (getCollectionDetailUseCase(id) as? Either.Right)?.value ?: return@launch
+            _uiState.value = _uiState.value.copy(
+                collectionStart = collection.startDate?.takeIf { it.isNotBlank() },
+                collectionEnd = collection.endDate?.takeIf { it.isNotBlank() }
+            )
         }
     }
 
@@ -80,12 +101,18 @@ class AddEditTransportationViewModel(
                         isLoading = false,
                         existingTransportation = result.value
                     )
+                    result.value.collection?.takeIf { it.isNotBlank() }?.let(::loadCollectionDates)
                 }
             }
         }
     }
     
     fun saveTransportation(formData: TransportationFormData) {
+        // The form let an arrival before the departure through, and the server kept it (QA 04).
+        if (TransportDates.arrivesBeforeDeparting(formData.departureDate, formData.arrivalDate)) {
+            _uiState.value = _uiState.value.copy(errorMessage = "The arrival can't be before the departure.")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             

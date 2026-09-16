@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditChecklist
 
+import com.desarrollodroide.adventurelog.feature.ui.components.date.DatePickerField
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.PublicSwitchRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -218,11 +220,10 @@ fun AddEditChecklistScreen(
                 }
                 }
 
-                StyledTextField(
+                DatePickerField(
+                    label = "Date (optional)",
                     value = state.date,
                     onValueChange = viewModel::onDateChange,
-                    label = "Date (YYYY-MM-DD, optional)",
-                    icon = Icons.Default.CalendarMonth,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -234,25 +235,11 @@ fun AddEditChecklistScreen(
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Public checklist", style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                text = "Visible to anyone the collection is shared with",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = state.isPublic,
-                            onCheckedChange = viewModel::onPublicChange
-                        )
-                    }
+                    PublicSwitchRow(
+                        title = "Public checklist",
+                        checked = state.isPublic,
+                        onCheckedChange = viewModel::onPublicChange
+                    )
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

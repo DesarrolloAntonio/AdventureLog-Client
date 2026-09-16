@@ -91,4 +91,5 @@ class GuestActionsTest {
         onNodeWithText("Manage collections").assertExists()
         onNodeWithText("Delete").assertExists()
     }
+
 }

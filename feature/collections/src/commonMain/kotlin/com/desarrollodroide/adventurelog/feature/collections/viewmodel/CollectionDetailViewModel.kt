@@ -1,5 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 
+import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RemoveLocationFromCollectionUseCase
+import com.desarrollodroide.adventurelog.core.model.toSafeFileName
+import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
+import com.desarrollodroide.adventurelog.core.model.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
@@ -69,8 +75,59 @@ class CollectionDetailViewModel(
     private val deleteLodgingUseCase: DeleteLodgingUseCase,
     private val autoGenerateItineraryUseCase: AutoGenerateItineraryUseCase,
     private val addItineraryEntryUseCase: AddItineraryEntryUseCase,
-    private val deleteItineraryEntryUseCase: DeleteItineraryEntryUseCase
+    private val deleteItineraryEntryUseCase: DeleteItineraryEntryUseCase,
+    private val duplicateLocationUseCase: DuplicateLocationUseCase,
+    private val getShareImageUseCase: GetShareImageUseCase,
+    private val removeLocationFromCollectionUseCase: RemoveLocationFromCollectionUseCase,
+    private val platformFiles: PlatformFiles
 ) : ViewModel() {
+
+    /** The outcome of a place card's action, for the snackbar. */
+    private val _actionMessage = MutableStateFlow<String?>(null)
+    val actionMessage: StateFlow<String?> = _actionMessage.asStateFlow()
+
+    fun clearActionMessage() {
+        _actionMessage.value = null
+    }
+
+    /**
+     * Duplicate and Share externally were offered on a place inside a collection and did nothing
+     * (QA 04, CO-09). The copy is made outside any collection - that is the server's duplicate -
+     * so the message says where to find it.
+     */
+    fun duplicateLocation(location: Location) {
+        viewModelScope.launch {
+            _actionMessage.value = when (val result = duplicateLocationUseCase(location.id)) {
+                is Either.Left -> result.value
+                is Either.Right -> "Duplicated as \"${result.value.name}\" in Places"
+            }
+        }
+    }
+
+    /** The card the server renders, as Places shares it: the server is private, a link would not open. */
+    fun shareLocation(location: Location) {
+        viewModelScope.launch {
+            _actionMessage.value = when (val result = getShareImageUseCase(location.id)) {
+                is Either.Left -> result.value
+                is Either.Right ->
+                    if (platformFiles.share(result.value, location.name.toSafeFileName(extension = "png"))) null
+                    else "Nothing on this device can share an image."
+            }
+        }
+    }
+
+    /** Out of this collection only - Delete removes the place everywhere (QA 04, CO-10). */
+    fun removeFromCollection(location: Location, collectionId: String) {
+        viewModelScope.launch {
+            _actionMessage.value = when (val result = removeLocationFromCollectionUseCase(location.id, collectionId)) {
+                is Either.Left -> result.value
+                is Either.Right -> {
+                    loadCollection(collectionId)
+                    "\"${location.name}\" is no longer in this collection"
+                }
+            }
+        }
+    }
     
     private val _uiState = MutableStateFlow(CollectionDetailUiState(isLoading = true))
     val uiState: StateFlow<CollectionDetailUiState> = _uiState.asStateFlow()

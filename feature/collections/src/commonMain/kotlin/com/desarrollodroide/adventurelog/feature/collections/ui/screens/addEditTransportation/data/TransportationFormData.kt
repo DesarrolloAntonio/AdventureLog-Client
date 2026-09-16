@@ -49,7 +49,9 @@ data class TransportationFormData(
                 arrivalDate = transportation.endDate ?: transportation.date ?: "",
                 departureTimezone = transportation.startTimezone ?: deviceTimezone,
                 arrivalTimezone = transportation.endTimezone ?: deviceTimezone,
-                isAllDay = true,
+                // Read from the value, as the web does. It was always true, which showed a timed
+                // departure as a bare date and offered no way to set its time.
+                isAllDay = TransportDates.isAllDay(transportation.date.orEmpty()),
                 constrainToCollectionDates = false,
                 flightNumber = transportation.flightNumber ?: "",
                 distance = transportation.distance ?: "",

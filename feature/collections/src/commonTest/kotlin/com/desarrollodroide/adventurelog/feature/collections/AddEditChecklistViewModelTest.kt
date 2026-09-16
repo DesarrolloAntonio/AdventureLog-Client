@@ -43,6 +43,18 @@ class AddEditChecklistViewModelTest {
 
         override suspend fun getCollection(collectionId: String): Either<ApiResponse, Collection> = collection
 
+        var updates = 0
+        override suspend fun updateChecklist(
+            checklistId: String,
+            name: String,
+            items: List<Pair<String, Boolean>>,
+            date: String?,
+            isPublic: Boolean
+        ): Either<ApiResponse, Checklist> {
+            updates++
+            return result
+        }
+
         override suspend fun createChecklist(
             collectionId: String,
             name: String,
@@ -175,6 +187,43 @@ class AddEditChecklistViewModelTest {
 
         assertEquals("", vm.state.value.name)
         assertEquals("Network unavailable", vm.state.value.loadError)
+    }
+
+    private fun packing() = collectionWithChecklist(
+        Checklist(
+            id = "k1", user = "u", name = "Packing", createdAt = "", updatedAt = "",
+            items = listOf(ChecklistItem("i1", "u", "Boots", true, "k1", "", ""))
+        )
+    )
+
+    @Test
+    fun savingAChecklistThatWasNotChangedSendsNothing() = runTest(dispatcher) {
+        // QA 04, CO-04: every save made the server delete and recreate each item.
+        val (vm, repo) = viewModel()
+        repo.collection = Either.Right(packing())
+        vm.load("c1", "k1")
+        testScheduler.advanceUntilIdle()
+
+        vm.save("c1")
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(vm.state.value.saved)
+        assertEquals(0, repo.updates)
+    }
+
+    @Test
+    fun untickingOneLineIsStillSaved() = runTest(dispatcher) {
+        val (vm, repo) = viewModel()
+        repo.collection = Either.Right(packing())
+        vm.load("c1", "k1")
+        testScheduler.advanceUntilIdle()
+
+        vm.toggleLine(0)
+        vm.save("c1")
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(vm.state.value.saved)
+        assertEquals(1, repo.updates)
     }
 }
 

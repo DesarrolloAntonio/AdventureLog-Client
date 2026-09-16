@@ -32,7 +32,8 @@ interface CollectionsRepository {
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String? = null
     ): Either<ApiResponse, Collection>
 
     /** Notes belong to a collection, so they live on this repository rather than one of their own. */

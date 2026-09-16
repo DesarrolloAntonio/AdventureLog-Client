@@ -47,6 +47,10 @@ val collectionsModule = module {
             autoGenerateItineraryUseCase = get(),
             addItineraryEntryUseCase = get(),
             deleteItineraryEntryUseCase = get(),
+            duplicateLocationUseCase = get(),
+            getShareImageUseCase = get(),
+            removeLocationFromCollectionUseCase = get(),
+            platformFiles = get(),
         )
     }
 
@@ -75,6 +79,7 @@ val collectionsModule = module {
             generateDescriptionUseCase = get(),
             searchLocationsUseCase = get(),
             searchWikipediaImageUseCase = get(),
+            getCollectionDetailUseCase = get(),
             transportationId = params.get(0),
             existingTransportation = params.getOrNull(),
             collectionId = params.get(2)

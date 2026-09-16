@@ -50,7 +50,8 @@ fun AdventureItem(
     onDelete: () -> Unit = {},
     showMenu: Boolean = true,
     /** False for someone else's place in a collection shared with you: see [LocationActionsSheet]. */
-    isOwner: Boolean = true
+    isOwner: Boolean = true,
+    onRemoveFromCollection: (() -> Unit)? = null
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -254,7 +255,8 @@ fun AdventureItem(
             onShare = { showDropdownMenu = false; onShare() },
             onManageCollections = { showDropdownMenu = false; onManageCollections() },
             onDelete = { showDropdownMenu = false; showDeleteDialog = true },
-            isOwner = isOwner
+            isOwner = isOwner,
+            onRemoveFromCollection = onRemoveFromCollection?.let { remove -> { showDropdownMenu = false; remove() } }
         )
     }
 

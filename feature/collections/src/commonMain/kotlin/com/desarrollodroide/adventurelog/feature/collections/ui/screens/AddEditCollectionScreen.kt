@@ -34,7 +34,9 @@ fun AddEditCollectionScreen(
     onNavigateBack: () -> Unit,
     onSave: (CollectionFormData) -> Unit,
     modifier: Modifier = Modifier,
-    initialData: CollectionFormData? = null
+    initialData: CollectionFormData? = null,
+    /** The form stays while saving, so a refusal leaves what was typed where it was. */
+    isSaving: Boolean = false
 ) {
     var formData by remember {
         mutableStateOf(initialData ?: CollectionFormData())
@@ -69,8 +71,12 @@ fun AddEditCollectionScreen(
         ) {
             PrimaryButton(
                 onClick = { onSave(formData) },
-                text = if (initialData != null) "Update Collection" else "Create Collection",
-                enabled = formData.name.isNotBlank()
+                text = when {
+                    isSaving -> "Saving…"
+                    initialData != null -> "Update Collection"
+                    else -> "Create Collection"
+                },
+                enabled = formData.name.isNotBlank() && !isSaving
             )
 
             TextButton(

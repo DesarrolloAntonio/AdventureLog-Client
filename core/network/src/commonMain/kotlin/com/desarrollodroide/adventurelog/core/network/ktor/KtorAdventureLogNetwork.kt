@@ -392,7 +392,8 @@ class KtorAdventureLogNetwork(
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): CollectionDTO {
         ensureInitialized()
         return collectionDataSource.createCollection(
@@ -400,7 +401,8 @@ class KtorAdventureLogNetwork(
             description = description,
             isPublic = isPublic,
             startDate = startDate,
-            endDate = endDate
+            endDate = endDate,
+            link = link
         )
     }
 

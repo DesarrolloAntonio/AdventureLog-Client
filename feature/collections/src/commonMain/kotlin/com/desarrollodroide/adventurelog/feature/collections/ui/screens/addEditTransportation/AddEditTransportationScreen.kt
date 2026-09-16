@@ -91,6 +91,8 @@ fun AddEditTransportationScreen(
                 viewModel.clearLocationSearch()
             },
             wikipediaImageState = uiState.wikipediaImageState,
+            collectionStart = uiState.collectionStart,
+            collectionEnd = uiState.collectionEnd,
             onSearchWikipediaImage = { query ->
                 viewModel.searchWikipediaImage(query)
             },
@@ -123,6 +125,8 @@ fun AddEditTransportationContent(
     wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
+    collectionStart: String? = null,
+    collectionEnd: String? = null,
     modifier: Modifier = Modifier
 ) {
     var formData by remember(existingTransportation) {
@@ -171,7 +175,9 @@ fun AddEditTransportationContent(
 
         DateTransportationSection(
             formData = formData,
-            onFormDataChange = { formData = it }
+            onFormDataChange = { formData = it },
+            collectionStart = collectionStart,
+            collectionEnd = collectionEnd
         )
 
         LocationTransportationSection(

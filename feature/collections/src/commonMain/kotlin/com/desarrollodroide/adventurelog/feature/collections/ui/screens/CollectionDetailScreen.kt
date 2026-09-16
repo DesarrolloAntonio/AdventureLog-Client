@@ -116,6 +116,14 @@ fun CollectionDetailScreen(
         viewModel.loadCollection(collectionId)
     }
     
+    val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
+    LaunchedEffect(actionMessage) {
+        actionMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearActionMessage()
+        }
+    }
+
     // Handle delete state changes
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
@@ -203,6 +211,9 @@ fun CollectionDetailScreen(
                     onManageCollections = { adventure -> 
                         locationToManageCollections = adventure 
                     },
+                    onDuplicateAdventure = viewModel::duplicateLocation,
+                    onShareAdventure = viewModel::shareLocation,
+                    onRemoveFromCollection = { adventure -> viewModel.removeFromCollection(adventure, collectionId) },
                     onAddTransportation = onAddTransportation,
                     onEditTransportation = onEditTransportation,
                     onDeleteTransportation = { transportation ->
@@ -284,6 +295,9 @@ fun CollectionDetailContent(
     onEditAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit,
+    onDuplicateAdventure: (Location) -> Unit = {},
+    onShareAdventure: (Location) -> Unit = {},
+    onRemoveFromCollection: (Location) -> Unit = {},
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     onDeleteTransportation: (Transportation) -> Unit,
@@ -456,12 +470,12 @@ fun CollectionDetailContent(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "No adventures yet",
+                                    text = "No places in this collection yet",
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Start adding adventures to build your collection",
+                                    text = "Add one from its menu in Places: Manage collections.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -477,6 +491,9 @@ fun CollectionDetailContent(
                             onEdit = { onEditAdventure(adventure) },
                             onDelete = { onDeleteAdventure(adventure) },
                             onManageCollections = { onManageCollections(adventure) },
+                            onDuplicate = { onDuplicateAdventure(adventure) },
+                            onShare = { onShareAdventure(adventure) },
+                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
                             isOwner = ownedBy(adventure.user.uuid, currentUserId)
                         )
                     }
@@ -591,12 +608,12 @@ fun CollectionDetailContent(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "No adventures yet",
+                                    text = "No places in this collection yet",
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Start adding adventures to build your collection",
+                                    text = "Add one from its menu in Places: Manage collections.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -612,6 +629,9 @@ fun CollectionDetailContent(
                             onEdit = { onEditAdventure(adventure) },
                             onDelete = { onDeleteAdventure(adventure) },
                             onManageCollections = { onManageCollections(adventure) },
+                            onDuplicate = { onDuplicateAdventure(adventure) },
+                            onShare = { onShareAdventure(adventure) },
+                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
                             isOwner = ownedBy(adventure.user.uuid, currentUserId)
                         )
                     }
@@ -715,6 +735,7 @@ fun CollectionDetailContent(
                         SimpleEntryCard(
                             onClick = { onEditLodging(stay) },
                             onDelete = { onDeleteLodging(stay) },
+                            kind = "stay",
                             title = stay.name,
                             lines = listOfNotNull(
                                 stay.location?.takeIf { it.isNotBlank() },
@@ -742,7 +763,8 @@ fun CollectionDetailContent(
                             ),
                             badge = null,
                             onClick = { onEditNote(note) },
-                            onDelete = { onDeleteNote(note) }
+                            onDelete = { onDeleteNote(note) },
+                            kind = "note"
                         )
                     }
                 }
@@ -758,6 +780,7 @@ fun CollectionDetailContent(
                         SimpleEntryCard(
                             onClick = { onEditChecklist(checklist) },
                             onDelete = { onDeleteChecklist(checklist) },
+                            kind = "checklist",
                             title = checklist.name,
                             lines = checklist.items.take(4).map { item ->
                                 (if (item.isChecked) "\u2713 " else "\u25cb ") + item.name
@@ -1333,8 +1356,27 @@ private fun SimpleEntryCard(
     lines: List<String>,
     badge: String?,
     onClick: (() -> Unit)? = null,
-    onDelete: (() -> Unit)? = null
+    onDelete: (() -> Unit)? = null,
+    /** What the card is, for the confirmation: "note", "checklist", "stay". */
+    kind: String = "item"
 ) {
+    // One tap on the bin used to delete it outright (QA 04, CO-07). Places, collections and
+    // transports all ask first; these now do too.
+    var confirmDelete by remember { mutableStateOf(false) }
+    if (confirmDelete && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text("Delete this $kind?") },
+            text = { Text("\"$title\" will be deleted. This cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = { confirmDelete = false; onDelete() }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } }
+        )
+    }
+
     Card(
         onClick = onClick ?: {},
         enabled = onClick != null,
@@ -1360,7 +1402,7 @@ private fun SimpleEntryCard(
                     MetaChip(text = badge, tone = ChipTone.NEUTRAL)
                 }
                 if (onDelete != null) {
-                    IconButton(onClick = onDelete) {
+                    IconButton(onClick = { confirmDelete = true }) {
                         Icon(
                             imageVector = Icons.Default.DeleteOutline,
                             contentDescription = "Delete",

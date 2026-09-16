@@ -57,12 +57,18 @@ fun StyledTextField(
             minLines = if (singleLine) 1 else minLines,
             maxLines = if (singleLine) 1 else Int.MAX_VALUE,
             keyboardOptions = keyboardOptions,
-            leadingIcon = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // Only beside a single line. Material centres a leading icon vertically, so in a
+            // multi-line field it floated halfway down, away from the text it labels (QA 04).
+            leadingIcon = if (singleLine) {
+                {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                null
             },
             isError = isError,
             shape = RoundedCornerShape(30.dp),

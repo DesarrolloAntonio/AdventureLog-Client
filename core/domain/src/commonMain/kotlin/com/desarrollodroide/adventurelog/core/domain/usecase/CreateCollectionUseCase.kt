@@ -13,7 +13,8 @@ class CreateCollectionUseCase(
         description: String,
         isPublic: Boolean,
         startDate: String? = null,
-        endDate: String? = null
+        endDate: String? = null,
+        link: String? = null
     ): Either<String, Collection> {
         // Validate required fields
         if (name.isBlank()) {
@@ -26,7 +27,8 @@ class CreateCollectionUseCase(
             description = description,
             isPublic = isPublic,
             startDate = startDate,
-            endDate = endDate
+            endDate = endDate,
+            link = link
         )) {
             is Either.Left -> {
                 when (result.value) {

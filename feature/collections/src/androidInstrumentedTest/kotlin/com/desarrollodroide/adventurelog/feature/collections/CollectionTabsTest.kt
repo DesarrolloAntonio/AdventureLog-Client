@@ -21,6 +21,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.screens.Collecti
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import androidx.compose.ui.test.onNodeWithContentDescription
 
 /**
  * The six tabs of a collection.
@@ -156,4 +157,69 @@ class CollectionTabsTest {
         onNodeWithText("Checklists").performClick()
         assertEquals(CollectionTab.CHECKLISTS, chosen)
     }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun theBinOnANoteAsksFirstAndOnlyDeletesOnConfirm() = runComposeUiTest {
+        // QA 04, CO-07: one tap on the bin deleted the note on the server, no question asked.
+        var deleted = 0
+        setContent {
+            WithAppLocals {
+                CollectionDetailContent(
+                    collection = collection, selectedTab = CollectionTab.NOTES, onTabSelected = {},
+                    onAdventureClick = {}, onEditAdventure = {}, onDeleteAdventure = {}, onManageCollections = {},
+                    onAddTransportation = {}, onEditTransportation = {}, onDeleteTransportation = {},
+                    onDeleteNote = { deleted++ }
+                )
+            }
+        }
+
+        onNodeWithContentDescription("Delete").performClick()
+        onNodeWithText("Delete this note?").assertIsDisplayed()
+        assertEquals(0, deleted)
+
+        onNodeWithText("Cancel").performClick()
+        onNodeWithText("Delete this note?").assertDoesNotExist()
+        assertEquals(0, deleted)
+
+        onNodeWithContentDescription("Delete").performClick()
+        onAllNodesWithText("Delete").onFirst().performClick()
+        assertEquals(1, deleted)
+    }
+
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun aPlaceInsideACollectionCanBeDuplicatedSharedAndTakenOut() = runComposeUiTest {
+        // QA 04: Duplicate and Share externally did nothing here (CO-09), and there was no way
+        // to take a place out of just this collection (CO-10).
+        val place = com.desarrollodroide.adventurelog.core.model.preview.PreviewData.locations.first()
+        val done = mutableListOf<String>()
+        setContent {
+            WithAppLocals {
+                CollectionDetailContent(
+                    collection = collection.copy(locations = listOf(place)), selectedTab = CollectionTab.LOCATIONS,
+                    onTabSelected = {}, onAdventureClick = {}, onEditAdventure = {}, onDeleteAdventure = {},
+                    onManageCollections = {}, onAddTransportation = {}, onEditTransportation = {}, onDeleteTransportation = {},
+                    onDuplicateAdventure = { done += "duplicate ${it.id}" },
+                    onShareAdventure = { done += "share ${it.id}" },
+                    onRemoveFromCollection = { done += "remove ${it.id}" }
+                )
+            }
+        }
+
+        val expected = mutableListOf<String>()
+        listOf("Duplicate" to "duplicate", "Share externally" to "share", "Remove from collection" to "remove")
+            .forEach { (action, what) ->
+                onNodeWithContentDescription("More options").performClick()
+                waitUntil(timeoutMillis = 5_000) { onAllNodesWithText(action).fetchSemanticsNodes().isNotEmpty() }
+                onNodeWithText(action).performClick()
+                // Let the sheet finish leaving before the next one opens: opening it again while it
+                // was still animating out crashed inside the sheet's own coroutine, not in the app.
+                waitUntil(timeoutMillis = 5_000) { onAllNodesWithText("Remove from collection").fetchSemanticsNodes().isEmpty() }
+                expected += "$what ${place.id}"
+                assertEquals(expected, done)
+            }
+    }
+
 }

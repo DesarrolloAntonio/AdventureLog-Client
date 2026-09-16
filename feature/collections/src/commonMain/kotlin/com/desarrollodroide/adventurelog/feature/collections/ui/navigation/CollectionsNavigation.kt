@@ -204,7 +204,8 @@ fun NavGraphBuilder.collectionsScreen(
                     onSave = { formData ->
                         viewModel.saveCollection(formData)
                     },
-                    initialData = uiState.initialData
+                    initialData = uiState.initialData,
+                    isSaving = uiState.isSaving
                 )
             }
             
@@ -261,7 +262,8 @@ fun NavGraphBuilder.collectionsScreen(
                     onSave = { formData ->
                         viewModel.saveCollection(formData)
                     },
-                    initialData = uiState.initialData
+                    initialData = uiState.initialData,
+                    isSaving = uiState.isSaving
                 )
             }
             
