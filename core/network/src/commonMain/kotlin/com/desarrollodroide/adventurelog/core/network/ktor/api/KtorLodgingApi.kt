@@ -36,6 +36,7 @@ class KtorLodgingApi(
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean,
@@ -49,6 +50,7 @@ class KtorLodgingApi(
         timezone = timezone?.takeIf { it.isNotBlank() },
         reservationNumber = reservationNumber,
         price = price?.takeIf { it.isNotBlank() },
+        priceCurrency = priceCurrency?.takeIf { it.isNotBlank() },
         link = link,
         location = location,
         isPublic = isPublic,
@@ -64,6 +66,7 @@ class KtorLodgingApi(
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean,
@@ -79,7 +82,7 @@ class KtorLodgingApi(
             setBody(
                 body(
                     name, type, description, checkIn, checkOut, timezone,
-                    reservationNumber, price, link, location, isPublic, collectionId
+                    reservationNumber, price, priceCurrency, link, location, isPublic, collectionId
                 )
             )
         }
@@ -104,6 +107,7 @@ class KtorLodgingApi(
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean
@@ -118,7 +122,7 @@ class KtorLodgingApi(
             setBody(
                 body(
                     name, type, description, checkIn, checkOut, timezone,
-                    reservationNumber, price, link, location, isPublic, null
+                    reservationNumber, price, priceCurrency, link, location, isPublic, null
                 )
             )
         }

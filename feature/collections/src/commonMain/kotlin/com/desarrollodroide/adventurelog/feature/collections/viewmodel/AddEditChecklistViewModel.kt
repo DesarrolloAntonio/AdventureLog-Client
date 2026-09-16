@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionItemUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveChecklistUseCase
 import com.desarrollodroide.adventurelog.core.model.Checklist
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,8 @@ data class ChecklistFormState(
     val date: String = "",
     val isPublic: Boolean = false,
     val isSaving: Boolean = false,
+    val isLoading: Boolean = false,
+    val loadError: String? = null,
     val error: String? = null,
     val saved: Boolean = false
 ) {
@@ -29,7 +32,8 @@ data class ChecklistFormState(
 }
 
 class AddEditChecklistViewModel(
-    private val saveChecklistUseCase: SaveChecklistUseCase
+    private val saveChecklistUseCase: SaveChecklistUseCase,
+    private val getCollectionItemUseCase: GetCollectionItemUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChecklistFormState())
@@ -37,15 +41,31 @@ class AddEditChecklistViewModel(
 
     private var checklistId: String? = null
 
-    fun prefill(checklist: Checklist?) {
-        if (checklist == null || checklistId == checklist.id) return
-        checklistId = checklist.id
-        _state.value = ChecklistFormState(
-            name = checklist.name,
-            lines = checklist.items.map { ChecklistLine(it.name, it.isChecked) },
-            date = checklist.date?.substringBefore('T').orEmpty(),
-            isPublic = checklist.isPublic
-        )
+    /** The checklist as the server has it now - see AddEditNoteViewModel.load. */
+    fun load(collectionId: String, id: String?) {
+        if (id == null || checklistId == id) return
+        checklistId = id
+        _state.value = ChecklistFormState(isLoading = true)
+        viewModelScope.launch {
+            when (val result = getCollectionItemUseCase(collectionId) { c -> c.checklists.firstOrNull { it.id == id } }) {
+                is Either.Left -> _state.update { it.copy(isLoading = false, loadError = result.value) }
+                is Either.Right -> {
+                    val checklist = result.value
+                    _state.value = ChecklistFormState(
+                        name = checklist.name,
+                        lines = checklist.items.map { ChecklistLine(it.name, it.isChecked) },
+                        date = checklist.date?.substringBefore('T').orEmpty(),
+                        isPublic = checklist.isPublic
+                    )
+                }
+            }
+        }
+    }
+
+    fun retryLoad(collectionId: String) {
+        val id = checklistId ?: return
+        checklistId = null
+        load(collectionId, id)
     }
 
     fun onNameChange(value: String) = _state.update { it.copy(name = value) }

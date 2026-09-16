@@ -20,8 +20,9 @@ data class ChecklistRequest(
     val items: List<ChecklistItemRequest> = emptyList(),
     @SerialName("date")
     val date: String? = null,
+    // No default - see NoteRequest: `false` equal to the default was left out of the body.
     @SerialName("is_public")
-    val isPublic: Boolean = false,
+    val isPublic: Boolean,
     @SerialName("collection")
     val collection: String? = null
 )

@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionItemUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveLodgingUseCase
 import com.desarrollodroide.adventurelog.core.model.Lodging
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,10 +27,15 @@ data class LodgingFormState(
     val checkOut: String = "",
     val reservationNumber: String = "",
     val price: String = "",
+    /** Kept as loaded: the form has no currency field, and sending a price without one makes the
+     * server rewrite the currency to the account's default (measured). */
+    val priceCurrency: String = "",
     val link: String = "",
     val location: String = "",
     val isPublic: Boolean = false,
     val isSaving: Boolean = false,
+    val isLoading: Boolean = false,
+    val loadError: String? = null,
     val error: String? = null,
     val saved: Boolean = false
 ) {
@@ -37,7 +43,8 @@ data class LodgingFormState(
 }
 
 class AddEditLodgingViewModel(
-    private val saveLodgingUseCase: SaveLodgingUseCase
+    private val saveLodgingUseCase: SaveLodgingUseCase,
+    private val getCollectionItemUseCase: GetCollectionItemUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LodgingFormState())
@@ -46,9 +53,26 @@ class AddEditLodgingViewModel(
     private var lodgingId: String? = null
     private var existingTimezone: String? = null
 
-    fun prefill(lodging: Lodging?) {
-        if (lodging == null || lodgingId == lodging.id) return
-        lodgingId = lodging.id
+    /** The stay as the server has it now - see AddEditNoteViewModel.load. */
+    fun load(collectionId: String, id: String?) {
+        if (id == null || lodgingId == id) return
+        lodgingId = id
+        _state.value = LodgingFormState(isLoading = true)
+        viewModelScope.launch {
+            when (val result = getCollectionItemUseCase(collectionId) { c -> c.lodging.firstOrNull { it.id == id } }) {
+                is Either.Left -> _state.update { it.copy(isLoading = false, loadError = result.value) }
+                is Either.Right -> fill(result.value)
+            }
+        }
+    }
+
+    fun retryLoad(collectionId: String) {
+        val id = lodgingId ?: return
+        lodgingId = null
+        load(collectionId, id)
+    }
+
+    private fun fill(lodging: Lodging) {
         existingTimezone = lodging.timezone
         _state.value = LodgingFormState(
             name = lodging.name,
@@ -58,6 +82,7 @@ class AddEditLodgingViewModel(
             checkOut = lodging.checkOut?.substringBefore('T').orEmpty(),
             reservationNumber = lodging.reservationNumber.orEmpty(),
             price = lodging.price.orEmpty(),
+            priceCurrency = lodging.priceCurrency.orEmpty(),
             link = lodging.link.orEmpty(),
             location = lodging.location.orEmpty(),
             isPublic = lodging.isPublic
@@ -98,6 +123,7 @@ class AddEditLodgingViewModel(
                 timezone = timezone.takeIf { form.checkIn.isNotBlank() || form.checkOut.isNotBlank() },
                 reservationNumber = form.reservationNumber.trim(),
                 price = form.price.takeIf { it.isNotBlank() },
+                priceCurrency = form.priceCurrency.takeIf { it.isNotBlank() },
                 link = form.link.trim(),
                 location = form.location.trim(),
                 isPublic = form.isPublic

@@ -50,18 +50,21 @@ class AddEditTransportationViewModel(
     val uiState: StateFlow<AddEditTransportationUiState> = _uiState.asStateFlow()
     
     init {
-        if (existingTransportation != null) {
-            _uiState.value = _uiState.value.copy(existingTransportation = existingTransportation)
-        } else if (transportationId != null) {
+        if (transportationId != null) {
+            // Always from the server, never the copy carried in the route: saving that copy put
+            // back every field as it was when the collection was opened (measured).
             loadTransportation(transportationId)
+        } else if (existingTransportation != null) {
+            _uiState.value = _uiState.value.copy(existingTransportation = existingTransportation)
         }
+    }
+
+    fun retryLoad() {
+        transportationId?.let(::loadTransportation)
     }
     
     private fun loadTransportation(transportationId: String) {
-        if (_uiState.value.existingTransportation != null) {
-            return
-        }
-        
+        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             

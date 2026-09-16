@@ -695,7 +695,7 @@ class KtorAdventureLogNetwork(
             collections = collections,
             visits = visits,
             price = price,
-            priceCurrency = priceCurrency
+            priceCurrency = priceCurrency,
         )
     }
     
@@ -749,6 +749,7 @@ class KtorAdventureLogNetwork(
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean,
@@ -757,7 +758,7 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return lodgingDataSource.createLodging(
             name, type, description, checkIn, checkOut, timezone,
-            reservationNumber, price, link, location, isPublic, collectionId
+            reservationNumber, price, priceCurrency, link, location, isPublic, collectionId
         )
     }
 
@@ -771,6 +772,7 @@ class KtorAdventureLogNetwork(
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean
@@ -778,7 +780,7 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return lodgingDataSource.updateLodging(
             lodgingId, name, type, description, checkIn, checkOut, timezone,
-            reservationNumber, price, link, location, isPublic
+            reservationNumber, price, priceCurrency, link, location, isPublic
         )
     }
 

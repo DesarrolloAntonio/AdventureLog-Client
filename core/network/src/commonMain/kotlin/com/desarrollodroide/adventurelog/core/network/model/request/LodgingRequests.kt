@@ -15,8 +15,10 @@ data class LodgingRequest(
     val name: String,
     @SerialName("type")
     val type: String,
+    // These carry "" when the user empties them. With a default of "" they were left out of the
+    // body, and clearing a field left the old text on the server (measured).
     @SerialName("description")
-    val description: String = "",
+    val description: String,
     @SerialName("check_in")
     val checkIn: String? = null,
     @SerialName("check_out")
@@ -24,15 +26,19 @@ data class LodgingRequest(
     @SerialName("timezone")
     val timezone: String? = null,
     @SerialName("reservation_number")
-    val reservationNumber: String = "",
+    val reservationNumber: String,
     @SerialName("price")
     val price: String? = null,
+    // Sent with the price: given a price and no currency, the server rewrites the currency to the
+    // account's default, so an 80 EUR stay silently became 80 USD on the next save (measured).
+    @SerialName("price_currency")
+    val priceCurrency: String? = null,
     @SerialName("link")
-    val link: String = "",
+    val link: String,
     @SerialName("location")
-    val location: String = "",
+    val location: String,
     @SerialName("is_public")
-    val isPublic: Boolean = false,
+    val isPublic: Boolean,
     @SerialName("collection")
     val collection: String? = null
 )

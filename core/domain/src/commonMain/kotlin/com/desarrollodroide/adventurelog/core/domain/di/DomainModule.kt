@@ -12,6 +12,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUs
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionItemUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
@@ -83,6 +84,7 @@ val domainModule = module {
     factoryOf(::GetCollectionsPagingUseCase)
     factoryOf(::ObserveCollectionsUseCase)
     factoryOf(::GetCollectionDetailUseCase)
+    factoryOf(::GetCollectionItemUseCase)
     factoryOf(::InitializeSessionUseCase)
     factoryOf(::SaveSessionUseCase)
     factory { LogoutUseCase(get(), get(), get(), getAll()) }

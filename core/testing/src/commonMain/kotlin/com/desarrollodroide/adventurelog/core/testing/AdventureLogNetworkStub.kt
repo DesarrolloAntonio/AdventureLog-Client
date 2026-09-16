@@ -209,6 +209,7 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean,
@@ -224,6 +225,7 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean

@@ -67,7 +67,7 @@ fun AddEditLodgingScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var stayOpen by remember { mutableStateOf(true) }
 
-    LaunchedEffect(existingLodging?.id) { viewModel.prefill(existingLodging) }
+    LaunchedEffect(existingLodging?.id) { viewModel.load(collectionId, existingLodging?.id) }
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
     LaunchedEffect(state.error) {
         state.error?.let {
@@ -76,6 +76,24 @@ fun AddEditLodgingScreen(
         }
     }
 
+
+    if (state.isLoading || state.loadError != null) {
+        // No form until the record is in hand: an empty one could be saved over it.
+        Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            if (state.loadError == null) {
+                CircularProgressIndicator()
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(text = state.loadError!!, style = MaterialTheme.typography.bodyLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        TextButton(onClick = onCancel) { Text("Cancel") }
+                        Button(onClick = { viewModel.retryLoad(collectionId) }) { Text("Try again") }
+                    }
+                }
+            }
+        }
+        return
+    }
     Box(modifier = modifier.fillMaxSize()) {
         ContentColumn {
             Column(

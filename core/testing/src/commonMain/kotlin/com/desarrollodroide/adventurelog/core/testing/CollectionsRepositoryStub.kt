@@ -82,6 +82,7 @@ abstract class CollectionsRepositoryStub : CollectionsRepository {
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean
@@ -96,6 +97,7 @@ abstract class CollectionsRepositoryStub : CollectionsRepository {
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean

@@ -19,6 +19,7 @@ class SaveLodgingUseCase(
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean
@@ -26,12 +27,12 @@ class SaveLodgingUseCase(
         val result = if (lodgingId == null) {
             collectionsRepository.createLodging(
                 collectionId, name, type, description, checkIn, checkOut, timezone,
-                reservationNumber, price, link, location, isPublic
+                reservationNumber, price, priceCurrency, link, location, isPublic
             )
         } else {
             collectionsRepository.updateLodging(
                 lodgingId, name, type, description, checkIn, checkOut, timezone,
-                reservationNumber, price, link, location, isPublic
+                reservationNumber, price, priceCurrency, link, location, isPublic
             )
         }
         return when (result) {

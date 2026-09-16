@@ -82,6 +82,7 @@ interface CollectionsRepository {
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean
@@ -97,6 +98,7 @@ interface CollectionsRepository {
         timezone: String?,
         reservationNumber: String,
         price: String?,
+        priceCurrency: String?,
         link: String,
         location: String,
         isPublic: Boolean

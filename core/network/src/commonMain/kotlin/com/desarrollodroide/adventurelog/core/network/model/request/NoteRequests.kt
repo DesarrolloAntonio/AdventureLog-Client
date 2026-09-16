@@ -17,8 +17,10 @@ data class NoteRequest(
     val content: String,
     @SerialName("date")
     val date: String? = null,
+    // No default: the client leaves out any field equal to its default, so `false` never went out
+    // and a note could not be made private again (measured).
     @SerialName("is_public")
-    val isPublic: Boolean = false,
+    val isPublic: Boolean,
     @SerialName("collection")
     val collection: String? = null
 )

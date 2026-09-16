@@ -135,7 +135,8 @@ fun AddEditTransportationContent(
         )
     }
 
-    if (isLoading && existingTransportation == null && isEditMode) {
+    if (isEditMode && existingTransportation == null) {
+        // Editing needs the record from the server; without it there is no form to save.
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center

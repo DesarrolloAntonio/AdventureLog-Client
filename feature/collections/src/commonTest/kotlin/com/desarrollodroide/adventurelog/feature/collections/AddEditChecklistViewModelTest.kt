@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.collections
 
+import com.desarrollodroide.adventurelog.core.model.Collection
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionItemUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import com.desarrollodroide.adventurelog.core.testing.CollectionsRepositoryStub
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
@@ -33,9 +36,12 @@ class AddEditChecklistViewModelTest {
     private class FakeRepo : CollectionsRepositoryStub() {
         var savedItems: List<Pair<String, Boolean>>? = null
         var savedName: String? = null
+        var collection: Either<ApiResponse, Collection> = Either.Right(collectionWithChecklist())
         var result: Either<ApiResponse, Checklist> = Either.Right(
             Checklist(id = "k1", user = "u", name = "Packing", createdAt = "", updatedAt = "")
         )
+
+        override suspend fun getCollection(collectionId: String): Either<ApiResponse, Collection> = collection
 
         override suspend fun createChecklist(
             collectionId: String,
@@ -54,7 +60,7 @@ class AddEditChecklistViewModelTest {
     @AfterTest fun tearDown() = Dispatchers.resetMain()
 
     private fun viewModel(repo: FakeRepo = FakeRepo()) =
-        AddEditChecklistViewModel(SaveChecklistUseCase(repo)) to repo
+        AddEditChecklistViewModel(SaveChecklistUseCase(repo), GetCollectionItemUseCase(GetCollectionDetailUseCase(repo))) to repo
 
     @Test
     fun aListWithoutATitleCannotBeSaved() {
@@ -136,9 +142,9 @@ class AddEditChecklistViewModelTest {
     }
 
     @Test
-    fun editingAnExistingListStartsFromIt() {
-        val (vm, _) = viewModel()
-        vm.prefill(
+    fun editingAnExistingListStartsFromWhatTheServerHas() = runTest(dispatcher) {
+        val (vm, repo) = viewModel()
+        repo.collection = Either.Right(collectionWithChecklist(
             Checklist(
                 id = "k1",
                 user = "u",
@@ -150,10 +156,31 @@ class AddEditChecklistViewModelTest {
                     ChecklistItem("i2", "u", "Tablets", false, "k1", "", "")
                 )
             )
-        )
+        ))
+        vm.load("c1", "k1")
+        testScheduler.advanceUntilIdle()
 
         assertEquals("Packing", vm.state.value.name)
         assertEquals(2, vm.state.value.lines.size)
         assertEquals(1, vm.state.value.doneCount)
     }
+
+    @Test
+    fun aListThatCannotBeReadGivesNoFormToSave() = runTest(dispatcher) {
+        val (vm, repo) = viewModel()
+        repo.collection = Either.Left(ApiResponse.IOException)
+
+        vm.load("c1", "k1")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals("", vm.state.value.name)
+        assertEquals("Network unavailable", vm.state.value.loadError)
+    }
 }
+
+private fun collectionWithChecklist(vararg lists: Checklist) = Collection(
+    id = "c1", description = "", userId = "u", name = "QA_Col", isPublic = false, locations = emptyList(),
+    createdAt = "", startDate = null, endDate = null, transportations = emptyList(), notes = emptyList(),
+    updatedAt = "", checklists = lists.toList(), isArchived = false, sharedWith = emptyList(), link = "",
+    lodging = emptyList()
+)

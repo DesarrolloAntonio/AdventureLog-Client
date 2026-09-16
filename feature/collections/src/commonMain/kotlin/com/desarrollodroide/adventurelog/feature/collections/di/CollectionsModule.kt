@@ -82,14 +82,14 @@ val collectionsModule = module {
     }
 
     viewModel {
-        AddEditNoteViewModel(saveNoteUseCase = get())
+        AddEditNoteViewModel(saveNoteUseCase = get(), getCollectionItemUseCase = get())
     }
 
     viewModel {
-        AddEditChecklistViewModel(saveChecklistUseCase = get())
+        AddEditChecklistViewModel(saveChecklistUseCase = get(), getCollectionItemUseCase = get())
     }
 
     viewModel {
-        AddEditLodgingViewModel(saveLodgingUseCase = get())
+        AddEditLodgingViewModel(saveLodgingUseCase = get(), getCollectionItemUseCase = get())
     }
 }
