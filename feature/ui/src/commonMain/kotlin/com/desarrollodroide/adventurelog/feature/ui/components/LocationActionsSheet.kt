@@ -57,6 +57,12 @@ fun LocationActionsSheet(
     onShare: () -> Unit,
     onManageCollections: () -> Unit,
     onDelete: () -> Unit,
+    /**
+     * False for someone else's place inside a collection shared with you. The server lets you edit
+     * or duplicate it, but refuses a delete (403) and taking it out of the owner's collections (400),
+     * so those two are not offered (measured with two accounts, QA 09).
+     */
+    isOwner: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -76,19 +82,21 @@ fun LocationActionsSheet(
             ActionRow(Icons.Outlined.Edit, "Edit place", onEdit)
             ActionRow(Icons.Outlined.ContentCopy, "Duplicate", onDuplicate)
             ActionRow(Icons.Outlined.Share, "Share externally", onShare)
-            ActionRow(Icons.Outlined.FolderOpen, "Manage collections", onManageCollections)
+            if (isOwner) {
+                ActionRow(Icons.Outlined.FolderOpen, "Manage collections", onManageCollections)
 
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
 
-            ActionRow(
-                icon = Icons.Outlined.Delete,
-                label = "Delete",
-                onClick = onDelete,
-                tint = MaterialTheme.colorScheme.error
-            )
+                ActionRow(
+                    icon = Icons.Outlined.Delete,
+                    label = "Delete",
+                    onClick = onDelete,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
         }

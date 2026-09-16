@@ -19,6 +19,7 @@ class GetRegionsUseCase(
             is Either.Left -> when (result.value) {
                 is ApiResponse.IOException -> Either.Left("Network unavailable")
                 is ApiResponse.HttpError -> Either.Left("Could not load the regions, try again later")
+                is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                 is ApiResponse.InvalidCredentials -> Either.Left("Session expired, please log in again")
             }
             is Either.Right -> Either.Right(result.value)

@@ -14,6 +14,7 @@ class GetCollectionDetailUseCase(
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("Network unavailable")
                     is ApiResponse.HttpError -> Either.Left("Error getting collection details, try again later")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired, please log in again")
                 }
             }

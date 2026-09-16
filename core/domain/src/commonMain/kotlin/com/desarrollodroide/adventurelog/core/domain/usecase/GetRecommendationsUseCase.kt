@@ -42,6 +42,7 @@ class GetRecommendationsUseCase(
                 when (result.value) {
                     is ApiResponse.IOException -> "No internet connection. Please check your network."
                     is ApiResponse.HttpError -> "Could not search there. Try somewhere else."
+                    is ApiResponse.Forbidden -> "You don't have permission to do that."
                     is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."
                 }
             )

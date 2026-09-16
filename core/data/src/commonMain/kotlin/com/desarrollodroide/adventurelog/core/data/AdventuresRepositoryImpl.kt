@@ -146,7 +146,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getLocation: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -199,7 +200,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during createAdventure: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -227,7 +229,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getRecommendations: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -280,7 +283,8 @@ class AdventuresRepositoryImpl(
         Either.Right(block())
     } catch (e: HttpException) {
         when (e.code) {
-            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            401 -> Either.Left(ApiResponse.InvalidCredentials)
+            403 -> Either.Left(ApiResponse.Forbidden)
             else -> Either.Left(ApiResponse.HttpError)
         }
     } catch (e: IOException) {
@@ -302,7 +306,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during generateDescription: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -330,7 +335,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during deleteAdventure: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -392,7 +398,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during updateAdventure: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -418,7 +425,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during updateLocationCollections: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {

@@ -40,7 +40,8 @@ fun Collection.toUltraSlimCollection(): UltraSlimCollection = UltraSlimCollectio
     endDate = endDate,
     adventureCount = locations.size,
     featuredImage = extractFeaturedImage(),
-    link = link
+    link = link,
+    ownerId = userId
 )
 
 /**

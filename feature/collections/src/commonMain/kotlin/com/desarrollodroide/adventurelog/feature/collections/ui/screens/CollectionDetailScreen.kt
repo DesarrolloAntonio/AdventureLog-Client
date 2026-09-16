@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import com.desarrollodroide.adventurelog.core.model.ownedBy
+import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -108,6 +110,7 @@ fun CollectionDetailScreen(
     
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentUserId = rememberCurrentUserId()
     
     LaunchedEffect(collectionId) {
         viewModel.loadCollection(collectionId)
@@ -165,6 +168,7 @@ fun CollectionDetailScreen(
             }
             uiState.collection != null -> {
                 CollectionDetailContent(
+                    currentUserId = currentUserId,
                     collection = uiState.collection!!,
                     showTitle = showTitle,
                     onBackClick = onBackClick,
@@ -292,6 +296,8 @@ fun CollectionDetailContent(
     onAddLodging: () -> Unit = {},
     onEditLodging: (Lodging) -> Unit = {},
     onDeleteLodging: (Lodging) -> Unit = {},
+    /** Tells your places from the owner's in a collection shared with you (QA 09, MC-02). */
+    currentUserId: String? = null,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -470,7 +476,8 @@ fun CollectionDetailContent(
                             onClick = { onAdventureClick(adventure) },
                             onEdit = { onEditAdventure(adventure) },
                             onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) }
+                            onManageCollections = { onManageCollections(adventure) },
+                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
                         )
                     }
                 }
@@ -604,7 +611,8 @@ fun CollectionDetailContent(
                             onClick = { onAdventureClick(adventure) },
                             onEdit = { onEditAdventure(adventure) },
                             onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) }
+                            onManageCollections = { onManageCollections(adventure) },
+                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
                         )
                     }
                 }

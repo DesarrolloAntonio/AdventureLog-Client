@@ -55,5 +55,6 @@ class DeleteLodgingUseCase(
 private fun ApiResponse.lodgingMessage(): String = when (this) {
     is ApiResponse.IOException -> "Network unavailable"
     is ApiResponse.HttpError -> "Could not save that, try again later"
+    is ApiResponse.Forbidden -> "You don't have permission to do that."
     is ApiResponse.InvalidCredentials -> "Session expired, please log in again"
 }

@@ -30,6 +30,7 @@ class UpdateCollectionUseCase(
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
                     is ApiResponse.HttpError -> Either.Left("Failed to update collection. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("That collection belongs to someone else, so only its owner can change it.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

@@ -21,6 +21,7 @@ class LoginUseCase(
                     // server seen from outside. That is the thing to check (measured).
                     is ApiResponse.IOException -> Either.Left(CANNOT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Error getting user credentials, try again later")
+                    ApiResponse.Forbidden -> Either.Left("Invalid username or password")
                     ApiResponse.InvalidCredentials -> Either.Left("Invalid username or password")
                 }
             }

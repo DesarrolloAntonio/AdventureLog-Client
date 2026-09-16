@@ -23,6 +23,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -241,6 +242,9 @@ fun HomeScreenContent(
     }
 
     // Function to navigate to any screen in the app
+    // Set by Home's invitation banner and cleared once Collections has opened on Invites.
+    var openCollectionInvites by rememberSaveable { mutableStateOf(false) }
+
     val navigateTo: (CurrentScreen) -> Unit = { screen ->
         navController.navigate(screen.route) {
             // Pop up to the start destination of the graph to
@@ -523,6 +527,10 @@ fun HomeScreenContent(
                                 },
                                 onSeeCalendar = { navigateTo(CurrentScreen.CALENDAR) },
                                 onSeeAllPlaces = { navigateTo(CurrentScreen.PLACES) },
+                                onSeeInvitations = {
+                                    openCollectionInvites = true
+                                    navigateTo(CurrentScreen.COLLECTIONS)
+                                },
                                 onRetry = onRetryDashboard,
                                 onAddPlace = {
                                     navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
@@ -590,6 +598,8 @@ fun HomeScreenContent(
                         // Collections screen with navigator
                         composable(route = NavigationRoutes.Collections.route) {
                             CollectionsPane(
+                                openInvites = openCollectionInvites,
+                                onInvitesOpened = { openCollectionInvites = false },
                                 onAddCollection = {
                                     navController.navigate(NavigationRoutes.Collections.add)
                                 },

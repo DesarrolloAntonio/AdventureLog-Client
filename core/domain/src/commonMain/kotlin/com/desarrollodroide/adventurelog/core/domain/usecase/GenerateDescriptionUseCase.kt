@@ -13,6 +13,7 @@ class GenerateDescriptionUseCase(
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("No internet connection. Cannot generate description.")
                     is ApiResponse.HttpError -> Either.Left("No Wikipedia description available for \"$name\"")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

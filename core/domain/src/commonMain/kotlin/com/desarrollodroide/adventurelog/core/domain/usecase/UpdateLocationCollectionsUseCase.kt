@@ -22,6 +22,7 @@ class UpdateLocationCollectionsUseCase(
                 val errorMessage = when (updateResult.value) {
                     is ApiResponse.IOException -> "Network error"
                     is ApiResponse.HttpError -> "Server error"
+                    is ApiResponse.Forbidden -> "That place belongs to someone else."
                     is ApiResponse.InvalidCredentials -> "Invalid credentials"
                 }
                 Either.Left(errorMessage)

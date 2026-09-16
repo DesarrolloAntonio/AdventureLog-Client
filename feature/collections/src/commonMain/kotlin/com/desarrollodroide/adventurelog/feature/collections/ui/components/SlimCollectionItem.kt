@@ -60,6 +60,7 @@ fun SlimCollectionItem(
     onDownloadPdf: () -> Unit = {},
     onExportZip: () -> Unit = {},
     busyLabel: String? = null,
+    isOwner: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -196,6 +197,7 @@ fun SlimCollectionItem(
         CollectionActionsSheet(
             collection = collection,
             busyLabel = busyLabel,
+            isOwner = isOwner,
             onDismiss = { showMenu = false },
             onOpen = { showMenu = false; onClick() },
             onEdit = { showMenu = false; onEditCollection() },

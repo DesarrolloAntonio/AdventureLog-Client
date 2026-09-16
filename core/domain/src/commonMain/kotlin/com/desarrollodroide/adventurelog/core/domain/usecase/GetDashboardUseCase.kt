@@ -16,6 +16,7 @@ class GetDashboardUseCase(
                     // server sent people to check a network that was fine (measured).
                     is ApiResponse.IOException -> "Can't reach the server. Check your connection."
                     is ApiResponse.HttpError -> "Could not load your dashboard. Please try again."
+                    is ApiResponse.Forbidden -> "You don't have permission to do that."
                     is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."
                 }
             )

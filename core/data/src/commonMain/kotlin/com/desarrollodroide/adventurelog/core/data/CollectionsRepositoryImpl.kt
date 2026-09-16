@@ -187,7 +187,8 @@ class CollectionsRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during createCollection: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -240,7 +241,8 @@ class CollectionsRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during deleteCollection: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -309,7 +311,8 @@ class CollectionsRepositoryImpl(
         Either.Right(block())
     } catch (e: HttpException) {
         when (e.code) {
-            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            401 -> Either.Left(ApiResponse.InvalidCredentials)
+            403 -> Either.Left(ApiResponse.Forbidden)
             else -> Either.Left(ApiResponse.HttpError)
         }
     } catch (e: IOException) {
@@ -351,7 +354,8 @@ class CollectionsRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during updateCollection: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -494,7 +498,8 @@ class CollectionsRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error on a note call: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {

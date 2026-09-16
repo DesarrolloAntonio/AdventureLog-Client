@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.InvitesBanner
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -80,6 +81,7 @@ fun DashboardScreen(
     onAddPlace: () -> Unit = { },
     onAddCollection: () -> Unit = { },
     onRetry: () -> Unit = { },
+    onSeeInvitations: () -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (homeUiState) {
@@ -102,16 +104,28 @@ fun DashboardScreen(
                 TextButton(onClick = onRetry) { Text("Try again") }
             }
 
-            is HomeUiState.Success -> DashboardList(
-                dashboard = homeUiState.dashboard,
-                today = homeUiState.today,
-                onAdventureClick = onAdventureClick,
-                onTripClick = onTripClick,
-                onSeeCalendar = onSeeCalendar,
-                onSeeAllPlaces = onSeeAllPlaces,
-                onAddPlace = onAddPlace,
-                onAddCollection = onAddCollection
-            )
+            is HomeUiState.Success -> Column(Modifier.fillMaxSize()) {
+                // The dashboard has carried the count all along and nothing showed it, so an
+                // account with an invitation waiting - often a brand-new one, on the first-run
+                // screen - had no idea (QA 09, MC-05).
+                if (homeUiState.dashboard.inviteCount > 0) {
+                    InvitesBanner(
+                        count = homeUiState.dashboard.inviteCount,
+                        onClick = onSeeInvitations
+                    )
+                }
+                DashboardList(
+                    dashboard = homeUiState.dashboard,
+                    today = homeUiState.today,
+                    onAdventureClick = onAdventureClick,
+                    onTripClick = onTripClick,
+                    onSeeCalendar = onSeeCalendar,
+                    onSeeAllPlaces = onSeeAllPlaces,
+                    onAddPlace = onAddPlace,
+                    onAddCollection = onAddCollection,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }

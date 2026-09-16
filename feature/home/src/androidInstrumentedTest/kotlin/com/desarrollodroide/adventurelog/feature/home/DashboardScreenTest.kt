@@ -169,4 +169,32 @@ class DashboardScreenTest {
         onAllNodes(hasText("Countries")).assertCountEquals(0)
         assertTrue(onAllNodes(hasText("Add a place")).fetchSemanticsNodes().isNotEmpty())
     }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun aPendingInvitationIsShownEvenToAnAccountWithNothingYet() = runComposeUiTest {
+        // QA 09, MC-05: a brand-new account with an invitation waiting saw only the first-run
+        // screen - the dashboard carried the count and nothing showed it.
+        var opened = 0
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(dashboard = Dashboard(inviteCount = 1)),
+                    onSeeInvitations = { opened++ }
+                )
+            }
+        }
+
+        onNodeWithText("You have an invitation to a collection").assertIsDisplayed().performClick()
+        assertEquals(1, opened)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun noInvitationNoBanner() = runComposeUiTest {
+        setContent { WithAppLocals { DashboardScreen(homeUiState = HomeUiState.Success(dashboard = dashboard)) } }
+
+        onAllNodes(hasText("invitation", substring = true)).assertCountEquals(0)
+    }
+
 }

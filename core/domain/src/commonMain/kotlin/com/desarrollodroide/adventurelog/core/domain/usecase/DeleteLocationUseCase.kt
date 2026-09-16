@@ -13,6 +13,7 @@ class DeleteLocationUseCase(
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
                     is ApiResponse.HttpError -> Either.Left("Failed to delete location. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("That place belongs to someone else, so it cannot be deleted from here.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

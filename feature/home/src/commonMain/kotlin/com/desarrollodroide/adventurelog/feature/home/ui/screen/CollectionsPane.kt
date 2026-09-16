@@ -75,6 +75,8 @@ fun CollectionsPane(
     onAddLodging: (String) -> Unit,
     onEditLodging: (String, Lodging) -> Unit,
     onHomeClick: () -> Unit,
+    openInvites: Boolean = false,
+    onInvitesOpened: () -> Unit = { },
     modifier: Modifier = Modifier
 ) {
     val backStack = rememberNavBackStack(collectionsNavConfiguration, CollectionsList)
@@ -107,6 +109,8 @@ fun CollectionsPane(
                 )
             ) {
                 CollectionsScreen(
+                    openInvites = openInvites,
+                    onInvitesOpened = onInvitesOpened,
                     onCollectionClick = { id, _ ->
                         // Swap the open collection rather than stacking them, so back leaves
                         // Collections instead of retracing everything opened along the way.

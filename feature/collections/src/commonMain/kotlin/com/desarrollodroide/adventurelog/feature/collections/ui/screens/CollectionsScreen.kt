@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import com.desarrollodroide.adventurelog.feature.ui.components.PullableStateBox
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.InvitesBanner
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,6 +72,8 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.core.model.ownedBy
+import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.SlimCollectionItem
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsFilterSheet
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
@@ -102,6 +106,9 @@ fun CollectionsScreen(
     onFirstLoaded: (UltraSlimCollection) -> Unit = { },
     /** The id of a collection just deleted, so a two-pane caller can drop it from its detail side. */
     onCollectionDeleted: (String) -> Unit = { },
+    /** Arrive on Invites, freshly loaded - Home's invitation banner asks for this. */
+    openInvites: Boolean = false,
+    onInvitesOpened: () -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
@@ -132,6 +139,14 @@ fun CollectionsScreen(
 
     var collectionToDelete by remember { mutableStateOf<UltraSlimCollection?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentUserId = rememberCurrentUserId()
+
+    LaunchedEffect(openInvites) {
+        if (openInvites) {
+            viewModel.showInvites()
+            onInvitesOpened()
+        }
+    }
 
     LaunchedEffect(actionMessage) {
         actionMessage?.let {
@@ -198,6 +213,7 @@ fun CollectionsScreen(
         onDownloadPdf = { viewModel.exportCollection(it, CollectionExport.PDF) },
         onExportZip = { viewModel.exportCollection(it, CollectionExport.ZIP) },
         busyLabel = busyLabel,
+        currentUserId = currentUserId,
         collectionCount = collectionCount,
         pendingInvites = pendingInvites,
         statusFilter = statusFilter,
@@ -280,6 +296,7 @@ private fun CollectionsContent(
     onDownloadPdf: (UltraSlimCollection) -> Unit = {},
     onExportZip: (UltraSlimCollection) -> Unit = {},
     busyLabel: String? = null,
+    currentUserId: String? = null,
     collectionCount: Int = 0,
     pendingInvites: List<CollectionInvite> = emptyList(),
     statusFilter: TripStatus? = null,
@@ -392,7 +409,8 @@ private fun CollectionsContent(
                         onArchiveCollection = onArchiveCollection,
                         onDownloadPdf = onDownloadPdf,
                         onExportZip = onExportZip,
-                        busyLabel = busyLabel
+                        busyLabel = busyLabel,
+                        currentUserId = currentUserId
                     )
                 }
 
@@ -410,6 +428,7 @@ private fun CollectionsContent(
                         onDownloadPdf = onDownloadPdf,
                         onExportZip = onExportZip,
                         busyLabel = busyLabel,
+                        currentUserId = currentUserId,
                     )
                 }
 
@@ -462,6 +481,7 @@ private fun CollectionsContent(
                                 onDownloadPdf = onDownloadPdf,
                                 onExportZip = onExportZip,
                                 busyLabel = busyLabel,
+                                currentUserId = currentUserId,
                             )
                         }
                     }
@@ -484,6 +504,7 @@ private fun CollectionsPagingList(
     onDownloadPdf: (UltraSlimCollection) -> Unit = {},
     onExportZip: (UltraSlimCollection) -> Unit = {},
     busyLabel: String? = null,
+    currentUserId: String? = null,
 ) {
     // Same reasoning as the places list: let the width decide the column count.
         // Same single content column as everywhere else.
@@ -517,7 +538,10 @@ private fun CollectionsPagingList(
                         onArchiveCollection = { onArchiveCollection(collection) },
                         onDownloadPdf = { onDownloadPdf(collection) },
                         onExportZip = { onExportZip(collection) },
-                        busyLabel = busyLabel
+                        busyLabel = busyLabel,
+                        // A collection shared with you: the server refuses its owner-only actions, so they
+                        // are not offered (QA 09, MC-02).
+                        isOwner = ownedBy(collection.ownerId, currentUserId)
                     )
                 }
             }
@@ -566,12 +590,9 @@ private fun CollectionsPagingList(
 
 @Composable
 private fun EmptyState() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    // Pullable: a new account's list is empty, and a pull is how an invitation that arrived since
+    // gets in (QA 09).
+    PullableStateBox {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -607,12 +628,7 @@ private fun NoSearchResultsState(searchQuery: String, statusFilter: TripStatus? 
         null -> null
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    PullableStateBox {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -682,44 +698,6 @@ private fun ActiveFilters(
  * An invitation announces itself. It used to sit behind a tab that was empty for everyone who had
  * not been invited to anything, which is nearly always.
  */
-@Composable
-private fun InvitesBanner(count: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.MarkEmailUnread,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(Modifier.width(14.dp))
-        Text(
-            text = if (count == 1) {
-                "You have an invitation to a collection"
-            } else {
-                "You have $count invitations to collections"
-            },
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(20.dp)
-        )
-    }
-}
 
 /** Whole-list tabs: the archive, what others have shared, and pending invitations. */
 @Composable
@@ -737,6 +715,7 @@ private fun TabContentList(
     onDownloadPdf: (UltraSlimCollection) -> Unit,
     onExportZip: (UltraSlimCollection) -> Unit,
     busyLabel: String?,
+    currentUserId: String?,
     modifier: Modifier = Modifier
 ) {
     when {
@@ -787,7 +766,10 @@ private fun TabContentList(
                         onArchiveCollection = { onArchiveCollection(collection) },
                         onDownloadPdf = { onDownloadPdf(collection) },
                         onExportZip = { onExportZip(collection) },
-                        busyLabel = busyLabel
+                        busyLabel = busyLabel,
+                        // A collection shared with you: the server refuses its owner-only actions, so they
+                        // are not offered (QA 09, MC-02).
+                        isOwner = ownedBy(collection.ownerId, currentUserId)
                     )
                 }
             }
@@ -797,7 +779,9 @@ private fun TabContentList(
 
 @Composable
 private fun TabEmpty(title: String, body: String) {
-    Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+    // Pullable, like the main list's empty state: "No invitations" is the screen a refresh has to
+    // be able to change.
+    PullableStateBox {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)

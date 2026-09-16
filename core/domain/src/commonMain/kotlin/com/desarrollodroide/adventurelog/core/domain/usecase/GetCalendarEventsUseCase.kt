@@ -17,6 +17,7 @@ class GetCalendarEventsUseCase(
                 when (result.value) {
                     is ApiResponse.IOException -> "No internet connection."
                     is ApiResponse.HttpError -> "Could not load your calendar. Please try again."
+                    is ApiResponse.Forbidden -> "You don't have permission to do that."
                     is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."
                 }
             )

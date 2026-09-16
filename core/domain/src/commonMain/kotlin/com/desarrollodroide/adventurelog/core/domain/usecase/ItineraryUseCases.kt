@@ -58,5 +58,6 @@ class DeleteItineraryEntryUseCase(
 private fun ApiResponse.itineraryMessage(): String = when (this) {
     is ApiResponse.IOException -> "Network unavailable"
     is ApiResponse.HttpError -> "Could not change the itinerary, try again later"
+    is ApiResponse.Forbidden -> "You don't have permission to do that."
     is ApiResponse.InvalidCredentials -> "Session expired, please log in again"
 }

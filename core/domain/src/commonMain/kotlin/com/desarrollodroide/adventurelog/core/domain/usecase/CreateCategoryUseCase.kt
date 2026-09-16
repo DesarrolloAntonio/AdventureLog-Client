@@ -32,6 +32,7 @@ class CreateCategoryUseCase(
                 when (result.value) {
                     is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
                     is ApiResponse.HttpError -> Either.Left("Failed to create category. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

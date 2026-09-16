@@ -34,6 +34,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.desarrollodroide.adventurelog.feature.settings.viewmodel.ProfileState
+import androidx.compose.ui.unit.Dp
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.Image
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
@@ -116,11 +123,21 @@ fun UsersScreen(
                     if (state.users.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) { NobodyYet() }
                     } else {
-                        items(state.filtered, key = { it.uuid }) { user -> UserCard(user) }
+                        items(state.filtered, key = { it.uuid }) { user ->
+                            UserCard(user, onClick = { viewModel.openProfile(user) })
+                        }
                     }
                 }
             }
         }
+    }
+
+    state.profile?.let { profile ->
+        ProfileSheet(
+            profile = profile,
+            onRetry = viewModel::retryProfile,
+            onDismiss = viewModel::closeProfile
+        )
     }
 }
 
@@ -155,11 +172,9 @@ private fun NobodyYet() {
 }
 
 @Composable
-private fun UserCard(user: PublicUser) {
-    val imageLoader = LocalImageLoader.current
-    val photo = user.profilePic?.takeIf { it.isNotBlank() }
-
+private fun UserCard(user: PublicUser, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
@@ -171,29 +186,7 @@ private fun UserCard(user: PublicUser) {
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (photo != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = photo, imageLoader = imageLoader),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(44.dp).clip(CircleShape)
-                )
-            } else {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = user.displayName.take(1).uppercase(),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-                }
-            }
+            Avatar(user, size = 44.dp)
 
             Spacer(Modifier.width(12.dp))
 
@@ -216,3 +209,127 @@ private fun UserCard(user: PublicUser) {
         }
     }
 }
+
+@Composable
+private fun Avatar(user: PublicUser, size: Dp) {
+    val imageLoader = LocalImageLoader.current
+    val photo = user.profilePic?.takeIf { it.isNotBlank() }
+    if (photo != null) {
+        Image(
+            painter = rememberAsyncImagePainter(model = photo, imageLoader = imageLoader),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(size).clip(CircleShape)
+        )
+    } else {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            modifier = Modifier.size(size)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = user.displayName.take(1).uppercase(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Someone's public profile: who they are and their numbers, which is how the web's profile page
+ * opens. Their public places and collections, the page's second half, are not here yet - each would
+ * need a way to open another person's record, which the app does not have.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProfileSheet(profile: ProfileState, onRetry: () -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Avatar(profile.person, size = 56.dp)
+                Spacer(Modifier.width(14.dp))
+                Column {
+                    Text(
+                        text = profile.person.displayName,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "@${profile.person.username}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            val stats = profile.stats
+            when {
+                profile.isLoading -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+                }
+
+                profile.error != null -> Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = profile.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                    TextButton(onClick = onRetry) { Text("Try again") }
+                }
+
+                stats != null -> Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ProfileNumber("Places", stats.locationCount.toString(), Modifier.weight(1f))
+                        ProfileNumber("Visited", stats.visitedLocationCount.toString(), Modifier.weight(1f))
+                        ProfileNumber("Trips", stats.tripsCount.toString(), Modifier.weight(1f))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ProfileNumber("Countries", stats.visitedCountryCount.toString(), Modifier.weight(1f))
+                        ProfileNumber("Regions", stats.visitedRegionCount.toString(), Modifier.weight(1f))
+                        ProfileNumber("Cities", stats.visitedCityCount.toString(), Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileNumber(label: String, value: String, modifier: Modifier = Modifier) {
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+

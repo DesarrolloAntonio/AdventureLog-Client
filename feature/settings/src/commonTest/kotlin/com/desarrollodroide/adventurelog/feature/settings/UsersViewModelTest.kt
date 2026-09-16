@@ -1,6 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.settings
 
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.common.ApiResponse
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
+import com.desarrollodroide.adventurelog.core.model.UserStats
+import com.desarrollodroide.adventurelog.core.testing.FakeUserRepository
+import kotlinx.coroutines.test.advanceUntilIdle
 import com.desarrollodroide.adventurelog.core.domain.repository.SharingRepository
 import com.desarrollodroide.adventurelog.core.model.PublicUser
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.UsersViewModel
@@ -34,6 +39,17 @@ class UsersViewModelTest {
         private fun unused(): Nothing = throw AssertionError("not part of this test")
     }
 
+    /** Whose numbers were asked for, and what the server answers. */
+    private class Stats(
+        var answer: Either<ApiResponse, UserStats> = Either.Right(UserStats(locationCount = 12, visitedCountryCount = 4))
+    ) : FakeUserRepository() {
+        val asked = mutableListOf<String>()
+        override suspend fun getUserStats(username: String): Either<ApiResponse, UserStats> {
+            asked += username
+            return answer
+        }
+    }
+
     private val people = listOf(
         PublicUser("2", "zoe", "Zoe", "Adams"),
         PublicUser("1", "ana", "Ana", "Beltrán"),
@@ -45,7 +61,7 @@ class UsersViewModelTest {
 
     @Test
     fun peopleArriveSortedByTheNameYouSee() = runTest(dispatcher) {
-        val vm = UsersViewModel(FakeSharing(Either.Right(people)))
+        val vm = UsersViewModel(FakeSharing(Either.Right(people)), GetUserStatsUseCase(Stats()))
         testScheduler.advanceUntilIdle()
 
         // Sorted on displayName lowercased, and displayName falls back to the username when
@@ -56,7 +72,7 @@ class UsersViewModelTest {
 
     @Test
     fun searchMatchesEitherTheNameOrTheUsername() = runTest(dispatcher) {
-        val vm = UsersViewModel(FakeSharing(Either.Right(people)))
+        val vm = UsersViewModel(FakeSharing(Either.Right(people)), GetUserStatsUseCase(Stats()))
         testScheduler.advanceUntilIdle()
 
         vm.onQueryChange("belt")
@@ -72,7 +88,7 @@ class UsersViewModelTest {
     @Test
     fun aFailureIsShownAndCanBeRetried() = runTest(dispatcher) {
         val repo = FakeSharing(Either.Left("Network unavailable"))
-        val vm = UsersViewModel(repo)
+        val vm = UsersViewModel(repo, GetUserStatsUseCase(Stats()))
         testScheduler.advanceUntilIdle()
 
         assertEquals("Network unavailable", vm.uiState.value.error)
@@ -82,4 +98,36 @@ class UsersViewModelTest {
         testScheduler.advanceUntilIdle()
         assertEquals(2, repo.calls)
     }
+
+    @Test
+    fun openingSomeoneShowsTheirOwnNumbers() = runTest(dispatcher) {
+        val stats = Stats()
+        val vm = UsersViewModel(FakeSharing(Either.Right(people)), GetUserStatsUseCase(stats))
+        advanceUntilIdle()
+
+        vm.openProfile(people.first())
+        advanceUntilIdle()
+
+        assertEquals(listOf("zoe"), stats.asked)
+        assertEquals(12, vm.uiState.value.profile?.stats?.locationCount)
+        assertFalse(vm.uiState.value.profile!!.isLoading)
+    }
+
+    @Test
+    fun aProfileThatCouldNotLoadCanBeTriedAgain() = runTest(dispatcher) {
+        val stats = Stats(answer = Either.Left(ApiResponse.IOException))
+        val vm = UsersViewModel(FakeSharing(Either.Right(people)), GetUserStatsUseCase(stats))
+        advanceUntilIdle()
+        vm.openProfile(people.first())
+        advanceUntilIdle()
+        assertEquals("No internet connection. Cannot load statistics.", vm.uiState.value.profile?.error)
+
+        stats.answer = Either.Right(UserStats(locationCount = 3))
+        vm.retryProfile()
+        advanceUntilIdle()
+
+        assertEquals(null, vm.uiState.value.profile?.error)
+        assertEquals(3, vm.uiState.value.profile?.stats?.locationCount)
+    }
+
 }

@@ -27,6 +27,13 @@ import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import com.desarrollodroide.adventurelog.feature.ui.components.PullableStateBox
+import androidx.compose.ui.test.swipeDown
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.onRoot
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 /**
  * The pieces that appear on more than one screen, so a regression here is a regression everywhere.
@@ -105,4 +112,23 @@ class SharedComponentsTest {
         onNodeWithText("The stay").performClick()
         onAllNodes(hasText("Inside the card")).assertCountEquals(0)
     }
+
+    @OptIn(ExperimentalTestApi::class, ExperimentalMaterial3Api::class)
+    @Test
+    fun anEmptyMessageCanStillBePulledToRefresh() = runComposeUiTest {
+        // QA 09: a new account's "No collections yet" could not be pulled, so an invitation that
+        // arrived while the app was open never came in.
+        var refreshes = 0
+        setContent {
+            PullToRefreshBox(isRefreshing = false, onRefresh = { refreshes++ }) {
+                PullableStateBox { Text("No collections yet") }
+            }
+        }
+
+        onRoot().performTouchInput { swipeDown(startY = top + 20f, endY = bottom - 20f, durationMillis = 600) }
+        waitForIdle()
+
+        assertEquals(1, refreshes)
+    }
+
 }
