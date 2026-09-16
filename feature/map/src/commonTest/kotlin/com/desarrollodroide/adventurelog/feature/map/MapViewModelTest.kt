@@ -5,15 +5,12 @@ import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedCitiesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Location
-import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 import com.desarrollodroide.adventurelog.core.testing.CountriesRepositoryStub
 import com.desarrollodroide.adventurelog.core.testing.LocationsRepositoryStub
-import com.desarrollodroide.adventurelog.core.testing.FakeUserRepository
 import com.desarrollodroide.adventurelog.core.testing.testUser
 import com.desarrollodroide.adventurelog.feature.map.viewmodel.MapViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +22,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -78,20 +76,17 @@ class MapViewModelTest {
         locations: Either<ApiResponse, List<Location>> = Either.Right(emptyList()),
         regions: Either<ApiResponse, List<VisitedRegion>> = Either.Right(emptyList()),
         cities: Either<ApiResponse, List<VisitedCity>> = Either.Right(emptyList()),
-        stats: Either<ApiResponse, UserStats> = Either.Right(UserStats()),
-        session: com.desarrollodroide.adventurelog.core.model.UserDetails? = testUser
+        savedState: androidx.lifecycle.SavedStateHandle = androidx.lifecycle.SavedStateHandle()
     ): MapViewModel {
         val locationsRepo = object : LocationsRepositoryStub() {
             override suspend fun getAllLocations() = locations
         }
         val countries = Countries(regions = regions, cities = cities)
-        val users = FakeUserRepository(session = session, stats = stats)
         return MapViewModel(
             getAllLocationsUseCase = GetAllLocationsUseCase(locationsRepo),
-            observeUserStatsUseCase = ObserveUserStatsUseCase(users),
             getVisitedRegionsUseCase = GetVisitedRegionsUseCase(countries),
             getVisitedCitiesUseCase = GetVisitedCitiesUseCase(countries),
-            userRepository = users
+            savedStateHandle = savedState
         )
     }
 
@@ -102,13 +97,10 @@ class MapViewModelTest {
 
     private fun viewModelWith(locations: Flaky): MapViewModel {
         val countries = Countries()
-        val users = FakeUserRepository(session = testUser, stats = Either.Right(UserStats()))
         return MapViewModel(
             getAllLocationsUseCase = GetAllLocationsUseCase(locations),
-            observeUserStatsUseCase = ObserveUserStatsUseCase(users),
             getVisitedRegionsUseCase = GetVisitedRegionsUseCase(countries),
-            getVisitedCitiesUseCase = GetVisitedCitiesUseCase(countries),
-            userRepository = users
+            getVisitedCitiesUseCase = GetVisitedCitiesUseCase(countries)
         )
     }
 
@@ -184,15 +176,26 @@ class MapViewModelTest {
     }
 
     @Test
-    fun theRegionCountComesFromTheStatsNotFromTheCollections() = runTest(dispatcher) {
-        // tripsCount is the number of collections. It sat in this field once, and an account
-        // with two collections reported 33 visited regions.
+    fun theRegionCountIsTheVisitedRegionsNotTheCollectionsNorADefault() = runTest(dispatcher) {
+        // tripsCount - the number of collections - sat in this field once, and an account with
+        // two collections reported 33 visited regions. Then it came from stats that answer a
+        // failure with zeros (QA 06). It is the visited regions the map loads.
         val vm = viewModel(
-            stats = Either.Right(UserStats(visitedRegionCount = 7, tripsCount = 33))
+            regions = Either.Right(listOf(region("JP-26"), region("NO-46")))
         )
+        assertFalse(vm.uiState.value.regionsLoaded)
         testScheduler.advanceUntilIdle()
 
-        assertEquals(7, vm.uiState.value.filters.regionCount)
+        assertTrue(vm.uiState.value.regionsLoaded)
+        assertEquals(2, vm.uiState.value.filters.regionCount)
+    }
+
+    @Test
+    fun regionsThatFailToLoadLeaveTheirCountUnknown() = runTest(dispatcher) {
+        val vm = viewModel(regions = Either.Left(ApiResponse.IOException))
+        testScheduler.advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.regionsLoaded)
     }
 
     @Test
@@ -311,15 +314,6 @@ class MapViewModelTest {
     }
 
     @Test
-    fun aSessionWithNoUsernameSkipsTheStatsInsteadOfCrashing() = runTest(dispatcher) {
-        val vm = viewModel(session = null, locations = Either.Right(listOf(place("Prado"))))
-        testScheduler.advanceUntilIdle()
-
-        assertEquals(0, vm.uiState.value.filters.regionCount)
-        assertEquals(listOf("Prado"), vm.uiState.value.locations.map { it.name })
-    }
-
-    @Test
     fun refreshingAsksAgain() = runTest(dispatcher) {
         var calls = 0
         val locationsRepo = object : LocationsRepositoryStub() {
@@ -329,13 +323,10 @@ class MapViewModelTest {
             }
         }
         val countries = Countries()
-        val users = FakeUserRepository()
         val vm = MapViewModel(
             getAllLocationsUseCase = GetAllLocationsUseCase(locationsRepo),
-            observeUserStatsUseCase = ObserveUserStatsUseCase(users),
             getVisitedRegionsUseCase = GetVisitedRegionsUseCase(countries),
-            getVisitedCitiesUseCase = GetVisitedCitiesUseCase(countries),
-            userRepository = users
+            getVisitedCitiesUseCase = GetVisitedCitiesUseCase(countries)
         )
         testScheduler.advanceUntilIdle()
         assertEquals(1, calls)
@@ -362,4 +353,40 @@ class MapViewModelTest {
         assertNull(vm.uiState.value.error)
         assertEquals(listOf("Prado"), vm.uiState.value.locations.map { it.name })
     }
+
+    // --- through process death (QA 06, MP-03) ----------------------------------------------
+
+    @Test
+    fun theChosenFiltersComeBackAfterTheProcessDies() = runTest(dispatcher) {
+        val saved = androidx.lifecycle.SavedStateHandle()
+        val before = viewModel(savedState = saved)
+        before.toggleVisitedFilter()
+        before.toggleShowCities()
+        before.toggleCategory("Nature")
+        before.toggleCategory("City")
+
+        // A new view model over the same saved state is what Android hands back after a kill.
+        val after = viewModel(savedState = saved)
+        testScheduler.advanceUntilIdle()
+
+        with(after.uiState.value.filters) {
+            assertEquals(false, showVisited)
+            assertEquals(true, showCities)
+            assertEquals(setOf("Nature", "City"), selectedCategories)
+        }
+    }
+
+    @Test
+    fun aMapWithNothingSavedStartsFromTheDefaults() = runTest(dispatcher) {
+        val vm = viewModel()
+        testScheduler.advanceUntilIdle()
+
+        with(vm.uiState.value.filters) {
+            assertEquals(true, showVisited)
+            assertEquals(true, showPlanned)
+            assertEquals(false, showCities)
+            assertEquals(emptySet(), selectedCategories)
+        }
+    }
+
 }

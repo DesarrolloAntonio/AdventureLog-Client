@@ -101,7 +101,7 @@ class CollectionsRepositoryImpl(
             logger.e { "HTTP Error during getCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -128,7 +128,7 @@ class CollectionsRepositoryImpl(
             logger.e { "HTTP Error during getAllCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -148,7 +148,7 @@ class CollectionsRepositoryImpl(
             logger.e { "HTTP Error during getCollection: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -219,7 +219,7 @@ class CollectionsRepositoryImpl(
             logger.e { "HTTP Error during refreshCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {

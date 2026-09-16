@@ -22,6 +22,7 @@ class RefusalIsNotASessionTest {
         override suspend fun deleteAdventure(adventureId: String) {
             throw HttpException(status, "refused")
         }
+        override suspend fun getAdventures(page: Int, pageSize: Int) = throw HttpException(status, "refused")
     }
 
     @Test
@@ -42,4 +43,13 @@ class RefusalIsNotASessionTest {
         assertEquals(Either.Left(ApiResponse.InvalidCredentials), repository.deleteLocation("any"))
         assertEquals(Either.Left("Session expired. Please log in again."), DeleteLocationUseCase(repository)("any"))
     }
+
+    @Test
+    fun theMapsListOfPlacesTellsARefusalFromAnEndedSession() = runTest {
+        // Written as a separate "403 ->" line, this one was missed when 401 and 403 were first
+        // told apart (found in the QA 06 round).
+        assertEquals(Either.Left(ApiResponse.Forbidden), AdventuresRepositoryImpl(Server(403)).getAllLocations())
+        assertEquals(Either.Left(ApiResponse.InvalidCredentials), AdventuresRepositoryImpl(Server(401)).getAllLocations())
+    }
+
 }

@@ -1,12 +1,12 @@
 package com.desarrollodroide.adventurelog.feature.map.viewmodel
 
+import com.desarrollodroide.adventurelog.feature.map.ui.state.MapFilters
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllLocationsUseCase
-import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedCitiesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
 import com.desarrollodroide.adventurelog.feature.map.ui.state.MapUiState
@@ -19,50 +19,58 @@ import com.desarrollodroide.adventurelog.core.model.userTags
 
 class MapViewModel(
     private val getAllLocationsUseCase: GetAllLocationsUseCase,
-    private val observeUserStatsUseCase: ObserveUserStatsUseCase,
     private val getVisitedRegionsUseCase: GetVisitedRegionsUseCase,
     private val getVisitedCitiesUseCase: GetVisitedCitiesUseCase,
-    private val userRepository: UserRepository
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle()
 ) : ViewModel() {
     
     private val logger = Logger.withTag("MapViewModel")
-    private val _uiState = MutableStateFlow(MapUiState())
+    private val _uiState = MutableStateFlow(MapUiState(filters = restoredFilters()))
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
+
+    /**
+     * What the filter sheet had chosen, as it was before the process died. Chosen filters came back
+     * as the defaults after a `ui.py kill` (QA 06, MP-03). Only the choices are kept: the counts are
+     * facts and are loaded again.
+     */
+    private fun restoredFilters(): MapFilters {
+        val defaults = MapFilters()
+        return defaults.copy(
+            showVisited = savedStateHandle.get<Boolean>(KEY_VISITED) ?: defaults.showVisited,
+            showPlanned = savedStateHandle.get<Boolean>(KEY_PLANNED) ?: defaults.showPlanned,
+            showRegions = savedStateHandle.get<Boolean>(KEY_REGIONS) ?: defaults.showRegions,
+            showCities = savedStateHandle.get<Boolean>(KEY_CITIES) ?: defaults.showCities,
+            selectedCategories = savedStateHandle.get<String>(KEY_CATEGORIES)
+                ?.split(SEPARATOR)?.filter { it.isNotEmpty() }?.toSet() ?: defaults.selectedCategories
+        )
+    }
+
+    private fun saveFilters(filters: MapFilters) {
+        savedStateHandle[KEY_VISITED] = filters.showVisited
+        savedStateHandle[KEY_PLANNED] = filters.showPlanned
+        savedStateHandle[KEY_REGIONS] = filters.showRegions
+        savedStateHandle[KEY_CITIES] = filters.showCities
+        savedStateHandle[KEY_CATEGORIES] = filters.selectedCategories.joinToString(SEPARATOR)
+    }
+
+    private fun updateFilters(change: (MapFilters) -> MapFilters) {
+        _uiState.update { it.copy(filters = change(it.filters)) }
+        saveFilters(_uiState.value.filters)
+    }
+
+    private companion object {
+        const val KEY_VISITED = "map_show_visited"
+        const val KEY_PLANNED = "map_show_planned"
+        const val KEY_REGIONS = "map_show_regions"
+        const val KEY_CITIES = "map_show_cities"
+        const val KEY_CATEGORIES = "map_categories"
+        const val SEPARATOR = "\u001F"
+    }
     
     init {
         loadAllAdventures()
-        observeUserStats()
         loadVisitedRegions()
         loadVisitedCities()
-    }
-    
-    private fun observeUserStats() {
-        viewModelScope.launch {
-            // Get current user session to obtain username
-            val userSession = userRepository.getUserSessionOnce()
-            val username = userSession?.username
-            if (username == null) {
-                logger.w { "No username found in session, cannot observe stats" }
-                return@launch
-            }
-            
-            observeUserStatsUseCase(username).collect { stats ->
-                logger.d { "📊 User stats updated:" }
-                logger.d { "  - Visited regions: ${stats.visitedRegionCount}" }
-                logger.d { "  - Visited countries: ${stats.visitedCountryCount}" }
-
-                // Only the region count comes from here. Visited used to be filled with
-                // tripsCount - the number of collections - so the map reported 33 visited places
-                // for an account with two.
-                _uiState.update { state ->
-                    state.copy(
-                        filters = state.filters.copy(
-                            regionCount = stats.visitedRegionCount
-                        )
-                    )
-                }
-            }
-        }
     }
     
     private fun loadVisitedCities() {
@@ -83,11 +91,7 @@ class MapViewModel(
         }
     }
 
-    fun toggleShowCities() {
-        _uiState.update { state ->
-            state.copy(filters = state.filters.copy(showCities = !state.filters.showCities))
-        }
-    }
+    fun toggleShowCities() = updateFilters { it.copy(showCities = !it.showCities) }
 
     private fun loadVisitedRegions() {
         viewModelScope.launch {
@@ -101,9 +105,14 @@ class MapViewModel(
                     val visitedRegions = result.value
                     logger.d { "✅ Successfully loaded ${visitedRegions.size} visited regions" }
                     
+                    // The count is these regions. It came from the account's stats, whose use case
+                    // answers a failure with an all-zero UserStats, so a slow server showed
+                    // "0 Regions" as a fact (QA 06, screenshot). These carry a real outcome.
                     _uiState.update { state ->
                         state.copy(
-                            visitedRegions = visitedRegions
+                            visitedRegions = visitedRegions,
+                            regionsLoaded = true,
+                            filters = state.filters.copy(regionCount = visitedRegions.size)
                         )
                     }
                 }
@@ -186,49 +195,20 @@ class MapViewModel(
         }
     }
     
-    fun toggleVisitedFilter() {
-        _uiState.update { state ->
-            state.copy(
-                filters = state.filters.copy(
-                    showVisited = !state.filters.showVisited
-                )
-            )
-        }
-    }
+    fun toggleVisitedFilter() = updateFilters { it.copy(showVisited = !it.showVisited) }
     
-    fun togglePlannedFilter() {
-        _uiState.update { state ->
-            state.copy(
-                filters = state.filters.copy(
-                    showPlanned = !state.filters.showPlanned
-                )
-            )
-        }
-    }
+    fun togglePlannedFilter() = updateFilters { it.copy(showPlanned = !it.showPlanned) }
     
-    fun toggleShowRegions() {
-        _uiState.update { state ->
-            state.copy(
-                filters = state.filters.copy(
-                    showRegions = !state.filters.showRegions
-                )
-            )
-        }
-    }
+    fun toggleShowRegions() = updateFilters { it.copy(showRegions = !it.showRegions) }
 
-    fun toggleCategory(category: String) {
-        _uiState.update { state ->
-            val selected = state.filters.selectedCategories
-            state.copy(
-                filters = state.filters.copy(
-                    selectedCategories = if (category in selected) {
-                        selected - category
-                    } else {
-                        selected + category
-                    }
-                )
-            )
-        }
+    fun toggleCategory(category: String) = updateFilters { filters ->
+        filters.copy(
+            selectedCategories = if (category in filters.selectedCategories) {
+                filters.selectedCategories - category
+            } else {
+                filters.selectedCategories + category
+            }
+        )
     }
     
     fun toggleActivityTypeFilter(activityType: String) {
@@ -249,17 +229,13 @@ class MapViewModel(
     }
     
     /** Back to showing everything, which is not the same as every switch off. */
-    fun clearFilters() {
-        _uiState.update { state ->
-            state.copy(
-                filters = state.filters.copy(
-                    selectedActivityTypes = emptySet(),
-                    selectedCategories = emptySet(),
-                    showVisited = true,
-                    showPlanned = true
-                )
-            )
-        }
+    fun clearFilters() = updateFilters {
+        it.copy(
+            selectedActivityTypes = emptySet(),
+            selectedCategories = emptySet(),
+            showVisited = true,
+            showPlanned = true
+        )
     }
 
     fun refresh() {

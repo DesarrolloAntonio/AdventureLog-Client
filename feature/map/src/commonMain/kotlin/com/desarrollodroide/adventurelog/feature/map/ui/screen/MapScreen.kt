@@ -35,7 +35,24 @@ fun MapScreen(
         onStopOrDispose { }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // The card sits above the map, not over it. Floating on top it covered the northern edge of
+    // whatever was framed - a place in Norway sat under it - and with places spread from Peru to
+    // Japan no camera padding could make room, because the map is already as far out as it goes
+    // (QA 06, MP-02: padding was tried first and the screenshot showed no change).
+    Column(modifier = Modifier.fillMaxSize()) {
+        ClearStatsSection(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp),
+            isLoading = uiState.isLoading,
+            placesFailed = uiState.error != null,
+            regionsKnown = uiState.regionsLoaded,
+            visitedCount = uiState.filters.visitedCount,
+            plannedCount = uiState.filters.plannedCount,
+            regionCount = uiState.filters.regionCount,
+            onFilterClick = { showFilterSheet = true }
+        )
+
         MapContent(
             locations = filteredAdventures,
             visitedRegions = uiState.visitedRegions,
@@ -45,17 +62,8 @@ fun MapScreen(
             isLoading = uiState.isLoading,
             error = uiState.error,
             onRetry = viewModel::refresh,
-            onAdventureClick = onAdventureClick
-        )
-        
-        ClearStatsSection(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 32.dp, start = 16.dp, end = 16.dp),
-            visitedCount = uiState.filters.visitedCount,
-            plannedCount = uiState.filters.plannedCount,
-            regionCount = uiState.filters.regionCount,
-            onFilterClick = { showFilterSheet = true }
+            onAdventureClick = onAdventureClick,
+            modifier = Modifier.weight(1f)
         )
     }
     

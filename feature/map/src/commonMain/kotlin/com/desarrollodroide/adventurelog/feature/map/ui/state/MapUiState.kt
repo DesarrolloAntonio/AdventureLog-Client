@@ -13,7 +13,9 @@ data class MapUiState(
     /** Category display name to how many of the mapped places carry it. */
     val categoryCounts: List<Pair<String, Int>> = emptyList(),
     val error: String? = null,
-    val filters: MapFilters = MapFilters()
+    val filters: MapFilters = MapFilters(),
+    /** Whether the visited regions have arrived, so their count is a fact rather than a default. */
+    val regionsLoaded: Boolean = false
 )
 
 data class MapFilters(

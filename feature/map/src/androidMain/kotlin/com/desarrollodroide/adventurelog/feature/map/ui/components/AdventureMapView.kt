@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
+import com.desarrollodroide.adventurelog.feature.map.ui.state.markerLabel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -139,9 +140,11 @@ actual fun AdventureMapView(
                 region.latitude?.let { lat ->
                     region.longitude?.let { lng ->
                         val markerState = rememberMarkerState(position = LatLng(lat, lng))
-                        
+                        val label = region.markerLabel()
                         MarkerComposable(
                             state = markerState,
+                            title = label.title,
+                            snippet = label.snippet
                         ) {
                             RegionMarker()
                         }
@@ -157,7 +160,8 @@ actual fun AdventureMapView(
                 val lng = city.longitude
                 if (lat != null && lng != null) {
                     val cityState = rememberMarkerState(position = LatLng(lat, lng))
-                    MarkerComposable(state = cityState, title = city.name) {
+                    val label = city.markerLabel()
+                    MarkerComposable(state = cityState, title = label.title, snippet = label.snippet) {
                         CityMarker()
                     }
                 }
@@ -260,7 +264,7 @@ private fun CityMarker(modifier: Modifier = Modifier) {
 private fun RegionMarker(
     modifier: Modifier = Modifier
 ) {
-    val regionColor = Color(0xFF4CAF50) // Verde similar al de la web
+    val regionColor = Color(0xFF4CAF50) // the web's green
     
     Box(
         modifier = modifier.size(36.dp),
