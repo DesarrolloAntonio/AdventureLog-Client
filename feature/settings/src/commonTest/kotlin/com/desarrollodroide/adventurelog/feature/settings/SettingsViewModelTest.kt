@@ -70,7 +70,8 @@ class SettingsActionsTest {
     fun aSweepThatFailsSaysSomethingAPersonCanRead() = kotlinx.coroutines.test.runTest {
         val useCase = RefreshVisitedRegionsUseCase(FakeCountries(Either.Left(ApiResponse.IOException)))
         val result = useCase() as Either.Left
-        assertEquals("Network unavailable", result.value)
+        // The app's one wording for this since QA 05 (WO-04); it said "Network unavailable".
+        assertEquals("Can't reach the server. Check your connection.", result.value)
     }
 
     @Test

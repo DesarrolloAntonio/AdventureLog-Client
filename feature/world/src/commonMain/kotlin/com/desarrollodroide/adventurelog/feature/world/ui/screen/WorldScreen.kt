@@ -71,7 +71,7 @@ fun WorldScreen(
     viewModel: WorldViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var isRefreshing by remember { mutableStateOf(false) }
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     WorldScreenContent(
         uiState = uiState,
@@ -82,11 +82,7 @@ fun WorldScreen(
         onShowFilters = { /* TODO: Implement filter dialog */ },
         onCountryClick = onCountryClick,
         onMapClick = onMapClick,
-        onRefresh = {
-            isRefreshing = true
-            viewModel.onRefresh()
-            isRefreshing = false
-        },
+        onRefresh = viewModel::onRefresh,
         modifier = modifier
     )
 }
@@ -359,6 +355,12 @@ private fun VisitStatusFilters(
                         FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.surfaceVariant
                     },
                     selectedLabelColor = when (filterMode) {
+                        FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.onSurfaceVariant
+                        else -> Color.White
+                    },
+                    // The tick the colour of the label: left to the default it was dark teal on the
+                    // teal "All" chip and could not be seen (QA 05, screenshot).
+                    selectedLeadingIconColor = when (filterMode) {
                         FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.onSurfaceVariant
                         else -> Color.White
                     }

@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.aspectRatio
@@ -56,7 +57,10 @@ fun CountryCard(
                 modifier = Modifier
                     .width(60.dp)
                     .aspectRatio(3f / 2f)
-                    .clip(RoundedCornerShape(6.dp)),
+                    .clip(RoundedCornerShape(6.dp))
+                    // A hairline edge: a flag that is mostly white (Japan) had no outline on the
+                    // white card and read as a red dot floating beside the name.
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp)),
                 contentScale = ContentScale.Crop
             )
 

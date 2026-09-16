@@ -14,7 +14,8 @@ val worldModule = module {
             getCountriesUseCase = get(),
             refreshCountriesUseCase = get(),
             getVisitedRegionsUseCase = get(),
-            getVisitedCitiesUseCase = get()
+            getVisitedCitiesUseCase = get(),
+            observeCountriesUseCase = get()
         )
     }
 

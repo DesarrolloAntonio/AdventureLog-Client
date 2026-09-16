@@ -172,13 +172,31 @@ class CountriesRepositoryImpl(
         }
     }
 
+    /**
+     * Keeps the cached country's count in step with a tick. The world list is drawn from these
+     * counts and was loaded once, so Japan still read 3/47 after its fourth region was ticked
+     * (QA 05, WO-02). A region's id starts with its country's code: "JP-23".
+     */
+    private fun countVisit(regionId: String, delta: Int) {
+        val code = regionId.substringBefore('-')
+        _countriesFlow.value = _countriesFlow.value.map { country ->
+            if (country.countryCode.equals(code, ignoreCase = true)) {
+                country.copy(numVisits = (country.numVisits + delta).coerceAtLeast(0))
+            } else {
+                country
+            }
+        }
+    }
+
     override suspend fun markRegionVisited(regionId: String): Either<ApiResponse, VisitedRegion> {
         return try {
             val visited = networkDataSource.markRegionVisited(regionId).toDomainModel()
             // Add it to the cached list rather than refetching: the country screen reads this flow
             // and the tick should follow the tap, not a round trip.
+            val wasVisited = _visitedRegionsFlow.value.any { it.regionId == regionId }
             _visitedRegionsFlow.value = _visitedRegionsFlow.value
                 .filterNot { it.regionId == regionId } + visited
+            if (!wasVisited) countVisit(regionId, +1)
             Either.Right(visited)
         } catch (e: HttpException) {
             logger.e { "HTTP Error marking region visited: ${e.code}" }
@@ -199,7 +217,9 @@ class CountriesRepositoryImpl(
     override suspend fun unmarkRegionVisited(regionId: String): Either<ApiResponse, Unit> {
         return try {
             networkDataSource.unmarkRegionVisited(regionId)
+            val wasVisited = _visitedRegionsFlow.value.any { it.regionId == regionId }
             _visitedRegionsFlow.value = _visitedRegionsFlow.value.filterNot { it.regionId == regionId }
+            if (wasVisited) countVisit(regionId, -1)
             Either.Right(Unit)
         } catch (e: HttpException) {
             logger.e { "HTTP Error removing visited region: ${e.code}" }

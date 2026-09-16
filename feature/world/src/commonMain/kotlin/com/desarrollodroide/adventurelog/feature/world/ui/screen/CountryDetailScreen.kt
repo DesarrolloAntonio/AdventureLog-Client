@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.screen
 
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -107,6 +111,16 @@ fun CountryDetailScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
+                        // onNavigateBack reached this screen and nothing drew it: the only way
+                        // back was the system gesture (QA 05, screenshot).
+                        // In a Box: a grid item centres what it holds, and the arrow sat mid-screen.
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                            IconButton(onClick = onNavigateBack, modifier = Modifier.padding(top = 4.dp)) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            }
+                        }
+                    }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         CountryHeader(
                             name = state.country?.name ?: countryCode.uppercase(),
                             capital = state.country?.capital,
@@ -180,13 +194,14 @@ private fun CountryHeader(
                 )
             }
             Spacer(Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.Bottom) {
+            Row {
                 Text(
                     text = "Regions visited",
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).alignByBaseline()
                 )
                 Text(
+                    modifier = Modifier.alignByBaseline(),
                     text = "$visited",
                     style = MaterialTheme.typography.titleMedium,
                     fontFamily = FontFamily.Monospace,
@@ -194,6 +209,7 @@ private fun CountryHeader(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
+                    modifier = Modifier.alignByBaseline(),
                     text = " / $total",
                     style = MaterialTheme.typography.bodySmall,
                     fontFamily = FontFamily.Monospace,
@@ -214,9 +230,13 @@ private fun CountryHeader(
 
 @Composable
 private fun RegionCard(row: RegionRow, onClick: () -> Unit) {
+    // A checkbox, not a button with an icon that says "Visited": a screen reader now hears the
+    // region, whether it is ticked, and that a tap changes it (QA 05, WO-03).
     Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .toggleable(value = row.visited, role = Role.Checkbox, onValueChange = { onClick() }),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -233,7 +253,7 @@ private fun RegionCard(row: RegionRow, onClick: () -> Unit) {
                 } else {
                     Icons.Default.RadioButtonUnchecked
                 },
-                contentDescription = if (row.visited) "Visited" else "Not visited",
+                contentDescription = null,
                 tint = if (row.visited) {
                     MaterialTheme.colorScheme.primary
                 } else {
