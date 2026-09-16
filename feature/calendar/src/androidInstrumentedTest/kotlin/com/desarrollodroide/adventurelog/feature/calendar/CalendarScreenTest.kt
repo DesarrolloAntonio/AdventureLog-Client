@@ -1,7 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.calendar
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -9,6 +12,7 @@ import com.desarrollodroide.adventurelog.core.model.CalendarEvent
 import com.desarrollodroide.adventurelog.feature.calendar.ui.screen.CalendarScreen
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarDay
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarUiState
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -43,13 +47,15 @@ class CalendarScreenTest {
         state: CalendarUiState,
         onToggleType: (String) -> Unit = {},
         onClearTypes: () -> Unit = {},
-        onRetry: () -> Unit = {}
+        onRetry: () -> Unit = {},
+        onOpen: (EventTarget) -> Unit = {}
     ): @androidx.compose.runtime.Composable () -> Unit = {
         CalendarScreen(
             state = state,
             onToggleType = onToggleType,
             onClearTypes = onClearTypes,
-            onRetry = onRetry
+            onRetry = onRetry,
+            onOpen = onOpen
         )
     }
 
@@ -148,5 +154,59 @@ class CalendarScreenTest {
 
         onNodeWithText("All").performClick()
         assertEquals(1, cleared)
+    }
+
+    @Test
+    fun theTypeChipsSayWhichOneIsOn() = runComposeUiTest {
+        setContent {
+            show(
+                CalendarUiState(
+                    isLoading = false,
+                    days = listOf(day("2026-03-04", "Prado")),
+                    today = LocalDate.parse("2026-03-01"),
+                    availableTypes = listOf("lodging", "visit"),
+                    selectedTypes = setOf("lodging")
+                )
+            )()
+        }
+
+        // CA-03: only the colour said so, and a screen reader heard three identical chips.
+        onNodeWithText("Lodging").assertIsOn()
+        onNodeWithText("Visit").assertIsOff()
+        onNodeWithText("All").assertIsOff()
+    }
+
+    @Test
+    fun aRowOpensWhatItNamesAndARowThatNamesNothingIsNotAButton() = runComposeUiTest {
+        var opened: EventTarget? = null
+        val date = "2026-03-06"
+        fun event(id: String, title: String, type: String, resource: String, trip: String?) = CalendarEvent(
+            id = id, type = type, title = title, start = date, end = date, allDay = true, icon = "",
+            category = "", locationLabel = "", collectionId = trip, collectionName = trip?.let { "Morocco" },
+            resourceId = resource
+        )
+        setContent {
+            show(
+                CalendarUiState(
+                    isLoading = false,
+                    days = listOf(
+                        CalendarDay(
+                            LocalDate.parse(date),
+                            listOf(
+                                event("visit-1", "Jemaa el-Fnaa", "visit", "place-1", "trip-1"),
+                                event("transportation-1", "Night train", "transportation", "leg-1", null)
+                            )
+                        )
+                    ),
+                    today = LocalDate.parse("2026-03-01")
+                ),
+                onOpen = { opened = it }
+            )()
+        }
+
+        // CA-02: every row was inert.
+        onNodeWithText("Jemaa el-Fnaa").performClick()
+        assertEquals(EventTarget.Place("place-1"), opened)
+        onNodeWithText("Night train").assertHasNoClickAction()
     }
 }

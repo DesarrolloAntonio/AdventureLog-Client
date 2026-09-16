@@ -112,7 +112,9 @@ fun CollectionsFilterSheet(
                         MetaChip(
                             text = label,
                             tone = if (statusFilter == status) ChipTone.ACCENT else ChipTone.NEUTRAL,
-                            onClick = { onStatusFilterChanged(status) }
+                            onClick = { onStatusFilterChanged(status) },
+                            // The same colour-only state as the calendar's chips (QA 07, CA-03).
+                            selected = statusFilter == status
                         )
                     }
                 }
@@ -157,7 +159,8 @@ internal val StatusOptions: List<Pair<TripStatus?, String>> = listOf(
     TripStatus.FOLDER to "📁 Folder",
     TripStatus.UPCOMING to "🚀 Upcoming",
     TripStatus.IN_PROGRESS to "🎯 In progress",
-    TripStatus.COMPLETED to "✓ Completed"
+    // Not "✓": a chosen chip carries a tick of its own, and it read "✓ ✓ Completed" (QA 07).
+    TripStatus.COMPLETED to "🏁 Completed"
 )
 
 @Composable

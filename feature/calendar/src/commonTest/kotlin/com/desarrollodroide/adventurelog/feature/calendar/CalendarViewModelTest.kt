@@ -7,6 +7,9 @@ import com.desarrollodroide.adventurelog.core.model.CalendarEvent
 import com.desarrollodroide.adventurelog.core.testing.CalendarRepositoryStub
 import com.desarrollodroide.adventurelog.core.testing.testCalendarEvent
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarViewModel
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.Earlier
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.target
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -205,6 +208,95 @@ class CalendarViewModelTest {
         assertEquals("No internet connection.", vm.uiState.value.error)
         assertEquals(false, vm.uiState.value.isLoading)
         assertNull(vm.uiState.value.today)
+    }
+
+    /** The window's answer, then whatever the request with no lower bound gets. */
+    private class Journal(
+        private val window: List<CalendarEvent>,
+        var before: Either<ApiResponse, List<CalendarEvent>>
+    ) : CalendarRepositoryStub() {
+        val asked = mutableListOf<Pair<String?, String?>>()
+
+        override suspend fun getEvents(
+            start: String?,
+            end: String?
+        ): Either<ApiResponse, List<CalendarEvent>> {
+            asked += start to end
+            return if (start == null) before else Either.Right(window)
+        }
+    }
+
+    @Test
+    fun showingEarlierAsksForEverythingBeforeTheWindowAndAddsItOnce() = runTest(dispatcher) {
+        val trip = testCalendarEvent("spans", "2025-01-01T00:00:00Z")
+        val journal = Journal(
+            window = listOf(trip, testCalendarEvent("recent", "2026-03-01")),
+            // The server counts anything overlapping the bound, so the trip comes back again.
+            before = Either.Right(listOf(testCalendarEvent("petra", "2024-05-18", type = "lodging"), trip))
+        )
+        val vm = CalendarViewModel(GetCalendarEventsUseCase(journal))
+        testScheduler.advanceUntilIdle()
+        val windowStart = vm.uiState.value.windowStart.toString()
+
+        vm.loadEarlier()
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(null to windowStart, journal.asked.last())
+        assertEquals(
+            listOf("petra", "spans", "recent"),
+            vm.uiState.value.days.flatMap { it.events }.map { it.id }
+        )
+        assertEquals(Earlier.Loaded(found = 1), vm.uiState.value.earlier)
+        // A type only the older events had is offered too.
+        assertEquals(listOf("lodging", "visit"), vm.uiState.value.availableTypes)
+    }
+
+    @Test
+    fun earlierThatFailsSaysSoKeepsTheWindowAndCanBeTriedAgain() = runTest(dispatcher) {
+        val journal = Journal(
+            window = listOf(testCalendarEvent("recent", "2026-03-01")),
+            before = Either.Left(ApiResponse.IOException)
+        )
+        val vm = CalendarViewModel(GetCalendarEventsUseCase(journal))
+        testScheduler.advanceUntilIdle()
+
+        vm.loadEarlier()
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(Earlier.Failed("No internet connection."), vm.uiState.value.earlier)
+        assertEquals(listOf("recent"), vm.uiState.value.days.flatMap { it.events }.map { it.id })
+
+        journal.before = Either.Right(listOf(testCalendarEvent("petra", "2024-05-18")))
+        vm.loadEarlier()
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(Earlier.Loaded(found = 1), vm.uiState.value.earlier)
+        assertEquals(listOf("petra", "recent"), vm.uiState.value.days.flatMap { it.events }.map { it.id })
+    }
+
+    @Test
+    fun aVisitOpensItsPlaceAndAnythingInATripOpensTheTrip() {
+        val visit = testCalendarEvent("visit-1", "2026-03-06").copy(
+            resourceId = "place-1", collectionId = "trip-1", collectionName = "Morocco"
+        )
+        val trip = testCalendarEvent("collection-1", "2026-03-05", type = "collection").copy(
+            resourceId = "trip-1", collectionId = "trip-1", collectionName = "Morocco"
+        )
+        val stay = testCalendarEvent("lodging-1", "2026-03-06", type = "lodging").copy(
+            resourceId = "stay-1", collectionId = "trip-1", collectionName = "Morocco"
+        )
+
+        assertEquals(EventTarget.Place("place-1"), visit.target())
+        assertEquals(EventTarget.Collection("trip-1", "Morocco"), trip.target())
+        assertEquals(EventTarget.Collection("trip-1", "Morocco"), stay.target())
+    }
+
+    @Test
+    fun somethingThatBelongsToNothingTheAppShowsOpensNothing() {
+        val flight = testCalendarEvent("transportation-1", "2026-03-06", type = "transportation")
+            .copy(resourceId = "leg-1")
+
+        assertNull(flight.target())
     }
 
     @Test

@@ -158,7 +158,7 @@ fun SlimCollectionItem(
                                         else -> "🚀 In $days days"
                                     }
                                 } ?: "🚀 Upcoming"
-                                TripStatus.COMPLETED -> "✓ Completed"
+                                TripStatus.COMPLETED -> "🏁 Completed" // the filter's own label
                                 TripStatus.FOLDER -> "📁 Folder"
                             },
                             // Where the trip stands is worth a colour; that it is a folder is not.

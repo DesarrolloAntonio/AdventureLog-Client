@@ -67,7 +67,10 @@ data class CalendarEventDTO(
     val collectionId: String? = null,
 
     @SerialName("collection_name")
-    val collectionName: String? = null
+    val collectionName: String? = null,
+
+    @SerialName("resource_id")
+    val resourceId: String = ""
 )
 
 fun CalendarEventDTO.toDomainModel(): CalendarEvent = CalendarEvent(
@@ -81,7 +84,8 @@ fun CalendarEventDTO.toDomainModel(): CalendarEvent = CalendarEvent(
     category = category,
     locationLabel = locationLabel,
     collectionId = collectionId,
-    collectionName = collectionName
+    collectionName = collectionName,
+    resourceId = resourceId
 )
 
 fun DashboardDTO.toDomainModel(): Dashboard = Dashboard(

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,6 +41,9 @@ import com.desarrollodroide.adventurelog.core.model.CalendarEvent
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarDay
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarUiState
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarViewModel
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.Earlier
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.target
 import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 import kotlinx.datetime.LocalDate
@@ -47,7 +51,11 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
-fun CalendarScreenRoute(modifier: Modifier = Modifier) {
+fun CalendarScreenRoute(
+    onOpenPlace: (String) -> Unit,
+    onOpenCollection: (id: String, name: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val viewModel = koinViewModel<CalendarViewModel>()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -56,6 +64,13 @@ fun CalendarScreenRoute(modifier: Modifier = Modifier) {
         onToggleType = viewModel::toggleType,
         onClearTypes = viewModel::clearTypes,
         onRetry = viewModel::load,
+        onShowEarlier = viewModel::loadEarlier,
+        onOpen = { target ->
+            when (target) {
+                is EventTarget.Place -> onOpenPlace(target.id)
+                is EventTarget.Collection -> onOpenCollection(target.id, target.name)
+            }
+        },
         modifier = modifier
     )
 }
@@ -74,7 +89,9 @@ fun CalendarScreen(
     onToggleType: (String) -> Unit,
     onClearTypes: () -> Unit,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onShowEarlier: () -> Unit = {},
+    onOpen: (EventTarget) -> Unit = {}
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when {
@@ -115,65 +132,38 @@ fun CalendarScreen(
 
             else -> {
                 val listState = rememberLazyListState()
+                val items = agendaItems(state)
 
                 // Web opens the calendar on today's month, not the start of everything the
-                // account has ever logged - land here the same way instead of making the user
-                // scroll past a year of past trips first.
-                LaunchedEffect(state.days, state.today) {
+                // account has ever logged - land on today the same way. Keyed on the date and the
+                // filter, not the days: showing earlier events adds days above, and the reader who
+                // asked for them is looking at the top, not at today.
+                LaunchedEffect(state.today, state.selectedTypes) {
                     val index = todayScrollIndex(state)
                     if (index > 0) listState.scrollToItem(index)
                 }
 
-                                // A calendar is a column of days; stretching a day across 1200dp reads worse.
+                // A calendar is a column of days; stretching a day across 1200dp reads worse.
                 ContentColumn {
-    LazyColumn(
+                    LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         state = listState,
                         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        if (state.availableTypes.size > 1) {
-                            item {
-                                FlowRow(
-                                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    MetaChip(
-                                        text = "All",
-                                        tone = if (state.selectedTypes.isEmpty()) {
-                                            ChipTone.ACCENT
-                                        } else {
-                                            ChipTone.NEUTRAL
-                                        },
-                                        onClick = onClearTypes
+                        items.forEach { agendaItem ->
+                            item(key = agendaItem.key) {
+                                when (agendaItem) {
+                                    AgendaItem.Chips -> TypeChips(state, onToggleType, onClearTypes)
+                                    AgendaItem.Earlier -> EarlierRow(state, onShowEarlier)
+                                    is AgendaItem.Month -> MonthHeading(agendaItem.date)
+                                    is AgendaItem.Today -> TodayMarker(agendaItem.date)
+                                    is AgendaItem.Day -> DayRow(
+                                        day = agendaItem.day,
+                                        isToday = agendaItem.day.date == state.today,
+                                        onOpen = onOpen
                                     )
-                                    state.availableTypes.forEach { type ->
-                                        MetaChip(
-                                            text = type.replaceFirstChar { it.uppercase() },
-                                            tone = if (type in state.selectedTypes) {
-                                                ChipTone.ACCENT
-                                            } else {
-                                                ChipTone.NEUTRAL
-                                            },
-                                            onClick = { onToggleType(type) }
-                                        )
-                                    }
                                 }
-                            }
-                        }
-
-                        var lastMonth: String? = null
-                        state.days.forEach { day ->
-                            val month = "${day.date.year}-${day.date.monthNumber}"
-                            if (month != lastMonth) {
-                                lastMonth = month
-                                item(key = "month-$month") {
-                                    MonthHeading(day.date)
-                                }
-                            }
-                            item(key = "day-${day.date}") {
-                                DayRow(day = day, isToday = day.date == state.today)
                             }
                         }
                     }
@@ -184,24 +174,174 @@ fun CalendarScreen(
 }
 
 /**
- * The LazyColumn item index of the first day at or after today, counting the header chip row
- * and each month divider exactly as the list below builds them. 0 (the top) when there is no
- * today - either the account has no dates at all, or every one of them is already in the past.
+ * One row of the agenda. The list and the index it scrolls to are both read from [agendaItems], so
+ * the two cannot disagree about where today is.
  */
-internal fun todayScrollIndex(state: CalendarUiState): Int {
-    val today = state.today ?: return 0
-    var index = if (state.availableTypes.size > 1) 1 else 0
+internal sealed interface AgendaItem {
+    val key: String
+
+    data object Chips : AgendaItem {
+        override val key = "chips"
+    }
+
+    data object Earlier : AgendaItem {
+        override val key = "earlier"
+    }
+
+    data class Month(val date: LocalDate) : AgendaItem {
+        override val key get() = "month-${monthKey(date)}"
+    }
+
+    data class Today(val date: LocalDate) : AgendaItem {
+        override val key get() = "today"
+    }
+
+    data class Day(val day: CalendarDay) : AgendaItem {
+        override val key get() = "day-${day.date}"
+    }
+}
+
+/**
+ * The agenda, top to bottom: the type chips when there is a choice, what is known before the
+ * window, then each month's heading and days - with today marked where it falls, even on a date
+ * with nothing on it. Nothing marked it (QA 07, CA-01): today was only used to pick where to
+ * scroll, so on opening you could not tell what had happened from what was coming.
+ */
+internal fun agendaItems(state: CalendarUiState): List<AgendaItem> = buildList {
+    if (state.availableTypes.size > 1) add(AgendaItem.Chips)
+    val earlier = state.earlier
+    if (state.windowStart != null && !(earlier is Earlier.Loaded && earlier.found > 0)) {
+        add(AgendaItem.Earlier)
+    }
+
+    val today = state.today
+    var todayPlaced = today == null
     var lastMonth: String? = null
     state.days.forEach { day ->
-        val month = "${day.date.year}-${day.date.monthNumber}"
+        val month = monthKey(day.date)
+        val todayGoesHere = !todayPlaced && today != null && day.date >= today
+        // Today's month has nothing in it: the marker goes between the months, dated.
+        if (todayGoesHere && monthKey(today!!) != month) {
+            add(AgendaItem.Today(today))
+            todayPlaced = true
+        }
         if (month != lastMonth) {
             lastMonth = month
-            index++
+            add(AgendaItem.Month(day.date))
         }
-        if (day.date >= today) return index
-        index++
+        // Today's month has something: the marker goes under its heading.
+        if (todayGoesHere && !todayPlaced) {
+            add(AgendaItem.Today(today!!))
+            todayPlaced = true
+        }
+        add(AgendaItem.Day(day))
     }
-    return 0
+    // Everything is in the past: today goes after it.
+    if (!todayPlaced && today != null) add(AgendaItem.Today(today))
+}
+
+private fun monthKey(date: LocalDate) = "${date.year}-${date.monthNumber}"
+
+/** Where the list opens: today's marker. 0 (the top) when there is no today to mark. */
+internal fun todayScrollIndex(state: CalendarUiState): Int =
+    agendaItems(state).indexOfFirst { it is AgendaItem.Today }.coerceAtLeast(0)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TypeChips(
+    state: CalendarUiState,
+    onToggleType: (String) -> Unit,
+    onClearTypes: () -> Unit
+) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val all = state.selectedTypes.isEmpty()
+        MetaChip(
+            text = "All",
+            tone = if (all) ChipTone.ACCENT else ChipTone.NEUTRAL,
+            onClick = onClearTypes,
+            selected = all
+        )
+        state.availableTypes.forEach { type ->
+            val on = type in state.selectedTypes
+            MetaChip(
+                text = type.replaceFirstChar { it.uppercase() },
+                tone = if (on) ChipTone.ACCENT else ChipTone.NEUTRAL,
+                onClick = { onToggleType(type) },
+                selected = on
+            )
+        }
+    }
+}
+
+@Composable
+private fun EarlierRow(state: CalendarUiState, onShowEarlier: () -> Unit) {
+    val since = state.windowStart?.let { longDate(it) } ?: return
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        when (val earlier = state.earlier) {
+            Earlier.NotAsked -> TextButton(onClick = onShowEarlier) {
+                Text("Show everything before $since")
+            }
+
+            Earlier.Loading -> Row(
+                modifier = Modifier.padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = "Looking before $since…",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            is Earlier.Failed -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = earlier.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                TextButton(onClick = onShowEarlier) { Text("Try again") }
+            }
+
+            is Earlier.Loaded -> Text(
+                text = "Nothing before $since",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TodayMarker(date: LocalDate) {
+    val color = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // In the date column, where a day's number would be.
+        Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(color))
+        }
+        Text(
+            text = "Today · ${weekdayName(date.dayOfWeek.ordinal)} ${date.dayOfMonth} ${monthName(date.monthNumber).take(3)}",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
+        Spacer(Modifier.width(12.dp))
+        Box(modifier = Modifier.weight(1f).height(2.dp).background(color))
+    }
 }
 
 @Composable
@@ -216,11 +356,13 @@ private fun MonthHeading(date: LocalDate) {
 }
 
 @Composable
-private fun DayRow(day: CalendarDay, isToday: Boolean) {
+private fun DayRow(day: CalendarDay, isToday: Boolean, onOpen: (EventTarget) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        // The date column: a number you can find with your eye, and today marked once.
+        // The date column: a number you can find with your eye, and today marked once. Sized to
+        // sit centred on a card's minimum height - it was taller than a one-line card, so the
+        // weekday hung below it (QA 07, screenshot).
         Column(
-            modifier = Modifier.width(52.dp).padding(top = 10.dp),
+            modifier = Modifier.width(52.dp).padding(top = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
@@ -258,59 +400,79 @@ private fun DayRow(day: CalendarDay, isToday: Boolean) {
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            day.events.forEach { EventCard(it) }
+            day.events.forEach { event -> EventCard(event, onOpen) }
         }
     }
 }
 
 @Composable
-private fun EventCard(event: CalendarEvent) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+private fun EventCard(event: CalendarEvent, onOpen: (EventTarget) -> Unit) {
+    val target = event.target()
+    val shape = RoundedCornerShape(16.dp)
+    val colors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+    )
+    val elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    if (target != null) {
+        Card(
+            onClick = { onOpen(target) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            colors = colors,
+            elevation = elevation
+        ) { EventCardContent(event) }
+    } else {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            colors = colors,
+            elevation = elevation
+        ) { EventCardContent(event) }
+    }
+}
+
+@Composable
+private fun EventCardContent(event: CalendarEvent) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 64.dp)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (event.icon.isNotBlank()) {
-                Text(text = event.icon, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.width(12.dp))
-            }
-            Column(modifier = Modifier.weight(1f)) {
+        if (event.icon.isNotBlank()) {
+            Text(text = event.icon, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.width(12.dp))
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = event.title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            // A place inside a collection of the same name says it once, not twice.
+            val detail = listOfNotNull(
+                event.locationLabel.takeIf { it.isNotBlank() },
+                event.collectionName?.takeIf { it.isNotBlank() }
+            ).distinct().filterNot { it == event.title }.joinToString(" · ")
+            if (detail.isNotBlank()) {
                 Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 2,
+                    text = detail,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                // A place inside a collection of the same name says it once, not twice.
-                val detail = listOfNotNull(
-                    event.locationLabel.takeIf { it.isNotBlank() },
-                    event.collectionName?.takeIf { it.isNotBlank() }
-                ).distinct().filterNot { it == event.title }.joinToString(" · ")
-                if (detail.isNotBlank()) {
-                    Text(
-                        text = detail,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
             }
-            Spacer(Modifier.width(10.dp))
-            Text(
-                text = timeLabel(event),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = timeLabel(event),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -342,6 +504,10 @@ private fun shortDate(isoDay: String, showYear: Boolean): String {
     val label = "$day ${monthName(month).take(3)}"
     return if (showYear) "$label ${parts[0].takeLast(2)}" else label
 }
+
+/** "16 Sep 2025". */
+private fun longDate(date: LocalDate): String =
+    "${date.dayOfMonth} ${monthName(date.monthNumber).take(3)} ${date.year}"
 
 private fun monthName(month: Int): String = when (month) {
     1 -> "January"; 2 -> "February"; 3 -> "March"; 4 -> "April"

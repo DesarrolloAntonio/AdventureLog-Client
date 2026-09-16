@@ -937,7 +937,18 @@ fun HomeScreenContent(
                             onAdventureClick = onOpenLocationById
                         )
 
-                        calendarScreen()
+                        calendarScreen(
+                            // A visit opens its place; a trip, or anything dated inside one, the trip.
+                            onOpenPlace = onOpenLocationById,
+                            onOpenCollection = { id, name ->
+                                navController.navigate(
+                                    NavigationRoutes.Collections.createDetailRoute(
+                                        collectionId = id,
+                                        collectionName = name
+                                    )
+                                )
+                            }
+                        )
                     }
                 }
             }
