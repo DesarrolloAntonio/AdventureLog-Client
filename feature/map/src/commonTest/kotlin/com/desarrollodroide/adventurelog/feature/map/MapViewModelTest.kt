@@ -95,6 +95,23 @@ class MapViewModelTest {
         )
     }
 
+    /** A server that answers differently the second time, for the retry. */
+    private class Flaky(var answer: Either<ApiResponse, List<Location>>) : LocationsRepositoryStub() {
+        override suspend fun getAllLocations() = answer
+    }
+
+    private fun viewModelWith(locations: Flaky): MapViewModel {
+        val countries = Countries()
+        val users = FakeUserRepository(session = testUser, stats = Either.Right(UserStats()))
+        return MapViewModel(
+            getAllLocationsUseCase = GetAllLocationsUseCase(locations),
+            observeUserStatsUseCase = ObserveUserStatsUseCase(users),
+            getVisitedRegionsUseCase = GetVisitedRegionsUseCase(countries),
+            getVisitedCitiesUseCase = GetVisitedCitiesUseCase(countries),
+            userRepository = users
+        )
+    }
+
     private fun region(name: String) = VisitedRegion(
         id = name.hashCode(), userId = "u", regionId = name, name = name,
         longitude = 0.0, latitude = 0.0
@@ -327,5 +344,22 @@ class MapViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(2, calls)
+    }
+
+    @Test
+    fun aMapThatFailedCanBeTriedAgain() = runTest(dispatcher) {
+        // With no network the map showed "Error loading map data" and stayed there: nothing
+        // reloaded it, not the tab, not coming back to the app (measured).
+        val server = Flaky(Either.Left(ApiResponse.IOException))
+        val vm = viewModelWith(server)
+        testScheduler.advanceUntilIdle()
+        assertEquals("Failed to load places", vm.uiState.value.error)
+
+        server.answer = Either.Right(listOf(place("Prado")))
+        vm.refresh()
+        testScheduler.advanceUntilIdle()
+
+        assertNull(vm.uiState.value.error)
+        assertEquals(listOf("Prado"), vm.uiState.value.locations.map { it.name })
     }
 }
