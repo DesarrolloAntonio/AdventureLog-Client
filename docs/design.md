@@ -57,6 +57,42 @@ redesign's own `minmax(0,1fr) 348px`, and it is what the empty third of a tablet
 - **Text over a photograph disappears** whenever the photograph is a bright sky. Names go under
   the image, on `surfaceContainerLowest`.
 
+## A place with no photo
+
+The photo's slot never goes away. Layouts must not depend on whether a place has photos, so an
+empty slot keeps its size and is filled on purpose, never left looking like a failed load. That is
+`LocationPlaceholder` (in `feature/ui`): a flat tonal surface with the category's emoji, or a
+neutral surface with a line pin when there is no category. The fallback never invents an emoji,
+because categories belong to the user. Its colours come from `placeholderColors()`, as theme
+roles, so dark theme follows.
+
+What it replaced, and why not to bring it back: a gradient that took a photograph's room and said
+nothing, and before that a survey grid under a Static Maps thumbnail that never loaded (that's why
+`feature/ui` no longer has a Maps key).
+
+- **Places list card:** same size and composition. The ink changes from white on a dark scrim to
+  `onSurface` on a band one tone deeper, and the card gets a hairline border. The emoji sits
+  above the text band, measured rather than assumed. Where the card has its actions, the missing
+  pieces are offered in place as dashed `AddChip`s ("+ Add photo", "+ Category") that open the
+  editor, which is where both are set. "+ Add photo" opens it on the images section, like the
+  detail page's button.
+- **Home strip (`PlaceMiniCard`):** keeps its 72dp slot, with the hairline drawn *inside* it.
+  Every text line is always drawn, even when empty, so cards side by side keep one height. A row
+  without a photo that would otherwise sit empty says "No category" instead.
+- **Detail page:** no 300dp cover. A stand-in that tall wastes the first screen. It gets a
+  `CompactPlaceBar` (back, edit, share) that stays put, and a horizontal `NoPhotoCard`. The bar
+  doesn't show the name, because the page's heading right below it already does. The card's "Add
+  photo" opens the editor on its images section, already expanded and scrolled to
+  (`createEditRoute(…, openImages = true)`), not on "Basic Information".
+
+Two traps from this:
+
+- **A screen that paints its own surface must provide `LocalContentColor`.** Opened from Home,
+  the detail page sits outside the tab shell, and every title without its own colour came out
+  black in dark theme.
+- **A shell that pads for the system bars must also `consumeWindowInsets`.** Otherwise a screen
+  that pads for the status bar itself, like the compact bar, pads for it twice.
+
 ## Nothing Material in a shared view
 
 The plan for iOS is native SwiftUI navigation, toolbars and search with the Compose content

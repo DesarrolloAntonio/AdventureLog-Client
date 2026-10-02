@@ -66,6 +66,8 @@ fun CollectionsPane(
     onEditCollection: (UltraSlimCollection) -> Unit,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
+    /** The edit form opened on its images, for a card's "+ Add photo". */
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
     onAddTransportation: (String) -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     onAddNote: (String) -> Unit,
@@ -139,6 +141,7 @@ fun CollectionsPane(
                     onHomeClick = onHomeClick,
                     onAdventureClick = onAdventureClick,
                     onEditAdventure = onEditAdventure,
+                    onAddPhoto = onAddPhoto,
                     onAddTransportation = { onAddTransportation(key.collectionId) },
                     onEditTransportation = onEditTransportation,
                     onAddNote = onAddNote,

@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Dispatchers
@@ -477,13 +478,18 @@ fun HomeScreenContent(
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) { innerPadding ->
+                val barsPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding()
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(
-                            top = innerPadding.calculateTopPadding(),
-                            bottom = innerPadding.calculateBottomPadding()
-                        )
+                        .padding(barsPadding)
+                        // Said as well as done, so a screen that pads for the status bar itself
+                        // (a place's compact bar, which also opens outside this shell) doesn't
+                        // pad for it twice in here.
+                        .consumeWindowInsets(barsPadding)
                 ) {
                     // NavHost to manage the content on each screen with animations
                     AnimatedDirectionalNavHost(
@@ -555,6 +561,15 @@ fun HomeScreenContent(
                                         )
                                     )
                                 },
+                                onAddPhoto = { location ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            location.id,
+                                            json.encodeToString(location),
+                                            openImages = true
+                                        )
+                                    )
+                                },
                                 onCollectionClick = { collection ->
                                     navController.navigate(
                                         NavigationRoutes.Collections.createDetailRoute(
@@ -579,12 +594,14 @@ fun HomeScreenContent(
 
                                 override fun navigateToEditLocation(
                                     locationId: String,
-                                    locationJson: String
+                                    locationJson: String,
+                                    openImages: Boolean
                                 ) {
                                     navController.navigate(
                                         NavigationRoutes.Locations.createEditRoute(
                                             locationId,
-                                            locationJson
+                                            locationJson,
+                                            openImages
                                         )
                                     )
                                 }
@@ -617,6 +634,18 @@ fun HomeScreenContent(
                                                 serializer = Location.serializer(),
                                                 value = adventure
                                             )
+                                        )
+                                    )
+                                },
+                                onAddPhoto = { adventure ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            adventureId = adventure.id,
+                                            adventureJson = json.encodeToString(
+                                                serializer = Location.serializer(),
+                                                value = adventure
+                                            ),
+                                            openImages = true
                                         )
                                     )
                                 },
@@ -776,7 +805,7 @@ fun HomeScreenContent(
                                     onAdventureClick(location)
                                 }
 
-                                override fun navigateToEditAdventure(adventure: Location) {
+                                override fun navigateToEditAdventure(adventure: Location, openImages: Boolean) {
                                     val adventureJson = json.encodeToString(
                                         serializer = Location.serializer(),
                                         value = adventure
@@ -784,7 +813,8 @@ fun HomeScreenContent(
                                     navController.navigate(
                                         NavigationRoutes.Locations.createEditRoute(
                                             adventureId = adventure.id,
-                                            adventureJson = adventureJson
+                                            adventureJson = adventureJson,
+                                            openImages = openImages
                                         )
                                     )
                                 }

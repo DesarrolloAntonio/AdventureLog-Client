@@ -40,10 +40,11 @@ object NavigationRoutes {
     object Locations {
         const val route = "adventures"
         const val add = "adventures/add"
-        const val editRoute = "adventures/edit?adventureId={adventureId}&adventureJson={adventureJson}"
-        
-        fun createEditRoute(adventureId: String, adventureJson: String): String {
-            return "adventures/edit?adventureId=${routeArg(adventureId)}&adventureJson=${routeArg(adventureJson)}"
+        const val editRoute = "adventures/edit?adventureId={adventureId}&adventureJson={adventureJson}&openImages={openImages}"
+
+        /** [openImages] opens the form on its images section, for "Add photo" rather than "Edit". */
+        fun createEditRoute(adventureId: String, adventureJson: String, openImages: Boolean = false): String {
+            return "adventures/edit?adventureId=${routeArg(adventureId)}&adventureJson=${routeArg(adventureJson)}&openImages=$openImages"
         }
     }
 

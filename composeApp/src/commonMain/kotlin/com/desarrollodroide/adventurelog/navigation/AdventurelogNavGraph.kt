@@ -67,9 +67,9 @@ fun AdventureLogNavGraph(
             )
         }
 
-        override fun navigateToEditLocation(location: Location) {
+        override fun navigateToEditLocation(location: Location, openImages: Boolean) {
             navController.navigate(
-                NavigationRoutes.Locations.createEditRoute(location.id, json.encodeToString(location))
+                NavigationRoutes.Locations.createEditRoute(location.id, json.encodeToString(location), openImages)
             ) { launchSingleTop = true }
         }
     }
@@ -83,8 +83,8 @@ fun AdventureLogNavGraph(
         override fun navigateToAddLocation() {
             navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
         }
-        override fun navigateToEditLocation(locationId: String, locationJson: String) {
-            navController.navigate(NavigationRoutes.Locations.createEditRoute(locationId, locationJson)) {
+        override fun navigateToEditLocation(locationId: String, locationJson: String, openImages: Boolean) {
+            navController.navigate(NavigationRoutes.Locations.createEditRoute(locationId, locationJson, openImages)) {
                 launchSingleTop = true
             }
         }
@@ -114,7 +114,7 @@ fun AdventureLogNavGraph(
         override fun navigateToAdventure(location: Location) {
             navController.navigate("detail/${location.id}")
         }
-        override fun navigateToEditAdventure(adventure: Location) {
+        override fun navigateToEditAdventure(adventure: Location, openImages: Boolean) {
             navigateToHome()
         }
         override fun navigateToAddTransportation(collectionId: String) {

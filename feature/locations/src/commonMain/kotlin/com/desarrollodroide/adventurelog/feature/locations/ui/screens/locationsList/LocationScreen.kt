@@ -71,6 +71,7 @@ fun LocationListScreen(
     onAdventureClick: (Location) -> Unit = { },
     onAddAdventureClick: () -> Unit = { },
     onEditAdventure: (Location) -> Unit = { },
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
     /**
      * Called once with the first place the list loads. Two-pane callers use it to fill the detail
      * side, which otherwise sits empty until something is tapped.
@@ -152,6 +153,7 @@ fun LocationListScreen(
         onSearchSubmit = viewModel::executeSearch,
         onShowFilters = viewModel::showFilters,
         onEditAdventure = onEditAdventure,
+        onAddPhoto = onAddPhoto,
         onDuplicateAdventure = viewModel::duplicateLocation,
         onShareAdventure = viewModel::shareLocation,
         onDeleteAdventure = { adventure -> 
@@ -265,6 +267,7 @@ private fun AdventureListContent(
     onSearchSubmit: () -> Unit,
     onShowFilters: () -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
     onDuplicateAdventure: (Location) -> Unit,
     onShareAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -357,6 +360,7 @@ private fun AdventureListContent(
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
+                        onAddPhoto = onAddPhoto,
                         onDuplicateAdventure = onDuplicateAdventure,
                         onShareAdventure = onShareAdventure,
                         onDeleteAdventure = onDeleteAdventure,
@@ -383,6 +387,7 @@ private fun AdventureListContent(
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
+                        onAddPhoto = onAddPhoto,
                         onDuplicateAdventure = onDuplicateAdventure,
                         onShareAdventure = onShareAdventure,
                         onDeleteAdventure = onDeleteAdventure,
@@ -420,6 +425,7 @@ private fun AdventureListContent(
                                 collections = collections,
                                 onAdventureClick = onAdventureClick,
                                 onEditAdventure = onEditAdventure,
+                                onAddPhoto = onAddPhoto,
                                 onDuplicateAdventure = onDuplicateAdventure,
                                 onShareAdventure = onShareAdventure,
                                 onDeleteAdventure = onDeleteAdventure,
@@ -439,6 +445,7 @@ private fun AdventuresPagingList(
     collections: List<UltraSlimCollection>,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
     onDuplicateAdventure: (Location) -> Unit,
     onShareAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -472,6 +479,7 @@ private fun AdventuresPagingList(
                         location = adventure,
                         onClick = { onAdventureClick(adventure) },
                         onEdit = { onEditAdventure(adventure) },
+                        onAddPhoto = { onAddPhoto(adventure) },
                         onDuplicate = { onDuplicateAdventure(adventure) },
                         onShare = { onShareAdventure(adventure) },
                         onDelete = { onDeleteAdventure(adventure) },

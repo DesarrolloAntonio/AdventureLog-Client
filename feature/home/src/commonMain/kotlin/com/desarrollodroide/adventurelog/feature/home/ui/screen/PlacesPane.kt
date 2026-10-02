@@ -75,6 +75,8 @@ private val placesNavConfiguration = SavedStateConfiguration {
 fun PlacesPane(
     onAddPlace: () -> Unit,
     onEditPlace: (Location) -> Unit,
+    /** The edit form opened on its images, for a place's "Add photo". */
+    onAddPhoto: (Location) -> Unit,
     onCollectionClick: (UltraSlimCollection) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -108,6 +110,7 @@ fun PlacesPane(
                     },
                     onAddAdventureClick = onAddPlace,
                     onEditAdventure = onEditPlace,
+                    onAddPhoto = onAddPhoto,
                     // A detail pane holding one sentence of apology is a worse use of half a
                     // tablet than simply showing the first place. On a phone there is no second
                     // pane to fill, so nothing opens by itself.
@@ -130,7 +133,8 @@ fun PlacesPane(
                     onBackClick = { backStack.removeLastOrNull() },
                     onCollectionClick = onCollectionClick,
                     showBack = !twoPanes,
-                    onEditClick = onEditPlace
+                    onEditClick = onEditPlace,
+                    onAddPhotoClick = onAddPhoto
                 )
             }
         }

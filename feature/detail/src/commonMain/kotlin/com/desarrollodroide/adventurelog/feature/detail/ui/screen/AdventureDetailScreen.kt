@@ -48,7 +48,9 @@ fun AdventureDetailScreenRoute(
     onCollectionClick: (UltraSlimCollection) -> Unit = {},
     showBack: Boolean = true,
     /** Opens the edit form for the place; null hides Edit. */
-    onEditClick: ((Location) -> Unit)? = null
+    onEditClick: ((Location) -> Unit)? = null,
+    /** Opens the edit form on its images. Null falls back to [onEditClick]. */
+    onAddPhotoClick: ((Location) -> Unit)? = null
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
     
@@ -91,6 +93,7 @@ fun AdventureDetailScreenRoute(
                     collections = collections,
                     onBackClick = onBackClick,
                     onEditClick = onEditClick?.let { edit -> { edit(state.location) } },
+                    onAddPhotoClick = (onAddPhotoClick ?: onEditClick)?.let { add -> { add(state.location) } },
                     // The old callback reached a view model method that only wrote a log line,
                     // so the row had never opened anything.
                     onOpenMap = { _: String, _: String -> mapsFor = state.location },
@@ -151,6 +154,7 @@ fun AdventureDetailScreen(
     collections: List<UltraSlimCollection> = emptyList(),
     onBackClick: () -> Unit,
     onEditClick: (() -> Unit)? = null,
+    onAddPhotoClick: (() -> Unit)? = onEditClick,
     onOpenMap: (String, String) -> Unit,
     onOpenLink: (String) -> Unit,
     openingAttachmentId: String? = null,
@@ -161,121 +165,151 @@ fun AdventureDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val cover = location.images.firstOrNull()?.image?.takeIf { it.isNotBlank() }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-    ) {
-        CoverImageWithButtons(
-            imageUrl = location.images.firstOrNull()?.image,
-            adventureName = location.name,
-            onBackClick = onBackClick,
-            onShareClick = onShareLocation,
-            onEditClick = onEditClick,
-            showBack = showBack
-        )
-
-        // The page proper, lifted over the bottom of the photograph.
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = (-24).dp)
-                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 24.dp)
-                .padding(top = 28.dp, bottom = 48.dp),
-            // One rhythm for the whole page, set here rather than by each section in turn.
-            verticalArrangement = Arrangement.spacedBy(28.dp)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                HeaderInfo(
-                    title = location.name,
-                    location = location.location,
-                    rating = location.rating
-                )
-                CategoryTags(
-                    category = location.category,
-                    isPublic = location.isPublic,
-                    tags = location.tags.userTags(),
-                    isVisited = location.isVisited,
-                    visitCount = location.visits.size
+    // The page paints its own surface, so it says what colour text on it is. Opened from Home it
+    // sits outside the tab shell, where nothing else does, and every title without a colour of its
+    // own came out black on the dark theme.
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+        Column(modifier = modifier.fillMaxSize()) {
+            // No photograph, no cover: a bar that stays put, and the page starts right under it.
+            if (cover == null) {
+                CompactPlaceBar(
+                    onBackClick = onBackClick,
+                    onShareClick = onShareLocation,
+                    onEditClick = onEditClick,
+                    showBack = showBack
                 )
             }
 
-            location.description?.takeIf { it.isNotBlank() }?.let { description ->
-                DetailSection(title = "About") {
-                    AboutBody(description = description)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+            ) {
+                if (cover != null) {
+                    CoverImageWithButtons(
+                        imageUrl = cover,
+                        onBackClick = onBackClick,
+                        onShareClick = onShareLocation,
+                        onEditClick = onEditClick,
+                        showBack = showBack
+                    )
                 }
-            }
 
-            if (location.images.isNotEmpty()) {
-                DetailSection(title = "Photos (${location.images.size})") {
-                    AdventurePhotosCarousel(images = location.images)
-                }
-            }
-
-            val lat = location.latitude
-            val lon = location.longitude
-            if (!lat.isNullOrBlank() && !lon.isNullOrBlank()) {
-                DetailSection(title = "Where") {
-                    MapBody(latitude = lat, longitude = lon, onOpenMap = onOpenMap)
-                }
-            }
-
-            if (location.visits.isNotEmpty()) {
-                DetailSection(title = if (location.visits.size == 1) "Visit" else "Visits") {
-                    VisitsSection(visits = location.visits)
-                }
-            }
-
-            if (collections.isNotEmpty()) {
-                DetailSection(
-                    title = if (collections.size == 1) "Collection" else "Collections"
+                // The page proper, lifted over the bottom of the photograph when there is one.
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (cover != null) {
+                                Modifier
+                                    .offset(y = (-24).dp)
+                                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                            } else {
+                                Modifier
+                            }
+                        )
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 24.dp)
+                        .padding(top = if (cover != null) 28.dp else 20.dp, bottom = 48.dp),
+                    // One rhythm for the whole page, set here rather than by each section in turn.
+                    verticalArrangement = Arrangement.spacedBy(28.dp)
                 ) {
-                    CollectionsSection(
-                        collections = collections,
-                        onCollectionClick = onCollectionClick
-                    )
-                }
-            }
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        HeaderInfo(
+                            title = location.name,
+                            location = location.location,
+                            rating = location.rating
+                        )
+                        CategoryTags(
+                            category = location.category,
+                            isPublic = location.isPublic,
+                            tags = location.tags.userTags(),
+                            isVisited = location.isVisited,
+                            visitCount = location.visits.size
+                        )
+                    }
 
-            if (location.attachments.isNotEmpty()) {
-                DetailSection(
-                    title = if (location.attachments.size == 1) "Attachment" else "Attachments"
-                ) {
-                    AttachmentsSection(
-                        attachments = location.attachments,
-                        openingAttachmentId = openingAttachmentId,
-                        onOpenAttachment = onOpenAttachment
-                    )
-                }
-            }
+                    if (cover == null && onAddPhotoClick != null) {
+                        NoPhotoCard(categoryIcon = location.category?.icon, onAddPhoto = onAddPhotoClick)
+                    }
 
-            if (location.trails.isNotEmpty()) {
-                DetailSection(title = if (location.trails.size == 1) "Trail" else "Trails") {
-                    TrailsSection(trails = location.trails, onOpenTrail = onOpenLink)
-                }
-            }
+                    location.description?.takeIf { it.isNotBlank() }?.let { description ->
+                        DetailSection(title = "About") {
+                            AboutBody(description = description)
+                        }
+                    }
 
-            location.link?.takeIf { it.isNotBlank() }?.let { link ->
-                DetailSection(title = "Link") {
-                    LinkBody(link = link, onOpenLink = onOpenLink)
-                }
-            }
+                    if (location.images.isNotEmpty()) {
+                        DetailSection(title = "Photos (${location.images.size})") {
+                            AdventurePhotosCarousel(images = location.images)
+                        }
+                    }
 
-            // The short facts that never deserved a heading each: a price, and two dates.
-            DetailSection(title = "Details") {
-                location.price?.let { price ->
-                    val code = location.priceCurrency?.takeIf { it.isNotBlank() }
-                        ?: Currencies.DEFAULT
-                    FactRow(
-                        label = "Price",
-                        value = "${Currencies.formatAmount(price)} $code"
-                    )
+                    val lat = location.latitude
+                    val lon = location.longitude
+                    if (!lat.isNullOrBlank() && !lon.isNullOrBlank()) {
+                        DetailSection(title = "Where") {
+                            MapBody(latitude = lat, longitude = lon, onOpenMap = onOpenMap)
+                        }
+                    }
+
+                    if (location.visits.isNotEmpty()) {
+                        DetailSection(title = if (location.visits.size == 1) "Visit" else "Visits") {
+                            VisitsSection(visits = location.visits)
+                        }
+                    }
+
+                    if (collections.isNotEmpty()) {
+                        DetailSection(
+                            title = if (collections.size == 1) "Collection" else "Collections"
+                        ) {
+                            CollectionsSection(
+                                collections = collections,
+                                onCollectionClick = onCollectionClick
+                            )
+                        }
+                    }
+
+                    if (location.attachments.isNotEmpty()) {
+                        DetailSection(
+                            title = if (location.attachments.size == 1) "Attachment" else "Attachments"
+                        ) {
+                            AttachmentsSection(
+                                attachments = location.attachments,
+                                openingAttachmentId = openingAttachmentId,
+                                onOpenAttachment = onOpenAttachment
+                            )
+                        }
+                    }
+
+                    if (location.trails.isNotEmpty()) {
+                        DetailSection(title = if (location.trails.size == 1) "Trail" else "Trails") {
+                            TrailsSection(trails = location.trails, onOpenTrail = onOpenLink)
+                        }
+                    }
+
+                    location.link?.takeIf { it.isNotBlank() }?.let { link ->
+                        DetailSection(title = "Link") {
+                            LinkBody(link = link, onOpenLink = onOpenLink)
+                        }
+                    }
+
+                    // The short facts that never deserved a heading each: a price, and two dates.
+                    DetailSection(title = "Details") {
+                        location.price?.let { price ->
+                            val code = location.priceCurrency?.takeIf { it.isNotBlank() }
+                                ?: Currencies.DEFAULT
+                            FactRow(
+                                label = "Price",
+                                value = "${Currencies.formatAmount(price)} $code"
+                            )
+                        }
+                        FactRow(label = "Added", value = location.createdAt.take(10))
+                        FactRow(label = "Last updated", value = location.updatedAt.take(10))
+                    }
                 }
-                FactRow(label = "Added", value = location.createdAt.take(10))
-                FactRow(label = "Last updated", value = location.updatedAt.take(10))
             }
         }
     }

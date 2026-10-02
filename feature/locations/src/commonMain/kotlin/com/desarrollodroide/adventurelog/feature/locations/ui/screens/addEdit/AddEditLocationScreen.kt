@@ -35,6 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
+import kotlin.math.roundToInt
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.Category
@@ -112,7 +115,9 @@ internal fun formImageOf(image: ContentImage) = ImageFormData(
 fun AddEditLocationScreen(
     locationId: String?,
     location: Location?,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    /** Open on the images section, scrolled to it: the form was reached by "Add photo". */
+    openImages: Boolean = false
 ) {
     val viewModel = koinViewModel<AddEditAdventureViewModel> {
         parametersOf(locationId, location)
@@ -138,6 +143,7 @@ fun AddEditLocationScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         AddEditLocationContent(
+            openImages = openImages,
             isEditMode = locationId != null,
             existingLocation = uiState.existingLocation,
             categories = uiState.categories,
@@ -245,6 +251,7 @@ internal fun visitFormOf(visit: Visit): VisitFormData {
 
 @Composable
 fun AddEditLocationContent(
+    openImages: Boolean = false,
     isEditMode: Boolean = false,
     existingLocation: Location? = null,
     categories: List<Category>,
@@ -358,11 +365,24 @@ fun AddEditLocationContent(
 
     // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
     // box the length of the screen holding a place name, and the eye loses the line it is on.
+    val scrollState = rememberScrollState()
+    // Where the images section starts in the scrolled column, once it has been placed.
+    var imagesTop by remember { mutableStateOf<Int?>(null) }
+    // Once, on arrival: after that the scroll is the user's.
+    var scrolledToImages by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(imagesTop) {
+        val top = imagesTop
+        if (openImages && !scrolledToImages && top != null) {
+            scrollState.animateScrollTo(top)
+            scrolledToImages = true
+        }
+    }
+
     ContentColumn(modifier) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -400,15 +420,18 @@ fun AddEditLocationContent(
             onFormDataChange = { formData = it }
         )
 
-        ImagesSection(
-            images = formData.images,
-            onImagesChange = { updatedImages ->
-                formData = formData.copy(images = updatedImages)
-            },
-            wikipediaImageState = wikipediaImageState,
-            onSearchWikipediaImage = onSearchWikipediaImage,
-            onResetWikipediaState = onResetWikipediaState
-        )
+        Box(Modifier.onPlaced { imagesTop = it.positionInParent().y.roundToInt() }) {
+            ImagesSection(
+                images = formData.images,
+                onImagesChange = { updatedImages ->
+                    formData = formData.copy(images = updatedImages)
+                },
+                wikipediaImageState = wikipediaImageState,
+                onSearchWikipediaImage = onSearchWikipediaImage,
+                onResetWikipediaState = onResetWikipediaState,
+                initiallyExpanded = openImages
+            )
+        }
 
         // Visits are saved after the location, against /api/visits/ - they cannot be nested in
         // the location payload because each one needs a location id that does not exist yet.

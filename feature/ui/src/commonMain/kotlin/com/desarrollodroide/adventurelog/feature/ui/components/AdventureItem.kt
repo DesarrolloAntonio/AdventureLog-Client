@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +21,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,8 @@ fun AdventureItem(
     onClick: () -> Unit = {},
     onOpenDetails: () -> Unit = { onClick() },
     onEdit: () -> Unit = {},
+    /** The edit form opened on its images, for the card's "+ Add photo". */
+    onAddPhoto: () -> Unit = onEdit,
     onDuplicate: () -> Unit = {},
     onShare: () -> Unit = {},
     onManageCollections: () -> Unit = {},
@@ -57,6 +62,8 @@ fun AdventureItem(
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     val imageLoader = LocalImageLoader.current
+    val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
+    val placeholder = placeholderColors(hasCategory = !location.category?.icon.isNullOrBlank())
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -65,10 +72,13 @@ fun AdventureItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = if (hasImage) null else BorderStroke(1.dp, placeholder.edge)
     ) {
         Box {
-            val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
+            val density = LocalDensity.current
+            // Measured, not assumed: the band grows with a second line of name, a rating, chips.
+            var textBandHeight by remember { mutableStateOf(0.dp) }
 
             // A ratio, not a height. A fixed 250dp against a column that is 380dp wide on a
             // phone and 340dp on a tablet gave a tall card in one place and a square in the
@@ -86,9 +96,9 @@ fun AdventureItem(
                 )
             } else {
                 LocationPlaceholder(
-                    name = location.name,
-                    latitude = location.latitude,
-                    longitude = location.longitude,
+                    icon = location.category?.icon,
+                    // The writing below is laid over the picture; the emoji keeps clear of it.
+                    bottomInset = textBandHeight,
                     modifier = photo
                 )
             }
@@ -100,26 +110,40 @@ fun AdventureItem(
             // it darkens only the band the text occupies, and it reaches 0.92 at the bottom
             // edge, which holds even over snow. Whatever the photograph is doing, the strip
             // under the writing is dark.
+            //
+            // Without a photograph the card keeps the same size and composition but changes
+            // material: ink on the placeholder's own surface, one tone deeper under the writing,
+            // with no dark scrim pretending there is a picture to protect it from.
+            val ink = if (hasImage) Color.White else MaterialTheme.colorScheme.onSurface
+            val softInk = if (hasImage) Color.White.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
+            val band = if (hasImage) {
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.Black.copy(alpha = 0.55f),
+                        Color.Black.copy(alpha = 0.92f)
+                    )
+                )
+            } else {
+                Brush.verticalGradient(
+                    0f to placeholder.band.copy(alpha = 0f),
+                    0.34f to placeholder.band,
+                    1f to placeholder.band
+                )
+            }
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.55f),
-                                Color.Black.copy(alpha = 0.92f)
-                            )
-                        )
-                    )
+                    .onSizeChanged { textBandHeight = with(density) { it.height.toDp() } }
+                    .background(brush = band)
                     .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
                 Text(
                     text = location.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
+                    color = ink,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -130,14 +154,14 @@ fun AdventureItem(
                         Icon(
                             imageVector = Icons.Default.Place,
                             contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.75f),
+                            tint = softInk,
                             modifier = Modifier.size(13.dp)
                         )
                         Spacer(modifier = Modifier.width(3.dp))
                         Text(
                             text = label,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.75f),
+                            color = softInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -153,7 +177,7 @@ fun AdventureItem(
                             Text(
                                 text = "\u2605".repeat(rating.coerceAtMost(5)),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = Color.White
+                                color = ink
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                         }
@@ -161,7 +185,7 @@ fun AdventureItem(
                             Text(
                                 text = category.displayName.uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.75f),
+                                color = softInk,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -175,7 +199,7 @@ fun AdventureItem(
                         text = "\uD83D\uDCB0 ${Currencies.formatAmount(price)} " +
                             (location.priceCurrency ?: Currencies.DEFAULT),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = softInk
                     )
                 }
 
@@ -183,7 +207,12 @@ fun AdventureItem(
                 val collectionNames = location.collections.mapNotNull { id ->
                     collections.find { it.id == id }?.name
                 }
-                if (!location.isPublic || collectionNames.isNotEmpty() || tags.isNotEmpty()) {
+                // What's missing is offered where it would be, and both lead to the editor, which
+                // is where a photo is uploaded and a category chosen. Only where the card has its
+                // actions: the dashboard's grid shows the same card without them.
+                val offerPhoto = !hasImage && showMenu
+                val offerCategory = offerPhoto && category == null
+                if (!location.isPublic || collectionNames.isNotEmpty() || tags.isNotEmpty() || offerPhoto) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     @OptIn(ExperimentalLayoutApi::class)
@@ -192,24 +221,31 @@ fun AdventureItem(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        val onCard = if (hasImage) ChipTone.ON_IMAGE else ChipTone.NEUTRAL
+                        if (offerCategory) {
+                            AddChip(text = "Category", onClick = onEdit, color = ink)
+                        }
                         if (!location.isPublic) {
                             MetaChip(text = "\uD83D\uDD12 Private", tone = ChipTone.WARNING)
                         }
                         val visibleCollections = collectionNames.take(2)
                         visibleCollections.forEach { name ->
-                            MetaChip(text = "\uD83D\uDCC1 $name", tone = ChipTone.ON_IMAGE)
+                            MetaChip(text = "\uD83D\uDCC1 $name", tone = onCard)
                         }
                         val remainingCollections = collectionNames.size - visibleCollections.size
                         if (remainingCollections > 0) {
-                            MetaChip(text = "+$remainingCollections", tone = ChipTone.ON_IMAGE)
+                            MetaChip(text = "+$remainingCollections", tone = onCard)
                         }
                         val visibleTags = tags.take(3)
                         visibleTags.forEach { tag ->
-                            MetaChip(text = tag, tone = ChipTone.ON_IMAGE)
+                            MetaChip(text = tag, tone = onCard)
                         }
                         val hiddenTags = tags.size - visibleTags.size
                         if (hiddenTags > 0) {
-                            MetaChip(text = "+$hiddenTags", tone = ChipTone.ON_IMAGE)
+                            MetaChip(text = "+$hiddenTags", tone = onCard)
+                        }
+                        if (offerPhoto) {
+                            AddChip(text = "Add photo", onClick = onAddPhoto, color = ink)
                         }
                     }
                 }

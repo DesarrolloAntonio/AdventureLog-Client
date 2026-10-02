@@ -22,7 +22,8 @@ import kotlinx.serialization.json.Json
 interface LocationsNavigator {
     fun navigateToLocationDetail(location: Location)
     fun navigateToAddLocation()
-    fun navigateToEditLocation(locationId: String, locationJson: String)
+    /** [openImages] opens the form on its images, for "Add photo". */
+    fun navigateToEditLocation(locationId: String, locationJson: String, openImages: Boolean = false)
     fun navigateBack()
 }
 
@@ -57,6 +58,9 @@ fun NavGraphBuilder.locationsScreen(
             onEditAdventure = { adventure ->
                 val adventureJson = json.encodeToString(adventure)
                 navigator.navigateToEditLocation(adventure.id, adventureJson)
+            },
+            onAddPhoto = { adventure ->
+                navigator.navigateToEditLocation(adventure.id, json.encodeToString(adventure), openImages = true)
             }
         )
     }
@@ -83,11 +87,16 @@ fun NavGraphBuilder.locationsScreen(
             },
             navArgument("adventureJson") { 
                 type = NavType.StringType
+            },
+            navArgument("openImages") {
+                type = NavType.BoolType
+                defaultValue = false
             }
         )
     ) { backStackEntry ->
         val adventureId = backStackEntry.savedStateHandle.get<String>("adventureId") ?: ""
         val adventureJson = backStackEntry.savedStateHandle.get<String>("adventureJson") ?: ""
+        val openImages = backStackEntry.savedStateHandle.get<Boolean>("openImages") ?: false
         
         val location = if (adventureJson.isNotEmpty()) {
             json.decodeFromString<Location>(adventureJson)
@@ -99,6 +108,7 @@ fun NavGraphBuilder.locationsScreen(
             AddEditLocationScreen(
                 locationId = adventureId,
                 location = location,
+                openImages = openImages,
                 onNavigateBack = {
                     navigator.navigateBack()
                 }

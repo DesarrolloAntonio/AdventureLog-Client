@@ -68,6 +68,10 @@ import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import androidx.compose.foundation.layout.IntrinsicSize
 import com.desarrollodroide.adventurelog.feature.ui.components.LocationPlaceholder
+import com.desarrollodroide.adventurelog.feature.ui.components.placeholderColors
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.horizontalScroll
 
 @Composable
@@ -1018,6 +1022,9 @@ private fun ComingUpRow(entry: ComingUp, modifier: Modifier = Modifier) {
  * Not the card the places list uses. Text laid over a photograph disappears whenever the
  * photograph is pale - the name of a white village against a bright sky - and at this size there
  * is no room to darken it enough to fix that without losing the photograph too.
+ *
+ * Without a photograph the 72dp slot stays, filled by [LocationPlaceholder] with a hairline along
+ * its bottom that anchors it to the writing, so a strip mixing both keeps one height.
  */
 @Composable
 private fun PlaceMiniCard(
@@ -1045,11 +1052,19 @@ private fun PlaceMiniCard(
                 modifier = Modifier.fillMaxWidth().height(72.dp)
             )
         } else {
+            val edge = placeholderColors(hasCategory = !location.category?.icon.isNullOrBlank()).edge
             LocationPlaceholder(
-                name = location.name,
-                latitude = location.latitude,
-                longitude = location.longitude,
-                modifier = Modifier.fillMaxWidth().height(72.dp)
+                icon = location.category?.icon,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    // Drawn inside the 72dp, not below it: a divider would make this card 1dp
+                    // taller than the photographs beside it.
+                    .drawWithContent {
+                        drawContent()
+                        val y = size.height - 0.5.dp.toPx()
+                        drawLine(edge, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
+                    }
             )
         }
         Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 10.dp)) {
@@ -1060,41 +1075,42 @@ private fun PlaceMiniCard(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            val where = listOfNotNull(
-                location.location?.takeIf { it.isNotBlank() }
-            ).firstOrNull()
-            if (where != null) {
+            // Every line is drawn, empty or not. These cards stand side by side in a row, and a
+            // place with no category or no label was a card a line shorter than its neighbours.
+            Text(
+                text = location.location?.takeIf { it.isNotBlank() }.orEmpty(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            val rating = location.rating?.toInt() ?: 0
+            // The category as the user made it, emoji and name. "No category" only on a card
+            // with no photograph, where the neutral pin above would otherwise go unexplained.
+            val category = location.category?.let { "${it.icon} ${it.displayName}".trim() }
+                ?: if (photo == null) "No category" else ""
+            // The full line height, untrimmed: the stars come from a fallback font taller than
+            // Quicksand, and a trimmed line made a rated card 1dp taller than its neighbours.
+            val rowStyle = MaterialTheme.typography.labelSmall.copy(
+                lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None)
+            )
+            Spacer(Modifier.height(5.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (rating > 0) {
+                    Text(
+                        text = "\u2605".repeat(rating),
+                        style = rowStyle,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(6.dp))
+                }
                 Text(
-                    text = where,
-                    style = MaterialTheme.typography.labelMedium,
+                    text = category,
+                    style = rowStyle,
                     color = MaterialTheme.colorScheme.outline,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-            val rating = location.rating?.toInt() ?: 0
-            val category = location.category?.displayName?.uppercase().orEmpty()
-            if (rating > 0 || category.isNotBlank()) {
-                Spacer(Modifier.height(5.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (rating > 0) {
-                        Text(
-                            text = "\u2605".repeat(rating),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(Modifier.width(6.dp))
-                    }
-                    if (category.isNotBlank()) {
-                        Text(
-                            text = category,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
             }
         }
     }
