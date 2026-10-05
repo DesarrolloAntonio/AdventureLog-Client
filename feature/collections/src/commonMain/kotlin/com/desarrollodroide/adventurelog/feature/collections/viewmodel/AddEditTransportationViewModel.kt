@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class AddEditTransportationUiState(
@@ -226,19 +228,32 @@ class AddEditTransportationViewModel(
         }
     }
     
+    /**
+     * The search field calls this on every keystroke. Each call used to start its own request and
+     * whichever answered last won, so "Valencia" showed the results for "Valen" and "Madrid Atocha"
+     * said "No results found" because "Madrid A" took five seconds (QA RL-05). Only the latest
+     * query is kept: the previous one is cancelled, and nothing is sent until typing pauses.
+     */
+    private var searchJob: Job? = null
+
     fun searchLocations(query: String) {
+        searchJob?.cancel()
         if (query.isBlank()) {
             _uiState.value = _uiState.value.copy(
-                locationSearchResults = emptyList()
+                locationSearchResults = emptyList(),
+                isSearchingLocation = false
             )
             return
         }
         
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isSearchingLocation = true,
-                errorMessage = null
-            )
+        // Searching from the first keystroke: during the pause the modal would otherwise say
+        // "No results found" for a query that was never sent.
+        _uiState.value = _uiState.value.copy(
+            isSearchingLocation = true,
+            errorMessage = null
+        )
+        searchJob = viewModelScope.launch {
+            delay(LOCATION_SEARCH_DEBOUNCE_MS)
             
             when (val result = searchLocationsUseCase(query)) {
                 is Either.Left -> {
@@ -259,8 +274,10 @@ class AddEditTransportationViewModel(
     }
     
     fun clearLocationSearch() {
+        searchJob?.cancel()
         _uiState.value = _uiState.value.copy(
-            locationSearchResults = emptyList()
+            locationSearchResults = emptyList(),
+            isSearchingLocation = false
         )
     }
     
@@ -288,3 +305,5 @@ class AddEditTransportationViewModel(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 }
+
+internal const val LOCATION_SEARCH_DEBOUNCE_MS = 300L
