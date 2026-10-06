@@ -37,7 +37,8 @@ class TrailsRepositoryImpl(
         Either.Right(block())
     } catch (e: HttpException) {
         when (e.code) {
-            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            401 -> Either.Left(ApiResponse.InvalidCredentials)
+            403 -> Either.Left(ApiResponse.Forbidden)
             else -> Either.Left(ApiResponse.HttpError)
         }
     } catch (e: IOException) {

@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingData
@@ -23,18 +24,28 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.io.IOException
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 private val logger = Logger.withTag("CollectionsRepositoryImpl")
 
 class CollectionsRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
-) : CollectionsRepository {
+) : CollectionsRepository, AccountDataCache {
 
     private val _collectionsFlow = MutableStateFlow<List<UltraSlimCollection>>(emptyList())
     override val collectionsFlow: StateFlow<List<UltraSlimCollection>> = _collectionsFlow.asStateFlow()
 
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
+
+    override fun clearAccountData() {
+        _collectionsFlow.value = emptyList()
+        _version.value++
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCollectionsPagingData(
@@ -90,7 +101,7 @@ class CollectionsRepositoryImpl(
             logger.e { "HTTP Error during getCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -117,7 +128,7 @@ class CollectionsRepositoryImpl(
             logger.e { "HTTP Error during getAllCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -137,7 +148,7 @@ class CollectionsRepositoryImpl(
             logger.e { "HTTP Error during getCollection: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -154,7 +165,8 @@ class CollectionsRepositoryImpl(
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): Either<ApiResponse, Collection> {
         return try {
             val collection = networkDataSource.createCollection(
@@ -162,7 +174,8 @@ class CollectionsRepositoryImpl(
                 description = description,
                 isPublic = isPublic,
                 startDate = startDate,
-                endDate = endDate
+                endDate = endDate,
+                link = link
             ).toDomainModel()
 
             // Convert created collection to UltraSlimCollection for the list
@@ -176,7 +189,8 @@ class CollectionsRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during createCollection: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -192,12 +206,20 @@ class CollectionsRepositoryImpl(
         return try {
             val collections = networkDataSource.getCollections(1, 1000).map { it.toDomainModel() }
             _collectionsFlow.value = collections
+
+            // An explicit refresh is a statement that what is on screen may be out of date, and
+            // the paged list is on screen too - it just reads from a different source than the
+            // cached flow above. Without this, anything that only calls refresh() (duplicating a
+            // collection, accepting an invitation) moved the header count and left the list
+            // alone: six collections above five cards.
+            _version.value++
+
             Either.Right(collections)
         } catch (e: HttpException) {
             logger.e { "HTTP Error during refreshCollections: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -221,7 +243,8 @@ class CollectionsRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during deleteCollection: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -240,7 +263,18 @@ class CollectionsRepositoryImpl(
         collectionId: String,
         archived: Boolean
     ): Either<ApiResponse, Collection> = guard {
-        networkDataSource.setCollectionArchived(collectionId, archived).toDomainModel()
+        val collection = networkDataSource.setCollectionArchived(collectionId, archived)
+            .toDomainModel()
+
+        // Archiving changes which collections the paged list should show, so it has to invalidate
+        // paging and update the cached list the same way create and delete do. Without this the
+        // archived collection stayed on screen until the process died.
+        _collectionsFlow.value = _collectionsFlow.value.map {
+            if (it.id == collectionId) it.copy(isArchived = archived) else it
+        }
+        _version.value++
+
+        collection
     }
 
     override suspend fun exportCollection(
@@ -279,7 +313,8 @@ class CollectionsRepositoryImpl(
         Either.Right(block())
     } catch (e: HttpException) {
         when (e.code) {
-            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            401 -> Either.Left(ApiResponse.InvalidCredentials)
+            403 -> Either.Left(ApiResponse.Forbidden)
             else -> Either.Left(ApiResponse.HttpError)
         }
     } catch (e: IOException) {
@@ -321,7 +356,8 @@ class CollectionsRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during updateCollection: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -329,6 +365,150 @@ class CollectionsRepositoryImpl(
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e { "Unexpected error during updateCollection: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun createNote(
+        collectionId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Note> = noteCall {
+        networkDataSource.createNote(name, content, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateNote(
+        noteId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Note> = noteCall {
+        networkDataSource.updateNote(noteId, name, content, date, isPublic)
+    }
+
+    override suspend fun deleteNote(noteId: String): Either<ApiResponse, Unit> = noteCall {
+        networkDataSource.deleteNote(noteId)
+    }
+
+    override suspend fun createChecklist(
+        collectionId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Checklist> = noteCall {
+        networkDataSource.createChecklist(name, items, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateChecklist(
+        checklistId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Either<ApiResponse, Checklist> = noteCall {
+        networkDataSource.updateChecklist(checklistId, name, items, date, isPublic)
+    }
+
+    override suspend fun deleteChecklist(checklistId: String): Either<ApiResponse, Unit> = noteCall {
+        networkDataSource.deleteChecklist(checklistId)
+    }
+
+    override suspend fun createLodging(
+        collectionId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        priceCurrency: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Either<ApiResponse, Lodging> = noteCall {
+        networkDataSource.createLodging(
+            name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, priceCurrency, link, location, isPublic, collectionId
+        )
+    }
+
+    override suspend fun updateLodging(
+        lodgingId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        priceCurrency: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Either<ApiResponse, Lodging> = noteCall {
+        networkDataSource.updateLodging(
+            lodgingId, name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, priceCurrency, link, location, isPublic
+        )
+    }
+
+    override suspend fun deleteLodging(lodgingId: String): Either<ApiResponse, Unit> = noteCall {
+        networkDataSource.deleteLodging(lodgingId)
+    }
+
+    override suspend fun autoGenerateItinerary(
+        collectionId: String
+    ): Either<ApiResponse, List<ItineraryEntry>> = noteCall {
+        networkDataSource.autoGenerateItinerary(collectionId)
+    }
+
+    override suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): Either<ApiResponse, ItineraryEntry> = noteCall {
+        networkDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
+    }
+
+    override suspend fun deleteItineraryEntry(entryId: String): Either<ApiResponse, Unit> =
+        noteCall {
+            networkDataSource.deleteItineraryEntry(entryId)
+        }
+
+    /**
+     * The note, checklist and lodging calls differ only in the line that talks to the network; the twenty lines of
+     * error mapping around them are identical, and three copies of it is three places to fix the
+     * next time the shape changes.
+     *
+     * The version counter is bumped either way: a collection's note list is part of the collection
+     * the detail screen is showing, so it has to be re-read.
+     */
+    private inline fun <T> noteCall(block: () -> T): Either<ApiResponse, T> {
+        return try {
+            val result = block()
+            _version.value++
+            Either.Right(result)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error on a note call: ${e.code}" }
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error on a note call: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error on a note call: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

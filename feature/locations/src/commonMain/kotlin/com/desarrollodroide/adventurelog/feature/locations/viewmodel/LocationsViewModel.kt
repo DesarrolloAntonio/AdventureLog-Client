@@ -136,7 +136,8 @@ class LocationsViewModel(
     sealed class DeleteState {
         data object Idle : DeleteState()
         data object Loading : DeleteState()
-        data object Success : DeleteState()
+        /** Carries the id: a two-pane caller has to know which place left. */
+        data class Success(val locationId: String) : DeleteState()
         data class Error(val message: String) : DeleteState()
     }
     
@@ -175,13 +176,15 @@ class LocationsViewModel(
     ) { query, filters ->
         Pair(query, filters)
     }.flatMapLatest { (query, filters) ->
-        // Only pass non-default values to avoid using the filtered endpoint unnecessarily
+        // Only pass non-default values to avoid using the filtered endpoint unnecessarily.
+        // includeCollections is true by default, so testing it for truth made this always true
+        // and the plain endpoint below unreachable: what counts is a departure from the default.
         val hasActiveFilters = filters.categoryNames.isNotEmpty() ||
                 filters.sortField != LocationSortField.UPDATED_AT ||
                 filters.sortDirection != SortDirection.DESCENDING ||
                 filters.visitedFilter != VisitedFilter.ALL ||
                 query.isNotEmpty() ||
-                filters.includeCollections
+                !filters.includeCollections
         
         if (hasActiveFilters) {
             getLocationsPagingUseCase(
@@ -285,7 +288,7 @@ class LocationsViewModel(
                     _deleteState.value = DeleteState.Error(result.value)
                 }
                 is Either.Right -> {
-                    _deleteState.value = DeleteState.Success
+                    _deleteState.value = DeleteState.Success(adventureId)
                     // The paging data will automatically refresh due to the repository updating the flow
                 }
             }

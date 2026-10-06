@@ -38,6 +38,8 @@ data class LodgingDTO(
     
     @SerialName("price")
     val price: String? = null,
+    @SerialName("price_currency")
+    val priceCurrency: String? = null,
     
     @SerialName("latitude")
     val latitude: String? = null,
@@ -82,6 +84,7 @@ fun LodgingDTO.toDomainModel(): Lodging = Lodging(
     checkOut = checkOut,
     reservationNumber = reservationNumber,
     price = price,
+    priceCurrency = priceCurrency,
     latitude = latitude,
     longitude = longitude,
     location = location,

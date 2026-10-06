@@ -17,10 +17,10 @@ class RememberMeCredentialsUseCase(
     fun get(): Flow<Account?> = userRepository.getRememberMeCredentials()
 
     /**
-     * Saves remember me credentials
+     * Saves remember me credentials: the server and the username, never the password
      */
-    suspend fun save(url: String, username: String, password: String) {
-        userRepository.saveRememberMeCredentials(url, username, password)
+    suspend fun save(url: String, username: String) {
+        userRepository.saveRememberMeCredentials(url, username)
     }
 
     /**

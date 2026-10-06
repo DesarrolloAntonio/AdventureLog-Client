@@ -17,3 +17,10 @@ moduleGraphConfig {
     heading = "### Module Graph"
     showFullPath = true
 }
+// A test that never ends is neither red nor green: one looped inside runTest and held a module's
+// run at full CPU for twenty minutes, in silence (QA campaign, 2026-09-15). Every test task stops.
+subprojects {
+    tasks.withType<Test>().configureEach {
+        timeout.set(java.time.Duration.ofMinutes(15))
+    }
+}

@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import app.cash.paging.Pager
 import app.cash.paging.PagingConfig
 import app.cash.paging.PagingData
@@ -9,6 +10,8 @@ import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSource
 import com.desarrollodroide.adventurelog.core.data.paging.AdventuresPagingSourceFiltered
 import com.desarrollodroide.adventurelog.core.domain.repository.LocationsRepository
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
@@ -24,9 +27,14 @@ private val logger = Logger.withTag("AdventuresRepositoryImpl")
 
 class AdventuresRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
-) : LocationsRepository {
+) : LocationsRepository, AccountDataCache {
 
     override var selectedLocation: Location? = null
+
+    override fun clearAccountData() {
+        selectedLocation = null
+        _version.value++
+    }
 
     // Version counter to force paging invalidation
     private val _version = MutableStateFlow(0)
@@ -85,7 +93,7 @@ class AdventuresRepositoryImpl(
             logger.e { "HTTP Error during getAdventures: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -105,7 +113,7 @@ class AdventuresRepositoryImpl(
             logger.e { "HTTP Error during getAllAdventuresForMap: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -128,13 +136,18 @@ class AdventuresRepositoryImpl(
         }
         
         logger.e { "⚠️ selectedLocation not available, fetching from network: $objectId" }
+        return fetchLocation(objectId)
+    }
+
+    override suspend fun fetchLocation(objectId: String): Either<ApiResponse, Location> {
         return try {
             val location = networkDataSource.getAdventureDetail(objectId).toDomainModel()
             Either.Right(location)
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getLocation: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -159,7 +172,8 @@ class AdventuresRepositoryImpl(
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String>
+        activityTypes: List<String>,
+        collectionIds: List<String>
     ): Either<ApiResponse, Location> {
         return try {
             val adventure = networkDataSource.createAdventure(
@@ -175,7 +189,8 @@ class AdventuresRepositoryImpl(
                 visits = visits,
             price = price,
             priceCurrency = priceCurrency,
-                activityTypes = activityTypes
+                activityTypes = activityTypes,
+                collectionIds = collectionIds
             ).toDomainModel()
             
             // Increment version to invalidate paging
@@ -185,7 +200,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during createAdventure: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -193,6 +209,35 @@ class AdventuresRepositoryImpl(
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e { "Unexpected error during createAdventure: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: RecommendationCategory,
+        radiusMetres: Int
+    ): Either<ApiResponse, List<Recommendation>> {
+        return try {
+            Either.Right(
+                networkDataSource.getRecommendations(
+                    latitude, longitude, place, category, radiusMetres
+                )
+            )
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error during getRecommendations: ${e.code}" }
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error during getRecommendations: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error during getRecommendations: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }
@@ -205,7 +250,7 @@ class AdventuresRepositoryImpl(
             logger.e { "HTTP Error during refreshAdventures: ${e.code}" }
             when (e.code) {
                 401 -> Either.Left(ApiResponse.InvalidCredentials)
-                403 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -218,7 +263,14 @@ class AdventuresRepositoryImpl(
     }
 
     override suspend fun duplicateLocation(locationId: String): Either<ApiResponse, Location> =
-        call { networkDataSource.duplicateLocation(locationId).toDomainModel() }
+        call {
+            val copy = networkDataSource.duplicateLocation(locationId).toDomainModel()
+            // A duplicate is a new place in the list, so the paged list has to be told, the same
+            // way create and delete tell it. Without this the snackbar named a copy that was not
+            // on screen until the screen was left and re-entered.
+            _version.value++
+            copy
+        }
 
     override suspend fun getShareImage(
         locationId: String,
@@ -231,7 +283,8 @@ class AdventuresRepositoryImpl(
         Either.Right(block())
     } catch (e: HttpException) {
         when (e.code) {
-            401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+            401 -> Either.Left(ApiResponse.InvalidCredentials)
+            403 -> Either.Left(ApiResponse.Forbidden)
             else -> Either.Left(ApiResponse.HttpError)
         }
     } catch (e: IOException) {
@@ -253,7 +306,8 @@ class AdventuresRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during generateDescription: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -268,15 +322,21 @@ class AdventuresRepositoryImpl(
     override suspend fun deleteLocation(adventureId: String): Either<ApiResponse, Unit> {
         return try {
             networkDataSource.deleteAdventure(adventureId)
-            
+
             // Increment version to invalidate paging
             _version.value++
-            
+
+            // Don't leave a deleted place in the cache getLocation() answers from.
+            if (selectedLocation?.id == adventureId) {
+                selectedLocation = null
+            }
+
             Either.Right(Unit)
         } catch (e: HttpException) {
             logger.e { "HTTP Error during deleteAdventure: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -300,7 +360,7 @@ class AdventuresRepositoryImpl(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>,
+        collections: List<String>?,
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?
@@ -323,15 +383,23 @@ class AdventuresRepositoryImpl(
             price = price,
             priceCurrency = priceCurrency
             ).toDomainModel()
-            
+
             // Increment version to invalidate paging
             _version.value++
-            
+
+            // getLocation() answers from selectedLocation whenever the ids match, so leaving the
+            // pre-edit copy there means opening the place you just edited shows what it used to
+            // say. Replace it with what the server just returned.
+            if (selectedLocation?.id == adventure.id) {
+                selectedLocation = adventure
+            }
+
             Either.Right(adventure)
         } catch (e: HttpException) {
             logger.e { "HTTP Error during updateAdventure: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -339,6 +407,33 @@ class AdventuresRepositoryImpl(
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e { "Unexpected error during updateAdventure: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun updateLocationCollections(
+        locationId: String,
+        collections: List<String>
+    ): Either<ApiResponse, Location> {
+        return try {
+            val location = networkDataSource.updateLocationCollections(locationId, collections).toDomainModel()
+            _version.value++
+            if (selectedLocation?.id == location.id) {
+                selectedLocation = location
+            }
+            Either.Right(location)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error during updateLocationCollections: ${e.code}" }
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error during updateLocationCollections: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error during updateLocationCollections: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

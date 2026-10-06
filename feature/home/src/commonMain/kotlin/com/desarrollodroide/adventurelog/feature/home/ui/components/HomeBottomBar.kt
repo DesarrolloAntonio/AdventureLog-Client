@@ -12,11 +12,8 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 
@@ -29,29 +26,29 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScree
  *
  * Five is the ceiling for a bar like this, which is why World is a hub rather than a leaf:
  * countries, regions and cities live under it instead of each claiming a slot.
+ *
+ * These are supplied as navigation-suite items rather than drawn as a bar, so the same five
+ * destinations become a bottom bar on a phone and a rail down the side on a tablet - where a bar
+ * pinned to the bottom edge of a large screen is a long way from where the hands are.
  */
-@Composable
-fun HomeBottomBar(
+fun NavigationSuiteScope.homeNavigationItems(
     current: CurrentScreen,
-    onSelect: (CurrentScreen) -> Unit,
-    modifier: Modifier = Modifier
+    onSelect: (CurrentScreen) -> Unit
 ) {
-    NavigationBar(modifier = modifier) {
-        Destination.entries.forEach { destination ->
-            val selected = destination.screen == current
+    Destination.entries.forEach { destination ->
+        val selected = destination.screen == current
 
-            NavigationBarItem(
-                selected = selected,
-                onClick = { onSelect(destination.screen) },
-                icon = {
-                    Icon(
-                        imageVector = if (selected) destination.selectedIcon else destination.icon,
-                        contentDescription = null
-                    )
-                },
-                label = { Text(destination.label) }
-            )
-        }
+        item(
+            selected = selected,
+            onClick = { onSelect(destination.screen) },
+            icon = {
+                Icon(
+                    imageVector = if (selected) destination.selectedIcon else destination.icon,
+                    contentDescription = null
+                )
+            },
+            label = { Text(destination.label) }
+        )
     }
 }
 

@@ -29,5 +29,7 @@ data class CalendarEvent(
     val category: String,
     val locationLabel: String,
     val collectionId: String?,
-    val collectionName: String?
+    val collectionName: String?,
+    /** The id of the thing itself - the place for a visit, the collection for a trip. */
+    val resourceId: String = ""
 )

@@ -15,8 +15,9 @@ class GetVisitedRegionsUseCase(
         when (val result = countriesRepository.getVisitedRegions()) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("Network unavailable")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Error getting visited regions, try again later")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired, please log in again")
                 }
             }

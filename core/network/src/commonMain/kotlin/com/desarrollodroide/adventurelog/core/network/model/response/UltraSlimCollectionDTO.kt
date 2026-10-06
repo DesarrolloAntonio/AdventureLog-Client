@@ -98,6 +98,7 @@ fun UltraSlimCollectionDTO.toDomainModel(): UltraSlimCollection {
         link = link,
         status = TripStatus.fromApi(status),
         daysUntilStart = daysUntilStart,
-        sharedWith = sharedWith
+        sharedWith = sharedWith,
+        ownerId = user
     )
 }

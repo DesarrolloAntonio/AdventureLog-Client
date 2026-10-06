@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,6 +90,11 @@ fun CategoryDropdown(
                 .fillMaxWidth()
                 .height(55.dp)
                 .clip(RoundedCornerShape(30.dp))
+                // The field's placeholder isn't read out, so the control had no name at all.
+                .semantics {
+                    contentDescription = selectedCategory?.let { "Category: ${it.displayName}" }
+                        ?: if (categories.isEmpty()) "No categories. Create one" else "Category, required"
+                }
                 .clickable {
                     if (categories.isEmpty()) {
                         showAddCategorySheet = true

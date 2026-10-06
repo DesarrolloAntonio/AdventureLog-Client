@@ -11,13 +11,17 @@ data class Collection(
     val startDate: String?,
     val endDate: String?,
     val transportations: List<Transportation>,
-    val notes: List<String>,
+    val notes: List<Note>,
     val updatedAt: String,
-    val checklists: List<String>,
+    val checklists: List<Checklist>,
     val isArchived: Boolean,
     val sharedWith: List<String>,
     val link: String,
-    val lodging: List<String>
+    val lodging: List<Lodging>,
+    /** The trip laid out day by day. Empty until someone builds one; see [ItineraryEntry]. */
+    val itinerary: List<ItineraryEntry> = emptyList(),
+    /** What the days of the trip are called, for the days that have been given a name. */
+    val itineraryDays: List<ItineraryDayNote> = emptyList()
 )
 
 /**
@@ -36,7 +40,8 @@ fun Collection.toUltraSlimCollection(): UltraSlimCollection = UltraSlimCollectio
     endDate = endDate,
     adventureCount = locations.size,
     featuredImage = extractFeaturedImage(),
-    link = link
+    link = link,
+    ownerId = userId
 )
 
 /**

@@ -12,8 +12,9 @@ class SearchLocationsUseCase(
         return when (val result = geocodeRepository.searchLocations(query)) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("No internet connection. Cannot search locations.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Failed to search locations. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

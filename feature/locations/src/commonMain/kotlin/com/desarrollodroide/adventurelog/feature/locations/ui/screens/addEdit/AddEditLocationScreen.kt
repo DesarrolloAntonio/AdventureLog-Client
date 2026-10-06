@@ -1,5 +1,14 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit
 
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.datetime.TimeZone
+import com.desarrollodroide.adventurelog.core.model.isAllDayVisit
+import com.desarrollodroide.adventurelog.core.model.ContentImage
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
+import kotlin.math.roundToInt
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.Category
@@ -58,6 +70,7 @@ import org.koin.core.parameter.parametersOf
 import co.touchlab.kermit.Logger
 import androidx.compose.material3.AlertDialog
 import com.desarrollodroide.adventurelog.feature.ui.platform.PlatformBackHandler
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 private val logger = Logger.withTag("AddEditLocationScreen")
 
@@ -89,21 +102,24 @@ private fun splitIsoDateTime(isoString: String?): SplitDateTime {
     }
 }
 
-/**
- * True when this bound carries no meaningful time of day.
- *
- * Midnight is how an all-day visit is stored now; end-of-day is the older form the server still
- * accepts and normalises. Both have to read as all-day, or a visit saved before the app started
- * sending midnight comes back looking like it runs from 00:00 to 23:59.
- */
-private fun SplitDateTime.isAllDayBound(): Boolean =
-    time == null || time == "00:00" || time == "23:59"
+
+/** A photo the place already has, as the form holds it: known by its server id, never uploaded again. */
+internal fun formImageOf(image: ContentImage) = ImageFormData(
+    uri = image.image,
+    type = ImageType.URL,
+    isPrimary = image.isPrimary,
+    serverId = image.id
+)
 
 @Composable
 fun AddEditLocationScreen(
     locationId: String?,
     location: Location?,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    /** Open on the images section, scrolled to it: the form was reached by "Add photo". */
+    openImages: Boolean = false,
+    /** A new place started from a trip goes into that trip. */
+    intoCollectionId: String? = null
 ) {
     val viewModel = koinViewModel<AddEditAdventureViewModel> {
         parametersOf(locationId, location)
@@ -129,13 +145,17 @@ fun AddEditLocationScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         AddEditLocationContent(
+            openImages = openImages,
             isEditMode = locationId != null,
             existingLocation = uiState.existingLocation,
             categories = uiState.categories,
             isLoading = uiState.isLoading,
+            isSaving = uiState.isSavingLocation,
+            loadError = uiState.loadError,
+            onRetryLoad = viewModel::retryLoad,
             onNavigateBack = onNavigateBack,
             onSave = { formData ->
-                viewModel.saveLocation(formData)
+                viewModel.saveLocation(formData, intoCollectionId)
             },
             onGenerateDescription = { name, onDescriptionGenerated ->
                 viewModel.generateDescription(name, onDescriptionGenerated)
@@ -172,12 +192,75 @@ fun AddEditLocationScreen(
         )
     }
 }
+/**
+ * The form as it starts: from the place being edited, or empty for a new one. Kept apart from the
+ * screen so the unchanged state can be told from an edited one, and restored after a process death.
+ */
+internal fun locationFormOf(existingLocation: Location?, defaultCurrency: String): LocationFormData =
+    if (existingLocation != null) {
+        LocationFormData(
+            name = existingLocation.name,
+            description = existingLocation.description ?: "",
+            category = existingLocation.category,
+            rating = existingLocation.rating?.toInt() ?: 0,
+            price = existingLocation.price?.let(Currencies::formatAmount) ?: "",
+            priceCurrency = existingLocation.priceCurrency ?: Currencies.DEFAULT,
+            link = existingLocation.link ?: "",
+            location = existingLocation.location ?: "",
+            latitude = existingLocation.latitude,
+            longitude = existingLocation.longitude,
+            isPublic = existingLocation.isPublic,
+            tags = existingLocation.tags,
+            visits = existingLocation.visits.map(::visitFormOf),
+            trails = existingLocation.trails.map { trail ->
+                TrailFormData(
+                    id = trail.id,
+                    name = trail.name,
+                    link = trail.link ?: trail.wandererLink.orEmpty()
+                )
+            },
+            images = existingLocation.images.map(::formImageOf)
+        )
+    } else {
+        LocationFormData(
+            // No category is chosen for a new place, as on the web: the one this used to pick was
+            // read before the categories had loaded, so it was always none anyway.
+            category = null,
+            // The web pre-fills money fields with the account's preferred currency; a new
+            // location that always said USD would make every European price wrong by
+            // default.
+            priceCurrency = defaultCurrency
+        )
+    }
+
+/** A visit as the form holds it. Saving compares against this to leave untouched visits alone. */
+internal fun visitFormOf(visit: Visit): VisitFormData {
+    val start = splitIsoDateTime(visit.startDate)
+    val end = splitIsoDateTime(visit.endDate)
+    val allDay = isAllDayVisit(visit.startDate, visit.endDate)
+    return VisitFormData(
+        id = visit.id,
+        startDate = start.date,
+        endDate = end.date,
+        startTime = start.time.takeUnless { allDay },
+        endTime = end.time.takeUnless { allDay },
+        // A visit stored with no timezone used to be given Europe/Madrid, whoever was travelling.
+        timezone = visit.timezone ?: TimeZone.currentSystemDefault().id,
+        notes = visit.notes ?: "",
+        isAllDay = allDay
+    )
+}
+
 @Composable
 fun AddEditLocationContent(
+    openImages: Boolean = false,
     isEditMode: Boolean = false,
     existingLocation: Location? = null,
     categories: List<Category>,
     isLoading: Boolean = false,
+    isSaving: Boolean = false,
+    loadError: String? = null,
+    onRetryLoad: () -> Unit = {},
     onNavigateBack: () -> Unit,
     onSave: (adventureData: LocationFormData) -> Unit,
     onGenerateDescription: (name: String, onDescriptionGenerated: (String) -> Unit) -> Unit,
@@ -195,83 +278,39 @@ fun AddEditLocationContent(
     defaultCurrency: String = Currencies.DEFAULT,
     modifier: Modifier = Modifier
 ) {
-    var formData by remember(existingLocation) {
-        mutableStateOf(
-            if (existingLocation != null) {
-                logger.d { "DEBUG: Loading existing location: ${existingLocation.name}" }
-                logger.d { "DEBUG: Number of visits: ${existingLocation.visits.size}" }
-                
-                val parsedVisits = existingLocation.visits.mapIndexed { index, visit ->
-                    logger.d { "DEBUG: Visit $index - startDate: ${visit.startDate}, endDate: ${visit.endDate}" }
-                    
-                    val startDateTime = splitIsoDateTime(visit.startDate)
-                    val endDateTime = splitIsoDateTime(visit.endDate)
-                    
-                    logger.d { "DEBUG: Parsed visit $index - startDate: ${startDateTime.date}, startTime: ${startDateTime.time}" }
-                    logger.d { "DEBUG: Parsed visit $index - endDate: ${endDateTime.date}, endTime: ${endDateTime.time}" }
-                    
-                    // An all-day visit is stored as midnight on both bounds, so a time of
-                    // 00:00 means "no time" rather than "one minute past midnight". Reading it
-                    // literally left the All day switch off on every visit ever saved.
-                    val allDay = startDateTime.isAllDayBound() && endDateTime.isAllDayBound()
-
-                    VisitFormData(
-                        id = visit.id,
-                        startDate = startDateTime.date,
-                        endDate = endDateTime.date,
-                        startTime = startDateTime.time.takeUnless { allDay },
-                        endTime = endDateTime.time.takeUnless { allDay },
-                        timezone = visit.timezone ?: "Europe/Madrid",
-                        notes = visit.notes ?: "",
-                        isAllDay = allDay
-                    )
-                }
-                
-                logger.d { "DEBUG: Total parsed visits: ${parsedVisits.size}" }
-                
-                val parsedTrails = existingLocation.trails.map { trail ->
-                    TrailFormData(
-                        id = trail.id,
-                        name = trail.name,
-                        link = trail.link ?: trail.wandererLink.orEmpty()
-                    )
-                }
-
-                LocationFormData(
-                    name = existingLocation.name,
-                    description = existingLocation.description ?: "",
-                    category = existingLocation.category,
-                    rating = existingLocation.rating?.toInt() ?: 0,
-                    // Round-tripping the stored price matters: the update serialises nulls, so a
-                    // form that forgot it would clear the value on the next save.
-                    price = existingLocation.price?.let(Currencies::formatAmount) ?: "",
-                    priceCurrency = existingLocation.priceCurrency ?: Currencies.DEFAULT,
-                    link = existingLocation.link ?: "",
-                    location = existingLocation.location ?: "",
-                    latitude = existingLocation.latitude,
-                    longitude = existingLocation.longitude,
-                    isPublic = existingLocation.isPublic,
-                    tags = existingLocation.tags,
-                    visits = parsedVisits,
-                    trails = parsedTrails,
-                    images = existingLocation.images.map { contentImage ->
-                        ImageFormData(
-                            uri = contentImage.image,
-                            type = ImageType.URL,
-                            isPrimary = contentImage.isPrimary
-                        )
-                    }
-                )
+    if (isEditMode && existingLocation == null) {
+        // Editing needs the place as the server has it. Until it arrives there is no form: an
+        // empty one could be saved over the place.
+        Box(
+            modifier = modifier.fillMaxSize().padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (loadError == null) {
+                CircularProgressIndicator()
             } else {
-                LocationFormData(
-                    category = categories.firstOrNull(),
-                    // The web pre-fills money fields with the account's preferred currency; a new
-                    // location that always said USD would make every European price wrong by
-                    // default.
-                    priceCurrency = defaultCurrency
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = loadError,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = onNavigateBack) { Text("Go back") }
+                        Button(onClick = onRetryLoad) { Text("Try again") }
+                    }
+                }
             }
-        )
+        }
+        return
+    }
+
+    // Saveable, so a form half filled in survives the process being killed in the background: it
+    // came back empty (measured). Keyed by the place, so a different place starts from its own data.
+    var formData by rememberSaveable(existingLocation?.id, stateSaver = LocationFormSaver) {
+        mutableStateOf(locationFormOf(existingLocation, defaultCurrency))
     }
 
     // Update location when reverse geocode completes
@@ -284,20 +323,10 @@ fun AddEditLocationContent(
     }
 
 
-    if (isLoading && existingLocation == null && isEditMode) {
-        // Show loading state while loading adventure for edit
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-        return
-    }
 
     // A filled-in form is worth something. Back used to throw it away without a word, which is
     // the one thing a form must never do.
-    val initialFormData = remember(existingLocation) { formData }
+    val initialFormData = remember(existingLocation) { locationFormOf(existingLocation, defaultCurrency) }
     var confirmDiscard by remember { mutableStateOf(false) }
     val hasChanges = formData != initialFormData
 
@@ -336,10 +365,26 @@ fun AddEditLocationContent(
         )
     }
 
+    // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
+    // box the length of the screen holding a place name, and the eye loses the line it is on.
+    val scrollState = rememberScrollState()
+    // Where the images section starts in the scrolled column, once it has been placed.
+    var imagesTop by remember { mutableStateOf<Int?>(null) }
+    // Once, on arrival: after that the scroll is the user's.
+    var scrolledToImages by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(imagesTop) {
+        val top = imagesTop
+        if (openImages && !scrolledToImages && top != null) {
+            scrollState.animateScrollTo(top)
+            scrolledToImages = true
+        }
+    }
+
+    ContentColumn(modifier) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -377,15 +422,18 @@ fun AddEditLocationContent(
             onFormDataChange = { formData = it }
         )
 
-        ImagesSection(
-            images = formData.images,
-            onImagesChange = { updatedImages ->
-                formData = formData.copy(images = updatedImages)
-            },
-            wikipediaImageState = wikipediaImageState,
-            onSearchWikipediaImage = onSearchWikipediaImage,
-            onResetWikipediaState = onResetWikipediaState
-        )
+        Box(Modifier.onPlaced { imagesTop = it.positionInParent().y.roundToInt() }) {
+            ImagesSection(
+                images = formData.images,
+                onImagesChange = { updatedImages ->
+                    formData = formData.copy(images = updatedImages)
+                },
+                wikipediaImageState = wikipediaImageState,
+                onSearchWikipediaImage = onSearchWikipediaImage,
+                onResetWikipediaState = onResetWikipediaState,
+                initiallyExpanded = openImages
+            )
+        }
 
         // Visits are saved after the location, against /api/visits/ - they cannot be nested in
         // the location payload because each one needs a location id that does not exist yet.
@@ -402,7 +450,14 @@ fun AddEditLocationContent(
         ) {
             PrimaryButton(
                 onClick = { onSave(formData) },
-                text = if (isEditMode) "Save changes" else "Create place"
+                text = when {
+                    isSaving -> "Saving…"
+                    isEditMode -> "Save changes"
+                    else -> "Create place"
+                },
+                // Held while a save runs: nothing showed one was under way, and a second tap made a
+                // second place.
+                enabled = !isSaving
             )
 
             TextButton(
@@ -417,6 +472,7 @@ fun AddEditLocationContent(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
     }
 }
 

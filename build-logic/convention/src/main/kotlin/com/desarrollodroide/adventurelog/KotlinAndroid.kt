@@ -15,7 +15,8 @@ internal fun Project.configureKotlinAndroid(
     compileSdk = libs.findVersion("android.compileSdk").get().requiredVersion.toInt()
     defaultConfig {
         minSdk = libs.findVersion("android.minSdk").get().requiredVersion.toInt()
-        consumerProguardFiles("consumer-proguard-rules.pro")
+        // Only modules that ship their own rules have the file; AGP 9 fails a release build on a missing one.
+        if (file("consumer-proguard-rules.pro").exists()) consumerProguardFiles("consumer-proguard-rules.pro")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

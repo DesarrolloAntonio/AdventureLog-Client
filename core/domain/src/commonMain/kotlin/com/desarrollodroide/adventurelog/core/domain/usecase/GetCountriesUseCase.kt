@@ -12,8 +12,9 @@ class GetCountriesUseCase(
         when (val result = countriesRepository.getCountries()) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("Network unavailable")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Error loading countries, try again later")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired, please log in again")
                 }
             }

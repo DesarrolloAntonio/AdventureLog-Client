@@ -1,5 +1,13 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import com.desarrollodroide.adventurelog.core.model.ownedBy
+import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,9 +35,25 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionView
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionViewSwitcher
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsTabs
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ItineraryItemPicker
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.summary
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.agenda
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.itinerary
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.stats
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionCalendarView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionItineraryView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionRecommendationsView
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsUiState
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsViewModel
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionMapView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionStatsView
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.DeleteState
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.UpdateCollectionsState
@@ -40,6 +64,12 @@ import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.DeleteOutline
+import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 @Composable
 fun CollectionDetailScreen(
@@ -48,13 +78,35 @@ fun CollectionDetailScreen(
     onHomeClick: () -> Unit,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
+    /** A new place, created inside this collection (QA CO-19). */
+    onAddPlace: () -> Unit = {},
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
+    onAddNote: (String) -> Unit = {},
+    onEditNote: (String, Note) -> Unit = { _, _ -> },
+    onAddChecklist: (String) -> Unit = {},
+    onEditChecklist: (String, Checklist) -> Unit = { _, _ -> },
+    onAddLodging: (String) -> Unit = {},
+    onEditLodging: (String, Lodging) -> Unit = { _, _ -> },
+    /**
+     * Whether the screen has to say where it is. Reached from Home it does not: that route puts a
+     * breadcrumb in the shell's app bar. Reached from the Collections tab it does - that pane
+     * keeps its own back stack, so the shell's route never changes and its breadcrumb never
+     * appears. Without this the screen opened on a description, with no name on it and no way
+     * back but the system gesture.
+     */
+    showTitle: Boolean = false,
     modifier: Modifier = Modifier,
-    viewModel: CollectionDetailViewModel = koinViewModel()
+    viewModel: CollectionDetailViewModel = koinViewModel(),
+    recommendationsViewModel: RecommendationsViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
+    val selectedView by viewModel.selectedView.collectAsStateWithLifecycle()
+    val itineraryWorking by viewModel.itineraryWorking.collectAsStateWithLifecycle()
+    val itineraryTarget by viewModel.itineraryTarget.collectAsStateWithLifecycle()
+    val recommendations by recommendationsViewModel.uiState.collectAsStateWithLifecycle()
     val allCollections by viewModel.allCollections.collectAsStateWithLifecycle()
     val collectionsLoading by viewModel.collectionsLoading.collectAsStateWithLifecycle()
     val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
@@ -62,16 +114,25 @@ fun CollectionDetailScreen(
     
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentUserId = rememberCurrentUserId()
     
     LaunchedEffect(collectionId) {
         viewModel.loadCollection(collectionId)
     }
     
+    val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
+    LaunchedEffect(actionMessage) {
+        actionMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearActionMessage()
+        }
+    }
+
     // Handle delete state changes
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
             is DeleteState.Success -> {
-                snackbarHostState.showSnackbar("Adventure deleted successfully")
+                snackbarHostState.showSnackbar(state.message)
                 viewModel.clearDeleteState()
             }
             is DeleteState.Error -> {
@@ -119,22 +180,60 @@ fun CollectionDetailScreen(
             }
             uiState.collection != null -> {
                 CollectionDetailContent(
+                    currentUserId = currentUserId,
                     collection = uiState.collection!!,
+                    showTitle = showTitle,
+                    onBackClick = onBackClick,
+                    onHomeClick = onHomeClick,
                     selectedTab = selectedTab,
                     onTabSelected = viewModel::onTabSelected,
+                    selectedView = selectedView,
+                    onViewSelected = viewModel::onViewSelected,
+                    itineraryWorking = itineraryWorking,
+                    onAutoGenerateItinerary = viewModel::autoGenerateItinerary,
+                    onAddToItineraryDay = viewModel::openItineraryPicker,
+                    onRemoveFromItinerary = viewModel::removeFromItinerary,
+                    recommendations = recommendations,
+                    onRecommendationAnchor = recommendationsViewModel::onAnchorSelected,
+                    onRecommendationQuery = recommendationsViewModel::onQueryChanged,
+                    onRecommendationCategory = recommendationsViewModel::onCategorySelected,
+                    onRecommendationRadius = recommendationsViewModel::onRadiusSelected,
+                    onRecommendationSearch = { anchor ->
+                        recommendationsViewModel.search(anchor)
+                    },
+                    onRecommendationAdd = { recommendation ->
+                        recommendationsViewModel.addAsPlace(
+                            recommendation = recommendation,
+                            collectionId = collectionId
+                        ) { viewModel.loadCollection(collectionId) }
+                    },
                     onAdventureClick = onAdventureClick,
                     onEditAdventure = onEditAdventure,
+                    onAddPhoto = onAddPhoto,
                     onDeleteAdventure = { adventure -> 
                         viewModel.deleteAdventure(adventure.id)
                     },
                     onManageCollections = { adventure -> 
                         locationToManageCollections = adventure 
                     },
+                    onDuplicateAdventure = viewModel::duplicateLocation,
+                    onShareAdventure = viewModel::shareLocation,
+                    onRemoveFromCollection = { adventure -> viewModel.removeFromCollection(adventure, collectionId) },
+                    onAddPlace = onAddPlace,
                     onAddTransportation = onAddTransportation,
                     onEditTransportation = onEditTransportation,
                     onDeleteTransportation = { transportation ->
                         viewModel.deleteTransportation(transportation.id)
                     },
+                    onAddNote = { onAddNote(collectionId) },
+                    onEditNote = { note -> onEditNote(collectionId, note) },
+                    onDeleteNote = { note -> viewModel.deleteNote(note.id) },
+                    onAddChecklist = { onAddChecklist(collectionId) },
+                    onEditChecklist = { list -> onEditChecklist(collectionId, list) },
+                    onDeleteChecklist = { list -> viewModel.deleteChecklist(list.id) },
+                    onAddLodging = { onAddLodging(collectionId) },
+                    onEditLodging = { stay -> onEditLodging(collectionId, stay) },
+                    onDeleteLodging = { stay -> viewModel.deleteLodging(stay.id) },
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -146,6 +245,19 @@ fun CollectionDetailScreen(
         )
     }
     
+    itineraryTarget?.let { target ->
+        uiState.collection?.let { collection ->
+            ItineraryItemPicker(
+                collection = collection,
+                dayLabel = target.label,
+                onPick = { kind, itemId ->
+                    viewModel.addToItinerary(kind, itemId, target.date)
+                },
+                onDismiss = viewModel::dismissItineraryPicker
+            )
+        }
+    }
+
     // Manage Collections dialog
     locationToManageCollections?.let { adventure ->
         ManageCollectionsDialog(
@@ -167,15 +279,47 @@ fun CollectionDetailScreen(
 @Composable
 fun CollectionDetailContent(
     collection: Collection,
+    showTitle: Boolean = false,
+    onBackClick: () -> Unit = {},
+    onHomeClick: () -> Unit = {},
     selectedTab: CollectionTab,
     onTabSelected: (CollectionTab) -> Unit,
+    selectedView: CollectionView = CollectionView.ITEMS,
+    onViewSelected: (CollectionView) -> Unit = {},
+    itineraryWorking: Boolean = false,
+    onAutoGenerateItinerary: () -> Unit = {},
+    onAddToItineraryDay: (String?, String) -> Unit = { _, _ -> },
+    onRemoveFromItinerary: (String) -> Unit = {},
+    recommendations: RecommendationsUiState = RecommendationsUiState(),
+    onRecommendationAnchor: (String?) -> Unit = {},
+    onRecommendationQuery: (String) -> Unit = {},
+    onRecommendationCategory: (RecommendationCategory) -> Unit = {},
+    onRecommendationRadius: (Int) -> Unit = {},
+    onRecommendationSearch: (Pair<Double, Double>?) -> Unit = {},
+    onRecommendationAdd: (Recommendation) -> Unit = {},
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit,
+    onDuplicateAdventure: (Location) -> Unit = {},
+    onShareAdventure: (Location) -> Unit = {},
+    onRemoveFromCollection: (Location) -> Unit = {},
+    onAddPlace: () -> Unit = {},
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     onDeleteTransportation: (Transportation) -> Unit,
+    onAddNote: () -> Unit = {},
+    onEditNote: (Note) -> Unit = {},
+    onDeleteNote: (Note) -> Unit = {},
+    onAddChecklist: () -> Unit = {},
+    onEditChecklist: (Checklist) -> Unit = {},
+    onDeleteChecklist: (Checklist) -> Unit = {},
+    onAddLodging: () -> Unit = {},
+    onEditLodging: (Lodging) -> Unit = {},
+    onDeleteLodging: (Lodging) -> Unit = {},
+    /** Tells your places from the owner's in a collection shared with you (QA 09, MC-02). */
+    currentUserId: String? = null,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -189,21 +333,95 @@ fun CollectionDetailContent(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
-            CollectionHeader(collection)
+            CollectionHeader(
+                collection,
+                showTitle = showTitle,
+                onBackClick = onBackClick,
+                onHomeClick = onHomeClick
+            )
         }
         
         item {
-            Box(
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
+            // No inset of its own: the list already pads, and 16 on top of 16 made this the one
+            // element on the screen narrower than everything around it. The extra space above is
+            // the break between what the collection is and how you move around inside it -
+            // without it the tabs read as a fourth row of the header's chips.
+            CollectionViewSwitcher(
+                modifier = Modifier.padding(top = 8.dp),
+                selectedView = selectedView,
+                onViewSelected = onViewSelected,
+                views = CollectionView.entries
+            )
+        }
+
+        // The item tabs belong to the Items view and only to it: they choose which of a
+        // collection's things to list, which is a question the map and the figures do not ask.
+        if (selectedView == CollectionView.ITEMS) {
+            item {
                 CollectionsTabs(
                     selectedTab = selectedTab,
-                    onTabSelected = onTabSelected
+                    onTabSelected = onTabSelected,
+                    counts = mapOf(
+                        CollectionTab.LOCATIONS to collection.locations.size,
+                        CollectionTab.TRANSPORTATIONS to collection.transportations.size,
+                        CollectionTab.LODGING to collection.lodging.size,
+                        CollectionTab.NOTES to collection.notes.size,
+                        CollectionTab.CHECKLISTS to collection.checklists.size
+                    )
                 )
             }
         }
-        
-        when (selectedTab) {
+
+        when (selectedView) {
+            CollectionView.STATS -> item { CollectionStatsView(stats = collection.stats()) }
+            CollectionView.CALENDAR -> item { CollectionCalendarView(days = collection.agenda()) }
+            CollectionView.MAP -> item {
+                CollectionMapView(
+                    locations = collection.locations,
+                    onLocationClick = { id ->
+                        collection.locations.find { it.id == id }?.let(onAdventureClick)
+                    }
+                )
+            }
+            CollectionView.ITINERARY -> item {
+                CollectionItineraryView(
+                    itinerary = collection.itinerary(),
+                    isWorking = itineraryWorking,
+                    onAutoGenerate = onAutoGenerateItinerary,
+                    onAddToDay = onAddToItineraryDay,
+                    onRemoveEntry = onRemoveFromItinerary
+                )
+            }
+            CollectionView.RECOMMENDATIONS -> item {
+                // Only places with coordinates can anchor a search; one without them would send
+                // the server nothing to look around.
+                val anchors = collection.locations.filter {
+                    !it.latitude.isNullOrBlank() && !it.longitude.isNullOrBlank()
+                }
+                CollectionRecommendationsView(
+                    state = recommendations,
+                    anchors = anchors,
+                    onAnchorSelected = onRecommendationAnchor,
+                    onQueryChanged = onRecommendationQuery,
+                    onCategorySelected = onRecommendationCategory,
+                    onRadiusSelected = onRecommendationRadius,
+                    onSearch = {
+                        val anchor = anchors
+                            .firstOrNull { it.id == recommendations.anchorLocationId }
+                            ?.let { place ->
+                                val lat = place.latitude?.toDoubleOrNull()
+                                val lon = place.longitude?.toDoubleOrNull()
+                                if (lat != null && lon != null) lat to lon else null
+                            }
+                        onRecommendationSearch(anchor)
+                    },
+                    onAdd = onRecommendationAdd
+                )
+            }
+            CollectionView.ITEMS -> Unit
+        }
+
+        if (selectedView == CollectionView.ITEMS) when (selectedTab) {
             CollectionTab.ALL -> {
                 // Show Locations section
                 item {
@@ -218,22 +436,13 @@ fun CollectionDetailContent(
                             fontWeight = FontWeight.Bold
                         )
                         
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    text = "${collection.locations.size}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        // A way to add a place here, like every other section. It showed a count bubble
+                        // instead - the chip above already says how many (QA CO-19).
+                        IconButton(onClick = onAddPlace) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add place"
+                            )
                         }
                     }
                 }
@@ -260,12 +469,12 @@ fun CollectionDetailContent(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "No adventures yet",
+                                    text = "No places in this collection yet",
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Start adding adventures to build your collection",
+                                    text = "Tap + to add a new one, or add a place you already have from its menu in Places.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -279,8 +488,13 @@ fun CollectionDetailContent(
                             location = adventure,
                             onClick = { onAdventureClick(adventure) },
                             onEdit = { onEditAdventure(adventure) },
+                            onAddPhoto = { onAddPhoto(adventure) },
                             onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) }
+                            onManageCollections = { onManageCollections(adventure) },
+                            onDuplicate = { onDuplicateAdventure(adventure) },
+                            onShare = { onShareAdventure(adventure) },
+                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
+                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
                         )
                     }
                 }
@@ -297,7 +511,8 @@ fun CollectionDetailContent(
                             transportation = transportation,
                             collectionStartDate = collection.startDate,
                             collectionEndDate = collection.endDate
-                        )
+                        ),
+                        summary = transportation.summary()
                     )
                 }
                 
@@ -352,22 +567,13 @@ fun CollectionDetailContent(
                             fontWeight = FontWeight.Bold
                         )
                         
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    text = "${collection.locations.size}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        // A way to add a place here, like every other section. It showed a count bubble
+                        // instead - the chip above already says how many (QA CO-19).
+                        IconButton(onClick = onAddPlace) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add place"
+                            )
                         }
                     }
                 }
@@ -394,12 +600,12 @@ fun CollectionDetailContent(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "No adventures yet",
+                                    text = "No places in this collection yet",
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Start adding adventures to build your collection",
+                                    text = "Tap + to add a new one, or add a place you already have from its menu in Places.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -413,8 +619,13 @@ fun CollectionDetailContent(
                             location = adventure,
                             onClick = { onAdventureClick(adventure) },
                             onEdit = { onEditAdventure(adventure) },
+                            onAddPhoto = { onAddPhoto(adventure) },
                             onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) }
+                            onManageCollections = { onManageCollections(adventure) },
+                            onDuplicate = { onDuplicateAdventure(adventure) },
+                            onShare = { onShareAdventure(adventure) },
+                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
+                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
                         )
                     }
                 }
@@ -432,6 +643,12 @@ fun CollectionDetailContent(
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
+                        IconButton(onClick = onAddTransportation) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add transportation"
+                            )
+                        }
                     }
                 }
                 
@@ -446,7 +663,8 @@ fun CollectionDetailContent(
                             transportation = transportation,
                             collectionStartDate = collection.startDate,
                             collectionEndDate = collection.endDate
-                        )
+                        ),
+                        summary = transportation.summary()
                     )
                 }
                 
@@ -502,6 +720,78 @@ fun CollectionDetailContent(
                 }
             }
             
+            CollectionTab.LODGING -> {
+                item { TabHeading("Lodging", onAdd = onAddLodging) }
+                if (collection.lodging.isEmpty()) {
+                    item { EmptyTab("No lodging in this collection yet.") }
+                } else {
+                    items(collection.lodging, key = { it.id }) { stay ->
+                        SimpleEntryCard(
+                            onClick = { onEditLodging(stay) },
+                            onDelete = { onDeleteLodging(stay) },
+                            kind = "stay",
+                            title = stay.name,
+                            lines = listOfNotNull(
+                                stay.location?.takeIf { it.isNotBlank() },
+                                lodgingDates(stay.checkIn, stay.checkOut),
+                                stay.reservationNumber?.takeIf { it.isNotBlank() }
+                                    ?.let { "Reservation $it" }
+                            ),
+                            badge = stay.type.replaceFirstChar { c -> c.uppercase() }
+                        )
+                    }
+                }
+            }
+
+            CollectionTab.NOTES -> {
+                item { TabHeading("Notes", onAdd = onAddNote) }
+                if (collection.notes.isEmpty()) {
+                    item { EmptyTab("No notes in this collection yet.") }
+                } else {
+                    items(collection.notes, key = { it.id }) { note ->
+                        SimpleEntryCard(
+                            title = note.name,
+                            lines = listOfNotNull(
+                                note.content?.takeIf { it.isNotBlank() },
+                                note.date?.substringBefore('T')?.takeIf { it.isNotBlank() }
+                            ),
+                            badge = null,
+                            onClick = { onEditNote(note) },
+                            onDelete = { onDeleteNote(note) },
+                            kind = "note"
+                        )
+                    }
+                }
+            }
+
+            CollectionTab.CHECKLISTS -> {
+                item { TabHeading("Checklists", onAdd = onAddChecklist) }
+                if (collection.checklists.isEmpty()) {
+                    item { EmptyTab("No checklists in this collection yet.") }
+                } else {
+                    items(collection.checklists, key = { it.id }) { checklist ->
+                        val done = checklist.items.count { it.isChecked }
+                        SimpleEntryCard(
+                            onClick = { onEditChecklist(checklist) },
+                            onDelete = { onDeleteChecklist(checklist) },
+                            kind = "checklist",
+                            title = checklist.name,
+                            lines = checklist.items.take(4).map { item ->
+                                (if (item.isChecked) "\u2713 " else "\u25cb ") + item.name
+                            } + listOfNotNull(
+                                "and ${checklist.items.size - 4} more"
+                                    .takeIf { checklist.items.size > 4 }
+                            ),
+                            badge = if (checklist.items.isEmpty()) {
+                                null
+                            } else {
+                                "$done / ${checklist.items.size}"
+                            }
+                        )
+                    }
+                }
+            }
+
             else -> {
                 item {
                     Card(
@@ -545,12 +835,47 @@ fun CollectionDetailContent(
 @Composable
 fun CollectionHeader(
     collection: Collection,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showTitle: Boolean = false,
+    onBackClick: () -> Unit = {},
+    onHomeClick: () -> Unit = {}
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        if (showTitle) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // IconButtons, for their 48dp touch targets (the clickable icons measured 32dp).
+                IconButton(onClick = onBackClick) {
+                    Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "Back")
+                }
+                IconButton(onClick = onHomeClick) {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = "Home",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(12.dp)
+                )
+                Text(
+                    text = collection.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
         // Description (only if not blank)
         if (collection.description.isNotBlank()) {
             Text(
@@ -584,7 +909,9 @@ data class TransportationItem(
     val name: String,
     val type: String,
     val imageUrl: String?,
-    val isNotInItineraryDateRange: Boolean = false
+    val isNotInItineraryDateRange: Boolean = false,
+    /** "2 Nov 2026 · Madrid → Barcelona" - see [Transportation.summary]. */
+    val summary: String? = null
 )
 
 @Composable
@@ -655,6 +982,16 @@ fun TransportationItemCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                transportation.summary?.let { summary ->
+                    Text(
+                        text = summary,
+                        color = Color.White.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -968,5 +1305,143 @@ private fun parseDateTimeToComparable(dateString: String): Long {
         cleanDate.toLongOrNull() ?: 0L
     } catch (e: Exception) {
         0L
+    }
+}
+
+
+/** The heading each tab opens with, matching the one the Places tab already had. */
+@Composable
+private fun TabHeading(title: String, onAdd: (() -> Unit)? = null) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        if (onAdd != null) {
+            IconButton(onClick = onAdd) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add $title")
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyTab(message: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(28.dp)
+        )
+    }
+}
+
+/**
+ * One entry in the lodging, notes or checklists tab.
+ *
+ * These three were greyed out because the collection model kept only their ids - the server had
+ * been sending the whole objects all along and the mapper reduced each to `it.id`.
+ */
+@Composable
+private fun SimpleEntryCard(
+    title: String,
+    lines: List<String>,
+    badge: String?,
+    onClick: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
+    /** What the card is, for the confirmation: "note", "checklist", "stay". */
+    kind: String = "item"
+) {
+    // One tap on the bin used to delete it outright (QA 04, CO-07). Places, collections and
+    // transports all ask first; these now do too.
+    var confirmDelete by remember { mutableStateOf(false) }
+    if (confirmDelete && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text("Delete this $kind?") },
+            text = { Text("\"$title\" will be deleted. This cannot be undone.") },
+            confirmButton = {
+                TextButton(onClick = { confirmDelete = false; onDelete() }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } }
+        )
+    }
+
+    Card(
+        onClick = onClick ?: {},
+        enabled = onClick != null,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (badge != null) {
+                    Spacer(Modifier.width(10.dp))
+                    MetaChip(text = badge, tone = ChipTone.NEUTRAL)
+                }
+                if (onDelete != null) {
+                    IconButton(onClick = { confirmDelete = true }) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            lines.forEach { line ->
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = line,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/** "12/09 - 15/09", or one of the two when only one is set. */
+private fun lodgingDates(checkIn: String?, checkOut: String?): String? {
+    val short = { d: String? ->
+        d?.substringBefore('T')?.split("-")?.takeIf { it.size == 3 }?.let { "${it[2]}/${it[1]}" }
+    }
+    val a = short(checkIn)
+    val b = short(checkOut)
+    return when {
+        a != null && b != null && a != b -> "$a \u2013 $b"
+        a != null -> a
+        b != null -> b
+        else -> null
     }
 }

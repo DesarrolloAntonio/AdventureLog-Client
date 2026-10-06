@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.viewmodel
 
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportDates
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
@@ -18,6 +20,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class AddEditTransportationUiState(
@@ -29,7 +33,10 @@ data class AddEditTransportationUiState(
     val isGeneratingDescription: Boolean = false,
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
-    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle
+    val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
+    /** The collection's own dates, for "Constrain to Collection Dates"; null when it has none. */
+    val collectionStart: String? = null,
+    val collectionEnd: String? = null
 )
 
 class AddEditTransportationViewModel(
@@ -39,6 +46,7 @@ class AddEditTransportationViewModel(
     private val generateDescriptionUseCase: GenerateDescriptionUseCase,
     private val searchLocationsUseCase: SearchLocationsUseCase,
     private val searchWikipediaImageUseCase: SearchWikipediaImageUseCase,
+    private val getCollectionDetailUseCase: GetCollectionDetailUseCase,
     private val transportationId: String? = null,
     private val existingTransportation: Transportation? = null,
     // Transportations belong to a collection; created without one they are orphaned and never
@@ -50,18 +58,36 @@ class AddEditTransportationViewModel(
     val uiState: StateFlow<AddEditTransportationUiState> = _uiState.asStateFlow()
     
     init {
-        if (existingTransportation != null) {
-            _uiState.value = _uiState.value.copy(existingTransportation = existingTransportation)
-        } else if (transportationId != null) {
+        if (transportationId != null) {
+            // Always from the server, never the copy carried in the route: saving that copy put
+            // back every field as it was when the collection was opened (measured).
             loadTransportation(transportationId)
+        } else if (existingTransportation != null) {
+            _uiState.value = _uiState.value.copy(existingTransportation = existingTransportation)
         }
+        collectionId?.takeIf { it.isNotBlank() }?.let(::loadCollectionDates)
+    }
+
+    /**
+     * "Constrain to Collection Dates" was a switch that nothing read (QA 04). The web limits the
+     * pickers to the collection's dates, so the form needs them.
+     */
+    private fun loadCollectionDates(id: String) {
+        viewModelScope.launch {
+            val collection = (getCollectionDetailUseCase(id) as? Either.Right)?.value ?: return@launch
+            _uiState.value = _uiState.value.copy(
+                collectionStart = collection.startDate?.takeIf { it.isNotBlank() },
+                collectionEnd = collection.endDate?.takeIf { it.isNotBlank() }
+            )
+        }
+    }
+
+    fun retryLoad() {
+        transportationId?.let(::loadTransportation)
     }
     
     private fun loadTransportation(transportationId: String) {
-        if (_uiState.value.existingTransportation != null) {
-            return
-        }
-        
+        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             
@@ -77,12 +103,18 @@ class AddEditTransportationViewModel(
                         isLoading = false,
                         existingTransportation = result.value
                     )
+                    result.value.collection?.takeIf { it.isNotBlank() }?.let(::loadCollectionDates)
                 }
             }
         }
     }
     
     fun saveTransportation(formData: TransportationFormData) {
+        // The form let an arrival before the departure through, and the server kept it (QA 04).
+        if (TransportDates.arrivesBeforeDeparting(formData.departureDate, formData.arrivalDate)) {
+            _uiState.value = _uiState.value.copy(errorMessage = "The arrival can't be before the departure.")
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             
@@ -196,19 +228,32 @@ class AddEditTransportationViewModel(
         }
     }
     
+    /**
+     * The search field calls this on every keystroke. Each call used to start its own request and
+     * whichever answered last won, so "Valencia" showed the results for "Valen" and "Madrid Atocha"
+     * said "No results found" because "Madrid A" took five seconds (QA RL-05). Only the latest
+     * query is kept: the previous one is cancelled, and nothing is sent until typing pauses.
+     */
+    private var searchJob: Job? = null
+
     fun searchLocations(query: String) {
+        searchJob?.cancel()
         if (query.isBlank()) {
             _uiState.value = _uiState.value.copy(
-                locationSearchResults = emptyList()
+                locationSearchResults = emptyList(),
+                isSearchingLocation = false
             )
             return
         }
         
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isSearchingLocation = true,
-                errorMessage = null
-            )
+        // Searching from the first keystroke: during the pause the modal would otherwise say
+        // "No results found" for a query that was never sent.
+        _uiState.value = _uiState.value.copy(
+            isSearchingLocation = true,
+            errorMessage = null
+        )
+        searchJob = viewModelScope.launch {
+            delay(LOCATION_SEARCH_DEBOUNCE_MS)
             
             when (val result = searchLocationsUseCase(query)) {
                 is Either.Left -> {
@@ -229,8 +274,10 @@ class AddEditTransportationViewModel(
     }
     
     fun clearLocationSearch() {
+        searchJob?.cancel()
         _uiState.value = _uiState.value.copy(
-            locationSearchResults = emptyList()
+            locationSearchResults = emptyList(),
+            isSearchingLocation = false
         )
     }
     
@@ -258,3 +305,5 @@ class AddEditTransportationViewModel(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 }
+
+internal const val LOCATION_SEARCH_DEBOUNCE_MS = 300L

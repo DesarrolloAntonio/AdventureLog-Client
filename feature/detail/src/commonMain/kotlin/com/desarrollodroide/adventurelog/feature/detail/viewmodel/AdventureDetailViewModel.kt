@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import com.desarrollodroide.adventurelog.feature.ui.util.PlatformFiles
-import com.desarrollodroide.adventurelog.feature.ui.util.AuthenticatedFileDownloader
 import kotlinx.coroutines.launch
 import co.touchlab.kermit.Logger
+import com.desarrollodroide.adventurelog.feature.detail.domain.FileHandoff
+import com.desarrollodroide.adventurelog.feature.detail.domain.Handoff
 
 private val logger = Logger.withTag("AdventureDetailViewModel")
 
@@ -31,8 +31,7 @@ sealed class LocationState {
 
 class AdventureDetailViewModel(
     private val getLocationUseCase: GetLocationUseCase,
-    private val fileDownloader: AuthenticatedFileDownloader,
-    private val platformFiles: PlatformFiles,
+    private val fileHandoff: FileHandoff,
     private val getShareImageUseCase: GetShareImageUseCase,
     observeCollectionsUseCase: ObserveCollectionsUseCase
 ) : ViewModel() {
@@ -53,10 +52,17 @@ class AdventureDetailViewModel(
             initialValue = emptyList()
         )
 
-    val collections: StateFlow<List<UltraSlimCollection>> = _locationState.map { state ->
+    // combine, not map + allCollections.value: the location can finish loading before
+    // observeCollectionsUseCase()'s first emission lands, and a one-shot read of .value at that
+    // instant would freeze this on an empty list forever, since _locationState never emits again
+    // once it reaches Success.
+    val collections: StateFlow<List<UltraSlimCollection>> = combine(
+        _locationState,
+        allCollections
+    ) { state, all ->
         when (state) {
             is LocationState.Success -> {
-                allCollections.value.filter { collection ->
+                all.filter { collection ->
                     state.location.collections.contains(collection.id)
                 }
             }
@@ -88,13 +94,7 @@ class AdventureDetailViewModel(
         }
     }
 
-    fun editAdventure(adventureId: String) {
-        logger.d { "Edit adventure: $adventureId" }
-    }
 
-    fun openMap(latitude: String, longitude: String) {
-        logger.d { "Open map at: $latitude, $longitude" }
-    }
 
     /**
      * Attachments are served behind the same auth check as photos, so the file is fetched with
@@ -106,13 +106,14 @@ class AdventureDetailViewModel(
 
         viewModelScope.launch {
             _openingAttachmentId.value = attachment.id
-            val bytes = fileDownloader.download(attachment.file)
 
-            _attachmentMessage.value = when {
-                bytes == null -> "Could not download this attachment."
-                !platformFiles.open(bytes, attachment.displayFileName()) ->
+            _attachmentMessage.value = when (
+                fileHandoff.open(attachment.file, attachment.displayFileName())
+            ) {
+                Handoff.COULD_NOT_FETCH -> "Could not download this attachment."
+                Handoff.NOTHING_TAKES_IT ->
                     "Nothing on this device can open a .${attachment.extension} file."
-                else -> null
+                Handoff.DONE -> null
             }
             _openingAttachmentId.value = null
         }
@@ -128,10 +129,9 @@ class AdventureDetailViewModel(
                 is Either.Left -> result.value
                 is Either.Right -> {
                     val fileName = location.name.toSafeFileName(extension = "png")
-                    if (platformFiles.share(result.value, fileName)) {
-                        null
-                    } else {
-                        "Nothing on this device can share an image."
+                    when (fileHandoff.share(result.value, fileName)) {
+                        Handoff.DONE -> null
+                        else -> "Nothing on this device can share an image."
                     }
                 }
             }

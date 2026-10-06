@@ -17,6 +17,18 @@ import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddres
 import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpSend
+import io.ktor.client.plugins.plugin
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
@@ -49,9 +61,27 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTransportationApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
+import com.desarrollodroide.adventurelog.core.network.api.NoteApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorNoteApi
+import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.core.network.api.ChecklistApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorChecklistApi
+import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.core.network.api.ItineraryApi
+import com.desarrollodroide.adventurelog.core.network.api.RecommendationApi
+import com.desarrollodroide.adventurelog.core.network.api.LodgingApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorItineraryApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorRecommendationApi
+import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorLodgingApi
+import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+import com.desarrollodroide.adventurelog.core.model.Recommendation
+import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
+import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 class KtorAdventureLogNetwork(
-    private val adventurelogClient: HttpClient
+    private val adventurelogClient: HttpClient,
+    private val backgroundScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) : AdventureLogNetwork {
 
     private val logger = Logger.withTag("KtorAdventurelogNetwork")
@@ -60,6 +90,24 @@ class KtorAdventureLogNetwork(
 
     private var sessionToken: String? = null
     private var baseUrl: String? = null
+
+    private val rejections = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    override val sessionRejections: Flow<Unit> = rejections.asSharedFlow()
+
+    init {
+        // One place sees every answer, so no screen has to recognise an ended session on its own.
+        // Most of them could not: /api/locations/ answers an anonymous caller 200 with an empty
+        // list, and Places told a signed-out user "No places yet" over 22 of them (measured).
+        adventurelogClient.plugin(HttpSend).intercept { request ->
+            val call = execute(request)
+            val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_PATH)
+            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut) {
+                logger.w { "Server rejected the session (401 on ${call.request.url.encodedPath})" }
+                rejections.tryEmit(Unit)
+            }
+            call
+        }
+    }
     
     private val authDataSource: AuthApi by lazy {
         KtorAuthApi(
@@ -141,6 +189,41 @@ class KtorAdventureLogNetwork(
         )
     }
     
+    private val lodgingDataSource: LodgingApi by lazy {
+        KtorLodgingApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
+    private val itineraryDataSource: ItineraryApi by lazy {
+        KtorItineraryApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
+    private val recommendationDataSource: RecommendationApi by lazy {
+        KtorRecommendationApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
+    private val checklistDataSource: ChecklistApi by lazy {
+        KtorChecklistApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
+    private val noteDataSource: NoteApi by lazy {
+        KtorNoteApi(
+            httpClient = adventurelogClient,
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+        )
+    }
+
     private val transportationDataSource: TransportationApi by lazy {
         KtorTransportationApi(
             httpClient = adventurelogClient,
@@ -161,6 +244,18 @@ class KtorAdventureLogNetwork(
         logger.d {
             "Network initialized from existing session - BaseURL: ${this.baseUrl}, " +
                 "SessionToken: ${if (sessionToken.isNullOrEmpty()) "absent" else "present"}"
+        }
+    }
+
+    override fun endServerSession() {
+        val server = baseUrl ?: return
+        val token = sessionToken ?: return
+        backgroundScope.launch {
+            try {
+                authDataSource.logout(server, token)
+            } catch (e: Exception) {
+                logger.w { "Could not end the session on the server: ${e.message}" }
+            }
         }
     }
 
@@ -263,7 +358,8 @@ class KtorAdventureLogNetwork(
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String>
+        activityTypes: List<String>,
+        collectionIds: List<String>
     ): LocationDTO {
         ensureInitialized()
         return adventureDataSource.createLocation(
@@ -279,7 +375,8 @@ class KtorAdventureLogNetwork(
             visits = visits,
             price = price,
             priceCurrency = priceCurrency,
-            activityTypes = activityTypes
+            activityTypes = activityTypes,
+            collectionIds = collectionIds
         )
     }
     
@@ -295,7 +392,8 @@ class KtorAdventureLogNetwork(
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): CollectionDTO {
         ensureInitialized()
         return collectionDataSource.createCollection(
@@ -303,7 +401,8 @@ class KtorAdventureLogNetwork(
             description = description,
             isPublic = isPublic,
             startDate = startDate,
-            endDate = endDate
+            endDate = endDate,
+            link = link
         )
     }
 
@@ -559,6 +658,11 @@ class KtorAdventureLogNetwork(
         ensureInitialized()
         return adventureDataSource.deleteLocation(adventureId)
     }
+
+    override suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO {
+        ensureInitialized()
+        return adventureDataSource.updateLocationCollections(locationId, collections)
+    }
     
     override suspend fun updateAdventure(
         adventureId: String,
@@ -572,7 +676,7 @@ class KtorAdventureLogNetwork(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String>,
+        collections: List<String>?,
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?
@@ -593,7 +697,7 @@ class KtorAdventureLogNetwork(
             collections = collections,
             visits = visits,
             price = price,
-            priceCurrency = priceCurrency
+            priceCurrency = priceCurrency,
         )
     }
     
@@ -636,6 +740,158 @@ class KtorAdventureLogNetwork(
     override suspend fun getVisitedRegions(): List<VisitedRegionDTO> {
         ensureInitialized()
         return countriesDataSource.getVisitedRegions()
+    }
+
+    override suspend fun createLodging(
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        priceCurrency: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean,
+        collectionId: String
+    ): Lodging {
+        ensureInitialized()
+        return lodgingDataSource.createLodging(
+            name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, priceCurrency, link, location, isPublic, collectionId
+        )
+    }
+
+    override suspend fun updateLodging(
+        lodgingId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        priceCurrency: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): Lodging {
+        ensureInitialized()
+        return lodgingDataSource.updateLodging(
+            lodgingId, name, type, description, checkIn, checkOut, timezone,
+            reservationNumber, price, priceCurrency, link, location, isPublic
+        )
+    }
+
+    override suspend fun deleteLodging(lodgingId: String) {
+        ensureInitialized()
+        lodgingDataSource.deleteLodging(lodgingId)
+    }
+
+    override suspend fun autoGenerateItinerary(collectionId: String): List<ItineraryEntry> {
+        ensureInitialized()
+        return itineraryDataSource.autoGenerateItinerary(collectionId)
+    }
+
+    override suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): ItineraryEntry {
+        ensureInitialized()
+        return itineraryDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
+    }
+
+    override suspend fun deleteItineraryEntry(entryId: String) {
+        ensureInitialized()
+        itineraryDataSource.deleteItineraryEntry(entryId)
+    }
+
+    override suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: RecommendationCategory,
+        radiusMetres: Int
+    ): List<Recommendation> {
+        ensureInitialized()
+        return recommendationDataSource.getRecommendations(
+            latitude, longitude, place, category, radiusMetres
+        )
+    }
+
+    override suspend fun createChecklist(
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): Checklist {
+        ensureInitialized()
+        return checklistDataSource.createChecklist(name, items, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateChecklist(
+        checklistId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): Checklist {
+        ensureInitialized()
+        return checklistDataSource.updateChecklist(checklistId, name, items, date, isPublic)
+    }
+
+    override suspend fun deleteChecklist(checklistId: String) {
+        ensureInitialized()
+        checklistDataSource.deleteChecklist(checklistId)
+    }
+
+    override suspend fun createNote(
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): Note {
+        ensureInitialized()
+        return noteDataSource.createNote(name, content, date, isPublic, collectionId)
+    }
+
+    override suspend fun updateNote(
+        noteId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): Note {
+        ensureInitialized()
+        return noteDataSource.updateNote(noteId, name, content, date, isPublic)
+    }
+
+    override suspend fun deleteNote(noteId: String) {
+        ensureInitialized()
+        noteDataSource.deleteNote(noteId)
+    }
+
+    override suspend fun refreshVisitedRegions(): Pair<Int, Int> {
+        ensureInitialized()
+        return countriesDataSource.refreshVisitedRegions()
+    }
+
+    override suspend fun markRegionVisited(regionId: String): VisitedRegionDTO {
+        ensureInitialized()
+        return countriesDataSource.markRegionVisited(regionId)
+    }
+
+    override suspend fun unmarkRegionVisited(regionId: String) {
+        ensureInitialized()
+        countriesDataSource.unmarkRegionVisited(regionId)
     }
     
     override suspend fun getVisitedCities(): List<VisitedCityDTO> {
@@ -766,5 +1022,15 @@ class KtorAdventureLogNetwork(
             imageBytes = imageBytes,
             fileName = fileName
         )
+    }
+
+    override suspend fun deleteImage(imageId: String) {
+        ensureInitialized()
+        contentDataSource.deleteImage(imageId)
+    }
+
+    override suspend fun setPrimaryImage(imageId: String) {
+        ensureInitialized()
+        contentDataSource.setPrimaryImage(imageId)
     }
 }

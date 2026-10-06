@@ -12,8 +12,9 @@ class GetAllLocationsUseCase(
         return when (val result = locationsRepository.getAllLocations()) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("No internet connection. Map requires network access.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Failed to load locations. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

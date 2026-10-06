@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.network.model.request
 
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -34,7 +35,9 @@ data class UpdateLocationRequest(
     val location: String,
     @SerialName("is_public")
     val isPublic: Boolean,
-    val collections: List<String>,
+    // Null is left out of the body, and the server only replaces a place's collections when the
+    // key is there. `[]` took the place out of every collection.
+    val collections: List<String>? = null,
     val link: String,
     val longitude: String? = null,
     val latitude: String? = null,
@@ -43,11 +46,18 @@ data class UpdateLocationRequest(
     val city: Map<String, String> = emptyMap(),
     val country: Map<String, String> = emptyMap(),
     val region: Map<String, String> = emptyMap(),
-    // The client serialises nulls, so these are only safe to send because the form round-trips
-    // whatever the location already had: sending a bare null here would clear a stored price.
-    val price: Double? = null,
+    // JSON null, not a Kotlin null: the client leaves Kotlin nulls out of the body, and a price the
+    // form had cleared then stayed on the server (measured). The form always round-trips the price,
+    // so JsonNull here means the user removed it.
+    val price: JsonElement? = null,
     @SerialName("price_currency")
-    val priceCurrency: String? = null
+    val priceCurrency: JsonElement? = null
+)
+
+/** A PATCH that changes which collections a place is in and nothing else about it. */
+@Serializable
+data class LocationCollectionsRequest(
+    val collections: List<String>
 )
 
 @Serializable

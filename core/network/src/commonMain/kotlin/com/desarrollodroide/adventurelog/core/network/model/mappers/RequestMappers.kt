@@ -71,7 +71,8 @@ fun createAdventureRequest(
     visits: List<VisitFormData>,
     price: Double? = null,
     priceCurrency: String? = null,
-    activityTypes: List<String> = emptyList()
+    activityTypes: List<String> = emptyList(),
+    collectionIds: List<String> = emptyList()
 ): CreateLocationRequest {
     return CreateLocationRequest(
         name = name,
@@ -80,7 +81,7 @@ fun createAdventureRequest(
         tags = activityTypes.takeIf { it.isNotEmpty() },
         location = location.takeIf { it.isNotBlank() },
         isPublic = isPublic,
-        collections = emptyList(),
+        collections = collectionIds,
         link = link.takeIf { it.isNotBlank() },
         longitude = longitude.toCoordinateString(),
         latitude = latitude.toCoordinateString(),

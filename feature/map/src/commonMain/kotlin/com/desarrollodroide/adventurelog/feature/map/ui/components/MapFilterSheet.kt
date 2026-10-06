@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
+import androidx.compose.material3.Switch
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -43,18 +45,10 @@ fun MapFilterSheet(
                 .fillMaxWidth()
                 .padding(bottom = 32.dp)
         ) {
-            // Drag handle
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .width(40.dp)
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
+            // No drag handle of its own: ModalBottomSheet draws one, and the sheet showed two
+            // stacked bars (QA 06, screenshot).
+            Spacer(modifier = Modifier.height(8.dp))
+
             // Title
             Text(
                 text = "View Options",
@@ -231,11 +225,14 @@ private fun FilterOption(
     color: androidx.compose.ui.graphics.Color,
     modifier: Modifier = Modifier
 ) {
+    // A layer is on or off, so the row is a switch: it says so to a screen reader, and the tick
+    // that used to lead the row no longer sits beside the Visited layer's own tick icon (QA 06,
+    // screenshot: "✓ ✓ Visited").
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick() },
+            .toggleable(value = isSelected, role = Role.Switch, onValueChange = { onClick() }),
         color = if (isSelected) {
             color.copy(alpha = 0.12f)
         } else {
@@ -248,20 +245,6 @@ private fun FilterOption(
                 .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Checkbox icon
-            Icon(
-                imageVector = if (isSelected) {
-                    Icons.Default.CheckCircle
-                } else {
-                    Icons.Default.RadioButtonUnchecked
-                },
-                contentDescription = null,
-                tint = if (isSelected) color else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier.size(24.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
             // Icon
             Icon(
                 imageVector = icon,
@@ -292,7 +275,10 @@ private fun FilterOption(
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
+                Spacer(modifier = Modifier.width(12.dp))
             }
+
+            Switch(checked = isSelected, onCheckedChange = null)
         }
     }
 }

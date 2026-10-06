@@ -15,6 +15,9 @@ data class Lodging(
     val checkOut: String? = null,
     val reservationNumber: String? = null,
     val price: String? = null,
+    /** The currency the price is in. Kept so a save can send it back: without it the server
+     * rewrites the currency to the account's default (measured). */
+    val priceCurrency: String? = null,
     val latitude: String? = null,
     val longitude: String? = null,
     val location: String? = null,

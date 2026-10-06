@@ -1,5 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
+import androidx.compose.foundation.layout.consumeWindowInsets
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.Dispatchers
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
@@ -12,25 +18,28 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
-import com.desarrollodroide.adventurelog.feature.home.ui.components.HomeBottomBar
+import com.desarrollodroide.adventurelog.feature.home.ui.components.homeNavigationItems
 import com.desarrollodroide.adventurelog.feature.home.ui.components.ProfileMenu
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
@@ -56,7 +65,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.lerp
@@ -68,9 +77,30 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScreen
 import androidx.compose.material.icons.filled.Search
 import com.desarrollodroide.adventurelog.feature.home.ui.components.GlobalSearchSheet
+import androidx.compose.foundation.layout.BoxWithConstraints
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.notesScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.NotesNavigator
+import com.desarrollodroide.adventurelog.core.model.Note
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.checklistsScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.ChecklistsNavigator
+import com.desarrollodroide.adventurelog.core.model.Checklist
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.lodgingScreen
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.LodgingNavigator
+import com.desarrollodroide.adventurelog.core.model.Lodging
 
 /**
  * Entry point composable that integrates with navigation
@@ -84,6 +114,23 @@ fun MainShellRoute(
 ) {
     val homeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val userDetails by viewModel.userDetails.collectAsStateWithLifecycle()
+    val signedOut by viewModel.signedOut.collectAsStateWithLifecycle()
+
+    val imageLoader = LocalImageLoader.current
+    LaunchedEffect(signedOut) {
+        if (signedOut) {
+            // The account's photos stay in the image cache otherwise, for the next person to sign
+            // in on this phone. Before navigating: leaving cancels this effect.
+            imageLoader.memoryCache?.clear()
+            withContext(Dispatchers.IO) { imageLoader.diskCache?.clear() }
+            onNavigateToLogin()
+        }
+    }
+
+    LifecycleStartEffect(Unit) {
+        viewModel.recheckSession()
+        onStopOrDispose { }
+    }
 
     HomeScreenContent(
         homeUiState = homeUiState,
@@ -93,10 +140,9 @@ fun MainShellRoute(
             onAdventureClick(adventure)
         },
         onOpenLocationById = onOpenLocationById,
-        onLogout = {
-            viewModel.logout()
-            onNavigateToLogin()
-        }
+        onRetryDashboard = viewModel::loadDashboard,
+        onRefreshDashboard = viewModel::refreshDashboard,
+        onLogout = viewModel::logout
     )
 }
 
@@ -120,6 +166,8 @@ fun HomeScreenContent(
     userDetails: UserDetails? = null,
     onAdventureClick: (Location) -> Unit = { },
     onOpenLocationById: (String) -> Unit = { },
+    onRetryDashboard: () -> Unit = {},
+    onRefreshDashboard: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -180,6 +228,10 @@ fun HomeScreenContent(
         currentBackStackEntry?.destination?.route?.let { route ->
             currentScreen = CurrentScreen.fromRoute(route)
         }
+        // One collapsing app bar serves every destination. Left as it was, a long scroll in
+        // Settings opened Home with the bar still folded away - no greeting, no search, no
+        // account button - until the user thought to drag the page down (measured).
+        resetScrollBehavior(scrollBehavior)
     }
 
     // Navigation actions
@@ -192,6 +244,9 @@ fun HomeScreenContent(
     }
 
     // Function to navigate to any screen in the app
+    // Set by Home's invitation banner and cleared once Collections has opened on Invites.
+    var openCollectionInvites by rememberSaveable { mutableStateOf(false) }
+
     val navigateTo: (CurrentScreen) -> Unit = { screen ->
         navController.navigate(screen.route) {
             // Pop up to the start destination of the graph to
@@ -229,37 +284,66 @@ fun HomeScreenContent(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // The backdrop was a photograph, and a photograph fights the content it is behind: its
-        // bright bands were the same white as the cards, and it stayed daylight when the theme
-        // went dark, so it needed washing down one way and dimming the other before it behaved.
+        // Flat, the redesign's #F5FAFB - the theme's own surface.
         //
-        // A gradient mixed from the theme's own containers has neither problem. It is never
-        // white, so a card always reads as a card; it follows the palette wherever the palette
-        // goes, dynamic colour included; and it needs no bitmap at all.
-        val scheme = MaterialTheme.colorScheme
+        // This was a gradient mixed from the palette's containers, which was the right answer when
+        // the palette came from the wallpaper and could be anything. It is the wrong one now: the
+        // cards are surfaceContainerLowest, a hair off white, and a background that drifts through
+        // three container tones leaves them reading as cards in some corners and as nothing in
+        // others. One ground, and the cards sit on it.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            lerp(scheme.surface, scheme.primaryContainer, 0.70f),
-                            lerp(scheme.surface, scheme.secondaryContainer, 0.55f),
-                            lerp(scheme.surface, scheme.tertiaryContainer, 0.40f)
-                        )
-                    )
-                )
+                .background(MaterialTheme.colorScheme.surface)
         )
 
+            // The five destinations become a bottom bar on a phone and a rail on a tablet.
+            // The suite draws whichever suits the window; nothing below it needs to know which.
+            NavigationSuiteScaffold(
+                navigationSuiteItems = { homeNavigationItems(currentScreen) { navigateTo(it) } },
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
+            BoxWithConstraints {
+            val appBarWidth = maxWidth
             Scaffold(
                 modifier = Modifier
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .background(Color.Transparent),  // Ensure Scaffold is transparent
                 topBar = {
-                    MediumTopAppBar(
+                    // The bar is transparent, so insetting it simply moves the title and the
+                    // actions onto the same left and right edge as the content below. Without
+                    // this the greeting starts at the window edge while everything under it
+                    // starts 120dp further in, which is one width too many for one screen.
+                    val gutter = ((appBarWidth - MaxContentWidth) / 2).coerceAtLeast(0.dp)
+                    TopAppBar(
+                        modifier = Modifier.padding(horizontal = gutter),
+                        // Back sits in the bar's own navigation slot. Inside the title it was a
+                        // clickable icon 28dp wide, and as an IconButton the title's inset still
+                        // clipped it to 38dp (measured) - under the 48dp a finger needs.
+                        navigationIcon = {
+                            if (isCollectionDetail) {
+                                IconButton(
+                                    onClick = {
+                                        // Reset scroll behavior when navigating back from collection detail
+                                        // This fixes the issue where the breadcrumb gets stuck as title
+                                        // when user has scrolled up and then clicks to go back
+                                        resetScrollBehavior(scrollBehavior)
+                                        navController.navigateUp()
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.ChevronLeft,
+                                        contentDescription = "Back"
+                                    )
+                                }
+                            }
+                        },
                         title = {
+                            // No fillMaxHeight here: the app bar already centres its title, and
+                            // filling the height makes the bar grow to half the screen under
+                            // Compose 1.12's looser slot constraints - taking the content with it.
                             Box(
-                                modifier = Modifier.fillMaxHeight(),
                                 contentAlignment = Alignment.CenterStart
                             ) {
                                 // If we're in a collection detail, show a simple breadcrumb
@@ -267,21 +351,9 @@ fun HomeScreenContent(
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        // Chevron Left icon for going back
-                                        Icon(
-                                            imageVector = Icons.Default.ChevronLeft,
-                                            contentDescription = "Back",
-                                            modifier = Modifier
-                                                .clickable {
-                                                    // Reset scroll behavior when navigating back from collection detail
-                                                    // This fixes the issue where the breadcrumb gets stuck as title
-                                                    // when user has scrolled up and then clicks to go back
-                                                    resetScrollBehavior(scrollBehavior)
-                                                    navController.navigateUp()
-                                                }
-                                                .padding(end = 4.dp)
-                                        )
-
+                                        // Clear of Back's 48dp touch target, which reached 6dp into
+                                        // this icon's.
+                                        Spacer(Modifier.width(8.dp))
                                         // Home icon instead of text
                                         Icon(
                                             imageVector = Icons.Default.Home,
@@ -315,36 +387,85 @@ fun HomeScreenContent(
                                         )
                                     }
                                 } else {
-                                    // For other screens, show the normal title
-                                    val topBarTitle =
-                                        CurrentScreen.fromRoute(currentRoute).getTitle(userName)
-
-                                    Text(
-                                        text = topBarTitle,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    // Title and, under it, one line saying where you stand. The
+                                    // redesign puts it here rather than in the page, so the
+                                    // screen opens on content instead of on a caption.
+                                    val screen = CurrentScreen.fromRoute(currentRoute)
+                                    Column {
+                                        Text(
+                                            text = screen.getTitle(userName),
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        val subtitle = dashboardSubtitle(screen, homeUiState)
+                                        if (subtitle != null) {
+                                            Text(
+                                                text = subtitle,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         },
                         actions = {
-                            IconButton(onClick = { searchOpen = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search everything"
-                                )
+                            // The redesign puts adding a place in the bar on a wide window, where
+                            // there is room for a labelled button; on a phone the same action is
+                            // the floating button the list screens already carry.
+                            if (currentScreen == CurrentScreen.HOME && appBarWidth >= 1000.dp) {
+                                Button(
+                                    onClick = { navController.navigate(NavigationRoutes.Locations.add) },
+                                    shape = RoundedCornerShape(22.dp),
+                                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Add place", style = MaterialTheme.typography.labelLarge)
+                                }
+                                Spacer(Modifier.width(12.dp))
                             }
+
+                            Surface(
+                                onClick = { searchOpen = true },
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                modifier = Modifier.size(38.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Search everything",
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(10.dp))
                             ProfileMenu(
                                 user = userDetails,
                                 userName = userName,
                                 serverUrl = userDetails?.serverUrl.orEmpty(),
                                 onSettings = { navigateTo(CurrentScreen.SETTINGS) },
                                 onCalendar = { navigateTo(CurrentScreen.CALENDAR) },
+                                // A section of its own, like Calendar and Settings. Pushed with a plain
+                                // navigate it landed inside whichever section was open, and that
+                                // section's saved stack then reopened People: Calendar showed People
+                                // until the app restarted (QA RL-10).
+                                onUsers = { navigateTo(CurrentScreen.USERS) },
                                 onLogout = onLogout
                             )
                         },
                         scrollBehavior = scrollBehavior,
-                        colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        colors = TopAppBarDefaults.topAppBarColors(
                             // Make TopBar transparent to see the background
                             containerColor = Color.Transparent,
                             scrolledContainerColor = Color.Transparent,
@@ -354,25 +475,24 @@ fun HomeScreenContent(
                         )
                     )
                 },
-                bottomBar = {
-                    HomeBottomBar(
-                        current = currentScreen,
-                        onSelect = { navigateTo(it) }
-                    )
-                },
                 // Transparent has no content colour of its own, so Material resolves it to
                 // unspecified and text falls back to black - invisible on the dark theme's
                 // backdrop. The gradient is the background here, so say what sits on it.
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) { innerPadding ->
+                val barsPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding()
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(
-                            top = innerPadding.calculateTopPadding(),
-                            bottom = innerPadding.calculateBottomPadding()
-                        )
+                        .padding(barsPadding)
+                        // Said as well as done, so a screen that pads for the status bar itself
+                        // (a place's compact bar, which also opens outside this shell) doesn't
+                        // pad for it twice in here.
+                        .consumeWindowInsets(barsPadding)
                 ) {
                     // NavHost to manage the content on each screen with animations
                     AnimatedDirectionalNavHost(
@@ -394,30 +514,92 @@ fun HomeScreenContent(
                             enterTransition = NavigationAnimations.enterTransitionFade,
                             exitTransition = NavigationAnimations.exitTransitionFade
                         ) {
+                            // This entry's lifecycle: started again on returning from another tab, a
+                            // place's page, an add screen or the background.
+                            LifecycleStartEffect(Unit) {
+                                onRefreshDashboard()
+                                onStopOrDispose { }
+                            }
                             DashboardScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 homeUiState = homeUiState,
                                 onAdventureClick = onAdventureClick,
+                                // launchSingleTop on each: a double tap opened the trip twice, and Back
+                                // returned to the same trip (measured).
                                 onTripClick = { trip ->
                                     navController.navigate(
                                         NavigationRoutes.Collections.createDetailRoute(
                                             collectionId = trip.id,
                                             collectionName = trip.name
                                         )
-                                    )
+                                    ) { launchSingleTop = true }
                                 },
                                 onSeeCalendar = { navigateTo(CurrentScreen.CALENDAR) },
+                                onSeeAllPlaces = { navigateTo(CurrentScreen.PLACES) },
+                                onSeeInvitations = {
+                                    openCollectionInvites = true
+                                    navigateTo(CurrentScreen.COLLECTIONS)
+                                },
+                                onRetry = onRetryDashboard,
+                                onOpenEvent = { target ->
+                                    when (target) {
+                                        is EventTarget.Place -> onOpenLocationById(target.id)
+                                        is EventTarget.Collection -> navController.navigate(
+                                            NavigationRoutes.Collections.createDetailRoute(
+                                                collectionId = target.id,
+                                                collectionName = target.name
+                                            )
+                                        ) { launchSingleTop = true }
+                                    }
+                                },
                                 onAddPlace = {
-                                    navController.navigate(NavigationRoutes.Locations.add)
+                                    navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
+                                },
+                                onAddPlaceToTrip = { trip ->
+                                    navController.navigate(NavigationRoutes.Locations.createAddRoute(trip.id)) { launchSingleTop = true }
                                 },
                                 onAddCollection = {
-                                    navController.navigate(NavigationRoutes.Collections.add)
+                                    navController.navigate(NavigationRoutes.Collections.add) { launchSingleTop = true }
                                 }
                             )
                         }
 
                         // Locations screen with navigator
+                        composable(route = NavigationRoutes.Locations.route) {
+                            PlacesPane(
+                                onAddPlace = {
+                                    navController.navigate(NavigationRoutes.Locations.add)
+                                },
+                                onEditPlace = { location ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            location.id,
+                                            json.encodeToString(location)
+                                        )
+                                    )
+                                },
+                                onAddPhoto = { location ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            location.id,
+                                            json.encodeToString(location),
+                                            openImages = true
+                                        )
+                                    )
+                                },
+                                onCollectionClick = { collection ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.createDetailRoute(
+                                            collectionId = collection.id,
+                                            collectionName = collection.name
+                                        )
+                                    )
+                                }
+                            )
+                        }
+
                         locationsScreen(
+                            registerListRoute = false,
                             navigator = object : LocationsNavigator {
                                 override fun navigateToLocationDetail(location: Location) {
                                     onAdventureClick(location)
@@ -429,12 +611,14 @@ fun HomeScreenContent(
 
                                 override fun navigateToEditLocation(
                                     locationId: String,
-                                    locationJson: String
+                                    locationJson: String,
+                                    openImages: Boolean
                                 ) {
                                     navController.navigate(
                                         NavigationRoutes.Locations.createEditRoute(
                                             locationId,
-                                            locationJson
+                                            locationJson,
+                                            openImages
                                         )
                                     )
                                 }
@@ -446,7 +630,120 @@ fun HomeScreenContent(
                         )
 
                         // Collections screen with navigator
+                        composable(route = NavigationRoutes.Collections.route) {
+                            CollectionsPane(
+                                openInvites = openCollectionInvites,
+                                onInvitesOpened = { openCollectionInvites = false },
+                                onAddCollection = {
+                                    navController.navigate(NavigationRoutes.Collections.add)
+                                },
+                                onEditCollection = { collection ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.createEditRoute(collection.id)
+                                    )
+                                },
+                                onAdventureClick = onAdventureClick,
+                                onEditAdventure = { adventure ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            adventureId = adventure.id,
+                                            adventureJson = json.encodeToString(
+                                                serializer = Location.serializer(),
+                                                value = adventure
+                                            )
+                                        )
+                                    )
+                                },
+                                onAddPhoto = { adventure ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            adventureId = adventure.id,
+                                            adventureJson = json.encodeToString(
+                                                serializer = Location.serializer(),
+                                                value = adventure
+                                            ),
+                                            openImages = true
+                                        )
+                                    )
+                                },
+                                onAddTransportation = { collectionId ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createAddRoute(
+                                            collectionId = collectionId
+                                        )
+                                    )
+                                },
+                                onAddPlace = { collectionId ->
+                                    navController.navigate(NavigationRoutes.Locations.createAddRoute(collectionId)) { launchSingleTop = true }
+                                },
+                                onEditTransportation = { transportation ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Transportations.createEditRoute(
+                                            transportationId = transportation.id,
+                                            transportationJson = json.encodeToString(
+                                                serializer = Transportation.serializer(),
+                                                value = transportation
+                                            )
+                                        )
+                                    )
+                                },
+                                onAddNote = { id ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createAddRoute(id)
+                                    )
+                                },
+                                onAddLodging = { id ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createAddRoute(id)
+                                    )
+                                },
+                                onEditLodging = { id, stay ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createEditRoute(
+                                            collectionId = id,
+                                            lodgingId = stay.id,
+                                            lodgingJson = json.encodeToString(
+                                                serializer = Lodging.serializer(),
+                                                value = stay
+                                            )
+                                        )
+                                    )
+                                },
+                                onAddChecklist = { id ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createAddRoute(id)
+                                    )
+                                },
+                                onEditChecklist = { id, list ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createEditRoute(
+                                            collectionId = id,
+                                            checklistId = list.id,
+                                            checklistJson = json.encodeToString(
+                                                serializer = Checklist.serializer(),
+                                                value = list
+                                            )
+                                        )
+                                    )
+                                },
+                                onEditNote = { id, note ->
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createEditRoute(
+                                            collectionId = id,
+                                            noteId = note.id,
+                                            noteJson = json.encodeToString(
+                                                serializer = Note.serializer(),
+                                                value = note
+                                            )
+                                        )
+                                    )
+                                },
+                                onHomeClick = { navigateTo(CurrentScreen.HOME) }
+                            )
+                        }
+
                         collectionsScreen(
+                            registerListRoute = false,
                             navigator = object : CollectionsNavigator {
                                 override fun navigateToCollectionDetail(
                                     collectionId: String,
@@ -456,6 +753,60 @@ fun HomeScreenContent(
                                         NavigationRoutes.Collections.createDetailRoute(
                                             collectionId = collectionId,
                                             collectionName = collectionName
+                                        )
+                                    )
+                                }
+
+                                override fun navigateToAddNote(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditNote(
+                                    collectionId: String,
+                                    noteId: String,
+                                    noteJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createEditRoute(
+                                            collectionId, noteId, noteJson
+                                        )
+                                    )
+                                }
+
+                                override fun navigateToAddLodging(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditLodging(
+                                    collectionId: String,
+                                    lodgingId: String,
+                                    lodgingJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createEditRoute(
+                                            collectionId, lodgingId, lodgingJson
+                                        )
+                                    )
+                                }
+
+                                override fun navigateToAddChecklist(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditChecklist(
+                                    collectionId: String,
+                                    checklistId: String,
+                                    checklistJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createEditRoute(
+                                            collectionId, checklistId, checklistJson
                                         )
                                     )
                                 }
@@ -474,7 +825,7 @@ fun HomeScreenContent(
                                     onAdventureClick(location)
                                 }
 
-                                override fun navigateToEditAdventure(adventure: Location) {
+                                override fun navigateToEditAdventure(adventure: Location, openImages: Boolean) {
                                     val adventureJson = json.encodeToString(
                                         serializer = Location.serializer(),
                                         value = adventure
@@ -482,9 +833,14 @@ fun HomeScreenContent(
                                     navController.navigate(
                                         NavigationRoutes.Locations.createEditRoute(
                                             adventureId = adventure.id,
-                                            adventureJson = adventureJson
+                                            adventureJson = adventureJson,
+                                            openImages = openImages
                                         )
                                     )
+                                }
+
+                                override fun navigateToAddPlace(collectionId: String) {
+                                    navController.navigate(NavigationRoutes.Locations.createAddRoute(collectionId)) { launchSingleTop = true }
                                 }
 
                                 override fun navigateToAddTransportation(collectionId: String) {
@@ -509,6 +865,84 @@ fun HomeScreenContent(
 
                                 override fun navigateToHome() {
                                     navigateToHome()
+                                }
+
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
+                        )
+
+                        lodgingScreen(
+                            navigator = object : LodgingNavigator {
+                                override fun navigateToAddLodging(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditLodging(
+                                    collectionId: String,
+                                    lodgingId: String,
+                                    lodgingJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Lodgings.createEditRoute(
+                                            collectionId, lodgingId, lodgingJson
+                                        )
+                                    )
+                                }
+
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
+                        )
+
+                        checklistsScreen(
+                            navigator = object : ChecklistsNavigator {
+                                override fun navigateToAddChecklist(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditChecklist(
+                                    collectionId: String,
+                                    checklistId: String,
+                                    checklistJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Checklists.createEditRoute(
+                                            collectionId, checklistId, checklistJson
+                                        )
+                                    )
+                                }
+
+                                override fun navigateBack() {
+                                    navController.navigateUp()
+                                }
+                            }
+                        )
+
+                        notesScreen(
+                            navigator = object : NotesNavigator {
+                                override fun navigateToAddNote(collectionId: String) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createAddRoute(collectionId)
+                                    )
+                                }
+
+                                override fun navigateToEditNote(
+                                    collectionId: String,
+                                    noteId: String,
+                                    noteJson: String
+                                ) {
+                                    navController.navigate(
+                                        NavigationRoutes.Collections.Notes.createEditRoute(
+                                            collectionId, noteId, noteJson
+                                        )
+                                    )
                                 }
 
                                 override fun navigateBack() {
@@ -552,14 +986,27 @@ fun HomeScreenContent(
 
                         mapScreen(
                             navController = navController,
-                            onAdventureClick = { adventureId ->
-                                // TODO: Navigate to adventure detail with adventureId
-                            }
+                            // The map only knows an id, which is what onOpenLocationById is for -
+                            // the same route the web's pin popup offers behind "Ver detalles".
+                            onAdventureClick = onOpenLocationById
                         )
 
-                        calendarScreen()
+                        calendarScreen(
+                            // A visit opens its place; a trip, or anything dated inside one, the trip.
+                            onOpenPlace = onOpenLocationById,
+                            onOpenCollection = { id, name ->
+                                navController.navigate(
+                                    NavigationRoutes.Collections.createDetailRoute(
+                                        collectionId = id,
+                                        collectionName = name
+                                    )
+                                )
+                            }
+                        )
                     }
                 }
+            }
+            }
             }
     }
 }
@@ -624,4 +1071,28 @@ private fun HomeScreenErrorPreview() {
             userDetails = null
         )
     }
+}
+
+
+/**
+ * The line under the screen's name: what the numbers say about you right now.
+ *
+ * Only home has one for the moment - the other screens print their own count inside the page,
+ * and two copies of "22 places" one above the other reads as a mistake.
+ */
+internal fun dashboardSubtitle(screen: CurrentScreen, state: HomeUiState): String? {
+    if (screen != CurrentScreen.HOME) return null
+    val dashboard = (state as? HomeUiState.Success)?.dashboard ?: return null
+    val visited = dashboard.stats.visitedLocationCount
+    // Ahead means not started: the trip under way is on the card below, not ahead of anyone
+    // (measured: "3 trips ahead" with one in progress and two to come).
+    val trips = dashboard.upcomingTrips.size
+    return listOfNotNull(
+        "$visited places visited",
+        when {
+            trips == 0 -> null
+            trips == 1 -> "1 trip ahead"
+            else -> "$trips trips ahead"
+        }
+    ).joinToString(" \u00b7 ")
 }

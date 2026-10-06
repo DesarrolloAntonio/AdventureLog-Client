@@ -68,16 +68,4 @@ interface SettingsRepository {
      * @param useDynamicColors True to enable dynamic colors, false otherwise
      */
     suspend fun setUseDynamicColors(useDynamicColors: Boolean)
-    
-    /**
-     * Gets whether compact view is enabled as an observable StateFlow
-     * @return StateFlow of the compact view setting
-     */
-    fun getCompactView(): StateFlow<Boolean>
-    
-    /**
-     * Sets whether to use compact view
-     * @param compactView True to enable compact view, false otherwise
-     */
-    suspend fun setCompactView(compactView: Boolean)
 }

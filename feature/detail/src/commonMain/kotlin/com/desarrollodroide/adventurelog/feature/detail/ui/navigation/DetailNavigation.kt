@@ -33,6 +33,10 @@ fun NavGraphBuilder.detailNavGraph(
                 onBackClick = { navigator.navigateUp() },
                 onCollectionClick = { collection ->
                     navigator.navigateToCollection(collection.id, collection.name)
+                },
+                onEditClick = { location -> navigator.navigateToEditLocation(location) },
+                onAddPhotoClick = { location ->
+                    navigator.navigateToEditLocation(location, openImages = true)
                 }
             )
         }

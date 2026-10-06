@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.core.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class VisitFormData(
     /**
      * Null for a visit the user has just added and that the server has never seen. Carrying the

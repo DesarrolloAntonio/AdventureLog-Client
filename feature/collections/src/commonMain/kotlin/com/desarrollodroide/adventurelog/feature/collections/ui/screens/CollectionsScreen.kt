@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import com.desarrollodroide.adventurelog.feature.ui.components.PullableStateBox
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.InvitesBanner
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Folder
@@ -32,6 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.desarrollodroide.adventurelog.core.model.CollectionInvite
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTab
+import com.desarrollodroide.adventurelog.feature.collections.model.collectionsHeader
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.collectionsLoadErrorMessage
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTabContent
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
@@ -66,6 +74,8 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.core.model.ownedBy
+import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.SlimCollectionItem
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsFilterSheet
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionsViewModel
@@ -86,6 +96,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.Tune
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.ShareCollectionSheet
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun CollectionsScreen(
@@ -93,6 +104,13 @@ fun CollectionsScreen(
     onAddCollectionClick: () -> Unit = { },
     onEditCollection: (UltraSlimCollection) -> Unit = { },
     onPagingItemsReady: (LazyPagingItems<UltraSlimCollection>) -> Unit = { },
+    /** See LocationListScreen: two-pane callers use this to fill the empty detail side. */
+    onFirstLoaded: (UltraSlimCollection) -> Unit = { },
+    /** The id of a collection just deleted, so a two-pane caller can drop it from its detail side. */
+    onCollectionDeleted: (String) -> Unit = { },
+    /** Arrive on Invites, freshly loaded - Home's invitation banner asks for this. */
+    openInvites: Boolean = false,
+    onInvitesOpened: () -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = koinViewModel()
 ) {
@@ -111,8 +129,26 @@ fun CollectionsScreen(
     val tabContent by viewModel.tabContent.collectAsStateWithLifecycle()
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
 
+    var announcedFirst by remember { mutableStateOf(false) }
+    LaunchedEffect(pagingItems.itemCount, announcedFirst) {
+        if (!announcedFirst && pagingItems.itemCount > 0) {
+            pagingItems.peek(0)?.let {
+                announcedFirst = true
+                onFirstLoaded(it)
+            }
+        }
+    }
+
     var collectionToDelete by remember { mutableStateOf<UltraSlimCollection?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentUserId = rememberCurrentUserId()
+
+    LaunchedEffect(openInvites) {
+        if (openInvites) {
+            viewModel.showInvites()
+            onInvitesOpened()
+        }
+    }
 
     LaunchedEffect(actionMessage) {
         actionMessage?.let {
@@ -179,6 +215,7 @@ fun CollectionsScreen(
         onDownloadPdf = { viewModel.exportCollection(it, CollectionExport.PDF) },
         onExportZip = { viewModel.exportCollection(it, CollectionExport.ZIP) },
         busyLabel = busyLabel,
+        currentUserId = currentUserId,
         collectionCount = collectionCount,
         pendingInvites = pendingInvites,
         statusFilter = statusFilter,
@@ -195,6 +232,7 @@ fun CollectionsScreen(
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
             is CollectionsViewModel.DeleteState.Success -> {
+                onCollectionDeleted(state.collectionId)
                 pagingItems.refresh()
                 snackbarHostState.showSnackbar("Collection deleted successfully")
                 viewModel.clearDeleteState()
@@ -260,6 +298,7 @@ private fun CollectionsContent(
     onDownloadPdf: (UltraSlimCollection) -> Unit = {},
     onExportZip: (UltraSlimCollection) -> Unit = {},
     busyLabel: String? = null,
+    currentUserId: String? = null,
     collectionCount: Int = 0,
     pendingInvites: List<CollectionInvite> = emptyList(),
     statusFilter: TripStatus? = null,
@@ -274,17 +313,8 @@ private fun CollectionsContent(
           Column {
             // The count follows what is on screen. It used to report the whole library even on
             // the archive, where nothing was.
-            val shownCount = if (tab == CollectionsTab.MINE) {
-                collectionCount
-            } else {
-                tabContent.collections.size
-            }
             Text(
-                text = buildString {
-                    append(shownCount)
-                    append(if (shownCount == 1) " collection" else " collections")
-                    if (tab != CollectionsTab.MINE) append(" · ${tab.label}")
-                },
+                text = collectionsHeader(tab, collectionCount, tabContent),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 20.dp, top = 4.dp)
@@ -372,7 +402,8 @@ private fun CollectionsContent(
                         onArchiveCollection = onArchiveCollection,
                         onDownloadPdf = onDownloadPdf,
                         onExportZip = onExportZip,
-                        busyLabel = busyLabel
+                        busyLabel = busyLabel,
+                        currentUserId = currentUserId
                     )
                 }
 
@@ -390,6 +421,7 @@ private fun CollectionsContent(
                         onDownloadPdf = onDownloadPdf,
                         onExportZip = onExportZip,
                         busyLabel = busyLabel,
+                        currentUserId = currentUserId,
                     )
                 }
 
@@ -408,7 +440,7 @@ private fun CollectionsContent(
                 pagingItems.loadState.refresh is LoadStateError -> {
                     val error = pagingItems.loadState.refresh as LoadStateError
                     ErrorState(
-                        message = error.error.message ?: "Unknown error",
+                        message = collectionsLoadErrorMessage(error.error),
                         onRetry = { pagingItems.retry() }
                     )
                 }
@@ -442,6 +474,7 @@ private fun CollectionsContent(
                                 onDownloadPdf = onDownloadPdf,
                                 onExportZip = onExportZip,
                                 busyLabel = busyLabel,
+                                currentUserId = currentUserId,
                             )
                         }
                     }
@@ -464,75 +497,85 @@ private fun CollectionsPagingList(
     onDownloadPdf: (UltraSlimCollection) -> Unit = {},
     onExportZip: (UltraSlimCollection) -> Unit = {},
     busyLabel: String? = null,
+    currentUserId: String? = null,
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 16.dp,
-            bottom = 80.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey { it.id }
-        ) { index ->
-            val collection = pagingItems[index]
-            if (collection != null) {
-                SlimCollectionItem(
-                    collection = collection,
-                    onClick = { onCollectionClick(collection.id, collection.name) },
-                    onEditCollection = { onEditCollection(collection) },
-                    onDeleteCollection = { onDeleteCollection(collection) },
-                    onShareCollection = { onShareCollection(collection) },
-                    onShareWithPeople = { onShareWithPeople(collection) },
-                    onDuplicateCollection = { onDuplicateCollection(collection) },
-                    onArchiveCollection = { onArchiveCollection(collection) },
-                    onDownloadPdf = { onDownloadPdf(collection) },
-                    onExportZip = { onExportZip(collection) },
-                    busyLabel = busyLabel
-                )
-            }
-        }
-
-        when (pagingItems.loadState.append) {
-            is LoadStateLoading -> {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+    // Same reasoning as the places list: let the width decide the column count.
+        // Same single content column as everywhere else.
+    ContentColumn {
+    LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 300.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 80.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey { it.id }
+            ) { index ->
+                val collection = pagingItems[index]
+                if (collection != null) {
+                    SlimCollectionItem(
+                        collection = collection,
+                        onClick = { onCollectionClick(collection.id, collection.name) },
+                        onEditCollection = { onEditCollection(collection) },
+                        onDeleteCollection = { onDeleteCollection(collection) },
+                        onShareCollection = { onShareCollection(collection) },
+                        onShareWithPeople = { onShareWithPeople(collection) },
+                        onDuplicateCollection = { onDuplicateCollection(collection) },
+                        onArchiveCollection = { onArchiveCollection(collection) },
+                        onDownloadPdf = { onDownloadPdf(collection) },
+                        onExportZip = { onExportZip(collection) },
+                        busyLabel = busyLabel,
+                        // A collection shared with you: the server refuses its owner-only actions, so they
+                        // are not offered (QA 09, MC-02).
+                        isOwner = ownedBy(collection.ownerId, currentUserId)
+                    )
                 }
             }
 
-            is LoadStateError -> {
-                val error = pagingItems.loadState.append as LoadStateError
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error loading more: ${error.error.message}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
+            when (pagingItems.loadState.append) {
+                is LoadStateLoading -> {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            is LoadStateNotLoading -> {
-                // Nothing to do
+                is LoadStateError -> {
+                    val error = pagingItems.loadState.append as LoadStateError
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = collectionsLoadErrorMessage(error.error),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+
+                is LoadStateNotLoading -> {
+                    // Nothing to do
+                }
             }
         }
     }
@@ -540,12 +583,9 @@ private fun CollectionsPagingList(
 
 @Composable
 private fun EmptyState() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    // Pullable: a new account's list is empty, and a pull is how an invitation that arrived since
+    // gets in (QA 09).
+    PullableStateBox {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -581,12 +621,7 @@ private fun NoSearchResultsState(searchQuery: String, statusFilter: TripStatus? 
         null -> null
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    PullableStateBox {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -656,44 +691,6 @@ private fun ActiveFilters(
  * An invitation announces itself. It used to sit behind a tab that was empty for everyone who had
  * not been invited to anything, which is nearly always.
  */
-@Composable
-private fun InvitesBanner(count: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.MarkEmailUnread,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(Modifier.width(14.dp))
-        Text(
-            text = if (count == 1) {
-                "You have an invitation to a collection"
-            } else {
-                "You have $count invitations to collections"
-            },
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(20.dp)
-        )
-    }
-}
 
 /** Whole-list tabs: the archive, what others have shared, and pending invitations. */
 @Composable
@@ -711,6 +708,7 @@ private fun TabContentList(
     onDownloadPdf: (UltraSlimCollection) -> Unit,
     onExportZip: (UltraSlimCollection) -> Unit,
     busyLabel: String?,
+    currentUserId: String?,
     modifier: Modifier = Modifier
 ) {
     when {
@@ -761,7 +759,10 @@ private fun TabContentList(
                         onArchiveCollection = { onArchiveCollection(collection) },
                         onDownloadPdf = { onDownloadPdf(collection) },
                         onExportZip = { onExportZip(collection) },
-                        busyLabel = busyLabel
+                        busyLabel = busyLabel,
+                        // A collection shared with you: the server refuses its owner-only actions, so they
+                        // are not offered (QA 09, MC-02).
+                        isOwner = ownedBy(collection.ownerId, currentUserId)
                     )
                 }
             }
@@ -771,7 +772,9 @@ private fun TabContentList(
 
 @Composable
 private fun TabEmpty(title: String, body: String) {
-    Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+    // Pullable, like the main list's empty state: "No invitations" is the screen a refresh has to
+    // be able to change.
+    PullableStateBox {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)

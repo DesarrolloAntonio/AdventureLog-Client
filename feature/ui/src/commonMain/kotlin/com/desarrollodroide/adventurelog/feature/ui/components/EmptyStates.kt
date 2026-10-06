@@ -2,6 +2,11 @@ package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +26,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+
+/**
+ * A centred message that the pull-to-refresh around it can still be pulled over.
+ *
+ * `PullToRefreshBox` only hears a drag that a scrollable child passes up to it, and a plain `Box`
+ * is not one - so an empty list could not be refreshed at all. That is exactly when refreshing
+ * matters: measured with a new account whose Collections said "No collections yet" while an
+ * invitation waited on the server, and no pull brought it in (QA 09).
+ */
+@Composable
+fun PullableStateBox(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .heightIn(min = maxHeight)
+                .padding(32.dp),
+            contentAlignment = Alignment.Center,
+            content = content
+        )
+    }
+}
 
 @Composable
 fun NoSearchResultsState(

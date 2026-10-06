@@ -19,10 +19,11 @@ fun CompactProgressSection(
     partiallyVisitedCount: Int,
     modifier: Modifier = Modifier
 ) {
-    // Progress measures countries finished, not merely started - the same thing the web's bar
-    // shows, and the reason it reads 0% for an account with one partially visited country.
+    // The web's own progress bar counts any visited country (fully or partially), not just
+    // completed ones - confirmed live: an account with 6 visited / 0 complete out of 250 shows
+    // "2%" there, which is 6/250, not 0/250.
     val progressPercentage = if (totalCountries > 0) {
-        ((completeCount.toFloat() / totalCountries) * 100).toInt()
+        ((visitedCount.toFloat() / totalCountries) * 100).toInt()
     } else 0
 
     Card(

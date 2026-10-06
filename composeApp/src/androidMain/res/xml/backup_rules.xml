@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and older. Shared preferences hold the session token that keeps the account signed
+     in (and, before 2026-09-15, the password in plain text): a backup of them is a way into the
+     account from any device the backup is restored to. The app signs in again after a restore. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="." />
+</full-backup-content>

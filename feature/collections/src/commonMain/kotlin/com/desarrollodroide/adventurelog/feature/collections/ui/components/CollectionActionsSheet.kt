@@ -56,6 +56,12 @@ import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 fun CollectionActionsSheet(
     collection: UltraSlimCollection,
     busyLabel: String?,
+    /**
+     * False for a collection someone shared with you. The server answers its owner-only actions -
+     * edit, share, duplicate, export ZIP, archive, delete - with a 404, so they are not offered.
+     * Open, the share card and the PDF are allowed and stay (measured with two accounts, QA 09).
+     */
+    isOwner: Boolean = true,
     onDismiss: () -> Unit,
     onOpen: () -> Unit,
     onEdit: () -> Unit,
@@ -89,30 +95,45 @@ fun CollectionActionsSheet(
                 color = MaterialTheme.colorScheme.outlineVariant
             )
 
+            if (!isOwner) {
+                Text(
+                    text = "Shared with you. Only its owner can change, share or delete it.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp)
+                )
+            }
+
             ActionRow(Icons.Outlined.Info, "Open collection", onOpen)
-            ActionRow(Icons.Outlined.Edit, "Edit collection", onEdit)
-            ActionRow(Icons.Outlined.PersonAdd, "Share with people", onShareWithPeople)
+            if (isOwner) {
+                ActionRow(Icons.Outlined.Edit, "Edit collection", onEdit)
+                ActionRow(Icons.Outlined.PersonAdd, "Share with people", onShareWithPeople)
+            }
             ActionRow(Icons.Outlined.Share, "Share externally", onShare)
-            ActionRow(Icons.Outlined.ContentCopy, "Duplicate", onDuplicate)
+            if (isOwner) {
+                ActionRow(Icons.Outlined.ContentCopy, "Duplicate", onDuplicate)
+            }
             ActionRow(Icons.Outlined.PictureAsPdf, "Download PDF", onDownloadPdf)
-            ActionRow(Icons.Outlined.FolderZip, "Export ZIP", onExportZip)
-            ActionRow(
-                icon = if (collection.isArchived) Icons.Outlined.Unarchive else Icons.Outlined.Archive,
-                label = if (collection.isArchived) "Restore from archive" else "Archive",
-                onClick = onArchive
-            )
+            if (isOwner) {
+                ActionRow(Icons.Outlined.FolderZip, "Export ZIP", onExportZip)
+                ActionRow(
+                    icon = if (collection.isArchived) Icons.Outlined.Unarchive else Icons.Outlined.Archive,
+                    label = if (collection.isArchived) "Restore from archive" else "Archive",
+                    onClick = onArchive
+                )
 
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
 
-            ActionRow(
-                icon = Icons.Outlined.Delete,
-                label = "Delete",
-                onClick = onDelete,
-                tint = MaterialTheme.colorScheme.error
-            )
+                ActionRow(
+                    icon = Icons.Outlined.Delete,
+                    label = "Delete",
+                    onClick = onDelete,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
         }

@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.util
 
+import com.desarrollodroide.adventurelog.core.domain.repository.LocalAccountCopies
 import coil3.PlatformContext
 
 /**
@@ -9,7 +10,7 @@ import coil3.PlatformContext
  * simply be handed over by URL: a viewer or a browser has no session and gets a 403. The bytes
  * are fetched with the signed-in client first and written somewhere the platform can reach.
  */
-interface PlatformFiles {
+interface PlatformFiles : LocalAccountCopies {
 
     /** @return false when nothing on the device could open this kind of file. */
     suspend fun open(bytes: ByteArray, fileName: String): Boolean

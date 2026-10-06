@@ -1,8 +1,8 @@
 # 🏕️ Adventure Log
 
 ![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=develop)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg)
-![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.8.2-green.svg)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-blue.svg)
+![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.12.0-green.svg)
 ![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-orange.svg)
 ![Modular](https://img.shields.io/badge/Design-Modular-yellow.svg)
 ![KMP](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-purple.svg)
@@ -17,9 +17,8 @@
 > sign-in, the dashboard, places, collections and a place's own page all work - but it has had far
 > less use, and a few things are Android-only for now (see Known Issues).
 >
-> Still missing against the web client: downloading the calendar as `.ics`, uploading a profile
-> picture, and the parts of Settings that cover MFA, API keys and third-party integrations. There
-> is no user directory and none is planned - sharing a collection has its own people picker.
+> What the web client has and this app doesn't yet - and what it won't - is listed under
+> [What's next](#-whats-next).
 >
 > A first release is the goal; there is no date on it.
 
@@ -52,7 +51,8 @@ further.
 Two ways in:
 
 - **Sideload the APK** from [Releases](https://github.com/DesarrolloAntonio/AdventureLog-Client/releases).
-  Android 7.0 and up.
+  Android 7.0 and up. The newest there is a development build from 28 August; new ones appear once
+  signed releases are switched on (see [What's next](#-whats-next)).
 - **Join the Play internal test** - [open an issue](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/new)
   saying you would like in and which Google account to add. Capped at 100 testers, and it means
   updates arrive through Play like any other app.
@@ -158,6 +158,7 @@ AdventureLog/
 
 - **Architecture & Navigation**
   - [Compose Navigation](https://developer.android.com/jetpack/compose/navigation): Jetpack navigation for Compose
+  - [Navigation 3](https://developer.android.com/guide/navigation/navigation-3): typed back stacks and list-detail panes for Places and Collections
   - [Lifecycle Components](https://developer.android.com/jetpack/androidx/releases/lifecycle): ViewModel and lifecycle-aware components
 
 - **Dependency Injection**
@@ -208,10 +209,10 @@ The app uses sealed classes to represent different UI states, providing type-saf
 
 ### Prerequisites
 
-- An Android Studio new enough for AGP 8.13
+- An Android Studio new enough for AGP 9.2
 - JDK 17 (what CI builds with; the compiled bytecode targets Java 11)
 - Xcode 26 (for iOS development) - the iOS deployment target is 15.3
-- Kotlin 2.2.21
+- Kotlin 2.4.10
 
 ### Setup & Build
 
@@ -290,8 +291,8 @@ cached it shows a spinner on a train. Places, collections and the dashboard shou
 locally, the server should become the thing that refreshes them rather than the only source, and
 writes made without a connection should queue until there is one.
 
-**Type-safe navigation routes.** Routes are plain strings right now, with serialized JSON passed
-inside them. That is fragile on its own terms, and it is also the prerequisite hiding behind two
+**Type-safe navigation routes.** Places and Collections run on Navigation 3 with typed keys; every
+other screen is still plain strings with serialized JSON passed inside them. That is fragile on its own terms, and it is also the prerequisite hiding behind two
 other items on this list - both Navigation 3 and the SwiftUI shell need routes that are objects
 with identity, not strings to be parsed.
 
@@ -301,51 +302,54 @@ the content inside each screen - the approach JetBrains documents in
 [Liquid Glass in Compose Multiplatform](https://kotlinlang.org/docs/multiplatform/ios-liquid-glass.html).
 Needs typed routes first, and a decision that the iOS tab bar stops being Compose's.
 
-**Toolchain upgrade.** Compose Multiplatform 1.9.0 first, on its own: it is built against
-kotlinx-datetime 0.7.1 and so fixes the iOS date picker outright. Kotlin, AGP 9 and compileSdk 36
-come after, as one piece - the Coil, Koin and Ktor updates are all gated behind them.
+**iOS parity.** `PlatformBackHandler` does nothing on iOS, so going back from a form there skips
+the "discard your changes?" question (Cancel still asks), and there is no system back gesture,
+because the whole app is a single view controller.
 
-**iOS parity.** `PlatformBackHandler` does nothing on iOS, which silently disables the
-"discard your changes?" prompt and anything else built on it. Related: there is no system back
-gesture, because the whole app is a single view controller.
+**Publishing.** Signing is wired: on `main` CI builds a signed release when the four secrets
+(`KEYSTORE_BASE64`, `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`) exist,
+and skips the release otherwise. Missing are those secrets and an upload of the current build to
+the Play internal test, whose draft is still the 28 August one.
 
-**Adaptive layouts.** `NavigationSuiteScaffold` turns the bottom bar into a navigation rail on
-tablets, foldables and landscape. The multiplatform artifact already matches the Compose version
-in use. If the SwiftUI shell happens, this becomes the Android and desktop answer only.
+**The remaining gaps against the web client.** Decided on 2026-10-06, after a QA pass listed
+every feature the web has and this app doesn't:
 
-**A signed release build.** There is no signing configuration in the project at all, and CI
-publishes a debug APK. This is the piece missing between here and a store listing.
+- *Next:* signing in to accounts with **MFA or SSO** (today they cannot sign in at all), a **Spanish**
+  translation, **leaving a collection** shared with you, and **uploading attachments** to a place.
+- *Out of scope for now:* sign-up and password reset (the web does them), the other 23 languages,
+  Strava/GPX activities, locate-me and sunrise/sunset, collection import, cover picking and
+  itinerary reordering, map search, tap-to-add and layers, the month calendar and `.ics` export,
+  profile pictures, API keys and third-party integrations.
 
-**The remaining gaps against the web client.** Downloading the calendar as `.ics`, uploading a
-profile picture, and the parts of Settings covering MFA, API keys and third-party integrations.
-
-**Wider tests.** The data layer and the ViewModels have no tests, and while there are Maestro
-flows, nothing runs them in CI.
+**Wider tests in CI.** CI runs the unit tests and builds both variants; the UI tests that need a
+device, and the Maestro flow, only run locally.
 
 ## 🧪 Testing Strategy
 
-- **Unit Tests**:
-  - ✅ Model layer: models, mappers and the Markdown parser (20 test files)
-  - ✅ Domain layer: use cases (10 test files)
-  - ✅ Network layer: DTO mapping and session handling (4 test files)
-  - 🚧 Data layer tests (Coming)
-  - 🚧 ViewModel tests (Coming)
-- **Integration Tests**: Verify interactions between components (Coming)
-- **UI Tests**: Test user interfaces and workflows (Coming)
+- **Unit tests** (`commonTest`, run on Android and iOS): models and mappers, use cases, the network
+  and data layers, and the ViewModels of every feature - with hand-written fakes from
+  `core/testing`, since MockK has no Kotlin/Native support.
+- **UI tests** (`androidInstrumentedTest`, Compose, on a device or emulator): screens and shared
+  components in `feature/collections`, `home`, `calendar`, `locations` and `ui`.
+- **Flows**: one Maestro flow in `.maestro/`.
+
+```bash
+./gradlew allTests testDebugUnitTest      # unit tests, every target
+./gradlew connectedDebugAndroidTest      # UI tests, with a device attached
+```
 
 ## ⚠️ Known Issues
 
 - **MockK Support**: MockK doesn't support Kotlin/Native targets in Kotlin Multiplatform. Tests use manual fakes instead of mocking libraries for cross-platform compatibility.
 
-- **Date picker on iOS**: Compose Multiplatform 1.8.2 is built against kotlinx-datetime 0.6.0
-  while this project uses 0.7.1, which moved `Instant`. Kotlin/Native's partial linkage lets the
-  framework link anyway and leaves the missing symbols throwing at runtime, so opening a date
-  picker on iOS fails. Android is unaffected. Fixed by moving to Compose Multiplatform 1.9.0,
-  which is built against 0.7.1.
+- **Date picker on iOS**: Compose Multiplatform 1.8.2 was built against kotlinx-datetime 0.6.0
+  while this project uses 0.7.1, which moved `Instant`, so opening a date picker on iOS threw at
+  runtime. The project is on Compose Multiplatform 1.12.0 now, built against 0.7.1, which should
+  have fixed it - not yet checked on an iOS device.
 
-- **Back handling on iOS**: `PlatformBackHandler` has no iOS implementation, so anything relying
-  on it - such as the "discard your changes?" prompt when leaving a half-filled form - does
-  nothing there. The whole app is a single `ComposeUIViewController`, so there is no
+- **Back handling on iOS**: `PlatformBackHandler` has no iOS implementation, so leaving a
+  half-filled form by going back skips the "discard your changes?" question there (its Cancel
+  button still asks). The whole app is a single `ComposeUIViewController`, so there is no
   `UINavigationController` to provide a system back gesture either.
 
 ## 🛠️ Development Workflow

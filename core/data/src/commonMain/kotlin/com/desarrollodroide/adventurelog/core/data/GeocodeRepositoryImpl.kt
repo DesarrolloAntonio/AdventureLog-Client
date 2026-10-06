@@ -41,7 +41,8 @@ class GeocodeRepositoryImpl(
             } catch (e: HttpException) {
                 logger.e { "HTTP Error searching locations: ${e.code}" }
                 when (e.code) {
-                    401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                    401 -> Either.Left(ApiResponse.InvalidCredentials)
+                    403 -> Either.Left(ApiResponse.Forbidden)
                     else -> Either.Left(ApiResponse.HttpError)
                 }
             } catch (e: IOException) {
@@ -77,7 +78,8 @@ class GeocodeRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error reverse geocoding: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {

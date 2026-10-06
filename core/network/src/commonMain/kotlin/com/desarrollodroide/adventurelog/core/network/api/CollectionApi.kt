@@ -28,7 +28,8 @@ interface CollectionApi {
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String? = null
     ): CollectionDTO
     
     /**

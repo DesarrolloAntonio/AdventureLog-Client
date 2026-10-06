@@ -69,6 +69,12 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew :composeApp:assembleDebug
         
+      # The release variant runs tasks debug never does (R8, consumer ProGuard rules). On AGP 9 it
+      # stopped building and only the release job would have noticed (QA RL-01, RL-03). Unsigned:
+      # signing applies only when KEYSTORE_PATH is set, and it is not here.
+      - name: Build Release APK (unsigned)
+        run: ./gradlew :composeApp:assembleRelease
+        
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -95,6 +101,12 @@ jobs:
       # it reaches any Kotlin/Native code.
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The action's default list is "tools platform-tools", and Google has removed the
+          # "tools" package from the SDK repository, so the step failed before any build ran
+          # ("Failed to find package 'tools'"). Gradle downloads the platform and build tools
+          # it needs on its own.
+          packages: 'platform-tools'
 
       - name: Create local.properties
         run: |

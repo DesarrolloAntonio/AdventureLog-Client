@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.FolderOff
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
@@ -57,14 +60,23 @@ fun LocationActionsSheet(
     onShare: () -> Unit,
     onManageCollections: () -> Unit,
     onDelete: () -> Unit,
+    /**
+     * False for someone else's place inside a collection shared with you. The server lets you edit
+     * or duplicate it, but refuses a delete (403) and taking it out of the owner's collections (400),
+     * so those two are not offered (measured with two accounts, QA 09).
+     */
+    isOwner: Boolean = true,
+    /** Offered inside a collection, where Delete would take the place out of every other one too. */
+    onRemoveFromCollection: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(),
+        // Fully open: half open cut Delete off under the gesture bar once the sheet grew a row.
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         modifier = modifier
     ) {
-        Column(modifier = Modifier.navigationBarsPadding()) {
+        Column(modifier = Modifier.navigationBarsPadding().verticalScroll(rememberScrollState())) {
             SheetHeader(name = locationName, place = locationPlace)
 
             HorizontalDivider(
@@ -76,19 +88,22 @@ fun LocationActionsSheet(
             ActionRow(Icons.Outlined.Edit, "Edit place", onEdit)
             ActionRow(Icons.Outlined.ContentCopy, "Duplicate", onDuplicate)
             ActionRow(Icons.Outlined.Share, "Share externally", onShare)
-            ActionRow(Icons.Outlined.FolderOpen, "Manage collections", onManageCollections)
+            if (isOwner) {
+                ActionRow(Icons.Outlined.FolderOpen, "Manage collections", onManageCollections)
+                onRemoveFromCollection?.let { ActionRow(Icons.Outlined.FolderOff, "Remove from collection", it) }
 
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
 
-            ActionRow(
-                icon = Icons.Outlined.Delete,
-                label = "Delete",
-                onClick = onDelete,
-                tint = MaterialTheme.colorScheme.error
-            )
+                ActionRow(
+                    icon = Icons.Outlined.Delete,
+                    label = "Delete",
+                    onClick = onDelete,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
         }

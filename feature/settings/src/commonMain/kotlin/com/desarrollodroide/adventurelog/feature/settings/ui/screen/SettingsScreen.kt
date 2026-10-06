@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.settings.platform.FEEDBACK_ADDRESS
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -58,6 +61,8 @@ import kotlinx.coroutines.flow.emptyFlow
 import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.AccountHeader
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
+import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisitedRegionsCard
 
 @Composable
 fun SettingsScreen(
@@ -70,6 +75,9 @@ fun SettingsScreen(
     val user by viewModel.user.collectAsState()
     val themeMode by viewModel.themeMode.collectAsState()
     val dynamicColors by viewModel.useDynamicColors.collectAsState()
+    val regionsRefreshing by viewModel.regionsRefreshing.collectAsState()
+    val regionsMessage by viewModel.regionsMessage.collectAsState()
+    val backupInProgress by viewModel.backupInProgress.collectAsState()
     val isChangingPassword by viewModel.isChangingPassword.collectAsState()
 
     SettingsContent(
@@ -92,6 +100,12 @@ fun SettingsScreen(
         onReloadEmails = viewModel::loadEmails,
         storage = storage,
         onReloadStorage = viewModel::loadStorage,
+        regionsRefreshing = regionsRefreshing,
+        onRefreshRegions = viewModel::refreshVisitedRegions,
+        backupInProgress = backupInProgress,
+        onDownloadBackup = viewModel::downloadBackup,
+        regionsMessage = regionsMessage,
+        onRegionsMessageShown = viewModel::clearRegionsMessage,
         onLogout = onLogout,
         messages = viewModel.messages
     )
@@ -107,7 +121,7 @@ fun SettingsContent(
     user: UserDetails?,
     profile: ProfileSectionState,
     onChangeProfile: ((ProfileForm) -> ProfileForm) -> Unit,
-    onSaveIdentity: (username: String, firstName: String, lastName: String) -> Unit,
+    onSaveIdentity: (username: String, firstName: String, lastName: String, onResult: (String?) -> Unit) -> Unit,
     isChangingPassword: Boolean,
     onChangePassword: (String, String, () -> Unit) -> Unit,
     emails: EmailsSectionState,
@@ -118,13 +132,21 @@ fun SettingsContent(
     onReloadEmails: () -> Unit,
     storage: StorageSectionState,
     onReloadStorage: () -> Unit,
+    regionsRefreshing: Boolean = false,
+    onRefreshRegions: () -> Unit = {},
+    backupInProgress: Boolean = false,
+    onDownloadBackup: () -> Unit = {},
+    regionsMessage: String? = null,
+    onRegionsMessageShown: () -> Unit = {},
     onLogout: () -> Unit,
     messages: Flow<String>,
 ) {
     val platformActions by PlatformActionsProvider.platformActions.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     var editProfileOpen by remember { mutableStateOf(false) }
+    var editProfileError by remember { mutableStateOf<String?>(null) }
     var legalPage by remember { mutableStateOf<LegalPage?>(null) }
     var confirmLogout by remember { mutableStateOf(false) }
 
@@ -132,70 +154,94 @@ fun SettingsContent(
         messages.collect { snackbarHostState.showSnackbar(it) }
     }
 
+    LaunchedEffect(regionsMessage) {
+        regionsMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            onRegionsMessageShown()
+        }
+    }
+
     val primaryEmail = emails.addresses.firstOrNull { it.primary }?.email
         ?: emails.addresses.firstOrNull()?.email
         ?: user?.email
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item {
-                AccountHeader(
-                    user = user,
-                    primaryEmail = primaryEmail,
-                    serverUrl = serverUrl,
-                    onClick = { editProfileOpen = true }
-                )
+                // Settings is a column of rows; on a tablet it was one row per 1200dp line.
+        ContentColumn {
+    LazyColumn(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                item {
+                    AccountHeader(
+                        user = user,
+                        primaryEmail = primaryEmail,
+                        serverUrl = serverUrl,
+                        onClick = { editProfileOpen = true }
+                    )
+                }
+                item {
+                    PreferencesGroup(state = profile, onChange = onChangeProfile)
+                }
+                item {
+                    AppearanceGroup(
+                        themeMode = themeMode,
+                        onThemeModeChanged = onThemeModeChanged,
+                        dynamicColors = dynamicColors,
+                        onDynamicColorsChanged = onDynamicColorsChanged
+                    )
+                }
+                item {
+                    SignInGroup(
+                        hasPassword = user?.hasPassword ?: true,
+                        isChangingPassword = isChangingPassword,
+                        onChangePassword = onChangePassword,
+                        emails = emails,
+                        onAddEmail = onAddEmail,
+                        onVerifyEmail = onVerifyEmail,
+                        onSetPrimaryEmail = onSetPrimaryEmail,
+                        onRemoveEmail = onRemoveEmail,
+                        onRetryEmails = onReloadEmails
+                    )
+                }
+                item {
+                    VisitedRegionsCard(
+                        isRefreshing = regionsRefreshing,
+                        onRefresh = onRefreshRegions,
+                        isBackingUp = backupInProgress,
+                        onDownloadBackup = onDownloadBackup
+                    )
+                }
+                item {
+                    StorageSection(state = storage, onRetry = onReloadStorage)
+                }
+                item {
+                    AboutSection(
+                        user = user,
+                        serverUrl = serverUrl,
+                        appVersion = platformActions?.getAppVersion() ?: "",
+                        onNavigateToServerGuide = {
+                            platformActions?.openUrlInBrowser(ADVENTURELOG_GITHUB_URL)
+                        },
+                        onNavigateToSourceCode = {
+                            platformActions?.openUrlInBrowser(ADVENTURELOG_CLIENT_GITHUB_URL)
+                        },
+                        onSendFeedbackEmail = {
+                            if (platformActions?.sendFeedbackEmail() == false) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("No email app found. Write to $FEEDBACK_ADDRESS")
+                                }
+                            }
+                        },
+                        onNavigateToTermsOfUse = { legalPage = LegalPage.TERMS },
+                        onNavigateToPrivacyPolicy = { legalPage = LegalPage.PRIVACY }
+                    )
+                }
+                item {
+                    SignOutCard(onClick = { confirmLogout = true })
+                }
+                item { Spacer(Modifier.height(24.dp)) }
             }
-            item {
-                PreferencesGroup(state = profile, onChange = onChangeProfile)
-            }
-            item {
-                AppearanceGroup(
-                    themeMode = themeMode,
-                    onThemeModeChanged = onThemeModeChanged,
-                    dynamicColors = dynamicColors,
-                    onDynamicColorsChanged = onDynamicColorsChanged
-                )
-            }
-            item {
-                SignInGroup(
-                    hasPassword = user?.hasPassword ?: true,
-                    isChangingPassword = isChangingPassword,
-                    onChangePassword = onChangePassword,
-                    emails = emails,
-                    onAddEmail = onAddEmail,
-                    onVerifyEmail = onVerifyEmail,
-                    onSetPrimaryEmail = onSetPrimaryEmail,
-                    onRemoveEmail = onRemoveEmail,
-                    onRetryEmails = onReloadEmails
-                )
-            }
-            item {
-                StorageSection(state = storage, onRetry = onReloadStorage)
-            }
-            item {
-                AboutSection(
-                    user = user,
-                    serverUrl = serverUrl,
-                    appVersion = platformActions?.getAppVersion() ?: "",
-                    onNavigateToServerGuide = {
-                        platformActions?.openUrlInBrowser(ADVENTURELOG_GITHUB_URL)
-                    },
-                    onNavigateToSourceCode = {
-                        platformActions?.openUrlInBrowser(ADVENTURELOG_CLIENT_GITHUB_URL)
-                    },
-                    onSendFeedbackEmail = { platformActions?.sendFeedbackEmail() },
-                    onNavigateToTermsOfUse = { legalPage = LegalPage.TERMS },
-                    onNavigateToPrivacyPolicy = { legalPage = LegalPage.PRIVACY }
-                )
-            }
-            item {
-                SignOutCard(onClick = { confirmLogout = true })
-            }
-            item { Spacer(Modifier.height(24.dp)) }
         }
 
         SnackbarHost(
@@ -208,10 +254,16 @@ fun SettingsContent(
         EditProfileDialog(
             initial = profile.form,
             isSaving = profile.isSaving,
-            onDismiss = { editProfileOpen = false },
-            onConfirm = { username, firstName, lastName ->
+            error = editProfileError,
+            onDismiss = {
                 editProfileOpen = false
-                onSaveIdentity(username, firstName, lastName)
+                editProfileError = null
+            },
+            onConfirm = { username, firstName, lastName ->
+                editProfileError = null
+                onSaveIdentity(username, firstName, lastName) { refusal ->
+                    if (refusal == null) editProfileOpen = false else editProfileError = refusal
+                }
             }
         )
     }
@@ -314,7 +366,7 @@ private fun SettingsPreviewContent(mode: ThemeMode, dynamicColors: Boolean) {
         user = null,
         profile = ProfileSectionState(),
         onChangeProfile = {},
-        onSaveIdentity = { _, _, _ -> },
+        onSaveIdentity = { _, _, _, _ -> },
         isChangingPassword = false,
         onChangePassword = { _, _, _ -> },
         emails = EmailsSectionState(isLoading = false),

@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
+import com.desarrollodroide.adventurelog.core.model.visitBoundText
+import com.desarrollodroide.adventurelog.core.model.isAllDayVisit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -90,11 +92,7 @@ private fun VisitItem(
                     .padding(16.dp)
             ) {
                 visit.startDate?.let { startDate ->
-                    val isAllDay = visit.endDate?.let { endDate ->
-                        startDate == endDate ||
-                                (startDate.contains("T") && endDate.contains("T") &&
-                                        startDate.split("T").first() == endDate.split("T").first())
-                    } ?: (visit.endDate == null)
+                    val isAllDay = isAllDayVisit(startDate, visit.endDate)
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +120,8 @@ private fun VisitItem(
                             )
                         } else {
                             Text(
-                                text = "From: ${formatDateDisplay(startDate)}",
+                                // With its time: a timed visit showed only its dates (measured).
+                                text = "From: ${visitBoundText(startDate)}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )
@@ -133,7 +132,7 @@ private fun VisitItem(
                         visit.endDate?.let { endDate ->
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "To: ${formatDateDisplay(endDate)}",
+                                text = "To: ${visitBoundText(endDate)}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )

@@ -23,13 +23,24 @@ fun ClearStatsSection(
     plannedCount: Int,
     regionCount: Int,
     onFilterClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /**
+     * While the places load, or when they failed to, the counts are unknown - not zero. The card
+     * said "0 Visited · 0 Planned · 0 Regions" over the spinner and over "Failed to load places",
+     * as if the account were empty (QA 06, screenshots).
+     */
+    isLoading: Boolean = false,
+    placesFailed: Boolean = false,
+    /** Regions load on their own; until they have, their count is unknown too. */
+    regionsKnown: Boolean = true
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         shadowElevation = 4.dp,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+        // Opaque: it no longer floats over the map, and at 95% its own shadow showed through as a
+        // lighter rectangle inside the card (QA 06, screenshot).
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column {
             Row(
@@ -44,7 +55,7 @@ fun ClearStatsSection(
                 ) {
                     StatItem(
                         icon = Icons.Default.CheckCircle,
-                        value = visitedCount,
+                        value = visitedCount.takeUnless { isLoading || placesFailed },
                         label = "Visited",
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -60,7 +71,7 @@ fun ClearStatsSection(
 
                     StatItem(
                         icon = Icons.Default.Schedule,
-                        value = plannedCount,
+                        value = plannedCount.takeUnless { isLoading || placesFailed },
                         label = "Planned",
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -76,7 +87,7 @@ fun ClearStatsSection(
 
                     StatItem(
                         icon = Icons.Default.Public,
-                        value = regionCount,
+                        value = regionCount.takeIf { regionsKnown },
                         label = "Regions",
                         color = MaterialTheme.colorScheme.secondary
                     )
@@ -113,7 +124,7 @@ fun ClearStatsSection(
 @Composable
 private fun StatItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    value: Int,
+    value: Int?,
     label: String,
     color: Color
 ) {
@@ -132,7 +143,7 @@ private fun StatItem(
                 tint = color
             )
             Text(
-                text = value.toString(),
+                text = statText(value),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = color,
@@ -147,3 +158,6 @@ private fun StatItem(
         )
     }
 }
+
+/** A count as the card shows it: a dash while it is not known yet, never a zero that is not true. */
+internal fun statText(value: Int?): String = value?.toString() ?: "–"

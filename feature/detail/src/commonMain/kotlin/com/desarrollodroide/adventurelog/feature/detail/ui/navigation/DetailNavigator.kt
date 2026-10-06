@@ -11,4 +11,10 @@ interface DetailNavigator {
      * printed the collection's name to stdout.
      */
     fun navigateToCollection(collectionId: String, collectionName: String)
+
+    /** [openImages] opens the form on its images, for "Add photo". */
+    fun navigateToEditLocation(
+        location: com.desarrollodroide.adventurelog.core.model.Location,
+        openImages: Boolean = false
+    )
 }

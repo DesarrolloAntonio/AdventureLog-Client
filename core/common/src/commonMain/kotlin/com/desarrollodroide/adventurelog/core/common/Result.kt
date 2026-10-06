@@ -28,11 +28,20 @@ sealed class Either<out A, out B> {
  * A sealed interface representing different types of API responses.
  * - [ApiResponse.HttpError] indicates an HTTP error.
  * - [ApiResponse.IOException] indicates an input/output exception.
+ * - [ApiResponse.InvalidCredentials] the session is no longer good (401).
+ * - [ApiResponse.Forbidden] the session is fine; the server refused this one thing (403).
  */
 sealed interface ApiResponse {
     data object HttpError : ApiResponse
     data object IOException : ApiResponse
     data object InvalidCredentials : ApiResponse
+
+    /**
+     * A 403: signed in, and not allowed to touch that particular record - someone else's place
+     * inside a collection they shared with you, for instance. Kept apart from
+     * [InvalidCredentials] because telling that person to log in again is both untrue and useless.
+     */
+    data object Forbidden : ApiResponse
 }
 
 /**

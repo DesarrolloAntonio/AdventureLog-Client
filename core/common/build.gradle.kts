@@ -8,3 +8,11 @@ compose.resources {
     packageOfResClass = "com.desarrollodroide.adventurelog.resources"
     generateResClass = always
 }
+
+kotlin {
+    sourceSets {
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+    }
+}

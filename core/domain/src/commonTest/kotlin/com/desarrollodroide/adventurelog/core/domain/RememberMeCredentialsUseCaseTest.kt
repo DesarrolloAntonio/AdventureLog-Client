@@ -21,14 +21,12 @@ class RememberMeCredentialsUseCaseTest {
     private class FakeUserRepository : UserRepository {
         var savedUrl: String? = null
         var savedUsername: String? = null
-        var savedPassword: String? = null
         var clearRememberMeCalled = false
         var rememberMeCredentialsFlow: Flow<Account?> = flowOf(null)
 
-        override suspend fun saveRememberMeCredentials(url: String, username: String, password: String) {
+        override suspend fun saveRememberMeCredentials(url: String, username: String) {
             savedUrl = url
             savedUsername = username
-            savedPassword = password
         }
 
         override fun getRememberMeCredentials(): Flow<Account?> {
@@ -83,16 +81,14 @@ class RememberMeCredentialsUseCaseTest {
     private val useCase = RememberMeCredentialsUseCase(fakeRepository)
 
     @Test
-    fun `save stores credentials in repository`() = runTest {
+    fun `save stores the server and the username in repository`() = runTest {
         val url = "https://test.com"
         val username = "testuser"
-        val password = "testpass"
 
-        useCase.save(url, username, password)
+        useCase.save(url, username)
 
         assertEquals(url, fakeRepository.savedUrl)
         assertEquals(username, fakeRepository.savedUsername)
-        assertEquals(password, fakeRepository.savedPassword)
     }
 
     @Test

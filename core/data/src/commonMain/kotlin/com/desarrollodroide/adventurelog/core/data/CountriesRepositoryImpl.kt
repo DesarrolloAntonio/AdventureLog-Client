@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.data
 
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.CountriesRepository
@@ -20,7 +21,7 @@ private val logger = Logger.withTag("CountriesRepositoryImpl")
 
 class CountriesRepositoryImpl(
     private val networkDataSource: AdventureLogNetwork
-) : CountriesRepository {
+) : CountriesRepository, AccountDataCache {
 
     private val _countriesFlow = MutableStateFlow<List<Country>>(emptyList())
     override val countriesFlow: StateFlow<List<Country>> = _countriesFlow.asStateFlow()
@@ -31,6 +32,13 @@ class CountriesRepositoryImpl(
     private val _visitedCitiesFlow = MutableStateFlow<List<VisitedCity>>(emptyList())
     override val visitedCitiesFlow: StateFlow<List<VisitedCity>> = _visitedCitiesFlow.asStateFlow()
     
+    /** Countries carry the account's own visit counts, and the regions and cities are its visits. */
+    override fun clearAccountData() {
+        _countriesFlow.value = emptyList()
+        _visitedRegionsFlow.value = emptyList()
+        _visitedCitiesFlow.value = emptyList()
+    }
+
     override suspend fun getCountries(): Either<ApiResponse, List<Country>> {
         // If we already have countries cached, return them
         if (_countriesFlow.value.isNotEmpty()) {
@@ -44,7 +52,8 @@ class CountriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getCountries: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -63,7 +72,8 @@ class CountriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getRegions: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -92,7 +102,8 @@ class CountriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getVisitedRegions: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -113,7 +124,8 @@ class CountriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getVisitedCities: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -147,7 +159,8 @@ class CountriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during refreshCountries: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -155,6 +168,93 @@ class CountriesRepositoryImpl(
             Either.Left(ApiResponse.IOException)
         } catch (e: Exception) {
             logger.e { "Unexpected error during refreshCountries: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    /**
+     * Keeps the cached country's count in step with a tick. The world list is drawn from these
+     * counts and was loaded once, so Japan still read 3/47 after its fourth region was ticked
+     * (QA 05, WO-02). A region's id starts with its country's code: "JP-23".
+     */
+    private fun countVisit(regionId: String, delta: Int) {
+        val code = regionId.substringBefore('-')
+        _countriesFlow.value = _countriesFlow.value.map { country ->
+            if (country.countryCode.equals(code, ignoreCase = true)) {
+                country.copy(numVisits = (country.numVisits + delta).coerceAtLeast(0))
+            } else {
+                country
+            }
+        }
+    }
+
+    override suspend fun markRegionVisited(regionId: String): Either<ApiResponse, VisitedRegion> {
+        return try {
+            val visited = networkDataSource.markRegionVisited(regionId).toDomainModel()
+            // Add it to the cached list rather than refetching: the country screen reads this flow
+            // and the tick should follow the tap, not a round trip.
+            val wasVisited = _visitedRegionsFlow.value.any { it.regionId == regionId }
+            _visitedRegionsFlow.value = _visitedRegionsFlow.value
+                .filterNot { it.regionId == regionId } + visited
+            if (!wasVisited) countVisit(regionId, +1)
+            Either.Right(visited)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error marking region visited: ${e.code}" }
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error marking region visited: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error marking region visited: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun unmarkRegionVisited(regionId: String): Either<ApiResponse, Unit> {
+        return try {
+            networkDataSource.unmarkRegionVisited(regionId)
+            val wasVisited = _visitedRegionsFlow.value.any { it.regionId == regionId }
+            _visitedRegionsFlow.value = _visitedRegionsFlow.value.filterNot { it.regionId == regionId }
+            if (wasVisited) countVisit(regionId, -1)
+            Either.Right(Unit)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error removing visited region: ${e.code}" }
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error removing visited region: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error removing visited region: ${e.message}" }
+            Either.Left(ApiResponse.HttpError)
+        }
+    }
+
+    override suspend fun refreshVisitedRegions(): Either<ApiResponse, Pair<Int, Int>> {
+        return try {
+            val found = networkDataSource.refreshVisitedRegions()
+            // The sweep may have added records, so the cached list is stale either way.
+            getVisitedRegions()
+            Either.Right(found)
+        } catch (e: HttpException) {
+            logger.e { "HTTP Error refreshing visited regions: ${e.code}" }
+            when (e.code) {
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
+                else -> Either.Left(ApiResponse.HttpError)
+            }
+        } catch (e: IOException) {
+            logger.e { "IO Error refreshing visited regions: ${e.message}" }
+            Either.Left(ApiResponse.IOException)
+        } catch (e: Exception) {
+            logger.e { "Unexpected error refreshing visited regions: ${e.message}" }
             Either.Left(ApiResponse.HttpError)
         }
     }

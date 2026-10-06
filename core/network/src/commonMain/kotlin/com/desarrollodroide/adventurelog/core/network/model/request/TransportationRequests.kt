@@ -59,8 +59,9 @@ data class TransportationRequest(
     @SerialName("destination_longitude")
     val destinationLongitude: Double? = null,
 
+    // No default - see NoteRequest.
     @SerialName("is_public")
-    val isPublic: Boolean = false,
+    val isPublic: Boolean,
 
     @SerialName("collection")
     val collection: String? = null

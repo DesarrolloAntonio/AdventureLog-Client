@@ -7,4 +7,7 @@ interface AuthApi {
         username: String,
         password: String
     ): UserDetailsDTO
+
+    /** Ends [sessionToken]'s session on the server at [baseUrl]. */
+    suspend fun logout(baseUrl: String, sessionToken: String)
 }

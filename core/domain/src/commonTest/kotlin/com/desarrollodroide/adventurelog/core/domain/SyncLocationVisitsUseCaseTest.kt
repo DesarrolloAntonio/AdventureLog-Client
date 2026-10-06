@@ -45,6 +45,26 @@ class SyncLocationVisitsUseCaseTest {
     private val useCase = SyncLocationVisitsUseCase(repository)
 
     @Test
+    fun `a visit left as it was loaded is not sent again`() = runTest {
+        // Every save PATCHed every visit: seconds were cut and a missing timezone filled in on
+        // visits nobody had touched (measured).
+        val asLoaded = form(id = "v1").copy(notes = "as loaded")
+
+        useCase("loc-1", existing = listOf(visitOf("v1")), edited = listOf(asLoaded), original = listOf(asLoaded))
+
+        assertTrue(repository.updated.isEmpty(), "sent: ${repository.updated}")
+    }
+
+    @Test
+    fun `a visit changed in the form is sent`() = runTest {
+        val asLoaded = form(id = "v1").copy(notes = "as loaded")
+
+        useCase("loc-1", existing = listOf(visitOf("v1")), edited = listOf(asLoaded.copy(notes = "changed")), original = listOf(asLoaded))
+
+        assertEquals(listOf("v1"), repository.updated.map { it.first })
+    }
+
+    @Test
     fun `a visit without an id is created`() = runTest {
         val result = useCase("loc-1", existing = emptyList(), edited = listOf(form()))
 

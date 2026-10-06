@@ -12,7 +12,10 @@ data class CreateCollectionRequest(
     @SerialName("start_date")
     val startDate: String? = null,
     @SerialName("end_date")
-    val endDate: String? = null
+    val endDate: String? = null,
+    // A link typed while creating a collection had nowhere to go and was dropped (QA 04, CO-12).
+    @SerialName("link")
+    val link: String? = null
 )
 
 @Serializable
