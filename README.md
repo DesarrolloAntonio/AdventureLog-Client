@@ -17,10 +17,8 @@
 > sign-in, the dashboard, places, collections and a place's own page all work - but it has had far
 > less use, and a few things are Android-only for now (see Known Issues).
 >
-> Still missing against the web client: downloading the calendar as `.ics`, uploading a profile
-> picture, restoring a backup (downloading one works), and the parts of Settings that cover MFA,
-> API keys and third-party integrations. People - the travellers with a public profile - is in the
-> account menu, and sharing a collection has its own people picker.
+> What the web client has and this app doesn't yet - and what it won't - is listed under
+> [What's next](#-whats-next).
 >
 > A first release is the goal; there is no date on it.
 
@@ -53,7 +51,8 @@ further.
 Two ways in:
 
 - **Sideload the APK** from [Releases](https://github.com/DesarrolloAntonio/AdventureLog-Client/releases).
-  Android 7.0 and up.
+  Android 7.0 and up. The newest there is a development build from 28 August; new ones appear once
+  signed releases are switched on (see [What's next](#-whats-next)).
 - **Join the Play internal test** - [open an issue](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/new)
   saying you would like in and which Google account to add. Capped at 100 testers, and it means
   updates arrive through Play like any other app.
@@ -159,6 +158,7 @@ AdventureLog/
 
 - **Architecture & Navigation**
   - [Compose Navigation](https://developer.android.com/jetpack/compose/navigation): Jetpack navigation for Compose
+  - [Navigation 3](https://developer.android.com/guide/navigation/navigation-3): typed back stacks and list-detail panes for Places and Collections
   - [Lifecycle Components](https://developer.android.com/jetpack/androidx/releases/lifecycle): ViewModel and lifecycle-aware components
 
 - **Dependency Injection**
@@ -209,7 +209,7 @@ The app uses sealed classes to represent different UI states, providing type-saf
 
 ### Prerequisites
 
-- An Android Studio new enough for AGP 9.3
+- An Android Studio new enough for AGP 9.2
 - JDK 17 (what CI builds with; the compiled bytecode targets Java 11)
 - Xcode 26 (for iOS development) - the iOS deployment target is 15.3
 - Kotlin 2.4.10
@@ -302,12 +302,14 @@ the content inside each screen - the approach JetBrains documents in
 [Liquid Glass in Compose Multiplatform](https://kotlinlang.org/docs/multiplatform/ios-liquid-glass.html).
 Needs typed routes first, and a decision that the iOS tab bar stops being Compose's.
 
-**iOS parity.** `PlatformBackHandler` does nothing on iOS, which silently disables the
-"discard your changes?" prompt and anything else built on it. Related: there is no system back
-gesture, because the whole app is a single view controller.
+**iOS parity.** `PlatformBackHandler` does nothing on iOS, so going back from a form there skips
+the "discard your changes?" question (Cancel still asks), and there is no system back gesture,
+because the whole app is a single view controller.
 
-**A signed release build.** There is no signing configuration in the project at all, and CI
-publishes a debug APK. This is the piece missing between here and a store listing.
+**Publishing.** Signing is wired: on `main` CI builds a signed release when the four secrets
+(`KEYSTORE_BASE64`, `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`) exist,
+and skips the release otherwise. Missing are those secrets and an upload of the current build to
+the Play internal test, whose draft is still the 28 August one.
 
 **The remaining gaps against the web client.** Decided on 2026-10-06, after a QA pass listed
 every feature the web has and this app doesn't:
@@ -319,33 +321,35 @@ every feature the web has and this app doesn't:
   itinerary reordering, map search, tap-to-add and layers, the month calendar and `.ics` export,
   profile pictures, API keys and third-party integrations.
 
-**Wider tests.** The data layer and the ViewModels have no tests, and while there are Maestro
-flows, nothing runs them in CI.
+**Wider tests in CI.** CI runs the unit tests and builds both variants; the UI tests that need a
+device, and the Maestro flow, only run locally.
 
 ## 🧪 Testing Strategy
 
-- **Unit Tests**:
-  - ✅ Model layer: models, mappers and the Markdown parser (20 test files)
-  - ✅ Domain layer: use cases (10 test files)
-  - ✅ Network layer: DTO mapping and session handling (4 test files)
-  - 🚧 Data layer tests (Coming)
-  - 🚧 ViewModel tests (Coming)
-- **Integration Tests**: Verify interactions between components (Coming)
-- **UI Tests**: Test user interfaces and workflows (Coming)
+- **Unit tests** (`commonTest`, run on Android and iOS): models and mappers, use cases, the network
+  and data layers, and the ViewModels of every feature - with hand-written fakes from
+  `core/testing`, since MockK has no Kotlin/Native support.
+- **UI tests** (`androidInstrumentedTest`, Compose, on a device or emulator): screens and shared
+  components in `feature/collections`, `home`, `calendar`, `locations` and `ui`.
+- **Flows**: one Maestro flow in `.maestro/`.
+
+```bash
+./gradlew allTests testDebugUnitTest      # unit tests, every target
+./gradlew connectedDebugAndroidTest      # UI tests, with a device attached
+```
 
 ## ⚠️ Known Issues
 
 - **MockK Support**: MockK doesn't support Kotlin/Native targets in Kotlin Multiplatform. Tests use manual fakes instead of mocking libraries for cross-platform compatibility.
 
-- **Date picker on iOS**: Compose Multiplatform 1.8.2 is built against kotlinx-datetime 0.6.0
-  while this project uses 0.7.1, which moved `Instant`. Kotlin/Native's partial linkage lets the
-  framework link anyway and leaves the missing symbols throwing at runtime, so opening a date
-  picker on iOS fails. Android is unaffected. Fixed by moving to Compose Multiplatform 1.9.0,
-  which is built against 0.7.1.
+- **Date picker on iOS**: Compose Multiplatform 1.8.2 was built against kotlinx-datetime 0.6.0
+  while this project uses 0.7.1, which moved `Instant`, so opening a date picker on iOS threw at
+  runtime. The project is on Compose Multiplatform 1.12.0 now, built against 0.7.1, which should
+  have fixed it - not yet checked on an iOS device.
 
-- **Back handling on iOS**: `PlatformBackHandler` has no iOS implementation, so anything relying
-  on it - such as the "discard your changes?" prompt when leaving a half-filled form - does
-  nothing there. The whole app is a single `ComposeUIViewController`, so there is no
+- **Back handling on iOS**: `PlatformBackHandler` has no iOS implementation, so leaving a
+  half-filled form by going back skips the "discard your changes?" question there (its Cancel
+  button still asks). The whole app is a single `ComposeUIViewController`, so there is no
   `UINavigationController` to provide a system back gesture either.
 
 ## 🛠️ Development Workflow
