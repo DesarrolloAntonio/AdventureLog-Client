@@ -60,6 +60,7 @@ kotlin {
             // the version, and naming androidx.compose.ui:ui-test-junit4-android directly asks
             // for a version nothing here declares.
             implementation(compose.uiTest)
+            implementation(projects.core.testing)
             implementation(libs.androidx.test.runner)
             implementation(libs.junit)
             // compose.uiTest drags in Espresso 3.5.0, whose input injection calls

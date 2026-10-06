@@ -9,7 +9,9 @@ import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.ui.screen.comingUpEntries
 import com.desarrollodroide.adventurelog.feature.home.ui.screen.dashboardSubtitle
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
 import kotlin.test.Test
+import kotlin.test.assertNull
 import kotlin.test.assertEquals
 
 /** What Home says is ahead: each trip once, and only trips that have not started. */
@@ -90,4 +92,36 @@ class HomeComingUpTest {
     fun `trips that have not started are counted`() {
         assertEquals("5 places visited · 1 trip ahead", subtitle(null, listOf(trip("a", "2026-09-16"))))
     }
+
+    // QA HM-09: event rows in Coming up opened nothing while the trip rows beside them did.
+
+    private fun opened(event: CalendarEvent): EventTarget? {
+        var target: EventTarget? = null
+        val entry = comingUpEntries(emptyList(), listOf(event), today = null, onTripClick = {}, onOpenEvent = { target = it }).single()
+        entry.onClick?.invoke()
+        return target
+    }
+
+    private fun event(type: String, collectionId: String? = null, resourceId: String = "") = CalendarEvent(
+        id = "$type-1", type = type, title = "QA_$type", start = "2026-10-12", end = "2026-10-12", allDay = true,
+        icon = "", category = "", locationLabel = "", collectionId = collectionId, collectionName = collectionId,
+        resourceId = resourceId
+    )
+
+    @Test
+    fun `a visit in Coming up opens its place`() {
+        assertEquals(EventTarget.Place("p9"), opened(event("visit", collectionId = "Peru", resourceId = "p9")))
+    }
+
+    @Test
+    fun `a stay inside a trip opens the trip`() {
+        assertEquals(EventTarget.Collection("Peru", "Peru"), opened(event("lodging", collectionId = "Peru")))
+    }
+
+    @Test
+    fun `an event that belongs to nothing opens nothing`() {
+        val entry = comingUpEntries(emptyList(), listOf(event("note")), today = null, onTripClick = {}).single()
+        assertNull(entry.onClick)
+    }
+
 }

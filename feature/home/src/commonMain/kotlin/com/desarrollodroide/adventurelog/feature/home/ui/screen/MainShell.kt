@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
 import androidx.compose.foundation.layout.consumeWindowInsets
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.IO
@@ -540,8 +541,22 @@ fun HomeScreenContent(
                                     navigateTo(CurrentScreen.COLLECTIONS)
                                 },
                                 onRetry = onRetryDashboard,
+                                onOpenEvent = { target ->
+                                    when (target) {
+                                        is EventTarget.Place -> onOpenLocationById(target.id)
+                                        is EventTarget.Collection -> navController.navigate(
+                                            NavigationRoutes.Collections.createDetailRoute(
+                                                collectionId = target.id,
+                                                collectionName = target.name
+                                            )
+                                        ) { launchSingleTop = true }
+                                    }
+                                },
                                 onAddPlace = {
                                     navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
+                                },
+                                onAddPlaceToTrip = { trip ->
+                                    navController.navigate(NavigationRoutes.Locations.createAddRoute(trip.id)) { launchSingleTop = true }
                                 },
                                 onAddCollection = {
                                     navController.navigate(NavigationRoutes.Collections.add) { launchSingleTop = true }

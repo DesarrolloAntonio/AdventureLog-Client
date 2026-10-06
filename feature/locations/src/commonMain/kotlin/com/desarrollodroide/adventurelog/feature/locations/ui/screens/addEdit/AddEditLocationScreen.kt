@@ -117,7 +117,9 @@ fun AddEditLocationScreen(
     location: Location?,
     onNavigateBack: () -> Unit,
     /** Open on the images section, scrolled to it: the form was reached by "Add photo". */
-    openImages: Boolean = false
+    openImages: Boolean = false,
+    /** A new place started from a trip goes into that trip. */
+    intoCollectionId: String? = null
 ) {
     val viewModel = koinViewModel<AddEditAdventureViewModel> {
         parametersOf(locationId, location)
@@ -153,7 +155,7 @@ fun AddEditLocationScreen(
             onRetryLoad = viewModel::retryLoad,
             onNavigateBack = onNavigateBack,
             onSave = { formData ->
-                viewModel.saveLocation(formData)
+                viewModel.saveLocation(formData, intoCollectionId)
             },
             onGenerateDescription = { name, onDescriptionGenerated ->
                 viewModel.generateDescription(name, onDescriptionGenerated)

@@ -15,6 +15,7 @@ import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.screen.DashboardScreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import com.desarrollodroide.adventurelog.core.testing.testLocation
 import org.junit.Test
 import androidx.compose.ui.test.assertIsDisplayed
 
@@ -195,6 +196,25 @@ class DashboardScreenTest {
         setContent { WithAppLocals { DashboardScreen(homeUiState = HomeUiState.Success(dashboard = dashboard)) } }
 
         onAllNodes(hasText("invitation", substring = true)).assertCountEquals(0)
+    }
+
+
+    // QA HM-09: "Recently updated (22)" sat over three cards - the number was the whole library.
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun recentlyUpdatedDoesNotClaimTheLibraryTotal() = runComposeUiTest {
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(
+                        dashboard = dashboard.copy(recentLocations = listOf(testLocation("Machu Picchu"), testLocation("Petra")))
+                    )
+                )
+            }
+        }
+
+        onNodeWithText("Recently updated").assertExists()
+        onNodeWithText("Recently updated (22)").assertDoesNotExist()
     }
 
 }

@@ -1,6 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.InvitesBanner
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.target
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -83,9 +85,12 @@ fun DashboardScreen(
     onSeeCalendar: () -> Unit = { },
     onSeeAllPlaces: () -> Unit = { },
     onAddPlace: () -> Unit = { },
+    /** The trip card's own "Add a place": the new place goes into that trip (QA HM-09). */
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit = { onAddPlace() },
     onAddCollection: () -> Unit = { },
     onRetry: () -> Unit = { },
     onSeeInvitations: () -> Unit = { },
+    onOpenEvent: (EventTarget) -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (homeUiState) {
@@ -126,7 +131,9 @@ fun DashboardScreen(
                     onSeeCalendar = onSeeCalendar,
                     onSeeAllPlaces = onSeeAllPlaces,
                     onAddPlace = onAddPlace,
+                    onAddPlaceToTrip = onAddPlaceToTrip,
                     onAddCollection = onAddCollection,
+                    onOpenEvent = onOpenEvent,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -148,7 +155,9 @@ private fun DashboardList(
     onSeeCalendar: () -> Unit,
     onSeeAllPlaces: () -> Unit,
     onAddPlace: () -> Unit,
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit,
     onAddCollection: () -> Unit,
+    onOpenEvent: (EventTarget) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // An in-progress trip outranks a future one: if the user is travelling right now, that is the
@@ -203,7 +212,7 @@ private fun DashboardList(
                         onTripClick = onTripClick,
                         onAdventureClick = onAdventureClick,
                         onSeeAllPlaces = onSeeAllPlaces,
-                        onAddPlace = onAddPlace,
+                        onAddPlaceToTrip = onAddPlaceToTrip,
                         modifier = Modifier.weight(1f)
                     )
                     DataRail(
@@ -213,12 +222,13 @@ private fun DashboardList(
                         today = today,
                         onTripClick = onTripClick,
                         onSeeCalendar = onSeeCalendar,
+                        onOpenEvent = onOpenEvent,
                         modifier = Modifier.width(DataRailWidth)
                     )
                 }
             } else {
                 StackedDashboard(
-                    onAddPlace = onAddPlace,
+                    onAddPlaceToTrip = onAddPlaceToTrip,
                     featuredTrip = featuredTrip,
                     dashboard = dashboard,
                     otherTrips = otherTrips,
@@ -226,7 +236,8 @@ private fun DashboardList(
                     onTripClick = onTripClick,
                     onAdventureClick = onAdventureClick,
                     onSeeCalendar = onSeeCalendar,
-                    onSeeAllPlaces = onSeeAllPlaces
+                    onSeeAllPlaces = onSeeAllPlaces,
+                    onOpenEvent = onOpenEvent
                 )
             }
         }
@@ -241,7 +252,7 @@ private fun MainColumn(
     onTripClick: (UltraSlimCollection) -> Unit,
     onAdventureClick: (Location) -> Unit,
     onSeeAllPlaces: () -> Unit,
-    onAddPlace: () -> Unit,
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -256,14 +267,16 @@ private fun MainColumn(
                 TripCard(
                     trip = featuredTrip,
                     onClick = { onTripClick(featuredTrip) },
-                    onAddPlace = onAddPlace
+                    onAddPlace = { onAddPlaceToTrip(featuredTrip) }
                 )
             }
         }
         if (dashboard.recentLocations.isNotEmpty()) {
             item(key = "recent-header", span = { GridItemSpan(maxLineSpan) }) {
                 SectionHeader(
-                    title = "Recently updated (${dashboard.stats.locationCount})",
+                    // Not the library total: the strip shows a handful, and "(22)" over three cards read as a
+                    // count of what was there (QA HM-09). "See all" is the way to the rest.
+                    title = "Recently updated",
                     trailing = "See all",
                     onTrailingClick = onSeeAllPlaces
                 )
@@ -293,6 +306,7 @@ private fun DataRail(
     today: LocalDate?,
     onTripClick: (UltraSlimCollection) -> Unit,
     onSeeCalendar: () -> Unit,
+    onOpenEvent: (EventTarget) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -304,7 +318,7 @@ private fun DataRail(
     ) {
         StatsCard(dashboard, title = "YOUR MAP SO FAR")
 
-        val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTripId)
+        val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTripId, onOpenEvent)
         if (comingUp.isNotEmpty()) {
             SectionHeader(
                 title = "Coming up",
@@ -383,9 +397,10 @@ private fun StackedDashboard(
     onAdventureClick: (Location) -> Unit,
     onSeeCalendar: () -> Unit,
     onSeeAllPlaces: () -> Unit,
-    onAddPlace: () -> Unit
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit,
+    onOpenEvent: (EventTarget) -> Unit
 ) {
-    val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTrip?.id)
+    val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTrip?.id, onOpenEvent)
 
     Column(
         modifier = Modifier
@@ -398,7 +413,7 @@ private fun StackedDashboard(
             TripCard(
                 trip = featuredTrip,
                 onClick = { onTripClick(featuredTrip) },
-                onAddPlace = onAddPlace
+                onAddPlace = { onAddPlaceToTrip(featuredTrip) }
             )
         }
 
@@ -418,7 +433,9 @@ private fun StackedDashboard(
         if (dashboard.recentLocations.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SectionHeader(
-                    title = "Recently updated (${dashboard.stats.locationCount})",
+                    // Not the library total: the strip shows a handful, and "(22)" over three cards read as a
+                    // count of what was there (QA HM-09). "See all" is the way to the rest.
+                    title = "Recently updated",
                     trailing = "See all",
                     onTrailingClick = onSeeAllPlaces
                 )
@@ -926,7 +943,8 @@ internal fun comingUpEntries(
     events: List<CalendarEvent>,
     today: LocalDate?,
     onTripClick: (UltraSlimCollection) -> Unit,
-    featuredTripId: String? = null
+    featuredTripId: String? = null,
+    onOpenEvent: (EventTarget) -> Unit = {}
 ): List<ComingUp> {
     // The calendar sends every dated collection as an event of its own. A trip already listed here,
     // or already on the card above, came back a second time as that event - each trip twice, and
@@ -950,7 +968,10 @@ internal fun comingUpEntries(
             event.locationLabel.takeIf { it.isNotBlank() },
             event.collectionName?.takeIf { it.isNotBlank() }
         ).firstOrNull { it != event.title }.orEmpty()
-        ComingUp("event-${event.id}", event.start, event.title, detail, null)
+        // An event row opens what the calendar opens for it - its place, or the trip it belongs to.
+        // It used to open nothing while the trip rows beside it did (QA HM-09).
+        val target = event.target()
+        ComingUp("event-${event.id}", event.start, event.title, detail, target?.let { { onOpenEvent(it) } })
     }
     return (fromTrips + fromEvents).sortedBy { it.date.substringBefore('T') }
 }

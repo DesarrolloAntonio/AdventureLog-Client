@@ -69,6 +69,7 @@ class EditPlaceSaveTest {
         override suspend fun fetchLocation(objectId: String): Either<ApiResponse, Location> = onServer
         val updated = mutableListOf<String>()
         var created = 0
+        var createdInto: List<String>? = null
         /** Holds a create on the wire, as the network does, until the test lets it through. */
         var createGate: CompletableDeferred<Unit>? = null
         override suspend fun updateLocation(
@@ -84,6 +85,7 @@ class EditPlaceSaveTest {
             activityTypes: List<String>, collectionIds: List<String>
         ): Either<ApiResponse, Location> {
             createGate?.await()
+            createdInto = collectionIds
             return Either.Right(testLocation(name, id = "new${++created}"))
         }
     }
@@ -283,4 +285,31 @@ class EditPlaceSaveTest {
 
         assertEquals(listOf("v2"), visits.updated)
     }
+
+    // QA HM-09: the trip card's "Add a place" made a place that belonged to no trip.
+
+    @Test
+    fun `a place started from a trip is created in that trip`() = runTest(dispatcher) {
+        val server = Server(Either.Left(ApiResponse.HttpError), testLocation("unused"))
+        val vm = viewModel(server, adventureId = null)
+        testScheduler.advanceUntilIdle()
+
+        vm.saveLocation(LocationFormData(name = "QA_Place_InTrip", category = testCategory("Nature")), intoCollectionId = "trip-peru")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(listOf("trip-peru"), server.createdInto)
+    }
+
+    @Test
+    fun `a place started from nowhere is created in no trip`() = runTest(dispatcher) {
+        val server = Server(Either.Left(ApiResponse.HttpError), testLocation("unused"))
+        val vm = viewModel(server, adventureId = null)
+        testScheduler.advanceUntilIdle()
+
+        vm.saveLocation(LocationFormData(name = "QA_Place_Loose", category = testCategory("Nature")))
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(emptyList(), server.createdInto)
+    }
+
 }

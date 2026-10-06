@@ -40,6 +40,9 @@ object NavigationRoutes {
     object Locations {
         const val route = "adventures"
         const val add = "adventures/add"
+        /** [add] with the trip the new place goes into, when it is started from one (QA HM-09). */
+        const val addRoute = "adventures/add?collectionId={collectionId}"
+        fun createAddRoute(collectionId: String): String = "adventures/add?collectionId=${routeArg(collectionId)}"
         const val editRoute = "adventures/edit?adventureId={adventureId}&adventureJson={adventureJson}&openImages={openImages}"
 
         /** [openImages] opens the form on its images section, for "Add photo" rather than "Edit". */

@@ -66,11 +66,21 @@ fun NavGraphBuilder.locationsScreen(
     }
     
     // Add Adventure Screen
-    composable(route = NavigationRoutes.Locations.add) {
+    composable(
+        route = NavigationRoutes.Locations.addRoute,
+        arguments = listOf(
+            navArgument("collectionId") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
         Box(formModifier) {
             AddEditLocationScreen(
                 locationId = null,
                 location = null,
+                intoCollectionId = backStackEntry.savedStateHandle.get<String>("collectionId"),
                 onNavigateBack = {
                     navigator.navigateBack()
                 }

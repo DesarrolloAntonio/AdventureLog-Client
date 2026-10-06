@@ -145,7 +145,11 @@ class AddEditAdventureViewModel(
     private var createdLocationId: String? = null
     private val uploadedImageUris = mutableSetOf<String>()
 
-    fun saveLocation(formData: LocationFormData) {
+    /**
+     * [intoCollectionId]: the trip a new place was started from. The trip card's "Add a place"
+     * opened a blank form and the place landed in no trip at all (QA HM-09).
+     */
+    fun saveLocation(formData: LocationFormData, intoCollectionId: String? = null) {
         // One save at a time: a double tap on Create made two places (measured).
         if (_uiState.value.isSavingLocation) return
         _uiState.value = _uiState.value.copy(
@@ -155,14 +159,14 @@ class AddEditAdventureViewModel(
         )
         viewModelScope.launch {
             try {
-                save(formData)
+                save(formData, intoCollectionId)
             } finally {
                 _uiState.value = _uiState.value.copy(isSavingLocation = false)
             }
         }
     }
 
-    private suspend fun save(formData: LocationFormData) {
+    private suspend fun save(formData: LocationFormData, intoCollectionId: String?) {
             val targetId = adventureId ?: createdLocationId
             val retryOfCreate = adventureId == null && createdLocationId != null
             val result = if (targetId != null) {
@@ -204,7 +208,8 @@ class AddEditAdventureViewModel(
                     tags = formData.tags,
                     visits = formData.visits,
                     price = formData.price.toDoubleOrNull(),
-                    priceCurrency = formData.priceCurrency
+                    priceCurrency = formData.priceCurrency,
+                    collectionIds = listOfNotNull(intoCollectionId?.takeIf { it.isNotBlank() })
                 )
             }
             
