@@ -20,3 +20,14 @@ data class CollectionsTabContent(
     val isLoading: Boolean = false,
     val error: String? = null
 )
+
+/**
+ * The line above the search bar. It counts what the tab lists - on Invites that is invitations, not
+ * collections: the header said "0 collections · Invites" above two of them (QA RL-08).
+ */
+internal fun collectionsHeader(tab: CollectionsTab, collectionCount: Int, content: CollectionsTabContent): String =
+    when (tab) {
+        CollectionsTab.INVITES -> content.invites.size.let { if (it == 1) "1 invitation" else "$it invitations" }
+        CollectionsTab.MINE -> if (collectionCount == 1) "1 collection" else "$collectionCount collections"
+        else -> content.collections.size.let { "${if (it == 1) "1 collection" else "$it collections"} · ${tab.label}" }
+    }

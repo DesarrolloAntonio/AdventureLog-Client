@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.desarrollodroide.adventurelog.core.model.CollectionInvite
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTab
+import com.desarrollodroide.adventurelog.feature.collections.model.collectionsHeader
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTabContent
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
@@ -311,17 +312,8 @@ private fun CollectionsContent(
           Column {
             // The count follows what is on screen. It used to report the whole library even on
             // the archive, where nothing was.
-            val shownCount = if (tab == CollectionsTab.MINE) {
-                collectionCount
-            } else {
-                tabContent.collections.size
-            }
             Text(
-                text = buildString {
-                    append(shownCount)
-                    append(if (shownCount == 1) " collection" else " collections")
-                    if (tab != CollectionsTab.MINE) append(" · ${tab.label}")
-                },
+                text = collectionsHeader(tab, collectionCount, tabContent),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 20.dp, top = 4.dp)
