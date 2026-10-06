@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -152,40 +154,12 @@ fun AddEditChecklistScreen(
                 ) {
                     Column(modifier = Modifier.padding(vertical = 6.dp)) {
                         state.lines.forEachIndexed { index, line ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = line.checked,
-                                    onCheckedChange = { viewModel.toggleLine(index) }
-                                )
-                                Text(
-                                    text = line.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textDecoration = if (line.checked) {
-                                        TextDecoration.LineThrough
-                                    } else {
-                                        TextDecoration.None
-                                    },
-                                    color = if (line.checked) {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurface
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                )
-                                IconButton(onClick = { viewModel.removeLine(index) }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Remove",
-                                        modifier = Modifier.size(18.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+                            ChecklistLineRow(
+                                name = line.name,
+                                checked = line.checked,
+                                onToggle = { viewModel.toggleLine(index) },
+                                onRemove = { viewModel.removeLine(index) }
+                            )
                         }
 
                         if (state.lines.isEmpty()) {
@@ -266,5 +240,47 @@ fun AddEditChecklistScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+    }
+}
+
+/**
+ * One line of the list. The checkbox carried no name of its own, so a screen reader said
+ * "checkbox, not checked" without saying which item (QA RL-06): the whole row is now the toggle,
+ * read with the item's name, and Remove says what it removes.
+ */
+@Composable
+internal fun ChecklistLineRow(
+    name: String,
+    checked: Boolean,
+    onToggle: () -> Unit,
+    onRemove: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, role = Role.Checkbox, onValueChange = { onToggle() })
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(checked = checked, onCheckedChange = null, modifier = Modifier.padding(12.dp))
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodyLarge,
+            textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None,
+            color = if (checked) {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = onRemove) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Remove $name",
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
