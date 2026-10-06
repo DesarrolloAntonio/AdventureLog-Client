@@ -93,6 +93,28 @@ Two traps from this:
 - **A shell that pads for the system bars must also `consumeWindowInsets`.** Otherwise a screen
   that pads for the status bar itself, like the compact bar, pads for it twice.
 
+## One shape for every form
+
+Decided by the owner on 2026-10-06 (QA CO-19), after the collection editors had grown five ways of
+doing the same thing:
+
+- **A field keeps its label when it is filled.** `StyledTextField` uses the label slot, not the
+  placeholder, so "QA123" still reads as the reservation. That is why it has no fixed height.
+- **Cards sit at the form's own width.** `SectionCard` adds a 16dp side margin of its own for the
+  place form, whose column has none; a form that already pads its column passes `inset = 0.dp`.
+  Otherwise the card comes out narrower than the rows under it.
+- **Save across the form, Cancel under it**: `PrimaryButton` full width, then a full-width
+  `TextButton`. Never a small pair on the left.
+- **Every item form starts with a title**: "New …" or "Edit …".
+- **Leaving with something typed asks first** (`rememberDiscardGuard` in `feature/ui`), on Cancel
+  and on Back, with the same words everywhere: "Discard this …?" / "Discard changes?".
+- **Money shows its currency**, by code, beside a neutral money icon - never a "$" over euros.
+- **A section that lists something offers the "+" that adds one**, there in its heading. Inside a
+  collection that includes places: the new place is created in that collection.
+
+The view chips of a collection are cut at the screen edge on purpose: the cut is what says the row
+scrolls.
+
 ## Nothing Material in a shared view
 
 The plan for iOS is native SwiftUI navigation, toolbars and search with the Compose content
