@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.world.di
 
 import com.desarrollodroide.adventurelog.core.domain.di.domainModule
+import com.desarrollodroide.adventurelog.feature.world.viewmodel.CountryDetailViewModel
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.WorldViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -13,7 +14,17 @@ val worldModule = module {
             getCountriesUseCase = get(),
             refreshCountriesUseCase = get(),
             getVisitedRegionsUseCase = get(),
-            getVisitedCitiesUseCase = get()
+            getVisitedCitiesUseCase = get(),
+            observeCountriesUseCase = get()
+        )
+    }
+
+    viewModel {
+        CountryDetailViewModel(
+            getRegionsUseCase = get(),
+            getVisitedRegionsUseCase = get(),
+            getCountriesUseCase = get(),
+            setRegionVisitedUseCase = get()
         )
     }
 }

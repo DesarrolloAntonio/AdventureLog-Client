@@ -24,6 +24,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCity
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 interface AdventureLogNetwork {
 
@@ -105,6 +107,23 @@ interface AdventureLogNetwork {
     fun clearSession()
 
     /**
+     * Asks the server to end the current session, in the background: a sign-out must not wait on a
+     * server that may not answer. Sign-out used to leave the token valid on the server (measured:
+     * it still answered 200 after the app had signed out).
+     */
+    fun endServerSession()
+
+    /**
+     * Fires every time the server answers **401** to a request that carried the session token:
+     * the session is over, whatever screen asked.
+     *
+     * A 403 is not in it - that is a refusal of one object (a collection shared read-only), not of
+     * the session - and neither is a 401 to a request with no token, such as a failed login.
+     */
+    val sessionRejections: Flow<Unit>
+        get() = emptyFlow()
+
+    /**
      * Create a new adventure
      */
     suspend fun createAdventure(
@@ -120,7 +139,9 @@ interface AdventureLogNetwork {
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String> = emptyList()
+        activityTypes: List<String> = emptyList(),
+        /** Collections the new place joins straight away, so no second call is needed. */
+        collectionIds: List<String> = emptyList()
     ): LocationDTO
 
     /**
@@ -132,7 +153,8 @@ interface AdventureLogNetwork {
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String? = null
     ): CollectionDTO
 
     /**
@@ -286,6 +308,9 @@ interface AdventureLogNetwork {
      * Delete an adventure
      */
     suspend fun deleteAdventure(adventureId: String)
+
+    /** PATCH with `collections` alone. */
+    suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO
     
     /**
      * Update an existing adventure
@@ -302,7 +327,7 @@ interface AdventureLogNetwork {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList(),
+        collections: List<String>? = null,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
         priceCurrency: String? = null
@@ -345,6 +370,150 @@ interface AdventureLogNetwork {
      * Get visited cities for the current user
      */
     suspend fun getVisitedCities(): List<VisitedCityDTO>
+
+    /**
+     * Create a note in a collection
+     */
+    suspend fun createNote(
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): com.desarrollodroide.adventurelog.core.model.Note
+
+    /**
+     * Update a note
+     */
+    suspend fun updateNote(
+        noteId: String,
+        name: String,
+        content: String,
+        date: String?,
+        isPublic: Boolean
+    ): com.desarrollodroide.adventurelog.core.model.Note
+
+    /**
+     * Delete a note
+     */
+    suspend fun deleteNote(noteId: String)
+
+    /**
+     * Create lodging in a collection
+     */
+    suspend fun createLodging(
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        priceCurrency: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean,
+        collectionId: String
+    ): com.desarrollodroide.adventurelog.core.model.Lodging
+
+    /**
+     * Update lodging
+     */
+    suspend fun updateLodging(
+        lodgingId: String,
+        name: String,
+        type: String,
+        description: String,
+        checkIn: String?,
+        checkOut: String?,
+        timezone: String?,
+        reservationNumber: String,
+        price: String?,
+        priceCurrency: String?,
+        link: String,
+        location: String,
+        isPublic: Boolean
+    ): com.desarrollodroide.adventurelog.core.model.Lodging
+
+    /**
+     * Delete lodging
+     */
+    suspend fun deleteLodging(lodgingId: String)
+
+    /**
+     * Build a whole itinerary from the dates already on a collection's records. The server only
+     * allows it on a collection whose itinerary is empty.
+     */
+    suspend fun autoGenerateItinerary(
+        collectionId: String
+    ): List<com.desarrollodroide.adventurelog.core.model.ItineraryEntry>
+
+    /** Place one of a collection's items on a day, or in the trip-context bucket when null. */
+    suspend fun addItineraryEntry(
+        collectionId: String,
+        kind: com.desarrollodroide.adventurelog.core.model.ItineraryItemKind,
+        itemId: String,
+        date: String?,
+        order: Int
+    ): com.desarrollodroide.adventurelog.core.model.ItineraryEntry
+
+    /** Take an entry off its day, leaving the item itself alone. */
+    suspend fun deleteItineraryEntry(entryId: String)
+
+    /**
+     * Places near a point that are not in the account yet. Either the coordinates or [place] must
+     * be given; the server geocodes the latter.
+     */
+    suspend fun getRecommendations(
+        latitude: Double?,
+        longitude: Double?,
+        place: String?,
+        category: com.desarrollodroide.adventurelog.core.model.RecommendationCategory,
+        radiusMetres: Int
+    ): List<com.desarrollodroide.adventurelog.core.model.Recommendation>
+
+    /**
+     * Create a checklist in a collection
+     */
+    suspend fun createChecklist(
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean,
+        collectionId: String
+    ): com.desarrollodroide.adventurelog.core.model.Checklist
+
+    /**
+     * Update a checklist, items included
+     */
+    suspend fun updateChecklist(
+        checklistId: String,
+        name: String,
+        items: List<Pair<String, Boolean>>,
+        date: String?,
+        isPublic: Boolean
+    ): com.desarrollodroide.adventurelog.core.model.Checklist
+
+    /**
+     * Delete a checklist
+     */
+    suspend fun deleteChecklist(checklistId: String)
+
+    /**
+     * Sweep every location and mark the regions and cities they fall in
+     */
+    suspend fun refreshVisitedRegions(): Pair<Int, Int>
+
+    /**
+     * Mark a region as visited
+     */
+    suspend fun markRegionVisited(regionId: String): VisitedRegionDTO
+
+    /**
+     * Remove a visited-region record, keyed by the region's code
+     */
+    suspend fun unmarkRegionVisited(regionId: String)
     
     /**
      * Create a new transportation
@@ -420,4 +589,8 @@ interface AdventureLogNetwork {
         imageBytes: ByteArray,
         fileName: String
     )
+
+    suspend fun deleteImage(imageId: String)
+
+    suspend fun setPrimaryImage(imageId: String)
 }

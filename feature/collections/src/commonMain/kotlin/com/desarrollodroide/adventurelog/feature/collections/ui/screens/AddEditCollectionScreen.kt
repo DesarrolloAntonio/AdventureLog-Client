@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,20 +28,31 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components.DateSection
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.data.CollectionFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun AddEditCollectionScreen(
     onNavigateBack: () -> Unit,
     onSave: (CollectionFormData) -> Unit,
     modifier: Modifier = Modifier,
-    initialData: CollectionFormData? = null
+    initialData: CollectionFormData? = null,
+    /** The form stays while saving, so a refusal leaves what was typed where it was. */
+    isSaving: Boolean = false
 ) {
-    var formData by remember {
-        mutableStateOf(initialData ?: CollectionFormData())
-    }
+    val initialFormData = remember { initialData ?: CollectionFormData() }
+    var formData by remember { mutableStateOf(initialFormData) }
+    val leave = rememberDiscardGuard(
+        hasChanges = formData != initialFormData,
+        thing = "collection",
+        isEditing = initialData != null,
+        onLeave = onNavigateBack
+    )
 
+    // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
+    // box the length of the screen holding a place name, and the eye loses the line it is on.
+    ContentColumn(modifier) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
@@ -49,7 +61,7 @@ fun AddEditCollectionScreen(
         BasicInfoSection(
             formData = formData,
             onFormDataChange = { formData = it },
-            onNavigateBack = onNavigateBack
+            onNavigateBack = leave
         )
 
         DateSection(
@@ -65,12 +77,16 @@ fun AddEditCollectionScreen(
         ) {
             PrimaryButton(
                 onClick = { onSave(formData) },
-                text = if (initialData != null) "Update Collection" else "Create Collection",
-                enabled = formData.name.isNotBlank()
+                text = when {
+                    isSaving -> "Saving…"
+                    initialData != null -> "Update Collection"
+                    else -> "Create Collection"
+                },
+                enabled = formData.name.isNotBlank() && !isSaving
             )
 
             TextButton(
-                onClick = onNavigateBack,
+                onClick = leave,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -81,5 +97,6 @@ fun AddEditCollectionScreen(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
     }
 }

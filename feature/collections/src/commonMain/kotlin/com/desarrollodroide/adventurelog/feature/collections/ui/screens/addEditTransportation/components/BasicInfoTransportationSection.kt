@@ -164,7 +164,8 @@ fun BasicInfoTransportationSection(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Description",
@@ -200,13 +201,7 @@ fun BasicInfoTransportationSection(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Transparent
                     ),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Description,
-                            contentDescription = null,
-                            tint = Color.Gray
-                        )
-                    },
+                    // No leading icon: in a multi-line field Material centres it vertically, far from the text.
                     minLines = 3,
                     maxLines = 5
                 )
@@ -215,12 +210,7 @@ fun BasicInfoTransportationSection(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "Rating",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
+                // RatingBar carries its own "Rating" heading; a second one sat above it.
                 RatingBar(
                     rating = formData.rating,
                     onRatingChanged = { onFormDataChange(formData.copy(rating = it)) }

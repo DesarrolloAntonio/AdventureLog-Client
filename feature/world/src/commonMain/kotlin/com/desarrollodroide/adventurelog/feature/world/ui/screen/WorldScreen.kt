@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,6 +61,7 @@ import com.desarrollodroide.adventurelog.feature.world.ui.state.FilterMode
 import com.desarrollodroide.adventurelog.feature.world.ui.state.WorldRegion
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.WorldViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun WorldScreen(
@@ -64,7 +71,7 @@ fun WorldScreen(
     viewModel: WorldViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var isRefreshing by remember { mutableStateOf(false) }
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     WorldScreenContent(
         uiState = uiState,
@@ -75,11 +82,7 @@ fun WorldScreen(
         onShowFilters = { /* TODO: Implement filter dialog */ },
         onCountryClick = onCountryClick,
         onMapClick = onMapClick,
-        onRefresh = {
-            isRefreshing = true
-            viewModel.onRefresh()
-            isRefreshing = false
-        },
+        onRefresh = viewModel::onRefresh,
         modifier = modifier
     )
 }
@@ -128,17 +131,23 @@ private fun WorldScreenContent(
             }
             
             else -> {
-                LazyColumn(
+                // 250 flag cards is the longest list in the app, and the one that gains most
+                // from a second column. Search, progress, filters and cards all live inside the
+                // one content column, so they share a left and right edge at every window size.
+                ContentColumn {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 300.dp),
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
                         bottom = 16.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     // Search bar and filter button as first item
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -161,7 +170,7 @@ private fun WorldScreenContent(
                     }
 
                     // Progress section
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         CompactProgressSection(
                             totalCountries = uiState.totalCountriesCount,
                             visitedCount = uiState.visitedCountriesCount,
@@ -172,7 +181,7 @@ private fun WorldScreenContent(
                     }
 
                     // Filter chips
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -194,7 +203,7 @@ private fun WorldScreenContent(
 
                     // Countries or empty state
                     if (uiState.filteredCountries.isEmpty()) {
-                        item {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
                             EmptyState(
                                 searchQuery = uiState.searchQuery,
                                 hasFilters = hasActiveFilters || uiState.selectedRegion != WorldRegion.ALL
@@ -208,6 +217,7 @@ private fun WorldScreenContent(
                             )
                         }
                     }
+                }
                 }
             }
         }
@@ -225,7 +235,7 @@ private fun FilterChipsRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(vertical = 8.dp),
         shape = RoundedCornerShape(26.dp),
         // The same white as the search field directly above it. A grey pill under a white one
         // reads as two unrelated controls that happen to be the same shape.
@@ -309,7 +319,6 @@ private fun VisitStatusFilters(
 ) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(FilterMode.entries) { filterMode ->
@@ -346,6 +355,12 @@ private fun VisitStatusFilters(
                         FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.surfaceVariant
                     },
                     selectedLabelColor = when (filterMode) {
+                        FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.onSurfaceVariant
+                        else -> Color.White
+                    },
+                    // The tick the colour of the label: left to the default it was dark teal on the
+                    // teal "All" chip and could not be seen (QA 05, screenshot).
+                    selectedLeadingIconColor = when (filterMode) {
                         FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.onSurfaceVariant
                         else -> Color.White
                     }

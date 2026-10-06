@@ -148,4 +148,48 @@ object TestDataFactory {
         link = "",
         lodging = emptyList()
     )
+
+    /**
+     * A collection's notes, checklists and lodging were once lists of names. They are the full
+     * records now, which is what makes them showable on the collection tabs, so a test that
+     * wants three notes has to build three notes.
+     */
+    fun createNote(
+        id: String = "note-1",
+        name: String = "Test Note",
+        content: String? = null
+    ) = Note(
+        id = id,
+        user = "user-1",
+        name = name,
+        content = content,
+        createdAt = DEFAULT_DATE,
+        updatedAt = DEFAULT_DATE
+    )
+
+    fun createChecklist(
+        id: String = "checklist-1",
+        name: String = "Test Checklist",
+        items: List<ChecklistItem> = emptyList()
+    ) = Checklist(
+        id = id,
+        user = "user-1",
+        name = name,
+        createdAt = DEFAULT_DATE,
+        updatedAt = DEFAULT_DATE,
+        items = items
+    )
+
+    fun createLodging(
+        id: String = "lodging-1",
+        name: String = "Test Lodging",
+        type: String = "hotel"
+    ) = Lodging(
+        id = id,
+        user = "user-1",
+        name = name,
+        type = type,
+        createdAt = DEFAULT_DATE,
+        updatedAt = DEFAULT_DATE
+    )
 }

@@ -23,7 +23,8 @@ class CategoriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getCategories: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 else -> Either.Left(ApiResponse.HttpError)
             }
         } catch (e: IOException) {
@@ -42,7 +43,8 @@ class CategoriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during getCategoryById: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 404 -> Either.Left(ApiResponse.HttpError)
                 else -> Either.Left(ApiResponse.HttpError)
             }
@@ -70,7 +72,8 @@ class CategoriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during createCategory: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 400 -> Either.Left(ApiResponse.HttpError)
                 else -> Either.Left(ApiResponse.HttpError)
             }
@@ -100,7 +103,8 @@ class CategoriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during updateCategory: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 404 -> Either.Left(ApiResponse.HttpError)
                 400 -> Either.Left(ApiResponse.HttpError)
                 else -> Either.Left(ApiResponse.HttpError)
@@ -121,7 +125,8 @@ class CategoriesRepositoryImpl(
         } catch (e: HttpException) {
             logger.e { "HTTP Error during deleteCategory: ${e.code}" }
             when (e.code) {
-                401, 403 -> Either.Left(ApiResponse.InvalidCredentials)
+                401 -> Either.Left(ApiResponse.InvalidCredentials)
+                403 -> Either.Left(ApiResponse.Forbidden)
                 404 -> Either.Left(ApiResponse.HttpError)
                 else -> Either.Left(ApiResponse.HttpError)
             }

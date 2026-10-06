@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -56,7 +65,13 @@ fun MetaChip(
     modifier: Modifier = Modifier,
     tone: ChipTone = ChipTone.NEUTRAL,
     onClick: (() -> Unit)? = null,
-    onRemove: (() -> Unit)? = null
+    onRemove: (() -> Unit)? = null,
+    /**
+     * For a chip that is a filter: on or off. Colour alone said which one was on, to the eye and to
+     * nobody else - a screen reader heard three identical chips (QA 07, CA-03). Given, the chip is a
+     * checkbox with a tick; left null, it is a plain label or button as before.
+     */
+    selected: Boolean? = null
 ) {
     val container = when (tone) {
         ChipTone.NEUTRAL -> MaterialTheme.colorScheme.surfaceVariant
@@ -74,7 +89,15 @@ fun MetaChip(
     }
 
     Surface(
-        modifier = if (onClick != null) modifier.clickable(onClick = onClick) else modifier,
+        modifier = when {
+            onClick != null && selected != null -> modifier.toggleable(
+                value = selected,
+                role = Role.Checkbox,
+                onValueChange = { onClick() }
+            )
+            onClick != null -> modifier.clickable(onClick = onClick)
+            else -> modifier
+        },
         color = container,
         shape = RoundedCornerShape(percent = 50)
     ) {
@@ -88,6 +111,14 @@ fun MetaChip(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            if (selected == true) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = content
+                )
+            }
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
@@ -112,5 +143,47 @@ fun MetaChip(
                 }
             }
         }
+    }
+}
+
+/**
+ * Something the place doesn't have yet, offered where it would be: "+ Add photo", "+ Category".
+ *
+ * A dashed outline and no fill, so it reads as a gap to fill rather than as one more fact about the
+ * place. Same shape and type as [MetaChip], so the two sit in one row.
+ */
+@Composable
+fun AddChip(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurface
+) {
+    val outline = color.copy(alpha = 0.35f)
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(percent = 50))
+            .drawBehind {
+                val stroke = 1.dp.toPx()
+                drawRoundRect(
+                    color = outline,
+                    topLeft = Offset(stroke / 2, stroke / 2),
+                    size = Size(size.width - stroke, size.height - stroke),
+                    cornerRadius = CornerRadius((size.height - stroke) / 2),
+                    style = Stroke(
+                        width = stroke,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))
+                    )
+                )
+            }
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = "+ $text",
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Medium,
+            color = color
+        )
     }
 }

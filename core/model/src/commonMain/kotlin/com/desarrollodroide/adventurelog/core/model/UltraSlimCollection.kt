@@ -17,7 +17,9 @@ data class UltraSlimCollection(
     val daysUntilStart: Int? = null,
 
     /** The uuids of the people this collection is already shared with. */
-    val sharedWith: List<String> = emptyList()
+    val sharedWith: List<String> = emptyList(),
+    /** The uuid of whoever owns it; null when the server did not say. */
+    val ownerId: String? = null
 )
 
 /**

@@ -24,6 +24,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -76,6 +79,23 @@ fun ShareCollectionSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp)
             )
+
+            // A modal sheet is a window of its own: a snackbar raised by the screen underneath is
+            // drawn behind it, so the sheet says what happened itself.
+            state.message?.let { message ->
+                Text(
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (message.isError) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    modifier = Modifier
+                        .padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
+                        .semantics { liveRegion = LiveRegionMode.Polite }
+                )
+            }
 
             when {
                 state.isLoading -> Row(
@@ -167,8 +187,12 @@ data class ShareSheetState(
     val invitedThisVisit: Set<String> = emptySet(),
     val busyUuid: String? = null,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    /** The outcome of the last invite, revoke or remove - said here, not in a snackbar behind the sheet. */
+    val message: SheetMessage? = null
 )
+
+data class SheetMessage(val text: String, val isError: Boolean)
 
 @Composable
 private fun SectionLabel(text: String) {

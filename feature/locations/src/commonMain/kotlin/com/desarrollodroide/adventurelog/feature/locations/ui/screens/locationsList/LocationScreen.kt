@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
@@ -61,12 +64,24 @@ import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun LocationListScreen(
     onAdventureClick: (Location) -> Unit = { },
     onAddAdventureClick: () -> Unit = { },
     onEditAdventure: (Location) -> Unit = { },
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
+    /**
+     * Called once with the first place the list loads. Two-pane callers use it to fill the detail
+     * side, which otherwise sits empty until something is tapped.
+     */
+    onFirstLoaded: (Location) -> Unit = { },
+    /**
+     * Called with the id of a place that has just been deleted. A two-pane caller showing that
+     * place has to drop it: the pane kept a place that no longer existed (measured).
+     */
+    onPlaceDeleted: (String) -> Unit = { },
     modifier: Modifier = Modifier,
     viewModel: LocationsViewModel = koinViewModel()
 ) {
@@ -87,6 +102,16 @@ fun LocationListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
     val libraryCounts by viewModel.libraryCounts.collectAsStateWithLifecycle()
+
+    var announcedFirst by remember { mutableStateOf(false) }
+    LaunchedEffect(pagingItems.itemCount, announcedFirst) {
+        if (!announcedFirst && pagingItems.itemCount > 0) {
+            pagingItems.peek(0)?.let {
+                announcedFirst = true
+                onFirstLoaded(it)
+            }
+        }
+    }
 
     LaunchedEffect(actionMessage) {
         actionMessage?.let {
@@ -128,6 +153,7 @@ fun LocationListScreen(
         onSearchSubmit = viewModel::executeSearch,
         onShowFilters = viewModel::showFilters,
         onEditAdventure = onEditAdventure,
+        onAddPhoto = onAddPhoto,
         onDuplicateAdventure = viewModel::duplicateLocation,
         onShareAdventure = viewModel::shareLocation,
         onDeleteAdventure = { adventure -> 
@@ -143,17 +169,23 @@ fun LocationListScreen(
     )
 
     LaunchedEffect(pagingItems.loadState.refresh) {
-        if (pagingItems.loadState.refresh is LoadStateNotLoading) {
-            viewModel.onRefreshComplete()
+        val refresh = pagingItems.loadState.refresh
+        if (refreshHasEnded(refresh)) viewModel.onRefreshComplete()
+        if (refresh is LoadStateNotLoading) {
             // Adding or removing a place reloads the list; the header counts come from a
             // different call and would otherwise still be reporting the number from before.
             viewModel.loadLibraryCounts()
+        }
+        if (refresh is LoadStateError && pagingItems.itemCount > 0) {
+            // The places already shown stay; say why they weren't refreshed.
+            snackbarHostState.showSnackbar(placesLoadErrorMessage(refresh.error))
         }
     }
 
     LaunchedEffect(deleteState) {
         when (val state = deleteState) {
             is LocationsViewModel.DeleteState.Success -> {
+                onPlaceDeleted(state.locationId)
                 pagingItems.refresh()
                 snackbarHostState.showSnackbar("Place deleted")
                 viewModel.clearDeleteState()
@@ -235,6 +267,7 @@ private fun AdventureListContent(
     onSearchSubmit: () -> Unit,
     onShowFilters: () -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
     onDuplicateAdventure: (Location) -> Unit,
     onShareAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
@@ -327,6 +360,7 @@ private fun AdventureListContent(
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
+                        onAddPhoto = onAddPhoto,
                         onDuplicateAdventure = onDuplicateAdventure,
                         onShareAdventure = onShareAdventure,
                         onDeleteAdventure = onDeleteAdventure,
@@ -346,10 +380,25 @@ private fun AdventureListContent(
                     }
                 }
 
+                // A failed refresh over places already shown keeps them on screen.
+                pagingItems.loadState.refresh is LoadStateError && pagingItems.itemCount > 0 -> {
+                    AdventuresPagingList(
+                        pagingItems = pagingItems,
+                        collections = collections,
+                        onAdventureClick = onAdventureClick,
+                        onEditAdventure = onEditAdventure,
+                        onAddPhoto = onAddPhoto,
+                        onDuplicateAdventure = onDuplicateAdventure,
+                        onShareAdventure = onShareAdventure,
+                        onDeleteAdventure = onDeleteAdventure,
+                        onManageCollections = onManageCollections
+                    )
+                }
+
                 pagingItems.loadState.refresh is LoadStateError -> {
                     val error = pagingItems.loadState.refresh as LoadStateError
                     ErrorState(
-                        message = error.error.message ?: "Unknown error",
+                        message = placesLoadErrorMessage(error.error),
                         onRetry = { pagingItems.retry() }
                     )
                 }
@@ -376,6 +425,7 @@ private fun AdventureListContent(
                                 collections = collections,
                                 onAdventureClick = onAdventureClick,
                                 onEditAdventure = onEditAdventure,
+                                onAddPhoto = onAddPhoto,
                                 onDuplicateAdventure = onDuplicateAdventure,
                                 onShareAdventure = onShareAdventure,
                                 onDeleteAdventure = onDeleteAdventure,
@@ -395,75 +445,86 @@ private fun AdventuresPagingList(
     collections: List<UltraSlimCollection>,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit = onEditAdventure,
     onDuplicateAdventure: (Location) -> Unit,
     onShareAdventure: (Location) -> Unit,
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 16.dp,
-            bottom = 80.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(
-            count = pagingItems.itemCount,
-            key = pagingItems.itemKey { it.id }
-        ) { index ->
-            val adventure = pagingItems[index]
-            if (adventure != null) {
-                AdventureItem(
-                    location = adventure,
-                    onClick = { onAdventureClick(adventure) },
-                    onEdit = { onEditAdventure(adventure) },
-                    onDuplicate = { onDuplicateAdventure(adventure) },
-                    onShare = { onShareAdventure(adventure) },
-                    onDelete = { onDeleteAdventure(adventure) },
-                    onManageCollections = { onManageCollections(adventure) }
-                )
-            }
-        }
-
-        when (pagingItems.loadState.append) {
-            is LoadStateLoading -> {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+    // One card per row is right on a phone and absurd on a tablet, where it stretches a
+    // photograph across 1600px. A minimum width lets the window decide the column count: one on a
+    // phone, two or three on a tablet, without either having to name a device.
+        // Same single content column as everywhere else. In the two-pane layout the list side is
+    // narrower than the cap, so this changes nothing there.
+    ContentColumn {
+    LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 300.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = 80.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(
+                count = pagingItems.itemCount,
+                key = pagingItems.itemKey { it.id }
+            ) { index ->
+                val adventure = pagingItems[index]
+                if (adventure != null) {
+                    AdventureItem(
+                        location = adventure,
+                        onClick = { onAdventureClick(adventure) },
+                        onEdit = { onEditAdventure(adventure) },
+                        onAddPhoto = { onAddPhoto(adventure) },
+                        onDuplicate = { onDuplicateAdventure(adventure) },
+                        onShare = { onShareAdventure(adventure) },
+                        onDelete = { onDeleteAdventure(adventure) },
+                        onManageCollections = { onManageCollections(adventure) }
+                    )
                 }
             }
 
-            is LoadStateError -> {
-                val error = pagingItems.loadState.append as LoadStateError
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error loading more: ${error.error.message}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
+            when (pagingItems.loadState.append) {
+                is LoadStateLoading -> {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            is LoadStateNotLoading -> {
-                // Nothing to do
+                is LoadStateError -> {
+                    val error = pagingItems.loadState.append as LoadStateError
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = placesLoadErrorMessage(error.error),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+
+                is LoadStateNotLoading -> {
+                    // Nothing to do
+                }
             }
         }
     }

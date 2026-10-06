@@ -69,9 +69,11 @@ fun ImagesSection(
     onImagesChange: (List<ImageFormData>) -> Unit,
     wikipediaImageState: WikipediaImageResult,
     onSearchWikipediaImage: (String) -> Unit,
-    onResetWikipediaState: () -> Unit
+    onResetWikipediaState: () -> Unit,
+    /** Open from the start, for a form reached by "Add photo". */
+    initiallyExpanded: Boolean = false
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(initiallyExpanded) }
     var selectedTab by remember { mutableStateOf(0) }
     var urlInput by remember { mutableStateOf("") }
     var showImagePicker by remember { mutableStateOf(false) }

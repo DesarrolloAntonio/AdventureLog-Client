@@ -13,7 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class AddEditCollectionUiState(
+    /** Reading the collection being edited: there is no form to show yet. */
     val isLoading: Boolean = false,
+    /**
+     * Sending it. Kept apart from [isLoading] because the screen swapped the form for a spinner on
+     * either, and the form came back rebuilt - so a save that failed offline threw away everything
+     * typed (QA 04, CO-08).
+     */
+    val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val errorMessage: String? = null,
     val initialData: CollectionFormData? = null
@@ -65,7 +72,7 @@ class AddEditCollectionViewModel(
     
     fun saveCollection(formData: CollectionFormData) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            _uiState.value = _uiState.value.copy(isSaving = true, errorMessage = null)
             try {
                 val result = if (collectionId != null) {
                     // Update existing collection
@@ -85,27 +92,28 @@ class AddEditCollectionViewModel(
                         description = formData.description,
                         isPublic = formData.isPublic,
                         startDate = formData.startDate.ifEmpty { null },
-                        endDate = formData.endDate.ifEmpty { null }
+                        endDate = formData.endDate.ifEmpty { null },
+                        link = formData.link.ifEmpty { null }
                     )
                 }
                 
                 when (result) {
                     is Either.Left -> {
                         _uiState.value = _uiState.value.copy(
-                            isLoading = false,
+                            isSaving = false,
                             errorMessage = result.value
                         )
                     }
                     is Either.Right -> {
                         _uiState.value = _uiState.value.copy(
-                            isLoading = false,
+                            isSaving = false,
                             isSaved = true
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    isLoading = false,
+                    isSaving = false,
                     errorMessage = e.message ?: "Failed to save collection"
                 )
             }

@@ -11,4 +11,8 @@ interface ImagesRepository {
         imageBytes: ByteArray,
         fileName: String
     ): Either<ApiResponse, Unit>
+
+    suspend fun deleteImage(imageId: String): Either<ApiResponse, Unit>
+
+    suspend fun setPrimaryImage(imageId: String): Either<ApiResponse, Unit>
 }

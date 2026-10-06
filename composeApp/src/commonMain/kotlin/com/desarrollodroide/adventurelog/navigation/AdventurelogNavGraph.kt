@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.navigation
 
+import com.desarrollodroide.adventurelog.feature.locations.ui.navigation.locationsScreen
+import com.desarrollodroide.adventurelog.feature.locations.ui.navigation.LocationsNavigator
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -9,6 +11,8 @@ import com.desarrollodroide.adventurelog.feature.home.ui.navigation.homeNavGraph
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.loginNavGraph
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.CollectionsNavigator
+import com.desarrollodroide.adventurelog.feature.collections.ui.navigation.collectionsScreen
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.DetailNavigator
 import com.desarrollodroide.adventurelog.feature.detail.ui.navigation.detailNavGraph
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.HomeNavigator
@@ -62,8 +66,104 @@ fun AdventureLogNavGraph(
                 NavigationRoutes.Collections.createDetailRoute(collectionId, collectionName)
             )
         }
+
+        override fun navigateToEditLocation(location: Location, openImages: Boolean) {
+            navController.navigate(
+                NavigationRoutes.Locations.createEditRoute(location.id, json.encodeToString(location), openImages)
+            ) { launchSingleTop = true }
+        }
     }
-    
+
+    // The place form, registered here too so a place's page on this controller can open it. The
+    // form loads the place from the server by id, so this copy and the shell's show the same thing.
+    val locationsFromDetailNavigator = object : LocationsNavigator {
+        override fun navigateToLocationDetail(location: Location) {
+            navController.navigate("detail/${location.id}")
+        }
+        override fun navigateToAddLocation() {
+            navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
+        }
+        override fun navigateToEditLocation(locationId: String, locationJson: String, openImages: Boolean) {
+            navController.navigate(NavigationRoutes.Locations.createEditRoute(locationId, locationJson, openImages)) {
+                launchSingleTop = true
+            }
+        }
+        override fun navigateBack() {
+            navController.popBackStack()
+        }
+    }
+
+    // A place's detail screen lives on this top-level controller, not MainShell's own nested
+    // one, so its "belongs to" chip needs the collection screens registered here too - the
+    // Collections tab keeps its own copy of these same routes on MainShell's controller for the
+    // primary flow. Editing here is a rare side door (an unrelated adventure or transportation
+    // reached this way), so those actions fall back to going home rather than duplicating the
+    // add/edit destinations a second time.
+    val collectionsFromDetailNavigator = object : CollectionsNavigator {
+        override fun navigateToCollectionDetail(collectionId: String, collectionName: String) {
+            navController.navigate(
+                NavigationRoutes.Collections.createDetailRoute(collectionId, collectionName)
+            )
+        }
+        override fun navigateToAddCollection() {
+            navigateToHome()
+        }
+        override fun navigateToEditCollection(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToAdventure(location: Location) {
+            navController.navigate("detail/${location.id}")
+        }
+        override fun navigateToEditAdventure(adventure: Location, openImages: Boolean) {
+            navigateToHome()
+        }
+        // The add-place form lives in this graph too, so this one can open in place.
+        override fun navigateToAddPlace(collectionId: String) {
+            navController.navigate(NavigationRoutes.Locations.createAddRoute(collectionId)) { launchSingleTop = true }
+        }
+        override fun navigateToAddTransportation(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToEditTransportation(transportationId: String, transportationJson: String) {
+            navigateToHome()
+        }
+        override fun navigateToAddNote(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToEditNote(collectionId: String, noteId: String, noteJson: String) {
+            navigateToHome()
+        }
+        override fun navigateToAddChecklist(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToAddLodging(collectionId: String) {
+            navigateToHome()
+        }
+        override fun navigateToEditLodging(
+            collectionId: String,
+            lodgingId: String,
+            lodgingJson: String
+        ) {
+            navigateToHome()
+        }
+        override fun navigateToEditChecklist(
+            collectionId: String,
+            checklistId: String,
+            checklistJson: String
+        ) {
+            navigateToHome()
+        }
+        override fun navigateToHome() {
+            // The Home screen, not its graph: popping to the graph route left only the graph's own
+            // entry, which draws nothing - a blank white screen whose only exit was leaving the app
+            // (measured: Edit place in a collection opened from a place's page).
+            navController.popBackStack(NavigationRoutes.Home.screen, inclusive = false)
+        }
+        override fun navigateBack() {
+            navController.navigateUp()
+        }
+    }
+
     AnimatedNavHost(
         modifier = modifier,
         startDestination = NavigationRoutes.Login.graph,
@@ -72,5 +172,7 @@ fun AdventureLogNavGraph(
         loginNavGraph(navigator = loginNavigator)
         homeNavGraph(navigator = homeNavigator)
         detailNavGraph(navigator = detailNavigator)
+        collectionsScreen(navigator = collectionsFromDetailNavigator, standalone = true)
+        locationsScreen(navigator = locationsFromDetailNavigator, registerListRoute = false, standalone = true)
     }
 }

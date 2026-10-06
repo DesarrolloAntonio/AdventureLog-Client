@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.core.network.ktor.api
 
+import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
+import io.ktor.client.request.delete
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.api.ContentApi
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
@@ -85,6 +87,30 @@ class KtorContentApi(
                 response.status.value,
                 "Failed to upload image with status: ${response.status}"
             )
+        }
+    }
+
+    override suspend fun deleteImage(imageId: String) {
+        val sessionInfo = sessionProvider()
+        val response = httpClient.delete("${sessionInfo.baseUrl}/api/images/$imageId/") {
+            headers {
+                commonHeaders(sessionInfo.sessionToken)
+            }
+        }
+        if (!response.status.isSuccess()) {
+            throw HttpException(response.status.value, "Failed to delete image with status: ${response.status}")
+        }
+    }
+
+    override suspend fun setPrimaryImage(imageId: String) {
+        val sessionInfo = sessionProvider()
+        val response = httpClient.post("${sessionInfo.baseUrl}/api/images/$imageId/toggle_primary/") {
+            headers {
+                commonHeaders(sessionInfo.sessionToken)
+            }
+        }
+        if (!response.status.isSuccess()) {
+            throw HttpException(response.status.value, "Failed to set the primary image with status: ${response.status}")
         }
     }
 }

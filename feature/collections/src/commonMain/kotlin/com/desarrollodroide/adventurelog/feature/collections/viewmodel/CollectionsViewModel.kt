@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 import com.desarrollodroide.adventurelog.core.domain.repository.SharingRepository
 import com.desarrollodroide.adventurelog.core.model.PublicUser
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.ShareSheetState
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.SheetMessage
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class CollectionsViewModel(
@@ -96,9 +97,13 @@ class CollectionsViewModel(
     private val _statusFilter = MutableStateFlow<TripStatus?>(null)
     val statusFilter: StateFlow<TripStatus?> = _statusFilter.asStateFlow()
 
-    /** How many collections the account holds, for the header. */
+    /**
+     * How many collections the account holds, for the header. Archived ones are excluded: the
+     * list this number sits above comes from /api/collections/, which leaves them out, while the
+     * flow behind this count comes from /api/collections/all/, which does not.
+     */
     val collectionCount: StateFlow<Int> = observeCollectionsUseCase()
-        .map { it.size }
+        .map { collections -> collections.count { !it.isArchived } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     /**
@@ -126,7 +131,8 @@ class CollectionsViewModel(
     sealed class DeleteState {
         data object Idle : DeleteState()
         data object Loading : DeleteState()
-        data object Success : DeleteState()
+        /** Carries the id, for the same reason as in the places list. */
+        data class Success(val collectionId: String) : DeleteState()
         data class Error(val message: String) : DeleteState()
     }
 
@@ -233,6 +239,15 @@ class CollectionsViewModel(
         }
     }
 
+    /**
+     * Straight to pending invitations, asked for again even when that tab is already showing: the
+     * way in from Home is a banner saying one is waiting, and a list read earlier may predate it.
+     */
+    fun showInvites() {
+        _tab.value = CollectionsTab.INVITES
+        loadTab(CollectionsTab.INVITES)
+    }
+
     fun onTabSelected(tab: CollectionsTab) {
         if (_tab.value == tab) return
         _tab.value = tab
@@ -277,8 +292,6 @@ class CollectionsViewModel(
             when (val r = respondToCollectionInviteUseCase(invite.collectionId, accept)) {
                 is Either.Left -> r.value
                 is Either.Right -> {
-                    loadPendingInvites()
-                    if (_tab.value == CollectionsTab.INVITES) loadTab(CollectionsTab.INVITES)
                     refresh()
                     if (accept) {
                         "Joined \"${invite.collectionName}\""
@@ -348,7 +361,7 @@ class CollectionsViewModel(
                         )
                     )
                 }
-                _actionMessage.value = "Invitation sent to @${person.username}"
+                say("Invitation sent to @${person.username}")
             }
         }
     }
@@ -363,7 +376,7 @@ class CollectionsViewModel(
                         )
                     )
                 }
-                _actionMessage.value = "Invitation to @${person.username} withdrawn"
+                say("Invitation to @${person.username} withdrawn")
             }
         }
     }
@@ -374,7 +387,7 @@ class CollectionsViewModel(
                 _sharing.update {
                     it?.copy(state = it.state.copy(sharedWith = it.state.sharedWith - person.uuid))
                 }
-                _actionMessage.value = "@${person.username} no longer has access"
+                say("@${person.username} no longer has access")
                 refresh()
             }
         }
@@ -386,11 +399,27 @@ class CollectionsViewModel(
     ) {
         val target = _sharing.value ?: return
         if (target.state.busyUuid != null) return
-        _sharing.update { it?.copy(state = it.state.copy(busyUuid = person.uuid)) }
+        _sharing.update { it?.copy(state = it.state.copy(busyUuid = person.uuid, message = null)) }
         viewModelScope.launch {
             val result = block(target)
             _sharing.update { it?.copy(state = it.state.copy(busyUuid = null)) }
-            if (result is Either.Left) _actionMessage.value = result.value
+            if (result is Either.Left) say(result.value, isError = true)
+        }
+    }
+
+    /**
+     * Where a sharing message goes. The sheet is a window of its own, so the screen's snackbar is
+     * drawn behind it and nobody ever saw one - the server's own "Invite already sent to this
+     * user", and every failure, included. While the sheet is up it says so itself; once it is
+     * closed the snackbar is visible again.
+     */
+    private fun say(message: String, isError: Boolean = false) {
+        if (_sharing.value != null) {
+            _sharing.update {
+                it?.copy(state = it.state.copy(message = SheetMessage(message, isError)))
+            }
+        } else {
+            _actionMessage.value = message
         }
     }
 
@@ -442,6 +471,11 @@ class CollectionsViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             getAllCollectionsUseCase(forceRefresh = true)
+            // An invitation that arrived after the screen was built used to be unreachable: the
+            // invites were read once in init, and the banner that opens the Invites tab is drawn
+            // from that same list. A refresh asks again.
+            loadPendingInvites()
+            if (_tab.value != CollectionsTab.MINE) loadTab(_tab.value)
             _isRefreshing.value = false
         }
     }
@@ -454,7 +488,7 @@ class CollectionsViewModel(
                     _deleteState.value = DeleteState.Error(result.value)
                 }
                 is Either.Right -> {
-                    _deleteState.value = DeleteState.Success
+                    _deleteState.value = DeleteState.Success(collectionId)
                 }
             }
         }

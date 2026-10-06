@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.world.viewmodel
 
+import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCountriesUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
@@ -21,15 +22,33 @@ class WorldViewModel(
     private val getCountriesUseCase: GetCountriesUseCase,
     private val refreshCountriesUseCase: RefreshCountriesUseCase,
     private val getVisitedRegionsUseCase: GetVisitedRegionsUseCase,
-    private val getVisitedCitiesUseCase: GetVisitedCitiesUseCase
+    private val getVisitedCitiesUseCase: GetVisitedCitiesUseCase,
+    private val observeCountriesUseCase: ObserveCountriesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WorldUiState())
     val uiState: StateFlow<WorldUiState> = _uiState.asStateFlow()
-    
+
+    /**
+     * While a pull is in flight. The screen used to set its own flag to true and back to false in
+     * the same call, before the request even started, so the indicator was never drawn (QA 05, WO-01).
+     */
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     init {
         loadCountries()
         loadVisitedData()
+        // The list follows the cache, so a region ticked on a country's page shows here on the way
+        // back instead of after a pull (QA 05, WO-02).
+        viewModelScope.launch {
+            observeCountriesUseCase().collect { countries ->
+                if (countries.isEmpty()) return@collect
+                _uiState.update { it.copy(countries = countries, totalCountriesCount = countries.size) }
+                calculateStatistics(countries)
+                filterCountries()
+            }
+        }
     }
     
     fun onSearchQueryChanged(query: String) {
@@ -48,7 +67,9 @@ class WorldViewModel(
     }
     
     fun onRefresh() {
+        if (_isRefreshing.value) return
         viewModelScope.launch {
+            _isRefreshing.value = true
             _uiState.update { it.copy(isLoading = true) }
             
             when (val result = refreshCountriesUseCase()) {
@@ -72,6 +93,7 @@ class WorldViewModel(
                     }
                 }
             }
+            _isRefreshing.value = false
         }
     }
     

@@ -2,6 +2,8 @@ package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountDataCache
+import com.desarrollodroide.adventurelog.core.domain.repository.LocalAccountCopies
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
 import com.desarrollodroide.adventurelog.core.model.Account
@@ -10,6 +12,7 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.core.testing.AdventureLogNetworkStub
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
 import com.desarrollodroide.adventurelog.core.network.model.response.DashboardDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.TrailDTO
@@ -31,6 +34,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.VisitedRegi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
@@ -44,7 +48,7 @@ class LogoutUseCaseTest {
             clearUserSessionCalled = true
         }
 
-        override suspend fun saveRememberMeCredentials(url: String, username: String, password: String) {
+        override suspend fun saveRememberMeCredentials(url: String, username: String) {
             throw NotImplementedError()
         }
 
@@ -92,419 +96,81 @@ class LogoutUseCaseTest {
         }
     }
 
-    private open class FakeNetworkDataSource : AdventureLogNetwork {
+    private open class FakeNetworkDataSource : AdventureLogNetworkStub() {
         var clearSessionCalled = false
+        var endServerSessionCalledWithSessionStillSet = false
 
         override fun clearSession() {
             clearSessionCalled = true
         }
 
-        override fun initializeFromSession(serverUrl: String, sessionToken: String?) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getAdventures(page: Int, pageSize: Int): List<LocationDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getAdventureDetail(objectId: String): LocationDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getCollections(page: Int, pageSize: Int): List<com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO> {
-            throw NotImplementedError()
-        }
-        
-        override suspend fun getAllCollections(): List<com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getCollectionDetail(collectionId: String): CollectionDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun sendLogin(url: String, username: String, password: String): UserDetailsDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getUserDetails(): UserDetailsDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun createAdventure(
-            name: String,
-            description: String,
-            category: Category,
-            rating: Double,
-            link: String,
-            location: String,
-            latitude: String?,
-            longitude: String?,
-            isPublic: Boolean,
-            visits: List<VisitFormData>,
-            price: Double?,
-            priceCurrency: String?,
-            activityTypes: List<String>
-        ): LocationDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun createCollection(
-            name: String,
-            description: String,
-            isPublic: Boolean,
-            startDate: String?,
-            endDate: String?
-        ): CollectionDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getCategories(): List<CategoryDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun generateDescription(name: String): String {
-            return "Generated description for $name"
-        }
-
-        override suspend fun searchLocations(query: String): List<GeocodeSearchResultDTO> {
-            return emptyList()
-        }
-
-        override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResultDTO {
-            return ReverseGeocodeResultDTO(
-                city = "Test City",
-                region = "Test Region",
-                country = "Test Country",
-                cityId = "city-1",
-                regionId = "region-1",
-                countryId = "country-1",
-                displayName = "Test City, Test Region, Test Country",
-                locationName = "Test Location"
-            )
-        }
-
-        override suspend fun getUserStats(username: String): UserStatsDTO {
-            return UserStatsDTO()
-        }
-
-        override suspend fun getDashboard(): DashboardDTO {
-            return DashboardDTO()
-        }
-
-        override suspend fun getCalendarEvents(start: String?, end: String?): CalendarEventsDTO =
-            throw NotImplementedError()
-
-        override suspend fun globalSearch(query: String, limit: Int): SearchResultsDTO =
-            throw NotImplementedError()
-
-        override suspend fun getPublicUsers(): List<UserDetailsDTO> =
-            throw NotImplementedError()
-
-        override suspend fun shareCollection(collectionId: String, userUuid: String) =
-            throw NotImplementedError()
-
-        override suspend fun unshareCollection(collectionId: String, userUuid: String) =
-            throw NotImplementedError()
-
-        override suspend fun revokeInvite(collectionId: String, userUuid: String) =
-            throw NotImplementedError()
-
-
-        override suspend fun updateUserProfile(
-            username: String?,
-            firstName: String?,
-            lastName: String?,
-            publicProfile: Boolean?,
-            measurementSystem: String?,
-            defaultCurrency: String?,
-            mapStyle: String?
-        ): UserDetailsDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun changePassword(currentPassword: String, newPassword: String): Boolean {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getMediaUsage(): MediaUsageDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getEmailAddresses(): List<EmailAddressDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun addEmailAddress(email: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun requestEmailVerification(email: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun setPrimaryEmailAddress(email: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun removeEmailAddress(email: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun createVisit(locationId: String, visit: VisitFormData): VisitDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun updateVisit(
-            visitId: String,
-            locationId: String,
-            visit: VisitFormData
-        ): VisitDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun deleteVisit(visitId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun createTrail(locationId: String, trail: TrailFormData): TrailDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun updateTrail(
-            trailId: String,
-            locationId: String,
-            trail: TrailFormData
-        ): TrailDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun deleteTrail(trailId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun duplicateLocation(locationId: String): LocationDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getShareImage(locationId: String, aspect: String): ByteArray {
-            throw NotImplementedError()
-        }
-
-        override suspend fun duplicateCollection(collectionId: String): CollectionDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun setCollectionArchived(
-            collectionId: String,
-            archived: Boolean
-        ): CollectionDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getCollectionShareImage(
-            collectionId: String,
-            aspect: String
-        ): ByteArray {
-            throw NotImplementedError()
-        }
-
-        override suspend fun exportCollectionPdf(collectionId: String): ByteArray {
-            throw NotImplementedError()
-        }
-
-        override suspend fun exportCollectionZip(collectionId: String): ByteArray {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getArchivedCollections(): List<com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getSharedCollections(): List<com.desarrollodroide.adventurelog.core.network.model.response.UltraSlimCollectionDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getCollectionInvites(): List<CollectionInviteDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun acceptCollectionInvite(collectionId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun declineCollectionInvite(collectionId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getAdventuresFiltered(
-            page: Int,
-            pageSize: Int,
-            categoryIds: List<String>?,
-            sortBy: String?,
-            sortOrder: String?,
-            isVisited: Boolean?,
-            searchQuery: String?,
-            includeCollections: Boolean
-        ): List<LocationDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getCategoryById(categoryId: String): CategoryDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun createCategory(
-            name: String,
-            displayName: String,
-            icon: String?
-        ): CategoryDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun updateCategory(
-            categoryId: String,
-            name: String,
-            displayName: String,
-            icon: String?
-        ): CategoryDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun deleteCategory(categoryId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun deleteAdventure(adventureId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun updateAdventure(
-            adventureId: String,
-            name: String,
-            description: String,
-            category: Category?,
-            rating: Double,
-            link: String,
-            location: String,
-            latitude: String?,
-            longitude: String?,
-            isPublic: Boolean,
-            tags: List<String>,
-            collections: List<String>,
-            visits: List<VisitFormData>,
-            price: Double?,
-            priceCurrency: String?
-        ): LocationDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun deleteCollection(collectionId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun updateCollection(
-            collectionId: String,
-            name: String,
-            description: String,
-            isPublic: Boolean,
-            startDate: String?,
-            endDate: String?,
-            link: String?
-        ): CollectionDTO {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getCountries(): List<CountryDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getRegions(countryCode: String): List<RegionDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getVisitedRegions(): List<VisitedRegionDTO> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getVisitedCities(): List<VisitedCityDTO> {
-            throw NotImplementedError()
-        }
-        
-        override suspend fun createTransportation(
-            name: String,
-            type: String,
-            description: String,
-            rating: Double,
-            link: String,
-            fromLocation: String,
-            toLocation: String,
-            departureDate: String,
-            arrivalDate: String,
-            departureTimezone: String,
-            arrivalTimezone: String,
-            flightNumber: String,
-            distance: String,
-            originLatitude: String?,
-            originLongitude: String?,
-            destinationLatitude: String?,
-            destinationLongitude: String?,
-            isPublic: Boolean,
-            images: List<String>,
-            attachments: List<String>,
-            collectionId: String?
-        ): com.desarrollodroide.adventurelog.core.model.Transportation {
-            throw NotImplementedError()
-        }
-        
-        override suspend fun updateTransportation(
-            transportationId: String,
-            name: String,
-            type: String,
-            description: String,
-            rating: Double,
-            link: String,
-            fromLocation: String,
-            toLocation: String,
-            departureDate: String,
-            arrivalDate: String,
-            departureTimezone: String,
-            arrivalTimezone: String,
-            flightNumber: String,
-            distance: String,
-            originLatitude: String?,
-            originLongitude: String?,
-            destinationLatitude: String?,
-            destinationLongitude: String?,
-            isPublic: Boolean,
-            images: List<String>,
-            attachments: List<String>,
-            collectionId: String?
-        ): com.desarrollodroide.adventurelog.core.model.Transportation {
-            throw NotImplementedError()
-        }
-        
-        override suspend fun getTransportation(transportationId: String): com.desarrollodroide.adventurelog.core.model.Transportation {
-            throw NotImplementedError()
-        }
-        
-        override suspend fun deleteTransportation(transportationId: String) {
-            throw NotImplementedError()
-        }
-
-        override suspend fun uploadImage(
-            contentType: String,
-            objectId: String,
-            imageBytes: ByteArray,
-            fileName: String
-        ) {
-            throw NotImplementedError()
+        override fun endServerSession() {
+            endServerSessionCalledWithSessionStillSet = !clearSessionCalled
         }
     }
 
     private val fakeUserRepository = FakeUserRepository()
     private val fakeNetworkDataSource = FakeNetworkDataSource()
     private val useCase = LogoutUseCase(fakeUserRepository, fakeNetworkDataSource)
+
+    @Test
+    fun `signing out ends the session on the server before forgetting it`() = runTest {
+        useCase()
+
+        // Before clearSession: after it, the network no longer holds the token to send.
+        assertTrue(fakeNetworkDataSource.endServerSessionCalledWithSessionStillSet)
+    }
+
+    @Test
+    fun `signing out deletes the account files on the device`() = runTest {
+        var deleted = false
+        val useCase = LogoutUseCase(fakeUserRepository, fakeNetworkDataSource, LocalAccountCopies { deleted = true })
+
+        useCase()
+
+        assertTrue(deleted)
+    }
+
+    @Test
+    fun `signing out empties every account cache in memory`() = runTest {
+        val emptied = mutableListOf<String>()
+        val caches = listOf("countries", "collections").map { name ->
+            object : AccountDataCache {
+                override fun clearAccountData() { emptied += name }
+            }
+        }
+
+        LogoutUseCase(fakeUserRepository, fakeNetworkDataSource, LocalAccountCopies.None, caches)()
+
+        assertEquals(listOf("countries", "collections"), emptied)
+    }
+
+    @Test
+    fun `a cache that fails to empty does not stop the others or the sign-out`() = runTest {
+        var secondEmptied = false
+        val caches = listOf(
+            object : AccountDataCache { override fun clearAccountData() = throw IllegalStateException("boom") },
+            object : AccountDataCache { override fun clearAccountData() { secondEmptied = true } }
+        )
+
+        runCatching { LogoutUseCase(fakeUserRepository, fakeNetworkDataSource, LocalAccountCopies.None, caches)() }
+
+        assertTrue(secondEmptied)
+        assertTrue(fakeUserRepository.clearUserSessionCalled)
+    }
+
+    @Test
+    fun `a server that cannot be asked and files that cannot be deleted still sign out`() = runTest {
+        val unreachable = object : FakeNetworkDataSource() {
+            override fun endServerSession() = throw RuntimeException("no route to host")
+        }
+        val useCase = LogoutUseCase(fakeUserRepository, unreachable, LocalAccountCopies { throw RuntimeException("disk") })
+
+        runCatching { useCase() }
+
+        assertTrue(fakeUserRepository.clearUserSessionCalled)
+        assertTrue(unreachable.clearSessionCalled)
+    }
 
     @Test
     fun `invoke clears user session and network session`() = runTest {

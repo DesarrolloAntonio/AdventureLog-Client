@@ -13,7 +13,8 @@ class CreateCollectionUseCase(
         description: String,
         isPublic: Boolean,
         startDate: String? = null,
-        endDate: String? = null
+        endDate: String? = null,
+        link: String? = null
     ): Either<String, Collection> {
         // Validate required fields
         if (name.isBlank()) {
@@ -26,12 +27,14 @@ class CreateCollectionUseCase(
             description = description,
             isPublic = isPublic,
             startDate = startDate,
-            endDate = endDate
+            endDate = endDate,
+            link = link
         )) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Failed to create collection. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

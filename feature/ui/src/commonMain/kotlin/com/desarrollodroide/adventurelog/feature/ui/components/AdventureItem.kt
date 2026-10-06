@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +21,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,6 +36,8 @@ import com.desarrollodroide.adventurelog.core.model.preview.PreviewData
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import com.desarrollodroide.adventurelog.feature.ui.preview.PreviewImageDependencies
 import com.desarrollodroide.adventurelog.core.model.userTags
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun AdventureItem(
@@ -42,29 +47,43 @@ fun AdventureItem(
     onClick: () -> Unit = {},
     onOpenDetails: () -> Unit = { onClick() },
     onEdit: () -> Unit = {},
+    /** The edit form opened on its images, for the card's "+ Add photo". */
+    onAddPhoto: () -> Unit = onEdit,
     onDuplicate: () -> Unit = {},
     onShare: () -> Unit = {},
     onManageCollections: () -> Unit = {},
     onDelete: () -> Unit = {},
-    showMenu: Boolean = true
+    showMenu: Boolean = true,
+    /** False for someone else's place in a collection shared with you: see [LocationActionsSheet]. */
+    isOwner: Boolean = true,
+    onRemoveFromCollection: (() -> Unit)? = null
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     val imageLoader = LocalImageLoader.current
+    val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
+    val placeholder = placeholderColors(hasCategory = !location.category?.icon.isNullOrBlank())
 
     Card(
-        modifier = modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp),
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
         onClick = onClick,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp
-        )
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = if (hasImage) null else BorderStroke(1.dp, placeholder.edge)
     ) {
         Box {
-            val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
-            
+            val density = LocalDensity.current
+            // Measured, not assumed: the band grows with a second line of name, a rating, chips.
+            var textBandHeight by remember { mutableStateOf(0.dp) }
+
+            // A ratio, not a height. A fixed 250dp against a column that is 380dp wide on a
+            // phone and 340dp on a tablet gave a tall card in one place and a square in the
+            // other; a photograph asked to be square is a photograph with its ends cut off.
+            val photo = Modifier.fillMaxWidth().aspectRatio(3f / 2f)
             if (hasImage) {
                 Image(
                     painter = rememberAsyncImagePainter(
@@ -72,103 +91,128 @@ fun AdventureItem(
                         imageLoader = imageLoader
                     ),
                     contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
+                    modifier = photo,
                     contentScale = ContentScale.Crop
                 )
             } else {
                 LocationPlaceholder(
-                    name = location.name,
-                    latitude = location.latitude,
-                    longitude = location.longitude,
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
+                    icon = location.category?.icon,
+                    // The writing below is laid over the picture; the emoji keeps clear of it.
+                    bottomInset = textBandHeight,
+                    modifier = photo
                 )
             }
 
+            // Over the photograph, on a scrim.
+            //
+            // This sat under the photograph for a while, because white text on a bright sky
+            // disappears. The scrim is the answer to that rather than a second block of card:
+            // it darkens only the band the text occupies, and it reaches 0.92 at the bottom
+            // edge, which holds even over snow. Whatever the photograph is doing, the strip
+            // under the writing is dark.
+            //
+            // Without a photograph the card keeps the same size and composition but changes
+            // material: ink on the placeholder's own surface, one tone deeper under the writing,
+            // with no dark scrim pretending there is a picture to protect it from.
+            val ink = if (hasImage) Color.White else MaterialTheme.colorScheme.onSurface
+            val softInk = if (hasImage) Color.White.copy(alpha = 0.75f) else MaterialTheme.colorScheme.onSurfaceVariant
+            val band = if (hasImage) {
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.Transparent,
+                        Color.Black.copy(alpha = 0.55f),
+                        Color.Black.copy(alpha = 0.92f)
+                    )
+                )
+            } else {
+                Brush.verticalGradient(
+                    0f to placeholder.band.copy(alpha = 0f),
+                    0.34f to placeholder.band,
+                    1f to placeholder.band
+                )
+            }
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.6f),
-                                Color.Black.copy(alpha = 0.9f)
-                            ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
-                    )
-                    .padding(16.dp)
+                    .onSizeChanged { textBandHeight = with(density) { it.height.toDp() } }
+                    .background(brush = band)
+                    .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
                 Text(
                     text = location.name,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = ink,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Where the place actually is, and how it rated - both shown on the web card and
-                // the two things that tell near-identical entries apart at a glance.
                 location.location?.takeIf { it.isNotBlank() }?.let { label ->
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Place,
                             contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.75f),
-                            modifier = Modifier.size(14.dp)
+                            tint = softInk,
+                            modifier = Modifier.size(13.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
                         Text(
                             text = label,
-                            color = Color.White.copy(alpha = 0.85f),
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = softInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
-                location.price?.let { price ->
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "💰 ${Currencies.formatAmount(price)} " +
-                            (location.priceCurrency ?: Currencies.DEFAULT),
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 13.sp
-                    )
-                }
-
-                location.rating?.takeIf { it > 0 }?.let { rating ->
-                    Spacer(modifier = Modifier.height(4.dp))
+                val rating = location.rating?.toInt() ?: 0
+                val category = location.category
+                if (rating > 0 || category != null) {
+                    Spacer(modifier = Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        repeat(5) { index ->
-                            Icon(
-                                imageVector = if (index < rating.toInt()) {
-                                    Icons.Default.Star
-                                } else {
-                                    Icons.Default.StarBorder
-                                },
-                                contentDescription = null,
-                                tint = Color(0xFFFFC107),
-                                modifier = Modifier.size(14.dp)
+                        if (rating > 0) {
+                            Text(
+                                text = "\u2605".repeat(rating.coerceAtMost(5)),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = ink
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                        }
+                        if (category != null) {
+                            Text(
+                                text = category.displayName.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = softInk,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
                 }
 
+                location.price?.let { price ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "\uD83D\uDCB0 ${Currencies.formatAmount(price)} " +
+                            (location.priceCurrency ?: Currencies.DEFAULT),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = softInk
+                    )
+                }
+
                 val tags = location.tags.userTags()
-                if (location.category != null || !location.isPublic ||
-                    location.collections.isNotEmpty() || tags.isNotEmpty()
-                ) {
+                val collectionNames = location.collections.mapNotNull { id ->
+                    collections.find { it.id == id }?.name
+                }
+                // What's missing is offered where it would be, and both lead to the editor, which
+                // is where a photo is uploaded and a category chosen. Only where the card has its
+                // actions: the dashboard's grid shows the same card without them.
+                val offerPhoto = !hasImage && showMenu
+                val offerCategory = offerPhoto && category == null
+                if (!location.isPublic || collectionNames.isNotEmpty() || tags.isNotEmpty() || offerPhoto) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     @OptIn(ExperimentalLayoutApi::class)
@@ -177,46 +221,31 @@ fun AdventureItem(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Category tag
-                        location.category?.let { category ->
-                            MetaChip(
-                                text = "${category.icon} ${category.displayName}",
-                                tone = ChipTone.ON_IMAGE
-                            )
+                        val onCard = if (hasImage) ChipTone.ON_IMAGE else ChipTone.NEUTRAL
+                        if (offerCategory) {
+                            AddChip(text = "Category", onClick = onEdit, color = ink)
                         }
-
-                        // Private tag
                         if (!location.isPublic) {
-                            // The one fact on the card worth a colour: everything else is a label.
-                            MetaChip(text = "🔒 Private", tone = ChipTone.WARNING)
+                            MetaChip(text = "\uD83D\uDD12 Private", tone = ChipTone.WARNING)
                         }
-
-                        // Collection tags
-                        val collectionNames = location.collections.mapNotNull { id ->
-                            collections.find { it.id == id }?.name
-                        }
-
-                        // Show first 2 collections and a +N indicator if there are more
                         val visibleCollections = collectionNames.take(2)
-                        val remainingCount = collectionNames.size - visibleCollections.size
-
-                        visibleCollections.forEach { collectionName ->
-                            MetaChip(text = "📁 $collectionName", tone = ChipTone.ON_IMAGE)
+                        visibleCollections.forEach { name ->
+                            MetaChip(text = "\uD83D\uDCC1 $name", tone = onCard)
                         }
-
-                        if (remainingCount > 0) {
-                            MetaChip(text = "+$remainingCount", tone = ChipTone.ON_IMAGE)
+                        val remainingCollections = collectionNames.size - visibleCollections.size
+                        if (remainingCollections > 0) {
+                            MetaChip(text = "+$remainingCollections", tone = onCard)
                         }
-
-                        // The user's own tags, capped so a heavily tagged place does not push the
-                        // title off the card.
                         val visibleTags = tags.take(3)
                         visibleTags.forEach { tag ->
-                            MetaChip(text = tag, tone = ChipTone.ON_IMAGE)
+                            MetaChip(text = tag, tone = onCard)
                         }
                         val hiddenTags = tags.size - visibleTags.size
                         if (hiddenTags > 0) {
-                            MetaChip(text = "+$hiddenTags", tone = ChipTone.ON_IMAGE)
+                            MetaChip(text = "+$hiddenTags", tone = onCard)
+                        }
+                        if (offerPhoto) {
+                            AddChip(text = "Add photo", onClick = onAddPhoto, color = ink)
                         }
                     }
                 }
@@ -261,7 +290,9 @@ fun AdventureItem(
             onDuplicate = { showDropdownMenu = false; onDuplicate() },
             onShare = { showDropdownMenu = false; onShare() },
             onManageCollections = { showDropdownMenu = false; onManageCollections() },
-            onDelete = { showDropdownMenu = false; showDeleteDialog = true }
+            onDelete = { showDropdownMenu = false; showDeleteDialog = true },
+            isOwner = isOwner,
+            onRemoveFromCollection = onRemoveFromCollection?.let { remove -> { showDropdownMenu = false; remove() } }
         )
     }
 

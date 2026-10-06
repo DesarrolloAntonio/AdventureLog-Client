@@ -1,7 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.InvitesBanner
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
+import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.target
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,8 +16,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationCity
@@ -28,6 +35,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +56,25 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.datetime.LocalDate
 import androidx.compose.foundation.clickable
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxDashboardWidth
+import com.desarrollodroide.adventurelog.feature.ui.components.DataRailWidth
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.rememberAsyncImagePainter
+import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import androidx.compose.foundation.layout.IntrinsicSize
+import com.desarrollodroide.adventurelog.feature.ui.components.LocationPlaceholder
+import com.desarrollodroide.adventurelog.feature.ui.components.placeholderColors
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.horizontalScroll
 
 @Composable
 fun DashboardScreen(
@@ -56,29 +83,60 @@ fun DashboardScreen(
     onAdventureClick: (Location) -> Unit = { },
     onTripClick: (UltraSlimCollection) -> Unit = { },
     onSeeCalendar: () -> Unit = { },
+    onSeeAllPlaces: () -> Unit = { },
     onAddPlace: () -> Unit = { },
+    /** The trip card's own "Add a place": the new place goes into that trip (QA HM-09). */
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit = { onAddPlace() },
     onAddCollection: () -> Unit = { },
+    onRetry: () -> Unit = { },
+    onSeeInvitations: () -> Unit = { },
+    onOpenEvent: (EventTarget) -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (homeUiState) {
             is HomeUiState.Loading -> LoadingDialog(isLoading = true, showMessage = false)
 
-            is HomeUiState.Error -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            // The commonest reason to land here is no signal, which is over the moment it is
+            // over - so offer the retry rather than making someone restart the app to get it.
+            // The calendar has said "Try again" all along; this screen only stated the problem.
+            is HomeUiState.Error -> Column(
+                modifier = Modifier.fillMaxSize().padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(homeUiState.message, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = homeUiState.message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(8.dp))
+                TextButton(onClick = onRetry) { Text("Try again") }
             }
 
-            is HomeUiState.Success -> DashboardList(
-                dashboard = homeUiState.dashboard,
-                today = homeUiState.today,
-                onAdventureClick = onAdventureClick,
-                onTripClick = onTripClick,
-                onSeeCalendar = onSeeCalendar,
-                onAddPlace = onAddPlace,
-                onAddCollection = onAddCollection
-            )
+            is HomeUiState.Success -> Column(Modifier.fillMaxSize()) {
+                // The dashboard has carried the count all along and nothing showed it, so an
+                // account with an invitation waiting - often a brand-new one, on the first-run
+                // screen - had no idea (QA 09, MC-05).
+                if (homeUiState.dashboard.inviteCount > 0) {
+                    InvitesBanner(
+                        count = homeUiState.dashboard.inviteCount,
+                        onClick = onSeeInvitations
+                    )
+                }
+                DashboardList(
+                    dashboard = homeUiState.dashboard,
+                    today = homeUiState.today,
+                    onAdventureClick = onAdventureClick,
+                    onTripClick = onTripClick,
+                    onSeeCalendar = onSeeCalendar,
+                    onSeeAllPlaces = onSeeAllPlaces,
+                    onAddPlace = onAddPlace,
+                    onAddPlaceToTrip = onAddPlaceToTrip,
+                    onAddCollection = onAddCollection,
+                    onOpenEvent = onOpenEvent,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
@@ -95,13 +153,24 @@ private fun DashboardList(
     onAdventureClick: (Location) -> Unit,
     onTripClick: (UltraSlimCollection) -> Unit,
     onSeeCalendar: () -> Unit,
+    onSeeAllPlaces: () -> Unit,
     onAddPlace: () -> Unit,
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit,
     onAddCollection: () -> Unit,
+    onOpenEvent: (EventTarget) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // An in-progress trip outranks a future one: if the user is travelling right now, that is the
     // single most useful thing the screen can lead with.
     val featuredTrip = dashboard.activeTrip ?: dashboard.upcomingTrips.firstOrNull()
+
+    // The featured card above already covers the soonest trip (or the one in progress); the rest
+    // of upcomingTrips would otherwise never be reachable from Home.
+    val otherTrips = if (dashboard.activeTrip != null) {
+        dashboard.upcomingTrips
+    } else {
+        dashboard.upcomingTrips.drop(1)
+    }
 
     // Hiding empty sections is right until every section is empty, and then the first screen of a
     // new account is a card of zeros above a blank half-page. A counter reading 0 / 250 is not an
@@ -121,41 +190,95 @@ private fun DashboardList(
         return
     }
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        if (featuredTrip != null) {
-            item(key = "trip") {
-                TripCard(trip = featuredTrip, onClick = { onTripClick(featuredTrip) })
-            }
-        }
+    // Wide enough and the leftover space becomes a second column instead of margin: the main
+    // column keeps the trip and the photographs, and a 348dp rail carries the numbers. That is
+    // the whole point of the layout - a tablet was showing one phone-shaped column with a third
+    // of the screen empty beside it.
+    //
+    // The threshold is the redesign's own width (1fr + 348 + gap). Below it there is no room for
+    // two columns that both read well, so everything stacks, which is what a phone had anyway.
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val twoColumns = maxWidth >= 1000.dp
 
-        item(key = "stats") {
-            StatsCard(dashboard)
-        }
-
-        if (dashboard.upcomingEvents.isNotEmpty()) {
-            item(key = "events-header") {
-                // Home shows the next few; the calendar has the rest, and this is where anyone
-                // looking at what is coming would think to ask for more of it.
-                SectionHeader(
-                    title = "Coming up",
-                    trailing = "See all",
-                    onTrailingClick = onSeeCalendar
+        ContentColumn(maxWidth = if (twoColumns) MaxDashboardWidth else MaxContentWidth) {
+            if (twoColumns) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    MainColumn(
+                        featuredTrip = featuredTrip,
+                        dashboard = dashboard,
+                        onTripClick = onTripClick,
+                        onAdventureClick = onAdventureClick,
+                        onSeeAllPlaces = onSeeAllPlaces,
+                        onAddPlaceToTrip = onAddPlaceToTrip,
+                        modifier = Modifier.weight(1f)
+                    )
+                    DataRail(
+                        dashboard = dashboard,
+                        featuredTripId = featuredTrip?.id,
+                        otherTrips = otherTrips,
+                        today = today,
+                        onTripClick = onTripClick,
+                        onSeeCalendar = onSeeCalendar,
+                        onOpenEvent = onOpenEvent,
+                        modifier = Modifier.width(DataRailWidth)
+                    )
+                }
+            } else {
+                StackedDashboard(
+                    onAddPlaceToTrip = onAddPlaceToTrip,
+                    featuredTrip = featuredTrip,
+                    dashboard = dashboard,
+                    otherTrips = otherTrips,
+                    today = today,
+                    onTripClick = onTripClick,
+                    onAdventureClick = onAdventureClick,
+                    onSeeCalendar = onSeeCalendar,
+                    onSeeAllPlaces = onSeeAllPlaces,
+                    onOpenEvent = onOpenEvent
                 )
             }
-            items(dashboard.upcomingEvents, key = { "event-${it.id}" }) { event ->
-                EventRow(event, today)
+        }
+    }
+}
+
+/** The left-hand column on a wide window: the trip you are about to take, then the photographs. */
+@Composable
+private fun MainColumn(
+    featuredTrip: UltraSlimCollection?,
+    dashboard: Dashboard,
+    onTripClick: (UltraSlimCollection) -> Unit,
+    onAdventureClick: (Location) -> Unit,
+    onSeeAllPlaces: () -> Unit,
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 240.dp),
+        modifier = modifier.fillMaxHeight(),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (featuredTrip != null) {
+            item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
+                TripCard(
+                    trip = featuredTrip,
+                    onClick = { onTripClick(featuredTrip) },
+                    onAddPlace = { onAddPlaceToTrip(featuredTrip) }
+                )
             }
         }
-
         if (dashboard.recentLocations.isNotEmpty()) {
-            item(key = "recent-header") {
+            item(key = "recent-header", span = { GridItemSpan(maxLineSpan) }) {
                 SectionHeader(
+                    // Not the library total: the strip shows a handful, and "(22)" over three cards read as a
+                    // count of what was there (QA HM-09). "See all" is the way to the rest.
                     title = "Recently updated",
-                    trailing = "${dashboard.stats.locationCount}"
+                    trailing = "See all",
+                    onTrailingClick = onSeeAllPlaces
                 )
             }
             items(dashboard.recentLocations, key = { "loc-${it.id}" }) { location ->
@@ -164,6 +287,168 @@ private fun DashboardList(
                     onClick = { onAdventureClick(location) },
                     showMenu = false
                 )
+            }
+        }
+    }
+}
+
+/**
+ * The right-hand rail: everything that is a number or a date.
+ *
+ * It scrolls on its own so a long list of trips cannot drag the photographs off the screen with
+ * it, and each block is a card because side by side they would otherwise run together.
+ */
+@Composable
+private fun DataRail(
+    dashboard: Dashboard,
+    featuredTripId: String?,
+    otherTrips: List<UltraSlimCollection>,
+    today: LocalDate?,
+    onTripClick: (UltraSlimCollection) -> Unit,
+    onSeeCalendar: () -> Unit,
+    onOpenEvent: (EventTarget) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+            .padding(top = 8.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        StatsCard(dashboard, title = "YOUR MAP SO FAR")
+
+        val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTripId, onOpenEvent)
+        if (comingUp.isNotEmpty()) {
+            SectionHeader(
+                title = "Coming up",
+                trailing = "See all",
+                onTrailingClick = onSeeCalendar
+            )
+            comingUp.forEach { ComingUpRow(it) }
+        }
+
+        // The next trip that still has room in it. A count of places is a fact; this is the one
+        // thing on the screen asking to be done, so it is the only tinted card in the rail.
+        val toPlan = otherTrips.firstOrNull { it.adventureCount in 1..4 }
+        if (toPlan != null) {
+            Card(
+                onClick = { onTripClick(toPlan) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
+                    Text(
+                        text = toPlan.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        text = "${toPlan.adventureCount} places planned so far.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Plan the trip \u2192",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** A titled block in the rail, on the same white as the stats card beside it. */
+@Composable
+private fun RailCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            content = content
+        )
+    }
+}
+
+/** One column, for phones and foldables: the same blocks, stacked in reading order. */
+@Composable
+private fun StackedDashboard(
+    featuredTrip: UltraSlimCollection?,
+    dashboard: Dashboard,
+    otherTrips: List<UltraSlimCollection>,
+    today: LocalDate?,
+    onTripClick: (UltraSlimCollection) -> Unit,
+    onAdventureClick: (Location) -> Unit,
+    onSeeCalendar: () -> Unit,
+    onSeeAllPlaces: () -> Unit,
+    onAddPlaceToTrip: (UltraSlimCollection) -> Unit,
+    onOpenEvent: (EventTarget) -> Unit
+) {
+    val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTrip?.id, onOpenEvent)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (featuredTrip != null) {
+            TripCard(
+                trip = featuredTrip,
+                onClick = { onTripClick(featuredTrip) },
+                onAddPlace = { onAddPlaceToTrip(featuredTrip) }
+            )
+        }
+
+        StatsCard(dashboard)
+
+        if (comingUp.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SectionHeader(
+                    title = "Coming up",
+                    trailing = "See all",
+                    onTrailingClick = onSeeCalendar
+                )
+                comingUp.forEach { ComingUpRow(it) }
+            }
+        }
+
+        if (dashboard.recentLocations.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SectionHeader(
+                    // Not the library total: the strip shows a handful, and "(22)" over three cards read as a
+                    // count of what was there (QA HM-09). "See all" is the way to the rest.
+                    title = "Recently updated",
+                    trailing = "See all",
+                    onTrailingClick = onSeeAllPlaces
+                )
+                // A strip that runs off the edge, so the photographs stay photographs instead of
+                // becoming a column of thumbnails a phone screen deep.
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    dashboard.recentLocations.forEach { location ->
+                        PlaceMiniCard(location, onClick = { onAdventureClick(location) })
+                    }
+                }
             }
         }
     }
@@ -241,26 +526,27 @@ private fun SectionHeader(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
-        if (trailing != null) {
+        if (trailing != null && onTrailingClick != null) {
+            // A TextButton, for its 48dp: the padded text it replaces measured 47dp tall.
+            TextButton(onClick = onTrailingClick) {
+                Text(text = trailing, style = MaterialTheme.typography.labelLarge)
+            }
+        } else if (trailing != null) {
             Text(
                 text = trailing,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (onTrailingClick != null) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                modifier = if (onTrailingClick != null) {
-                    Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable(onClick = onTrailingClick)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                } else {
-                    Modifier
-                }
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
+}
+
+private fun tripSubtitle(trip: UltraSlimCollection): String = when {
+    trip.status == TripStatus.IN_PROGRESS -> "Happening now"
+    trip.daysUntilStart == 0 -> "Starts today"
+    trip.daysUntilStart == 1 -> "Starts tomorrow"
+    trip.daysUntilStart != null -> "In ${trip.daysUntilStart} days"
+    else -> "Upcoming"
 }
 
 /**
@@ -270,54 +556,162 @@ private fun SectionHeader(
 private fun TripCard(
     trip: UltraSlimCollection,
     onClick: () -> Unit,
+    onAddPlace: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val inProgress = trip.status == TripStatus.IN_PROGRESS
-    val subtitle = when {
-        inProgress -> "Happening now"
-        trip.daysUntilStart == 0 -> "Starts today"
-        trip.daysUntilStart == 1 -> "Starts tomorrow"
-        trip.daysUntilStart != null -> "In ${trip.daysUntilStart} days"
-        else -> "Upcoming"
-    }
+    val subtitle = tripSubtitle(trip)
 
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (inProgress) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.secondaryContainer
-            }
+            // Always the primary container. The featured trip used the secondary one unless it
+            // had already started, which is why the hero read as washed-out grey-green instead of
+            // the cyan the redesign leads with.
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
-            Text(
-                text = subtitle.uppercase(),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = trip.name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            if (trip.adventureCount > 0) {
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = if (trip.adventureCount == 1) "1 place" else "${trip.adventureCount} places",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                )
+        val image = trip.featuredImage?.takeIf { it.isNotBlank() }
+        val imageLoader = LocalImageLoader.current
+
+        // The photograph sits beside the text at every size - a narrow strip on a phone, a third
+        // of the card on a tablet. Stacking it above pushed the trip's name and its two actions
+        // below the fold, which is the opposite of what a hero card is for.
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            TripCardText(trip, subtitle, onClick, onAddPlace, Modifier.weight(1f))
+            if (image != null) {
+                // The Box is what keeps the card the height of its text. An Image inside a
+                // height(IntrinsicSize.Min) row reports its own natural height, and the card grows
+                // to the full size of the photograph - nine hundred dp of Cinque Terre.
+                Box(modifier = Modifier.fillMaxHeight().weight(0.37f)) {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = image, imageLoader = imageLoader),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.matchParentSize()
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun TripCardText(
+    trip: UltraSlimCollection,
+    subtitle: String,
+    onOpen: () -> Unit,
+    onAddPlace: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
+        Text(
+            text = subtitle.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+        )
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = trip.name,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+
+        // Places and dates on one line, the way the trip would be described out loud.
+        val places = when {
+            trip.adventureCount == 1 -> "1 place"
+            trip.adventureCount > 1 -> "${trip.adventureCount} places"
+            else -> null
+        }
+        val dates = tripDates(trip)
+        val line = listOfNotNull(places, dates).joinToString(" · ")
+        if (line.isNotEmpty()) {
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = line,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onOpen,
+                shape = RoundedCornerShape(22.dp),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
+            ) {
+                Text("Open trip", style = MaterialTheme.typography.labelLarge)
+            }
+            OutlinedButton(
+                onClick = onAddPlace,
+                shape = RoundedCornerShape(22.dp),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
+            ) {
+                Text("Add a place", style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    }
+}
+
+/** "05/09 - 09/09", or nothing when the trip has no dates on it. */
+private fun tripDates(trip: UltraSlimCollection): String? {
+    val from = trip.startDate?.substringBefore('T')?.takeIf { it.isNotBlank() } ?: return null
+    val to = trip.endDate?.substringBefore('T')?.takeIf { it.isNotBlank() }
+    val short = { d: String -> d.split("-").let { if (it.size == 3) "${it[2]}/${it[1]}" else d } }
+    return if (to != null && to != from) "${short(from)} \u2013 ${short(to)}" else short(from)
+}
+
+/**
+ * A trip further out than the featured one - same information as TripCard, in the compact row
+ * shape the events list already uses, since a full-size card per trip would push everything else
+ * off the first screen.
+ */
+@Composable
+private fun TripRow(
+    trip: UltraSlimCollection,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = trip.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (trip.adventureCount > 0) {
+                    Text(
+                        text = if (trip.adventureCount == 1) "1 place" else "${trip.adventureCount} places",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = tripSubtitle(trip),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -329,56 +723,60 @@ private fun TripCard(
 @Composable
 private fun StatsCard(
     dashboard: Dashboard,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    title: String? = null
 ) {
     val stats = dashboard.stats
+    val rows = listOf(
+        Triple("Countries", stats.visitedCountryCount, stats.totalCountries),
+        Triple("Regions", stats.visitedRegionCount, stats.totalRegions),
+        Triple("Cities", stats.visitedCityCount, stats.totalCities),
+        Triple("Places visited", stats.visitedLocationCount, stats.locationCount)
+    )
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        // The screen sits on a full-bleed photo, so the cards take the brightest fill on the
-        // tonal scale. That alone separates them - no shadow needed, and a shadow on a flat
-        // white card over a photograph only ever looks like a sticker.
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            StatRow(
-                icon = Icons.Default.Public,
-                label = "Countries",
-                visited = stats.visitedCountryCount,
-                total = stats.totalCountries
-            )
-            StatRow(
-                icon = Icons.Default.Terrain,
-                label = "Regions",
-                visited = stats.visitedRegionCount,
-                total = stats.totalRegions
-            )
-            StatRow(
-                icon = Icons.Default.LocationCity,
-                label = "Cities",
-                visited = stats.visitedCityCount,
-                total = stats.totalCities
-            )
-            StatRow(
-                icon = Icons.Default.Place,
-                label = "Places visited",
-                visited = stats.visitedLocationCount,
-                total = stats.locationCount
-            )
+        // No icons. Four of them down the left edge added a column of decoration and pushed the
+        // numbers - the only part anyone reads - into the middle of the card.
+        BoxWithConstraints {
+            val perRow = when {
+                maxWidth >= 900.dp -> 4
+                maxWidth >= 560.dp -> 2
+                else -> 1
+            }
+            Column(
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 13.dp),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                if (title != null) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                rows.chunked(perRow).forEach { chunk ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        chunk.forEach { (label, visited, total) ->
+                            StatRow(label, visited, total, Modifier.weight(1f))
+                        }
+                        repeat(perRow - chunk.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
 private fun StatRow(
-    icon: ImageVector,
     label: String,
     visited: Int,
     total: Int,
@@ -387,28 +785,25 @@ private fun StatRow(
     val fraction = if (total > 0) (visited.toFloat() / total).coerceIn(0f, 1f) else 0f
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.width(10.dp))
+        Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )
+            // Monospaced, so four rows of counts line up as a column of figures rather than
+            // drifting with the width of each number.
             Text(
                 text = visited.grouped(),
                 style = MaterialTheme.typography.titleMedium,
+                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = " / ${total.grouped()}",
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
+                fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -525,4 +920,219 @@ private fun String.toShortDate(): String {
     val date = substringBefore('T')
     val parts = date.split('-')
     return if (parts.size == 3) "${parts[2]}/${parts[1]}" else date
+}
+
+
+/**
+ * One dated thing, whether it came from a trip or from the calendar.
+ *
+ * The redesign folds "Upcoming trips" and "Coming up" into a single list, and it is right to: a
+ * trip that starts on the 5th and an event on the 5th are the same kind of fact to whoever is
+ * looking, and two separate lists made the reader merge them by eye.
+ */
+internal data class ComingUp(
+    val key: String,
+    val date: String,
+    val title: String,
+    val detail: String,
+    val onClick: (() -> Unit)?
+)
+
+internal fun comingUpEntries(
+    trips: List<UltraSlimCollection>,
+    events: List<CalendarEvent>,
+    today: LocalDate?,
+    onTripClick: (UltraSlimCollection) -> Unit,
+    featuredTripId: String? = null,
+    onOpenEvent: (EventTarget) -> Unit = {}
+): List<ComingUp> {
+    // The calendar sends every dated collection as an event of its own. A trip already listed here,
+    // or already on the card above, came back a second time as that event - each trip twice, and
+    // the one in progress again under its past start date (measured).
+    val tripsShown = trips.map { it.id }.toSet() + listOfNotNull(featuredTripId)
+    val fromTrips = trips.map { trip ->
+        ComingUp(
+            key = "trip-${trip.id}",
+            date = trip.startDate.orEmpty(),
+            title = trip.name,
+            detail = listOfNotNull(
+                tripSubtitle(trip),
+                trip.adventureCount.takeIf { it > 0 }
+                    ?.let { if (it == 1) "1 place" else "$it places" }
+            ).joinToString(" \u00b7 "),
+            onClick = { onTripClick(trip) }
+        )
+    }
+    val fromEvents = events.filterNot { it.type == "collection" && it.collectionId in tripsShown }.map { event ->
+        val detail = listOfNotNull(
+            event.locationLabel.takeIf { it.isNotBlank() },
+            event.collectionName?.takeIf { it.isNotBlank() }
+        ).firstOrNull { it != event.title }.orEmpty()
+        // An event row opens what the calendar opens for it - its place, or the trip it belongs to.
+        // It used to open nothing while the trip rows beside it did (QA HM-09).
+        val target = event.target()
+        ComingUp("event-${event.id}", event.start, event.title, detail, target?.let { { onOpenEvent(it) } })
+    }
+    return (fromTrips + fromEvents).sortedBy { it.date.substringBefore('T') }
+}
+
+private val MONTHS = listOf(
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+)
+
+/** A dated row: the day and month in a narrow column, then what happens on it. */
+@Composable
+private fun ComingUpRow(entry: ComingUp, modifier: Modifier = Modifier) {
+    val parts = entry.date.substringBefore('T').split("-")
+    val day = parts.getOrNull(2).orEmpty()
+    val month = parts.getOrNull(1)?.toIntOrNull()?.let { MONTHS.getOrNull(it - 1) }.orEmpty()
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        // Clickable only when there is somewhere to go. A disabled Card is not "not clickable",
+        // it is greyed out and faded, and a calendar entry that leads nowhere was reading as
+        // switched off next to a trip that does.
+        val clickable = entry.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier
+        Row(
+            modifier = clickable.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.width(38.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = day, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text(
+                    text = month,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = entry.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (entry.detail.isNotBlank()) {
+                    Text(
+                        text = entry.detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A place in the home strip: photograph on top, its four facts underneath on white.
+ *
+ * Not the card the places list uses. Text laid over a photograph disappears whenever the
+ * photograph is pale - the name of a white village against a bright sky - and at this size there
+ * is no room to darken it enough to fix that without losing the photograph too.
+ *
+ * Without a photograph the 72dp slot stays, filled by [LocationPlaceholder] with a hairline along
+ * its bottom that anchors it to the writing, so a strip mixing both keeps one height.
+ */
+@Composable
+private fun PlaceMiniCard(
+    location: Location,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val imageLoader = LocalImageLoader.current
+    val photo = location.images.firstOrNull()?.image?.takeIf { it.isNotBlank() }
+
+    Card(
+        onClick = onClick,
+        modifier = modifier.width(150.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        if (photo != null) {
+            Image(
+                painter = rememberAsyncImagePainter(model = photo, imageLoader = imageLoader),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().height(72.dp)
+            )
+        } else {
+            val edge = placeholderColors(hasCategory = !location.category?.icon.isNullOrBlank()).edge
+            LocationPlaceholder(
+                icon = location.category?.icon,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+                    // Drawn inside the 72dp, not below it: a divider would make this card 1dp
+                    // taller than the photographs beside it.
+                    .drawWithContent {
+                        drawContent()
+                        val y = size.height - 0.5.dp.toPx()
+                        drawLine(edge, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
+                    }
+            )
+        }
+        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 10.dp)) {
+            Text(
+                text = location.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            // Every line is drawn, empty or not. These cards stand side by side in a row, and a
+            // place with no category or no label was a card a line shorter than its neighbours.
+            Text(
+                text = location.location?.takeIf { it.isNotBlank() }.orEmpty(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            val rating = location.rating?.toInt() ?: 0
+            // The category as the user made it, emoji and name. "No category" only on a card
+            // with no photograph, where the neutral pin above would otherwise go unexplained.
+            val category = location.category?.let { "${it.icon} ${it.displayName}".trim() }
+                ?: if (photo == null) "No category" else ""
+            // The full line height, untrimmed: the stars come from a fallback font taller than
+            // Quicksand, and a trimmed line made a rated card 1dp taller than its neighbours.
+            val rowStyle = MaterialTheme.typography.labelSmall.copy(
+                lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None)
+            )
+            Spacer(Modifier.height(5.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (rating > 0) {
+                    Text(
+                        text = "\u2605".repeat(rating),
+                        style = rowStyle,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(6.dp))
+                }
+                Text(
+                    text = category,
+                    style = rowStyle,
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
 }

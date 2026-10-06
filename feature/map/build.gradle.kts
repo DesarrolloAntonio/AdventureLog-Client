@@ -19,6 +19,15 @@ kotlin {
             implementation(libs.kotlinx.datetime)
         }
         
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            // The stub has to name PagingData to satisfy LocationsRepository, even though the
+            // map never pages.
+            implementation(libs.multiplatform.paging.compose)
+        }
+
         androidMain.dependencies {
             implementation(libs.androidx.ui.tooling)
             implementation(libs.maps.compose)

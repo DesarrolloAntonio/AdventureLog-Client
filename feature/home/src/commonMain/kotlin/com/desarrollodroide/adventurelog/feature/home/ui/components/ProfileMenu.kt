@@ -38,6 +38,7 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.AccountHeader
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRowDivider
+import androidx.compose.material.icons.outlined.Group
 
 /**
  * Everything that used to sit at the top of the drawer: who you are, settings, and the way out.
@@ -55,6 +56,7 @@ fun ProfileMenu(
     serverUrl: String,
     onSettings: () -> Unit,
     onCalendar: () -> Unit,
+    onUsers: () -> Unit = {},
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -101,6 +103,18 @@ fun ProfileMenu(
                     onClick = {
                         open = false
                         onCalendar()
+                    }
+                )
+                SettingsRowDivider()
+                // The web has this as a top-level section; here it sits beside the calendar,
+                // since browsing other travellers is something you do occasionally, not daily.
+                SettingsRow(
+                    title = "People",
+                    icon = Icons.Outlined.Group,
+                    supporting = "Travellers with a public profile",
+                    onClick = {
+                        open = false
+                        onUsers()
                     }
                 )
                 SettingsRowDivider()

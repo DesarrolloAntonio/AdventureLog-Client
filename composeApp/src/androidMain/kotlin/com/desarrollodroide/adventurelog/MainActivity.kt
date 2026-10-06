@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,12 +37,15 @@ class MainActivity : ComponentActivity(), KoinComponent {
             // Observe the theme mode
             val themeMode by settingsRepository.getThemeMode().collectAsState()
 
-            // Determine if we're in dark mode
+            // isSystemInDarkTheme, not resources.configuration: the manifest keeps uiMode changes
+            // from recreating the activity, so only Compose's observed configuration notices the
+            // phone switching to dark while the app is open. Reading the resources left dark
+            // status-bar icons on a dark screen (measured).
+            val systemDark = isSystemInDarkTheme()
             val isDarkTheme = when (themeMode) {
                 ThemeMode.DARK -> true
                 ThemeMode.LIGHT -> false
-                ThemeMode.AUTO -> resources.configuration.uiMode and 
-                        Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+                ThemeMode.AUTO -> systemDark
             }
             
             // Update status bar based on theme changes

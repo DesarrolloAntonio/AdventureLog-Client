@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.components.settings
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -185,16 +187,24 @@ fun SettingsSwitchRow(
     icon: ImageVector? = null,
     enabled: Boolean = true
 ) {
+    // The row is the switch: one control that reads as its title and says on or off. The Switch
+    // inside used to be a second, nameless target - TalkBack announced "switch, off" with no
+    // word of what it switched (measured with the harness's a11y check).
     SettingsRow(
         title = title,
-        modifier = modifier,
+        modifier = modifier.toggleable(
+            value = checked,
+            enabled = enabled,
+            role = Role.Switch,
+            onValueChange = onCheckedChange
+        ),
         supporting = supporting,
         icon = icon,
-        onClick = { onCheckedChange(!checked) },
+        onClick = null,
         enabled = enabled,
         showChevron = false,
         trailing = {
-            Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+            Switch(checked = checked, onCheckedChange = null, enabled = enabled)
         }
     )
 }

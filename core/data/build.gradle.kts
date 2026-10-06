@@ -13,5 +13,12 @@ kotlin {
             implementation("com.russhwolf:multiplatform-settings-no-arg:1.3.0")
             implementation(libs.multiplatform.paging.common)
         }
+
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation("com.russhwolf:multiplatform-settings-test:1.3.0")
+        }
     }
 }

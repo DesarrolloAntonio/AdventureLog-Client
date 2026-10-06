@@ -15,12 +15,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +40,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.ImagesSection
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 
 @Composable
 fun AddEditTransportationScreen(
@@ -90,6 +93,8 @@ fun AddEditTransportationScreen(
                 viewModel.clearLocationSearch()
             },
             wikipediaImageState = uiState.wikipediaImageState,
+            collectionStart = uiState.collectionStart,
+            collectionEnd = uiState.collectionEnd,
             onSearchWikipediaImage = { query ->
                 viewModel.searchWikipediaImage(query)
             },
@@ -122,19 +127,27 @@ fun AddEditTransportationContent(
     wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
     onSearchWikipediaImage: (String) -> Unit = {},
     onResetWikipediaState: () -> Unit = {},
+    collectionStart: String? = null,
+    collectionEnd: String? = null,
     modifier: Modifier = Modifier
 ) {
-    var formData by remember(existingTransportation) {
-        mutableStateOf(
-            if (existingTransportation != null) {
-                TransportationFormData.fromTransportation(existingTransportation)
-            } else {
-                TransportationFormData()
-            }
-        )
+    val initialFormData = remember(existingTransportation) {
+        if (existingTransportation != null) {
+            TransportationFormData.fromTransportation(existingTransportation)
+        } else {
+            TransportationFormData()
+        }
     }
+    var formData by remember(existingTransportation) { mutableStateOf(initialFormData) }
+    val leave = rememberDiscardGuard(
+        hasChanges = formData != initialFormData,
+        thing = "transport",
+        isEditing = isEditMode,
+        onLeave = onNavigateBack
+    )
 
-    if (isLoading && existingTransportation == null && isEditMode) {
+    if (isEditMode && existingTransportation == null) {
+        // Editing needs the record from the server; without it there is no form to save.
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -144,18 +157,30 @@ fun AddEditTransportationContent(
         return
     }
 
+    // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
+    // box the length of the screen holding a place name, and the eye loses the line it is on.
+    ContentColumn(modifier) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Every other item form says what it is making; this one opened straight on its first
+        // section (QA CO-19).
+        Text(
+            text = if (isEditMode) "Edit transport" else "New transport",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
         BasicInfoTransportationSection(
             formData = formData,
             transportationTypes = transportationTypes,
             onFormDataChange = { formData = it },
-            onNavigateBack = onNavigateBack,
+            onNavigateBack = leave,
             onGenerateDescription = {
                 onGenerateDescription(formData.name) { generatedDescription ->
                     formData = formData.copy(description = generatedDescription)
@@ -166,7 +191,9 @@ fun AddEditTransportationContent(
 
         DateTransportationSection(
             formData = formData,
-            onFormDataChange = { formData = it }
+            onFormDataChange = { formData = it },
+            collectionStart = collectionStart,
+            collectionEnd = collectionEnd
         )
 
         LocationTransportationSection(
@@ -200,7 +227,7 @@ fun AddEditTransportationContent(
             )
 
             TextButton(
-                onClick = onNavigateBack,
+                onClick = leave,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -211,5 +238,6 @@ fun AddEditTransportationContent(
         }
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
     }
 }

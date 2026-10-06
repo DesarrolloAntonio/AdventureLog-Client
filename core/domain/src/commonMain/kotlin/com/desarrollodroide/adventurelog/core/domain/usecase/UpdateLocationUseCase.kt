@@ -22,7 +22,10 @@ class UpdateLocationUseCase(
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList(),
+        // Null leaves the place's collections as they are. Editing a place doesn't show them, and an
+        // empty list took every edited place out of all its collections (measured) - they change from
+        // Manage collections, which passes them.
+        collections: List<String>? = null,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
         priceCurrency: String? = null
@@ -46,8 +49,9 @@ class UpdateLocationUseCase(
         )) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Failed to update location. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("That place belongs to someone else.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

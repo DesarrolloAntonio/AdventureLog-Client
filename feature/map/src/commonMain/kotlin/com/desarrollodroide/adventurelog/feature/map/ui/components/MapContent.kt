@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -22,6 +25,7 @@ fun MapContent(
     showCities: Boolean = false,
     isLoading: Boolean,
     error: String?,
+    onRetry: () -> Unit = {},
     onAdventureClick: (adventureId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -54,6 +58,12 @@ fun MapContent(
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Without this the map was a dead screen for the rest of the session: nothing
+                    // reloaded it, not even leaving the tab and coming back (measured).
+                    Button(onClick = onRetry) {
+                        Text("Try again")
+                    }
                 }
             }
             

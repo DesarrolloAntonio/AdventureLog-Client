@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.navigation
 
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -17,7 +22,8 @@ import kotlinx.serialization.json.Json
 interface LocationsNavigator {
     fun navigateToLocationDetail(location: Location)
     fun navigateToAddLocation()
-    fun navigateToEditLocation(locationId: String, locationJson: String)
+    /** [openImages] opens the form on its images, for "Add photo". */
+    fun navigateToEditLocation(locationId: String, locationJson: String, openImages: Boolean = false)
     fun navigateBack()
 }
 
@@ -25,8 +31,15 @@ interface LocationsNavigator {
  * Extension function to add location screens to a navigation graph
  */
 fun NavGraphBuilder.locationsScreen(
-    navigator: LocationsNavigator
+    navigator: LocationsNavigator,
+    // The list is registered by the caller when it wants to wrap it in something of its own -
+    // the two-pane places screen does, and needs to own that route rather than duplicate it.
+    registerListRoute: Boolean = true,
+    // Outside the shell - the root graph, where a place's page opened from Home or search lives -
+    // nothing keeps the form off the status and gesture bars, so the form keeps itself inside them.
+    standalone: Boolean = false
 ) {
+    val formModifier = if (standalone) Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding() else Modifier
     val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
@@ -34,7 +47,7 @@ fun NavGraphBuilder.locationsScreen(
     }
     
     // Locations List Screen
-    composable(route = NavigationRoutes.Locations.route) {
+    if (registerListRoute) composable(route = NavigationRoutes.Locations.route) {
         LocationListScreen(
             onAdventureClick = { adventure ->
                 navigator.navigateToLocationDetail(adventure)
@@ -45,19 +58,34 @@ fun NavGraphBuilder.locationsScreen(
             onEditAdventure = { adventure ->
                 val adventureJson = json.encodeToString(adventure)
                 navigator.navigateToEditLocation(adventure.id, adventureJson)
+            },
+            onAddPhoto = { adventure ->
+                navigator.navigateToEditLocation(adventure.id, json.encodeToString(adventure), openImages = true)
             }
         )
     }
     
     // Add Adventure Screen
-    composable(route = NavigationRoutes.Locations.add) {
-        AddEditLocationScreen(
-            locationId = null,
-            location = null,
-            onNavigateBack = {
-                navigator.navigateBack()
+    composable(
+        route = NavigationRoutes.Locations.addRoute,
+        arguments = listOf(
+            navArgument("collectionId") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
             }
         )
+    ) { backStackEntry ->
+        Box(formModifier) {
+            AddEditLocationScreen(
+                locationId = null,
+                location = null,
+                intoCollectionId = backStackEntry.savedStateHandle.get<String>("collectionId"),
+                onNavigateBack = {
+                    navigator.navigateBack()
+                }
+            )
+        }
     }
     
     // Edit Adventure Screen
@@ -69,11 +97,16 @@ fun NavGraphBuilder.locationsScreen(
             },
             navArgument("adventureJson") { 
                 type = NavType.StringType
+            },
+            navArgument("openImages") {
+                type = NavType.BoolType
+                defaultValue = false
             }
         )
     ) { backStackEntry ->
         val adventureId = backStackEntry.savedStateHandle.get<String>("adventureId") ?: ""
         val adventureJson = backStackEntry.savedStateHandle.get<String>("adventureJson") ?: ""
+        val openImages = backStackEntry.savedStateHandle.get<Boolean>("openImages") ?: false
         
         val location = if (adventureJson.isNotEmpty()) {
             json.decodeFromString<Location>(adventureJson)
@@ -81,12 +114,15 @@ fun NavGraphBuilder.locationsScreen(
             null
         }
         
-        AddEditLocationScreen(
-            locationId = adventureId,
-            location = location,
-            onNavigateBack = {
-                navigator.navigateBack()
-            }
-        )
+        Box(formModifier) {
+            AddEditLocationScreen(
+                locationId = adventureId,
+                location = location,
+                openImages = openImages,
+                onNavigateBack = {
+                    navigator.navigateBack()
+                }
+            )
+        }
     }
 }

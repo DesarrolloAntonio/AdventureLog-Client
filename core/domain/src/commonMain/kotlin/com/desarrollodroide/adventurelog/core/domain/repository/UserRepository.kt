@@ -13,15 +13,17 @@ import kotlinx.coroutines.flow.Flow
 interface UserRepository {
     
     /**
-     * Saves credentials when user checks "Remember Me" in login
+     * Remembers where and as whom the user signs in, when they check "Remember Me".
+     *
+     * Never the password: the stored session already keeps them signed in, and a password kept
+     * next to it is a password in every backup of the device.
+     *
      * @param url Server URL
      * @param username User's username
-     * @param password User's password
      */
     suspend fun saveRememberMeCredentials(
         url: String,
-        username: String,
-        password: String
+        username: String
     )
     
     /**

@@ -7,9 +7,9 @@ import org.koin.dsl.module
 val mapModule = module {
     viewModel { MapViewModel(
         getAllLocationsUseCase = get(),
-        observeUserStatsUseCase = get(),
         getVisitedRegionsUseCase = get(),
         getVisitedCitiesUseCase = get(),
-        userRepository = get())
+        // A ViewModel definition hands over the SavedStateHandle the filters are kept in.
+        savedStateHandle = get())
     }
 }

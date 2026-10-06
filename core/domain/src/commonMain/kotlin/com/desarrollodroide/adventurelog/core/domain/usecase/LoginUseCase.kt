@@ -8,12 +8,20 @@ import com.desarrollodroide.adventurelog.core.model.UserDetails
 class LoginUseCase(
     private val loginRepository: LoginRepository
 ) {
+    companion object {
+        const val CANNOT_REACH_SERVER = "Can't reach the server. Check the address and your connection."
+    }
+
     suspend operator fun invoke(url: String, username: String, password: String): Either<String, UserDetails> =
         when (val result = loginRepository.sendLogin(url, username, password)) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("Network unavailable")
+                    // Not "Network unavailable": the phone's network is usually fine and it is the
+                    // server that did not answer - a wrong address, a VPN that is off, a home
+                    // server seen from outside. That is the thing to check (measured).
+                    is ApiResponse.IOException -> Either.Left(CANNOT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Error getting user credentials, try again later")
+                    ApiResponse.Forbidden -> Either.Left("Invalid username or password")
                     ApiResponse.InvalidCredentials -> Either.Left("Invalid username or password")
                 }
             }

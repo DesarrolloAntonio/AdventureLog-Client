@@ -57,7 +57,9 @@ interface AdventureApi {
         visits: List<VisitFormData>,
         price: Double?,
         priceCurrency: String?,
-        activityTypes: List<String> = emptyList()
+        activityTypes: List<String> = emptyList(),
+        /** Collections the new place joins straight away, so no second call is needed. */
+        collectionIds: List<String> = emptyList()
     ): LocationDTO
     
     /**
@@ -75,7 +77,7 @@ interface AdventureApi {
         longitude: String?,
         isPublic: Boolean,
         tags: List<String>,
-        collections: List<String> = emptyList(),
+        collections: List<String>? = null,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
         priceCurrency: String? = null
@@ -91,4 +93,7 @@ interface AdventureApi {
     suspend fun globalSearch(query: String, limit: Int = 20): SearchResultsDTO
 
     suspend fun deleteLocation(adventureId: String)
+
+    /** Sends only `collections`, so nothing else about the place is rewritten from a stale copy. */
+    suspend fun updateLocationCollections(locationId: String, collections: List<String>): LocationDTO
 }

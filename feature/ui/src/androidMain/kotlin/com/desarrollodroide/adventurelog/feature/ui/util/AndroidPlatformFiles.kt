@@ -71,8 +71,17 @@ class AndroidPlatformFiles(
         }
     }
 
+    /** The handed-over copies above, and the camera's captures (CameraCapture.android.kt). */
+    override suspend fun delete() {
+        withContext(Dispatchers.IO) {
+            File(context.cacheDir, SHARED_DIR).deleteRecursively()
+            File(context.cacheDir, CAMERA_DIR).deleteRecursively()
+        }
+    }
+
     private companion object {
         const val SHARED_DIR = "attachments"
+        const val CAMERA_DIR = "images"
     }
 }
 

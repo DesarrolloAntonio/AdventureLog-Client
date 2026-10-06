@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountError
 import com.desarrollodroide.adventurelog.core.domain.repository.AccountRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.SettingsRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
@@ -16,21 +17,98 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshVisitedRegionsUseCase
+import kotlinx.coroutines.flow.StateFlow
+import kotlin.time.Clock
+import com.desarrollodroide.adventurelog.feature.settings.domain.BackupExporter
+import com.desarrollodroide.adventurelog.feature.settings.domain.BackupResult
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val refreshVisitedRegionsUseCase: RefreshVisitedRegionsUseCase,
+    private val backupExporter: BackupExporter
 ) : ViewModel() {
+
+    private val _backupInProgress = MutableStateFlow(false)
+    val backupInProgress: StateFlow<Boolean> = _backupInProgress.asStateFlow()
+
+    /**
+     * Downloads the account's backup zip and hands it to the share sheet.
+     *
+     * The endpoint is behind the same auth check as everything else, so the bytes are fetched with
+     * the signed-in client and offered as a file - a plain URL would come back 403, and on a
+     * server reachable only over Tailscale a link is no use to anyone anyway.
+     */
+    fun downloadBackup() {
+        if (_backupInProgress.value) return
+        val server = getServerUrl().trimEnd('/')
+        if (server.isEmpty()) return
+
+        _backupInProgress.value = true
+        viewModelScope.launch {
+            _regionsMessage.value = when (backupExporter.export(server, backupFileName())) {
+                BackupResult.CouldNotDownload -> "Could not download the backup"
+                BackupResult.NowhereToPutIt -> "Nothing on this device can take the file"
+                BackupResult.Handed -> null
+            }
+            _backupInProgress.value = false
+        }
+    }
+
+    // The date, without pulling kotlinx-datetime into this module for one filename.
+    private fun backupFileName(): String {
+        val stamp = Clock.System.now().toString().substringBefore('T')
+        return "adventurelog-backup-$stamp.zip"
+    }
+
+    private val _regionsRefreshing = MutableStateFlow(false)
+    val regionsRefreshing: StateFlow<Boolean> = _regionsRefreshing.asStateFlow()
+
+    private val _regionsMessage = MutableStateFlow<String?>(null)
+    val regionsMessage: StateFlow<String?> = _regionsMessage.asStateFlow()
+
+    /**
+     * Asks the server to work out which regions and cities the saved places actually fall in.
+     * Places added before their coordinates were known never got counted, which is why the World
+     * tab can read lower than the map looks.
+     */
+    fun refreshVisitedRegions() {
+        if (_regionsRefreshing.value) return
+        _regionsRefreshing.value = true
+        viewModelScope.launch {
+            when (val result = refreshVisitedRegionsUseCase()) {
+                is Either.Right -> {
+                    val (regions, cities) = result.value
+                    _regionsMessage.value = when {
+                        regions == 0 && cities == 0 -> "Everything was already up to date"
+                        else -> buildString {
+                            append(regions)
+                            append(if (regions == 1) " new region" else " new regions")
+                            if (cities > 0) {
+                                append(", ")
+                                append(cities)
+                                append(if (cities == 1) " new city" else " new cities")
+                            }
+                        }
+                    }
+                }
+                is Either.Left -> _regionsMessage.value = result.value
+            }
+            _regionsRefreshing.value = false
+        }
+    }
+
+    fun clearRegionsMessage() {
+        _regionsMessage.value = null
+    }
 
     val themeMode = settingsRepository.getThemeMode()
         .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.AUTO)
 
     val useDynamicColors = settingsRepository.getUseDynamicColors()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
-
-    val compactView = settingsRepository.getCompactView()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val user = userRepository.getUserSession()
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -90,22 +168,40 @@ class SettingsViewModel(
         saveProfile()
     }
 
-    /** The name and username, saved together from the edit dialog. */
-    fun saveIdentity(username: String, firstName: String, lastName: String) {
-        updateProfile {
-            it.copy(username = username, firstName = firstName, lastName = lastName)
+    /**
+     * The name and username, saved together from the edit dialog.
+     *
+     * [onResult] hears null once the server has them, or the reason it refused. The dialog waits
+     * for it: it used to close on Save, so a refused username vanished along with everything typed,
+     * and the reason went to a snackbar behind the dialog's scrim (measured).
+     */
+    fun saveIdentity(
+        username: String,
+        firstName: String,
+        lastName: String,
+        onResult: (refusal: String?) -> Unit = {}
+    ) {
+        _profile.update {
+            it.copy(form = it.form.copy(username = username, firstName = firstName, lastName = lastName))
         }
+        saveProfile(onResult)
     }
 
-    private fun saveProfile() {
+    /** [onResult], when given, takes the outcome instead of the snackbar. */
+    private fun saveProfile(onResult: ((String?) -> Unit)? = null) {
         val state = _profile.value
-        if (state.isSaving || !state.hasChanges) return
+        if (state.isSaving) return
+        if (!state.hasChanges) {
+            onResult?.invoke(null)
+            return
+        }
         val form = state.form
         val saved = state.saved
 
         if (form.username.isBlank()) {
             _profile.update { it.copy(form = it.saved) }
-            viewModelScope.launch { _messages.send("Username cannot be empty.") }
+            val message = "Username cannot be empty."
+            if (onResult != null) onResult(message) else viewModelScope.launch { _messages.send(message) }
             return
         }
 
@@ -126,10 +222,21 @@ class SettingsViewModel(
             )
             _profile.update { it.copy(isSaving = false) }
             if (result is Either.Left) {
-                _profile.update { it.copy(form = it.saved) }
-                _messages.send(result.value)
+                // A refusal is the server's verdict on this value - "that username is taken" -
+                // so the form goes back to what the server holds. Not having reached the server
+                // is not a verdict on anything: keep what was typed, or the message telling them
+                // to try again is asking them to type it a second time first.
+                if (result.value.serverRefused) {
+                    _profile.update { it.copy(form = it.saved) }
+                }
+                if (onResult != null) onResult(result.value.message) else _messages.send(result.value.message)
                 return@launch
             }
+            // The server has what was sent, whether or not the session it republishes has reached
+            // this ViewModel yet. Waiting for that echo to clear hasChanges re-sent the same PATCH
+            // until it arrived - forever, in a test where it never did (measured: a hung build).
+            _profile.update { it.copy(saved = form) }
+            onResult?.invoke(null)
             // Something flipped while this one was in flight - send that too rather than leaving
             // the screen showing a value the server never received.
             if (_profile.value.hasChanges) saveProfile()
@@ -147,7 +254,7 @@ class SettingsViewModel(
                     _messages.send("Password changed.")
                     onSuccess()
                 }
-                is Either.Left -> _messages.send(result.value)
+                is Either.Left -> _messages.send(result.value.message)
             }
         }
     }
@@ -160,7 +267,7 @@ class SettingsViewModel(
                     it.copy(addresses = result.value, isLoading = false)
                 }
                 is Either.Left -> _emails.update {
-                    it.copy(isLoading = false, error = result.value)
+                    it.copy(isLoading = false, error = result.value.message)
                 }
             }
         }
@@ -193,7 +300,7 @@ class SettingsViewModel(
      * Every address action ends with a re-read: the server decides what "verified" and "primary"
      * mean, and guessing locally is how the two drift apart.
      */
-    private fun runEmailAction(success: String, action: suspend () -> Either<String, Unit>) {
+    private fun runEmailAction(success: String, action: suspend () -> Either<AccountError, Unit>) {
         if (_emails.value.isBusy) return
         _emails.update { it.copy(isBusy = true) }
         viewModelScope.launch {
@@ -204,7 +311,7 @@ class SettingsViewModel(
                     _messages.send(success)
                     loadEmails()
                 }
-                is Either.Left -> _messages.send(result.value)
+                is Either.Left -> _messages.send(result.value.message)
             }
         }
     }
@@ -217,7 +324,7 @@ class SettingsViewModel(
                     it.copy(usage = result.value, isLoading = false)
                 }
                 is Either.Left -> _storage.update {
-                    it.copy(isLoading = false, error = result.value)
+                    it.copy(isLoading = false, error = result.value.message)
                 }
             }
         }
@@ -232,12 +339,6 @@ class SettingsViewModel(
     fun setUseDynamicColors(useDynamic: Boolean) {
         viewModelScope.launch {
             settingsRepository.setUseDynamicColors(useDynamic)
-        }
-    }
-
-    fun setCompactView(isCompact: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setCompactView(isCompact)
         }
     }
 

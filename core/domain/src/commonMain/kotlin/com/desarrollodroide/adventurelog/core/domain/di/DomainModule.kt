@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.core.domain.di
 
+import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCountriesUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
@@ -12,9 +13,11 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUs
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionDetailUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionItemUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.LogoutUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.EndRejectedSessionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.CreateLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.UpdateLocationUseCase
@@ -31,6 +34,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GenerateDescription
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetDashboardUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateLocationUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RemoveLocationFromCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ArchiveCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateCollectionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ExportCollectionUseCase
@@ -40,11 +44,25 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.GetSharedCollection
 import com.desarrollodroide.adventurelog.core.domain.usecase.RespondToCollectionInviteUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationTrailsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationImagesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SyncLocationVisitsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveUserStatsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.ReverseGeocodeUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SearchWikipediaImageUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetRegionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteNoteUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteChecklistUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.AddItineraryEntryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetRecommendationsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.AutoGenerateItineraryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteItineraryEntryUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLodgingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveChecklistUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveLodgingUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SaveNoteUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshVisitedRegionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.SetRegionVisitedUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetVisitedRegionsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCountriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RefreshCountriesUseCase
@@ -67,10 +85,13 @@ val domainModule = module {
     factoryOf(::GetAllCollectionsUseCase)
     factoryOf(::GetCollectionsPagingUseCase)
     factoryOf(::ObserveCollectionsUseCase)
+    factoryOf(::ObserveCountriesUseCase)
     factoryOf(::GetCollectionDetailUseCase)
+    factoryOf(::GetCollectionItemUseCase)
     factoryOf(::InitializeSessionUseCase)
     factoryOf(::SaveSessionUseCase)
-    factoryOf(::LogoutUseCase)
+    factory { LogoutUseCase(get(), get(), get(), getAll()) }
+    factoryOf(::EndRejectedSessionsUseCase)
     factoryOf(::RememberMeCredentialsUseCase)
     factoryOf(::CreateLocationUseCase)
     factoryOf(::UpdateLocationUseCase)
@@ -92,7 +113,9 @@ val domainModule = module {
     factoryOf(::SearchEverythingUseCase)
     factoryOf(::SyncLocationVisitsUseCase)
     factoryOf(::SyncLocationTrailsUseCase)
+    factoryOf(::SyncLocationImagesUseCase)
     factoryOf(::DuplicateLocationUseCase)
+    factoryOf(::RemoveLocationFromCollectionUseCase)
     factoryOf(::GetShareImageUseCase)
     factoryOf(::DuplicateCollectionUseCase)
     factoryOf(::ArchiveCollectionUseCase)
@@ -103,6 +126,19 @@ val domainModule = module {
     factoryOf(::RespondToCollectionInviteUseCase)
     factoryOf(::ObserveUserStatsUseCase)
     factoryOf(::SearchWikipediaImageUseCase)
+    factoryOf(::GetRegionsUseCase)
+    factoryOf(::SetRegionVisitedUseCase)
+    factoryOf(::RefreshVisitedRegionsUseCase)
+    factoryOf(::SaveNoteUseCase)
+    factoryOf(::SaveChecklistUseCase)
+    factoryOf(::SaveLodgingUseCase)
+    factoryOf(::DeleteLodgingUseCase)
+    factoryOf(::AutoGenerateItineraryUseCase)
+    factoryOf(::AddItineraryEntryUseCase)
+    factoryOf(::DeleteItineraryEntryUseCase)
+    factoryOf(::GetRecommendationsUseCase)
+    factoryOf(::DeleteChecklistUseCase)
+    factoryOf(::DeleteNoteUseCase)
     factoryOf(::GetVisitedRegionsUseCase)
     factoryOf(::GetCountriesUseCase)
     factoryOf(::RefreshCountriesUseCase)

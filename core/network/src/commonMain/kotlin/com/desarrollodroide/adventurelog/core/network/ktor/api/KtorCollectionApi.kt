@@ -152,7 +152,8 @@ internal class KtorCollectionApi(
         description: String,
         isPublic: Boolean,
         startDate: String?,
-        endDate: String?
+        endDate: String?,
+        link: String?
     ): CollectionDTO {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/collections/"
@@ -162,7 +163,8 @@ internal class KtorCollectionApi(
             description = description,
             isPublic = isPublic,
             startDate = startDate,
-            endDate = endDate
+            endDate = endDate,
+            link = link?.takeIf { it.isNotBlank() }
         )
 
         val response = httpClient.post(url) {

@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.core.data
 
 import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.repository.AccountError
 import com.desarrollodroide.adventurelog.core.domain.repository.AccountRepository
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.model.EmailAddress
@@ -30,7 +31,7 @@ class AccountRepositoryImpl(
         measurementSystem: String?,
         defaultCurrency: String?,
         mapStyle: String?
-    ): Either<String, UserDetails> = call("update your profile") {
+    ): Either<AccountError, UserDetails> = call("update your profile") {
         val session = userRepository.activeSession
         val updated = networkDataSource.updateUserProfile(
             username = username,
@@ -55,7 +56,7 @@ class AccountRepositoryImpl(
     override suspend fun changePassword(
         currentPassword: String,
         newPassword: String
-    ): Either<String, Unit> = call("change your password") {
+    ): Either<AccountError, Unit> = call("change your password") {
         val changed = networkDataSource.changePassword(currentPassword, newPassword)
         if (!changed) {
             // allauth answers 400 here rather than throwing, and the only thing it can be is the
@@ -64,25 +65,25 @@ class AccountRepositoryImpl(
         }
     }
 
-    override suspend fun getMediaUsage(): Either<String, MediaUsage> = call("load storage usage") {
+    override suspend fun getMediaUsage(): Either<AccountError, MediaUsage> = call("load storage usage") {
         networkDataSource.getMediaUsage().toDomainModel()
     }
 
-    override suspend fun getEmailAddresses(): Either<String, List<EmailAddress>> =
+    override suspend fun getEmailAddresses(): Either<AccountError, List<EmailAddress>> =
         call("load your email addresses") {
             networkDataSource.getEmailAddresses().map { it.toDomainModel() }
         }
 
-    override suspend fun addEmailAddress(email: String): Either<String, Unit> =
+    override suspend fun addEmailAddress(email: String): Either<AccountError, Unit> =
         call("add that address") { networkDataSource.addEmailAddress(email) }
 
-    override suspend fun requestEmailVerification(email: String): Either<String, Unit> =
+    override suspend fun requestEmailVerification(email: String): Either<AccountError, Unit> =
         call("send the verification email") { networkDataSource.requestEmailVerification(email) }
 
-    override suspend fun setPrimaryEmailAddress(email: String): Either<String, Unit> =
+    override suspend fun setPrimaryEmailAddress(email: String): Either<AccountError, Unit> =
         call("set that address as primary") { networkDataSource.setPrimaryEmailAddress(email) }
 
-    override suspend fun removeEmailAddress(email: String): Either<String, Unit> =
+    override suspend fun removeEmailAddress(email: String): Either<AccountError, Unit> =
         call("remove that address") { networkDataSource.removeEmailAddress(email) }
 
     /**
@@ -93,18 +94,23 @@ class AccountRepositoryImpl(
     private suspend fun <T> call(
         action: String,
         block: suspend () -> T
-    ): Either<String, T> = withContext(ioDispatcher) {
+    ): Either<AccountError, T> = withContext(ioDispatcher) {
         try {
             Either.Right(block())
         } catch (e: HttpException) {
+            // The server answered, and what it said is the most useful thing to show.
             logger.e { "HTTP ${e.code} while trying to $action" }
-            Either.Left(e.message)
+            Either.Left(AccountError(e.message, serverRefused = true))
         } catch (e: IOException) {
             logger.e(e) { "IO error while trying to $action" }
-            Either.Left("No connection to the server. Please try again.")
+            Either.Left(
+                AccountError("No connection to the server. Please try again.", serverRefused = false)
+            )
         } catch (e: Exception) {
+            // Nothing came back that can be attributed to the server, so this counts as not
+            // having reached it: the caller keeps whatever the user has rather than dropping it.
             logger.e(e) { "Unexpected error while trying to $action" }
-            Either.Left("Could not $action.")
+            Either.Left(AccountError("Could not $action.", serverRefused = false))
         }
     }
 }

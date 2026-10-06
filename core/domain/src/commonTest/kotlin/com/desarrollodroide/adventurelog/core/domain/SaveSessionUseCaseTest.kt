@@ -19,7 +19,7 @@ class SaveSessionUseCaseTest {
         var savedUserDetails: UserDetails? = null
         var activeUserDetails: UserDetails? = null
 
-        override suspend fun saveRememberMeCredentials(url: String, username: String, password: String) {
+        override suspend fun saveRememberMeCredentials(url: String, username: String) {
             throw NotImplementedError()
         }
 

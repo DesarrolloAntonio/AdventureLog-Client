@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain
 import app.cash.paging.PagingData
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
-import com.desarrollodroide.adventurelog.core.domain.repository.CollectionsRepository
+import com.desarrollodroide.adventurelog.core.testing.CollectionsRepositoryStub
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCollectionsUseCase
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.CollectionExport
@@ -20,105 +20,28 @@ import kotlin.test.assertTrue
 
 class GetCollectionsUseCaseTest {
 
-    private class FakeCollectionsRepository : CollectionsRepository {
+    private class FakeCollectionsRepository : CollectionsRepositoryStub() {
         var getCollectionsResult: Either<ApiResponse, List<UltraSlimCollection>> = Either.Right(emptyList())
         var getCollectionsCallCount = 0
         var lastPageParam: Int? = null
         var lastPageSizeParam: Int? = null
-        
-        private val _collectionsFlow = MutableStateFlow<List<UltraSlimCollection>>(emptyList())
-        override val collectionsFlow: StateFlow<List<UltraSlimCollection>> = _collectionsFlow
 
-        override fun getCollectionsPagingData(
-            sortField: String?,
-            sortDirection: String?
-        ): Flow<PagingData<UltraSlimCollection>> {
-            return flowOf(PagingData.empty())
-        }
-
-        override suspend fun getCollections(page: Int, pageSize: Int): Either<ApiResponse, List<UltraSlimCollection>> {
+        override suspend fun getCollections(
+            page: Int,
+            pageSize: Int
+        ): Either<ApiResponse, List<UltraSlimCollection>> {
             getCollectionsCallCount++
             lastPageParam = page
             lastPageSizeParam = pageSize
             return getCollectionsResult
         }
 
-        override suspend fun getAllCollections(forceRefresh: Boolean): Either<ApiResponse, List<UltraSlimCollection>> {
-            return getCollectionsResult
-        }
+        override suspend fun getAllCollections(
+            forceRefresh: Boolean
+        ): Either<ApiResponse, List<UltraSlimCollection>> = getCollectionsResult
 
-        override suspend fun getCollection(collectionId: String): Either<ApiResponse, Collection> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun createCollection(
-            name: String,
-            description: String,
-            isPublic: Boolean,
-            startDate: String?,
-            endDate: String?
-        ): Either<ApiResponse, Collection> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>> {
-            return getCollectionsResult
-        }
-
-        override suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun duplicateCollection(
-            collectionId: String
-        ): Either<ApiResponse, Collection> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun setArchived(
-            collectionId: String,
-            archived: Boolean
-        ): Either<ApiResponse, Collection> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun exportCollection(
-            collectionId: String,
-            what: CollectionExport
-        ): Either<ApiResponse, ByteArray> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getArchivedCollections(): Either<ApiResponse, List<UltraSlimCollection>> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getSharedCollections(): Either<ApiResponse, List<UltraSlimCollection>> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun getInvites(): Either<ApiResponse, List<CollectionInvite>> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun respondToInvite(
-            collectionId: String,
-            accept: Boolean
-        ): Either<ApiResponse, Unit> {
-            throw NotImplementedError()
-        }
-
-        override suspend fun updateCollection(
-            collectionId: String,
-            name: String,
-            description: String,
-            isPublic: Boolean,
-            startDate: String?,
-            endDate: String?,
-            link: String?
-        ): Either<ApiResponse, Collection> {
-            throw NotImplementedError()
-        }
+        override suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>> =
+            getCollectionsResult
     }
 
     private val fakeRepository = FakeCollectionsRepository()
@@ -148,7 +71,7 @@ class GetCollectionsUseCaseTest {
         val result = useCase(page = 1, pageSize = 10)
 
         assertTrue(result is Either.Left)
-        assertEquals("Network unavailable", result.value)
+        assertEquals("Can't reach the server. Check your connection.", result.value)
     }
 
     @Test

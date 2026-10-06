@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,6 +25,12 @@ fun StyledTextField(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     singleLine: Boolean = true,
+    /**
+     * How tall a multi-line field starts. The caller's height modifier lands on the wrapping
+     * Column, not on the field, so setting it there gave a one-line box with an empty gap
+     * underneath it.
+     */
+    minLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     isError: Boolean = false,
     errorMessage: String = ""
@@ -33,30 +39,42 @@ fun StyledTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { 
-                Text(
-                    text = label,
-                    color = Color.Gray
-                ) 
+            // A label, not a placeholder: a placeholder goes the moment there is text, and a filled
+            // form read "QA123" and "80.00" with nothing saying which was the reservation and
+            // which the price (QA CO-19).
+            label = { Text(text = label) },
+            // Only a single-line field gets a fixed height. It used to be forced on every field
+            // together with maxLines = 1, so asking for a multi-line one - a note, a description -
+            // still gave one 55dp line that scrolled sideways.
+            modifier = if (singleLine) {
+                Modifier.fillMaxWidth().heightIn(min = 56.dp)
+            } else {
+                Modifier.fillMaxWidth()
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(55.dp),
             singleLine = singleLine,
-            maxLines = 1,
+            minLines = if (singleLine) 1 else minLines,
+            maxLines = if (singleLine) 1 else Int.MAX_VALUE,
             keyboardOptions = keyboardOptions,
-            leadingIcon = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color.Gray
-                )
+            // Only beside a single line. Material centres a leading icon vertically, so in a
+            // multi-line field it floated halfway down, away from the text it labels (QA 04).
+            leadingIcon = if (singleLine) {
+                {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                null
             },
             isError = isError,
             shape = RoundedCornerShape(30.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                // A solid container tone, not a 30% wash. Against the flat surface the redesign
+                // uses, a translucent fill left the field barely distinguishable from the page.
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 focusedBorderColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = if (isError) MaterialTheme.colorScheme.error else Color.Transparent
             )

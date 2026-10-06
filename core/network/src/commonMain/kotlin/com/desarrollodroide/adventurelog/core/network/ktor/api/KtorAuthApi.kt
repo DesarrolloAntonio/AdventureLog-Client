@@ -4,6 +4,8 @@ import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.api.AuthApi
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
+import com.desarrollodroide.adventurelog.core.network.ktor.SESSION_PATH
+import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.ktor.redactSecrets
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
@@ -11,6 +13,7 @@ import com.desarrollodroide.adventurelog.core.network.model.request.LoginRespons
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -114,5 +117,20 @@ class KtorAuthApi(
                 "Login failed with status: ${response.status}"
             )
         }
+    }
+
+    /**
+     * The web's sign-out: DELETE on allauth's session. allauth answers **401** when it has worked -
+     * "you are now not authenticated" - so no status is an error here; this is best effort, and
+     * the local sign-out never waits on it.
+     */
+    override suspend fun logout(baseUrl: String, sessionToken: String) {
+        val response = httpClient.delete("$baseUrl$SESSION_PATH") {
+            headers {
+                commonHeaders(sessionToken)
+                append("Referer", baseUrl)
+            }
+        }
+        logger.d { "Server session ended (${response.status.value})" }
     }
 }

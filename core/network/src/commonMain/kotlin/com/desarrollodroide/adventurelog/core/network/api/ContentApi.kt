@@ -9,4 +9,9 @@ interface ContentApi {
         imageBytes: ByteArray,
         fileName: String
     )
+
+    suspend fun deleteImage(imageId: String)
+
+    /** The server refuses (400) an image that is already the primary one. */
+    suspend fun setPrimaryImage(imageId: String)
 }

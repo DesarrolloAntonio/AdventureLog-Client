@@ -5,6 +5,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -13,16 +15,20 @@ fun RememberSessionSection(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    // The whole row is the control, so the words are both what TalkBack reads and something to
+    // tap; they were a separate, dead label next to a nameless box. 48dp, not 40: the box's own
+    // touch target overflowed the row into the Login button above it.
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(40.dp)
+            .heightIn(min = 48.dp)
+            .toggleable(value = checked, role = Role.Checkbox, onValueChange = onCheckedChange)
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = null
         )
         Text(
             text = "Remember me",

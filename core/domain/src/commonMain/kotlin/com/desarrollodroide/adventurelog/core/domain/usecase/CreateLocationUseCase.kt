@@ -23,7 +23,13 @@ class CreateLocationUseCase(
         tags: List<String>,
         visits: List<VisitFormData> = emptyList(),
         price: Double? = null,
-        priceCurrency: String? = null
+        priceCurrency: String? = null,
+        /**
+         * Collections the new place joins on creation. The server takes them in the same POST, so
+         * a place added from inside a collection needs one call rather than a create followed by
+         * a membership update that can fail on its own.
+         */
+        collectionIds: List<String> = emptyList()
     ): Either<String, Location> {
         if (name.isBlank()) {
             return Either.Left("Location name is required")
@@ -42,12 +48,14 @@ class CreateLocationUseCase(
             visits = visits,
             price = price,
             priceCurrency = priceCurrency,
-            activityTypes = tags
+            activityTypes = tags,
+            collectionIds = collectionIds
         )) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Failed to create location. Please try again.")
+                    is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")
                 }
             }

@@ -17,14 +17,19 @@ class GetLocationsPagingUseCase(
         sortOrder: String? = null,
         isVisited: Boolean? = null,
         searchQuery: String? = null,
-        includeCollections: Boolean = false
+        includeCollections: Boolean = true
     ): Flow<PagingData<Location>> {
-        val hasFilters = !categoryNames.isNullOrEmpty() || 
-                        (sortBy != null && sortBy != "updated_at") || 
-                        (sortOrder != null && sortOrder != "desc") || 
-                        isVisited != null || 
+        // The plain endpoint returns everything the account has, collection places included -
+        // the same set as the filtered one with include_collections=true. So true is the
+        // default here, and the only thing worth routing for is a caller asking to leave
+        // collection places out. Testing it for truth did the opposite: hiding them was the one
+        // request that never reached the endpoint that can do it.
+        val hasFilters = !categoryNames.isNullOrEmpty() ||
+                        (sortBy != null && sortBy != "updated_at") ||
+                        (sortOrder != null && sortOrder != "desc") ||
+                        isVisited != null ||
                         !searchQuery.isNullOrBlank() ||
-                        includeCollections
+                        !includeCollections
         
         return if (hasFilters) {
             locationsRepository.getLocationsPagingDataFiltered(

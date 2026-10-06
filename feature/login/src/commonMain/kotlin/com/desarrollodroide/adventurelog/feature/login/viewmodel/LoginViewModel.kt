@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.login.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.desarrollodroide.adventurelog.core.common.Either
@@ -20,11 +21,12 @@ class LoginViewModel(
     private val loginUseCase: LoginUseCase,
     private val initializeSessionUseCase: InitializeSessionUseCase,
     private val saveSessionUseCase: SaveSessionUseCase,
-    private val rememberMeCredentialsUseCase: RememberMeCredentialsUseCase
+    private val rememberMeCredentialsUseCase: RememberMeCredentialsUseCase,
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle()
 ) : ViewModel() {
 
     private val logger = co.touchlab.kermit.Logger.withTag("LoginViewModel")
-    private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Loading)
+    private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.CheckingSession)
     val uiState: StateFlow<LoginUiState> = _uiState
 
     private val _loginFormState = MutableStateFlow(LoginFormState())
@@ -46,6 +48,7 @@ class LoginViewModel(
                 }
 
                 loadRememberMeCredentials()
+                restoreTypedFields()
                 _uiState.update { LoginUiState.Empty }
 
             } catch (e: Exception) {
@@ -65,7 +68,7 @@ class LoginViewModel(
                 _loginFormState.update {
                     LoginFormState(
                         userName = account.userName,
-                        password = account.password,
+                        password = "",
                         serverUrl = account.serverUrl,
                         rememberSession = true,
                         userNameError = false,
@@ -93,7 +96,27 @@ class LoginViewModel(
         }
     }
 
+    /**
+     * What the user typed before Android killed the app - switching to a password manager is
+     * enough - wins over the remembered account. The password is not kept: saved state is written
+     * out of the process, and a password has no business there.
+     */
+    private fun restoreTypedFields() {
+        val userName = savedStateHandle.get<String>(KEY_USER_NAME)
+        val serverUrl = savedStateHandle.get<String>(KEY_SERVER_URL)
+        val remember = savedStateHandle.get<Boolean>(KEY_REMEMBER)
+        if (userName == null && serverUrl == null && remember == null) return
+        _loginFormState.update {
+            it.copy(
+                userName = userName ?: it.userName,
+                serverUrl = serverUrl ?: it.serverUrl,
+                rememberSession = remember ?: it.rememberSession
+            )
+        }
+    }
+
     fun updateUserName(newUserName: String) {
+        savedStateHandle[KEY_USER_NAME] = newUserName
         _loginFormState.value = _loginFormState.value.copy(
             userName = newUserName,
             userNameError = newUserName.isBlank()
@@ -108,6 +131,7 @@ class LoginViewModel(
     }
 
     fun updateServerUrl(newUrl: String) {
+        savedStateHandle[KEY_SERVER_URL] = newUrl
         _loginFormState.value = _loginFormState.value.copy(
             serverUrl = newUrl,
             urlError = !isValidUrl(newUrl)
@@ -115,6 +139,7 @@ class LoginViewModel(
     }
 
     fun updateRememberSession(value: Boolean) {
+        savedStateHandle[KEY_REMEMBER] = value
         _loginFormState.value = _loginFormState.value.copy(rememberSession = value)
 
         if (!value) {
@@ -187,10 +212,9 @@ class LoginViewModel(
                         if (rememberSession) {
                             rememberMeCredentialsUseCase.save(
                                 url = url,
-                                username = username,
-                                password = password
+                                username = username
                             )
-                            logger.d { "Saved persistent session and credentials - will auto-login next time" }
+                            logger.d { "Saved persistent session, server and username - will auto-login next time" }
                         } else {
                             rememberMeCredentialsUseCase.clear()
                             logger.d { "Remember me not checked - session is active for this run only" }
@@ -204,6 +228,12 @@ class LoginViewModel(
                 _uiState.update { LoginUiState.Error("Unexpected error occurred: ${e.message}") }
             }
         }
+    }
+
+    private companion object {
+        const val KEY_USER_NAME = "login_user_name"
+        const val KEY_SERVER_URL = "login_server_url"
+        const val KEY_REMEMBER = "login_remember"
     }
 
     fun clearErrors() {

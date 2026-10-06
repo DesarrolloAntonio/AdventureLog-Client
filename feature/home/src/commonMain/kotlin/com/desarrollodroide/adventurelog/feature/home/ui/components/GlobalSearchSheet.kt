@@ -22,6 +22,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -59,6 +60,13 @@ fun GlobalSearchSheet(
 ) {
     val viewModel = koinViewModel<GlobalSearchViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // The ViewModel belongs to the shell and outlives the sheet, so every way of closing it - a
+    // result, the scrim, a drag, back - starts the next search from nothing instead of reopening
+    // on the last one.
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.clear() }
+    }
     val focus = remember { FocusRequester() }
 
     LaunchedEffect(Unit) { focus.requestFocus() }

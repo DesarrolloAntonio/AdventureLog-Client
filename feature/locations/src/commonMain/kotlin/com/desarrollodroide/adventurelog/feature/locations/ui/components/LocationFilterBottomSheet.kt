@@ -164,7 +164,7 @@ internal fun LocationsFilterContent(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${getActiveFiltersCount(filters)} active filters",
+                            text = activeFiltersLabel(getActiveFiltersCount(filters)),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -318,13 +318,22 @@ private fun IncludeCollectionsSection(
     }
 }
 
+private fun activeFiltersLabel(count: Int): String = when (count) {
+    0 -> "No filters applied"
+    1 -> "1 active filter"
+    else -> "$count active filters"
+}
+
 private fun getActiveFiltersCount(filters: LocationFilters): Int {
     var count = 0
     if (filters.categoryNames.isNotEmpty()) count++
     if (filters.sortField != LocationSortField.UPDATED_AT) count++
     if (filters.sortDirection != SortDirection.DESCENDING) count++
     if (filters.visitedFilter != VisitedFilter.ALL) count++
-    if (filters.includeCollections) count++
+    // Counting this when it is *on* was right while off was the default. It is on by default
+    // now, so an untouched sheet announced one active filter, and the reset button could not
+    // clear it.
+    if (!filters.includeCollections) count++
     return count
 }
 

@@ -5,8 +5,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.feature.map.ui.components.MapContent
+import com.desarrollodroide.adventurelog.feature.map.ui.state.mapMarkers
 import com.desarrollodroide.adventurelog.feature.map.ui.components.MapFilterSheet
 import com.desarrollodroide.adventurelog.feature.map.ui.components.ClearStatsSection
 import com.desarrollodroide.adventurelog.feature.map.viewmodel.MapViewModel
@@ -22,21 +24,35 @@ fun MapScreen(
     var showFilterSheet by remember { mutableStateOf(false) }
     
     val filteredAdventures = remember(uiState.locations, uiState.filters) {
-        uiState.locations.filter { adventure ->
-            val matchesVisitFilter = (adventure.isVisited && uiState.filters.showVisited) || 
-                                    (!adventure.isVisited && uiState.filters.showPlanned)
-            
-            val matchesActivityType = uiState.filters.selectedActivityTypes.isEmpty() ||
-                                    adventure.tags.any { it in uiState.filters.selectedActivityTypes }
-
-            val matchesCategory = uiState.filters.selectedCategories.isEmpty() ||
-                                    adventure.category?.displayName in uiState.filters.selectedCategories
-
-            matchesVisitFilter && matchesActivityType && matchesCategory
-        }
+        uiState.locations.mapMarkers(uiState.filters)
     }
-    
-    Box(modifier = Modifier.fillMaxSize()) {
+
+    // Coming back to a map that failed to load tries again; without it the error stayed for the
+    // rest of the session (measured). A map that loaded is left alone - it is the heaviest read
+    // in the app.
+    LifecycleStartEffect(uiState.error) {
+        if (uiState.error != null) viewModel.refresh()
+        onStopOrDispose { }
+    }
+
+    // The card sits above the map, not over it. Floating on top it covered the northern edge of
+    // whatever was framed - a place in Norway sat under it - and with places spread from Peru to
+    // Japan no camera padding could make room, because the map is already as far out as it goes
+    // (QA 06, MP-02: padding was tried first and the screenshot showed no change).
+    Column(modifier = Modifier.fillMaxSize()) {
+        ClearStatsSection(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 8.dp, start = 16.dp, end = 16.dp),
+            isLoading = uiState.isLoading,
+            placesFailed = uiState.error != null,
+            regionsKnown = uiState.regionsLoaded,
+            visitedCount = uiState.filters.visitedCount,
+            plannedCount = uiState.filters.plannedCount,
+            regionCount = uiState.filters.regionCount,
+            onFilterClick = { showFilterSheet = true }
+        )
+
         MapContent(
             locations = filteredAdventures,
             visitedRegions = uiState.visitedRegions,
@@ -45,17 +61,9 @@ fun MapScreen(
             showCities = uiState.filters.showCities,
             isLoading = uiState.isLoading,
             error = uiState.error,
-            onAdventureClick = onAdventureClick
-        )
-        
-        ClearStatsSection(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 32.dp, start = 16.dp, end = 16.dp),
-            visitedCount = uiState.filters.visitedCount,
-            plannedCount = uiState.filters.plannedCount,
-            regionCount = uiState.filters.regionCount,
-            onFilterClick = { showFilterSheet = true }
+            onRetry = viewModel::refresh,
+            onAdventureClick = onAdventureClick,
+            modifier = Modifier.weight(1f)
         )
     }
     
