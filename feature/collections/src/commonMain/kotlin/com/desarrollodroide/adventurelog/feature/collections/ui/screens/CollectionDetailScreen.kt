@@ -43,6 +43,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.components.Colle
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionViewSwitcher
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsTabs
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.ItineraryItemPicker
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.summary
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.agenda
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.itinerary
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.stats
@@ -78,6 +79,8 @@ fun CollectionDetailScreen(
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
     onAddPhoto: (Location) -> Unit = onEditAdventure,
+    /** A new place, created inside this collection (QA CO-19). */
+    onAddPlace: () -> Unit = {},
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     onAddNote: (String) -> Unit = {},
@@ -216,6 +219,7 @@ fun CollectionDetailScreen(
                     onDuplicateAdventure = viewModel::duplicateLocation,
                     onShareAdventure = viewModel::shareLocation,
                     onRemoveFromCollection = { adventure -> viewModel.removeFromCollection(adventure, collectionId) },
+                    onAddPlace = onAddPlace,
                     onAddTransportation = onAddTransportation,
                     onEditTransportation = onEditTransportation,
                     onDeleteTransportation = { transportation ->
@@ -301,6 +305,7 @@ fun CollectionDetailContent(
     onDuplicateAdventure: (Location) -> Unit = {},
     onShareAdventure: (Location) -> Unit = {},
     onRemoveFromCollection: (Location) -> Unit = {},
+    onAddPlace: () -> Unit = {},
     onAddTransportation: () -> Unit,
     onEditTransportation: (Transportation) -> Unit,
     onDeleteTransportation: (Transportation) -> Unit,
@@ -431,22 +436,13 @@ fun CollectionDetailContent(
                             fontWeight = FontWeight.Bold
                         )
                         
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    text = "${collection.locations.size}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        // A way to add a place here, like every other section. It showed a count bubble
+                        // instead - the chip above already says how many (QA CO-19).
+                        IconButton(onClick = onAddPlace) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add place"
+                            )
                         }
                     }
                 }
@@ -478,7 +474,7 @@ fun CollectionDetailContent(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Add one from its menu in Places: Manage collections.",
+                                    text = "Tap + to add a new one, or add a place you already have from its menu in Places.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -515,7 +511,8 @@ fun CollectionDetailContent(
                             transportation = transportation,
                             collectionStartDate = collection.startDate,
                             collectionEndDate = collection.endDate
-                        )
+                        ),
+                        summary = transportation.summary()
                     )
                 }
                 
@@ -570,22 +567,13 @@ fun CollectionDetailContent(
                             fontWeight = FontWeight.Bold
                         )
                         
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    text = "${collection.locations.size}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        // A way to add a place here, like every other section. It showed a count bubble
+                        // instead - the chip above already says how many (QA CO-19).
+                        IconButton(onClick = onAddPlace) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add place"
+                            )
                         }
                     }
                 }
@@ -617,7 +605,7 @@ fun CollectionDetailContent(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Add one from its menu in Places: Manage collections.",
+                                    text = "Tap + to add a new one, or add a place you already have from its menu in Places.",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -675,7 +663,8 @@ fun CollectionDetailContent(
                             transportation = transportation,
                             collectionStartDate = collection.startDate,
                             collectionEndDate = collection.endDate
-                        )
+                        ),
+                        summary = transportation.summary()
                     )
                 }
                 
@@ -920,7 +909,9 @@ data class TransportationItem(
     val name: String,
     val type: String,
     val imageUrl: String?,
-    val isNotInItineraryDateRange: Boolean = false
+    val isNotInItineraryDateRange: Boolean = false,
+    /** "2 Nov 2026 · Madrid → Barcelona" - see [Transportation.summary]. */
+    val summary: String? = null
 )
 
 @Composable
@@ -991,6 +982,16 @@ fun TransportationItemCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+
+                transportation.summary?.let { summary ->
+                    Text(
+                        text = summary,
+                        color = Color.White.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 

@@ -17,7 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Link
@@ -52,6 +52,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.filled.Hotel
@@ -119,6 +120,9 @@ fun AddEditLodgingScreen(
                 )
 
                 SectionCard(
+                    // The rows below it already sit inside the form's 16dp; the card added its own and
+                    // came out narrower than everything else on the page (QA CO-19).
+                    inset = 0.dp,
                     title = "The stay",
                     icon = Icons.Default.Hotel,
                     expanded = stayOpen,
@@ -184,8 +188,10 @@ fun AddEditLodgingScreen(
                     StyledTextField(
                         value = state.price,
                         onValueChange = viewModel::onPriceChange,
-                        label = "Price",
-                        icon = Icons.Default.AttachMoney,
+                        // Not a dollar sign over a price in euros: the currency the stay is in, by its
+                        // code, and a plain money icon (QA CO-19).
+                        label = state.priceCurrency.takeIf { it.isNotBlank() }?.let { "Price ($it)" } ?: "Price",
+                        icon = Icons.Outlined.Payments,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -226,22 +232,18 @@ fun AddEditLodgingScreen(
                     )
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
+                // The same pair as the collection and transport forms: Save across the form,
+                // Cancel under it. These three had a small Save and Cancel side by side on the
+                // left (QA CO-19).
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    PrimaryButton(
                         onClick = { viewModel.save(collectionId) },
-                        enabled = state.canSave,
-                        shape = RoundedCornerShape(22.dp)
-                    ) {
-                        if (state.isSaving) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.height(18.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text("Save")
-                        }
+                        text = if (state.isSaving) "Saving…" else "Save",
+                        enabled = state.canSave
+                    )
+                    TextButton(onClick = leave, modifier = Modifier.fillMaxWidth()) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    TextButton(onClick = leave) { Text("Cancel") }
                 }
             }
         }

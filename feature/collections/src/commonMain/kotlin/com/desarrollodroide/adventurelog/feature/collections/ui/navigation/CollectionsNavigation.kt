@@ -42,6 +42,8 @@ interface CollectionsNavigator {
     /** [openImages] opens the form on its images, for "Add photo". */
     fun navigateToEditAdventure(adventure: Location, openImages: Boolean = false)
     fun navigateToAddTransportation(collectionId: String)
+    /** The add-place form, for a new place created inside [collectionId]. */
+    fun navigateToAddPlace(collectionId: String) {}
     fun navigateToEditTransportation(transportationId: String, transportationJson: String)
     fun navigateToAddNote(collectionId: String)
     fun navigateToEditNote(collectionId: String, noteId: String, noteJson: String)
@@ -132,6 +134,7 @@ fun NavGraphBuilder.collectionsScreen(
             onAddPhoto = { adventure ->
                 navigator.navigateToEditAdventure(adventure, openImages = true)
             },
+            onAddPlace = { navigator.navigateToAddPlace(collectionId) },
             onAddTransportation = {
                 navigator.navigateToAddTransportation(collectionId)
             },

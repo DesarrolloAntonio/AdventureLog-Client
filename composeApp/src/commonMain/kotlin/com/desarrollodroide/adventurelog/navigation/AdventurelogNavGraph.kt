@@ -117,6 +117,10 @@ fun AdventureLogNavGraph(
         override fun navigateToEditAdventure(adventure: Location, openImages: Boolean) {
             navigateToHome()
         }
+        // The add-place form lives in this graph too, so this one can open in place.
+        override fun navigateToAddPlace(collectionId: String) {
+            navController.navigate(NavigationRoutes.Locations.createAddRoute(collectionId)) { launchSingleTop = true }
+        }
         override fun navigateToAddTransportation(collectionId: String) {
             navigateToHome()
         }

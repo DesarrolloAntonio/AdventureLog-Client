@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.feature.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,17 +39,15 @@ fun StyledTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = {
-                Text(
-                    text = label,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
+            // A label, not a placeholder: a placeholder goes the moment there is text, and a filled
+            // form read "QA123" and "80.00" with nothing saying which was the reservation and
+            // which the price (QA CO-19).
+            label = { Text(text = label) },
             // Only a single-line field gets a fixed height. It used to be forced on every field
             // together with maxLines = 1, so asking for a multi-line one - a note, a description -
             // still gave one 55dp line that scrolled sideways.
             modifier = if (singleLine) {
-                Modifier.fillMaxWidth().height(55.dp)
+                Modifier.fillMaxWidth().heightIn(min = 56.dp)
             } else {
                 Modifier.fillMaxWidth()
             },

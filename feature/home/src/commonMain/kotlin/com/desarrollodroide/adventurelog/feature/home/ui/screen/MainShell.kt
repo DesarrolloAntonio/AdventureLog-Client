@@ -673,6 +673,9 @@ fun HomeScreenContent(
                                         )
                                     )
                                 },
+                                onAddPlace = { collectionId ->
+                                    navController.navigate(NavigationRoutes.Locations.createAddRoute(collectionId)) { launchSingleTop = true }
+                                },
                                 onEditTransportation = { transportation ->
                                     navController.navigate(
                                         NavigationRoutes.Collections.Transportations.createEditRoute(
@@ -834,6 +837,10 @@ fun HomeScreenContent(
                                             openImages = openImages
                                         )
                                     )
+                                }
+
+                                override fun navigateToAddPlace(collectionId: String) {
+                                    navController.navigate(NavigationRoutes.Locations.createAddRoute(collectionId)) { launchSingleTop = true }
                                 }
 
                                 override fun navigateToAddTransportation(collectionId: String) {

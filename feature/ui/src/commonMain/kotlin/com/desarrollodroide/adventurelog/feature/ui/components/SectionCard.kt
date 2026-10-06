@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -35,12 +36,15 @@ fun SectionCard(
     onExpandedChange: (Boolean) -> Unit,
     leadingContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
+    /** The card's own side margin. A form that already pads its column passes 0. */
+    inset: Dp = 16.dp,
     content: @Composable () -> Unit
 ) {
     Card(
-        modifier = Modifier
+        // [modifier] was declared and never applied.
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = inset, vertical = 8.dp),
         shape = RoundedCornerShape(18.dp),
         // surfaceContainerLowest with no shadow, like every other card since the redesign. This
         // was a translucent `surface` with a 1dp elevation - the same colour as the page it sits

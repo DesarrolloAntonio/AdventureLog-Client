@@ -14,6 +14,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -129,6 +130,19 @@ class SharedComponentsTest {
         waitForIdle()
 
         assertEquals(1, refreshes)
+    }
+
+
+    // QA CO-19: once filled, a field read "QA123" with nothing saying it was the reservation.
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun aFilledFieldStillSaysWhatItIs() = runComposeUiTest {
+        setContent {
+            StyledTextField(value = "QA123", onValueChange = {}, label = "Reservation", icon = Icons.Default.Title)
+        }
+
+        onNode(hasSetTextAction() and hasText("Reservation")).assertExists()
+        onNode(hasSetTextAction() and hasText("QA123")).assertExists()
     }
 
 }
