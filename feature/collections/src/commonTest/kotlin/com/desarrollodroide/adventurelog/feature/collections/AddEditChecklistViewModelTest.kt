@@ -225,6 +225,49 @@ class AddEditChecklistViewModelTest {
         assertTrue(vm.state.value.saved)
         assertEquals(1, repo.updates)
     }
+
+    // QA RL-09: Cancel threw a filled-in list away without asking. These decide whether it asks.
+
+    private suspend fun kotlinx.coroutines.test.TestScope.loadedPacking(): AddEditChecklistViewModel {
+        val (vm, repo) = viewModel()
+        repo.collection = Either.Right(collectionWithChecklist(
+            Checklist(
+                id = "k1", user = "u", name = "Packing", createdAt = "", updatedAt = "",
+                items = listOf(ChecklistItem("i1", "u", "Boots", false, "k1", "", ""))
+            )
+        ))
+        vm.load("c1", "k1")
+        testScheduler.advanceUntilIdle()
+        return vm
+    }
+
+    @Test
+    fun aNewListWithSomethingTypedHasChangesToLose() {
+        val (vm, _) = viewModel()
+        vm.onNameChange("Packing")
+        assertTrue(vm.hasChanges())
+    }
+
+    @Test
+    fun anItemTypedButNotAddedYetCountsAsAChange() {
+        val (vm, _) = viewModel()
+        vm.onDraftChange("Passport")
+        assertTrue(vm.hasChanges())
+    }
+
+    @Test
+    fun tickingAnItemOfALoadedListIsAChange() = runTest(dispatcher) {
+        val vm = loadedPacking()
+        vm.toggleLine(0)
+        assertTrue(vm.hasChanges())
+    }
+
+    @Test
+    fun anUntouchedFormHasNothingToLose() = runTest(dispatcher) {
+        assertFalse(viewModel().first.hasChanges())
+        assertFalse(loadedPacking().hasChanges())
+    }
+
 }
 
 private fun collectionWithChecklist(vararg lists: Checklist) = Collection(

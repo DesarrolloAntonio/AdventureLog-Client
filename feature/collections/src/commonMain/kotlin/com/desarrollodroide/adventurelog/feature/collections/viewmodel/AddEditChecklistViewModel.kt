@@ -75,6 +75,17 @@ class AddEditChecklistViewModel(
         load(collectionId, id)
     }
 
+    /**
+     * Whether leaving now would lose something: what was typed differs from the checklist as it
+     * opened (empty for a new one), counting an item typed but not added yet. Cancel used to throw
+     * a filled-in list away without asking, where the place form asks (QA RL-09).
+     */
+    fun hasChanges(form: ChecklistFormState = _state.value): Boolean {
+        val start = asLoaded ?: ChecklistFormState()
+        return form.name != start.name || form.lines != start.lines || form.date != start.date ||
+            form.isPublic != start.isPublic || form.draft.isNotBlank()
+    }
+
     fun onNameChange(value: String) = _state.update { it.copy(name = value) }
     fun onDraftChange(value: String) = _state.update { it.copy(draft = value) }
     fun onDateChange(value: String) = _state.update { it.copy(date = value) }
