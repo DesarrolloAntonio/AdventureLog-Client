@@ -309,8 +309,15 @@ gesture, because the whole app is a single view controller.
 **A signed release build.** There is no signing configuration in the project at all, and CI
 publishes a debug APK. This is the piece missing between here and a store listing.
 
-**The remaining gaps against the web client.** Downloading the calendar as `.ics`, uploading a
-profile picture, and the parts of Settings covering MFA, API keys and third-party integrations.
+**The remaining gaps against the web client.** Decided on 2026-10-06, after a QA pass listed
+every feature the web has and this app doesn't:
+
+- *Next:* signing in to accounts with **MFA or SSO** (today they cannot sign in at all), a **Spanish**
+  translation, **leaving a collection** shared with you, and **uploading attachments** to a place.
+- *Out of scope for now:* sign-up and password reset (the web does them), the other 23 languages,
+  Strava/GPX activities, locate-me and sunrise/sunset, collection import, cover picking and
+  itinerary reordering, map search, tap-to-add and layers, the month calendar and `.ics` export,
+  profile pictures, API keys and third-party integrations.
 
 **Wider tests.** The data layer and the ViewModels have no tests, and while there are Maestro
 flows, nothing runs them in CI.
