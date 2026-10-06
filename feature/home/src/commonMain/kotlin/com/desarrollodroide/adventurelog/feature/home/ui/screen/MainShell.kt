@@ -455,9 +455,11 @@ fun HomeScreenContent(
                                 serverUrl = userDetails?.serverUrl.orEmpty(),
                                 onSettings = { navigateTo(CurrentScreen.SETTINGS) },
                                 onCalendar = { navigateTo(CurrentScreen.CALENDAR) },
-                                onUsers = {
-                                    navController.navigate(NavigationRoutes.Users.route) { launchSingleTop = true }
-                                },
+                                // A section of its own, like Calendar and Settings. Pushed with a plain
+                                // navigate it landed inside whichever section was open, and that
+                                // section's saved stack then reopened People: Calendar showed People
+                                // until the app restarted (QA RL-10).
+                                onUsers = { navigateTo(CurrentScreen.USERS) },
                                 onLogout = onLogout
                             )
                         },
