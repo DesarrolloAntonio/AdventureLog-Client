@@ -16,7 +16,7 @@ class DuplicateLocationUseCase(
         when (val result = locationsRepository.duplicateLocation(locationId)) {
             is Either.Left -> Either.Left(
                 when (result.value) {
-                    is ApiResponse.IOException -> "No internet connection."
+                    is ApiResponse.IOException -> CANT_REACH_SERVER
                     is ApiResponse.Forbidden -> "That place belongs to someone else."
                     is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."
                     is ApiResponse.HttpError -> "Could not duplicate this location."

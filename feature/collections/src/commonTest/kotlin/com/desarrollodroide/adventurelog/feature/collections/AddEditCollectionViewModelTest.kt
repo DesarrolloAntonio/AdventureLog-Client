@@ -69,7 +69,7 @@ class AddEditCollectionViewModelTest {
         advanceUntilIdle()
         assertFalse(vm.uiState.value.isLoading)
         assertFalse(vm.uiState.value.isSaving)
-        assertEquals("No internet connection. Please check your network.", vm.uiState.value.errorMessage)
+        assertEquals("Can't reach the server. Check your connection.", vm.uiState.value.errorMessage)
     }
 
     @Test

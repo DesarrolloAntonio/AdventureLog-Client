@@ -205,7 +205,7 @@ class CalendarViewModelTest {
         )
         testScheduler.advanceUntilIdle()
 
-        assertEquals("No internet connection.", vm.uiState.value.error)
+        assertEquals("Can't reach the server. Check your connection.", vm.uiState.value.error)
         assertEquals(false, vm.uiState.value.isLoading)
         assertNull(vm.uiState.value.today)
     }
@@ -263,7 +263,7 @@ class CalendarViewModelTest {
         vm.loadEarlier()
         testScheduler.advanceUntilIdle()
 
-        assertEquals(Earlier.Failed("No internet connection."), vm.uiState.value.earlier)
+        assertEquals(Earlier.Failed("Can't reach the server. Check your connection."), vm.uiState.value.earlier)
         assertEquals(listOf("recent"), vm.uiState.value.days.flatMap { it.events }.map { it.id })
 
         journal.before = Either.Right(listOf(testCalendarEvent("petra", "2024-05-18")))

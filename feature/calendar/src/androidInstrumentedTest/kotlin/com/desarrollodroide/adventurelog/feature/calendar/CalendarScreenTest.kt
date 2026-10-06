@@ -73,12 +73,12 @@ class CalendarScreenTest {
         var retries = 0
         setContent {
             show(
-                CalendarUiState(isLoading = false, error = "No internet connection."),
+                CalendarUiState(isLoading = false, error = "Can't reach the server. Check your connection."),
                 onRetry = { retries++ }
             )()
         }
 
-        onNodeWithText("No internet connection.").assertIsDisplayed()
+        onNodeWithText("Can't reach the server. Check your connection.").assertIsDisplayed()
         onNodeWithText("Try again").performClick()
         assertEquals(1, retries)
     }

@@ -117,7 +117,7 @@ class AddEditNoteViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertFalse(vm.state.value.saved)
-        assertEquals("Network unavailable", vm.state.value.error)
+        assertEquals("Can't reach the server. Check your connection.", vm.state.value.error)
         assertEquals("Book the 6am slot", vm.state.value.content)
     }
 
@@ -145,7 +145,7 @@ class AddEditNoteViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals("", vm.state.value.name)
-        assertEquals("Network unavailable", vm.state.value.loadError)
+        assertEquals("Can't reach the server. Check your connection.", vm.state.value.loadError)
     }
 
     // QA RL-09: Cancel left without asking. These decide whether it asks.

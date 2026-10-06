@@ -388,7 +388,7 @@ class LocationsViewModelTest {
         vm.shareLocation(place)
         testScheduler.advanceUntilIdle()
 
-        assertEquals("No internet connection.", vm.actionMessage.value)
+        assertEquals("Can't reach the server. Check your connection.", vm.actionMessage.value)
     }
 
     @Test
@@ -445,7 +445,7 @@ class LocationsViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(
-            LocationsViewModel.DeleteState.Error("No internet connection. Please check your network."),
+            LocationsViewModel.DeleteState.Error("Can't reach the server. Check your connection."),
             vm.deleteState.value
         )
 
@@ -475,7 +475,7 @@ class LocationsViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(
-            CategoriesState.Error("No internet connection. Please check your network."),
+            CategoriesState.Error("Can't reach the server. Check your connection."),
             vm.categoriesState.value
         )
         assertEquals(1, categories.getCalls)

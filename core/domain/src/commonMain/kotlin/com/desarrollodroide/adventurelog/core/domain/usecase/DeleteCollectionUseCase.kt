@@ -11,7 +11,7 @@ class DeleteCollectionUseCase(
         return when (val result = collectionsRepository.deleteCollection(collectionId)) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("No internet connection. Please check your network.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Failed to delete collection. Please try again.")
                     is ApiResponse.Forbidden -> Either.Left("That collection belongs to someone else, so only its owner can delete it.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")

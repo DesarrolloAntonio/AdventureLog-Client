@@ -27,7 +27,7 @@ class RemoveLocationFromCollectionUseCase(
     }
 
     private fun ApiResponse.message(): String = when (this) {
-        is ApiResponse.IOException -> "Can't reach the server. Check your connection."
+        is ApiResponse.IOException -> CANT_REACH_SERVER
         is ApiResponse.HttpError -> "Could not take the place out of this collection."
         is ApiResponse.Forbidden -> "That place belongs to someone else."
         is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."

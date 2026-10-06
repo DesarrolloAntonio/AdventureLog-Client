@@ -12,7 +12,7 @@ class GetUserStatsUseCase(
         return when (val result = userRepository.getUserStats(username)) {
             is Either.Left -> {
                 when (result.value) {
-                    is ApiResponse.IOException -> Either.Left("No internet connection. Cannot load statistics.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.HttpError -> Either.Left("Failed to load user statistics. Please try again.")
                     is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Session expired. Please log in again.")

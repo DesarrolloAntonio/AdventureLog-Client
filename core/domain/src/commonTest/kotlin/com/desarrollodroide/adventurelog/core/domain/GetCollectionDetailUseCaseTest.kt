@@ -55,7 +55,7 @@ class GetCollectionDetailUseCaseTest {
         val result = useCase("collection123")
 
         assertTrue(result is Either.Left)
-        assertEquals("Network unavailable", result.value)
+        assertEquals("Can't reach the server. Check your connection.", result.value)
     }
 
     @Test

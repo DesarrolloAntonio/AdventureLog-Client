@@ -41,7 +41,7 @@ class RespondToCollectionInviteUseCase(
 private fun <T> Either<ApiResponse, T>.describe(action: String): Either<String, T> = when (this) {
     is Either.Left -> Either.Left(
         when (value) {
-            is ApiResponse.IOException -> "No internet connection."
+            is ApiResponse.IOException -> CANT_REACH_SERVER
             is ApiResponse.Forbidden -> "You don't have permission to do that."
             is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."
             is ApiResponse.HttpError -> "Could not $action."

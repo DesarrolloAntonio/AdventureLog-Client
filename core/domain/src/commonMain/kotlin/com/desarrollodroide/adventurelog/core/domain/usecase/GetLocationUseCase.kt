@@ -22,7 +22,7 @@ class GetLocationUseCase(
             is Either.Left -> {
                 when (result.value) {
                     is ApiResponse.HttpError -> Either.Left("The server could not load this place. Please try again.")
-                    is ApiResponse.IOException -> Either.Left("Can't reach the server. Check your connection.")
+                    is ApiResponse.IOException -> Either.Left(CANT_REACH_SERVER)
                     is ApiResponse.Forbidden -> Either.Left("You don't have permission to do that.")
                     is ApiResponse.InvalidCredentials -> Either.Left("Authentication error. Please login again.")
                 }

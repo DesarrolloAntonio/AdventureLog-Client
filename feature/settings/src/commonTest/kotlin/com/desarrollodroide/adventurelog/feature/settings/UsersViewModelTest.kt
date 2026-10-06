@@ -87,11 +87,11 @@ class UsersViewModelTest {
 
     @Test
     fun aFailureIsShownAndCanBeRetried() = runTest(dispatcher) {
-        val repo = FakeSharing(Either.Left("Network unavailable"))
+        val repo = FakeSharing(Either.Left("Can't reach the server. Check your connection."))
         val vm = UsersViewModel(repo, GetUserStatsUseCase(Stats()))
         testScheduler.advanceUntilIdle()
 
-        assertEquals("Network unavailable", vm.uiState.value.error)
+        assertEquals("Can't reach the server. Check your connection.", vm.uiState.value.error)
         assertTrue(vm.uiState.value.users.isEmpty())
 
         vm.load()
@@ -120,7 +120,7 @@ class UsersViewModelTest {
         advanceUntilIdle()
         vm.openProfile(people.first())
         advanceUntilIdle()
-        assertEquals("No internet connection. Cannot load statistics.", vm.uiState.value.profile?.error)
+        assertEquals("Can't reach the server. Check your connection.", vm.uiState.value.profile?.error)
 
         stats.answer = Either.Right(UserStats(locationCount = 3))
         vm.retryProfile()

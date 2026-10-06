@@ -20,7 +20,7 @@ class UpdateLocationCollectionsUseCase(
         return when (val updateResult = locationsRepository.updateLocationCollections(locationId, collectionIds)) {
             is Either.Left -> {
                 val errorMessage = when (updateResult.value) {
-                    is ApiResponse.IOException -> "Network error"
+                    is ApiResponse.IOException -> CANT_REACH_SERVER
                     is ApiResponse.HttpError -> "Server error"
                     is ApiResponse.Forbidden -> "That place belongs to someone else."
                     is ApiResponse.InvalidCredentials -> "Invalid credentials"

@@ -153,8 +153,8 @@ class AdventureDetailViewModelTest {
         vm.shareLocation(PreviewData.locations.first())
         testScheduler.advanceUntilIdle()
 
-        // "No internet connection." here, "Network unavailable" in the note and region use
+        // "Can't reach the server. Check your connection." here, "Can't reach the server. Check your connection." in the note and region use
         // cases: the same condition, worded three ways across the app.
-        assertEquals("No internet connection.", vm.attachmentMessage.value)
+        assertEquals("Can't reach the server. Check your connection.", vm.attachmentMessage.value)
     }
 }

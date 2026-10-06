@@ -186,7 +186,7 @@ class AddEditChecklistViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals("", vm.state.value.name)
-        assertEquals("Network unavailable", vm.state.value.loadError)
+        assertEquals("Can't reach the server. Check your connection.", vm.state.value.loadError)
     }
 
     private fun packing() = collectionWithChecklist(

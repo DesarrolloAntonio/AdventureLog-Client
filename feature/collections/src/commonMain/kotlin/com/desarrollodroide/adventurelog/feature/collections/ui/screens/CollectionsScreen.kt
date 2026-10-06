@@ -39,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import com.desarrollodroide.adventurelog.core.model.CollectionInvite
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTab
 import com.desarrollodroide.adventurelog.feature.collections.model.collectionsHeader
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.collectionsLoadErrorMessage
 import com.desarrollodroide.adventurelog.feature.collections.model.CollectionsTabContent
 import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
@@ -439,7 +440,7 @@ private fun CollectionsContent(
                 pagingItems.loadState.refresh is LoadStateError -> {
                     val error = pagingItems.loadState.refresh as LoadStateError
                     ErrorState(
-                        message = error.error.message ?: "Unknown error",
+                        message = collectionsLoadErrorMessage(error.error),
                         onRetry = { pagingItems.retry() }
                     )
                 }
@@ -564,7 +565,7 @@ private fun CollectionsPagingList(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Error loading more: ${error.error.message}",
+                                text = collectionsLoadErrorMessage(error.error),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.error
                             )
