@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -129,15 +130,20 @@ fun AddEditTransportationContent(
     collectionEnd: String? = null,
     modifier: Modifier = Modifier
 ) {
-    var formData by remember(existingTransportation) {
-        mutableStateOf(
-            if (existingTransportation != null) {
-                TransportationFormData.fromTransportation(existingTransportation)
-            } else {
-                TransportationFormData()
-            }
-        )
+    val initialFormData = remember(existingTransportation) {
+        if (existingTransportation != null) {
+            TransportationFormData.fromTransportation(existingTransportation)
+        } else {
+            TransportationFormData()
+        }
     }
+    var formData by remember(existingTransportation) { mutableStateOf(initialFormData) }
+    val leave = rememberDiscardGuard(
+        hasChanges = formData != initialFormData,
+        thing = "transport",
+        isEditing = isEditMode,
+        onLeave = onNavigateBack
+    )
 
     if (isEditMode && existingTransportation == null) {
         // Editing needs the record from the server; without it there is no form to save.
@@ -164,7 +170,7 @@ fun AddEditTransportationContent(
             formData = formData,
             transportationTypes = transportationTypes,
             onFormDataChange = { formData = it },
-            onNavigateBack = onNavigateBack,
+            onNavigateBack = leave,
             onGenerateDescription = {
                 onGenerateDescription(formData.name) { generatedDescription ->
                     formData = formData.copy(description = generatedDescription)
@@ -211,7 +217,7 @@ fun AddEditTransportationContent(
             )
 
             TextButton(
-                onClick = onNavigateBack,
+                onClick = leave,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(

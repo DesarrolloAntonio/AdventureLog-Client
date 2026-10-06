@@ -38,6 +38,7 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditNo
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -66,6 +67,12 @@ fun AddEditNoteScreen(
     var detailsOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingNote?.id) { viewModel.load(collectionId, existingNote?.id) }
+    val leave = rememberDiscardGuard(
+        hasChanges = !state.isLoading && viewModel.hasChanges(state),
+        thing = "note",
+        isEditing = existingNote != null,
+        onLeave = onCancel
+    )
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
     LaunchedEffect(state.error) {
         state.error?.let {
@@ -174,7 +181,7 @@ fun AddEditNoteScreen(
                             Text("Save")
                         }
                     }
-                    TextButton(onClick = onCancel) { Text("Cancel") }
+                    TextButton(onClick = leave) { Text("Cancel") }
                 }
             }
         }

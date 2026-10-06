@@ -37,6 +37,16 @@ class AddEditNoteViewModel(
 
     private var noteId: String? = null
 
+    /** The note as it was read; null for a new one. */
+    private var asLoaded: NoteFormState? = null
+
+    /** Whether leaving now would lose something typed - see AddEditChecklistViewModel.hasChanges (QA RL-09). */
+    fun hasChanges(form: NoteFormState = _state.value): Boolean {
+        val start = asLoaded ?: NoteFormState()
+        return form.name != start.name || form.content != start.content || form.date != start.date ||
+            form.isPublic != start.isPublic
+    }
+
     /**
      * The note as the server has it now. The form used to start from the copy carried in the route,
      * and saving put that copy back over whatever had changed since (measured).
@@ -55,7 +65,7 @@ class AddEditNoteViewModel(
                         content = note.content.orEmpty(),
                         date = note.date?.substringBefore('T').orEmpty(),
                         isPublic = note.isPublic
-                    )
+                    ).also { asLoaded = it }
                 }
             }
         }

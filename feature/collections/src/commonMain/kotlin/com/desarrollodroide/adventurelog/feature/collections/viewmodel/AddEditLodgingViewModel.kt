@@ -53,6 +53,16 @@ class AddEditLodgingViewModel(
     private var lodgingId: String? = null
     private var existingTimezone: String? = null
 
+    /** The stay as it was read; null for a new one. */
+    private var asLoaded: LodgingFormState? = null
+
+    /** Whether leaving now would lose something typed - see AddEditChecklistViewModel.hasChanges (QA RL-09). */
+    fun hasChanges(form: LodgingFormState = _state.value): Boolean = form.typed() != (asLoaded ?: LodgingFormState()).typed()
+
+    /** Only what the person typed: the flags that say what the screen is doing are not part of it. */
+    private fun LodgingFormState.typed() =
+        copy(isSaving = false, isLoading = false, loadError = null, error = null, saved = false)
+
     /** The stay as the server has it now - see AddEditNoteViewModel.load. */
     fun load(collectionId: String, id: String?) {
         if (id == null || lodgingId == id) return
@@ -86,7 +96,7 @@ class AddEditLodgingViewModel(
             link = lodging.link.orEmpty(),
             location = lodging.location.orEmpty(),
             isPublic = lodging.isPublic
-        )
+        ).also { asLoaded = it }
     }
 
     fun onNameChange(v: String) = _state.update { it.copy(name = v) }

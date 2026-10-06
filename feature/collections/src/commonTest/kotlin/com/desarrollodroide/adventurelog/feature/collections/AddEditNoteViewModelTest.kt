@@ -147,6 +147,30 @@ class AddEditNoteViewModelTest {
         assertEquals("", vm.state.value.name)
         assertEquals("Network unavailable", vm.state.value.loadError)
     }
+
+    // QA RL-09: Cancel left without asking. These decide whether it asks.
+
+    @Test
+    fun aNewNoteWithSomethingTypedHasChangesToLose() {
+        val vm = viewModel(FakeRepo())
+        vm.onContentChange("Gate 4")
+        assertTrue(vm.hasChanges())
+    }
+
+    @Test
+    fun aLoadedNoteIsOnlyChangedWhenSomethingIsEdited() = runTest(dispatcher) {
+        val repo = FakeRepo()
+        repo.collection = Either.Right(collectionWith(note("n7", "Tickets", content = "Gate 4")))
+        val vm = viewModel(repo)
+        assertFalse(vm.hasChanges())
+
+        vm.load("c1", "n7")
+        testScheduler.advanceUntilIdle()
+        assertFalse(vm.hasChanges())
+
+        vm.onNameChange("Tickets and passes")
+        assertTrue(vm.hasChanges())
+    }
 }
 
 private fun note(id: String, name: String, content: String = "") =

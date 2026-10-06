@@ -162,6 +162,32 @@ class AddEditLodgingViewModelTest {
 
         assertEquals("EUR", repo.priceCurrency)
     }
+
+    // QA RL-09: Cancel left without asking. These decide whether it asks.
+
+    @Test
+    fun aNewStayWithSomethingTypedHasChangesToLose() {
+        val vm = viewModel(FakeRepo())
+        vm.onPriceChange("80")
+        assertTrue(vm.hasChanges())
+    }
+
+    @Test
+    fun aLoadedStayIsOnlyChangedWhenSomethingIsEdited() = runTest(dispatcher) {
+        val repo = FakeRepo()
+        repo.collection = Either.Right(emptyCollection(
+            Lodging(id = "l1", user = "u", name = "Hotel", price = "80.00", priceCurrency = "EUR", createdAt = "", updatedAt = "")
+        ))
+        val vm = viewModel(repo)
+        assertFalse(vm.hasChanges())
+
+        vm.load("c1", "l1")
+        testScheduler.advanceUntilIdle()
+        assertFalse(vm.hasChanges())
+
+        vm.onTypeChange("hostel")
+        assertTrue(vm.hasChanges())
+    }
 }
 
 private fun emptyCollection(vararg stays: Lodging) = Collection(

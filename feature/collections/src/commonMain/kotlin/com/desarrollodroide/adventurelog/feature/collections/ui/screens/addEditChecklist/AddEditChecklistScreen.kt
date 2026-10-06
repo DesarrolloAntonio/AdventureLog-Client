@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -54,7 +53,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import org.koin.compose.viewmodel.koinViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
-import com.desarrollodroide.adventurelog.feature.ui.platform.PlatformBackHandler
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.filled.Checklist
@@ -80,20 +79,12 @@ fun AddEditChecklistScreen(
 
     LaunchedEffect(existingChecklist?.id) { viewModel.load(collectionId, existingChecklist?.id) }
 
-    var confirmDiscard by remember { mutableStateOf(false) }
-    val hasChanges = !state.isLoading && viewModel.hasChanges(state)
-    val leave = { if (hasChanges) confirmDiscard = true else onCancel() }
-    PlatformBackHandler(enabled = hasChanges) { confirmDiscard = true }
-    if (confirmDiscard) {
-        DiscardChecklistDialog(
-            isEditing = existingChecklist != null,
-            onDiscard = {
-                confirmDiscard = false
-                onCancel()
-            },
-            onKeepEditing = { confirmDiscard = false }
-        )
-    }
+    val leave = rememberDiscardGuard(
+        hasChanges = !state.isLoading && viewModel.hasChanges(state),
+        thing = "checklist",
+        isEditing = existingChecklist != null,
+        onLeave = onCancel
+    )
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
     LaunchedEffect(state.error) {
         state.error?.let {
@@ -302,26 +293,3 @@ internal fun ChecklistLineRow(
     }
 }
 
-/** The same question the place form asks before throwing away what was typed. */
-@Composable
-internal fun DiscardChecklistDialog(isEditing: Boolean, onDiscard: () -> Unit, onKeepEditing: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onKeepEditing,
-        title = { Text(if (isEditing) "Discard changes?" else "Discard this checklist?") },
-        text = {
-            Text(
-                if (isEditing) {
-                    "The changes you have made will not be saved."
-                } else {
-                    "Nothing has been created yet, and what you have typed will be lost."
-                }
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onDiscard) { Text("Discard", color = MaterialTheme.colorScheme.error) }
-        },
-        dismissButton = {
-            TextButton(onClick = onKeepEditing) { Text("Keep editing") }
-        }
-    )
-}

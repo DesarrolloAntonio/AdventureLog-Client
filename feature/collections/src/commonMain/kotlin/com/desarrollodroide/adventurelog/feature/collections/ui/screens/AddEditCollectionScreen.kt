@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -38,9 +39,14 @@ fun AddEditCollectionScreen(
     /** The form stays while saving, so a refusal leaves what was typed where it was. */
     isSaving: Boolean = false
 ) {
-    var formData by remember {
-        mutableStateOf(initialData ?: CollectionFormData())
-    }
+    val initialFormData = remember { initialData ?: CollectionFormData() }
+    var formData by remember { mutableStateOf(initialFormData) }
+    val leave = rememberDiscardGuard(
+        hasChanges = formData != initialFormData,
+        thing = "collection",
+        isEditing = initialData != null,
+        onLeave = onNavigateBack
+    )
 
     // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
     // box the length of the screen holding a place name, and the eye loses the line it is on.
@@ -55,7 +61,7 @@ fun AddEditCollectionScreen(
         BasicInfoSection(
             formData = formData,
             onFormDataChange = { formData = it },
-            onNavigateBack = onNavigateBack
+            onNavigateBack = leave
         )
 
         DateSection(
@@ -80,7 +86,7 @@ fun AddEditCollectionScreen(
             )
 
             TextButton(
-                onClick = onNavigateBack,
+                onClick = leave,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(

@@ -50,6 +50,7 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.LodgingTy
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import org.koin.compose.viewmodel.koinViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberDiscardGuard
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -70,6 +71,12 @@ fun AddEditLodgingScreen(
     var stayOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingLodging?.id) { viewModel.load(collectionId, existingLodging?.id) }
+    val leave = rememberDiscardGuard(
+        hasChanges = !state.isLoading && viewModel.hasChanges(state),
+        thing = "stay",
+        isEditing = existingLodging != null,
+        onLeave = onCancel
+    )
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
     LaunchedEffect(state.error) {
         state.error?.let {
@@ -234,7 +241,7 @@ fun AddEditLodgingScreen(
                             Text("Save")
                         }
                     }
-                    TextButton(onClick = onCancel) { Text("Cancel") }
+                    TextButton(onClick = leave) { Text("Cancel") }
                 }
             }
         }
