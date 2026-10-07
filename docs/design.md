@@ -76,7 +76,7 @@ nothing, and before that a survey grid under a Static Maps thumbnail that never 
   pieces are offered in place as dashed `AddChip`s ("+ Add photo", "+ Category") that open the
   editor, which is where both are set. "+ Add photo" opens it on the images section, like the
   detail page's button.
-- **Home strip (`PlaceMiniCard`):** keeps its 72dp slot, with the hairline drawn *inside* it.
+- **Home strip (`PlaceMiniCard`):** keeps its 4:3 photo slot (176dp cards; the old 72dp band was too thin to show the place), with the hairline drawn *inside* it.
   Every text line is always drawn, even when empty, so cards side by side keep one height. A row
   without a photo that would otherwise sit empty says "No category" instead.
 - **Detail page:** no 300dp cover. A stand-in that tall wastes the first screen. It gets a

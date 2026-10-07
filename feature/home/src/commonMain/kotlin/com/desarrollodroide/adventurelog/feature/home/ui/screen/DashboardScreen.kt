@@ -4,6 +4,7 @@ import com.desarrollodroide.adventurelog.feature.collections.ui.components.Invit
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.target
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -1044,9 +1045,13 @@ private fun ComingUpRow(entry: ComingUp, modifier: Modifier = Modifier) {
  * photograph is pale - the name of a white village against a bright sky - and at this size there
  * is no room to darken it enough to fix that without losing the photograph too.
  *
- * Without a photograph the 72dp slot stays, filled by [LocationPlaceholder] with a hairline along
- * its bottom that anchors it to the writing, so a strip mixing both keeps one height.
+ * The photograph gets a ratio, 4:3, not a height: the old 72dp band was a sliver too thin to show
+ * the place. Without a photograph the same 4:3 slot stays, filled by [LocationPlaceholder] with a
+ * hairline along its bottom that anchors it to the writing, so a strip mixing both keeps one height.
  */
+private val PlaceMiniCardWidth = 176.dp
+private const val PlaceMiniPhotoRatio = 4f / 3f
+
 @Composable
 private fun PlaceMiniCard(
     location: Location,
@@ -1058,7 +1063,7 @@ private fun PlaceMiniCard(
 
     Card(
         onClick = onClick,
-        modifier = modifier.width(150.dp),
+        modifier = modifier.width(PlaceMiniCardWidth),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
@@ -1070,7 +1075,7 @@ private fun PlaceMiniCard(
                 painter = rememberAsyncImagePainter(model = photo, imageLoader = imageLoader),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().height(72.dp)
+                modifier = Modifier.fillMaxWidth().aspectRatio(PlaceMiniPhotoRatio)
             )
         } else {
             val edge = placeholderColors(hasCategory = !location.category?.icon.isNullOrBlank()).edge
@@ -1078,8 +1083,8 @@ private fun PlaceMiniCard(
                 icon = location.category?.icon,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(72.dp)
-                    // Drawn inside the 72dp, not below it: a divider would make this card 1dp
+                    .aspectRatio(PlaceMiniPhotoRatio)
+                    // Drawn inside the slot, not below it: a divider would make this card 1dp
                     // taller than the photographs beside it.
                     .drawWithContent {
                         drawContent()
