@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import com.desarrollodroide.adventurelog.core.network.api.AuthApi
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
+import com.desarrollodroide.adventurelog.core.network.ktor.LOGIN_PATH
 import com.desarrollodroide.adventurelog.core.network.ktor.SESSION_PATH
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
@@ -37,7 +38,7 @@ class KtorAuthApi(
         password: String
     ): UserDetailsDTO {
         val sessionInfo = sessionProvider()
-        val loginUrl = "${sessionInfo.baseUrl}/auth/browser/v1/auth/login"
+        val loginUrl = "${sessionInfo.baseUrl}$LOGIN_PATH"
         logger.d { "Login URL: $loginUrl" }
 
         val response = httpClient.post(loginUrl) {
@@ -56,32 +57,23 @@ class KtorAuthApi(
         logger.d { "Login response status: ${response.status}" }
 
         if (response.status.isSuccess()) {
-            val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
+            val responseBody = response.body<String>()
+            val loginResponse = json.decodeFromString<LoginResponse>(responseBody)
 
-            var sessionToken: String? = null
-            for (cookie in cookies) {
-                if (cookie.contains("sessionid=")) {
-                    val sessionidPattern = Regex("sessionid=([^;]+)")
-                    val matchResult = sessionidPattern.find(cookie)
-                    sessionToken = matchResult?.groupValues?.get(1)
-                }
-            }
+            // The app client returns the session in the body, so it survives the web frontend's
+            // proxy, which strips every Set-Cookie. The cookie is only a fallback.
+            val sessionToken = loginResponse.meta.sessionToken
+                ?: response.headers.getAll("Set-Cookie").orEmpty()
+                    .firstNotNullOfOrNull { Regex("sessionid=([^;]+)").find(it)?.groupValues?.get(1) }
 
             if (sessionToken == null) {
-                // Pointing the app at the web frontend instead of the backend lands here: the
-                // SvelteKit proxy strips set-cookie from everything it forwards, so login answers
-                // 200 with no session at all.
-                logger.w { "No session token found in cookies - is the server URL the backend?" }
+                logger.w { "Login answered ${response.status.value} with no session token" }
             } else {
                 // Never log the token itself - it grants full account access.
                 logger.d { "Session token received (${sessionToken.length} chars)" }
                 // Notify the parent about the new session token
                 onSessionTokenReceived(sessionToken)
             }
-
-            val responseBody = response.body<String>()
-
-            val loginResponse = json.decodeFromString<LoginResponse>(responseBody)
 
             logger.d { "Login successful for user: ${loginResponse.data.user.username}" }
 
