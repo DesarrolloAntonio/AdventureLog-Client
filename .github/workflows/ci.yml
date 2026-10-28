@@ -163,9 +163,10 @@ jobs:
       # A signed release build, not the debug APK: debug is signed with the keystore every
       # developer already has, installs under a different application id, and can never be
       # upgraded to the real app.
-      - name: Build signed release APK
+      - name: Build signed release APK and bundle
         if: steps.signing.outputs.ready == 'true'
-        run: ./gradlew :composeApp:assembleRelease
+        # The APK is for sideloading from GitHub; Google Play only takes the bundle (AAB).
+        run: ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/key_store.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
@@ -185,9 +186,11 @@ jobs:
           # Named exactly, not globbed: an unsigned build lands beside it as
           # composeApp-release-unsigned.apk, and publishing that would be worse than
           # publishing nothing.
-          files: composeApp/build/outputs/apk/release/composeApp-release.apk
+          files: |
+            composeApp/build/outputs/apk/release/composeApp-release.apk
+            composeApp/build/outputs/bundle/release/composeApp-release.aab
           generate_release_notes: true
-          # Still a pre-1.0 alpha, but a real signed build rather than a debug one.
-          prerelease: true
+          # A version with a pre-release suffix (1.1.0-beta) is published as a pre-release.
+          prerelease: ${{ contains(env.APP_VERSION_NAME, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

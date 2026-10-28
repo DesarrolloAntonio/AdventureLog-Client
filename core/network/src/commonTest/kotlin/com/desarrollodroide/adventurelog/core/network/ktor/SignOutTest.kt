@@ -30,7 +30,11 @@ class SignOutTest {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         // allauth answers a successful DELETE on the session with 401.
         val network = KtorAdventureLogNetwork(
-            HttpClient(MockEngine { request -> requests += request; respond("", HttpStatusCode.Unauthorized) }),
+            HttpClient(MockEngine { request ->
+                // The /csrf/ probe that tells a direct Django from the web frontend's proxy.
+                if (request.url.encodedPath != "/csrf/") requests += request
+                respond("", HttpStatusCode.Unauthorized)
+            }),
             backgroundScope = scope
         )
 

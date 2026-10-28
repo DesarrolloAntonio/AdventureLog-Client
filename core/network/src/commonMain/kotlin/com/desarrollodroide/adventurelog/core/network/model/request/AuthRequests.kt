@@ -29,7 +29,8 @@ data class LoginUserData(
     val display: String,
     @SerialName("has_usable_password")
     val hasUsablePassword: Boolean? = null,
-    val email: String,
+    /** The app client leaves it out when the account has none. */
+    val email: String = "",
     val username: String,
     @SerialName("first_name")
     val firstName: String? = null,
@@ -59,5 +60,8 @@ data class LoginMethod(
 @Serializable
 data class LoginMeta(
     @SerialName("is_authenticated")
-    val isAuthenticated: Boolean
+    val isAuthenticated: Boolean,
+    /** Only the app client sends it; it is the Django session key. */
+    @SerialName("session_token")
+    val sessionToken: String? = null
 )

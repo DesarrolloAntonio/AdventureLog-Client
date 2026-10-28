@@ -21,6 +21,14 @@ import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.header
+import io.ktor.client.request.url
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -94,11 +102,39 @@ class KtorAdventureLogNetwork(
     private val rejections = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val sessionRejections: Flow<Unit> = rejections.asSharedFlow()
 
+    private val csrfToken = newCsrfToken()
+
+    /** Null until the first request to a server finds out; reset whenever the server changes. */
+    private var behindWebProxy: Boolean? = null
+    private val probeLock = Mutex()
+
     init {
         // One place sees every answer, so no screen has to recognise an ended session on its own.
         // Most of them could not: /api/locations/ answers an anonymous caller 200 with an empty
         // list, and Places told a signed-out user "No places yet" over 22 of them (measured).
         adventurelogClient.plugin(HttpSend).intercept { request ->
+            // The session comes from the request's own header, not from sessionToken: sign-out
+            // sends its DELETE in the background after clearSession() has already emptied it.
+            val requestSession = request.headers[SESSION_TOKEN_HEADER]
+            val toOwnServer = baseUrl?.let { Url(it).origin() == request.url.build().origin() } == true
+            if (requestSession != null || toOwnServer) {
+                val origin = request.url.build().origin()
+                val proxied = behindWebProxy ?: probeLock.withLock {
+                    behindWebProxy ?: run {
+                        val probe = HttpRequestBuilder().apply {
+                            url("$origin$CSRF_PROBE_PATH")
+                            header("X-Is-Mobile", "true")
+                        }
+                        val answer = execute(probe).response
+                        (answer.contentType()?.match(ContentType.Text.Html) == true).also {
+                            logger.d { "Server at $origin: ${if (it) "behind the web frontend's proxy" else "Django directly"}" }
+                            behindWebProxy = it
+                        }
+                    }
+                }
+                if (proxied) request.attachProxiedSession(requestSession)
+                else request.attachDjangoSession(requestSession, csrfToken)
+            }
             val call = execute(request)
             val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_PATH)
             if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut) {
@@ -240,6 +276,7 @@ class KtorAdventureLogNetwork(
         sessionToken: String?
     ) {
         this.baseUrl = serverUrl.trimEnd('/')
+        behindWebProxy = null
         this.sessionToken = sessionToken
         logger.d {
             "Network initialized from existing session - BaseURL: ${this.baseUrl}, " +
@@ -262,6 +299,7 @@ class KtorAdventureLogNetwork(
     override fun clearSession() {
         sessionToken = null
         baseUrl = null
+        behindWebProxy = null
         logger.d { "Network session cleared - all tokens and base URL reset" }
     }
 
@@ -271,6 +309,7 @@ class KtorAdventureLogNetwork(
         password: String
     ): UserDetailsDTO {
         baseUrl = url.trimEnd('/')
+        behindWebProxy = null
         // Initialize the session info before calling login
         // The authDataSource will use the sessionProvider to get the baseUrl
         

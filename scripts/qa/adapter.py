@@ -29,6 +29,8 @@ Server quirks, each of which produced a wrong conclusion once:
 - DELETE /auth/browser/v1/auth/session with X-Session-Token revokes that session (answers 401 by
   allauth's convention). The adapter's cached token then answers 401 and `request` logs in again.
 """
+import secrets
+import string
 import json
 import os
 import re
@@ -67,6 +69,24 @@ def account(key="A"):
     return creds[key]
 
 
+CSRF = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
+
+
+def _django_session(req):
+    """What server 0.13.1 wants, as the app sends it: the session as a `sessionid` cookie (it no
+    longer reads X-Session-Token), a made-up csrftoken pair (double-submit, 32 alphanumerics) and a
+    same-origin Referer - login and every unsafe request answer 403 without them."""
+    from urllib.parse import urlsplit
+    u = urlsplit(req.full_url)
+    cookies = [f"csrftoken={CSRF}"]
+    if req.has_header("X-session-token"):
+        cookies.append(f"sessionid={req.get_header('X-session-token')}")
+    req.add_header("Cookie", "; ".join(cookies))
+    req.add_header("X-CSRFToken", CSRF)
+    if not req.has_header("Referer"):
+        req.add_header("Referer", f"{u.scheme}://{u.netloc}")
+
+
 def _raw(method, url, body=None, headers=None):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method)
@@ -76,6 +96,7 @@ def _raw(method, url, body=None, headers=None):
         req.add_header("Content-Type", "application/json")
     for k, v in (headers or {}).items():
         req.add_header(k, v)
+    _django_session(req)
     try:
         with urllib.request.urlopen(req, timeout=30, context=ssl.create_default_context()) as res:
             return res.status, res.headers, res.read()
@@ -160,6 +181,7 @@ def upload(path, fields, files, account="A"):
     req.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
     req.add_header("Accept", "application/json")
     req.add_header("X-Session-Token", token(account))
+    _django_session(req)
     try:
         with urllib.request.urlopen(req, timeout=60, context=ssl.create_default_context()) as res:
             return res.status, _parse(res.read())
