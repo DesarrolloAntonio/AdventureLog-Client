@@ -21,6 +21,7 @@ import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -94,11 +95,20 @@ class KtorAdventureLogNetwork(
     private val rejections = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val sessionRejections: Flow<Unit> = rejections.asSharedFlow()
 
+    private val csrfToken = newCsrfToken()
+
     init {
         // One place sees every answer, so no screen has to recognise an ended session on its own.
         // Most of them could not: /api/locations/ answers an anonymous caller 200 with an empty
         // list, and Places told a signed-out user "No places yet" over 22 of them (measured).
         adventurelogClient.plugin(HttpSend).intercept { request ->
+            // The session comes from the request's own header, not from sessionToken: sign-out
+            // sends its DELETE in the background after clearSession() has already emptied it.
+            val requestSession = request.headers[SESSION_TOKEN_HEADER]
+            val toOwnServer = baseUrl?.let { Url(it).origin() == request.url.build().origin() } == true
+            if (requestSession != null || toOwnServer) {
+                request.attachDjangoSession(requestSession, csrfToken)
+            }
             val call = execute(request)
             val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_PATH)
             if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut) {
