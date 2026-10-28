@@ -9,6 +9,7 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.module.Module
@@ -68,6 +69,8 @@ val imageLoaderModule = module {
                         isSameOrigin(context.url.buildString(), session?.serverUrl)
                     ) {
                         context.header("X-Session-Token", token)
+                        // Server 0.13.1 reads the session only from its cookie. GETs need no CSRF.
+                        context.header(HttpHeaders.Cookie, "sessionid=$token")
                     }
                 }
             }

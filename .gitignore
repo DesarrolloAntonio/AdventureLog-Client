@@ -43,3 +43,6 @@ __pycache__/
 
 # QA campaign notes stay local (owner, 2026-09-15)
 docs/qa/
+
+# Release keystore and its password (backed up by Kopia, never committed)
+signing/
