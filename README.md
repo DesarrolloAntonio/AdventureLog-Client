@@ -29,8 +29,11 @@ but has had far less use and is not distributed yet.
 This is a *client*: it needs a
 [self-hosted AdventureLog server](https://github.com/seanmorley15/AdventureLog) to talk to.
 
-Download the APK from the [latest release](https://github.com/DesarrolloAntonio/AdventureLog-Client/releases/latest)
-(Android 7.0 and up), then sign in with your server's address and your account.
+<a href="https://play.google.com/store/apps/details?id=com.desarrollodroide.adventurelog"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80" alt="Get it on Google Play"/></a>
+
+Get it on [Google Play](https://play.google.com/store/apps/details?id=com.desarrollodroide.adventurelog),
+or download the APK from the [latest release](https://github.com/DesarrolloAntonio/AdventureLog-Client/releases/latest).
+Android 7.0 and up. Then sign in with your server's address and your account.
 
 Bug reports are welcome as [issues](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/new):
 what you did, what happened instead, and the device and Android version. A screenshot helps.
