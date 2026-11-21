@@ -1,7 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.util
 
 import com.desarrollodroide.adventurelog.core.domain.repository.LocalAccountCopies
-import coil3.PlatformContext
+import org.koin.core.scope.Scope
 
 /**
  * Hands a downloaded file to whatever the platform uses to view or share it.
@@ -19,7 +19,8 @@ interface PlatformFiles : LocalAccountCopies {
     suspend fun share(bytes: ByteArray, fileName: String): Boolean
 }
 
-expect fun createPlatformFiles(platformContext: PlatformContext): PlatformFiles
+/** Built by the Koin module; each platform takes what it needs (the Android `Context`) from the scope. */
+expect fun Scope.createPlatformFiles(): PlatformFiles
 
 /**
  * Best-effort media type from a file extension, for the handful the app actually attaches.

@@ -2,7 +2,7 @@ package com.desarrollodroide.adventurelog.feature.settings
 
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.PrivacyPolicy
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.TermsOfUse
-import com.desarrollodroide.adventurelog.feature.settings.ui.components.annotated
+import com.desarrollodroide.adventurelog.feature.settings.ui.components.plainText
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -13,8 +13,8 @@ import kotlin.test.assertTrue
  */
 class LegalTextsTest {
 
-    private val terms = TermsOfUse.annotated().text
-    private val privacy = PrivacyPolicy.annotated().text
+    private val terms = TermsOfUse.plainText()
+    private val privacy = PrivacyPolicy.plainText()
 
     @Test
     fun `neither text names another app or leaves a placeholder`() {

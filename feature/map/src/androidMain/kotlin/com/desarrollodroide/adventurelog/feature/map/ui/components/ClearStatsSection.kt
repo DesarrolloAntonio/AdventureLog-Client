@@ -158,6 +158,3 @@ private fun StatItem(
         )
     }
 }
-
-/** A count as the card shows it: a dash while it is not known yet, never a zero that is not true. */
-internal fun statText(value: Int?): String = value?.toString() ?: "–"

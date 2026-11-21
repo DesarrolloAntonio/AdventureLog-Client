@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog
 
 import android.app.Application
+import com.desarrollodroide.adventurelog.di.androidUiModule
 import com.desarrollodroide.adventurelog.di.appModule
 import com.desarrollodroide.adventurelog.feature.settings.platform.AndroidPlatformActions
 import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformActionsProvider
@@ -18,7 +19,7 @@ class AdventureLogApplication: Application(){
         startKoin {
             androidLogger()
             androidContext(applicationContext)
-            modules(appModule)
+            modules(appModule, androidUiModule)
         }
     }
 

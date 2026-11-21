@@ -1,9 +1,5 @@
 package com.desarrollodroide.adventurelog.di
 
-import coil3.annotation.ExperimentalCoilApi
-import coil3.network.CacheStrategy
-import coil3.network.NetworkFetcher
-import coil3.network.ktor3.asNetworkClient
 import com.desarrollodroide.adventurelog.core.data.di.dataModule
 import com.desarrollodroide.adventurelog.feature.locations.di.locationsModule
 import com.desarrollodroide.adventurelog.feature.calendar.di.calendarModule
@@ -15,11 +11,12 @@ import com.desarrollodroide.adventurelog.feature.map.di.mapModule
 import com.desarrollodroide.adventurelog.feature.settings.di.settingsModule
 import com.desarrollodroide.adventurelog.feature.ui.di.imageLoaderModule
 import com.desarrollodroide.adventurelog.feature.world.di.worldModule
-
-import io.ktor.client.HttpClient
 import org.koin.dsl.module
 
-@OptIn(ExperimentalCoilApi::class)
+/**
+ * Everything both apps share. Swift starts Koin with this alone (doInitKoin); Android adds
+ * androidUiModule for what only its Compose UI uses.
+ */
 val appModule = module {
     // Include all feature modules explicitly
     includes(
@@ -35,11 +32,4 @@ val appModule = module {
         mapModule,
         imageLoaderModule
     )
-    
-    single {
-        NetworkFetcher.Factory(
-            networkClient = { get<HttpClient>().asNetworkClient() },
-            cacheStrategy = { CacheStrategy.DEFAULT },
-        )
-    }
 }
