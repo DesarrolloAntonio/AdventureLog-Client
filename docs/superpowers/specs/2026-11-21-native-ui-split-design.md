@@ -1,6 +1,6 @@
 # Native UI split: Material 3 Expressive on Android, Liquid Glass on iOS
 
-Date: 2026-11-21 · Branch: `feat/native-ui-split` · Status: awaiting owner approval
+Date: 2026-11-21 · Branch: `feat/native-ui-split` · Status: approved by the owner 2026-11-21
 
 ## Intent
 
@@ -66,6 +66,14 @@ From the sibling projects:
   per ViewModel, forwarders for sealed actions. Its recorded costs: Kotlin default arguments do not
   reach Swift, so a new state field breaks every Swift call site; ViewModels are singletons whose
   scope is never cancelled; search text echoed through the ViewModel drops characters.
+
+## Who designs
+
+Decided by the owner on 2026-11-21: **the visual design of both platforms comes from Claude
+Design**, not from the builder. Phases 2 and 3 each start from a Claude Design canvas the owner has
+picked from, exported into `design/` and read as markup (see `docs/design.md`). The builder
+implements the canvas; where the canvas is silent, the builder asks or follows the platform
+default, and does not invent a look. Phases 0, 1 and 1b involve no visual design.
 
 ## Approaches
 
@@ -202,7 +210,7 @@ implementation plan; the first plan covers Phases 0, 1 and 1b.
 
 ## Merging and releases
 
-**Open, owner to confirm.** Proposed:
+Approved by the owner 2026-11-21:
 
 - Phases 1 and 1b merge to `develop` as soon as they pass: Android is unchanged, so `develop`
   stays releasable and Play hotfixes are unaffected.
