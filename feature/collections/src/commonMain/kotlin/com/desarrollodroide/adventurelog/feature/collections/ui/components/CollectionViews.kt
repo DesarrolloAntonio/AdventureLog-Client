@@ -27,22 +27,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-/**
- * The ways of looking at one collection.
- *
- * This is a different axis from [CollectionTab], and the web draws it as a separate row for that
- * reason: the tabs choose *which of a collection's things* to list, and these choose *how to look
- * at all of them* - as a list, along a timeline, on a map, by date, or as figures. Folding the two
- * into one row would put "Notes" and "Map" beside each other as if they were alternatives.
- */
-enum class CollectionView(val title: String, val icon: ImageVector) {
-    ITEMS("Items", Icons.AutoMirrored.Filled.List),
-    ITINERARY("Itinerary", Icons.Default.Timeline),
-    MAP("Map", Icons.Default.Map),
-    CALENDAR("Calendar", Icons.Default.CalendarMonth),
-    RECOMMENDATIONS("Nearby", Icons.Default.Explore),
-    STATS("Stats", Icons.Default.BarChart)
-}
+/** The icon a view is drawn with. Lives here, not on [CollectionView], so that enum stays free of Compose. */
+internal val CollectionView.icon: ImageVector
+    get() = when (this) {
+        CollectionView.ITEMS -> Icons.AutoMirrored.Filled.List
+        CollectionView.ITINERARY -> Icons.Default.Timeline
+        CollectionView.MAP -> Icons.Default.Map
+        CollectionView.CALENDAR -> Icons.Default.CalendarMonth
+        CollectionView.RECOMMENDATIONS -> Icons.Default.Explore
+        CollectionView.STATS -> Icons.Default.BarChart
+    }
 
 /**
  * A scrolling row rather than the wrapping one the tabs use.
