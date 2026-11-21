@@ -8,11 +8,15 @@ import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.da
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 
-// Split out of AddEditLocationScreen.kt (Compose, androidMain): the form's starting state is plain
-// logic, tested on every platform.
+// Split out of AddEditLocationScreen.kt (Compose, androidMain). Shared and public on purpose: the
+// form's starting state is the AddEditAdventureViewModel's input, which a SwiftUI screen builds too,
+// and EditPlaceSaveTest (a ViewModel test in commonTest) uses it as its fixture.
 
-/** A photo the place already has, as the form holds it: known by its server id, never uploaded again. */
-internal fun formImageOf(image: ContentImage) = ImageFormData(
+/**
+ * A photo the place already has, as the form holds it: known by its server id, never uploaded again.
+ * Public: Swift screens build the ViewModel's form input with it.
+ */
+fun formImageOf(image: ContentImage) = ImageFormData(
     uri = image.image,
     type = ImageType.URL,
     isPrimary = image.isPrimary,
@@ -22,8 +26,9 @@ internal fun formImageOf(image: ContentImage) = ImageFormData(
 /**
  * The form as it starts: from the place being edited, or empty for a new one. Kept apart from the
  * screen so the unchanged state can be told from an edited one, and restored after a process death.
+ * Public: Swift screens build the ViewModel's form input with it.
  */
-internal fun locationFormOf(existingLocation: Location?, defaultCurrency: String): LocationFormData =
+fun locationFormOf(existingLocation: Location?, defaultCurrency: String): LocationFormData =
     if (existingLocation != null) {
         LocationFormData(
             name = existingLocation.name,
