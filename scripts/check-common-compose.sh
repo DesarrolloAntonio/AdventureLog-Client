@@ -9,7 +9,9 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT" || exit 2
 
-COMPOSE_RE='androidx\.compose|org\.jetbrains\.compose'
+# Compose itself, plus the libraries that only exist for Compose UI (Navigation, Koin's Compose
+# entry points, Coil - whose core needs Skia on iOS - and the Compose flavours of paging/lifecycle).
+COMPOSE_RE='androidx\.compose|org\.jetbrains\.compose|androidx\.navigation|org\.koin\.compose|coil3|app\.cash\.paging\.compose|androidx\.lifecycle\.compose|androidx\.lifecycle\.viewmodel\.compose'
 fail=0
 
 common_kt() { # list *.kt in commonMain/commonTest, outside build/
@@ -31,6 +33,10 @@ check_b() {
   echo "== (b) Compose dependencies inside commonMain blocks =="
   local n=0 f hits
   while IFS= read -r f; do
+    # A module with no iOS target (core/resources) has an Android-only commonMain: nothing to check.
+    case "$f" in ./build-logic/*) ;; *)
+      grep -Eq 'adventurelog\.kotlinMultiplatform|ios(Arm64|SimulatorArm64|X64)' "$f" || continue;;
+    esac
     # Track brace depth inside a commonMain { } block; flag Compose-family dependency lines in it.
     hits=$(awk '
       function count(s, ch,   t) { t = s; return gsub(ch, "", t) }
@@ -41,9 +47,9 @@ check_b() {
         }
         if (inblock) {
           depth += count(line, "\\{") - count(line, "\\}")
-          if (line ~ /(compose|navigation-compose|koin\.compose|coil\.compose|lifecycle\.runtimeCompose|libs\.[A-Za-z0-9_.-]*compose)/ &&
+          # Case-insensitive: catalog aliases spell it runtimeCompose, viewmodelCompose, composeVM.
+          if (tolower(line) ~ /(compose|navigation|material3|coil|maps|emoji|zoomimage|tooling)/ &&
               line !~ /^[[:space:]]*(\/\/|\*)/ ) {
-            if (line ~ /compose\.components\.resources/ && FILENAME ~ /core\/common/) next
             printf "%s:%d: %s\n", FILENAME, NR, line
           }
           if (depth <= 0 && line ~ /\}/) inblock = 0

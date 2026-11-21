@@ -41,6 +41,7 @@ include(":core:domain")
 include(":core:model")
 include(":core:network")
 include(":core:permissions")
+include(":core:resources")
 include(":core:testing")
 
 include(":feature:login")

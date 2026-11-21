@@ -11,18 +11,17 @@ kotlin {
             api(projects.core.common)
             implementation(projects.core.model)
             api(projects.core.domain)
-
-            implementation(libs.koin.composeVM)
-
-            implementation(libs.navigation.compose)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.navigation.compose)
-            implementation(libs.coil.compose)
-            implementation(libs.coil.network.ktor)
+            // The image client and the file downloader are plain Ktor.
+            implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
+            implementation(libs.koin.composeVM)
+            implementation(libs.navigation.compose)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
             implementation(libs.androidx.ui.tooling)
             // BackHandler, for the discard guard on forms.
             implementation(libs.androidx.activity.compose)
