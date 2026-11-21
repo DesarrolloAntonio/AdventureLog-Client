@@ -36,7 +36,6 @@ modulegraph = "0.13.0"
 buildConfig = "5.7.1"
 playServicesMaps = "19.2.0"
 zoomimageComposeCoil = "1.4.0"
-compose-hot-reload = "1.0.0-dev.34.1"
 uiTooling = "1.9.4"
 protobuf = "4.33.0"
 datastorePreferences = "1.1.7"
@@ -124,7 +123,6 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 modulegraph = { id = "dev.iurysouza.modulegraph", version.ref = "modulegraph" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }
-composeHotReload = { id = "org.jetbrains.compose-hot-reload", version.ref = "compose-hot-reload" }
 
 # Plugins defined by this project
 adventurelog-composeMultiplatform = { id = "com.desarrollodroide.adventurelog.composeMultiplatform", version = "unspecified" }

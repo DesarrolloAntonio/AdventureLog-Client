@@ -13,7 +13,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.composeHotReload)
 }
 
 // Load API keys from local.properties
@@ -160,7 +159,6 @@ android {
     }
 }
 
-// Hot reload support
 composeCompiler {
     featureFlags = setOf(
         ComposeFeatureFlag.OptimizeNonSkippingGroups
