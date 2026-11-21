@@ -143,7 +143,10 @@ Four types that ViewModels use are declared inside files full of Compose. They g
 - Create: `composeApp/src/iosMain/.../IosKoin.kt` (final version of the spike's file, per the decision note)
 
 **Interfaces:**
-- Consumes: the decision note (bridge choice, SKIE on or off).
+- Consumes: the decision note in the spec. From it, this task also does:
+  - add the SKIE plugin (`co.touchlab.skie` 0.10.16) to `composeApp`;
+  - remove the `composeHotReload` plugin and its catalog entries everywhere (its 1.0.0-dev.34.1 artifact no longer resolves and breaks the iOS link on a clean machine; there is no desktop target to use it);
+  - `IosKoin.kt` holds only `fun doInitKoin()` (starts Koin once with `appModule`). The ViewModel owner and the paging presenter are Phase 3 work, built when the first SwiftUI screen needs them.
 - Produces: `doInitKoin()` for Task 7; framework exports `core:model`, `core:domain` and all ten feature modules.
 
 - [ ] **Step 1:** Change the convention plugin so all Compose dependencies are added to `androidMain`. Leave `components.resources` in `commonMain` only where `Res` is used from shared code.
@@ -178,7 +181,7 @@ Four types that ViewModels use are declared inside files full of Compose. They g
 - Consumes: `doInitKoin()` from Task 5.
 
 - [ ] **Step 1:** `iOSApp.init()` calls `doInitKoin()`. `ContentView` is a `ContentUnavailableView` titled "AdventureLog" with the description "The iOS app is being rebuilt." No `ComposeView`.
-- [ ] **Step 2:** Set `IPHONEOS_DEPLOYMENT_TARGET = 26.0` in all four build configurations.
+- [ ] **Step 2:** Set `IPHONEOS_DEPLOYMENT_TARGET = 26.0` in all four build configurations, and convert the `iosApp` source group to a file-system-synchronized folder so later Swift files need no `pbxproj` edits.
 - [ ] **Step 3:** Run `xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`. Expected: BUILD SUCCEEDED.
 - [ ] **Step 4:** Launch in the simulator and screenshot. Expected: the placeholder, no crash, Koin started (no `KoinApplication has not been started` in the log).
 - [ ] **Step 5:** Commit: `feat(ios): SwiftUI placeholder on iOS 26, Compose removed`.
@@ -199,6 +202,8 @@ Four types that ViewModels use are declared inside files full of Compose. They g
 ## Phase 1b: shared ViewModel changes
 
 ### Task 9: Apply the decision note's ViewModel changes
+
+**Skipped: the decision note's list is empty (2026-11-21).** The text below is kept for reference only.
 
 Skip if the note's list is empty. Each change is test-first in the module's `commonTest`, with the Android screen adapted in the same commit so Android behaviour is unchanged.
 

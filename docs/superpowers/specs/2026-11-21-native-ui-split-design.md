@@ -237,3 +237,50 @@ Approved by the owner 2026-11-21:
 - The spike's ViewModel changes as their own step (Phase 1b), after the owner reads the note.
 - Swift compiled in CI only from Phase 3.
 - Android moves to `androidx.compose.material3` rather than the Compose Multiplatform artifact.
+
+## Decision note (bridge spike, 2026-11-21)
+
+Spike branch `spike/swift-bridge` (`77734c5e`, `d4a58409`, `dee18669`), simulator "AL Spike" (iOS 27.0), live 0.13.1 server, account A. The screens were driven by an in-app script, not by real taps. The spike's code stays on that local branch for reference and is never merged; its reports and screenshots are local scratch, not in the repo.
+
+1. **Bridge: SKIE.** **OBSERVED:** SKIE 0.10.16 links on Kotlin 2.4.10 / CMP 1.12. It gives typed `for await` over `StateFlow`, native Swift enums, an exhaustive `onEnum(of:)` for sealed types, and `async` suspend functions. Without SKIE the header has untyped `StateFlow` protocols and `as?` cascades.
+2. **ViewModel lifetime: one Kotlin `ViewModelStoreOwner` per screen, held by a Swift `ObservableObject` in `@StateObject`, with `clear()` in `deinit`.**
+   - **OBSERVED:** `onCleared()` ran on pop for World, CountryDetail and Places. Places' paging collection was cancelled on pop (`JobCancellationException` in `t3-run-p5.log`).
+   - **Rule:** nothing that captures the view (a Binding, a closure, a stored Task) may outlive the view. One leaked Binding silently stopped `onCleared` (Task 2).
+3. **Observing state: collect each `StateFlow` in the view's `.task { for await s in vm.uiState { state = s } }`.** **OBSERVED:** search, filter, toggle and paging lists all updated, and the collection ended with the view.
+4. **Paging: an `iosMain` presenter, with no ViewModel change.**
+   - **OBSERVED:** `PagingListPresenter<T>` subclasses androidx.paging 3.3.0-alpha02's `PagingDataDiffer`. On iOS this is the version app.cash 0.5.1 resolves to; `PagingDataPresenter` only exists from 3.5.0.
+   - It exposes `items: StateFlow<List<T>>`, a `status` (refreshing / loadingMore / endReached / error) and `itemAccessed(index)` (an indexed `get`, which sends the access hint), and collects in the ViewModel's `viewModelScope`.
+   - With pages of 5: the first fill loaded pages 1–3 (15 items), scrolling loaded page 4 (20), then page 5 (22, end). A search reset the list to 1 item. At the real 30/10, page 1 loaded 22 items and the list ended.
+   - The presenter is generic, so Collections can reuse it (**REASONED**, not tried).
+5. **`SavedStateHandle`: the owner must give Koin `CreationExtras` that carry a `SavedStateRegistryOwner`.**
+   - **OBSERVED:** the constructor default `SavedStateHandle()` is never used, because both Koin modules pass `savedStateHandle = get()`.
+   - Plain `koin.get(kClass)`, the spike's first owner, throws `NoDefinitionFoundException` for `SavedStateHandle`.
+   - Koin's `resolveViewModel` with empty extras throws "must have a value by `SAVED_STATE_REGISTRY_OWNER_KEY`".
+   - An owner with a `SavedStateRegistry`, `enableSavedStateHandles()` and `resolveViewModel` constructs both ViewModels, and their keys appear in `performSave` (`map_show_cities=true`, `login_user_name=probe-user`).
+   - **REASONED:** on iOS that state is in memory only, so it does not survive the process. It matters only if we adopt SwiftUI state restoration, which nothing plans. The registry owner is still needed, just to construct these ViewModels.
+6. **Text input: keep the text in `@State` and send it to the ViewModel with `.onChange`. Never bind a field to a value read back from a `StateFlow`.** **OBSERVED (simulated keys):** with a ViewModel round-trip, 4 of 5 characters were lost at a 0 ms gap. With `@State`, none were lost.
+7. **What Swift cannot do nicely, and the rules that follow:**
+   - **Default arguments do not exist from Swift.** `WorldUiState` needs all 11 arguments. **OBSERVED** in the header. Rule: give Kotlin factories for previews and tests.
+   - **Method generics are erased.** `get<T>(KClass<T>)` returns a bare `ViewModel`, and Swift cannot name a `KClass`. **OBSERVED.** Rule: one typed accessor per ViewModel on the owner, or a generic Kotlin *class*, whose generics do survive (`PagingListPresenter<Location>` did).
+   - **Sealed types need SKIE's `onEnum(of:)`.** **OBSERVED.** Rule: switch on `onEnum`, never `as?`.
+   - **An uncaught Kotlin exception kills the app** (**REASONED**). Rule: catch in Kotlin, or mark the function `@Throws`.
+8. **Shared-ViewModel changes Phase 1b must make: none.**
+   - Paging is handled by the `iosMain` presenter (item 4), `SavedStateHandle` by the owner (item 5), and text input by `@State` in Swift (item 6). **OBSERVED** for World, CountryDetail, Locations, Map and Login (Map and Login only constructed).
+   - Optional, not required: nav arguments as ViewModel parameters (`CountryDetailViewModel.load(code)` is imperative), and Kotlin factories for UI-state previews.
+9. **Things the move (Phase 1) must also do that the plan does not yet list:**
+   - **The hot-reload dependency no longer resolves.** The old jetbrains.space repo is gone. The spike bumped it to 1.3.0 to get past. The move removes the hot-reload plugin instead: it is a desktop/JVM tool and there is no desktop target (controller's call).
+   - **Exports.** The framework must export every module whose types Swift names. Today that is `core:model`, `core:domain`, `feature:world` and `feature:locations`; it must add `feature:login`, `feature:map` and every other native screen's feature module. The `api(...)` deps must follow.
+   - **Paging in `iosMain`.** Add `paging-common` to `iosMain`, and move the presenter into the real code.
+   - **The production `IosViewModelOwner`.** Give it a `SavedStateRegistry` and resolve through Koin's `resolveViewModel` (item 5).
+   - **The Xcode project.** Convert the `Spike` group to a synchronized folder; each file now needs four hand edits to `pbxproj`. The deployment target is already 26.0.
+   - **A login entry point.** Swift needs `LoginViewModel` (once exported, with the registry owner), or a Kotlin `suspend` login function.
+   - **Build time.** The debug framework links with `optimized = true`, about 5 minutes per link.
+10. **What was NOT verified:**
+    - real taps, real scrolling gestures and real keyboard typing; all driving was scripted, and scrolling used `ScrollViewProxy.scrollTo`;
+    - pull-to-refresh, `retry()` after a network error, and paging in Collections;
+    - placeholders; `enablePlaceholders` is false everywhere;
+    - the filtered paging source with more than one page (search returned 1 item);
+    - Map and Login screens beyond construction;
+    - SwiftUI state restoration;
+    - an iOS 18 deployment target;
+    - Android and desktop builds with the hot-reload bump.
