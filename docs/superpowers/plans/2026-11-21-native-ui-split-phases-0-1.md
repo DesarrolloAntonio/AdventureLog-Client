@@ -76,7 +76,7 @@ Work on `spike/swift-bridge`, branched from `feat/native-ui-split`. Nothing here
 - [ ] **Step 1:** Write `IosKoin.kt` with the two declarations above.
 - [ ] **Step 2:** Write `ViewModelOwner.swift`: an `ObservableObject` that holds an `IosViewModelOwner` and calls `clear()` in `deinit`.
 - [ ] **Step 3:** Write `WorldSpikeView`: a `NavigationStack` with a searchable `List` of countries from `uiState`, pushing a detail list of regions with a toggle. Plain system components; no styling.
-- [ ] **Step 4:** Run on the iOS 27 simulator against the demo server. Log in is out of scope: seed the session the way `scripts/qa` does, or hardcode the demo account for the spike.
+- [ ] **Step 4:** Run on the iOS 27 simulator against the demo server. Log in is out of scope: read the demo account from the untracked `qa.credentials.json` at build time; never commit a credential, even on the spike branch.
 - [ ] **Step 5:** Answer, with evidence, in notes kept for Task 3:
   - Does state reach SwiftUI and update on search, filter and toggle?
   - Add a `println` in `WorldViewModel.onCleared()`: is it called when the view is popped?
@@ -113,7 +113,7 @@ On `feat/native-ui-split`.
 
 ### Task 4: Split shared types out of Compose files
 
-Four types that ViewModels use are declared inside files full of Compose. They get their own files so the Compose files can leave.
+Four types that ViewModels use are declared inside files full of Compose. They get their own files so the Compose files can leave. Four is a floor: it comes from the direct imports of `*ViewModel.kt` files only, and Task 5's iOS compile may find more.
 
 **Files:**
 - Create in `feature/collections/src/commonMain/.../feature/collections/ui/components/`: `CollectionTab.kt`, `CollectionView.kt`, `ShareSheetState.kt` (holds `ShareSheetState` and `SheetMessage`)
@@ -150,18 +150,21 @@ Four types that ViewModels use are declared inside files full of Compose. They g
 - [ ] **Step 2:** Move the files with `git mv`, driven by the script's list from check (a). Keep packages. Non-Composable files that import Compose (`CollectionsNavigation`, `LocationsNavigation`, `HomeBottomBar`, `LocationFormSaver`, `UriOpening`, `NavigationAnimations`) move too.
 - [ ] **Step 3:** Collapse each `expect`/`actual` composable to a single Android function and delete the iOS `actual`. Keep non-UI `actual`s (`IOSPlatformFiles`, `IOSImageBytesProvider`, `UrlValidator.ios.kt`, `IosPlatformActions`, `Utils.ios.kt`, `Platform.ios.kt`) only if shared code still calls their `expect`.
 - [ ] **Step 4:** In each module's build file, move Compose-flavoured libraries from `commonMain.dependencies` to `androidMain.dependencies`. In `composeApp`, add the exports and make the exported modules `api`.
-- [ ] **Step 5:** Run `scripts/check-common-compose.sh`. Expected: PASS.
-- [ ] **Step 6:** Run `./gradlew build allTests :composeApp:linkDebugFrameworkIosSimulatorArm64`. Expected: BUILD SUCCESSFUL.
-- [ ] **Step 7:** Add the script as a step in the `test` job of `.github/workflows/ci.yml`.
-- [ ] **Step 8:** Commit: `refactor(ui): move all Compose from commonMain to androidMain`.
+- [ ] **Step 5:** Replace Compose-flavoured artifacts that shared code genuinely needs with their plain versions in `commonMain`: the catalog alias `androidx-lifecycle-viewmodel` points at `lifecycle-viewmodel-compose`, so add a `lifecycle-viewmodel` alias for shared code and keep the Compose one for `androidMain`; the Koin modules' `viewModel { }` DSL must resolve from a non-Compose Koin artifact (`koin-core-viewmodel`), with `koin.composeVM` in `androidMain` only.
+- [ ] **Step 6:** Run `scripts/check-common-compose.sh`. Expected: PASS.
+- [ ] **Step 7:** Check the real oracle, the resolved iOS graph: `./gradlew :composeApp:dependencies --configuration iosSimulatorArm64CompileKlibraries | grep -iE "compose|skiko"`. Expected: no output, or only `components-resources` if it was kept.
+- [ ] **Step 8:** Run `./gradlew build allTests :composeApp:linkDebugFrameworkIosSimulatorArm64`. Expected: BUILD SUCCESSFUL. The iOS compile is what finds any shared type Task 4 missed; split it out the same way and rerun.
+- [ ] **Step 9:** Add the script as a step in the `test` job of `.github/workflows/ci.yml`.
+- [ ] **Step 10:** Commit: `refactor(ui): move all Compose from commonMain to androidMain`.
 
 ### Task 6: Android on `androidx.compose.material3` 1.5
 
 **Files:**
 - Modify: `gradle/libs.versions.toml`, `ComposeMultiplatformConventionPlugin.kt`
 
-- [ ] **Step 1:** Add `androidx.compose.material3:material3` at the newest 1.5.x stable and use it in `androidMain` in place of `composeDeps.material3`. Before pinning, read that version's `.module` file and confirm it does not ask for an alpha `foundation`.
-- [ ] **Step 2:** Run `./gradlew :composeApp:dependencyInsight --configuration debugRuntimeClasspath --dependency material3`. Expected: one resolved `androidx.compose.material3:material3:1.5.x`, no JetBrains redirect to another version.
+- [ ] **Step 1:** Record the baseline: run `./gradlew :composeApp:dependencyInsight --configuration debugRuntimeClasspath --dependency <name>` for `material3`, `ui`, `foundation` and `runtime`, and note the resolved `androidx` versions.
+- [ ] **Step 2:** Read the newest 1.5.x stable `.module` file for the `ui`, `foundation` and `runtime` versions it requires. Libraries for Developers runs 1.5.0 on Compose 1.13; this project's plugin is 1.12. If 1.5.x requires a newer Compose than the baseline, **stop and report**: the choices are raising the Compose Multiplatform plugin to 1.13 (its own change, before this task) or using the JetBrains `material3` artifact in `androidMain` at a version that has the Expressive APIs, as NextcloudApps does.
+- [ ] **Step 2b:** Otherwise add `androidx.compose.material3:material3` 1.5.x in `androidMain` in place of `composeDeps.material3`, and rerun the four `dependencyInsight` calls. Expected: `material3` at 1.5.x; `ui`, `foundation` and `runtime` unchanged from the baseline.
 - [ ] **Step 3:** No Expressive API is adopted here. Run `./gradlew build allTests`. Expected: PASS.
 - [ ] **Step 4:** Install the debug build on the Pixel 6a and walk every screen in the spec's list, light and dark, against screenshots taken from `main` first. Open every screenshot. Expected: no visible difference; any difference is fixed here or the swap is reverted and reported.
 - [ ] **Step 5:** Commit: `build(android): use androidx material3 1.5 for Expressive`.
