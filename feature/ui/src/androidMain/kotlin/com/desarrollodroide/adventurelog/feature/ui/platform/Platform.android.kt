@@ -1,3 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.ui.platform
 
-actual val isApplePlatform: Boolean = false
+/**
+ * Whether this is an Apple platform.
+ *
+ * Used to decide whether Apple Maps is worth offering: on Android the same link opens a web page,
+ * which is a worse answer than not offering it at all.
+ */
+val isApplePlatform: Boolean = false

@@ -25,14 +25,20 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 
+/**
+ * The two ends of a journey on a map: either, both, or neither may be known yet.
+ *
+ * A transportation is the one thing in the app with two places rather than one, which is why it
+ * does not reuse the single-point map the rest of the app draws.
+ */
 @Composable
-actual fun MapView(
+fun MapView(
     originLat: Double?,
     originLng: Double?,
     destinationLat: Double?,
     destinationLng: Double?,
     onMapClick: (Double, Double) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     val origin = remember(originLat, originLng) {
         if (originLat != null && originLng != null) LatLng(originLat, originLng) else null

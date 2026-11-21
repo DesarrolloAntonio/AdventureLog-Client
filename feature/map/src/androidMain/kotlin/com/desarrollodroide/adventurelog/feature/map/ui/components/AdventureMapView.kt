@@ -29,15 +29,19 @@ import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
 import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
 import com.google.maps.android.compose.*
 
+/**
+ * A common interface for the adventure map view.
+ * Platform-specific implementations will be provided in corresponding source sets.
+ */
 @Composable
-actual fun AdventureMapView(
+fun AdventureMapView(
     locations: List<Location>,
     visitedRegions: List<VisitedRegion>,
     visitedCities: List<VisitedCity>,
     showCities: Boolean,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(

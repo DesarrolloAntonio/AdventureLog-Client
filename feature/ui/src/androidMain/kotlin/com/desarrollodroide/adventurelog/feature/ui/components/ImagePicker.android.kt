@@ -10,7 +10,7 @@ import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 
 @Composable
-actual fun ImagePicker(
+fun ImagePicker(
     onImageSelected: (ImageFormData) -> Unit,
     onDismiss: () -> Unit
 ) {

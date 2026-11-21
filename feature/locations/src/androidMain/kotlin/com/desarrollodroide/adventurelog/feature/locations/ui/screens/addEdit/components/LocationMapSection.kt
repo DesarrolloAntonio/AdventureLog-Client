@@ -17,11 +17,11 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-actual fun LocationMapSection(
+fun LocationMapSection(
     latitude: String?,
     longitude: String?,
     onMapClick: (lat: Double, lon: Double) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     val defaultLocation = LatLng(40.4168, -3.7038) // Madrid as default
     

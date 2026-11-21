@@ -253,12 +253,6 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
-// Flag to check if dynamic colors are supported (will be set at runtime)
-expect val isDynamicColorSupported: Boolean
-
-@Composable
-expect fun getDynamicColorScheme(isDarkTheme: Boolean): androidx.compose.material3.ColorScheme?
-
 @Composable
 fun AppTheme(
     content: @Composable () -> Unit

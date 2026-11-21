@@ -18,9 +18,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.emoji2.emojipicker.EmojiPickerView
 import com.desarrollodroide.adventurelog.feature.locations.R
 
+/**
+ * Platform-specific emoji picker interface
+ */
 @Composable
-actual fun EmojiPicker(
-    modifier: Modifier,
+fun EmojiPicker(
+    modifier: Modifier = Modifier,
     onEmojiSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
