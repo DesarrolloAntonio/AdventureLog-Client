@@ -2,15 +2,15 @@
 
 ![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=main)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-blue.svg)
-![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.12.0-green.svg)
 ![KMP](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-purple.svg)
 
 A mobile client for [AdventureLog](https://github.com/seanmorley15/AdventureLog), the self-hosted
-travel journal, built with Kotlin Multiplatform and Compose Multiplatform. Log the places you have
-been, group them into trips, and see it all on a map, a calendar and a world of visited countries.
+travel journal, built with Kotlin Multiplatform: shared logic, Jetpack Compose on Android and
+SwiftUI on iOS. Log the places you have been, group them into trips, and see it all on a map,
+a calendar and a world of visited countries.
 
-**Android** is the primary platform and is where everything is tested. **iOS** builds and runs,
-but has had far less use and is not distributed yet.
+**Android** is the primary platform and is where everything is tested. **iOS** is a SwiftUI app
+that is still a placeholder and is not distributed yet.
 
 ## 🌟 Features
 
@@ -69,8 +69,8 @@ and each screen lives in its own `feature` module. ViewModels expose immutable U
 
 ```
 AdventureLog/
-├── composeApp/           # Android and iOS entry points, app-wide navigation and DI
-├── iosApp/               # Xcode project
+├── composeApp/           # Android app and iOS framework, app-wide navigation and DI
+├── iosApp/               # SwiftUI app (Xcode project)
 ├── build-logic/          # Gradle convention plugins
 ├── core/
 │   ├── common/           # Utilities and extensions
@@ -79,6 +79,7 @@ AdventureLog/
 │   ├── model/            # Domain models
 │   ├── network/          # Ktor client and API DTOs
 │   ├── permissions/      # Runtime permissions
+│   ├── resources/        # Fonts and strings (Android only)
 │   └── testing/          # Hand-written fakes shared by the tests
 └── feature/
     ├── calendar/         # Dated events as an agenda
@@ -89,13 +90,16 @@ AdventureLog/
     ├── login/            # Sign-in
     ├── map/              # Map
     ├── settings/         # Account and app settings
-    ├── ui/               # Shared UI components and theme
+    ├── ui/               # Shared Android UI components and theme
     └── world/            # Countries, regions and cities
 ```
 
-**Stack:** [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) with
-Material 3 · [Navigation 3](https://developer.android.com/guide/navigation/navigation-3) and
-Compose Navigation · [Koin](https://insert-koin.io/) · [Ktor](https://ktor.io/) ·
+UI is per platform: ViewModels and everything below them are shared, every `@Composable` lives in
+`androidMain`, and iOS is SwiftUI. See the
+[design](docs/superpowers/specs/2026-11-21-native-ui-split-design.md).
+
+**Stack:** [Jetpack Compose](https://developer.android.com/jetpack/compose) with
+Material 3 · [Navigation 3](https://developer.android.com/guide/navigation/navigation-3) · [Koin](https://insert-koin.io/) · [Ktor](https://ktor.io/) ·
 [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization) ·
 [Coil](https://coil-kt.github.io/coil/) ·
 [Multiplatform Settings](https://github.com/russhwolf/multiplatform-settings) · Coroutines and Flow
@@ -103,7 +107,7 @@ Compose Navigation · [Koin](https://insert-koin.io/) · [Ktor](https://ktor.io/
 ## 🚀 Building
 
 **Requirements:** an Android Studio recent enough for AGP 9.2, JDK 17, and Xcode 26 for iOS
-(deployment target 15.3).
+(iOS 26 minimum).
 
 ```bash
 git clone https://github.com/DesarrolloAntonio/AdventureLog-Client.git
@@ -111,13 +115,15 @@ cd AdventureLog-Client
 ```
 
 - **Android**: open the project in Android Studio and run the `composeApp` configuration.
-- **iOS**: run `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, then open
+- **iOS**: a placeholder for now. Run `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, then open
   `iosApp/iosApp.xcodeproj` in Xcode and run it.
 
 ## 🧪 Tests
 
 - **Unit tests** (`commonTest`, on Android and iOS): models, mappers, use cases, the network and
-  data layers, and every feature's ViewModels, using the fakes in `core/testing`.
+  data layers, and every feature's ViewModels, using the fakes in `core/testing`. Tests of
+  Android-only UI logic live in `androidUnitTest`.
+- **Shared-code check**: `scripts/check-common-compose.sh` fails if Compose reaches `commonMain`.
 - **UI tests** (`androidInstrumentedTest`, need a device or emulator): screens and shared
   components in `collections`, `home`, `calendar`, `locations` and `ui`.
 - **Flows**: one Maestro flow in `.maestro/`.
@@ -132,10 +138,108 @@ CI runs the unit tests and builds the app; the UI tests and the Maestro flow run
 ## ⚠️ Known issues
 
 - **MFA and SSO**: accounts that use them cannot sign in yet.
-- **Back on iOS**: going back from a half-filled form skips the "discard your changes?" question
-  (Cancel still asks), and there is no system back gesture.
-- **Date picker on iOS**: it used to crash; the Compose Multiplatform upgrade should have fixed it,
-  but that is not yet confirmed on a device.
+- **iOS**: the SwiftUI app is a placeholder; the real screens come in a later phase.
+
+### Module Graph
+
+```mermaid
+%%{
+  init: {
+    'theme': 'neutral'
+  }
+}%%
+
+graph LR
+  :feature:calendar --> :core:common
+  :feature:calendar --> :core:domain
+  :feature:calendar --> :core:model
+  :feature:calendar --> :feature:ui
+  :feature:calendar --> :core:testing
+  :feature:login --> :core:common
+  :feature:login --> :core:domain
+  :feature:login --> :core:model
+  :feature:login --> :feature:home
+  :feature:login --> :feature:ui
+  :feature:login --> :core:testing
+  :feature:collections --> :core:common
+  :feature:collections --> :core:domain
+  :feature:collections --> :core:model
+  :feature:collections --> :feature:detail
+  :feature:collections --> :feature:map
+  :feature:collections --> :feature:ui
+  :feature:collections --> :core:testing
+  :feature:locations --> :core:common
+  :feature:locations --> :core:domain
+  :feature:locations --> :core:model
+  :feature:locations --> :feature:detail
+  :feature:locations --> :feature:ui
+  :feature:locations --> :core:testing
+  :feature:settings --> :core:common
+  :feature:settings --> :core:domain
+  :feature:settings --> :core:model
+  :feature:settings --> :feature:ui
+  :feature:settings --> :core:testing
+  :composeApp --> :core:resources
+  :composeApp --> :feature:login
+  :composeApp --> :feature:home
+  :composeApp --> :feature:locations
+  :composeApp --> :feature:settings
+  :composeApp --> :feature:detail
+  :composeApp --> :feature:ui
+  :composeApp --> :feature:calendar
+  :composeApp --> :feature:collections
+  :composeApp --> :feature:world
+  :composeApp --> :feature:map
+  :composeApp --> :core:model
+  :composeApp --> :core:domain
+  :composeApp --> :core:data
+  :core:network --> :core:model
+  :feature:home --> :core:testing
+  :feature:home --> :core:resources
+  :feature:home --> :core:common
+  :feature:home --> :core:domain
+  :feature:home --> :core:model
+  :feature:home --> :feature:settings
+  :feature:home --> :feature:locations
+  :feature:home --> :feature:ui
+  :feature:home --> :feature:calendar
+  :feature:home --> :feature:collections
+  :feature:home --> :feature:world
+  :feature:home --> :feature:map
+  :feature:home --> :feature:detail
+  :core:testing --> :core:common
+  :core:testing --> :core:model
+  :core:testing --> :core:domain
+  :core:testing --> :core:network
+  :core:data --> :core:common
+  :core:data --> :core:domain
+  :core:data --> :core:network
+  :core:data --> :core:model
+  :core:data --> :core:testing
+  :feature:world --> :core:common
+  :feature:world --> :core:domain
+  :feature:world --> :core:model
+  :feature:world --> :feature:ui
+  :feature:world --> :core:testing
+  :core:domain --> :core:common
+  :core:domain --> :core:network
+  :core:domain --> :core:model
+  :core:domain --> :core:testing
+  :feature:ui --> :core:common
+  :feature:ui --> :core:domain
+  :feature:ui --> :core:model
+  :feature:detail --> :core:common
+  :feature:detail --> :core:domain
+  :feature:detail --> :core:model
+  :feature:detail --> :feature:ui
+  :feature:detail --> :core:testing
+  :feature:map --> :core:common
+  :feature:map --> :core:domain
+  :feature:map --> :core:model
+  :feature:map --> :feature:ui
+  :feature:map --> :core:data
+  :feature:map --> :core:testing
+```
 
 ## 📄 License
 
