@@ -38,6 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.runtime.SideEffect
+import androidx.core.view.WindowCompat
 import com.desarrollodroide.adventurelog.core.constants.ADVENTURELOG_CLIENT_GITHUB_URL
 import com.desarrollodroide.adventurelog.core.constants.ADVENTURELOG_GITHUB_URL
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
@@ -273,8 +278,20 @@ fun SettingsContent(
     legalPage?.let { page ->
         Dialog(
             onDismissRequest = { legalPage = null },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
         ) {
+            // Drawn edge to edge, the dialog's own window keeps the default light icons: on the
+            // daylight page they vanish. Match them to the page, as the activity does.
+            val view = LocalView.current
+            val lightPage = MaterialTheme.colorScheme.background.luminance() > 0.5f
+            SideEffect {
+                (view.parent as? DialogWindowProvider)?.window?.let { window ->
+                    WindowCompat.getInsetsController(window, view).apply {
+                        isAppearanceLightStatusBars = lightPage
+                        isAppearanceLightNavigationBars = lightPage
+                    }
+                }
+            }
             when (page) {
                 LegalPage.TERMS -> TermsOfUseScreen(onBack = { legalPage = null })
                 LegalPage.PRIVACY -> PrivacyPolicyScreen(onBack = { legalPage = null })

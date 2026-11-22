@@ -33,6 +33,7 @@ fun AppearanceGroup(
     var themeSheetOpen by remember { mutableStateOf(false) }
 
     SettingsGroup(
+        segmented = true,
         title = "Appearance",
         modifier = modifier,
         caption = "Kept on this phone only."

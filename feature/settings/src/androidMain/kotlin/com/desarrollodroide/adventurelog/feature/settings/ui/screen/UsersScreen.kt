@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,7 +94,7 @@ fun UsersScreen(
                         top = 8.dp,
                         bottom = 96.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -123,8 +124,13 @@ fun UsersScreen(
                     if (state.users.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) { NobodyYet() }
                     } else {
-                        items(state.filtered, key = { it.uuid }) { user ->
-                            UserCard(user, onClick = { viewModel.openProfile(user) })
+                        val people = state.filtered
+                        items(people.size, key = { people[it].uuid }) { index ->
+                            UserCard(
+                                people[index],
+                                shape = SegmentedListDefaults.shapeFor(index, people.size),
+                                onClick = { viewModel.openProfile(people[index]) }
+                            )
                         }
                     }
                 }
@@ -172,11 +178,12 @@ private fun NobodyYet() {
 }
 
 @Composable
-private fun UserCard(user: PublicUser, onClick: () -> Unit) {
+private fun UserCard(user: PublicUser, shape: androidx.compose.ui.graphics.Shape, onClick: () -> Unit) {
+    // A row of one segmented group, as the canvas draws People.
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),

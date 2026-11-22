@@ -1,5 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.ui.components.settings
 
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.clickable
@@ -42,12 +48,21 @@ import androidx.compose.ui.unit.dp
  * past everything to find anything. A row that carries its own current value underneath is
  * readable at a glance and only opens when there is a reason to.
  */
+/** Set by a segmented [SettingsGroup]: the colour each row paints as its own block. */
+val LocalSettingsSegmentColor = compositionLocalOf<Color?> { null }
+
 @Composable
 fun SettingsGroup(
     title: String,
     modifier: Modifier = Modifier,
     caption: String? = null,
     busy: Boolean = false,
+    /**
+     * Rows as the canvas draws them: each its own block, split by a thin gap, the group's outer
+     * corners round and the inner ones barely. Only for groups made of [SettingsRow]s - a group
+     * with content of its own (an email list, a storage bar) keeps the single card.
+     */
+    segmented: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // Pure white pops against the daylight backdrop; pure black against the dimmed one is a hole.
@@ -60,12 +75,36 @@ fun SettingsGroup(
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
+        // The canvas's section voice: condensed and heavy.
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
+            style = AdventureType.display(22.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
         )
+        if (segmented) {
+            Column(
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                CompositionLocalProvider(LocalSettingsSegmentColor provides cardColor) { content() }
+                if (caption != null) {
+                    Text(
+                        text = caption,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(cardColor, RoundedCornerShape(6.dp))
+                            .padding(horizontal = 20.dp, vertical = 12.dp)
+                    )
+                }
+                if (busy) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(2.dp), trackColor = Color.Transparent)
+                }
+            }
+            return@Column
+        }
         Card(
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
@@ -120,10 +159,12 @@ fun SettingsRow(
 ) {
     val contentColor = tint ?: MaterialTheme.colorScheme.onSurface
     val alpha = if (enabled) 1f else 0.38f
+    val segment = LocalSettingsSegmentColor.current
 
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .then(if (segment != null) Modifier.background(segment, RoundedCornerShape(6.dp)) else Modifier)
             .then(
                 if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick)
                 else Modifier
@@ -212,6 +253,8 @@ fun SettingsSwitchRow(
 /** Divider between rows, inset so it starts where the text does. */
 @Composable
 fun SettingsRowDivider(inset: Boolean = true) {
+    // In a segmented group the gap between rows is the divider.
+    if (LocalSettingsSegmentColor.current != null) return
     HorizontalDivider(
         modifier = Modifier.padding(start = if (inset) 60.dp else 20.dp, end = 20.dp),
         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)

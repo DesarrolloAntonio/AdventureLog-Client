@@ -40,6 +40,7 @@ fun PreferencesGroup(
     val form = state.form
 
     SettingsGroup(
+        segmented = true,
         title = "Preferences",
         modifier = modifier,
         busy = state.isSaving,

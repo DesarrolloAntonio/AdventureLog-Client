@@ -42,7 +42,8 @@ fun AboutSection(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        SettingsGroup(title = "About") {
+        SettingsGroup(
+        segmented = true,title = "About") {
             SettingsRow(
                 title = "Server",
                 icon = Icons.Outlined.Dns,
