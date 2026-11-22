@@ -71,8 +71,10 @@ fun PlaceRow(
     onRemoveFromCollection: (() -> Unit)? = null,
     /** The editor on its images. Offered in the actions only while the place has no photo. */
     onAddPhoto: (() -> Unit)? = null,
+    /** False where the row only shows the place (the map's card): no menu, no long press. */
+    showActions: Boolean = true,
 ) {
-    var showActions by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
 
     Surface(
@@ -83,7 +85,7 @@ fun PlaceRow(
         Row(
             modifier = Modifier
                 .heightIn(min = 76.dp)
-                .combinedClickable(onClick = onClick, onLongClick = { showActions = true })
+                .combinedClickable(onClick = onClick, onLongClick = if (showActions) ({ showMenu = true }) else null)
                 .padding(start = 10.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -110,16 +112,18 @@ fun PlaceRow(
             }
             val rating = location.rating?.roundToInt()?.takeIf { it > 0 }
             if (rating != null) RatingPill(rating)
-            IconButton(onClick = { showActions = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "More options", tint = colors.onSurfaceVariant)
+            if (showActions) {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "More options", tint = colors.onSurfaceVariant)
+                }
             }
         }
     }
 
     PlaceActions(
         location = location,
-        visible = showActions,
-        onDismiss = { showActions = false },
+        visible = showMenu,
+        onDismiss = { showMenu = false },
         onOpenDetails = onClick,
         onEdit = onEdit,
         onDuplicate = onDuplicate,
