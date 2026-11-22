@@ -68,7 +68,7 @@ Each item has its test in the task that owns the code (Tasks 2, 3, 4). Where eac
 
 **Interfaces:**
 - Consumes: `CurrentScreen`, the `Destination` enum (made `internal`).
-- Decided while building: the toolbar does not hide on scroll. The shell pads its content by `MainToolbarDefaults.Clearance` on compact windows, so every list, FAB and map already ends above it, and no screen has to know about it; hiding would only uncover empty background.
+- Decided with the owner (2026-11-22): content runs behind the toolbar and the toolbar slides away while content scrolls down (exit-always), back on scroll up - stopping content above it read as a docked bar on a white band. A screen's main action goes beside the toolbar (`rememberShellAction` in `feature/ui`), as the canvas draws Places and Collections; the current destination drops its name when name and action would not fit with a 12dp margin. Screens outside the five (Settings, Calendar, People) show all five as icons.
 - Produces: `@Composable fun MainToolbar(current: CurrentScreen, onSelect: (CurrentScreen) -> Unit, modifier: Modifier = Modifier)` — the canvas's dark pill: `inverseSurface` container, 64dp tall, 32dp corners, selected item a 48dp `primaryContainer` pill with icon and label, the others 48dp icon buttons with `contentDescription` = label. Dark theme inverts as the canvas does (container `inverseSurface` is light there).
 
 - [ ] **Step 1:** Write `MainToolbarTest`: the selected destination shows its label text; each unselected one is found by content description and has no text; clicking "Map" calls `onSelect(CurrentScreen.MAP)`; at `fontScale = 2f` the selected label is displayed and the toolbar's height stays 64dp (Review Focus 1).

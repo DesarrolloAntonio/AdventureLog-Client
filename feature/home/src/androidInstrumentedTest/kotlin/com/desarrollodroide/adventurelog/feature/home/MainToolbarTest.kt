@@ -1,15 +1,19 @@
 package com.desarrollodroide.adventurelog.feature.home
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -20,12 +24,17 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
+import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbar
 import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbarDefaults
+import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbarRow
+import com.desarrollodroide.adventurelog.feature.home.ui.components.rememberToolbarScrollState
+import com.desarrollodroide.adventurelog.feature.ui.components.ShellAction
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -42,6 +51,23 @@ class MainToolbarTest {
         onNodeWithText("Home").assertIsDisplayed()
         onNodeWithContentDescription("Map").assertIsDisplayed()
         onNodeWithText("Map").assertDoesNotExist()
+    }
+
+    @Test
+    fun aScreenOutsideTheFiveShowsEveryDestinationAsAnIcon() = runComposeUiTest {
+        // Settings, Calendar and People live in the shell but are none of the five.
+        setContent {
+            MainToolbarRow(
+                current = CurrentScreen.SETTINGS,
+                onSelect = {},
+                action = null,
+                scroll = rememberToolbarScrollState(),
+            )
+        }
+
+        listOf("Home", "Places", "Collections", "Map", "World").forEach {
+            onNodeWithContentDescription(it).assertIsDisplayed()
+        }
     }
 
     @Test
@@ -71,33 +97,110 @@ class MainToolbarTest {
         onNodeWithTag("toolbar").assertHeightIsEqualTo(MainToolbarDefaults.Height)
     }
 
+    /** A list under the floating row, wired the way the shell wires it. */
+    @Composable
+    private fun ListUnderToolbar(action: ShellAction? = null) {
+        val scroll = rememberToolbarScrollState()
+        Box(Modifier.fillMaxSize().nestedScroll(scroll.connection).testTag("root")) {
+            LazyColumn(Modifier.fillMaxSize().testTag("list")) {
+                items(50) { i -> Text("Row $i", Modifier.fillMaxWidth().height(56.dp).testTag("row$i")) }
+            }
+            MainToolbarRow(
+                current = CurrentScreen.PLACES,
+                onSelect = {},
+                action = action,
+                scroll = scroll,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
+
     @Test
-    fun lastListItemClearsTheToolbar() = runComposeUiTest {
+    fun contentRunsUnderTheToolbar() = runComposeUiTest {
+        setContent { ListUnderToolbar() }
+
+        // Floating means the list goes on behind it: a row is drawn where the toolbar is.
+        val toolbar = onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot()
+        val root = onNodeWithTag("root").getUnclippedBoundsInRoot()
+        val rowsBelowToolbarTop = (0 until 50).count { i ->
+            runCatching { onNodeWithTag("row$i").getUnclippedBoundsInRoot() }.getOrNull()
+                ?.let { it.bottom > toolbar.top && it.top < root.bottom } == true
+        }
+        assertTrue("no row behind the toolbar", rowsBelowToolbarTop > 0)
+    }
+
+    @Test
+    fun scrollingDownHidesTheToolbarAndScrollingUpBringsItBack() = runComposeUiTest {
+        setContent { ListUnderToolbar() }
+        val rootBottom = onNodeWithTag("root").getUnclippedBoundsInRoot().bottom
+
+        onNodeWithTag("list").performTouchInput { swipeUp() }
+        waitForIdle()
+        assertTrue(
+            "toolbar still on screen after scrolling down",
+            onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot().top >= rootBottom,
+        )
+
+        onNodeWithTag("list").performTouchInput { swipeDown() }
+        waitForIdle()
+        assertTrue(
+            "toolbar not back after scrolling up",
+            onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot().bottom <= rootBottom,
+        )
+    }
+
+    @Test
+    fun theScreensMainActionSitsBesideTheToolbar() = runComposeUiTest {
+        var added = false
+        setContent { ListUnderToolbar(ShellAction(Icons.Default.Add, "Add a place") { added = true }) }
+
+        val toolbar = onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot()
+        val action = onNodeWithContentDescription("Add a place").getUnclippedBoundsInRoot()
+        assertTrue(action.left >= toolbar.right)
+
+        onNodeWithContentDescription("Add a place").performClick()
+        assertTrue(added)
+    }
+
+    @Test
+    fun toolbarAndActionFitAPhone() = runComposeUiTest {
         setContent {
-            Box(Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().testTag("list"),
-                    contentPadding = PaddingValues(bottom = MainToolbarDefaults.clearance()),
-                ) {
-                    items(50) { i ->
-                        Text("Row $i", Modifier.fillMaxWidth().height(56.dp).testTag("row$i"))
-                    }
-                }
-                MainToolbar(
-                    current = CurrentScreen.PLACES,
+            Box(Modifier.width(412.dp).fillMaxSize().testTag("phone")) {
+                MainToolbarRow(
+                    current = CurrentScreen.COLLECTIONS,
                     onSelect = {},
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .then(MainToolbarDefaults.PositionModifier)
-                        .testTag("toolbar"),
+                    action = ShellAction(Icons.Default.Add, "Add collection") {},
+                    scroll = rememberToolbarScrollState(),
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             }
         }
 
-        onNodeWithTag("list").performScrollToIndex(49)
+        val phone = onNodeWithTag("phone").getUnclippedBoundsInRoot()
+        val toolbar = onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot()
+        val action = onNodeWithContentDescription("Add collection").getUnclippedBoundsInRoot()
+        val margin = MainToolbarDefaults.SideMargin
+        assertTrue("toolbar from ${toolbar.left} on a phone from ${phone.left}", toolbar.left >= phone.left + margin)
+        assertTrue("action to ${action.right} on a phone to ${phone.right}", action.right <= phone.right - margin)
+        // No room for "Collections" beside the button: the pill keeps the icon and says its name.
+        onNodeWithText("Collections").assertDoesNotExist()
+        onNodeWithContentDescription("Collections").assertIsDisplayed()
+    }
 
-        val row = onNodeWithTag("row49").getUnclippedBoundsInRoot()
-        val toolbar = onNodeWithTag("toolbar").getUnclippedBoundsInRoot()
-        assertTrue("row ends at ${row.bottom}, toolbar starts at ${toolbar.top}", row.bottom <= toolbar.top)
+    @Test
+    fun aShortNameStaysBesideTheAction() = runComposeUiTest {
+        setContent {
+            Box(Modifier.width(412.dp).fillMaxSize()) {
+                MainToolbarRow(
+                    current = CurrentScreen.PLACES,
+                    onSelect = {},
+                    action = ShellAction(Icons.Default.Add, "Add a place") {},
+                    scroll = rememberToolbarScrollState(),
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
+        }
+
+        onNodeWithText("Places").assertIsDisplayed()
     }
 }

@@ -45,6 +45,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberShellAction
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -307,6 +308,7 @@ private fun CollectionsContent(
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
+    val handedToShell = rememberShellAction(Icons.Default.Add, "Add collection", onAddCollectionClick)
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -359,7 +361,8 @@ private fun CollectionsContent(
           }
         },
         floatingActionButton = {
-            FloatingActionButton(
+            // On a phone the shell draws this beside its floating toolbar, as the canvas does.
+            if (!handedToShell) FloatingActionButton(
                 onClick = onAddCollectionClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary

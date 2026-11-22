@@ -22,10 +22,13 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.window.core.layout.WindowWidthSizeClass
-import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbar
-import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbarDefaults
+import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbarRow
+import com.desarrollodroide.adventurelog.feature.home.ui.components.rememberToolbarScrollState
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import com.desarrollodroide.adventurelog.feature.ui.components.ShellActionHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -291,7 +294,18 @@ fun HomeScreenContent(
     val compact = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass ==
         WindowWidthSizeClass.COMPACT
 
-    Box(modifier = modifier.fillMaxSize()) {
+    // The phone's floating row: it slides away while content scrolls down, and carries the main
+    // action of the screen on show ("Add a place") beside the destinations.
+    val toolbarScroll = rememberToolbarScrollState()
+    val shellActions = remember { ShellActionHost() }
+    LaunchedEffect(currentScreen) { toolbarScroll.show() }
+
+    CompositionLocalProvider(LocalShellActionHost provides if (compact) shellActions else null) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .then(if (compact) Modifier.nestedScroll(toolbarScroll.connection) else Modifier)
+    ) {
         // Flat, the redesign's #F5FAFB - the theme's own surface.
         //
         // This was a gradient mixed from the palette's containers, which was the right answer when
@@ -492,10 +506,9 @@ fun HomeScreenContent(
             ) { innerPadding ->
                 val barsPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding(),
-                    // On a phone the content stops above the floating toolbar, so a list's last
-                    // row and a screen's own FAB are never under it.
-                    bottom = innerPadding.calculateBottomPadding() +
-                        if (compact) MainToolbarDefaults.Clearance else 0.dp
+                    // On a phone the content runs on behind the floating toolbar, which slides away
+                    // while it scrolls down - so a list's last row is uncovered at the end.
+                    bottom = innerPadding.calculateBottomPadding()
                 )
                 Box(
                     modifier = Modifier
@@ -1022,14 +1035,15 @@ fun HomeScreenContent(
             }
 
             if (compact) {
-                MainToolbar(
+                MainToolbarRow(
                     current = currentScreen,
                     onSelect = { navigateTo(it) },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .then(MainToolbarDefaults.PositionModifier)
+                    action = shellActions.action,
+                    scroll = toolbarScroll,
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
+    }
     }
 }
 
