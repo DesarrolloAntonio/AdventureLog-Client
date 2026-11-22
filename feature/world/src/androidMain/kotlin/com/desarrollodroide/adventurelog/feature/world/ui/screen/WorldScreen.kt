@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.world.ui.components.CountryRow
+import com.desarrollodroide.adventurelog.feature.world.ui.components.WorldFilterGroup
+import com.desarrollodroide.adventurelog.feature.world.ui.components.PassportCard
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,8 +61,6 @@ import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.SearchBarAction
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
-import com.desarrollodroide.adventurelog.feature.world.ui.components.CompactProgressSection
-import com.desarrollodroide.adventurelog.feature.world.ui.components.CountryCard
 import com.desarrollodroide.adventurelog.feature.world.ui.state.FilterMode
 import com.desarrollodroide.adventurelog.feature.world.ui.state.WorldRegion
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.WorldViewModel
@@ -142,9 +144,11 @@ private fun WorldScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        bottom = 16.dp
+                        bottom = 120.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    // The countries are one segmented group, split by the thin gap; the blocks above
+                    // carry their own spacing.
+                    verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -173,11 +177,14 @@ private fun WorldScreenContent(
 
                     // Progress section
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        CompactProgressSection(
+                        // The passport page, as the canvas draws it. Regions are the countries' visited
+                        // regions summed; "planned" countries and a places count have no data here.
+                        PassportCard(
+                            visitedCountries = uiState.visitedCountriesCount,
                             totalCountries = uiState.totalCountriesCount,
-                            visitedCount = uiState.visitedCountriesCount,
-                            completeCount = uiState.completeCountriesCount,
-                            partiallyVisitedCount = uiState.partiallyVisitedCount,
+                            regionsVisited = uiState.countries.sumOf { it.numVisits },
+                            complete = uiState.completeCountriesCount,
+                            partial = uiState.partiallyVisitedCount,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
@@ -193,12 +200,10 @@ private fun WorldScreenContent(
                                 onRegionSelected = onRegionSelected
                             )
                             
-                            // Visit status filter chips
-                            VisitStatusFilters(
-                                selectedFilter = uiState.filterMode,
-                                onFilterSelected = { filterMode ->
-                                    viewModel.onFilterModeChanged(filterMode)
-                                }
+                            WorldFilterGroup(
+                                selected = uiState.filterMode,
+                                onSelect = viewModel::onFilterModeChanged,
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
                         }
                     }
@@ -212,10 +217,12 @@ private fun WorldScreenContent(
                             )
                         }
                     } else {
-                        items(uiState.filteredCountries) { country ->
-                            CountryCard(
-                                country = country,
-                                onClick = { onCountryClick(country.countryCode) }
+                        val countries = uiState.filteredCountries
+                        items(countries.size) { index ->
+                            CountryRow(
+                                country = countries[index],
+                                shape = SegmentedListDefaults.shapeFor(index, countries.size),
+                                onClick = onCountryClick
                             )
                         }
                     }
@@ -314,63 +321,6 @@ private fun FilterChipsRow(
     }
 }
 
-@Composable
-private fun VisitStatusFilters(
-    selectedFilter: FilterMode,
-    onFilterSelected: (FilterMode) -> Unit
-) {
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(FilterMode.entries) { filterMode ->
-            val isSelected = selectedFilter == filterMode
-            FilterChip(
-                selected = isSelected,
-                onClick = { onFilterSelected(filterMode) },
-                label = {
-                    Text(
-                        text = when (filterMode) {
-                            FilterMode.ALL -> "All"
-                            FilterMode.COMPLETE -> "Complete"
-                            FilterMode.PARTIAL -> "Partial"
-                            FilterMode.NOT_VISITED -> "Not visited"
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                        maxLines = 1
-                    )
-                },
-                leadingIcon = if (isSelected) {
-                    {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                } else null,
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = when (filterMode) {
-                        FilterMode.ALL -> MaterialTheme.colorScheme.primary
-                        FilterMode.COMPLETE -> Color(0xFF4CAF50)
-                        FilterMode.PARTIAL -> Color(0xFFFFA726)
-                        FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    selectedLabelColor = when (filterMode) {
-                        FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.onSurfaceVariant
-                        else -> Color.White
-                    },
-                    // The tick the colour of the label: left to the default it was dark teal on the
-                    // teal "All" chip and could not be seen (QA 05, screenshot).
-                    selectedLeadingIconColor = when (filterMode) {
-                        FilterMode.NOT_VISITED -> MaterialTheme.colorScheme.onSurfaceVariant
-                        else -> Color.White
-                    }
-                )
-            )
-        }
-    }
-}
 
 @Composable
 private fun EmptyState(
