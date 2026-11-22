@@ -301,6 +301,14 @@ fun HomeScreenContent(
     val toolbarScroll = rememberToolbarScrollState()
     val shellActions = remember { ShellActionHost() }
     LaunchedEffect(currentScreen) { toolbarScroll.show() }
+    // A screen with bars of its own scrolls too, and the nested scroll reaches the shell's bars
+    // while they are put away: back on the list, the app bar was folded and the toolbar gone.
+    LaunchedEffect(shellActions.chromeHiddenBy) {
+        if (shellActions.chromeHiddenBy == 0) {
+            toolbarScroll.show()
+            resetScrollBehavior(scrollBehavior)
+        }
+    }
 
     CompositionLocalProvider(LocalShellActionHost provides if (compact) shellActions else null) {
     Box(
@@ -336,6 +344,8 @@ fun HomeScreenContent(
                     .nestedScroll(scrollBehavior.nestedScrollConnection)
                     .background(Color.Transparent),  // Ensure Scaffold is transparent
                 topBar = {
+                    // A screen with bars of its own (a place's page) has the shell's put away.
+                    if (compact && shellActions.chromeHiddenBy > 0) return@Scaffold
                     // The bar is transparent, so insetting it simply moves the title and the
                     // actions onto the same left and right edge as the content below. Without
                     // this the greeting starts at the window edge while everything under it
@@ -1031,7 +1041,7 @@ fun HomeScreenContent(
             }
             }
 
-            if (compact) {
+            if (compact && shellActions.chromeHiddenBy == 0) {
                 MainToolbarRow(
                     current = currentScreen,
                     onSelect = { navigateTo(it) },

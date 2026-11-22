@@ -1,5 +1,12 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import androidx.compose.foundation.layout.navigationBarsPadding
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.placeFacts
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.PlacePhotoHero
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.PlaceHeadline
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.PlaceFactsStrip
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.PlaceActionsToolbar
 import com.desarrollodroide.adventurelog.feature.ui.util.CANNOT_OPEN_LINK
 import com.desarrollodroide.adventurelog.feature.ui.util.tryOpenUri
 import kotlinx.coroutines.launch
@@ -53,6 +60,9 @@ fun AdventureDetailScreenRoute(
     onAddPhotoClick: ((Location) -> Unit)? = null
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
+    // The page has its own photo and toolbar, as the canvas draws it: inside the shell on a phone,
+    // the shell's bars step aside.
+    if (showBack) HideShellChrome()
     
     LaunchedEffect(locationId) {
         viewModel.loadLocation(locationId)
@@ -166,151 +176,142 @@ fun AdventureDetailScreen(
 ) {
     val scrollState = rememberScrollState()
     val cover = location.images.firstOrNull()?.image?.takeIf { it.isNotBlank() }
+    val lat = location.latitude
+    val lon = location.longitude
+    val hasCoordinates = !lat.isNullOrBlank() && !lon.isNullOrBlank()
+    val link = location.link?.takeIf { it.isNotBlank() }
 
     // The page paints its own surface, so it says what colour text on it is. Opened from Home it
     // sits outside the tab shell, where nothing else does, and every title without a colour of its
     // own came out black on the dark theme.
     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-        Column(modifier = modifier.fillMaxSize()) {
-            // No photograph, no cover: a bar that stays put, and the page starts right under it.
-            if (cover == null) {
-                CompactPlaceBar(
-                    onBackClick = onBackClick,
-                    onShareClick = onShareLocation,
-                    onEditClick = onEditClick,
-                    showBack = showBack
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-            ) {
-                if (cover != null) {
-                    CoverImageWithButtons(
-                        imageUrl = cover,
+        Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // No photograph, no hero: a bar that stays put, and the page starts right under it.
+                // Edit lives in the toolbar below now, so the bar carries Back and Share.
+                if (cover == null) {
+                    CompactPlaceBar(
                         onBackClick = onBackClick,
                         onShareClick = onShareLocation,
-                        onEditClick = onEditClick,
+                        onEditClick = null,
                         showBack = showBack
                     )
                 }
 
-                // The page proper, lifted over the bottom of the photograph when there is one.
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (cover != null) {
-                                Modifier
-                                    .offset(y = (-24).dp)
-                                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                            } else {
-                                Modifier
-                            }
-                        )
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(horizontal = 24.dp)
-                        .padding(top = if (cover != null) 28.dp else 20.dp, bottom = 48.dp),
-                    // One rhythm for the whole page, set here rather than by each section in turn.
-                    verticalArrangement = Arrangement.spacedBy(28.dp)
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        HeaderInfo(
-                            title = location.name,
-                            location = location.location,
-                            rating = location.rating
-                        )
-                        CategoryTags(
-                            category = location.category,
-                            isPublic = location.isPublic,
-                            tags = location.tags.userTags(),
-                            isVisited = location.isVisited,
-                            visitCount = location.visits.size
+                    if (cover != null) {
+                        PlacePhotoHero(
+                            images = location.images,
+                            onBackClick = onBackClick,
+                            onShareClick = onShareLocation,
+                            showBack = showBack
                         )
                     }
 
-                    if (cover == null && onAddPhotoClick != null) {
-                        NoPhotoCard(categoryIcon = location.category?.icon, onAddPhoto = onAddPhotoClick)
-                    }
-
-                    location.description?.takeIf { it.isNotBlank() }?.let { description ->
-                        DetailSection(title = "About") {
-                            AboutBody(description = description)
-                        }
-                    }
-
-                    if (location.images.isNotEmpty()) {
-                        DetailSection(title = "Photos (${location.images.size})") {
-                            AdventurePhotosCarousel(images = location.images)
-                        }
-                    }
-
-                    val lat = location.latitude
-                    val lon = location.longitude
-                    if (!lat.isNullOrBlank() && !lon.isNullOrBlank()) {
-                        DetailSection(title = "Where") {
-                            MapBody(latitude = lat, longitude = lon, onOpenMap = onOpenMap)
-                        }
-                    }
-
-                    if (location.visits.isNotEmpty()) {
-                        DetailSection(title = if (location.visits.size == 1) "Visit" else "Visits") {
-                            VisitsSection(visits = location.visits)
-                        }
-                    }
-
-                    if (collections.isNotEmpty()) {
-                        DetailSection(
-                            title = if (collections.size == 1) "Collection" else "Collections"
-                        ) {
-                            CollectionsSection(
-                                collections = collections,
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                            // Room at the end for the floating toolbar over it.
+                            .padding(top = 16.dp, bottom = 140.dp),
+                        verticalArrangement = Arrangement.spacedBy(26.dp)
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                            PlaceHeadline(location)
+                            PlaceFactsStrip(
+                                facts = placeFacts(location, collections),
                                 onCollectionClick = onCollectionClick
                             )
                         }
-                    }
 
-                    if (location.attachments.isNotEmpty()) {
-                        DetailSection(
-                            title = if (location.attachments.size == 1) "Attachment" else "Attachments"
-                        ) {
-                            AttachmentsSection(
-                                attachments = location.attachments,
-                                openingAttachmentId = openingAttachmentId,
-                                onOpenAttachment = onOpenAttachment
-                            )
+                        if (cover == null && onAddPhotoClick != null) {
+                            NoPhotoCard(categoryIcon = location.category?.icon, onAddPhoto = onAddPhotoClick)
                         }
-                    }
 
-                    if (location.trails.isNotEmpty()) {
-                        DetailSection(title = if (location.trails.size == 1) "Trail" else "Trails") {
-                            TrailsSection(trails = location.trails, onOpenTrail = onOpenLink)
+                        location.description?.takeIf { it.isNotBlank() }?.let { description ->
+                            DetailSection(title = "About") {
+                                AboutBody(description = description)
+                            }
                         }
-                    }
 
-                    location.link?.takeIf { it.isNotBlank() }?.let { link ->
-                        DetailSection(title = "Link") {
-                            LinkBody(link = link, onOpenLink = onOpenLink)
+                        // The hero already shows one photograph; the strip is for browsing several and
+                        // opening them full screen.
+                        if (location.images.size > 1) {
+                            DetailSection(title = "Photos (${location.images.size})") {
+                                AdventurePhotosCarousel(images = location.images)
+                            }
                         }
-                    }
 
-                    // The short facts that never deserved a heading each: a price, and two dates.
-                    DetailSection(title = "Details") {
-                        location.price?.let { price ->
-                            val code = location.priceCurrency?.takeIf { it.isNotBlank() }
-                                ?: Currencies.DEFAULT
-                            FactRow(
-                                label = "Price",
-                                value = "${Currencies.formatAmount(price)} $code"
-                            )
+                        if (hasCoordinates) {
+                            DetailSection(title = "Where") {
+                                MapBody(latitude = lat!!, longitude = lon!!, onOpenMap = onOpenMap)
+                            }
                         }
-                        FactRow(label = "Added", value = location.createdAt.take(10))
-                        FactRow(label = "Last updated", value = location.updatedAt.take(10))
+
+                        if (location.visits.isNotEmpty()) {
+                            DetailSection(title = if (location.visits.size == 1) "Visit" else "Visits") {
+                                VisitsSection(visits = location.visits)
+                            }
+                        }
+
+                        // One trip is the TRIP stub above; several are listed here.
+                        if (collections.size > 1) {
+                            DetailSection(title = "Collections") {
+                                CollectionsSection(
+                                    collections = collections,
+                                    onCollectionClick = onCollectionClick
+                                )
+                            }
+                        }
+
+                        if (location.attachments.isNotEmpty()) {
+                            DetailSection(
+                                title = if (location.attachments.size == 1) "Attachment" else "Attachments"
+                            ) {
+                                AttachmentsSection(
+                                    attachments = location.attachments,
+                                    openingAttachmentId = openingAttachmentId,
+                                    onOpenAttachment = onOpenAttachment
+                                )
+                            }
+                        }
+
+                        if (location.trails.isNotEmpty()) {
+                            DetailSection(title = if (location.trails.size == 1) "Trail" else "Trails") {
+                                TrailsSection(trails = location.trails, onOpenTrail = onOpenLink)
+                            }
+                        }
+
+                        // The short facts that never deserved a heading each: a price, and two dates.
+                        DetailSection(title = "Details") {
+                            location.price?.let { price ->
+                                val code = location.priceCurrency?.takeIf { it.isNotBlank() }
+                                    ?: Currencies.DEFAULT
+                                FactRow(
+                                    label = "Price",
+                                    value = "${Currencies.formatAmount(price)} $code"
+                                )
+                            }
+                            FactRow(label = "Added", value = location.createdAt.take(10))
+                            FactRow(label = "Last updated", value = location.updatedAt.take(10))
+                        }
                     }
                 }
             }
+
+            PlaceActionsToolbar(
+                onOpenMaps = if (hasCoordinates) ({ onOpenMap(lat!!, lon!!) }) else null,
+                onOpenWebsite = link?.let { url -> { onOpenLink(url) } },
+                onEdit = onEditClick,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp)
+            )
         }
     }
 }

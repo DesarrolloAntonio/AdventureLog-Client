@@ -1,206 +1,90 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
-import com.desarrollodroide.adventurelog.core.model.visitBoundText
-import com.desarrollodroide.adventurelog.core.model.isAllDayVisit
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Visit
+import com.desarrollodroide.adventurelog.core.model.isAllDayVisit
+import com.desarrollodroide.adventurelog.core.model.visitBoundText
+import com.desarrollodroide.adventurelog.feature.ui.components.DateTile
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedList
 
+private val MONTHS = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+private val MONTH_NAMES = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/** "5 Jul 2026", from an ISO date or date-time; the raw value when it is not one. */
+internal fun longDate(iso: String): String {
+    val parts = iso.substringBefore('T').split("-")
+    val month = parts.getOrNull(1)?.toIntOrNull()?.let { MONTH_NAMES.getOrNull(it - 1) }
+    val day = parts.getOrNull(2)?.toIntOrNull()
+    return if (parts.size == 3 && month != null && day != null) "$day $month ${parts[0]}" else iso
+}
+
+/**
+ * A place's visits as one group of rows, each with its date as a calendar sheet - the most recent
+ * inked in the primary colour, as the canvas marks the one that matters. A timed visit says from
+ * and to; notes follow; the visit's time zone names where it was logged.
+ */
 @Composable
 fun VisitsSection(
     visits: List<Visit>,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        // Visit items with timeline style
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            visits.forEachIndexed { index, visit ->
-                VisitItem(
-                    visit = visit,
-                    isFirst = index == 0,
-                    isLast = index == visits.size - 1
-                )
-            }
-        }
-    }
+    val latest = visits.maxByOrNull { it.startDate.orEmpty() }
+    SegmentedList(items = visits, modifier = modifier) { visit -> VisitRow(visit, highlighted = visit === latest) }
 }
 
 @Composable
-private fun VisitItem(
-    visit: Visit,
-    isFirst: Boolean,
-    isLast: Boolean,
-    modifier: Modifier = Modifier
-) {
+private fun VisitRow(visit: Visit, highlighted: Boolean) {
+    val start = visit.startDate
+    val parts = start?.substringBefore('T')?.split("-").orEmpty()
+    val month = parts.getOrNull(1)?.toIntOrNull()?.let { MONTHS.getOrNull(it - 1) }
+    val day = parts.getOrNull(2)?.toIntOrNull()
+    val allDay = isAllDayVisit(start, visit.endDate)
+
     Row(
-        modifier = modifier.fillMaxWidth()
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(40.dp)
-        ) {
-            if (!isFirst) {
-                Box(
-                    modifier = Modifier
-                        .width(2.dp)
-                        .height(16.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(12.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
+        if (month != null && day != null) DateTile(month = month, day = day, highlighted = highlighted)
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = when {
+                    start == null -> "No date"
+                    allDay -> longDate(start)
+                    // With its time: a timed visit showed only its dates once (measured).
+                    else -> "From ${visitBoundText(start)}"
+                },
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
-            if (!isLast) {
-                Box(
-                    modifier = Modifier
-                        .width(2.dp)
-                        .height(80.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+            val detail = listOfNotNull(
+                if (allDay) "All day" else visit.endDate?.let { "To ${visitBoundText(it)}" },
+                visit.timezone?.takeIf { it.isNotBlank() }?.substringAfterLast('/')?.replace('_', ' '),
+            ).joinToString(" · ")
+            if (detail.isNotEmpty()) {
+                Text(detail, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            visit.notes?.takeIf { it.isNotBlank() }?.let { notes ->
+                Text(
+                    text = notes,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
-
-        // Content card
-        Card(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp, bottom = if (!isLast) 16.dp else 0.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            ),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                visit.startDate?.let { startDate ->
-                    val isAllDay = isAllDayVisit(startDate, visit.endDate)
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (isAllDay) {
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primary
-                                ),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Text(
-                                    text = "All Day",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = formatDateDisplay(startDate),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        } else {
-                            Text(
-                                // With its time: a timed visit showed only its dates (measured).
-                                text = "From: ${visitBoundText(startDate)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-
-                    if (!isAllDay) {
-                        visit.endDate?.let { endDate ->
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "To: ${visitBoundText(endDate)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                }
-
-                visit.notes?.let { notes ->
-                    if (notes.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = notes,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.Normal
-                        )
-                    }
-                }
-
-                val location = extractLocationFromTimezone(visit.timezone)
-                if (location.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = location,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun formatDateDisplay(dateString: String?): String {
-    if (dateString.isNullOrBlank()) {
-        return ""
-    }
-    return try {
-        if (dateString.contains("T")) {
-            dateString.substringBefore("T")
-        } else {
-            dateString
-        }
-    } catch (_: Exception) {
-        dateString
-    }
-}
-
-private fun extractLocationFromTimezone(timezone: String?): String {
-    if (timezone.isNullOrBlank()) {
-        return ""
-    }
-    return when {
-        timezone.contains("/") -> {
-            val parts = timezone.split("/")
-            parts.lastOrNull()?.replace("_", " ") ?: timezone
-        }
-        else -> timezone.replace("_", " ")
     }
 }

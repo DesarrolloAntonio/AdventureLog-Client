@@ -5,6 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -23,6 +24,9 @@ class ShellAction(
 @Stable
 class ShellActionHost {
     var action: ShellAction? by mutableStateOf(null)
+
+    /** How many shown screens draw their own top and bottom bars; the shell draws neither while > 0. */
+    var chromeHiddenBy: Int by mutableIntStateOf(0)
 }
 
 /** Provided by the shell only where it draws a floating toolbar (a phone); null elsewhere. */
@@ -45,4 +49,18 @@ fun rememberShellAction(icon: ImageVector, description: String, onClick: () -> U
         onDispose { if (host.action === action) host.action = null }
     }
     return true
+}
+
+/**
+ * For a screen that brings its own top and bottom bars - a place's page, with its photo and its
+ * toolbar - shown inside the shell on a phone: the shell's app bar and floating toolbar step aside
+ * while it is on screen. Elsewhere (a tablet, or outside the shell) it does nothing.
+ */
+@Composable
+fun HideShellChrome() {
+    val host = LocalShellActionHost.current ?: return
+    DisposableEffect(host) {
+        host.chromeHiddenBy++
+        onDispose { host.chromeHiddenBy-- }
+    }
 }

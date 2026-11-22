@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+
 plugins {
     alias(libs.plugins.adventurelog.kotlinMultiplatform)
     alias(libs.plugins.adventurelog.composeMultiplatform)
@@ -20,6 +22,21 @@ kotlin {
             implementation(libs.koin.core.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel)
         }
+        androidInstrumentedTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(projects.core.model)
+            implementation(compose.uiTest)
+            implementation(libs.androidx.test.runner)
+            implementation(libs.junit)
+            // compose.uiTest drags in Espresso 3.5.0, whose input injection calls
+            // InputManager.getInstance - gone in Android 17, so every test dies before it runs.
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.compose.ui.test.manifest)
+        }
+        androidUnitTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.kotlin.test)
+        }
         androidMain.dependencies {
             implementation(libs.koin.composeVM)
             implementation(libs.navigation.compose)
@@ -32,5 +49,11 @@ kotlin {
             implementation(libs.maps.compose)
             implementation(libs.play.services.maps)
         }
+    }
+}
+
+android {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }
