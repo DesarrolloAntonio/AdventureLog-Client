@@ -65,7 +65,8 @@ fun BasicInfoSection(
     formData: LocationFormData,
     categories: List<Category>,
     onFormDataChange: (LocationFormData) -> Unit,
-    onNavigateBack: () -> Unit = {},
+    /** The old in-card back arrow; the form's own header has Close now, so callers leave it out. */
+    onNavigateBack: (() -> Unit)? = null,
     onGenerateDescription: () -> Unit = {},
     isGeneratingDescription: Boolean = false,
     onAddCategory: (name: String, icon: String) -> Unit = { _, _ -> }
@@ -96,9 +97,9 @@ fun BasicInfoSection(
         icon = Icons.Outlined.Description,
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        leadingContent = {
+        leadingContent = onNavigateBack?.let { back -> {
             IconButton(
-                onClick = onNavigateBack,
+                onClick = back,
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
@@ -108,7 +109,7 @@ fun BasicInfoSection(
                     modifier = Modifier.size(20.dp)
                 )
             }
-        }
+        } }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)

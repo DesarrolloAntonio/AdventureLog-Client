@@ -76,12 +76,12 @@ fun CategoryDropdown(
                     tint = Color.Gray
                 )
             },
-            shape = RoundedCornerShape(30.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = Color.Transparent
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline
             )
         )
 
@@ -89,7 +89,7 @@ fun CategoryDropdown(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
-                .clip(RoundedCornerShape(30.dp))
+                .clip(RoundedCornerShape(14.dp))
                 // The field's placeholder isn't read out, so the control had no name at all.
                 .semantics {
                     contentDescription = selectedCategory?.let { "Category: ${it.displayName}" }

@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -41,6 +43,8 @@ fun AddEditCollectionScreen(
 ) {
     val initialFormData = remember { initialData ?: CollectionFormData() }
     var formData by remember { mutableStateOf(initialFormData) }
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
     val leave = rememberDiscardGuard(
         hasChanges = formData != initialFormData,
         thing = "collection",
@@ -58,10 +62,15 @@ fun AddEditCollectionScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
+        FormHeader(
+            title = if (initialData != null) "Edit collection" else "New collection",
+            onClose = leave,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
         BasicInfoSection(
             formData = formData,
-            onFormDataChange = { formData = it },
-            onNavigateBack = leave
+            onFormDataChange = { formData = it }
         )
 
         DateSection(

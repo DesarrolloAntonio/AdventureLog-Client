@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.ui.unit.sp
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -45,7 +47,7 @@ fun SectionCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = inset, vertical = 8.dp),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(24.dp),
         // surfaceContainerLowest with no shadow, like every other card since the redesign. This
         // was a translucent `surface` with a 1dp elevation - the same colour as the page it sits
         // on, separated only by a shadow, which on the flat background reads as a smudge rather
@@ -81,10 +83,10 @@ fun SectionCard(
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
+                    // The canvas's section voice: condensed and heavy.
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        style = AdventureType.display(22.sp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }

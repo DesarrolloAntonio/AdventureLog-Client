@@ -43,12 +43,12 @@ fun DateTimeField(
                     .weight(1f)
                     .height(55.dp),
                 enabled = false,
-                shape = RoundedCornerShape(30.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = Color.Transparent,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
                     disabledPlaceholderColor = Color.Gray,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    disabledContainerColor = Color.Transparent
                 )
             )
             
@@ -94,12 +94,12 @@ fun DateTimeField(
                     .weight(1f)
                     .height(55.dp),
                 enabled = false,
-                shape = RoundedCornerShape(30.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledBorderColor = Color.Transparent,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
                     disabledPlaceholderColor = Color.Gray,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    disabledContainerColor = Color.Transparent
                 ),
                 singleLine = true
             )

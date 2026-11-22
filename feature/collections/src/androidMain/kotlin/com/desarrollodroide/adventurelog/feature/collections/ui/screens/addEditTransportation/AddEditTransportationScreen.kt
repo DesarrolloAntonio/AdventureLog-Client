@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation
 
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -139,6 +141,8 @@ fun AddEditTransportationContent(
         }
     }
     var formData by remember(existingTransportation) { mutableStateOf(initialFormData) }
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
     val leave = rememberDiscardGuard(
         hasChanges = formData != initialFormData,
         thing = "transport",
@@ -169,10 +173,9 @@ fun AddEditTransportationContent(
 
         // Every other item form says what it is making; this one opened straight on its first
         // section (QA CO-19).
-        Text(
-            text = if (isEditMode) "Edit transport" else "New transport",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
+        FormHeader(
+            title = if (isEditMode) "Edit transport" else "New transport",
+            onClose = leave,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -180,7 +183,6 @@ fun AddEditTransportationContent(
             formData = formData,
             transportationTypes = transportationTypes,
             onFormDataChange = { formData = it },
-            onNavigateBack = leave,
             onGenerateDescription = {
                 onGenerateDescription(formData.name) { generatedDescription ->
                     formData = formData.copy(description = generatedDescription)

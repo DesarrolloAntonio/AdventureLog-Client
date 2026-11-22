@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit
 
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.datetime.TimeZone
@@ -239,6 +241,8 @@ fun AddEditLocationContent(
     }
 
     PlatformBackHandler(enabled = hasChanges) { confirmDiscard = true }
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
 
     if (confirmDiscard) {
         AlertDialog(
@@ -292,11 +296,16 @@ fun AddEditLocationContent(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
+        FormHeader(
+            title = if (isEditMode) "Edit place" else "New place",
+            onClose = { leave() },
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
         BasicInfoSection(
             formData = formData,
             categories = categories,
             onFormDataChange = { formData = it },
-            onNavigateBack = { leave() },
             onGenerateDescription = {
                 onGenerateDescription(formData.name) { generatedDescription ->
                     formData = formData.copy(description = generatedDescription)

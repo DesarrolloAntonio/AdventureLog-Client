@@ -56,12 +56,12 @@ fun TimezoneDropdown(
                     tint = Color.Gray
                 )
             },
-            shape = RoundedCornerShape(30.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                disabledBorderColor = Color.Transparent,
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
                 disabledPlaceholderColor = Color.Gray,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                disabledContainerColor = Color.Transparent,
                 disabledLeadingIconColor = Color.Gray
             )
         )

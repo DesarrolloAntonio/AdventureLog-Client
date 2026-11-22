@@ -44,7 +44,8 @@ import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 fun BasicInfoSection(
     formData: CollectionFormData,
     onFormDataChange: (CollectionFormData) -> Unit,
-    onNavigateBack: () -> Unit = {}
+    /** The old in-card back arrow; the form's own header has Close now, so callers leave it out. */
+    onNavigateBack: (() -> Unit)? = null
 ) {
     var expanded by remember { mutableStateOf(true) }
     
@@ -53,9 +54,9 @@ fun BasicInfoSection(
         icon = Icons.Outlined.Folder,
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        leadingContent = {
+        leadingContent = onNavigateBack?.let { back -> {
             IconButton(
-                onClick = onNavigateBack,
+                onClick = back,
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
@@ -65,7 +66,7 @@ fun BasicInfoSection(
                     modifier = Modifier.size(20.dp)
                 )
             }
-        }
+        } }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)

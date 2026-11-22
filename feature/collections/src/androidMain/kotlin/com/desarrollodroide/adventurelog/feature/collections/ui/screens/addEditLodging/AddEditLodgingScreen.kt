@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditLodging
 
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import com.desarrollodroide.adventurelog.feature.ui.components.date.DatePickerField
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.PublicSwitchRow
 import androidx.compose.foundation.layout.Arrangement
@@ -72,6 +74,8 @@ fun AddEditLodgingScreen(
     var stayOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingLodging?.id) { viewModel.load(collectionId, existingLodging?.id) }
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
     val leave = rememberDiscardGuard(
         hasChanges = !state.isLoading && viewModel.hasChanges(state),
         thing = "stay",
@@ -113,10 +117,9 @@ fun AddEditLodgingScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = if (existingLodging == null) "New lodging" else "Edit lodging",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                FormHeader(
+                    title = if (existingLodging == null) "New lodging" else "Edit lodging",
+                    onClose = leave
                 )
 
                 SectionCard(
@@ -177,24 +180,23 @@ fun AddEditLodgingScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StyledTextField(
-                        value = state.reservationNumber,
-                        onValueChange = viewModel::onReservationChange,
-                        label = "Reservation",
-                        icon = Icons.Default.ConfirmationNumber,
-                        modifier = Modifier.weight(1f)
-                    )
-                    StyledTextField(
-                        value = state.price,
-                        onValueChange = viewModel::onPriceChange,
-                        // Not a dollar sign over a price in euros: the currency the stay is in, by its
-                        // code, and a plain money icon (QA CO-19).
-                        label = state.priceCurrency.takeIf { it.isNotBlank() }?.let { "Price ($it)" } ?: "Price",
-                        icon = Icons.Outlined.Payments,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                // One per row: side by side, "Reservation" broke over two lines on a phone.
+                StyledTextField(
+                    value = state.reservationNumber,
+                    onValueChange = viewModel::onReservationChange,
+                    label = "Reservation",
+                    icon = Icons.Default.ConfirmationNumber,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                StyledTextField(
+                    value = state.price,
+                    onValueChange = viewModel::onPriceChange,
+                    // Not a dollar sign over a price in euros: the currency the stay is in, by its
+                    // code, and a plain money icon (QA CO-19).
+                    label = state.priceCurrency.takeIf { it.isNotBlank() }?.let { "Price ($it)" } ?: "Price",
+                    icon = Icons.Outlined.Payments,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 StyledTextField(
                     value = state.link,

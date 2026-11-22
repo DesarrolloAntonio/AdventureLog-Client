@@ -51,7 +51,8 @@ fun BasicInfoTransportationSection(
     formData: TransportationFormData,
     transportationTypes: List<String>,
     onFormDataChange: (TransportationFormData) -> Unit,
-    onNavigateBack: () -> Unit,
+    /** The old in-card back arrow; the form's own header has Close now, so callers leave it out. */
+    onNavigateBack: (() -> Unit)? = null,
     onGenerateDescription: () -> Unit,
     isGeneratingDescription: Boolean
 ) {
@@ -63,9 +64,9 @@ fun BasicInfoTransportationSection(
         icon = Icons.Outlined.Info,
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        leadingContent = {
+        leadingContent = onNavigateBack?.let { back -> {
             IconButton(
-                onClick = onNavigateBack,
+                onClick = back,
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
@@ -75,7 +76,7 @@ fun BasicInfoTransportationSection(
                     modifier = Modifier.size(20.dp)
                 )
             }
-        }
+        } }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -102,12 +103,12 @@ fun BasicInfoTransportationSection(
                     readOnly = true,
                     placeholder = { Text("Type") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeDropdownExpanded) },
-                    shape = RoundedCornerShape(30.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     ),
                     leadingIcon = {
                         Icon(
@@ -197,10 +198,10 @@ fun BasicInfoTransportationSection(
                         .height(120.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     ),
                     // No leading icon: in a multi-line field Material centres it vertically, far from the text.
                     minLines = 3,

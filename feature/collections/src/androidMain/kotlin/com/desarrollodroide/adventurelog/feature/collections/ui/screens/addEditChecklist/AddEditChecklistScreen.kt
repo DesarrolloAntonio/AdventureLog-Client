@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditChecklist
 
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import com.desarrollodroide.adventurelog.feature.ui.components.date.DatePickerField
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.PublicSwitchRow
 import androidx.compose.foundation.layout.Arrangement
@@ -80,6 +82,8 @@ fun AddEditChecklistScreen(
 
     LaunchedEffect(existingChecklist?.id) { viewModel.load(collectionId, existingChecklist?.id) }
 
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
     val leave = rememberDiscardGuard(
         hasChanges = !state.isLoading && viewModel.hasChanges(state),
         thing = "checklist",
@@ -121,11 +125,10 @@ fun AddEditChecklistScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = if (existingChecklist == null) "New checklist" else "Edit checklist",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
+                Row(verticalAlignment = Alignment.Bottom) {
+                    FormHeader(
+                        title = if (existingChecklist == null) "New checklist" else "Edit checklist",
+                        onClose = leave,
                         modifier = Modifier.weight(1f)
                     )
                     if (state.lines.isNotEmpty()) {

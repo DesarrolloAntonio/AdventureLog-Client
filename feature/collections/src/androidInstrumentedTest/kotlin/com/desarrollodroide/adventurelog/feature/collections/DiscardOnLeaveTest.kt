@@ -7,6 +7,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -47,6 +48,20 @@ class DiscardOnLeaveTest {
         assertEquals(0, left)
         onNodeWithText("Discard").performClick()
         assertEquals(1, left)
+    }
+
+    @Test
+    fun closeAsksJustAsCancelDoes() = runComposeUiTest {
+        var left = 0
+        setContent { WithAppLocals { AddEditCollectionScreen(onNavigateBack = { left++ }, onSave = {}) } }
+
+        // The form opens on what it is making, with Close at the top, as the canvas draws it.
+        onNodeWithText("New collection").assertIsDisplayed()
+        onNode(hasSetTextAction() and hasText("Collection Name")).performTextInput("QA_Trip")
+        onNodeWithContentDescription("Close").performClick()
+
+        onNodeWithText("Discard this collection?").assertIsDisplayed()
+        assertEquals(0, left)
     }
 
     @Test
