@@ -39,7 +39,7 @@ Each item has its test in the task that owns the code (Tasks 2, 3, 4). Where eac
 ### Task 1: Expressive theme
 
 **Files:**
-- Create: `core/resources/src/commonMain/composeResources/font/roboto_flex.ttf` (copy of `LibrariesForDevelopers/Repos/res/font/roboto_flex.ttf`, OFL 1.1)
+- Create: `feature/ui/src/androidMain/assets/fonts/roboto_flex.ttf` (copy of `LibrariesForDevelopers/Repos/res/font/roboto_flex.ttf`, OFL 1.1). Display styles set the optical-size axis to their own size: the canvas's browser does that on its own, and without it width 38 is barely narrower (92% at opsz 14 against 81% at opsz 44).
 - Create: `feature/ui/src/androidMain/kotlin/com/desarrollodroide/adventurelog/feature/ui/theme/AdventureType.kt`
 - Create: `composeApp/src/androidMain/kotlin/com/desarrollodroide/adventurelog/theme/Shape.kt`
 - Modify: `composeApp/src/androidMain/kotlin/com/desarrollodroide/adventurelog/theme/Type.kt`, `Theme.kt`, `Color.kt`
@@ -86,10 +86,10 @@ Each item has its test in the task that owns the code (Tasks 2, 3, 4). Where eac
 
 **Interfaces:**
 - Produces:
-  - `TicketCard(onClick: () -> Unit, photo: @Composable () -> Unit, title: String, subtitle: String, badge: @Composable (() -> Unit)?, stubs: List<Pair<String, String>>, modifier: Modifier = Modifier)` — 28dp corners, hairline `outlineVariant`, dashed perforation with two 24dp notches in the screen's background colour, stub labels 11sp/700/1.4sp tracking above `AdventureType.display(26.sp)` values.
+  - `TicketCard(onClick, photo: @Composable () -> Unit, title, subtitle, stubs: List<TicketStub>, modifier, badge: (@Composable () -> Unit)? = null, notchColor = surface)` — 28dp corners, hairline `outlineVariant`, dashed perforation with two 24dp notches in the screen's background colour, stub labels 11sp/700/1.4sp tracking above `AdventureType.display(26.sp)` values.
   - `PassportChip(code: String, name: String, visited: Boolean, modifier: Modifier = Modifier)` — visited: `primary`/`onPrimary`; planned: 2dp dashed `outline` border.
-  - `DateTile(day: Int, weekday: String, highlighted: Boolean)` — the calendar-sheet tile used by Calendar and the itinerary.
-  - `SegmentedList(items: List<T>, key: (T) -> Any, row: @Composable (T) -> Unit)` — first/last 24dp outer corners, 6dp inner, 2dp gaps; replaces divider lists in Settings and Country.
+  - `DateTile(month: String, day: Int, highlighted: Boolean, modifier: Modifier = Modifier)` — the calendar-sheet tile (month over day) used by Calendar and the itinerary.
+  - `SegmentedList(items: List<T>, modifier, containerColor, row: @Composable (T) -> Unit)` and `SegmentedListDefaults.shapeFor(index, count)` for lazy lists — first/last 24dp outer corners, 6dp inner, 3dp gaps; replaces divider lists in Settings and Country.
 
 - [ ] **Step 1:** Write `ExpressivePiecesTest`: a `TicketCard` titled with 60 characters shows at most two lines with ellipsis (Review Focus 4); a planned `PassportChip` is announced as "IT Italy, planned"; `SegmentedList` of 1 item gets all four corners at 24dp.
 - [ ] **Step 2:** Run it on the Pixel. Expected: FAIL, unresolved.

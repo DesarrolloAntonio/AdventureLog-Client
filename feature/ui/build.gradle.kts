@@ -16,8 +16,6 @@ kotlin {
             implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
-            // Roboto Flex, for the type tokens in feature/ui/theme.
-            implementation(projects.core.resources)
             implementation(libs.koin.composeVM)
             implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodelCompose)

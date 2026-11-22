@@ -19,7 +19,10 @@ import com.desarrollodroide.adventurelog.feature.ui.theme.robotoFlexCondensed
 @Composable
 fun getAppTypography(): Typography {
     val text = robotoFlex()
-    val display = robotoFlexCondensed()
+
+    // Condensed, cut for its own size (Roboto Flex's optical-size axis): one family per size.
+    @Composable
+    fun d(size: Int) = robotoFlexCondensed(size.sp)
 
     fun style(family: FontFamily, weight: Int, size: Int, lineHeight: Int, tracking: Double = 0.0) =
         TextStyle(
@@ -31,12 +34,12 @@ fun getAppTypography(): Typography {
         )
 
     return Typography(
-        displayLarge = style(display, 800, 57, 60, -0.25),
-        displayMedium = style(display, 800, 45, 48),
-        displaySmall = style(display, 800, 36, 40),
-        headlineLarge = style(display, 800, 32, 36),
-        headlineMedium = style(display, 800, 28, 32),
-        headlineSmall = style(display, 800, 24, 28),
+        displayLarge = style(d(57), 800, 57, 60, -0.25),
+        displayMedium = style(d(45), 800, 45, 48),
+        displaySmall = style(d(36), 800, 36, 40),
+        headlineLarge = style(d(32), 800, 32, 36),
+        headlineMedium = style(d(28), 800, 28, 32),
+        headlineSmall = style(d(24), 800, 24, 28),
         titleLarge = style(text, 600, 22, 28),
         titleMedium = style(text, 600, 16, 24, 0.15),
         titleSmall = style(text, 600, 14, 20, 0.1),
@@ -46,12 +49,12 @@ fun getAppTypography(): Typography {
         labelLarge = style(text, 600, 14, 20, 0.1),
         labelMedium = style(text, 600, 12, 16, 0.5),
         labelSmall = style(text, 600, 11, 16, 0.5),
-        displayLargeEmphasized = style(display, 900, 57, 60, -0.25),
-        displayMediumEmphasized = style(display, 900, 45, 48),
-        displaySmallEmphasized = style(display, 900, 36, 40),
-        headlineLargeEmphasized = style(display, 900, 32, 36),
-        headlineMediumEmphasized = style(display, 900, 28, 32),
-        headlineSmallEmphasized = style(display, 900, 24, 28),
+        displayLargeEmphasized = style(d(57), 900, 57, 60, -0.25),
+        displayMediumEmphasized = style(d(45), 900, 45, 48),
+        displaySmallEmphasized = style(d(36), 900, 36, 40),
+        headlineLargeEmphasized = style(d(32), 900, 32, 36),
+        headlineMediumEmphasized = style(d(28), 900, 28, 32),
+        headlineSmallEmphasized = style(d(24), 900, 24, 28),
         titleLargeEmphasized = style(text, 700, 22, 28),
         titleMediumEmphasized = style(text, 700, 16, 24, 0.15),
         titleSmallEmphasized = style(text, 700, 14, 20, 0.1),
