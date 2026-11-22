@@ -99,46 +99,12 @@ UI is per platform: ViewModels and everything below them are shared, every `@Com
 [design](docs/superpowers/specs/2026-11-21-native-ui-split-design.md).
 
 **Stack:** [Jetpack Compose](https://developer.android.com/jetpack/compose) with
-Material 3 · [Navigation 3](https://developer.android.com/guide/navigation/navigation-3) · [Koin](https://insert-koin.io/) · [Ktor](https://ktor.io/) ·
+Material 3 · [Compose Navigation](https://developer.android.com/guide/navigation/design), with
+[Navigation 3](https://developer.android.com/guide/navigation/navigation-3) for the list-detail panes ·
+[Koin](https://insert-koin.io/) · [Ktor](https://ktor.io/) ·
 [Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization) ·
 [Coil](https://coil-kt.github.io/coil/) ·
 [Multiplatform Settings](https://github.com/russhwolf/multiplatform-settings) · Coroutines and Flow
-
-## 🚀 Building
-
-**Requirements:** an Android Studio recent enough for AGP 9.2, JDK 17, and Xcode 26 for iOS
-(iOS 26 minimum).
-
-```bash
-git clone https://github.com/DesarrolloAntonio/AdventureLog-Client.git
-cd AdventureLog-Client
-```
-
-- **Android**: open the project in Android Studio and run the `composeApp` configuration.
-- **iOS**: a placeholder for now. Run `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, then open
-  `iosApp/iosApp.xcodeproj` in Xcode and run it.
-
-## 🧪 Tests
-
-- **Unit tests** (`commonTest`, on Android and iOS): models, mappers, use cases, the network and
-  data layers, and every feature's ViewModels, using the fakes in `core/testing`. Tests of
-  Android-only UI logic live in `androidUnitTest`.
-- **Shared-code check**: `scripts/check-common-compose.sh` fails if Compose reaches `commonMain`.
-- **UI tests** (`androidInstrumentedTest`, need a device or emulator): screens and shared
-  components in `collections`, `home`, `calendar`, `locations` and `ui`.
-- **Flows**: one Maestro flow in `.maestro/`.
-
-```bash
-./gradlew allTests testDebugUnitTest      # unit tests, every target
-./gradlew connectedDebugAndroidTest       # UI tests, with a device attached
-```
-
-CI runs the unit tests and builds the app; the UI tests and the Maestro flow run locally.
-
-## ⚠️ Known issues
-
-- **MFA and SSO**: accounts that use them cannot sign in yet.
-- **iOS**: the SwiftUI app is a placeholder; the real screens come in a later phase.
 
 ### Module Graph
 
@@ -240,6 +206,41 @@ graph LR
   :feature:map --> :core:data
   :feature:map --> :core:testing
 ```
+## 🚀 Building
+
+**Requirements:** an Android Studio recent enough for AGP 9.2, JDK 17, and Xcode 26 for iOS
+(iOS 26 minimum).
+
+```bash
+git clone https://github.com/DesarrolloAntonio/AdventureLog-Client.git
+cd AdventureLog-Client
+```
+
+- **Android**: open the project in Android Studio and run the `composeApp` configuration.
+- **iOS**: a placeholder for now. Run `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, then open
+  `iosApp/iosApp.xcodeproj` in Xcode and run it.
+
+## 🧪 Tests
+
+- **Unit tests** (`commonTest`, on Android and iOS): models, mappers, use cases, the network and
+  data layers, and every feature's ViewModels, using the fakes in `core/testing`. Tests of
+  Android-only UI logic live in `androidUnitTest`.
+- **Shared-code check**: `scripts/check-common-compose.sh` fails if Compose reaches `commonMain`.
+- **UI tests** (`androidInstrumentedTest`, need a device or emulator): screens and shared
+  components in `collections`, `home`, `calendar`, `locations` and `ui`.
+- **Flows**: one Maestro flow in `.maestro/`.
+
+```bash
+./gradlew allTests testDebugUnitTest      # unit tests, every target
+./gradlew connectedDebugAndroidTest       # UI tests, with a device attached
+```
+
+CI runs the unit tests and builds the app; the UI tests and the Maestro flow run locally.
+
+## ⚠️ Known issues
+
+- **MFA and SSO**: accounts that use them cannot sign in yet.
+- **iOS**: the SwiftUI app is a placeholder; the real screens come in a later phase.
 
 ## 📄 License
 
