@@ -118,6 +118,7 @@ fun NavGraphBuilder.collectionsScreen(
         CollectionDetailScreen(
             collectionId = collectionId,
             showTitle = standalone,
+            onEditCollection = { navigator.navigateToEditCollection(collectionId) },
             modifier = if (standalone) Modifier.statusBarsPadding() else Modifier,
             onBackClick = { 
                 navigator.navigateBack()

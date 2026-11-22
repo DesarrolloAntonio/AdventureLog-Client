@@ -674,6 +674,9 @@ fun HomeScreenContent(
                                         NavigationRoutes.Collections.createEditRoute(collection.id)
                                     )
                                 },
+                                onEditCollectionById = { id ->
+                                    navController.navigate(NavigationRoutes.Collections.createEditRoute(id))
+                                },
                                 onAdventureClick = onAdventureClick,
                                 onEditAdventure = { adventure ->
                                     navController.navigate(

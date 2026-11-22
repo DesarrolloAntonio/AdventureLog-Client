@@ -64,6 +64,8 @@ private val collectionsNavConfiguration = SavedStateConfiguration {
 fun CollectionsPane(
     onAddCollection: () -> Unit,
     onEditCollection: (UltraSlimCollection) -> Unit,
+    /** The collection open in the detail pane, edited from its header. */
+    onEditCollectionById: (String) -> Unit = {},
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
     /** The edit form opened on its images, for a card's "+ Add photo". */
@@ -152,7 +154,8 @@ fun CollectionsPane(
                     onEditChecklist = onEditChecklist,
                     onAddLodging = onAddLodging,
                     onEditLodging = onEditLodging,
-                    showTitle = true
+                    showTitle = true,
+                    onEditCollection = { onEditCollectionById(key.collectionId) }
                 )
             }
         }

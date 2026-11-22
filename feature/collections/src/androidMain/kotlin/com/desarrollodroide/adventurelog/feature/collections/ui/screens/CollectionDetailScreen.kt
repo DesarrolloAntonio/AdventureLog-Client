@@ -1,5 +1,29 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import androidx.compose.foundation.lazy.itemsIndexed
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
+import androidx.compose.foundation.layout.navigationBarsPadding
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.AddToCollectionMenu
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import androidx.compose.runtime.remember
+import kotlin.time.ExperimentalTime
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.LocalDate
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.collectionMoment
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.arrowDates
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Surface
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.foundation.BorderStroke
 import com.desarrollodroide.adventurelog.core.model.ownedBy
 import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
 import androidx.compose.foundation.clickable
@@ -97,10 +121,16 @@ fun CollectionDetailScreen(
      * back but the system gesture.
      */
     showTitle: Boolean = false,
+    /** Opens the collection's editor from the header. */
+    onEditCollection: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = koinViewModel(),
     recommendationsViewModel: RecommendationsViewModel = koinViewModel()
 ) {
+    // On a phone inside the shell the collection brings its own header (Back, Edit) and its own
+    // "+", as the canvas draws it; the shell's bars and breadcrumb step aside.
+    val onPhoneInShell = LocalShellActionHost.current != null
+    if (onPhoneInShell) HideShellChrome()
     val uiState by viewModel.uiState.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val selectedView by viewModel.selectedView.collectAsStateWithLifecycle()
@@ -182,9 +212,10 @@ fun CollectionDetailScreen(
                 CollectionDetailContent(
                     currentUserId = currentUserId,
                     collection = uiState.collection!!,
-                    showTitle = showTitle,
+                    showTitle = showTitle || onPhoneInShell,
                     onBackClick = onBackClick,
                     onHomeClick = onHomeClick,
+                    onEditCollection = onEditCollection,
                     selectedTab = selectedTab,
                     onTabSelected = viewModel::onTabSelected,
                     selectedView = selectedView,
@@ -239,6 +270,18 @@ fun CollectionDetailScreen(
             }
         }
         
+        // The canvas's one "+": a menu of the five kinds, while the collection is a list of them.
+        if (uiState.collection != null && selectedView == CollectionView.ITEMS) {
+            AddToCollectionMenu(
+                onAddPlace = onAddPlace,
+                onAddTransportation = onAddTransportation,
+                onAddLodging = { onAddLodging(collectionId) },
+                onAddNote = { onAddNote(collectionId) },
+                onAddChecklist = { onAddChecklist(collectionId) },
+                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding()
+            )
+        }
+
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -282,6 +325,7 @@ fun CollectionDetailContent(
     showTitle: Boolean = false,
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
+    onEditCollection: (() -> Unit)? = null,
     selectedTab: CollectionTab,
     onTabSelected: (CollectionTab) -> Unit,
     selectedView: CollectionView = CollectionView.ITEMS,
@@ -328,7 +372,8 @@ fun CollectionDetailContent(
             start = 16.dp,
             end = 16.dp,
             top = 16.dp,
-            bottom = 80.dp
+            // Room for the "+" menu over the end of the list.
+            bottom = 120.dp
         ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -337,7 +382,8 @@ fun CollectionDetailContent(
                 collection,
                 showTitle = showTitle,
                 onBackClick = onBackClick,
-                onHomeClick = onHomeClick
+                onHomeClick = onHomeClick,
+                onEditCollection = onEditCollection
             )
         }
         
@@ -483,19 +529,26 @@ fun CollectionDetailContent(
                         }
                     }
                 } else {
-                    items(collection.locations) { adventure ->
-                        AdventureItem(
-                            location = adventure,
-                            onClick = { onAdventureClick(adventure) },
-                            onEdit = { onEditAdventure(adventure) },
-                            onAddPhoto = { onAddPhoto(adventure) },
-                            onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) },
-                            onDuplicate = { onDuplicateAdventure(adventure) },
-                            onShare = { onShareAdventure(adventure) },
-                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
-                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
-                        )
+                    item {
+                        // Rows, as in Places and as the canvas draws a collection's places: one group,
+                        // split by the thin gap rather than the list's 24dp.
+                        Column(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                            collection.locations.forEachIndexed { index, adventure ->
+                            PlaceRow(
+                                location = adventure,
+                                shape = SegmentedListDefaults.shapeFor(index, collection.locations.size),
+                                onClick = { onAdventureClick(adventure) },
+                                onEdit = { onEditAdventure(adventure) },
+                                onAddPhoto = { onAddPhoto(adventure) },
+                                onDelete = { onDeleteAdventure(adventure) },
+                                onManageCollections = { onManageCollections(adventure) },
+                                onDuplicate = { onDuplicateAdventure(adventure) },
+                                onShare = { onShareAdventure(adventure) },
+                                onRemoveFromCollection = { onRemoveFromCollection(adventure) },
+                                isOwner = ownedBy(adventure.user.uuid, currentUserId)
+                                )
+                            }
+                        }
                     }
                 }
                 
@@ -614,19 +667,26 @@ fun CollectionDetailContent(
                         }
                     }
                 } else {
-                    items(collection.locations) { adventure ->
-                        AdventureItem(
-                            location = adventure,
-                            onClick = { onAdventureClick(adventure) },
-                            onEdit = { onEditAdventure(adventure) },
-                            onAddPhoto = { onAddPhoto(adventure) },
-                            onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) },
-                            onDuplicate = { onDuplicateAdventure(adventure) },
-                            onShare = { onShareAdventure(adventure) },
-                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
-                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
-                        )
+                    item {
+                        // Rows, as in Places and as the canvas draws a collection's places: one group,
+                        // split by the thin gap rather than the list's 24dp.
+                        Column(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                            collection.locations.forEachIndexed { index, adventure ->
+                            PlaceRow(
+                                location = adventure,
+                                shape = SegmentedListDefaults.shapeFor(index, collection.locations.size),
+                                onClick = { onAdventureClick(adventure) },
+                                onEdit = { onEditAdventure(adventure) },
+                                onAddPhoto = { onAddPhoto(adventure) },
+                                onDelete = { onDeleteAdventure(adventure) },
+                                onManageCollections = { onManageCollections(adventure) },
+                                onDuplicate = { onDuplicateAdventure(adventure) },
+                                onShare = { onShareAdventure(adventure) },
+                                onRemoveFromCollection = { onRemoveFromCollection(adventure) },
+                                isOwner = ownedBy(adventure.user.uuid, currentUserId)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -832,61 +892,119 @@ fun CollectionDetailContent(
     }
 }
 
+@OptIn(ExperimentalTime::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CollectionHeader(
     collection: Collection,
     modifier: Modifier = Modifier,
     showTitle: Boolean = false,
     onBackClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {}
+    onHomeClick: () -> Unit = {},
+    /** Opens the collection's editor; null where there is nowhere to edit it from. */
+    onEditCollection: (() -> Unit)? = null,
+    today: LocalDate = remember {
+        kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    },
 ) {
+    val colors = MaterialTheme.colorScheme
+    val moment = collectionMoment(collection.startDate, collection.endDate, today)
+    val dates = arrowDates(collection.startDate, collection.endDate)
+    // The list worth watching before a trip: the first one with anything on it.
+    val checklist = collection.checklists.firstOrNull { it.items.isNotEmpty() }
+
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (showTitle) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                // IconButtons, for their 48dp touch targets (the clickable icons measured 32dp).
-                IconButton(onClick = onBackClick) {
-                    Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "Back")
+        if (showTitle || onEditCollection != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showTitle) {
+                    FilledIconButton(
+                        onClick = onBackClick,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = colors.surfaceContainerLowest,
+                            contentColor = colors.onSurface
+                        )
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 }
-                IconButton(onClick = onHomeClick) {
-                    Icon(
-                        imageVector = Icons.Default.Home,
-                        contentDescription = "Home",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                Spacer(Modifier.weight(1f))
+                if (onEditCollection != null) {
+                    FilledTonalIconButton(onClick = onEditCollection) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit collection")
+                    }
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.width(12.dp)
-                )
-                Text(
-                    text = collection.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
 
-        // Description (only if not blank)
+        moment.eyebrow?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp,
+                color = colors.primary
+            )
+        }
+        Text(text = collection.name, style = AdventureType.display(58.sp), maxLines = 3, overflow = TextOverflow.Ellipsis)
+
+        if (moment.daysToGo != null || dates != null || checklist != null) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = colors.surfaceContainerLowest,
+                border = BorderStroke(1.dp, colors.outlineVariant),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    moment.daysToGo?.let { days ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(days.toString(), style = AdventureType.display(52.sp), color = colors.primary)
+                            Text(
+                                text = if (days == 1) "DAY TO GO" else "DAYS TO GO",
+                                fontSize = 11.sp,
+                                lineHeight = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.2.sp,
+                                color = colors.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        dates?.let { Text(it, style = AdventureType.display(24.sp)) }
+                        checklist?.let { list ->
+                            val done = list.items.count { it.isChecked }
+                            Text(
+                                text = "${list.name} \u00b7 $done of ${list.items.size}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            // Expressive's wavy progress: the list filling up as the trip nears.
+                            LinearWavyProgressIndicator(
+                                progress = { done.toFloat() / list.items.size },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         if (collection.description.isNotBlank()) {
             Text(
                 text = collection.description,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colors.onSurfaceVariant
             )
         }
-        
+
         // The two facts about the collection itself, in the same chips the rest of the app uses.
-        // These were the last outlined AssistChips left standing.
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
