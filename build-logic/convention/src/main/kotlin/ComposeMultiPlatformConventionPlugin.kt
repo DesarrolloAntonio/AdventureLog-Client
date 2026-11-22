@@ -32,7 +32,8 @@ class ComposeMultiplatformConventionPlugin : Plugin<Project> {
                     dependencies {
                         implementation(composeDeps.runtime)
                         implementation(composeDeps.foundation)
-                        implementation(composeDeps.material3)
+                        // androidx, not the JetBrains redirect: Material 3 Expressive lives in 1.5.
+                        implementation(libs.findLibrary("androidx.compose.material3").get())
                         implementation(composeDeps.materialIconsExtended)
                         implementation(composeDeps.material)
                         implementation(composeDeps.ui)
