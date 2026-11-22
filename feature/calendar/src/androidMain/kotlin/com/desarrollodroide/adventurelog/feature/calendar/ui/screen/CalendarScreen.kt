@@ -1,5 +1,13 @@
 package com.desarrollodroide.adventurelog.feature.calendar.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
+import androidx.compose.foundation.layout.widthIn
+import com.desarrollodroide.adventurelog.feature.ui.components.DateTile
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -130,7 +138,19 @@ fun CalendarScreen(
                 )
             }
 
-            else -> {
+            else -> Column(Modifier.fillMaxSize()) {
+              var mode by rememberSaveable { mutableStateOf(CalendarMode.AGENDA) }
+              // Not a ContentColumn: that fills the height, and the toggle took the whole screen.
+              Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                  CalendarModeToggle(
+                      mode = mode,
+                      onMode = { mode = it },
+                      modifier = Modifier.widthIn(max = MaxContentWidth).padding(horizontal = 16.dp, vertical = 8.dp)
+                  )
+              }
+              if (mode == CalendarMode.MONTH) {
+                ContentColumn(Modifier.weight(1f)) { MonthView(state, onOpen, Modifier.padding(horizontal = 16.dp)) }
+              } else Box(Modifier.weight(1f)) {
                 val listState = rememberLazyListState()
                 val items = agendaItems(state)
 
@@ -148,7 +168,7 @@ fun CalendarScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         state = listState,
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp),
+                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 120.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         items.forEach { agendaItem ->
@@ -168,6 +188,7 @@ fun CalendarScreen(
                         }
                     }
                 }
+            }
             }
         }
     }
@@ -330,7 +351,7 @@ private fun TodayMarker(date: LocalDate) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         // In the date column, where a day's number would be.
-        Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.width(60.dp).padding(end = 12.dp), contentAlignment = Alignment.Center) {
             Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(color))
         }
         Text(
@@ -348,9 +369,8 @@ private fun TodayMarker(date: LocalDate) {
 private fun MonthHeading(date: LocalDate) {
     Text(
         text = "${monthName(date.monthNumber)} ${date.year}",
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
+        style = AdventureType.display(28.sp),
+        color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 8.dp)
     )
 }
@@ -358,43 +378,13 @@ private fun MonthHeading(date: LocalDate) {
 @Composable
 private fun DayRow(day: CalendarDay, isToday: Boolean, onOpen: (EventTarget) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        // The date column: a number you can find with your eye, and today marked once. Sized to
-        // sit centred on a card's minimum height - it was taller than a one-line card, so the
-        // weekday hung below it (QA 07, screenshot).
-        Column(
-            modifier = Modifier.width(52.dp).padding(top = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isToday) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            androidx.compose.ui.graphics.Color.Transparent
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = day.date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isToday) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    }
-                )
-            }
-            Text(
-                text = weekdayName(day.date.dayOfWeek.ordinal),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        // The date as a calendar sheet, today inked in the primary colour, as the canvas draws it.
+        DateTile(
+            month = monthName(day.date.monthNumber).take(3).uppercase(),
+            day = day.date.dayOfMonth,
+            highlighted = isToday,
+            modifier = Modifier.padding(top = 6.dp, end = 12.dp)
+        )
 
         Column(
             modifier = Modifier.weight(1f),
@@ -406,7 +396,7 @@ private fun DayRow(day: CalendarDay, isToday: Boolean, onOpen: (EventTarget) -> 
 }
 
 @Composable
-private fun EventCard(event: CalendarEvent, onOpen: (EventTarget) -> Unit) {
+internal fun EventCard(event: CalendarEvent, onOpen: (EventTarget) -> Unit) {
     val target = event.target()
     val shape = RoundedCornerShape(16.dp)
     val colors = CardDefaults.cardColors(
