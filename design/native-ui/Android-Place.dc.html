@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android place detail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 44px; height: 264px; border-radius: 36px; overflow: hidden">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="388" height="264" role="img" aria-label="Photo of Trolltunga" style="display: block">
+      <rect width="176" height="132" fill="#F4DCC0"/>
+      <circle cx="140" cy="34" r="12" fill="#F6B989"/>
+      <path d="M0 84 L40 60 L84 74 L130 56 L176 70 V132 H0Z" fill="#A9B8BC"/>
+      <path d="M0 132 V92 L72 70 L128 66 L132 72 L76 84 L56 132Z" fill="#5C5A57"/>
+      <path d="M56 132 L76 84 L176 98 V132Z" fill="#6FA4B2"/>
+      <circle cx="122" cy="62" r="2" fill="#171D1E"/>
+    </svg>
+    <div style="position: absolute; left: 12px; right: 12px; top: 12px; display: flex; gap: 8px">
+      <a href="Android-Places.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#171D1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+      <span style="flex-grow: 1"></span>
+      <button aria-label="Share" style="all: unset; width: 48px; height: 48px; border-radius: 24px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#171D1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>
+      </button>
+    </div>
+    <span style="position: absolute; right: 14px; bottom: 14px; height: 28px; padding: 0 12px; border-radius: 14px; background: #2B3133; color: #ECF2F3; font-size: 13px; font-weight: 700; display: flex; align-items: center">1 / 4</span>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 324px; padding: 0 20px; display: flex; flex-direction: column">
+    <div style="display: flex; gap: 8px; align-items: center">
+      <span style="height: 32px; padding: 0 14px; border-radius: 10px; background: #D9E2FF; color: #3A4664; font-size: 14px; font-weight: 700; display: flex; align-items: center">Hiking</span>
+      <span style="height: 32px; padding: 0 12px 0 8px; border-radius: 16px; background: #9EEFFC; color: #004F57; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#004F57" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+        Visited
+      </span>
+    </div>
+    <h1 style="margin: 14px 0 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Trolltunga</h1>
+    <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px; font-size: 16px; color: #3F484A">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      Vestland, Norway
+    </div>
+    <div role="img" aria-label="Rated 5 out of 5" style="margin-top: 12px; display: flex; gap: 2px; font-size: 26px; color: #006973; letter-spacing: 1px">★★★★★</div>
+
+    <div style="margin-top: 18px; border-radius: 24px; background: #FFFFFF; border: 1px solid #DEE3E4; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 14px 0">
+      <span style="display: flex; flex-direction: column; padding: 0 16px"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">VISITED</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">6 JUL 26</span></span>
+      <span style="display: flex; flex-direction: column; padding: 0 16px; border-left: 2px dashed #DEE3E4"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">VISITS</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">1</span></span>
+      <a href="Android-Collection.dc.html" style="display: flex; flex-direction: column; padding: 0 16px; border-left: 2px dashed #DEE3E4; text-decoration: none; color: #006973"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">TRIP</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%; white-space: nowrap">Fjords</span></a>
+    </div>
+
+    <h2 style="margin: 26px 0 8px; font-size: 28px; font-weight: 800; font-stretch: 38%">About</h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #3F484A">A rock formation that juts horizontally out of a mountain, about 700 metres above Lake Ringedalsvatnet. The hike in and back is long; most people start at Skjeggedal.</p>
+
+    <h2 style="margin: 24px 0 10px; font-size: 28px; font-weight: 800; font-stretch: 38%">Visits</h2>
+    <div style="height: 64px; border-radius: 24px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#006973" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      <span style="display: flex; flex-direction: column">
+        <span style="font-size: 16px; font-weight: 700">6 Jul 2026</span>
+        <span style="font-size: 13px; color: #3F484A">Norwegian Fjords</span>
+      </span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center; align-items: center; gap: 10px">
+    <div role="toolbar" aria-label="Place actions" style="height: 64px; border-radius: 32px; background: #2B3133; display: flex; align-items: center; gap: 4px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <button aria-label="Open in maps" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+      </button>
+      <button aria-label="Website" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>
+      </button>
+      <button aria-label="Add visit" style="all: unset; height: 48px; padding: 0 18px 0 14px; border-radius: 24px; background: #9EEFFC; color: #004F57; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 750; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#004F57" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Visit
+      </button>
+    </div>
+    <button aria-label="Edit place" style="all: unset; width: 64px; height: 64px; border-radius: 20px; background: #D9E2FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0, 54, 61, 0.2); cursor: pointer">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#3A4664" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z M13.5 6.5l4 4"/></svg>
+    </button>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 44px; height: 264px; border-radius: 36px; overflow: hidden">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="388" height="264" role="img" aria-label="Photo of Trolltunga" style="display: block">
+      <rect width="176" height="132" fill="#F4DCC0"/>
+      <circle cx="140" cy="34" r="12" fill="#F6B989"/>
+      <path d="M0 84 L40 60 L84 74 L130 56 L176 70 V132 H0Z" fill="#A9B8BC"/>
+      <path d="M0 132 V92 L72 70 L128 66 L132 72 L76 84 L56 132Z" fill="#5C5A57"/>
+      <path d="M56 132 L76 84 L176 98 V132Z" fill="#6FA4B2"/>
+      <circle cx="122" cy="62" r="2" fill="#171D1E"/>
+    </svg>
+    <div style="position: absolute; left: 12px; right: 12px; top: 12px; display: flex; gap: 8px">
+      <a href="Android-Places.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; background: #1B2122; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#DEE3E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+      <span style="flex-grow: 1"></span>
+      <button aria-label="Share" style="all: unset; width: 48px; height: 48px; border-radius: 24px; background: #1B2122; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#DEE3E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>
+      </button>
+    </div>
+    <span style="position: absolute; right: 14px; bottom: 14px; height: 28px; padding: 0 12px; border-radius: 14px; background: #DEE3E4; color: #2B3133; font-size: 13px; font-weight: 700; display: flex; align-items: center">1 / 4</span>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 324px; padding: 0 20px; display: flex; flex-direction: column">
+    <div style="display: flex; gap: 8px; align-items: center">
+      <span style="height: 32px; padding: 0 14px; border-radius: 10px; background: #3A4664; color: #D9E2FF; font-size: 14px; font-weight: 700; display: flex; align-items: center">Hiking</span>
+      <span style="height: 32px; padding: 0 12px 0 8px; border-radius: 16px; background: #004F57; color: #9EEFFC; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#9EEFFC" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+        Visited
+      </span>
+    </div>
+    <h1 style="margin: 14px 0 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Trolltunga</h1>
+    <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px; font-size: 16px; color: #BFC8CA">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+      Vestland, Norway
+    </div>
+    <div role="img" aria-label="Rated 5 out of 5" style="margin-top: 12px; display: flex; gap: 2px; font-size: 26px; color: #81D3E0; letter-spacing: 1px">★★★★★</div>
+
+    <div style="margin-top: 18px; border-radius: 24px; background: #1B2122; border: 1px solid #3F484A; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 14px 0">
+      <span style="display: flex; flex-direction: column; padding: 0 16px"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">VISITED</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">6 JUL 26</span></span>
+      <span style="display: flex; flex-direction: column; padding: 0 16px; border-left: 2px dashed #3F484A"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">VISITS</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">1</span></span>
+      <a href="Android-Collection.dc.html" style="display: flex; flex-direction: column; padding: 0 16px; border-left: 2px dashed #3F484A; text-decoration: none; color: #81D3E0"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">TRIP</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%; white-space: nowrap">Fjords</span></a>
+    </div>
+
+    <h2 style="margin: 26px 0 8px; font-size: 28px; font-weight: 800; font-stretch: 38%">About</h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.5; color: #BFC8CA">A rock formation that juts horizontally out of a mountain, about 700 metres above Lake Ringedalsvatnet. The hike in and back is long; most people start at Skjeggedal.</p>
+
+    <h2 style="margin: 24px 0 10px; font-size: 28px; font-weight: 800; font-stretch: 38%">Visits</h2>
+    <div style="height: 64px; border-radius: 24px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#81D3E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      <span style="display: flex; flex-direction: column">
+        <span style="font-size: 16px; font-weight: 700">6 Jul 2026</span>
+        <span style="font-size: 13px; color: #BFC8CA">Norwegian Fjords</span>
+      </span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center; align-items: center; gap: 10px">
+    <div role="toolbar" aria-label="Place actions" style="height: 64px; border-radius: 32px; background: #DEE3E4; display: flex; align-items: center; gap: 4px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <button aria-label="Open in maps" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#00363C" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+      </button>
+      <button aria-label="Website" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#00363C" stroke-width="2" stroke-linecap="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>
+      </button>
+      <button aria-label="Add visit" style="all: unset; height: 48px; padding: 0 18px 0 14px; border-radius: 24px; background: #004F57; color: #9EEFFC; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 750; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#9EEFFC" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Visit
+      </button>
+    </div>
+    <button aria-label="Edit place" style="all: unset; width: 64px; height: 64px; border-radius: 20px; background: #3A4664; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0, 54, 61, 0.2); cursor: pointer">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#D9E2FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z M13.5 6.5l4 4"/></svg>
+    </button>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

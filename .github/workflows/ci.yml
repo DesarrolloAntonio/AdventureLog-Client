@@ -34,7 +34,11 @@ jobs:
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> local.properties
-          
+
+      # Shared code stays free of Compose: iOS draws SwiftUI over it (native UI split).
+      - name: Check commonMain has no Compose
+        run: scripts/check-common-compose.sh
+
       - name: Run unit tests
         run: ./gradlew test
         

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#007A85}a:hover{color:#005A62}
+.glass-bar{background:rgba(250,250,252,0.55);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.8);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.95),0 12px 32px rgba(0,0,0,0.16)}
+.glass-bar-d{background:rgba(36,36,40,0.55);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.16);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),0 12px 32px rgba(0,0,0,0.16)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #A5D2EC; color: #000000; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 390 844" width="390" height="844" role="img" aria-label="Map of Europe and North Africa with saved places" style="position: absolute; inset: 0">
+    <rect width="390" height="844" fill="#A5D2EC"/>
+    <path d="M190 40 C210 90 200 140 230 180 C250 210 240 250 270 270 L300 250 C310 200 290 150 310 110 C320 80 300 40 290 0 H200Z" fill="#F2EFE6"/>
+    <path d="M300 0 C320 60 350 110 390 140 V0Z" fill="#E8EEDD"/>
+    <path d="M40 150 C70 130 110 140 120 165 C110 190 70 195 45 180Z" fill="#F2EFE6"/>
+    <path d="M120 330 C170 300 240 290 300 300 C350 310 390 300 390 300 V520 C340 510 300 520 270 500 C250 470 220 470 200 500 C180 520 140 500 120 470 C100 440 90 380 120 330Z" fill="#F2EFE6"/>
+    <path d="M240 420 C255 440 262 470 280 492 C286 500 276 506 270 498 C252 476 236 450 232 428Z" fill="#E8EEDD"/>
+    <path d="M60 600 C120 570 220 560 300 575 C340 582 390 580 390 580 V844 H40 C30 760 40 660 60 600Z" fill="#EFE6D2"/>
+    <path d="M150 360 C190 350 230 365 260 360" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+    <path d="M120 420 C160 430 200 420 240 430" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+    <text x="320" y="70" font-size="11" font-weight="600" letter-spacing="2" fill="#8E8E93" font-family="-apple-system, system-ui, sans-serif">NORWAY</text>
+    <text x="150" y="400" font-size="11" font-weight="600" letter-spacing="2" fill="#8E8E93" font-family="-apple-system, system-ui, sans-serif">EUROPE</text>
+    <text x="120" y="660" font-size="11" font-weight="600" letter-spacing="2" fill="#8E8E93" font-family="-apple-system, system-ui, sans-serif">MOROCCO</text>
+  </svg>
+
+  <span aria-label="Norway, 3 places" style="position: absolute; left: 226px; top: 120px; width: 50px; height: 50px; border-radius: 25px; border: 3px solid #FFFFFF; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,0.28)">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="50" height="50" aria-hidden="true"><rect width="176" height="132" fill="#B9D8E6"/><path d="M0 70 L30 30 L58 62 L84 22 L120 66 L150 34 L176 58 V132 H0Z" fill="#6F95A1"/><path d="M0 132 L70 96 L104 100 L176 132Z" fill="#1F6675"/></svg>
+  </span>
+  <span aria-hidden="true" style="position: absolute; left: 262px; top: 112px; min-width: 22px; height: 22px; border-radius: 11px; background: #007A85; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF">3</span>
+
+  <span aria-label="Iceland, 4 places" style="position: absolute; left: 58px; top: 140px; width: 46px; height: 46px; border-radius: 23px; border: 3px solid #FFFFFF; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,0.28)">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="46" height="46" aria-hidden="true"><rect width="176" height="132" fill="#C9D7DE"/><path d="M60 0h30v132H60z" fill="#E9F2F6"/><path d="M0 60 C40 40 120 40 176 60 V132 H0Z" fill="#4E6B4A"/></svg>
+  </span>
+  <span aria-hidden="true" style="position: absolute; left: 92px; top: 132px; min-width: 22px; height: 22px; border-radius: 11px; background: #007A85; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF">4</span>
+
+  <span aria-label="Austria and Croatia, 2 places" style="position: absolute; left: 226px; top: 380px; width: 44px; height: 44px; border-radius: 22px; background: #007A85; border: 3px solid #FFFFFF; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(0,0,0,0.25)">2</span>
+  <span aria-label="Cinque Terre, planned" style="position: absolute; left: 196px; top: 440px; width: 40px; height: 40px; border-radius: 20px; background: #FFFFFF; border: 2.5px dashed #007A85; box-sizing: border-box; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(0,0,0,0.2)">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#007A85" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg>
+  </span>
+
+  <a href="iOS-Place.dc.html" aria-label="Chefchaouen, selected" style="position: absolute; left: 126px; top: 586px; display: flex; flex-direction: column; align-items: center">
+    <span style="width: 60px; height: 60px; border-radius: 30px; border: 3px solid #007A85; overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,0.3)">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="60" height="60" aria-hidden="true"><rect width="176" height="132" fill="#4F86C6"/><path d="M0 0h70v132H0z" fill="#8DB6E8"/><path d="M90 40h40v92H90z" fill="#2F5F9E"/><path d="M98 52h24v34H98z" fill="#C9DDF4"/></svg>
+    </span>
+    <span style="width: 12px; height: 12px; background: #007A85; transform: rotate(45deg); margin-top: -7px"></span>
+  </a>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; gap: 10px; align-items: flex-start">
+    <div class="glass-bar" role="group" aria-label="Filter" style="flex-grow: 1; height: 44px; border-radius: 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <button aria-pressed="true" style="all: unset; border-radius: 18px; background: rgba(255,255,255,0.9); box-shadow: 0 2px 6px rgba(0,0,0,0.1); font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">All</button>
+      <button aria-pressed="false" style="all: unset; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center">Visited</button>
+      <button aria-pressed="false" style="all: unset; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center">Planned</button>
+    </div>
+    <div class="glass-bar" style="width: 44px; border-radius: 22px; display: flex; flex-direction: column; overflow: hidden">
+      <button aria-label="Map style" style="all: unset; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 2.5 8.5 12 14l9.5-5.5Z M2.5 13 12 18.5 21.5 13"/></svg>
+      </button>
+      <span style="height: 0.5px; margin: 0 10px; background: rgba(0,0,0,0.18)"></span>
+      <button aria-label="Show my location" style="all: unset; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 4 3.5 11l7 2.5L13 20.5Z" fill="#007A85"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <a href="iOS-Place.dc.html" class="glass-bar" style="position: absolute; left: 14px; right: 14px; top: 668px; height: 84px; border-radius: 30px; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 10px; text-decoration: none; color: #000000; box-sizing: border-box">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="62" height="62" role="img" aria-label="Photo of Chefchaouen" style="border-radius: 20px; flex-shrink: 0"><rect width="176" height="132" fill="#4F86C6"/><path d="M0 0h70v132H0z" fill="#8DB6E8"/><path d="M90 40h40v92H90z" fill="#2F5F9E"/><path d="M98 52h24v34H98z" fill="#C9DDF4"/></svg>
+    <span style="display: flex; flex-direction: column; flex-grow: 1">
+      <span style="font-family: ui-serif, 'New York', Georgia, serif; font-size: 20px; font-weight: 700">Chefchaouen</span>
+      <span style="font-size: 13px; color: #3A3A3C">Morocco · Mar 2026 · ★ 5</span>
+    </span>
+    <span style="height: 40px; padding: 0 16px; border-radius: 20px; background: #007A85; color: #FFFFFF; font-size: 15px; font-weight: 600; display: flex; align-items: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.4)">Go</span>
+  </a>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 26px; display: flex; gap: 10px; align-items: center">
+    <nav class="glass-bar" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <a href="iOS-Home.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="iOS-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="iOS-Collection.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="iOS-Map.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(255,255,255,0.85); box-shadow: inset 0 1px 0.5px #FFFFFF, 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #007A85">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z" fill="#007A85"/><path d="M9 4v14 M15 6v14" stroke="#FFFFFF" stroke-width="1.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Map</span>
+      </a>
+      <a href="iOS-World.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="iOS-Places.dc.html" class="glass-bar" aria-label="Search the map" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #1B3640; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 390 844" width="390" height="844" role="img" aria-label="Map of Europe and North Africa with saved places" style="position: absolute; inset: 0">
+    <rect width="390" height="844" fill="#1B3640"/>
+    <path d="M190 40 C210 90 200 140 230 180 C250 210 240 250 270 270 L300 250 C310 200 290 150 310 110 C320 80 300 40 290 0 H200Z" fill="#2B2B2D"/>
+    <path d="M300 0 C320 60 350 110 390 140 V0Z" fill="#262A27"/>
+    <path d="M40 150 C70 130 110 140 120 165 C110 190 70 195 45 180Z" fill="#2B2B2D"/>
+    <path d="M120 330 C170 300 240 290 300 300 C350 310 390 300 390 300 V520 C340 510 300 520 270 500 C250 470 220 470 200 500 C180 520 140 500 120 470 C100 440 90 380 120 330Z" fill="#2B2B2D"/>
+    <path d="M240 420 C255 440 262 470 280 492 C286 500 276 506 270 498 C252 476 236 450 232 428Z" fill="#262A27"/>
+    <path d="M60 600 C120 570 220 560 300 575 C340 582 390 580 390 580 V844 H40 C30 760 40 660 60 600Z" fill="#2C2A26"/>
+    <path d="M150 360 C190 350 230 365 260 360" fill="none" stroke="#4A4A4E" stroke-width="3"/>
+    <path d="M120 420 C160 430 200 420 240 430" fill="none" stroke="#4A4A4E" stroke-width="2.5"/>
+    <text x="320" y="70" font-size="11" font-weight="600" letter-spacing="2" fill="#8E8E93" font-family="-apple-system, system-ui, sans-serif">NORWAY</text>
+    <text x="150" y="400" font-size="11" font-weight="600" letter-spacing="2" fill="#8E8E93" font-family="-apple-system, system-ui, sans-serif">EUROPE</text>
+    <text x="120" y="660" font-size="11" font-weight="600" letter-spacing="2" fill="#8E8E93" font-family="-apple-system, system-ui, sans-serif">MOROCCO</text>
+  </svg>
+
+  <span aria-label="Norway, 3 places" style="position: absolute; left: 226px; top: 120px; width: 50px; height: 50px; border-radius: 25px; border: 3px solid #FFFFFF; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,0.28)">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="50" height="50" aria-hidden="true"><rect width="176" height="132" fill="#B9D8E6"/><path d="M0 70 L30 30 L58 62 L84 22 L120 66 L150 34 L176 58 V132 H0Z" fill="#6F95A1"/><path d="M0 132 L70 96 L104 100 L176 132Z" fill="#1F6675"/></svg>
+  </span>
+  <span aria-hidden="true" style="position: absolute; left: 262px; top: 112px; min-width: 22px; height: 22px; border-radius: 11px; background: #007A85; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF">3</span>
+
+  <span aria-label="Iceland, 4 places" style="position: absolute; left: 58px; top: 140px; width: 46px; height: 46px; border-radius: 23px; border: 3px solid #FFFFFF; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,0.28)">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="46" height="46" aria-hidden="true"><rect width="176" height="132" fill="#C9D7DE"/><path d="M60 0h30v132H60z" fill="#E9F2F6"/><path d="M0 60 C40 40 120 40 176 60 V132 H0Z" fill="#4E6B4A"/></svg>
+  </span>
+  <span aria-hidden="true" style="position: absolute; left: 92px; top: 132px; min-width: 22px; height: 22px; border-radius: 11px; background: #007A85; color: #FFFFFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFFFF">4</span>
+
+  <span aria-label="Austria and Croatia, 2 places" style="position: absolute; left: 226px; top: 380px; width: 44px; height: 44px; border-radius: 22px; background: #007A85; border: 3px solid #FFFFFF; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(0,0,0,0.25)">2</span>
+  <span aria-label="Cinque Terre, planned" style="position: absolute; left: 196px; top: 440px; width: 40px; height: 40px; border-radius: 20px; background: #1C1C1E; border: 2.5px dashed #5AC8D4; box-sizing: border-box; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(0,0,0,0.2)">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#5AC8D4" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg>
+  </span>
+
+  <a href="iOS-Place.dc.html" aria-label="Chefchaouen, selected" style="position: absolute; left: 126px; top: 586px; display: flex; flex-direction: column; align-items: center">
+    <span style="width: 60px; height: 60px; border-radius: 30px; border: 3px solid #5AC8D4; overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,0.3)">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="60" height="60" aria-hidden="true"><rect width="176" height="132" fill="#4F86C6"/><path d="M0 0h70v132H0z" fill="#8DB6E8"/><path d="M90 40h40v92H90z" fill="#2F5F9E"/><path d="M98 52h24v34H98z" fill="#C9DDF4"/></svg>
+    </span>
+    <span style="width: 12px; height: 12px; background: #007A85; transform: rotate(45deg); margin-top: -7px"></span>
+  </a>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; gap: 10px; align-items: flex-start">
+    <div class="glass-bar-d" role="group" aria-label="Filter" style="flex-grow: 1; height: 44px; border-radius: 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <button aria-pressed="true" style="all: unset; border-radius: 18px; background: rgba(99,99,102,0.9); box-shadow: 0 2px 6px rgba(0,0,0,0.1); font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center">All</button>
+      <button aria-pressed="false" style="all: unset; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center">Visited</button>
+      <button aria-pressed="false" style="all: unset; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center">Planned</button>
+    </div>
+    <div class="glass-bar-d" style="width: 44px; border-radius: 22px; display: flex; flex-direction: column; overflow: hidden">
+      <button aria-label="Map style" style="all: unset; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 2.5 8.5 12 14l9.5-5.5Z M2.5 13 12 18.5 21.5 13"/></svg>
+      </button>
+      <span style="height: 0.5px; margin: 0 10px; background: rgba(255,255,255,0.18)"></span>
+      <button aria-label="Show my location" style="all: unset; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 4 3.5 11l7 2.5L13 20.5Z" fill="#5AC8D4"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <a href="iOS-Place.dc.html" class="glass-bar-d" style="position: absolute; left: 14px; right: 14px; top: 668px; height: 84px; border-radius: 30px; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 10px; text-decoration: none; color: #FFFFFF; box-sizing: border-box">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="62" height="62" role="img" aria-label="Photo of Chefchaouen" style="border-radius: 20px; flex-shrink: 0"><rect width="176" height="132" fill="#4F86C6"/><path d="M0 0h70v132H0z" fill="#8DB6E8"/><path d="M90 40h40v92H90z" fill="#2F5F9E"/><path d="M98 52h24v34H98z" fill="#C9DDF4"/></svg>
+    <span style="display: flex; flex-direction: column; flex-grow: 1">
+      <span style="font-family: ui-serif, 'New York', Georgia, serif; font-size: 20px; font-weight: 700">Chefchaouen</span>
+      <span style="font-size: 13px; color: #E5E5EA">Morocco · Mar 2026 · ★ 5</span>
+    </span>
+    <span style="height: 40px; padding: 0 16px; border-radius: 20px; background: #007A85; color: #FFFFFF; font-size: 15px; font-weight: 600; display: flex; align-items: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.4)">Go</span>
+  </a>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 26px; display: flex; gap: 10px; align-items: center">
+    <nav class="glass-bar-d" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <a href="iOS-Home.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="iOS-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="iOS-Collection.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="iOS-Map.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(255,255,255,0.16); box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #5AC8D4">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z" fill="#5AC8D4"/><path d="M9 4v14 M15 6v14" stroke="#FFFFFF" stroke-width="1.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Map</span>
+      </a>
+      <a href="iOS-World.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="iOS-Places.dc.html" class="glass-bar-d" aria-label="Search the map" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android calendar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <a href="Main.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#171D1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+      <span style="flex-grow: 1"></span>
+      <div role="group" aria-label="View" style="display: flex; gap: 2px; align-items: center">
+        <button aria-pressed="true" style="all: unset; height: 40px; padding: 0 16px; border-radius: 20px; background: #2B3133; color: #ECF2F3; font-size: 14px; font-weight: 700; display: flex; align-items: center">Month</button>
+        <button aria-pressed="false" style="all: unset; height: 40px; padding: 0 16px; border-radius: 8px 20px 20px 8px; background: #E3E9EA; color: #3F484A; font-size: 14px; font-weight: 600; display: flex; align-items: center">Agenda</button>
+      </div>
+    </div>
+    <h1 style="margin: 4px 4px 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Calendar</h1>
+
+    <div style="margin-top: 16px; border-radius: 28px; background: #FFFFFF; border: 1px solid #DEE3E4; padding: 14px 12px 12px">
+      <div style="display: flex; align-items: center; gap: 6px; padding: 0 6px 10px">
+        <span style="font-size: 30px; line-height: 1; font-weight: 800; font-stretch: 38%; flex-grow: 1">September <span style="color: #6F797A">2026</span></span>
+        <button aria-label="Previous month" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #CDE7EC; display: flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#334B4F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+        </button>
+        <button aria-label="Next month" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #CDE7EC; display: flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#334B4F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #3F484A; text-align: center; padding-bottom: 6px">
+        <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+      </div>
+
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span style="color: #BFC8CA">31</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; top: 32px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 6 / 8; height: 20px; margin-left: 4px; border-radius: 10px 0 0 10px; background: #006973; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding-left: 8px; white-space: nowrap; overflow: hidden">Cinque Terre</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; top: 32px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 1 / 4; height: 20px; margin-right: 4px; border-radius: 0 10px 10px 0; background: #006973"></span>
+        </div>
+      </div>
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 46px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>28</span><span>29</span><span>30</span><span style="color: #BFC8CA">1</span><span style="color: #BFC8CA">2</span><span style="color: #BFC8CA">3</span><span style="color: #BFC8CA">4</span>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin: 24px 4px 12px; font-size: 28px; font-weight: 800; font-stretch: 38%">Coming up</h2>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <a href="Android-Collection.dc.html" style="height: 76px; border-radius: 24px 24px 6px 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #171D1E">
+        <span style="width: 48px; height: 52px; border-radius: 14px; background: #006973; color: #FFFFFF; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+          <span style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px">SEP</span>
+          <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">5</span>
+        </span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Cinque Terre</span><span style="font-size: 13px; color: #3F484A">5–9 Sep · 2 places · in 8 days</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" style="height: 76px; border-radius: 6px 6px 24px 24px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #171D1E">
+        <span style="width: 48px; height: 52px; border-radius: 14px; background: #D9E2FF; color: #3A4664; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+          <span style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px">OCT</span>
+          <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">10</span>
+        </span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Peru</span><span style="font-size: 13px; color: #3F484A">10–22 Oct · 3 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <a href="Main.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#DEE3E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+      <span style="flex-grow: 1"></span>
+      <div role="group" aria-label="View" style="display: flex; gap: 2px; align-items: center">
+        <button aria-pressed="true" style="all: unset; height: 40px; padding: 0 16px; border-radius: 20px; background: #DEE3E4; color: #2B3133; font-size: 14px; font-weight: 700; display: flex; align-items: center">Month</button>
+        <button aria-pressed="false" style="all: unset; height: 40px; padding: 0 16px; border-radius: 8px 20px 20px 8px; background: #252B2C; color: #BFC8CA; font-size: 14px; font-weight: 600; display: flex; align-items: center">Agenda</button>
+      </div>
+    </div>
+    <h1 style="margin: 4px 4px 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Calendar</h1>
+
+    <div style="margin-top: 16px; border-radius: 28px; background: #1B2122; border: 1px solid #3F484A; padding: 14px 12px 12px">
+      <div style="display: flex; align-items: center; gap: 6px; padding: 0 6px 10px">
+        <span style="font-size: 30px; line-height: 1; font-weight: 800; font-stretch: 38%; flex-grow: 1">September <span style="color: #899294">2026</span></span>
+        <button aria-label="Previous month" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #334B4F; display: flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#CDE7EC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+        </button>
+        <button aria-label="Next month" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #334B4F; display: flex; align-items: center; justify-content: center; cursor: pointer">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#CDE7EC" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #BFC8CA; text-align: center; padding-bottom: 6px">
+        <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+      </div>
+
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span style="color: #3F484A">31</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; top: 32px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 6 / 8; height: 20px; margin-left: 4px; border-radius: 10px 0 0 10px; background: #81D3E0; color: #00363C; font-size: 11px; font-weight: 700; display: flex; align-items: center; padding-left: 8px; white-space: nowrap; overflow: hidden">Cinque Terre</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; top: 32px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 1 / 4; height: 20px; margin-right: 4px; border-radius: 0 10px 10px 0; background: #81D3E0"></span>
+        </div>
+      </div>
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 58px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 46px">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 15px; font-weight: 600; padding-top: 6px">
+          <span>28</span><span>29</span><span>30</span><span style="color: #3F484A">1</span><span style="color: #3F484A">2</span><span style="color: #3F484A">3</span><span style="color: #3F484A">4</span>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="margin: 24px 4px 12px; font-size: 28px; font-weight: 800; font-stretch: 38%">Coming up</h2>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <a href="Android-Collection.dc.html" style="height: 76px; border-radius: 24px 24px 6px 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #DEE3E4">
+        <span style="width: 48px; height: 52px; border-radius: 14px; background: #81D3E0; color: #00363C; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+          <span style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px">SEP</span>
+          <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">5</span>
+        </span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Cinque Terre</span><span style="font-size: 13px; color: #BFC8CA">5–9 Sep · 2 places · in 8 days</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" style="height: 76px; border-radius: 6px 6px 24px 24px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #DEE3E4">
+        <span style="width: 48px; height: 52px; border-radius: 14px; background: #3A4664; color: #D9E2FF; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0">
+          <span style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px">OCT</span>
+          <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">10</span>
+        </span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Peru</span><span style="font-size: 13px; color: #BFC8CA">10–22 Oct · 3 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

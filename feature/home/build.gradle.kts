@@ -28,20 +28,8 @@ kotlin {
             implementation(projects.feature.world)
             implementation(projects.feature.map)
             implementation(projects.feature.detail)
-
-            implementation(libs.koin.composeVM)
-            implementation(libs.material3.adaptive.navigation.suite)
-            implementation(libs.navigation3.ui)
-            implementation(libs.navigation3.runtime)
-            implementation(libs.material3.adaptive.navigation3)
-
-            implementation(libs.navigation.compose)
+            implementation(libs.koin.core.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.navigation.compose)
-
-            implementation(libs.coil.compose)
-            implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
@@ -50,7 +38,18 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
         androidMain.dependencies {
+            // Res (the app's fonts and strings) - Android only, like everything Compose.
+            implementation(projects.core.resources)
+            implementation(libs.koin.composeVM)
+            implementation(libs.navigation.compose)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.material3.adaptive.navigation.suite)
+            implementation(libs.navigation3.ui)
+            implementation(libs.navigation3.runtime)
+            implementation(libs.material3.adaptive.navigation3)
             implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
             implementation(libs.androidx.ui.tooling)
         }
         // Screen tests run on a device: this project has no JVM target, so there is nowhere

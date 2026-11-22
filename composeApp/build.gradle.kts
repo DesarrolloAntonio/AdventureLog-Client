@@ -3,6 +3,7 @@
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import java.util.Properties
 import java.io.FileInputStream
 
@@ -13,7 +14,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.skie)
 }
 
 // Load API keys from local.properties
@@ -38,6 +39,19 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            // Every module whose types Swift names. Each one is an api dependency below.
+            export(projects.core.model)
+            export(projects.core.domain)
+            export(projects.feature.login)
+            export(projects.feature.home)
+            export(projects.feature.locations)
+            export(projects.feature.settings)
+            export(projects.feature.detail)
+            export(projects.feature.ui)
+            export(projects.feature.calendar)
+            export(projects.feature.collections)
+            export(projects.feature.world)
+            export(projects.feature.map)
             optimized = true
         }
     }
@@ -45,6 +59,18 @@ kotlin {
     sourceSets {
 
         androidMain.dependencies {
+            // The Compose UI is Android only; iOS draws SwiftUI over the same ViewModels.
+            implementation(projects.core.resources)
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.ui)
+            implementation(libs.androidx.compose.material3)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
+            implementation(libs.navigation.compose)
+            implementation(libs.koin.compose)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.activity.ktx)
@@ -54,31 +80,23 @@ kotlin {
         }
 
         commonMain.dependencies {
-            implementation(projects.feature.login)
-            implementation(projects.feature.home)
-            implementation(projects.feature.locations)
-            implementation(projects.feature.settings)
-            implementation(projects.feature.detail)
-            implementation(projects.feature.ui)
-            implementation(projects.feature.calendar)
-            implementation(projects.feature.collections)
-            implementation(projects.feature.world)
-            implementation(projects.feature.map)
-            implementation(projects.core.model)
+            api(projects.feature.login)
+            api(projects.feature.home)
+            api(projects.feature.locations)
+            api(projects.feature.settings)
+            api(projects.feature.detail)
+            api(projects.feature.ui)
+            api(projects.feature.calendar)
+            api(projects.feature.collections)
+            api(projects.feature.world)
+            api(projects.feature.map)
+            api(projects.core.model)
+            api(projects.core.domain)
             implementation(projects.core.data)
 
-            implementation(compose.material3)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-
-            implementation(libs.navigation.compose)
-
             api(libs.koin.core)
-            implementation(libs.koin.compose)
 
             implementation(libs.ktor.client.core)
-            implementation(libs.coil.compose)
-            implementation(libs.coil.network.ktor)
 
             implementation(libs.filekit.core)
         }
@@ -160,8 +178,9 @@ android {
     }
 }
 
-// Hot reload support
 composeCompiler {
+    // Compose is compiled for Android only (see ComposeMultiplatformConventionPlugin).
+    targetKotlinPlatforms.set(setOf(KotlinPlatformType.androidJvm))
     featureFlags = setOf(
         ComposeFeatureFlag.OptimizeNonSkippingGroups
     )

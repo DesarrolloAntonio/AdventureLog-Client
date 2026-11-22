@@ -19,10 +19,10 @@ import com.google.maps.android.compose.rememberCameraPositionState
  * Displays a map centered at the specified coordinates.
  */
 @Composable
-actual fun MapView(
+fun MapView(
     latitude: String,
     longitude: String,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     // Parse latitude and longitude
     val latLng = remember(latitude, longitude) {

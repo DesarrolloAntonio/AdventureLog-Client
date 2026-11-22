@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <a href="Main.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#171D1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+    </div>
+    <h1 style="margin: 4px 4px 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Settings</h1>
+
+    <div style="margin-top: 18px; height: 84px; border-radius: 28px; background: #2B3133; color: #ECF2F3; display: flex; align-items: center; gap: 14px; padding: 0 18px 0 14px">
+      <span style="width: 56px; height: 56px; border-radius: 28px; background: #D9E2FF; color: #3A4664; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center">JD</span>
+      <span style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">John Doe</span>
+        <span style="font-size: 13px; color: #BFC8CA; margin-top: 4px">@claude · [YOUR SERVER]</span>
+      </span>
+      <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #3F484A; color: #9EEFFC; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px">
+        <span style="width: 7px; height: 7px; border-radius: 4px; background: #9EEFFC"></span>Online
+      </span>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #006973">APPEARANCE</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #CDE7EC; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#334B4F" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="#334B4F"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Theme</span><span style="font-size: 13px; color: #3F484A">Follow system</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <label style="height: 68px; border-radius: 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #CDE7EC; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#334B4F" stroke-width="2" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.2" fill="#334B4F"/><circle cx="11" cy="7.5" r="1.2" fill="#334B4F"/><circle cx="15.5" cy="8.5" r="1.2" fill="#334B4F"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Dynamic colour</span><span style="font-size: 13px; color: #3F484A">Take colours from your wallpaper</span></span>
+        <input type="checkbox" role="switch" aria-label="Dynamic colour" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+        <span aria-hidden="true" style="width: 52px; height: 32px; border-radius: 16px; background: #DEE3E4; border: 2px solid #6F797A; box-sizing: border-box; display: flex; align-items: center; padding-left: 6px">
+          <span style="width: 16px; height: 16px; border-radius: 8px; background: #6F797A"></span>
+        </span>
+      </label>
+      <div style="height: 68px; border-radius: 6px 6px 24px 24px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #CDE7EC; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#334B4F" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Map style</span><span style="font-size: 13px; color: #3F484A">Standard</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #006973">UNITS</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #D9E2FF; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3A4664" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="2"/><path d="M7 8v3M11 8v4M15 8v3M19 8v3"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Units</span><span style="font-size: 13px; color: #3F484A">Metric · km, °C</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <div style="height: 68px; border-radius: 6px 6px 24px 24px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #D9E2FF; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3A4664" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="3"/><circle cx="12" cy="12" r="2.5"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Currency</span><span style="font-size: 13px; color: #3F484A">EUR</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #006973">ACCOUNT</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #E3E9EA; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Sign-in &amp; email</span><span style="font-size: 13px; color: #3F484A">Password, email address</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <label style="height: 68px; border-radius: 6px 6px 24px 24px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #E3E9EA; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Public profile</span><span style="font-size: 13px; color: #3F484A">Others can see your stats</span></span>
+        <input type="checkbox" role="switch" checked aria-label="Public profile" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+        <span aria-hidden="true" style="width: 52px; height: 32px; border-radius: 16px; background: #006973; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; box-sizing: border-box">
+          <span style="width: 24px; height: 24px; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#006973" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span>
+        </span>
+      </label>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #006973">ABOUT</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #E3E9EA; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Source code</span><span style="font-size: 13px; color: #3F484A">Open source on GitHub</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <a href="Main.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#DEE3E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+    </div>
+    <h1 style="margin: 4px 4px 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Settings</h1>
+
+    <div style="margin-top: 18px; height: 84px; border-radius: 28px; background: #DEE3E4; color: #2B3133; display: flex; align-items: center; gap: 14px; padding: 0 18px 0 14px">
+      <span style="width: 56px; height: 56px; border-radius: 28px; background: #3A4664; color: #D9E2FF; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center">JD</span>
+      <span style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">John Doe</span>
+        <span style="font-size: 13px; color: #3F484A; margin-top: 4px">@claude · [YOUR SERVER]</span>
+      </span>
+      <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #C4CDCF; color: #006973; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px">
+        <span style="width: 7px; height: 7px; border-radius: 4px; background: #004F57"></span>Online
+      </span>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #81D3E0">APPEARANCE</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #334B4F; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="#CDE7EC" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="#CDE7EC"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Theme</span><span style="font-size: 13px; color: #BFC8CA">Follow system</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <label style="height: 68px; border-radius: 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #334B4F; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#CDE7EC" stroke-width="2" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2-1.5h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8Z"/><circle cx="7.5" cy="11" r="1.2" fill="#CDE7EC"/><circle cx="11" cy="7.5" r="1.2" fill="#CDE7EC"/><circle cx="15.5" cy="8.5" r="1.2" fill="#CDE7EC"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Dynamic colour</span><span style="font-size: 13px; color: #BFC8CA">Take colours from your wallpaper</span></span>
+        <input type="checkbox" role="switch" aria-label="Dynamic colour" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+        <span aria-hidden="true" style="width: 52px; height: 32px; border-radius: 16px; background: #303637; border: 2px solid #899294; box-sizing: border-box; display: flex; align-items: center; padding-left: 6px">
+          <span style="width: 16px; height: 16px; border-radius: 8px; background: #899294"></span>
+        </span>
+      </label>
+      <div style="height: 68px; border-radius: 6px 6px 24px 24px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #334B4F; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#CDE7EC" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Map style</span><span style="font-size: 13px; color: #BFC8CA">Standard</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #81D3E0">UNITS</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #3A4664; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#D9E2FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="2"/><path d="M7 8v3M11 8v4M15 8v3M19 8v3"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Units</span><span style="font-size: 13px; color: #BFC8CA">Metric · km, °C</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <div style="height: 68px; border-radius: 6px 6px 24px 24px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #3A4664; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#D9E2FF" stroke-width="2" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="3"/><circle cx="12" cy="12" r="2.5"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Currency</span><span style="font-size: 13px; color: #BFC8CA">EUR</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #81D3E0">ACCOUNT</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #252B2C; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Sign-in &amp; email</span><span style="font-size: 13px; color: #BFC8CA">Password, email address</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </div>
+      <label style="height: 68px; border-radius: 6px 6px 24px 24px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #252B2C; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Public profile</span><span style="font-size: 13px; color: #BFC8CA">Others can see your stats</span></span>
+        <input type="checkbox" role="switch" checked aria-label="Public profile" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+        <span aria-hidden="true" style="width: 52px; height: 32px; border-radius: 16px; background: #81D3E0; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px; box-sizing: border-box">
+          <span style="width: 24px; height: 24px; border-radius: 12px; background: #1B2122; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#81D3E0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span>
+        </span>
+      </label>
+    </div>
+
+    <div style="margin: 22px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #81D3E0">ABOUT</div>
+    <div style="display: flex; flex-direction: column; gap: 3px">
+      <div style="height: 68px; border-radius: 24px 24px 6px 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: #252B2C; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 600">Source code</span><span style="font-size: 13px; color: #BFC8CA">Open source on GitHub</span></span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

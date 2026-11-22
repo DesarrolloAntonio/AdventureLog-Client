@@ -11,11 +11,9 @@ kotlin {
             api(projects.core.domain)
             implementation(projects.feature.ui)
             implementation(projects.core.data)
-            
-            implementation(libs.koin.composeVM)
-            implementation(libs.navigation.compose)
+            implementation(libs.koin.core.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.androidx.lifecycle.viewmodel.savedstate)
             implementation(libs.kotlinx.datetime)
         }
         
@@ -25,10 +23,14 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             // The stub has to name PagingData to satisfy LocationsRepository, even though the
             // map never pages.
-            implementation(libs.multiplatform.paging.compose)
+            implementation(libs.multiplatform.paging.common)
         }
 
         androidMain.dependencies {
+            implementation(libs.koin.composeVM)
+            implementation(libs.navigation.compose)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.ui.tooling)
             implementation(libs.maps.compose)
             implementation(libs.maps.compose.utils)

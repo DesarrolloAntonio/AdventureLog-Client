@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.util
 
-import coil3.PlatformContext
+import org.koin.core.scope.Scope
 
 interface ImageBytesProvider {
     fun getImageBytes(uri: String): ByteArray?
@@ -8,4 +8,5 @@ interface ImageBytesProvider {
     suspend fun downloadImageFromUrl(url: String): ByteArray?
 }
 
-expect fun createImageBytesProvider(platformContext: PlatformContext): ImageBytesProvider
+/** Built by the Koin module; each platform takes what it needs (the Android `Context`) from the scope. */
+expect fun Scope.createImageBytesProvider(): ImageBytesProvider

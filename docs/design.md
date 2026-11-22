@@ -1,6 +1,6 @@
 # Design notes
 
-Why the screens look the way they do, and the traps that shape is built on. The visual source is
+Android only: iOS is SwiftUI and has its own design. Why the screens look the way they do, and the traps that shape is built on. The visual source is
 `design/dashboard-redesign.dc.html` - a Claude Design document exported into the repo so the
 layout can be read rather than eyeballed from screenshots. Read it, not a picture of it: the first
 attempt at the dashboard was transcribed by eye and got the hero colour, the icons and the section
@@ -39,7 +39,7 @@ The dashboard is the exception: past 1000dp it becomes two columns, `MaxDashboar
 wide, with a `DataRailWidth` (348dp) rail of numbers and dates on the right. That is the
 redesign's own `minmax(0,1fr) 348px`, and it is what the empty third of a tablet is for.
 
-## Layout traps, all found the hard way
+## Layout traps, all found the hard way (Android)
 
 - **A width cap on a spanned lazy-grid item does nothing.** The item is measured at an *exact*
   width and `widthIn(max = …)` coerces its own maximum back up into that fixed range. It compiles,
@@ -93,7 +93,7 @@ Two traps from this:
 - **A shell that pads for the system bars must also `consumeWindowInsets`.** Otherwise a screen
   that pads for the status bar itself, like the compact bar, pads for it twice.
 
-## One shape for every form
+## One shape for every form (Android)
 
 Decided by the owner on 2026-10-06 (QA CO-19), after the collection editors had grown five ways of
 doing the same thing:
@@ -115,17 +115,8 @@ doing the same thing:
 The view chips of a collection are cut at the screen edge on purpose: the cut is what says the row
 scrolls.
 
-## Nothing Material in a shared view
+## UI is no longer shared
 
-The plan for iOS is native SwiftUI navigation, toolbars and search with the Compose content
-reused inside. That only works if the content is not loudly Material, which is why the redesign
-was chosen over the Material 3 Expressive variant: expressive lives *inside* the content - the
-asymmetric corners, Roboto Flex, the tonal blocks - not in the chrome.
-
-So keep `TopAppBar`, `NavigationBar`, `FloatingActionButton` and ripple out of anything meant to
-be shared. Cards, text, photographs and pills travel; chrome does not. `MainShell` breaks this
-rule deliberately - it is the chrome, and it is the piece iOS replaces.
-
-Material 3 Expressive is not available anyway: `ButtonGroup`, `MaterialShapes`, `LoadingIndicator`
-and `SplitButtonLayout` do not resolve in Compose Multiplatform 1.12.0-alpha03, which is the
-newest published version. Expressive lives in the Android-only `androidx.compose.material3` line.
+Android and iOS each draw their own UI, so there is no "shared view" to keep neutral; Material is
+fine on Android. See `docs/superpowers/specs/2026-11-21-native-ui-split-design.md`. The visual
+design of each platform comes from Claude Design, in later phases.

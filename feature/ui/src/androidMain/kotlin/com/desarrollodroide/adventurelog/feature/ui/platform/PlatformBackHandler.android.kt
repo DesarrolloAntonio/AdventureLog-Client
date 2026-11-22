@@ -7,6 +7,6 @@ import androidx.compose.runtime.Composable
  * Android implementation of BackHandler using androidx.activity.compose.BackHandler
  */
 @Composable
-actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {
+fun PlatformBackHandler(enabled: Boolean = true, onBack: () -> Unit) {
     BackHandler(enabled = enabled, onBack = onBack)
 }

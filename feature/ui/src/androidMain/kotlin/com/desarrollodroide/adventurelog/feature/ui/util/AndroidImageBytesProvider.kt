@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.feature.ui.util
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import coil3.PlatformContext
+import org.koin.core.scope.Scope
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -55,6 +55,7 @@ class AndroidImageBytesProvider(
     }
 }
 
-actual fun createImageBytesProvider(platformContext: PlatformContext): ImageBytesProvider {
-    return AndroidImageBytesProvider(platformContext as Context)
+/** The Android `Context`, already registered by `androidContext()`. */
+actual fun Scope.createImageBytesProvider(): ImageBytesProvider {
+    return AndroidImageBytesProvider(get<Context>())
 }

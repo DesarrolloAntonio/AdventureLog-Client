@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
-import coil3.PlatformContext
+import org.koin.core.scope.Scope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -89,5 +89,6 @@ class AndroidPlatformFiles(
 private fun String.sanitisedFileName(): String =
     substringAfterLast('/').substringAfterLast('\\').ifBlank { "attachment" }
 
-actual fun createPlatformFiles(platformContext: PlatformContext): PlatformFiles =
-    AndroidPlatformFiles(platformContext as Context)
+/** The Android `Context`, already registered by `androidContext()`. */
+actual fun Scope.createPlatformFiles(): PlatformFiles =
+    AndroidPlatformFiles(get<Context>())

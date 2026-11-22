@@ -15,18 +15,15 @@ kotlin {
             implementation(projects.core.model)
             api(projects.core.domain)
             implementation(projects.feature.ui)
-
-            implementation(libs.koin.composeVM)
-
-            implementation(libs.navigation.compose)
+            implementation(libs.koin.core.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.navigation.compose)
-
-            implementation(libs.coil.compose)
-            implementation(libs.coil.network.ktor)
         }
         androidMain.dependencies {
+            implementation(libs.koin.composeVM)
+            implementation(libs.navigation.compose)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.coil.network.ktor)
             implementation(libs.coil.compose)
             implementation(libs.androidx.ui.tooling)
         }
