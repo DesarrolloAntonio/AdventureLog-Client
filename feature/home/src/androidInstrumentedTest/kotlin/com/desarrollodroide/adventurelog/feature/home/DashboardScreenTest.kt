@@ -5,8 +5,10 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
@@ -89,13 +91,50 @@ class DashboardScreenTest {
     fun theFeaturedTripLeadsTheScreen() = runComposeUiTest {
         setContent {
             WithAppLocals {
-                DashboardScreen(homeUiState = HomeUiState.Success(dashboard = dashboard))
+                DashboardScreen(homeUiState = HomeUiState.Success(dashboard = dashboard), firstName = "John")
             }
         }
 
+        // The greeting is the headline, the trip a ticket under it with its stubs.
+        onNodeWithText("Hi John, you are in Cinque Terre").assertIsDisplayed()
         onNodeWithText("Cinque Terre").assertIsDisplayed()
-        onNodeWithText("HAPPENING NOW").assertIsDisplayed()
-        onNodeWithText("2 places · 05/09 – 09/09").assertIsDisplayed()
+        onNodeWithText("5 SEP", useUnmergedTree = true).assertExists()
+        onNodeWithText("9 SEP", useUnmergedTree = true).assertExists()
+        onNodeWithText("PLACES", useUnmergedTree = true).assertExists()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun withNoTripTheHeadlineSaysWhatHasBeenDone() = runComposeUiTest {
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(dashboard = dashboard.copy(activeTrip = null)),
+                    firstName = "John",
+                )
+            }
+        }
+
+        onNodeWithText("Hi John, 17 places visited so far").assertIsDisplayed()
+        onAllNodes(hasText("PLACES")).assertCountEquals(0)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun yourMapSoFarOpensTheWorld() = runComposeUiTest {
+        var opened = 0
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(dashboard = dashboard),
+                    onSeeWorld = { opened++ },
+                )
+            }
+        }
+
+        // Visited countries only: the dashboard has no count of planned ones.
+        onNodeWithText("22 places · 6 countries visited").performScrollTo().performClick()
+        assertEquals(1, opened)
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -111,7 +150,7 @@ class DashboardScreenTest {
             }
         }
 
-        onNodeWithText("Open trip").performClick()
+        onNodeWithText("Cinque Terre").performClick()
         assertEquals("Cinque Terre", opened?.name)
     }
 
@@ -130,7 +169,7 @@ class DashboardScreenTest {
             }
         }
 
-        onNodeWithText("Add a place").performClick()
+        onNodeWithContentDescription("Add a place").performClick()
         assertEquals(1, added)
     }
 

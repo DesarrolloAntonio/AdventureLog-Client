@@ -76,6 +76,15 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
+import com.desarrollodroide.adventurelog.feature.ui.components.TicketCard
+import com.desarrollodroide.adventurelog.feature.ui.components.TicketStub
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
 @Composable
 fun DashboardScreen(
@@ -92,6 +101,10 @@ fun DashboardScreen(
     onRetry: () -> Unit = { },
     onSeeInvitations: () -> Unit = { },
     onOpenEvent: (EventTarget) -> Unit = { },
+    /** "Hi John": the account's first name, from the shell. Null or blank reads "Hi there". */
+    firstName: String? = null,
+    /** "Your map so far" opens World, where the countries behind the numbers are. */
+    onSeeWorld: () -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         when (homeUiState) {
@@ -135,6 +148,8 @@ fun DashboardScreen(
                     onAddPlaceToTrip = onAddPlaceToTrip,
                     onAddCollection = onAddCollection,
                     onOpenEvent = onOpenEvent,
+                    firstName = firstName,
+                    onSeeWorld = onSeeWorld,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -159,6 +174,8 @@ private fun DashboardList(
     onAddPlaceToTrip: (UltraSlimCollection) -> Unit,
     onAddCollection: () -> Unit,
     onOpenEvent: (EventTarget) -> Unit,
+    firstName: String?,
+    onSeeWorld: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // An in-progress trip outranks a future one: if the user is travelling right now, that is the
@@ -181,6 +198,8 @@ private fun DashboardList(
         featuredTrip == null &&
         dashboard.upcomingEvents.isEmpty() &&
         dashboard.recentLocations.isEmpty()
+
+    val headline = homeHeadline(firstName, featuredTrip, dashboard.stats.visitedLocationCount)
 
     if (nothingYet) {
         FirstRun(
@@ -208,6 +227,7 @@ private fun DashboardList(
                     horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     MainColumn(
+                        headline = headline,
                         featuredTrip = featuredTrip,
                         dashboard = dashboard,
                         onTripClick = onTripClick,
@@ -218,6 +238,7 @@ private fun DashboardList(
                     )
                     DataRail(
                         dashboard = dashboard,
+                        onSeeWorld = onSeeWorld,
                         featuredTripId = featuredTrip?.id,
                         otherTrips = otherTrips,
                         today = today,
@@ -229,6 +250,8 @@ private fun DashboardList(
                 }
             } else {
                 StackedDashboard(
+                    headline = headline,
+                    onSeeWorld = onSeeWorld,
                     onAddPlaceToTrip = onAddPlaceToTrip,
                     featuredTrip = featuredTrip,
                     dashboard = dashboard,
@@ -248,6 +271,7 @@ private fun DashboardList(
 /** The left-hand column on a wide window: the trip you are about to take, then the photographs. */
 @Composable
 private fun MainColumn(
+    headline: HomeHeadline,
     featuredTrip: UltraSlimCollection?,
     dashboard: Dashboard,
     onTripClick: (UltraSlimCollection) -> Unit,
@@ -263,9 +287,10 @@ private fun MainColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        item(key = "hero", span = { GridItemSpan(maxLineSpan) }) { HomeHero(headline) }
         if (featuredTrip != null) {
             item(key = "trip", span = { GridItemSpan(maxLineSpan) }) {
-                TripCard(
+                FeaturedTrip(
                     trip = featuredTrip,
                     onClick = { onTripClick(featuredTrip) },
                     onAddPlace = { onAddPlaceToTrip(featuredTrip) }
@@ -302,6 +327,7 @@ private fun MainColumn(
 @Composable
 private fun DataRail(
     dashboard: Dashboard,
+    onSeeWorld: () -> Unit,
     featuredTripId: String?,
     otherTrips: List<UltraSlimCollection>,
     today: LocalDate?,
@@ -317,7 +343,7 @@ private fun DataRail(
             .padding(top = 8.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatsCard(dashboard, title = "YOUR MAP SO FAR")
+        YourMapSoFar(dashboard, onSeeWorld)
 
         val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTripId, onOpenEvent)
         if (comingUp.isNotEmpty()) {
@@ -390,6 +416,8 @@ private fun RailCard(content: @Composable ColumnScope.() -> Unit) {
 /** One column, for phones and foldables: the same blocks, stacked in reading order. */
 @Composable
 private fun StackedDashboard(
+    headline: HomeHeadline,
+    onSeeWorld: () -> Unit,
     featuredTrip: UltraSlimCollection?,
     dashboard: Dashboard,
     otherTrips: List<UltraSlimCollection>,
@@ -407,18 +435,20 @@ private fun StackedDashboard(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 120.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        HomeHero(headline)
+
         if (featuredTrip != null) {
-            TripCard(
+            FeaturedTrip(
                 trip = featuredTrip,
                 onClick = { onTripClick(featuredTrip) },
                 onAddPlace = { onAddPlaceToTrip(featuredTrip) }
             )
         }
 
-        StatsCard(dashboard)
+        YourMapSoFar(dashboard, onSeeWorld)
 
         if (comingUp.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -524,8 +554,8 @@ private fun SectionHeader(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            style = AdventureType.display(28.sp),
+            modifier = Modifier.weight(1f, fill = false)
         )
         if (trailing != null && onTrailingClick != null) {
             // A TextButton, for its 48dp: the padded text it replaces measured 47dp tall.
@@ -551,114 +581,117 @@ private fun tripSubtitle(trip: UltraSlimCollection): String = when {
 }
 
 /**
- * The trip the user is on, or the next one they will be on.
+ * What Home leads with, the canvas's "Hi John, your next trip starts in 8 days": [lead], then the
+ * part that changes inked in the primary colour ([emphasis]), then [tail].
+ */
+data class HomeHeadline(val lead: String, val emphasis: String, val tail: String = "")
+
+/** The headline for [trip] (in progress or the next one), or for no trip at all. */
+internal fun homeHeadline(firstName: String?, trip: UltraSlimCollection?, visitedPlaces: Int): HomeHeadline {
+    val hi = "Hi ${firstName?.trim()?.takeIf { it.isNotEmpty() } ?: "there"}, "
+    if (trip == null) {
+        val places = if (visitedPlaces == 1) "1 place" else "$visitedPlaces places"
+        return HomeHeadline(hi, places, " visited so far")
+    }
+    if (trip.status == TripStatus.IN_PROGRESS) return HomeHeadline("${hi}you are in ", trip.name)
+    return when (val days = trip.daysUntilStart) {
+        null -> HomeHeadline("${hi}your next trip is ", trip.name)
+        0 -> HomeHeadline("${hi}your next trip starts ", "today")
+        1 -> HomeHeadline("${hi}your next trip starts ", "tomorrow")
+        else -> HomeHeadline("${hi}your next trip starts in ", "$days days")
+    }
+}
+
+/** "5 SEP", as a ticket prints a date; null when there is no date to print. */
+internal fun ticketDate(date: String?): String? {
+    val parts = date?.substringBefore('T')?.split("-")?.takeIf { it.size == 3 } ?: return null
+    val month = parts[1].toIntOrNull()?.let { MONTHS.getOrNull(it - 1) } ?: return null
+    val day = parts[2].toIntOrNull() ?: return null
+    return "$day $month"
+}
+
+/** The headline: condensed and heavy, the changing part in the primary colour. */
+@Composable
+private fun HomeHero(headline: HomeHeadline, modifier: Modifier = Modifier) {
+    val accent = MaterialTheme.colorScheme.primary
+    Text(
+        text = buildAnnotatedString {
+            append(headline.lead)
+            withStyle(SpanStyle(color = accent)) { append(headline.emphasis) }
+            append(headline.tail)
+        },
+        style = AdventureType.display(44.sp),
+        modifier = modifier.fillMaxWidth().padding(top = 8.dp)
+    )
+}
+
+/**
+ * The trip the user is on, or the next one they will be on, as a ticket: photo, name, then the
+ * stubs it would have printed on it - from, to, how many places.
  */
 @Composable
-private fun TripCard(
+private fun FeaturedTrip(
     trip: UltraSlimCollection,
     onClick: () -> Unit,
     onAddPlace: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val inProgress = trip.status == TripStatus.IN_PROGRESS
-    val subtitle = tripSubtitle(trip)
-
-    Card(
+    val image = trip.featuredImage?.takeIf { it.isNotBlank() }
+    val imageLoader = LocalImageLoader.current
+    val stubs = listOfNotNull(
+        ticketDate(trip.startDate)?.let { TicketStub("FROM", it) },
+        ticketDate(trip.endDate)?.takeIf { trip.endDate != trip.startDate }?.let { TicketStub("TO", it) },
+        TicketStub("PLACES", trip.adventureCount.toString()),
+    )
+    TicketCard(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            // Always the primary container. The featured trip used the secondary one unless it
-            // had already started, which is why the hero read as washed-out grey-green instead of
-            // the cyan the redesign leads with.
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        val image = trip.featuredImage?.takeIf { it.isNotBlank() }
-        val imageLoader = LocalImageLoader.current
-
-        // The photograph sits beside the text at every size - a narrow strip on a phone, a third
-        // of the card on a tablet. Stacking it above pushed the trip's name and its two actions
-        // below the fold, which is the opposite of what a hero card is for.
-        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-            TripCardText(trip, subtitle, onClick, onAddPlace, Modifier.weight(1f))
+        modifier = modifier,
+        photo = {
             if (image != null) {
-                // The Box is what keeps the card the height of its text. An Image inside a
-                // height(IntrinsicSize.Min) row reports its own natural height, and the card grows
-                // to the full size of the photograph - nine hundred dp of Cinque Terre.
-                Box(modifier = Modifier.fillMaxHeight().weight(0.37f)) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = image, imageLoader = imageLoader),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.matchParentSize()
-                    )
-                }
+                Image(
+                    painter = rememberAsyncImagePainter(model = image, imageLoader = imageLoader),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                LocationPlaceholder(icon = null, modifier = Modifier.fillMaxSize())
+            }
+        },
+        title = trip.name,
+        // The canvas prints the trip's region here; a collection has no place of its own, and
+        // its description is the only line it carries.
+        subtitle = trip.description.lineSequence().firstOrNull()?.trim().orEmpty(),
+        stubs = stubs,
+        badge = {
+            // Adding to the trip from Home: the new place goes into this collection (QA HM-09).
+            // A "+" alone, where the canvas has the status chip: with its words the button took
+            // half the row and broke the trip's name over two lines.
+            FilledTonalIconButton(onClick = onAddPlace, modifier = Modifier.size(48.dp)) {
+                Icon(Icons.Default.Add, contentDescription = "Add a place")
             }
         }
-    }
+    )
 }
 
+/**
+ * "Your map so far": the heading links to World, where the countries behind the numbers are, and
+ * the four figures sit under it. Countries visited only - the dashboard counts no planned ones.
+ */
 @Composable
-private fun TripCardText(
-    trip: UltraSlimCollection,
-    subtitle: String,
-    onOpen: () -> Unit,
-    onAddPlace: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
-        Text(
-            text = subtitle.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = trip.name,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-
-        // Places and dates on one line, the way the trip would be described out loud.
-        val places = when {
-            trip.adventureCount == 1 -> "1 place"
-            trip.adventureCount > 1 -> "${trip.adventureCount} places"
-            else -> null
+private fun YourMapSoFar(dashboard: Dashboard, onSeeWorld: () -> Unit) {
+    val stats = dashboard.stats
+    val places = if (stats.locationCount == 1) "1 place" else "${stats.locationCount} places"
+    val countries = if (stats.visitedCountryCount == 1) "1 country" else "${stats.visitedCountryCount} countries"
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionHeader(title = "Your map so far")
+        TextButton(
+            onClick = onSeeWorld,
+            contentPadding = PaddingValues(horizontal = 0.dp)
+        ) {
+            Text("$places \u00b7 $countries visited", style = MaterialTheme.typography.labelLarge)
         }
-        val dates = tripDates(trip)
-        val line = listOfNotNull(places, dates).joinToString(" · ")
-        if (line.isNotEmpty()) {
-            Spacer(Modifier.height(3.dp))
-            Text(
-                text = line,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
-                onClick = onOpen,
-                shape = RoundedCornerShape(22.dp),
-                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
-            ) {
-                Text("Open trip", style = MaterialTheme.typography.labelLarge)
-            }
-            OutlinedButton(
-                onClick = onAddPlace,
-                shape = RoundedCornerShape(22.dp),
-                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
-            ) {
-                Text("Add a place", style = MaterialTheme.typography.labelLarge)
-            }
-        }
+        StatsCard(dashboard)
     }
 }
 
@@ -737,7 +770,7 @@ private fun StatsCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),

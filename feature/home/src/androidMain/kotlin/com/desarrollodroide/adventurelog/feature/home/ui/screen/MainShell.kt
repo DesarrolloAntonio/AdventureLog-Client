@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -67,6 +68,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Terrain
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Home
@@ -414,24 +416,17 @@ fun HomeScreenContent(
                                     // redesign puts it here rather than in the page, so the
                                     // screen opens on content instead of on a caption.
                                     val screen = CurrentScreen.fromRoute(currentRoute)
-                                    Column {
+                                    if (screen == CurrentScreen.HOME) {
+                                        // Home greets in its own headline, so the bar carries the
+                                        // app's mark and name, as the canvas draws it.
+                                        BrandTitle()
+                                    } else {
                                         Text(
-                                            text = screen.getTitle(userName),
+                                            text = screen.title,
                                             style = MaterialTheme.typography.headlineSmall,
-                                            fontWeight = FontWeight.Bold,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
                                         )
-                                        val subtitle = dashboardSubtitle(screen, homeUiState)
-                                        if (subtitle != null) {
-                                            Text(
-                                                text = subtitle,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
                                     }
                                 }
                             }
@@ -566,6 +561,8 @@ fun HomeScreenContent(
                                     navigateTo(CurrentScreen.COLLECTIONS)
                                 },
                                 onRetry = onRetryDashboard,
+                                firstName = userDetails?.firstName,
+                                onSeeWorld = { navigateTo(CurrentScreen.TRAVEL) },
                                 onOpenEvent = { target ->
                                     when (target) {
                                         is EventTarget.Place -> onOpenLocationById(target.id)
@@ -1110,25 +1107,29 @@ private fun HomeScreenErrorPreview() {
 }
 
 
-/**
- * The line under the screen's name: what the numbers say about you right now.
- *
- * Only home has one for the moment - the other screens print their own count inside the page,
- * and two copies of "22 places" one above the other reads as a mistake.
- */
-internal fun dashboardSubtitle(screen: CurrentScreen, state: HomeUiState): String? {
-    if (screen != CurrentScreen.HOME) return null
-    val dashboard = (state as? HomeUiState.Success)?.dashboard ?: return null
-    val visited = dashboard.stats.visitedLocationCount
-    // Ahead means not started: the trip under way is on the card below, not ahead of anyone
-    // (measured: "3 trips ahead" with one in progress and two to come).
-    val trips = dashboard.upcomingTrips.size
-    return listOfNotNull(
-        "$visited places visited",
-        when {
-            trips == 0 -> null
-            trips == 1 -> "1 trip ahead"
-            else -> "$trips trips ahead"
+/** The app's mark - a mountain on the primary colour - and its name. */
+@Composable
+private fun BrandTitle() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Terrain,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(24.dp)
+            )
         }
-    ).joinToString(" \u00b7 ")
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = "AdventureLog",
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1
+        )
+    }
 }

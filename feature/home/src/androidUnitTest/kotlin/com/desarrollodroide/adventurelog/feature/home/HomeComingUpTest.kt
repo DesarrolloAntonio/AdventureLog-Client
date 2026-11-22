@@ -8,7 +8,6 @@ import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.ui.screen.comingUpEntries
-import com.desarrollodroide.adventurelog.feature.home.ui.screen.dashboardSubtitle
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
 import kotlin.test.Test
 import kotlin.test.assertNull
@@ -71,26 +70,6 @@ class HomeComingUpTest {
             listOf("trip-Peru", "event-Machu Picchu"),
             keys(listOf(peru), listOf(placeEvent("Machu Picchu", "2026-10-03", collectionId = peru.id)), featured = peru.id)
         )
-    }
-
-    private fun subtitle(active: UltraSlimCollection?, upcoming: List<UltraSlimCollection>) = dashboardSubtitle(
-        CurrentScreen.HOME,
-        HomeUiState.Success(
-            dashboard = Dashboard(stats = UserStats(visitedLocationCount = 5), activeTrip = active, upcomingTrips = upcoming)
-        )
-    )
-
-    @Test
-    fun `the trip under way is not counted as a trip ahead`() {
-        val now = trip("QA_Trip_Now", "2026-09-14", TripStatus.IN_PROGRESS)
-
-        assertEquals("5 places visited · 2 trips ahead", subtitle(now, listOf(trip("a", "2026-09-16"), trip("b", "2026-10-01"))))
-        assertEquals("5 places visited", subtitle(now, emptyList()))
-    }
-
-    @Test
-    fun `trips that have not started are counted`() {
-        assertEquals("5 places visited · 1 trip ahead", subtitle(null, listOf(trip("a", "2026-09-16"))))
     }
 
     // QA HM-09: event rows in Coming up opened nothing while the trip rows beside them did.
