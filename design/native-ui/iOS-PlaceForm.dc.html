@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS new place</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#007A85}a:hover{color:#005A62}
+.glass-bar{background:rgba(250,250,252,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.95),0 6px 18px rgba(0,0,0,0.1)}
+.glass-bar-d{background:rgba(36,36,40,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.16);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),0 6px 18px rgba(0,0,0,0.1)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #1C1C1E; color: #000000; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px; background: #5A5A5E"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; background: #F2F2F7; border-radius: 38px 38px 0 0; overflow: hidden; display: flex; flex-direction: column">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="glass-bar" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#000000" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <span style="flex-grow: 1; text-align: center; font-size: 17px; font-weight: 600">New Place</span>
+      <button aria-label="Save" style="all: unset; width: 44px; height: 44px; border-radius: 22px; background: #007A85; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 6px 14px rgba(0,122,133,0.3); cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+      </button>
+    </div>
+
+    <form style="padding: 18px 16px 0; display: flex; flex-direction: column">
+      <div style="display: flex; gap: 10px; margin-bottom: 18px">
+        <button type="button" style="all: unset; width: 96px; height: 96px; border-radius: 22px; background: #FFFFFF; border: 1.5px dashed #AEAEB2; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #007A85; font-size: 13px; font-weight: 600">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#007A85" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg>
+          Add Photos
+        </button>
+        <span style="flex-grow: 1; border-radius: 22px; background: #FFFFFF; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+          <input value="Hallstatt" aria-label="Name" style="all: unset; font-family: ui-serif, 'New York', Georgia, serif; font-size: 24px; font-weight: 700">
+          <span style="font-size: 13px; color: #636366">Name of the place</span>
+        </span>
+      </div>
+
+      <div style="border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; overflow: hidden">
+        <div style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+          <span style="width: 30px; height: 30px; border-radius: 8px; background: #5856D6; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"><path d="M4 4h7l9 9-7 7-9-9Z"/><circle cx="8.5" cy="8.5" r="1.4" fill="#FFFFFF"/></svg></span>
+          <span style="flex-grow: 1; height: 52px; display: flex; align-items: center; border-bottom: 0.5px solid #D1D1D6; font-size: 17px">Category<span style="flex-grow: 1"></span><span style="color: #636366">General</span><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#AEAEB2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px"><path d="m8 10 4 4 4-4"/></svg></span>
+        </div>
+        <div style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+          <span style="width: 30px; height: 30px; border-radius: 8px; background: #FF9500; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8Z" fill="#FFFFFF"/></svg></span>
+          <span style="flex-grow: 1; height: 52px; display: flex; align-items: center; border-bottom: 0.5px solid #D1D1D6; font-size: 17px">Rating<span style="flex-grow: 1"></span><span role="img" aria-label="4 of 5" style="color: #FF9500; font-size: 20px; letter-spacing: 1px">★★★★<span style="color: #D1D1D6">★</span></span></span>
+        </div>
+        <label style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+          <span style="width: 30px; height: 30px; border-radius: 8px; background: #34C759; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span>
+          <span style="flex-grow: 1; font-size: 17px">Visited</span>
+          <input type="checkbox" role="switch" checked aria-label="Visited" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+          <span aria-hidden="true" style="width: 62px; height: 28px; border-radius: 14px; background: #34C759; display: flex; align-items: center; justify-content: flex-end; padding: 2px; box-sizing: border-box"><span style="width: 38px; height: 24px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2)"></span></span>
+        </label>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #636366">WHERE IT IS</div>
+      <div style="border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; overflow: hidden">
+        <svg viewBox="0 0 358 130" width="358" height="130" role="img" aria-label="Map preview with the place pinned" style="display: block">
+          <rect width="358" height="130" fill="#F2EFE6"/>
+          <path d="M150 0 C140 40 170 80 150 130 H214 C232 86 204 44 222 0Z" fill="#A5D2EC"/>
+          <path d="M0 86 C80 66 150 96 358 74" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+          <path d="M0 86 C80 66 150 96 358 74" fill="none" stroke="#F6D36B" stroke-width="2"/>
+          <circle cx="180" cy="60" r="15" fill="#007A85" stroke="#FFFFFF" stroke-width="3"/>
+          <path d="M174 64 L178 57 L180 61 L182 58 L186 64Z" fill="#FFFFFF"/>
+        </svg>
+        <div style="height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 14px">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+          <input value="Hallstatt, Upper Austria" aria-label="Location" style="all: unset; flex-grow: 1; font-size: 17px">
+        </div>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #636366">DESCRIPTION</div>
+      <div style="border-radius: 24px; background: #FFFFFF; padding: 14px 16px; min-height: 60px; font-size: 17px; color: #8E8E93">What made it worth the trip?</div>
+    </form>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px; background: #2C2C2E"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; background: #000000; border-radius: 38px 38px 0 0; overflow: hidden; display: flex; flex-direction: column">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="glass-bar-d" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+      <span style="flex-grow: 1; text-align: center; font-size: 17px; font-weight: 600">New Place</span>
+      <button aria-label="Save" style="all: unset; width: 44px; height: 44px; border-radius: 22px; background: #007A85; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 6px 14px rgba(0,122,133,0.3); cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+      </button>
+    </div>
+
+    <form style="padding: 18px 16px 0; display: flex; flex-direction: column">
+      <div style="display: flex; gap: 10px; margin-bottom: 18px">
+        <button type="button" style="all: unset; width: 96px; height: 96px; border-radius: 22px; background: #1C1C1E; border: 1.5px dashed #48484A; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #5AC8D4; font-size: 13px; font-weight: 600">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#5AC8D4" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg>
+          Add Photos
+        </button>
+        <span style="flex-grow: 1; border-radius: 22px; background: #1C1C1E; padding: 12px 14px; display: flex; flex-direction: column; justify-content: center; gap: 2px">
+          <input value="Hallstatt" aria-label="Name" style="all: unset; font-family: ui-serif, 'New York', Georgia, serif; font-size: 24px; font-weight: 700">
+          <span style="font-size: 13px; color: #98989D">Name of the place</span>
+        </span>
+      </div>
+
+      <div style="border-radius: 24px; background: #1C1C1E; display: flex; flex-direction: column; overflow: hidden">
+        <div style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+          <span style="width: 30px; height: 30px; border-radius: 8px; background: #5856D6; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linejoin="round"><path d="M4 4h7l9 9-7 7-9-9Z"/><circle cx="8.5" cy="8.5" r="1.4" fill="#FFFFFF"/></svg></span>
+          <span style="flex-grow: 1; height: 52px; display: flex; align-items: center; border-bottom: 0.5px solid #38383A; font-size: 17px">Category<span style="flex-grow: 1"></span><span style="color: #98989D">General</span><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px"><path d="m8 10 4 4 4-4"/></svg></span>
+        </div>
+        <div style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+          <span style="width: 30px; height: 30px; border-radius: 8px; background: #FF9500; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8Z" fill="#FFFFFF"/></svg></span>
+          <span style="flex-grow: 1; height: 52px; display: flex; align-items: center; border-bottom: 0.5px solid #38383A; font-size: 17px">Rating<span style="flex-grow: 1"></span><span role="img" aria-label="4 of 5" style="color: #FF9500; font-size: 20px; letter-spacing: 1px">★★★★<span style="color: #48484A">★</span></span></span>
+        </div>
+        <label style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+          <span style="width: 30px; height: 30px; border-radius: 8px; background: #34C759; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span>
+          <span style="flex-grow: 1; font-size: 17px">Visited</span>
+          <input type="checkbox" role="switch" checked aria-label="Visited" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+          <span aria-hidden="true" style="width: 62px; height: 28px; border-radius: 14px; background: #34C759; display: flex; align-items: center; justify-content: flex-end; padding: 2px; box-sizing: border-box"><span style="width: 38px; height: 24px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2)"></span></span>
+        </label>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #98989D">WHERE IT IS</div>
+      <div style="border-radius: 24px; background: #1C1C1E; display: flex; flex-direction: column; overflow: hidden">
+        <svg viewBox="0 0 358 130" width="358" height="130" role="img" aria-label="Map preview with the place pinned" style="display: block">
+          <rect width="358" height="130" fill="#2B2B2D"/>
+          <path d="M150 0 C140 40 170 80 150 130 H214 C232 86 204 44 222 0Z" fill="#1B3640"/>
+          <path d="M0 86 C80 66 150 96 358 74" fill="none" stroke="#4A4A4E" stroke-width="4"/>
+          <path d="M0 86 C80 66 150 96 358 74" fill="none" stroke="#F6D36B" stroke-width="2"/>
+          <circle cx="180" cy="60" r="15" fill="#007A85" stroke="#4A4A4E" stroke-width="3"/>
+          <path d="M174 64 L178 57 L180 61 L182 58 L186 64Z" fill="#4A4A4E"/>
+        </svg>
+        <div style="height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 14px">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#98989D" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+          <input value="Hallstatt, Upper Austria" aria-label="Location" style="all: unset; flex-grow: 1; font-size: 17px">
+        </div>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #98989D">DESCRIPTION</div>
+      <div style="border-radius: 24px; background: #1C1C1E; padding: 14px 16px; min-height: 60px; font-size: 17px; color: #8E8E93">What made it worth the trip?</div>
+    </form>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

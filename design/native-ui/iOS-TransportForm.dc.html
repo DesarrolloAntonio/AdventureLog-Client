@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS new transport</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#007A85}a:hover{color:#005A62}
+.glass-bar{background:rgba(250,250,252,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.95),0 6px 18px rgba(0,0,0,0.1)}
+.glass-bar-d{background:rgba(36,36,40,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.16);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),0 6px 18px rgba(0,0,0,0.1)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #1C1C1E; color: #000000; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px; background: #5A5A5E"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; background: #F2F2F7; border-radius: 38px 38px 0 0; overflow: hidden; display: flex; flex-direction: column">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="glass-bar" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#000000" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span style="flex-grow: 1; text-align: center; display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 600">New Transport</span><span style="font-size: 12px; color: #636366">Cinque Terre</span></span>
+      <button aria-label="Save" style="all: unset; width: 44px; height: 44px; border-radius: 22px; background: #007A85; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 6px 14px rgba(0,122,133,0.3); cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></button>
+    </div>
+
+    <form style="padding: 18px 16px 0; display: flex; flex-direction: column">
+      <div role="radiogroup" aria-label="Type" style="height: 40px; border-radius: 20px; background: rgba(118,118,128,0.12); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 3px; box-sizing: border-box">
+        <button role="radio" aria-checked="false" aria-label="Car" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3A3A3C" stroke-width="2" stroke-linejoin="round"><path d="M4 16V12l2-5h12l2 5v4Z M4 12h16"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/></svg></button>
+        <button role="radio" aria-checked="true" aria-label="Train" style="all: unset; border-radius: 17px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#007A85" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="4"/><path d="M5 11h14M9 21l-2-4M15 21l2-4"/></svg></button>
+        <button role="radio" aria-checked="false" aria-label="Plane" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3A3A3C" stroke-width="2" stroke-linejoin="round"><path d="M10 21l2-1 2 1v-2l-2-1.5V13l8 3v-2l-8-5V4.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-3v4.5L8 19Z"/></svg></button>
+        <button role="radio" aria-checked="false" aria-label="Bus" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3A3A3C" stroke-width="2" stroke-linejoin="round"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M7 21v-3M17 21v-3"/></svg></button>
+        <button role="radio" aria-checked="false" aria-label="Boat" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3A3A3C" stroke-width="2" stroke-linejoin="round"><path d="M3 16l2 4h14l2-4Z M6 16V9h12v7 M12 9V4"/></svg></button>
+      </div>
+
+      <div style="margin-top: 14px; border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; overflow: hidden; position: relative">
+        <label style="padding: 12px 16px 12px 44px; border-bottom: 0.5px solid #D1D1D6; display: flex; flex-direction: column; position: relative">
+          <span aria-hidden="true" style="position: absolute; left: 18px; top: 22px; width: 12px; height: 12px; border-radius: 6px; border: 3px solid #007A85; box-sizing: border-box"></span>
+          <span style="font-size: 13px; color: #636366">From</span>
+          <input value="La Spezia Centrale" aria-label="From" style="all: unset; font-size: 17px; font-weight: 500">
+        </label>
+        <label style="padding: 12px 16px 12px 44px; display: flex; flex-direction: column; position: relative">
+          <span aria-hidden="true" style="position: absolute; left: 18px; top: 22px; width: 12px; height: 12px; border-radius: 6px; background: #007A85"></span>
+          <span style="font-size: 13px; color: #636366">To</span>
+          <input value="Vernazza" aria-label="To" style="all: unset; font-size: 17px; font-weight: 500">
+        </label>
+        <span aria-hidden="true" style="position: absolute; left: 23px; top: 36px; height: 34px; border-left: 2px dotted #AEAEB2"></span>
+        <button type="button" aria-label="Swap from and to" style="all: unset; position: absolute; right: 14px; top: 46px; width: 36px; height: 36px; border-radius: 18px; background: rgba(118,118,128,0.12); display: flex; align-items: center; justify-content: center">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#007A85" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16l-3-3M16 20V4l3 3"/></svg>
+        </button>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #636366">WHEN</div>
+      <div style="border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; overflow: hidden">
+        <div style="height: 56px; display: flex; align-items: center; padding: 0 16px; border-bottom: 0.5px solid #D1D1D6; font-size: 17px">Departs<span style="flex-grow: 1"></span><span style="display: flex; gap: 6px"><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.12); display: flex; align-items: center">5 Sep 2026</span><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.12); display: flex; align-items: center; color: #007A85">10:40</span></span></div>
+        <div style="height: 56px; display: flex; align-items: center; padding: 0 16px; border-bottom: 0.5px solid #D1D1D6; font-size: 17px">Arrives<span style="flex-grow: 1"></span><span style="display: flex; gap: 6px"><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.12); display: flex; align-items: center">5 Sep 2026</span><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.12); display: flex; align-items: center">—</span></span></div>
+        <label style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 16px">
+          <span style="flex-grow: 1; font-size: 17px">Keep to trip dates</span>
+          <input type="checkbox" role="switch" checked aria-label="Keep to trip dates" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+          <span aria-hidden="true" style="width: 62px; height: 28px; border-radius: 14px; background: #34C759; display: flex; align-items: center; justify-content: flex-end; padding: 2px; box-sizing: border-box"><span style="width: 38px; height: 24px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2)"></span></span>
+        </label>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #636366">DETAILS</div>
+      <div style="border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; overflow: hidden">
+        <label style="height: 52px; padding: 0 16px; display: flex; align-items: center; border-bottom: 0.5px solid #D1D1D6"><input value="La Spezia → Vernazza" aria-label="Name" style="all: unset; flex-grow: 1; font-size: 17px"></label>
+        <label style="height: 52px; padding: 0 16px; display: flex; align-items: center"><input placeholder="Link" aria-label="Link" style="all: unset; flex-grow: 1; font-size: 17px"></label>
+      </div>
+    </form>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px; background: #2C2C2E"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; background: #000000; border-radius: 38px 38px 0 0; overflow: hidden; display: flex; flex-direction: column">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="glass-bar-d" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span style="flex-grow: 1; text-align: center; display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 600">New Transport</span><span style="font-size: 12px; color: #98989D">Cinque Terre</span></span>
+      <button aria-label="Save" style="all: unset; width: 44px; height: 44px; border-radius: 22px; background: #007A85; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 6px 14px rgba(0,122,133,0.3); cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></button>
+    </div>
+
+    <form style="padding: 18px 16px 0; display: flex; flex-direction: column">
+      <div role="radiogroup" aria-label="Type" style="height: 40px; border-radius: 20px; background: rgba(118,118,128,0.24); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 3px; box-sizing: border-box">
+        <button role="radio" aria-checked="false" aria-label="Car" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#E5E5EA" stroke-width="2" stroke-linejoin="round"><path d="M4 16V12l2-5h12l2 5v4Z M4 12h16"/><circle cx="7.5" cy="16.5" r="1.8"/><circle cx="16.5" cy="16.5" r="1.8"/></svg></button>
+        <button role="radio" aria-checked="true" aria-label="Train" style="all: unset; border-radius: 17px; background: #636366; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#5AC8D4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="4"/><path d="M5 11h14M9 21l-2-4M15 21l2-4"/></svg></button>
+        <button role="radio" aria-checked="false" aria-label="Plane" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#E5E5EA" stroke-width="2" stroke-linejoin="round"><path d="M10 21l2-1 2 1v-2l-2-1.5V13l8 3v-2l-8-5V4.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-3v4.5L8 19Z"/></svg></button>
+        <button role="radio" aria-checked="false" aria-label="Bus" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#E5E5EA" stroke-width="2" stroke-linejoin="round"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M7 21v-3M17 21v-3"/></svg></button>
+        <button role="radio" aria-checked="false" aria-label="Boat" style="all: unset; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#E5E5EA" stroke-width="2" stroke-linejoin="round"><path d="M3 16l2 4h14l2-4Z M6 16V9h12v7 M12 9V4"/></svg></button>
+      </div>
+
+      <div style="margin-top: 14px; border-radius: 24px; background: #1C1C1E; display: flex; flex-direction: column; overflow: hidden; position: relative">
+        <label style="padding: 12px 16px 12px 44px; border-bottom: 0.5px solid #38383A; display: flex; flex-direction: column; position: relative">
+          <span aria-hidden="true" style="position: absolute; left: 18px; top: 22px; width: 12px; height: 12px; border-radius: 6px; border: 3px solid #5AC8D4; box-sizing: border-box"></span>
+          <span style="font-size: 13px; color: #98989D">From</span>
+          <input value="La Spezia Centrale" aria-label="From" style="all: unset; font-size: 17px; font-weight: 500">
+        </label>
+        <label style="padding: 12px 16px 12px 44px; display: flex; flex-direction: column; position: relative">
+          <span aria-hidden="true" style="position: absolute; left: 18px; top: 22px; width: 12px; height: 12px; border-radius: 6px; background: #007A85"></span>
+          <span style="font-size: 13px; color: #98989D">To</span>
+          <input value="Vernazza" aria-label="To" style="all: unset; font-size: 17px; font-weight: 500">
+        </label>
+        <span aria-hidden="true" style="position: absolute; left: 23px; top: 36px; height: 34px; border-left: 2px dotted #48484A"></span>
+        <button type="button" aria-label="Swap from and to" style="all: unset; position: absolute; right: 14px; top: 46px; width: 36px; height: 36px; border-radius: 18px; background: rgba(118,118,128,0.24); display: flex; align-items: center; justify-content: center">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#5AC8D4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16l-3-3M16 20V4l3 3"/></svg>
+        </button>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #98989D">WHEN</div>
+      <div style="border-radius: 24px; background: #1C1C1E; display: flex; flex-direction: column; overflow: hidden">
+        <div style="height: 56px; display: flex; align-items: center; padding: 0 16px; border-bottom: 0.5px solid #38383A; font-size: 17px">Departs<span style="flex-grow: 1"></span><span style="display: flex; gap: 6px"><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.24); display: flex; align-items: center">5 Sep 2026</span><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.24); display: flex; align-items: center; color: #5AC8D4">10:40</span></span></div>
+        <div style="height: 56px; display: flex; align-items: center; padding: 0 16px; border-bottom: 0.5px solid #38383A; font-size: 17px">Arrives<span style="flex-grow: 1"></span><span style="display: flex; gap: 6px"><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.24); display: flex; align-items: center">5 Sep 2026</span><span style="height: 34px; padding: 0 10px; border-radius: 8px; background: rgba(118,118,128,0.24); display: flex; align-items: center">—</span></span></div>
+        <label style="height: 52px; display: flex; align-items: center; gap: 12px; padding: 0 16px">
+          <span style="flex-grow: 1; font-size: 17px">Keep to trip dates</span>
+          <input type="checkbox" role="switch" checked aria-label="Keep to trip dates" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+          <span aria-hidden="true" style="width: 62px; height: 28px; border-radius: 14px; background: #34C759; display: flex; align-items: center; justify-content: flex-end; padding: 2px; box-sizing: border-box"><span style="width: 38px; height: 24px; border-radius: 12px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2)"></span></span>
+        </label>
+      </div>
+
+      <div style="margin: 22px 4px 6px; font-size: 13px; font-weight: 600; color: #98989D">DETAILS</div>
+      <div style="border-radius: 24px; background: #1C1C1E; display: flex; flex-direction: column; overflow: hidden">
+        <label style="height: 52px; padding: 0 16px; display: flex; align-items: center; border-bottom: 0.5px solid #38383A"><input value="La Spezia → Vernazza" aria-label="Name" style="all: unset; flex-grow: 1; font-size: 17px"></label>
+        <label style="height: 52px; padding: 0 16px; display: flex; align-items: center"><input placeholder="Link" aria-label="Link" style="all: unset; flex-grow: 1; font-size: 17px"></label>
+      </div>
+    </form>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android people</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <a href="Android-Settings.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#171D1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+    </div>
+    <h1 style="margin: 4px 4px 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">People</h1>
+    <div style="margin: 6px 4px 0; font-size: 15px; color: #3F484A">Travellers with a public profile on this server</div>
+
+    <label style="margin-top: 16px; height: 56px; border-radius: 28px; background: #E3E9EA; display: flex; align-items: center; gap: 12px; padding: 0 18px">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <input placeholder="Search people" aria-label="Search people" style="all: unset; flex-grow: 1; font-size: 16px">
+    </label>
+
+    <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px">
+      <a href="#profile-ana" style="border-radius: 24px; background: #FFFFFF; border: 1px solid #DEE3E4; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: #171D1E">
+        <span style="display: flex; align-items: center; gap: 14px">
+          <span style="width: 52px; height: 52px; border-radius: 26px; background: #9EEFFC; color: #004F57; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">AR</span>
+          <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 24px; line-height: 1; font-weight: 800; font-stretch: 38%">Ana Ruiz</span><span style="font-size: 13px; color: #3F484A; margin-top: 3px">@ana</span></span>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+        <span style="display: flex; gap: 6px">
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #E3E9EA; font-size: 12px; font-weight: 700; color: #3F484A; display: flex; align-items: center">41 places</span>
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #E3E9EA; font-size: 12px; font-weight: 700; color: #3F484A; display: flex; align-items: center">12 countries</span>
+        </span>
+      </a>
+      <a href="#profile-kenji" style="border-radius: 24px; background: #FFFFFF; border: 1px solid #DEE3E4; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: #171D1E">
+        <span style="display: flex; align-items: center; gap: 14px">
+          <span style="width: 52px; height: 52px; border-radius: 26px; background: #D9E2FF; color: #3A4664; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">KS</span>
+          <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 24px; line-height: 1; font-weight: 800; font-stretch: 38%">Kenji Sato</span><span style="font-size: 13px; color: #3F484A; margin-top: 3px">@kenji</span></span>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+        <span style="display: flex; gap: 6px">
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #E3E9EA; font-size: 12px; font-weight: 700; color: #3F484A; display: flex; align-items: center">18 places</span>
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #E3E9EA; font-size: 12px; font-weight: 700; color: #3F484A; display: flex; align-items: center">5 countries</span>
+        </span>
+      </a>
+      <a href="#profile-marta" style="border-radius: 24px; background: #FFFFFF; border: 1px solid #DEE3E4; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: #171D1E">
+        <span style="display: flex; align-items: center; gap: 14px">
+          <span style="width: 52px; height: 52px; border-radius: 26px; background: #CDE7EC; color: #334B4F; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">MS</span>
+          <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 24px; line-height: 1; font-weight: 800; font-stretch: 38%">Marta Silva</span><span style="font-size: 13px; color: #3F484A; margin-top: 3px">@marta</span></span>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+        <span style="display: flex; gap: 6px">
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #E3E9EA; font-size: 12px; font-weight: 700; color: #3F484A; display: flex; align-items: center">9 places</span>
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #E3E9EA; font-size: 12px; font-weight: 700; color: #3F484A; display: flex; align-items: center">3 countries</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <a href="Android-Settings.dc.html" aria-label="Back" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#DEE3E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      </a>
+    </div>
+    <h1 style="margin: 4px 4px 0; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">People</h1>
+    <div style="margin: 6px 4px 0; font-size: 15px; color: #BFC8CA">Travellers with a public profile on this server</div>
+
+    <label style="margin-top: 16px; height: 56px; border-radius: 28px; background: #252B2C; display: flex; align-items: center; gap: 12px; padding: 0 18px">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <input placeholder="Search people" aria-label="Search people" style="all: unset; flex-grow: 1; font-size: 16px">
+    </label>
+
+    <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 10px">
+      <a href="#profile-ana" style="border-radius: 24px; background: #1B2122; border: 1px solid #3F484A; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: #DEE3E4">
+        <span style="display: flex; align-items: center; gap: 14px">
+          <span style="width: 52px; height: 52px; border-radius: 26px; background: #004F57; color: #9EEFFC; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">AR</span>
+          <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 24px; line-height: 1; font-weight: 800; font-stretch: 38%">Ana Ruiz</span><span style="font-size: 13px; color: #BFC8CA; margin-top: 3px">@ana</span></span>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+        <span style="display: flex; gap: 6px">
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #252B2C; font-size: 12px; font-weight: 700; color: #BFC8CA; display: flex; align-items: center">41 places</span>
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #252B2C; font-size: 12px; font-weight: 700; color: #BFC8CA; display: flex; align-items: center">12 countries</span>
+        </span>
+      </a>
+      <a href="#profile-kenji" style="border-radius: 24px; background: #1B2122; border: 1px solid #3F484A; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: #DEE3E4">
+        <span style="display: flex; align-items: center; gap: 14px">
+          <span style="width: 52px; height: 52px; border-radius: 26px; background: #3A4664; color: #D9E2FF; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">KS</span>
+          <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 24px; line-height: 1; font-weight: 800; font-stretch: 38%">Kenji Sato</span><span style="font-size: 13px; color: #BFC8CA; margin-top: 3px">@kenji</span></span>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+        <span style="display: flex; gap: 6px">
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #252B2C; font-size: 12px; font-weight: 700; color: #BFC8CA; display: flex; align-items: center">18 places</span>
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #252B2C; font-size: 12px; font-weight: 700; color: #BFC8CA; display: flex; align-items: center">5 countries</span>
+        </span>
+      </a>
+      <a href="#profile-marta" style="border-radius: 24px; background: #1B2122; border: 1px solid #3F484A; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: #DEE3E4">
+        <span style="display: flex; align-items: center; gap: 14px">
+          <span style="width: 52px; height: 52px; border-radius: 26px; background: #334B4F; color: #CDE7EC; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">MS</span>
+          <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 24px; line-height: 1; font-weight: 800; font-stretch: 38%">Marta Silva</span><span style="font-size: 13px; color: #BFC8CA; margin-top: 3px">@marta</span></span>
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </span>
+        <span style="display: flex; gap: 6px">
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #252B2C; font-size: 12px; font-weight: 700; color: #BFC8CA; display: flex; align-items: center">9 places</span>
+          <span style="height: 28px; padding: 0 10px; border-radius: 8px; background: #252B2C; font-size: 12px; font-weight: 700; color: #BFC8CA; display: flex; align-items: center">3 countries</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

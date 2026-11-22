@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android edit checklist</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <button aria-label="Close" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#171D1E" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div style="margin: 4px 4px 0; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #006973">CINQUE TERRE</div>
+    <h1 style="margin: 2px 4px 0; font-size: 52px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Edit checklist</h1>
+
+    <form style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px">
+      <section style="border-radius: 24px; background: #FFFFFF; padding: 18px 16px; display: flex; flex-direction: column; gap: 16px">
+        <label style="position: relative; display: block">
+          <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #FFFFFF; font-size: 12px; font-weight: 600; color: #3F484A">Title</span>
+          <span style="height: 56px; border-radius: 14px; border: 1px solid #6F797A; display: flex; align-items: center; padding: 0 14px; box-sizing: border-box"><input value="Packing list" aria-label="Title" style="all: unset; flex-grow: 1; font-size: 16px"></span>
+        </label>
+      </section>
+
+      <section style="border-radius: 24px; background: #FFFFFF; padding: 18px 16px 10px; display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px">
+          <h2 style="margin: 0; font-size: 22px; font-weight: 800; font-stretch: 38%; flex-grow: 1">The list</h2>
+          <span style="font-size: 22px; font-weight: 800; font-stretch: 38%; color: #006973">3 / 7</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 6px">
+          <label style="flex-grow: 1; height: 48px; border-radius: 24px; background: #E3E9EA; display: flex; align-items: center; padding: 0 16px"><input placeholder="Add an item" aria-label="Add an item" style="all: unset; flex-grow: 1; font-size: 16px"></label>
+          <button type="button" style="all: unset; height: 48px; padding: 0 18px; border-radius: 24px; background: #CDE7EC; color: #334B4F; font-size: 15px; font-weight: 700; display: flex; align-items: center">Add</button>
+        </div>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; background: #006973; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; color: #6F797A; text-decoration: line-through">Passport</span></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; background: #006973; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; color: #6F797A; text-decoration: line-through">Hiking shoes</span></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; background: #006973; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; color: #6F797A; text-decoration: line-through">Rain jacket</span></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #6F797A; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Train tickets</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#6F797A" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #6F797A; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Swimsuit</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#6F797A" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #6F797A; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Sun cream</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#6F797A" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #6F797A; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Power adapter</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#6F797A" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+      </section>
+    </form>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 22px; background: #F5FAFB; border-top: 1px solid #DEE3E4; display: flex; flex-direction: column; gap: 4px">
+    <button type="submit" style="all: unset; height: 56px; border-radius: 28px; background: #006973; color: #FFFFFF; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer">Save changes</button>
+    <button type="button" style="all: unset; height: 48px; border-radius: 24px; color: #006973; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer">Cancel</button>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; height: 48px">
+      <button aria-label="Close" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#DEE3E4" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div style="margin: 4px 4px 0; font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: #81D3E0">CINQUE TERRE</div>
+    <h1 style="margin: 2px 4px 0; font-size: 52px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Edit checklist</h1>
+
+    <form style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px">
+      <section style="border-radius: 24px; background: #1B2122; padding: 18px 16px; display: flex; flex-direction: column; gap: 16px">
+        <label style="position: relative; display: block">
+          <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #1B2122; font-size: 12px; font-weight: 600; color: #BFC8CA">Title</span>
+          <span style="height: 56px; border-radius: 14px; border: 1px solid #899294; display: flex; align-items: center; padding: 0 14px; box-sizing: border-box"><input value="Packing list" aria-label="Title" style="all: unset; flex-grow: 1; font-size: 16px"></span>
+        </label>
+      </section>
+
+      <section style="border-radius: 24px; background: #1B2122; padding: 18px 16px 10px; display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px">
+          <h2 style="margin: 0; font-size: 22px; font-weight: 800; font-stretch: 38%; flex-grow: 1">The list</h2>
+          <span style="font-size: 22px; font-weight: 800; font-stretch: 38%; color: #81D3E0">3 / 7</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 6px">
+          <label style="flex-grow: 1; height: 48px; border-radius: 24px; background: #252B2C; display: flex; align-items: center; padding: 0 16px"><input placeholder="Add an item" aria-label="Add an item" style="all: unset; flex-grow: 1; font-size: 16px"></label>
+          <button type="button" style="all: unset; height: 48px; padding: 0 18px; border-radius: 24px; background: #334B4F; color: #CDE7EC; font-size: 15px; font-weight: 700; display: flex; align-items: center">Add</button>
+        </div>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; background: #81D3E0; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00363C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; color: #899294; text-decoration: line-through">Passport</span></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; background: #81D3E0; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00363C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; color: #899294; text-decoration: line-through">Hiking shoes</span></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; background: #81D3E0; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00363C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; color: #899294; text-decoration: line-through">Rain jacket</span></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #899294; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Train tickets</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#899294" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #899294; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Swimsuit</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#899294" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #899294; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Sun cream</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#899294" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+        <label style="height: 48px; display: flex; align-items: center; gap: 12px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; border: 2px solid #899294; box-sizing: border-box"></span><input type="checkbox" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span style="font-size: 16px; flex-grow: 1">Power adapter</span><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#899294" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></label>
+      </section>
+    </form>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 22px; background: #0E1415; border-top: 1px solid #3F484A; display: flex; flex-direction: column; gap: 4px">
+    <button type="submit" style="all: unset; height: 56px; border-radius: 28px; background: #81D3E0; color: #00363C; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer">Save changes</button>
+    <button type="button" style="all: unset; height: 48px; border-radius: 24px; color: #81D3E0; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer">Cancel</button>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

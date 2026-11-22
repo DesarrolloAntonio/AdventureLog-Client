@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS people</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#007A85}a:hover{color:#005A62}
+.glass-bar{background:rgba(250,250,252,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.95),0 8px 24px rgba(0,0,0,0.1)}
+.glass-bar-d{background:rgba(36,36,40,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.16);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),0 8px 24px rgba(0,0,0,0.1)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F2F2F7; color: #000000; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex">
+    <a href="iOS-Settings.dc.html" class="glass-bar" aria-label="Back" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+    </a>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 108px; padding: 0 16px; display: flex; flex-direction: column">
+    <h1 style="margin: 0 4px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 36px; line-height: 42px; font-weight: 700">People</h1>
+    <p style="margin: 2px 4px 0; font-size: 15px; color: #636366">Travellers with a public profile on this server</p>
+
+    <label style="margin-top: 14px; height: 40px; border-radius: 12px; background: rgba(118,118,128,0.12); display: flex; align-items: center; gap: 8px; padding: 0 12px">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#8E8E93" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <input placeholder="Search people" aria-label="Search people" style="all: unset; flex-grow: 1; font-size: 17px">
+    </label>
+
+    <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <a href="#profile-ana" style="border-radius: 26px; background: #FFFFFF; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #000000">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #FF9500; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">AR</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">Ana Ruiz</span>
+        <span style="font-size: 13px; color: #636366">@ana</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #007A85">41 places · 12 countries</span>
+      </a>
+      <a href="#profile-kenji" style="border-radius: 26px; background: #FFFFFF; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #000000">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #5856D6; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">KS</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">Kenji Sato</span>
+        <span style="font-size: 13px; color: #636366">@kenji</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #007A85">18 places · 5 countries</span>
+      </a>
+      <a href="#profile-marta" style="border-radius: 26px; background: #FFFFFF; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #000000">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #34A853; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">MS</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">Marta Silva</span>
+        <span style="font-size: 13px; color: #636366">@marta</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #007A85">9 places · 3 countries</span>
+      </a>
+      <a href="#profile-me" style="border-radius: 26px; background: #FFFFFF; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #000000; border: 2px solid #007A85">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #007A85; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">JD</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">John Doe</span>
+        <span style="font-size: 13px; color: #636366">@claude · You</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #007A85">22 places · 9 countries</span>
+      </a>
+    </div>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex">
+    <a href="iOS-Settings.dc.html" class="glass-bar-d" aria-label="Back" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+    </a>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 108px; padding: 0 16px; display: flex; flex-direction: column">
+    <h1 style="margin: 0 4px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 36px; line-height: 42px; font-weight: 700">People</h1>
+    <p style="margin: 2px 4px 0; font-size: 15px; color: #98989D">Travellers with a public profile on this server</p>
+
+    <label style="margin-top: 14px; height: 40px; border-radius: 12px; background: rgba(118,118,128,0.24); display: flex; align-items: center; gap: 8px; padding: 0 12px">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#8E8E93" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <input placeholder="Search people" aria-label="Search people" style="all: unset; flex-grow: 1; font-size: 17px">
+    </label>
+
+    <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <a href="#profile-ana" style="border-radius: 26px; background: #1C1C1E; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #FFFFFF">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #FF9500; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">AR</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">Ana Ruiz</span>
+        <span style="font-size: 13px; color: #98989D">@ana</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #5AC8D4">41 places · 12 countries</span>
+      </a>
+      <a href="#profile-kenji" style="border-radius: 26px; background: #1C1C1E; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #FFFFFF">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #5856D6; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">KS</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">Kenji Sato</span>
+        <span style="font-size: 13px; color: #98989D">@kenji</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #5AC8D4">18 places · 5 countries</span>
+      </a>
+      <a href="#profile-marta" style="border-radius: 26px; background: #1C1C1E; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #FFFFFF">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #34A853; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">MS</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">Marta Silva</span>
+        <span style="font-size: 13px; color: #98989D">@marta</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #5AC8D4">9 places · 3 countries</span>
+      </a>
+      <a href="#profile-me" style="border-radius: 26px; background: #1C1C1E; padding: 18px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: #FFFFFF; border: 2px solid #5AC8D4">
+        <span style="width: 72px; height: 72px; border-radius: 36px; background: #007A85; color: #FFFFFF; font-family: ui-rounded, -apple-system, system-ui, sans-serif; font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center">JD</span>
+        <span style="margin-top: 6px; font-size: 17px; font-weight: 600">John Doe</span>
+        <span style="font-size: 13px; color: #98989D">@claude · You</span>
+        <span style="margin-top: 6px; font-size: 12px; font-weight: 600; color: #5AC8D4">22 places · 9 countries</span>
+      </a>
+    </div>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

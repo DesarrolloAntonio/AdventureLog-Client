@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 20px 0; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 12px; height: 48px">
+      <span style="width: 40px; height: 40px; border-radius: 14px; background: #006973; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#FFFFFF"/></svg>
+      </span>
+      <span style="font-size: 20px; font-weight: 700; flex-grow: 1">AdventureLog</span>
+      <button aria-label="Account" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #D9E2FF; color: #3A4664; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer">JD</button>
+    </div>
+
+    <h1 style="margin: 22px 0 0; font-size: 44px; line-height: 0.95; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Hi John, your next trip<br>starts in <span style="color: #006973">8 days</span></h1>
+
+    <a href="Android-Collection.dc.html" style="margin-top: 20px; position: relative; border-radius: 28px; background: #FFFFFF; border: 1px solid #DEE3E4; text-decoration: none; color: #171D1E; display: flex; flex-direction: column">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="370" height="160" role="img" aria-label="Photo of Vernazza, Cinque Terre" style="display: block; border-radius: 27px 27px 0 0">
+        <rect width="176" height="132" fill="#BFDDEA"/><path d="M0 52 L60 30 L120 46 L176 24 V132 H0Z" fill="#7C8C5A"/><path d="M24 56h22v44H24z" fill="#E8A25B"/><path d="M46 46h20v54H46z" fill="#D9644A"/><path d="M66 58h24v42H66z" fill="#F1D27A"/><path d="M90 48h18v52H90z" fill="#9FC6C9"/><path d="M108 62h22v38h-22z" fill="#E07B55"/><path d="M130 54h18v46h-18z" fill="#F0B65E"/><rect y="100" width="176" height="32" fill="#2F7F8C"/>
+      </svg>
+      <div style="padding: 14px 20px 16px; display: flex; align-items: flex-end; gap: 12px">
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 30px; line-height: 1; font-weight: 800; font-stretch: 38%">Cinque Terre</span>
+          <span style="font-size: 14px; color: #3F484A; margin-top: 4px">Liguria, Italy</span>
+        </span>
+        <span style="height: 32px; padding: 0 12px; border-radius: 8px; background: #9EEFFC; color: #004F57; font-size: 13px; font-weight: 700; display: flex; align-items: center">Planned</span>
+      </div>
+      <div aria-hidden="true" style="position: relative; height: 0; border-top: 2px dashed #DEE3E4; margin: 0 22px">
+        <span style="position: absolute; left: -36px; top: -13px; width: 24px; height: 24px; border-radius: 12px; background: #F5FAFB; border-right: 1px solid #DEE3E4"></span>
+        <span style="position: absolute; right: -36px; top: -13px; width: 24px; height: 24px; border-radius: 12px; background: #F5FAFB; border-left: 1px solid #DEE3E4"></span>
+      </div>
+      <div style="padding: 14px 20px 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">FROM</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">5 SEP</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">TO</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">9 SEP</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">PLACES</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">2</span></span>
+      </div>
+    </a>
+
+    <div style="margin-top: 26px; display: flex; align-items: baseline; gap: 10px">
+      <h2 style="margin: 0; font-size: 28px; font-weight: 800; font-stretch: 38%; flex-grow: 1">Your map so far</h2>
+      <a href="#world" style="font-size: 14px; font-weight: 700; text-decoration: none">22 places · 9 countries</a>
+    </div>
+  </div>
+
+  <div role="list" aria-label="Countries" style="position: absolute; left: 20px; top: 618px; display: flex; gap: 8px; white-space: nowrap">
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #006973; color: #FFFFFF; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">NO<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Norway</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #006973; color: #FFFFFF; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">JP<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Japan</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #006973; color: #FFFFFF; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">IS<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Iceland</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #006973; color: #FFFFFF; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">MA<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Morocco</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; border: 2px dashed #6F797A; color: #3F484A; box-sizing: border-box; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">IT<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Planned</span></span>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 688px; display: flex; align-items: baseline">
+    <h2 style="margin: 0; font-size: 28px; font-weight: 800; font-stretch: 38%; flex-grow: 1">Recently visited</h2>
+    <a href="Android-Places.dc.html" style="font-size: 14px; font-weight: 700; text-decoration: none">See all</a>
+  </div>
+  <div style="position: absolute; left: 20px; top: 730px; display: flex; gap: 12px">
+    <a href="Android-Place.dc.html" aria-label="Geirangerfjord" style="width: 150px; height: 112px; border-radius: 20px; overflow: hidden; flex-shrink: 0">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="150" height="112" role="img" aria-label="Photo of Geirangerfjord" style="display: block"><rect width="176" height="132" fill="#CFE6EE"/><path d="M0 70 L30 30 L58 62 L84 22 L120 66 L150 34 L176 58 V132 H0Z" fill="#7FA3AE"/><path d="M0 132 V80 L40 52 L70 96 L0 132Z" fill="#3E6670"/><path d="M176 132 V70 L132 58 L104 100 Z" fill="#2E5560"/><path d="M0 132 L70 96 L104 100 L176 132Z" fill="#2F7F8C"/></svg>
+    </a>
+    <a href="Android-Place.dc.html" aria-label="Trolltunga" style="width: 150px; height: 112px; border-radius: 20px; overflow: hidden; flex-shrink: 0">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="150" height="112" role="img" aria-label="Photo of Trolltunga" style="display: block"><rect width="176" height="132" fill="#F4DCC0"/><circle cx="132" cy="38" r="14" fill="#F6B989"/><path d="M0 84 L40 60 L84 74 L130 56 L176 70 V132 H0Z" fill="#A9B8BC"/><path d="M0 132 V92 L72 70 L128 66 L132 72 L76 84 L56 132Z" fill="#5C5A57"/><path d="M56 132 L76 84 L176 98 V132Z" fill="#6FA4B2"/></svg>
+    </a>
+    <a href="Android-Place.dc.html" aria-label="Reine, Lofoten" style="width: 150px; height: 112px; border-radius: 20px; overflow: hidden; flex-shrink: 0">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="150" height="112" role="img" aria-label="Photo of Reine" style="display: block"><rect width="176" height="132" fill="#DDE8F0"/><path d="M0 90 L36 40 L60 70 L92 18 L128 72 L176 50 V132 H0Z" fill="#4F5D6B"/><rect y="96" width="176" height="36" fill="#5E8FA6"/><path d="M34 96 v-12 l8-7 8 7 v12z M58 96 v-10 l7-6 7 6 v10z M120 96 v-12 l8-7 8 7 v12z" fill="#B8452F"/></svg>
+    </a>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center">
+    <nav aria-label="Main" style="height: 64px; border-radius: 32px; background: #2B3133; display: flex; align-items: center; gap: 2px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <a href="Main.dc.html" aria-current="page" style="height: 48px; border-radius: 24px; background: #9EEFFC; color: #004F57; padding: 0 18px 0 14px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; font-weight: 700">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z" fill="#004F57"/></svg>
+        Home
+      </a>
+      <a href="Android-Places.dc.html" aria-label="Places" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5Z"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" aria-label="Collections" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+      </a>
+      <a href="#map" aria-label="Map" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+      </a>
+      <a href="#world" aria-label="World" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+      </a>
+    </nav>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 20px 0; display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 12px; height: 48px">
+      <span style="width: 40px; height: 40px; border-radius: 14px; background: #81D3E0; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#00363C"/></svg>
+      </span>
+      <span style="font-size: 20px; font-weight: 700; flex-grow: 1">AdventureLog</span>
+      <button aria-label="Account" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #3A4664; color: #D9E2FF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer">JD</button>
+    </div>
+
+    <h1 style="margin: 22px 0 0; font-size: 44px; line-height: 0.95; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Hi John, your next trip<br>starts in <span style="color: #81D3E0">8 days</span></h1>
+
+    <a href="Android-Collection.dc.html" style="margin-top: 20px; position: relative; border-radius: 28px; background: #1B2122; border: 1px solid #3F484A; text-decoration: none; color: #DEE3E4; display: flex; flex-direction: column">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="370" height="160" role="img" aria-label="Photo of Vernazza, Cinque Terre" style="display: block; border-radius: 27px 27px 0 0">
+        <rect width="176" height="132" fill="#BFDDEA"/><path d="M0 52 L60 30 L120 46 L176 24 V132 H0Z" fill="#7C8C5A"/><path d="M24 56h22v44H24z" fill="#E8A25B"/><path d="M46 46h20v54H46z" fill="#D9644A"/><path d="M66 58h24v42H66z" fill="#F1D27A"/><path d="M90 48h18v52H90z" fill="#9FC6C9"/><path d="M108 62h22v38h-22z" fill="#E07B55"/><path d="M130 54h18v46h-18z" fill="#F0B65E"/><rect y="100" width="176" height="32" fill="#2F7F8C"/>
+      </svg>
+      <div style="padding: 14px 20px 16px; display: flex; align-items: flex-end; gap: 12px">
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 30px; line-height: 1; font-weight: 800; font-stretch: 38%">Cinque Terre</span>
+          <span style="font-size: 14px; color: #BFC8CA; margin-top: 4px">Liguria, Italy</span>
+        </span>
+        <span style="height: 32px; padding: 0 12px; border-radius: 8px; background: #004F57; color: #9EEFFC; font-size: 13px; font-weight: 700; display: flex; align-items: center">Planned</span>
+      </div>
+      <div aria-hidden="true" style="position: relative; height: 0; border-top: 2px dashed #3F484A; margin: 0 22px">
+        <span style="position: absolute; left: -36px; top: -13px; width: 24px; height: 24px; border-radius: 12px; background: #0E1415; border-right: 1px solid #3F484A"></span>
+        <span style="position: absolute; right: -36px; top: -13px; width: 24px; height: 24px; border-radius: 12px; background: #0E1415; border-left: 1px solid #3F484A"></span>
+      </div>
+      <div style="padding: 14px 20px 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">FROM</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">5 SEP</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">TO</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">9 SEP</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">PLACES</span><span style="font-size: 26px; font-weight: 800; font-stretch: 38%">2</span></span>
+      </div>
+    </a>
+
+    <div style="margin-top: 26px; display: flex; align-items: baseline; gap: 10px">
+      <h2 style="margin: 0; font-size: 28px; font-weight: 800; font-stretch: 38%; flex-grow: 1">Your map so far</h2>
+      <a href="#world" style="font-size: 14px; font-weight: 700; text-decoration: none">22 places · 9 countries</a>
+    </div>
+  </div>
+
+  <div role="list" aria-label="Countries" style="position: absolute; left: 20px; top: 618px; display: flex; gap: 8px; white-space: nowrap">
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #81D3E0; color: #00363C; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">NO<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Norway</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #81D3E0; color: #00363C; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">JP<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Japan</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #81D3E0; color: #00363C; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">IS<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Iceland</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; background: #81D3E0; color: #00363C; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">MA<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Morocco</span></span>
+    <span role="listitem" style="height: 44px; padding: 0 14px; border-radius: 12px; border: 2px dashed #899294; color: #BFC8CA; box-sizing: border-box; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; font-stretch: 60%; letter-spacing: 1px">IT<span style="font-weight: 500; letter-spacing: 0; font-size: 13px">Planned</span></span>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 688px; display: flex; align-items: baseline">
+    <h2 style="margin: 0; font-size: 28px; font-weight: 800; font-stretch: 38%; flex-grow: 1">Recently visited</h2>
+    <a href="Android-Places.dc.html" style="font-size: 14px; font-weight: 700; text-decoration: none">See all</a>
+  </div>
+  <div style="position: absolute; left: 20px; top: 730px; display: flex; gap: 12px">
+    <a href="Android-Place.dc.html" aria-label="Geirangerfjord" style="width: 150px; height: 112px; border-radius: 20px; overflow: hidden; flex-shrink: 0">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="150" height="112" role="img" aria-label="Photo of Geirangerfjord" style="display: block"><rect width="176" height="132" fill="#CFE6EE"/><path d="M0 70 L30 30 L58 62 L84 22 L120 66 L150 34 L176 58 V132 H0Z" fill="#7FA3AE"/><path d="M0 132 V80 L40 52 L70 96 L0 132Z" fill="#3E6670"/><path d="M176 132 V70 L132 58 L104 100 Z" fill="#2E5560"/><path d="M0 132 L70 96 L104 100 L176 132Z" fill="#2F7F8C"/></svg>
+    </a>
+    <a href="Android-Place.dc.html" aria-label="Trolltunga" style="width: 150px; height: 112px; border-radius: 20px; overflow: hidden; flex-shrink: 0">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="150" height="112" role="img" aria-label="Photo of Trolltunga" style="display: block"><rect width="176" height="132" fill="#F4DCC0"/><circle cx="132" cy="38" r="14" fill="#F6B989"/><path d="M0 84 L40 60 L84 74 L130 56 L176 70 V132 H0Z" fill="#A9B8BC"/><path d="M0 132 V92 L72 70 L128 66 L132 72 L76 84 L56 132Z" fill="#5C5A57"/><path d="M56 132 L76 84 L176 98 V132Z" fill="#6FA4B2"/></svg>
+    </a>
+    <a href="Android-Place.dc.html" aria-label="Reine, Lofoten" style="width: 150px; height: 112px; border-radius: 20px; overflow: hidden; flex-shrink: 0">
+      <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="150" height="112" role="img" aria-label="Photo of Reine" style="display: block"><rect width="176" height="132" fill="#DDE8F0"/><path d="M0 90 L36 40 L60 70 L92 18 L128 72 L176 50 V132 H0Z" fill="#4F5D6B"/><rect y="96" width="176" height="36" fill="#5E8FA6"/><path d="M34 96 v-12 l8-7 8 7 v12z M58 96 v-10 l7-6 7 6 v10z M120 96 v-12 l8-7 8 7 v12z" fill="#B8452F"/></svg>
+    </a>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center">
+    <nav aria-label="Main" style="height: 64px; border-radius: 32px; background: #DEE3E4; display: flex; align-items: center; gap: 2px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <a href="Main.dc.html" aria-current="page" style="height: 48px; border-radius: 24px; background: #004F57; color: #9EEFFC; padding: 0 18px 0 14px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; font-weight: 700">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z" fill="#9EEFFC"/></svg>
+        Home
+      </a>
+      <a href="Android-Places.dc.html" aria-label="Places" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5Z"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" aria-label="Collections" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+      </a>
+      <a href="#map" aria-label="Map" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+      </a>
+      <a href="#world" aria-label="World" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+      </a>
+    </nav>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

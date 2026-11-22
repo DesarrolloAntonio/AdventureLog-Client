@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS calendar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#007A85}a:hover{color:#005A62}
+.glass-bar{background:rgba(250,250,252,0.55);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.8);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.95),0 10px 28px rgba(0,0,0,0.12)}
+.glass-bar-d{background:rgba(36,36,40,0.55);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.16);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),0 10px 28px rgba(0,0,0,0.12)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F2F2F7; color: #000000; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; gap: 10px">
+    <a href="iOS-Home.dc.html" class="glass-bar" aria-label="Back" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+    </a>
+    <span style="flex-grow: 1"></span>
+    <button class="glass-bar" style="height: 44px; padding: 0 16px; border-radius: 22px; font-size: 16px; font-weight: 500; color: #000000; cursor: pointer">Today</button>
+    <div class="glass-bar" style="height: 44px; border-radius: 22px; display: flex; align-items: center; padding: 0 2px">
+      <button aria-label="Previous month" style="all: unset; width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+      </button>
+      <button aria-label="Next month" style="all: unset; width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#000000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 108px; padding: 0 16px; display: flex; flex-direction: column">
+    <h1 style="margin: 0 4px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 36px; line-height: 42px; font-weight: 700">September <span style="color: #8E8E93; font-weight: 400">2026</span></h1>
+
+    <div style="margin-top: 14px; border-radius: 28px; background: #FFFFFF; padding: 14px 10px 10px">
+      <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); font-size: 12px; font-weight: 600; color: #636366; text-align: center; padding-bottom: 6px">
+        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+      </div>
+
+      <div style="position: relative; height: 48px">
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 4px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 6 / 8; height: 40px; margin-left: 4px; border-radius: 20px 0 0 20px; background: rgba(0,122,133,0.14)"></span>
+        </div>
+        <div style="position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; padding-top: 4px; font-size: 18px">
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #C7C7CC">31</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">1</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">2</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">3</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">4</span>
+          <span style="width: 40px; height: 40px; border-radius: 20px; background: #007A85; color: #FFFFFF; font-weight: 600; display: flex; align-items: center; justify-content: center">5</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #007A85; font-weight: 600">6</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 48px">
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 4px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 1 / 4; height: 40px; margin-right: 4px; border-radius: 0 20px 20px 0; background: rgba(0,122,133,0.14)"></span>
+        </div>
+        <div style="position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; padding-top: 4px; font-size: 18px">
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #007A85; font-weight: 600">7</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #007A85; font-weight: 600">8</span>
+          <span style="width: 40px; height: 40px; border-radius: 20px; background: #007A85; color: #FFFFFF; font-weight: 600; display: flex; align-items: center; justify-content: center">9</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">10</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">11</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">12</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">13</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; height: 48px; padding-top: 4px; box-sizing: border-box; font-size: 18px">
+        <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">14</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">15</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">16</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">17</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">18</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">19</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">20</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; height: 48px; padding-top: 4px; box-sizing: border-box; font-size: 18px">
+        <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">21</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">22</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">23</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">24</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">25</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">26</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">27</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; height: 48px; padding-top: 4px; box-sizing: border-box; font-size: 18px">
+        <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">28</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">29</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">30</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #C7C7CC">1</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #C7C7CC">2</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #C7C7CC">3</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #C7C7CC">4</span>
+      </div>
+    </div>
+
+    <h2 style="margin: 22px 4px 8px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 22px; font-weight: 700">Upcoming</h2>
+    <div style="border-radius: 24px; background: #FFFFFF; display: flex; flex-direction: column; overflow: hidden">
+      <a href="iOS-Collection.dc.html" style="height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #000000">
+        <span style="width: 5px; height: 40px; border-radius: 3px; background: #007A85"></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1; height: 64px; justify-content: center; border-bottom: 0.5px solid #D1D1D6"><span style="font-size: 17px; font-weight: 500">Cinque Terre</span><span style="font-size: 14px; color: #636366">5–9 Sep · 2 places</span></span>
+        <span style="font-size: 13px; font-weight: 600; color: #007A85">in 8 days</span>
+      </a>
+      <a href="iOS-Collection.dc.html" style="height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #000000">
+        <span style="width: 5px; height: 40px; border-radius: 3px; background: #5856D6"></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1; height: 64px; justify-content: center"><span style="font-size: 17px; font-weight: 500">Peru</span><span style="font-size: 14px; color: #636366">10–22 Oct · 3 places</span></span>
+      </a>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 26px; display: flex; gap: 10px; align-items: center">
+    <nav class="glass-bar" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <a href="iOS-Home.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(255,255,255,0.85); box-shadow: inset 0 1px 0.5px #FFFFFF, 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #007A85">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H14.5 V15 h-5 v6 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z" fill="#007A85"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="iOS-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="iOS-Collection.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="iOS-Map.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Map</span>
+      </a>
+      <a href="iOS-World.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="iOS-Places.dc.html" class="glass-bar" aria-label="Search" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; gap: 10px">
+    <a href="iOS-Home.dc.html" class="glass-bar-d" aria-label="Back" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+    </a>
+    <span style="flex-grow: 1"></span>
+    <button class="glass-bar-d" style="height: 44px; padding: 0 16px; border-radius: 22px; font-size: 16px; font-weight: 500; color: #FFFFFF; cursor: pointer">Today</button>
+    <div class="glass-bar-d" style="height: 44px; border-radius: 22px; display: flex; align-items: center; padding: 0 2px">
+      <button aria-label="Previous month" style="all: unset; width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+      </button>
+      <button aria-label="Next month" style="all: unset; width: 40px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 108px; padding: 0 16px; display: flex; flex-direction: column">
+    <h1 style="margin: 0 4px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 36px; line-height: 42px; font-weight: 700">September <span style="color: #8E8E93; font-weight: 400">2026</span></h1>
+
+    <div style="margin-top: 14px; border-radius: 28px; background: #1C1C1E; padding: 14px 10px 10px">
+      <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); font-size: 12px; font-weight: 600; color: #98989D; text-align: center; padding-bottom: 6px">
+        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+      </div>
+
+      <div style="position: relative; height: 48px">
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 4px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 6 / 8; height: 40px; margin-left: 4px; border-radius: 20px 0 0 20px; background: rgba(0,122,133,0.14)"></span>
+        </div>
+        <div style="position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; padding-top: 4px; font-size: 18px">
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #48484A">31</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">1</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">2</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">3</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">4</span>
+          <span style="width: 40px; height: 40px; border-radius: 20px; background: #007A85; color: #FFFFFF; font-weight: 600; display: flex; align-items: center; justify-content: center">5</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #5AC8D4; font-weight: 600">6</span>
+        </div>
+      </div>
+      <div style="position: relative; height: 48px">
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 4px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr))">
+          <span style="grid-column: 1 / 4; height: 40px; margin-right: 4px; border-radius: 0 20px 20px 0; background: rgba(0,122,133,0.14)"></span>
+        </div>
+        <div style="position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; padding-top: 4px; font-size: 18px">
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #5AC8D4; font-weight: 600">7</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #5AC8D4; font-weight: 600">8</span>
+          <span style="width: 40px; height: 40px; border-radius: 20px; background: #007A85; color: #FFFFFF; font-weight: 600; display: flex; align-items: center; justify-content: center">9</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">10</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">11</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">12</span>
+          <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">13</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; height: 48px; padding-top: 4px; box-sizing: border-box; font-size: 18px">
+        <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">14</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">15</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">16</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">17</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">18</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">19</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">20</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; height: 48px; padding-top: 4px; box-sizing: border-box; font-size: 18px">
+        <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">21</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">22</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">23</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">24</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">25</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">26</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">27</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; height: 48px; padding-top: 4px; box-sizing: border-box; font-size: 18px">
+        <span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">28</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">29</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center">30</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #48484A">1</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #48484A">2</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #48484A">3</span><span style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #48484A">4</span>
+      </div>
+    </div>
+
+    <h2 style="margin: 22px 4px 8px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 22px; font-weight: 700">Upcoming</h2>
+    <div style="border-radius: 24px; background: #1C1C1E; display: flex; flex-direction: column; overflow: hidden">
+      <a href="iOS-Collection.dc.html" style="height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #FFFFFF">
+        <span style="width: 5px; height: 40px; border-radius: 3px; background: #007A85"></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1; height: 64px; justify-content: center; border-bottom: 0.5px solid #38383A"><span style="font-size: 17px; font-weight: 500">Cinque Terre</span><span style="font-size: 14px; color: #98989D">5–9 Sep · 2 places</span></span>
+        <span style="font-size: 13px; font-weight: 600; color: #5AC8D4">in 8 days</span>
+      </a>
+      <a href="iOS-Collection.dc.html" style="height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #FFFFFF">
+        <span style="width: 5px; height: 40px; border-radius: 3px; background: #5856D6"></span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1; height: 64px; justify-content: center"><span style="font-size: 17px; font-weight: 500">Peru</span><span style="font-size: 14px; color: #98989D">10–22 Oct · 3 places</span></span>
+      </a>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 26px; display: flex; gap: 10px; align-items: center">
+    <nav class="glass-bar-d" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <a href="iOS-Home.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(255,255,255,0.16); box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #5AC8D4">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H14.5 V15 h-5 v6 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z" fill="#5AC8D4"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="iOS-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="iOS-Collection.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="iOS-Map.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Map</span>
+      </a>
+      <a href="iOS-World.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="iOS-Places.dc.html" class="glass-bar-d" aria-label="Search" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>
