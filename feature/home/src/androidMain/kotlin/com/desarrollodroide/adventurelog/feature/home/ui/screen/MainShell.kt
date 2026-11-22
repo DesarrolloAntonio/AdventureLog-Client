@@ -18,7 +18,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.window.core.layout.WindowWidthSizeClass
+import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbar
+import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -283,6 +288,9 @@ fun HomeScreenContent(
         )
     }
 
+    val compact = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass ==
+        WindowWidthSizeClass.COMPACT
+
     Box(modifier = modifier.fillMaxSize()) {
         // Flat, the redesign's #F5FAFB - the theme's own surface.
         //
@@ -297,10 +305,11 @@ fun HomeScreenContent(
                 .background(MaterialTheme.colorScheme.surface)
         )
 
-            // The five destinations become a bottom bar on a phone and a rail on a tablet.
-            // The suite draws whichever suits the window; nothing below it needs to know which.
+            // The five destinations are a floating toolbar on a phone (drawn below, over the
+            // content) and a rail on anything wider. The suite only ever draws the rail.
             NavigationSuiteScaffold(
                 navigationSuiteItems = { homeNavigationItems(currentScreen) { navigateTo(it) } },
+                layoutType = if (compact) NavigationSuiteType.None else NavigationSuiteType.NavigationRail,
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
@@ -483,7 +492,10 @@ fun HomeScreenContent(
             ) { innerPadding ->
                 val barsPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding(),
-                    bottom = innerPadding.calculateBottomPadding()
+                    // On a phone the content stops above the floating toolbar, so a list's last
+                    // row and a screen's own FAB are never under it.
+                    bottom = innerPadding.calculateBottomPadding() +
+                        if (compact) MainToolbarDefaults.Clearance else 0.dp
                 )
                 Box(
                     modifier = Modifier
@@ -1007,6 +1019,16 @@ fun HomeScreenContent(
                 }
             }
             }
+            }
+
+            if (compact) {
+                MainToolbar(
+                    current = currentScreen,
+                    onSelect = { navigateTo(it) },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .then(MainToolbarDefaults.PositionModifier)
+                )
             }
     }
 }

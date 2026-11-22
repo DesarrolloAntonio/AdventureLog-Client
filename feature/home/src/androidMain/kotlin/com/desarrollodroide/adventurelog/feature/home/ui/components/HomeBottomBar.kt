@@ -52,7 +52,7 @@ fun NavigationSuiteScope.homeNavigationItems(
     }
 }
 
-private enum class Destination(
+internal enum class Destination(
     val screen: CurrentScreen,
     val label: String,
     val icon: ImageVector,
