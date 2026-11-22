@@ -30,8 +30,7 @@ import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
 import com.google.maps.android.compose.*
 
 /**
- * A common interface for the adventure map view.
- * Platform-specific implementations will be provided in corresponding source sets.
+ * The adventure map: Google Maps with the user's places, visited regions and visited cities.
  */
 @Composable
 fun AdventureMapView(

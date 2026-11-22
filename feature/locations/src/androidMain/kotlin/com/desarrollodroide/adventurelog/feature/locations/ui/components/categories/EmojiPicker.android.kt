@@ -19,7 +19,7 @@ import androidx.emoji2.emojipicker.EmojiPickerView
 import com.desarrollodroide.adventurelog.feature.locations.R
 
 /**
- * Platform-specific emoji picker interface
+ * Emoji picker for a category, backed by the AndroidX `EmojiPickerView`.
  */
 @Composable
 fun EmojiPicker(
