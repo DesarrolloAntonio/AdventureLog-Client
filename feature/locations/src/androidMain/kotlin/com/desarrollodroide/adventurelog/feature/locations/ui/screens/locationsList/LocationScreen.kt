@@ -56,7 +56,10 @@ import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.LocationsFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel
-import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
+import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import androidx.compose.foundation.lazy.LazyColumn
+import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
@@ -161,6 +164,8 @@ fun LocationListScreen(
             viewModel.deleteAdventure(adventure.id)
         },
         libraryCounts = libraryCounts,
+        visitedFilter = filters.visitedFilter,
+        onVisitedFilterChange = { viewModel.onFiltersChanged(filters.copy(visitedFilter = it)) },
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
@@ -275,6 +280,8 @@ private fun AdventureListContent(
     onManageCollections: (Location) -> Unit,
     onRefresh: () -> Unit,
     libraryCounts: UserStats? = null,
+    visitedFilter: VisitedFilter = VisitedFilter.ALL,
+    onVisitedFilterChange: (VisitedFilter) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -286,14 +293,15 @@ private fun AdventureListContent(
           Column {
             // The whole library, not the page on screen - see LocationsViewModel.libraryCounts.
             libraryCounts?.let { counts ->
+                // Places and countries; the visited count is on the Visited button just below.
                 Text(
                     text = buildString {
                         append(counts.locationCount)
                         append(if (counts.locationCount == 1) " place" else " places")
-                        if (counts.visitedLocationCount > 0) {
+                        if (counts.visitedCountryCount > 0) {
                             append(" · ")
-                            append(counts.visitedLocationCount)
-                            append(" visited")
+                            append(counts.visitedCountryCount)
+                            append(if (counts.visitedCountryCount == 1) " country visited" else " countries visited")
                         }
                     },
                     style = MaterialTheme.typography.labelLarge,
@@ -301,6 +309,7 @@ private fun AdventureListContent(
                     modifier = Modifier.padding(start = 20.dp, top = 4.dp)
                 )
             }
+            val sheetFilterCount = activeFilterCount - if (visitedFilter != VisitedFilter.ALL) 1 else 0
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -319,11 +328,19 @@ private fun AdventureListContent(
                 SearchBarAction(
                     icon = Icons.Default.FilterList,
                     contentDescription = "Filters",
-                    active = activeFilterCount > 0,
-                    badgeCount = activeFilterCount,
+                    // Visited / Planned is already shown by the group below; the badge counts the
+                    // rest, the filters only the sheet shows.
+                    active = sheetFilterCount > 0,
+                    badgeCount = sheetFilterCount,
                     onClick = onShowFilters
                 )
             }
+            VisitedFilterGroup(
+                counts = libraryCounts,
+                selected = visitedFilter,
+                onSelect = onVisitedFilterChange,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+            )
           }
         },
         floatingActionButton = {
@@ -454,23 +471,14 @@ private fun AdventuresPagingList(
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit
 ) {
-    // One card per row is right on a phone and absurd on a tablet, where it stretches a
-    // photograph across 1600px. A minimum width lets the window decide the column count: one on a
-    // phone, two or three on a tablet, without either having to name a device.
-        // Same single content column as everywhere else. In the two-pane layout the list side is
-    // narrower than the cap, so this changes nothing there.
+    // Rows, as the canvas draws Places: a photograph is a thumbnail here and the place's own page
+    // is where it is shown large. One column at every width, capped like every other screen; in the
+    // two-pane layout the list side is narrower than the cap anyway.
     ContentColumn {
-    LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 300.dp),
+        LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 80.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)
         ) {
             items(
                 count = pagingItems.itemCount,
@@ -478,8 +486,11 @@ private fun AdventuresPagingList(
             ) { index ->
                 val adventure = pagingItems[index]
                 if (adventure != null) {
-                    AdventureItem(
+                    PlaceRow(
                         location = adventure,
+                        // One group: the outer corners round, the inner ones barely. A page loaded
+                        // below turns the last row into a middle one, which is what it then is.
+                        shape = SegmentedListDefaults.shapeFor(index, pagingItems.itemCount),
                         onClick = { onAdventureClick(adventure) },
                         onEdit = { onEditAdventure(adventure) },
                         onAddPhoto = { onAddPhoto(adventure) },
@@ -491,43 +502,30 @@ private fun AdventuresPagingList(
                 }
             }
 
-            when (pagingItems.loadState.append) {
-                is LoadStateLoading -> {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+            when (val append = pagingItems.loadState.append) {
+                is LoadStateLoading -> item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     }
                 }
 
-                is LoadStateError -> {
-                    val error = pagingItems.loadState.append as LoadStateError
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = placesLoadErrorMessage(error.error),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
+                is LoadStateError -> item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = placesLoadErrorMessage(append.error),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
 
-                is LoadStateNotLoading -> {
-                    // Nothing to do
-                }
+                else -> {}
             }
         }
     }

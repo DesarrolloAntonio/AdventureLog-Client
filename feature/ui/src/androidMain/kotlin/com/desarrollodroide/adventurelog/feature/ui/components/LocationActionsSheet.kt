@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -68,6 +69,8 @@ fun LocationActionsSheet(
     isOwner: Boolean = true,
     /** Offered inside a collection, where Delete would take the place out of every other one too. */
     onRemoveFromCollection: (() -> Unit)? = null,
+    /** "Add photo", for a place without one: the editor opened on its images. */
+    onAddPhoto: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -86,6 +89,7 @@ fun LocationActionsSheet(
 
             ActionRow(Icons.Outlined.Info, "Open details", onOpenDetails)
             ActionRow(Icons.Outlined.Edit, "Edit place", onEdit)
+            onAddPhoto?.let { ActionRow(Icons.Outlined.AddAPhoto, "Add photo", it) }
             ActionRow(Icons.Outlined.ContentCopy, "Duplicate", onDuplicate)
             ActionRow(Icons.Outlined.Share, "Share externally", onShare)
             if (isOwner) {
