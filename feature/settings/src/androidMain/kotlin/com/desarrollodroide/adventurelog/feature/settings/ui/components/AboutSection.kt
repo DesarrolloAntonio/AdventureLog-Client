@@ -43,7 +43,9 @@ fun AboutSection(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         SettingsGroup(
-        segmented = true,title = "About") {
+        segmented = true,
+        iconContainer = MaterialTheme.colorScheme.surfaceContainerHighest,
+        title = "About") {
             SettingsRow(
                 title = "Server",
                 icon = Icons.Outlined.Dns,

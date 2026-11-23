@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.ui.components.settings
 
+import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.layout.Box
 import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
@@ -51,6 +55,9 @@ import androidx.compose.ui.unit.dp
 /** Set by a segmented [SettingsGroup]: the colour each row paints as its own block. */
 val LocalSettingsSegmentColor = compositionLocalOf<Color?> { null }
 
+/** The tint of the rounded square behind a segmented row's icon; null outside a segmented group. */
+val LocalSettingsIconContainer = compositionLocalOf<Color?> { null }
+
 @Composable
 fun SettingsGroup(
     title: String,
@@ -63,6 +70,8 @@ fun SettingsGroup(
      * with content of its own (an email list, a storage bar) keeps the single card.
      */
     segmented: Boolean = false,
+    /** The tint behind each row's icon in a segmented group, one per group as the canvas draws it. */
+    iconContainer: Color? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // Pure white pops against the daylight backdrop; pure black against the dimmed one is a hole.
@@ -87,7 +96,10 @@ fun SettingsGroup(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)),
                 verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
-                CompositionLocalProvider(LocalSettingsSegmentColor provides cardColor) { content() }
+                CompositionLocalProvider(
+                    LocalSettingsSegmentColor provides cardColor,
+                    LocalSettingsIconContainer provides (iconContainer ?: scheme.secondaryContainer),
+                ) { content() }
                 if (caption != null) {
                     Text(
                         text = caption,
@@ -173,7 +185,25 @@ fun SettingsRow(
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null) {
+        val iconContainer = LocalSettingsIconContainer.current
+        if (icon != null && iconContainer != null && tint == null) {
+            // As the canvas draws a settings row: the icon in a tinted rounded square.
+            Box(
+                Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(iconContainer.copy(alpha = if (enabled) 1f else 0.38f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = contentColorFor(iconContainer).copy(alpha = alpha),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(Modifier.width(14.dp))
+        } else if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -245,7 +275,15 @@ fun SettingsSwitchRow(
         enabled = enabled,
         showChevron = false,
         trailing = {
-            Switch(checked = checked, onCheckedChange = null, enabled = enabled)
+            Switch(
+                checked = checked,
+                onCheckedChange = null,
+                enabled = enabled,
+                // The check in the thumb, as Material 3 draws a switch that is on.
+                thumbContent = if (checked) {
+                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(SwitchDefaults.IconSize)) }
+                } else null,
+            )
         }
     )
 }

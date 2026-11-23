@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
@@ -26,7 +27,12 @@ fun VisitedRegionsCard(
     onDownloadBackup: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    SettingsGroup(title = "Your data", segmented = true, modifier = modifier) {
+    SettingsGroup(
+        title = "Your data",
+        segmented = true,
+        iconContainer = MaterialTheme.colorScheme.primaryContainer,
+        modifier = modifier
+    ) {
         SettingsRow(
             title = "Update visited regions",
             supporting = "Work out which regions and cities your places fall in",

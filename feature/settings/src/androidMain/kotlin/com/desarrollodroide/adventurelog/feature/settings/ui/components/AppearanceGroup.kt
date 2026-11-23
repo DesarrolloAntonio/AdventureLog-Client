@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Brightness4
 import androidx.compose.material.icons.outlined.DarkMode
@@ -34,6 +35,7 @@ fun AppearanceGroup(
 
     SettingsGroup(
         segmented = true,
+        iconContainer = MaterialTheme.colorScheme.secondaryContainer,
         title = "Appearance",
         modifier = modifier,
         caption = "Kept on this phone only."

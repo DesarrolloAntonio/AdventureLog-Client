@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.components.settings
 
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,7 +61,9 @@ fun AccountHeader(
     Card(
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            // Dark in daylight and light at night, as the canvas draws it - the one card on the
+            // screen that is about you rather than a setting.
+            containerColor = MaterialTheme.colorScheme.inverseSurface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
@@ -76,9 +80,8 @@ fun AccountHeader(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = displayName.ifBlank { "Signed in" },
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = AdventureType.display(28.sp),
+                    color = MaterialTheme.colorScheme.inverseOnSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -86,7 +89,7 @@ fun AccountHeader(
                     Text(
                         text = "@$it",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                        color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -96,7 +99,7 @@ fun AccountHeader(
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.7f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -106,7 +109,7 @@ fun AccountHeader(
             Icon(
                 imageVector = actionIcon,
                 contentDescription = actionDescription,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                tint = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -119,7 +122,7 @@ private fun Avatar(imageUrl: String?, initials: String) {
         modifier = Modifier
             .size(64.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.inversePrimary),
         contentAlignment = Alignment.Center
     ) {
         if (imageUrl != null) {
@@ -132,9 +135,8 @@ private fun Avatar(imageUrl: String?, initials: String) {
         } else {
             Text(
                 text = initials,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                style = AdventureType.display(26.sp),
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }

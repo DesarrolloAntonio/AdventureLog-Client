@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Lock
@@ -41,6 +42,7 @@ fun PreferencesGroup(
 
     SettingsGroup(
         segmented = true,
+        iconContainer = MaterialTheme.colorScheme.tertiaryContainer,
         title = "Preferences",
         modifier = modifier,
         busy = state.isSaving,
