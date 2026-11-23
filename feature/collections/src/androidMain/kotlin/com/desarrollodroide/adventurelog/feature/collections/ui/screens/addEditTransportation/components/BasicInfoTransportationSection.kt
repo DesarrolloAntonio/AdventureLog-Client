@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,20 +17,22 @@ import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Flight
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +48,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import com.desarrollodroide.adventurelog.feature.ui.components.RatingBar
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BasicInfoTransportationSection(
     formData: TransportationFormData,
@@ -67,6 +70,7 @@ fun BasicInfoTransportationSection(
         leadingContent = onNavigateBack?.let { back -> {
             IconButton(
                 onClick = back,
+                shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
@@ -97,7 +101,7 @@ fun BasicInfoTransportationSection(
                     modifier = Modifier
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth()
-                        .height(55.dp),
+                        .heightIn(min = 56.dp),
                     value = getTransportationDisplayName(formData.type),
                     onValueChange = {},
                     readOnly = true,
@@ -114,7 +118,7 @@ fun BasicInfoTransportationSection(
                         Icon(
                             Icons.Outlined.DirectionsCar,
                             contentDescription = null,
-                            tint = Color.Gray
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     singleLine = true
@@ -175,17 +179,12 @@ fun BasicInfoTransportationSection(
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Button(
+                    TextButton(
                         onClick = onGenerateDescription,
                         enabled = formData.name.isNotBlank() && !isGeneratingDescription,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
+                        shapes = ButtonDefaults.shapes()
                     ) {
-                        Text(
-                            text = if (isGeneratingDescription) "Generating..." else "Generate",
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        Text(text = if (isGeneratingDescription) "Generating..." else "Generate")
                     }
                 }
 

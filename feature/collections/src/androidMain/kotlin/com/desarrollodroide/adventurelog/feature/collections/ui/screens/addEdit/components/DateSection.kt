@@ -1,22 +1,24 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -43,7 +45,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 fun DateSection(
     formData: CollectionFormData,
@@ -120,7 +122,8 @@ fun DateSection(
         DatePickerDialog(
             onDismissRequest = { showStartDatePicker = false },
             confirmButton = {
-                TextButton(
+                Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val instant = Instant.fromEpochMilliseconds(millis)
@@ -139,7 +142,7 @@ fun DateSection(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showStartDatePicker = false }) {
+                TextButton(onClick = { showStartDatePicker = false }, shapes = ButtonDefaults.shapes()) {
                     Text("Cancel")
                 }
             }
@@ -181,7 +184,8 @@ fun DateSection(
         DatePickerDialog(
             onDismissRequest = { showEndDatePicker = false },
             confirmButton = {
-                TextButton(
+                Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val instant = Instant.fromEpochMilliseconds(millis)
@@ -197,7 +201,7 @@ fun DateSection(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEndDatePicker = false }) {
+                TextButton(onClick = { showEndDatePicker = false }, shapes = ButtonDefaults.shapes()) {
                     Text("Cancel")
                 }
             }
@@ -207,6 +211,7 @@ fun DateSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun DateField(
     date: String,
@@ -224,7 +229,7 @@ private fun DateField(
             placeholder = {
                 Text(
                     text = placeholder,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             modifier = Modifier
@@ -235,25 +240,20 @@ private fun DateField(
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface,
                 disabledBorderColor = MaterialTheme.colorScheme.outline,
-                disabledPlaceholderColor = Color.Gray,
+                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 disabledContainerColor = Color.Transparent
             )
         )
         
         // Date picker button
-        IconButton(
+        FilledIconButton(
             onClick = onDateClick,
-            modifier = Modifier
-                .size(48.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape
-                )
+            shapes = IconButtonDefaults.shapes(),
+            modifier = Modifier.size(48.dp)
         ) {
             Icon(
                 imageVector = Icons.Outlined.CalendarToday,
                 contentDescription = "Select date",
-                tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(22.dp)
             )
         }

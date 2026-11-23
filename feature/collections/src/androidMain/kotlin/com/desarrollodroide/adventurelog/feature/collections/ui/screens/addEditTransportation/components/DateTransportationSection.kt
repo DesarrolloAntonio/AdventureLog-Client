@@ -6,7 +6,11 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportDates
@@ -21,7 +25,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -71,8 +78,8 @@ fun DateTransportationSection(
         ) {
             Text(
                 text = "Settings",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
             )
 
             // The rows are the switches (as CO-11): a tap on the words did nothing.
@@ -100,8 +107,8 @@ fun DateTransportationSection(
 
             Text(
                 text = "Date Selection",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
             )
 
             // One above the other. Side by side, each field took the whole width and the arrival
@@ -109,7 +116,11 @@ fun DateTransportationSection(
             val departure = TransportDates.toLocal(formData.departureDate, formData.departureTimezone, formData.isAllDay)
             val arrival = TransportDates.toLocal(formData.arrivalDate, formData.arrivalTimezone, formData.isAllDay)
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Departure", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = "Departure",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 DateTimeField(
                     date = departure.date,
                     time = departure.time.orEmpty(),
@@ -119,7 +130,11 @@ fun DateTransportationSection(
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Arrival", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = "Arrival",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 DateTimeField(
                     date = arrival.date,
                     time = arrival.time.orEmpty(),
@@ -208,7 +223,7 @@ fun DateTransportationSection(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 private fun TransportDatePicker(
     initial: String,
@@ -232,7 +247,8 @@ private fun TransportDatePicker(
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(
+            Button(
+                shapes = ButtonDefaults.shapes(),
                 onClick = {
                     // The picker's millis are that day at 00:00 UTC; read them in UTC, or a zone
                     // behind Greenwich lands on the day before.
@@ -242,7 +258,7 @@ private fun TransportDatePicker(
                 }
             ) { Text("OK") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        dismissButton = { TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) { Text("Cancel") } }
     ) {
         DatePicker(state = state)
     }
@@ -271,18 +287,19 @@ private fun SwitchRow(title: String, checked: Boolean, onCheckedChange: (Boolean
         modifier = Modifier
             .fillMaxWidth()
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .heightIn(min = 48.dp)
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Switch(
             checked = checked,
             onCheckedChange = null,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.primary,
-                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-            )
+            // The check in the thumb, as Material 3 draws a switch that is on.
+            thumbContent = if (checked) {
+                { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(SwitchDefaults.IconSize)) }
+            } else null
         )
     }
 }

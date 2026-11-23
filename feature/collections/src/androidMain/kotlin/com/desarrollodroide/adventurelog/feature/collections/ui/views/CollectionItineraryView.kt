@@ -1,7 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.views
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,23 +20,33 @@ import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.CollectionItinerary
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.ItineraryDay
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.ItineraryItem
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
 /**
  * The trip laid out day by day.
@@ -84,6 +93,7 @@ fun CollectionItineraryView(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AutoGenerateCard(isWorking: Boolean, onAutoGenerate: () -> Unit) {
     ItineraryCard {
@@ -98,13 +108,9 @@ private fun AutoGenerateCard(isWorking: Boolean, onAutoGenerate: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Button(onClick = onAutoGenerate, enabled = !isWorking) {
+        Button(onClick = onAutoGenerate, enabled = !isWorking, shapes = ButtonDefaults.shapes()) {
             if (isWorking) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
+                LoadingIndicator(modifier = Modifier.size(24.dp), color = LocalContentColor.current)
             } else {
                 Text("Build the itinerary")
             }
@@ -157,10 +163,10 @@ private fun DayCard(day: ItineraryDay, onAdd: () -> Unit, onRemove: (String) -> 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .width(52.dp)
+                    .width(56.dp)
                     .background(
                         MaterialTheme.colorScheme.primaryContainer,
-                        RoundedCornerShape(12.dp)
+                        RoundedCornerShape(16.dp)
                     )
                     .padding(vertical = 6.dp)
             ) {
@@ -171,8 +177,7 @@ private fun DayCard(day: ItineraryDay, onAdd: () -> Unit, onRemove: (String) -> 
                 )
                 Text(
                     text = day.date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    style = AdventureType.display(28.sp),
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
@@ -215,25 +220,34 @@ private fun DayCard(day: ItineraryDay, onAdd: () -> Unit, onRemove: (String) -> 
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ItemRow(item: ItineraryItem, onRemove: (String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(
-            imageVector = when (item.kind) {
-                ItineraryItemKind.LOCATION, ItineraryItemKind.VISIT -> Icons.Default.Place
-                ItineraryItemKind.TRANSPORTATION -> Icons.Default.Flight
-                ItineraryItemKind.LODGING -> Icons.Default.Hotel
-                ItineraryItemKind.NOTE -> Icons.AutoMirrored.Filled.Notes
-                ItineraryItemKind.CHECKLIST -> Icons.Default.Checklist
-            },
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
-        )
+        // The kind in a tonal rounded square, as the sheets' rows carry their icons.
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = when (item.kind) {
+                    ItineraryItemKind.LOCATION, ItineraryItemKind.VISIT -> Icons.Default.Place
+                    ItineraryItemKind.TRANSPORTATION -> Icons.Default.Flight
+                    ItineraryItemKind.LODGING -> Icons.Default.Hotel
+                    ItineraryItemKind.NOTE -> Icons.AutoMirrored.Filled.Notes
+                    ItineraryItemKind.CHECKLIST -> Icons.Default.Checklist
+                },
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp)
+            )
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.title,
@@ -248,7 +262,7 @@ private fun ItemRow(item: ItineraryItem, onRemove: (String) -> Unit) {
                 )
             }
         }
-        IconButton(onClick = { onRemove(item.entryId) }) {
+        IconButton(onClick = { onRemove(item.entryId) }, shapes = IconButtonDefaults.shapes()) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Take ${item.title} off this day",
@@ -259,19 +273,13 @@ private fun ItemRow(item: ItineraryItem, onRemove: (String) -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AddButton(onAdd: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-            .clickable(onClick = onAdd),
-        contentAlignment = Alignment.Center
-    ) {
+    FilledTonalIconButton(onClick = onAdd, shapes = IconButtonDefaults.shapes()) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = "Add something here",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp)
         )
     }
@@ -286,14 +294,15 @@ private fun EmptyLine(text: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                RoundedCornerShape(12.dp)
+                MaterialTheme.colorScheme.surfaceContainerHigh,
+                RoundedCornerShape(16.dp)
             )
             .padding(vertical = 14.dp),
         textAlign = TextAlign.Center
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NoDatesCard() {
     ItineraryCard {
@@ -302,16 +311,24 @@ private fun NoDatesCard() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Timeline,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(40.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(MaterialShapes.Cookie9Sided.toShape())
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Timeline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
             Text(
                 text = "This trip has no dates",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = AdventureType.display(28.sp),
+                textAlign = TextAlign.Center
             )
             Text(
                 text = "An itinerary is a set of days. Give the collection a start and an end " +
@@ -328,14 +345,15 @@ private fun NoDatesCard() {
 private fun ItineraryCard(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        // Lowest, as the collection page's own cards are; 24dp, as its ticket nearly is.
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             content()
