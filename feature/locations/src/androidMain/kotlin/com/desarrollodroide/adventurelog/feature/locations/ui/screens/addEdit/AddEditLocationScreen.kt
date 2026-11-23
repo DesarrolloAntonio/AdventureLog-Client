@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit
 
+import com.desarrollodroide.adventurelog.feature.ui.components.DiscardChangesDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.FormActionBar
 import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
 import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
@@ -246,31 +247,15 @@ fun AddEditLocationContent(
     HideShellChrome()
 
     if (confirmDiscard) {
-        AlertDialog(
-            onDismissRequest = { confirmDiscard = false },
-            title = { Text(if (isEditMode) "Discard changes?" else "Discard this place?") },
-            text = {
-                Text(
-                    if (isEditMode) {
-                        "The changes you have made will not be saved."
-                    } else {
-                        "Nothing has been created yet, and what you have typed will be lost."
-                    }
-                )
+        // The same question every form asks, in the same Expressive dialog.
+        DiscardChangesDialog(
+            thing = "place",
+            isEditing = isEditMode,
+            onDiscard = {
+                confirmDiscard = false
+                onNavigateBack()
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        confirmDiscard = false
-                        onNavigateBack()
-                    }
-                ) {
-                    Text("Discard", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDiscard = false }) { Text("Keep editing") }
-            }
+            onKeepEditing = { confirmDiscard = false },
         )
     }
 

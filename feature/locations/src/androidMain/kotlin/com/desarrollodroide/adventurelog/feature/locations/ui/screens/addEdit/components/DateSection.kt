@@ -1,23 +1,28 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.FilterSection
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import com.desarrollodroide.adventurelog.feature.ui.components.date.DateTimeField
 import com.desarrollodroide.adventurelog.feature.ui.components.date.TimePickerDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.date.TimezoneDropdown
@@ -27,7 +32,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 fun DateSection(
     formData: LocationFormData,
@@ -54,25 +59,9 @@ fun DateSection(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Settings section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                ),
-                border = CardDefaults.outlinedCardBorder()
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
+            // Settings: the timezone and whether the visit is all day.
+            FilterSection("Settings") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     // Timezone dropdown
                     TimezoneDropdown(
                         selectedTimezone = tempVisitData.timezone,
@@ -81,39 +70,13 @@ fun DateSection(
                         }
                     )
 
-                    // All day switch
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-                        ),
-                        border = CardDefaults.outlinedCardBorder()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "All day",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Switch(
-                                checked = tempVisitData.isAllDay,
-                                onCheckedChange = { isAllDay ->
-                                    tempVisitData = tempVisitData.copy(isAllDay = isAllDay)
-                                },
-                                colors = SwitchDefaults.colors(
-                                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                )
-                            )
+                    // All day switch: the whole row toggles it, not only the switch.
+                    AllDayRow(
+                        checked = tempVisitData.isAllDay,
+                        onCheckedChange = { isAllDay ->
+                            tempVisitData = tempVisitData.copy(isAllDay = isAllDay)
                         }
-                    }
+                    )
                 }
             }
 
@@ -121,8 +84,7 @@ fun DateSection(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Start date",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -139,8 +101,7 @@ fun DateSection(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "End date",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -168,8 +129,7 @@ fun DateSection(
                     )
                     Text(
                         text = "Add notes",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -182,7 +142,7 @@ fun DateSection(
                     placeholder = {
                         Text(
                             text = "Add notes about this visit",
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     modifier = Modifier
@@ -191,14 +151,13 @@ fun DateSection(
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Default
                     ),
-                    shape = RoundedCornerShape(16.dp),
+                    // The form's own field: outlined on the card, as StyledTextField draws them.
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                            alpha = 0.3f
-                        ),
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     )
                 )
             }
@@ -226,34 +185,19 @@ fun DateSection(
             )
 
             // Visits section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+            FilterSection("Visits") {
+                if (formData.visits.isEmpty()) {
                     Text(
-                        text = "Visits",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        text = "No visits added yet",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
-                    if (formData.visits.isEmpty()) {
-                        Text(
-                            text = "No visits added yet",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
                         formData.visits.forEachIndexed { index, visit ->
                             VisitItem(
                                 visit = visit,
+                                shape = SegmentedListDefaults.shapeFor(index, formData.visits.size),
                                 onEdit = {
                                     tempVisitData = visit
                                     editingVisitIndex = index
@@ -312,7 +256,8 @@ fun DateSection(
         DatePickerDialog(
             onDismissRequest = { showStartDatePicker = false },
             confirmButton = {
-                TextButton(
+                Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val instant = Instant.fromEpochMilliseconds(millis)
@@ -329,7 +274,7 @@ fun DateSection(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showStartDatePicker = false }) {
+                TextButton(onClick = { showStartDatePicker = false }, shapes = ButtonDefaults.shapes()) {
                     Text("Cancel")
                 }
             }
@@ -385,7 +330,8 @@ fun DateSection(
         DatePickerDialog(
             onDismissRequest = { showEndDatePicker = false },
             confirmButton = {
-                TextButton(
+                Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = {
                         datePickerState.selectedDateMillis?.let { millis ->
                             val instant = Instant.fromEpochMilliseconds(millis)
@@ -401,7 +347,7 @@ fun DateSection(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEndDatePicker = false }) {
+                TextButton(onClick = { showEndDatePicker = false }, shapes = ButtonDefaults.shapes()) {
                     Text("Cancel")
                 }
             }
@@ -463,5 +409,47 @@ fun DateSection(
             initialHour = initialHour,
             initialMinute = initialMinute
         )
+    }
+}
+
+/** "All day" as a settings row on the card; the whole row toggles it. */
+@Composable
+private fun AllDayRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .toggleable(value = checked, onValueChange = onCheckedChange, role = Role.Switch)
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Outlined.WbSunny, contentDescription = null, modifier = Modifier.size(22.dp))
+                }
+            }
+            Text(
+                text = "All day",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = checked,
+                onCheckedChange = null,
+                thumbContent = if (checked) {
+                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(SwitchDefaults.IconSize)) }
+                } else null
+            )
+        }
     }
 }
