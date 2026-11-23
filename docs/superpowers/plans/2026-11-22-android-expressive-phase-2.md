@@ -115,11 +115,19 @@ Each screen task has the same shape. **Files:** the screen file(s) listed; the e
 | 13 | Settings, People, Legal | `Android-Settings`, `-Users`, `-Legal` | `feature/settings/.../SettingsScreen.kt`, `UsersScreen.kt`, `TermsOfUseScreen.kt`, `PrivacyPolicyScreen.kt` | `SegmentedList` groups; Terms/Privacy as one screen with a tab row |
 | 14 | Login | `Android-Login` | `feature/login/.../LoginScreen.kt` | fields keep labels; show-password toggle announced; keyboard never covers Sign in (`imePadding`) |
 
+### Status, 2026-11-23
+
+Tasks 1-14 are done, one commit per screen on `feat/android-expressive`. Task 15: docs and the full
+walk done (phone light and dark, 1800x2400 window); `build allTests` and the check script pass; the
+minified release builds but was not opened on the Pixel, whose release slot holds the owner's own
+signed 0.0.9-alpha. Font scale 2.0 is covered by `MainToolbarTest` only: `font_scale` has no effect
+on this Pixel.
+
 ### Task 15: Documents and the release
 
 **Files:** Modify `docs/design.md`, `README.md` (screenshots), `composeApp/build.gradle.kts` (versionCode/versionName).
 
-- [ ] **Step 1:** `docs/design.md`: point the visual source at `design/native-ui/`, drop `dashboard-redesign.dc.html`, keep the layout traps and form rules, add the traps this phase found.
-- [ ] **Step 2:** Full walk of every screen in light and dark on the Pixel, plus the 1800×2400 window, plus font scale 2.0 on Home, Places and a form.
+- [x] **Step 1:** `docs/design.md`: point the visual source at `design/native-ui/`, drop `dashboard-redesign.dc.html`, keep the layout traps and form rules, add the traps this phase found.
+- [x] **Step 2:** Full walk of every screen in light and dark on the Pixel, plus the 1800×2400 window, plus font scale 2.0 on Home, Places and a form.
 - [ ] **Step 3:** `./gradlew build allTests`, `scripts/check-common-compose.sh`, and a minified release APK opened on the device.
-- [ ] **Step 4:** Commit, open the PR to `develop` with before/after screenshots per screen.
+- [x] **Step 4:** Commit, open the PR to `develop` with before/after screenshots per screen.

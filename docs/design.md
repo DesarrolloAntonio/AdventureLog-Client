@@ -1,10 +1,11 @@
 # Design notes
 
 Android only: iOS is SwiftUI and has its own design. Why the screens look the way they do, and the traps that shape is built on. The visual source is
-`design/dashboard-redesign.dc.html` - a Claude Design document exported into the repo so the
-layout can be read rather than eyeballed from screenshots. Read it, not a picture of it: the first
-attempt at the dashboard was transcribed by eye and got the hero colour, the icons and the section
-structure all wrong while the markup sat there saying otherwise.
+`design/native-ui/` - the Claude Design canvas exported into the repo, one `Android-<Screen>.dc.html`
+per screen in light and dark (`Main.dc.html` puts them side by side). Read it, not a picture of it:
+the first attempt at the dashboard was transcribed by eye and got the hero colour, the icons and the
+section structure all wrong while the markup sat there saying otherwise. (`design/dashboard-redesign.dc.html`
+is the older, pre-Expressive dashboard and no longer the reference.)
 
 ## One palette, and it is yours
 
@@ -115,8 +116,42 @@ doing the same thing:
 The view chips of a collection are cut at the screen edge on purpose: the cut is what says the row
 scrolls.
 
+## Material 3 Expressive (phase 2)
+
+The canvas is Material 3 Expressive, built on `androidx.compose.material3` 1.5:
+
+- **Theme:** `MaterialExpressiveTheme` with `MotionScheme.expressive()`, `AdventureShapes`, and
+  Roboto Flex for everything (from `feature/ui`'s assets). `AdventureType.display(size)` is the
+  canvas's condensed, heavy display face - page titles, big numbers; `AdventureType.stamp()` the
+  passport-stamp lettering.
+- **Navigation:** a `HorizontalFloatingToolbar` on phones that floats over the content and hides on
+  scroll, a nav rail on tablets. A screen's main action sits beside it as the toolbar's FAB through
+  `rememberShellAction`; a page that wants the whole screen (a place, a form) calls
+  `HideShellChrome()`.
+- **Shared pieces** in `feature/ui`: `SegmentedList` (rows as separate blocks, 3dp apart, outer
+  corners round), `TicketCard`, `PassportChip`, `DateTile`, `PlaceRow`, `FormHeader` (Close and a
+  large title). Choice rows are connected `ToggleButton`s.
+- **Dropped when there is no data behind it.** Anything the canvas draws that the server cannot
+  fill (a server "Found" check, a trip's region, a country strip) is left out, and the commit says
+  so.
+
+Traps from this phase:
+
+- **Roboto Flex only narrows when its optical size is set.** Condensed width does nothing at the
+  default `opsz`; `AdventureType` sets `FontVariation.opticalSizing` to the font size.
+- **`ButtonGroup` crashes inside lazy lists.** Lay connected `ToggleButton`s in a `Row` with
+  `ButtonGroupDefaults.connected*ButtonShapes()` and `ConnectedSpaceBetween`. Their colours are
+  `ToggleButtonDefaults.colors(...)` in 1.5, not `toggleButtonColors`.
+- **`ContentColumn` fills the height.** Put a fixed control above a list in a `Box` with `widthIn`
+  and give the list `weight(1f)`, or the control eats the screen.
+- **Google Maps tears down badly in UI tests.** Page tests use places without coordinates; map
+  pieces are tested on their own.
+- **A full-screen `Dialog` is a window of its own.** It needs `decorFitsSystemWindows = false` to
+  reach the edges, its own background, and its own status-bar icon colour (see Settings' Legal).
+
 ## UI is no longer shared
 
 Android and iOS each draw their own UI, so there is no "shared view" to keep neutral; Material is
 fine on Android. See `docs/superpowers/specs/2026-11-21-native-ui-split-design.md`. The visual
-design of each platform comes from Claude Design, in later phases.
+design of each platform comes from Claude Design: Android in Material 3 Expressive (above), iOS in
+Liquid Glass.
