@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.Animatable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -120,6 +125,8 @@ fun PlacePhotoHero(
     onShareClick: () -> Unit,
     showBack: Boolean,
     modifier: Modifier = Modifier,
+    /** How far the page has scrolled: the photo drifts at under half that, for depth. */
+    scrollOffset: () -> Int = { 0 },
 ) {
     val photos = images.filter { it.image.isNotBlank() }
     val pager = rememberPagerState { photos.size }
@@ -137,7 +144,16 @@ fun PlacePhotoHero(
                 painter = rememberAsyncImagePainter(model = photos[page].image, imageLoader = imageLoader),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    // Parallax: the page scrolls on, the photo lags behind and swells a touch.
+                    .graphicsLayer {
+                        val offset = scrollOffset().toFloat()
+                        translationY = offset * 0.45f
+                        val grow = 1f + (offset / 4000f).coerceAtMost(0.12f)
+                        scaleX = grow
+                        scaleY = grow
+                    },
             )
         }
         Row(
@@ -216,15 +232,32 @@ fun PlaceHeadline(location: Location, modifier: Modifier = Modifier) {
         }
         val stars = location.rating?.roundToInt()?.coerceIn(0, 5) ?: 0
         if (stars > 0) {
-            Text(
-                text = "★".repeat(stars) + "☆".repeat(5 - stars),
-                color = colors.primary,
-                fontSize = 26.sp,
-                letterSpacing = 1.sp,
+            // The stars pop in one after another on the expressive spring as the page opens.
+            val spec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+            Row(
                 modifier = Modifier
                     .padding(top = 10.dp)
                     .clearAndSetSemantics { contentDescription = "Rated $stars out of 5" },
-            )
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                repeat(5) { i ->
+                    val pop = remember(location.id) { Animatable(0f) }
+                    LaunchedEffect(location.id) {
+                        delay(80L * i)
+                        pop.animateTo(1f, spec)
+                    }
+                    Text(
+                        text = if (i < stars) "★" else "☆",
+                        color = colors.primary,
+                        fontSize = 26.sp,
+                        modifier = Modifier.graphicsLayer {
+                            scaleX = pop.value
+                            scaleY = pop.value
+                            rotationZ = (1f - pop.value) * -60f
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -264,6 +297,7 @@ fun PlaceFactsStrip(
     if (facts.isEmpty()) return
     val colors = MaterialTheme.colorScheme
     val dash = colors.outlineVariant
+    val page = colors.background
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = colors.surfaceContainerLowest,
@@ -285,6 +319,10 @@ fun PlaceFactsStrip(
                                     dash, Offset(0f, 0f), Offset(0f, size.height), strokeWidth = 2.dp.toPx(),
                                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())),
                                 )
+                                // A notch bitten out of the ticket's edge where each tear meets it.
+                                val r = 9.dp.toPx()
+                                drawCircle(page, r, Offset(0f, -14.dp.toPx() - 1.dp.toPx()))
+                                drawCircle(page, r, Offset(0f, size.height + 14.dp.toPx() + 1.dp.toPx()))
                             } else Modifier,
                         )
                         .then(

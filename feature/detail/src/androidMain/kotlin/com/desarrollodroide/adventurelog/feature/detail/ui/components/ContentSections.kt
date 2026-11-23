@@ -55,7 +55,9 @@ fun MapBody(
     latitude: String,
     longitude: String,
     onOpenMap: (String, String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emoji: String? = null,
+    visited: Boolean = true,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Card(
@@ -69,7 +71,9 @@ fun MapBody(
             MapView(
                 latitude = latitude,
                 longitude = longitude,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                emoji = emoji,
+                visited = visited
             )
         }
         Spacer(Modifier.height(8.dp))

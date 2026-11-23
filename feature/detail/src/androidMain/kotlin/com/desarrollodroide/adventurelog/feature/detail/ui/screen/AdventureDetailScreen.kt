@@ -208,7 +208,8 @@ fun AdventureDetailScreen(
                             images = location.images,
                             onBackClick = onBackClick,
                             onShareClick = onShareLocation,
-                            showBack = showBack
+                            showBack = showBack,
+                            scrollOffset = { scrollState.value }
                         )
                     }
 
@@ -248,7 +249,7 @@ fun AdventureDetailScreen(
 
                         if (hasCoordinates) {
                             DetailSection(title = "Where") {
-                                MapBody(latitude = lat!!, longitude = lon!!, onOpenMap = onOpenMap)
+                                MapBody(latitude = lat!!, longitude = lon!!, onOpenMap = onOpenMap, emoji = location.category?.icon, visited = location.isVisited)
                             }
                         }
 
