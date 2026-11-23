@@ -61,6 +61,7 @@ import com.desarrollodroide.adventurelog.core.model.Currencies
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.DescriptionSection
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
+import com.desarrollodroide.adventurelog.feature.ui.components.AddPhotoTile
 import com.desarrollodroide.adventurelog.feature.ui.components.RatingBar
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
@@ -154,6 +155,16 @@ fun BasicInfoSection(
                 rating = formData.rating,
                 onRatingChanged = {
                     onFormDataChange(formData.copy(rating = it))
+                }
+            )
+
+            AddPhotoTile(
+                photoCount = formData.images.size,
+                onPhotoPicked = { picked ->
+                    // The first photo of a place is its cover, as the Images section does it.
+                    onFormDataChange(
+                        formData.copy(images = formData.images + picked.copy(isPrimary = formData.images.isEmpty()))
+                    )
                 }
             )
 
