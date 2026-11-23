@@ -40,7 +40,9 @@ fun AdventureMapView(
     showCities: Boolean,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** The pin tapped last, drawn as a label with its name. */
+    selectedId: String? = null,
 ) {
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
@@ -173,11 +175,11 @@ fun AdventureMapView(
 
         // Clustered rather than one pin per place: two hundred markers over one country pile
         // into an unreadable blob, which is why the web clusters too. Zooming in splits them.
-        val clusterItems = remember(adventuresWithLocation) {
+        val clusterItems = remember(adventuresWithLocation, selectedId) {
             adventuresWithLocation.mapNotNull { adventure ->
                 val lat = adventure.latitude?.toDoubleOrNull()
                 val lng = adventure.longitude?.toDoubleOrNull()
-                if (lat == null || lng == null) null else LocationClusterItem(adventure, lat, lng)
+                if (lat == null || lng == null) null else LocationClusterItem(adventure, lat, lng, adventure.id == selectedId)
             }
         }
 
@@ -187,11 +189,13 @@ fun AdventureMapView(
                 onAdventureClick(item.location.id)
                 false
             },
-            clusterContent = { cluster -> ClusterBubble(count = cluster.size) },
+            clusterContent = { cluster -> ExpressiveClusterBubble(count = cluster.size) },
             clusterItemContent = { item ->
-                AdventureMarker(
-                    location = item.location,
-                    isVisited = item.location.isVisited
+                ExpressivePin(
+                    name = item.location.name,
+                    emoji = item.location.category?.icon,
+                    visited = item.location.isVisited,
+                    selected = item.selected,
                 )
             }
         )
@@ -202,56 +206,13 @@ fun AdventureMapView(
 private data class LocationClusterItem(
     val location: Location,
     private val lat: Double,
-    private val lng: Double
+    private val lng: Double,
+    // Part of the item so a new selection is a new item, and the clustering draws it again.
+    val selected: Boolean = false,
 ) : ClusterItem {
     override fun getPosition(): LatLng = LatLng(lat, lng)
     override fun getTitle(): String = location.name
     override fun getSnippet(): String = location.location.orEmpty()
-}
-
-/** How many places are stacked at this point. Grows a little with the count, as the web's does. */
-@Composable
-private fun ClusterBubble(count: Int, modifier: Modifier = Modifier) {
-    val size = when {
-        count >= 100 -> 56.dp
-        count >= 25 -> 48.dp
-        else -> 40.dp
-    }
-
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary)
-            .border(2.dp, Color.White, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = count.toString(),
-            color = MaterialTheme.colorScheme.onPrimary,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun AdventureMarker(
-    location: Location,
-    isVisited: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val markerColor = if (isVisited) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.tertiary
-    }
-    
-    SimpleMapMarker(
-        color = markerColor,
-        emoji = location.category?.icon,
-        modifier = modifier
-    )
 }
 
 @Composable

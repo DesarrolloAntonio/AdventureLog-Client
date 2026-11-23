@@ -77,7 +77,8 @@ fun MapScreen(
             error = uiState.error,
             onRetry = viewModel::refresh,
             onAdventureClick = { selectedId = it },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            selectedId = selectedId,
         )
 
         Column(

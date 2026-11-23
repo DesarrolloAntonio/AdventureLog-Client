@@ -16,6 +16,7 @@ import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MapContent(
     locations: List<Location>,
@@ -27,15 +28,16 @@ fun MapContent(
     error: String?,
     onRetry: () -> Unit = {},
     onAdventureClick: (adventureId: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedId: String? = null,
 ) {
     Box(
         modifier = modifier.fillMaxSize()
     ) {
         when {
             isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+                LoadingIndicator(
+                    modifier = Modifier.align(Alignment.Center).size(64.dp)
                 )
             }
             
@@ -84,7 +86,8 @@ fun MapContent(
                         visitedRegions = visitedRegions,
                         showRegions = showRegions,
                         onAdventureClick = onAdventureClick,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        selectedId = selectedId,
                     )
                 }
             }
