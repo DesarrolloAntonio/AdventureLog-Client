@@ -8,6 +8,9 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.performScrollTo
 import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.TripStatus
@@ -184,10 +187,14 @@ class DashboardScreenTest {
 
         // assertExists, not assertIsDisplayed: the stats sit below the fold on a phone, and
         // whether they have been scrolled to is not what this test is about.
-        onNodeWithText("Countries").assertExists()
-        onNodeWithText("Regions").assertExists()
-        onNodeWithText(" / 250").assertExists()
-        onNodeWithText(" / 5,322").assertExists()
+        // Places visited round the wavy ring, then countries, regions and cities in their shapes.
+        onNodeWithText("places visited", useUnmergedTree = true).assertExists()
+        onNodeWithText("of 22 saved", useUnmergedTree = true).assertExists()
+        onNodeWithText("countries", useUnmergedTree = true).assertExists()
+        onNodeWithText("of 250", useUnmergedTree = true).assertExists()
+        onNodeWithText("regions", useUnmergedTree = true).assertExists()
+        onNodeWithText("of 5,322", useUnmergedTree = true).assertExists()
+        onNodeWithText("of 153,728", useUnmergedTree = true).assertExists()
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -256,4 +263,25 @@ class DashboardScreenTest {
         onNodeWithText("Recently updated (22)").assertDoesNotExist()
     }
 
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun theRecentPlacesAreACarouselThatOpensThem() = runComposeUiTest {
+        var opened: String? = null
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(
+                        dashboard = dashboard.copy(recentLocations = listOf(testLocation("Machu Picchu"), testLocation("Petra")))
+                    ),
+                    onAdventureClick = { opened = it.name },
+                )
+            }
+        }
+
+        // The semantic click: a carousel item lies under the carousel's own drag handling, and
+        // an injected tap in the test window did not reach it (on the phone a tap opens it).
+        onNodeWithContentDescription("Machu Picchu").performScrollTo().assertHasClickAction()
+            .performSemanticsAction(SemanticsActions.OnClick)
+        assertEquals("Machu Picchu", opened)
+    }
 }

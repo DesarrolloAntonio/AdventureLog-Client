@@ -53,6 +53,8 @@ import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
+import com.desarrollodroide.adventurelog.feature.home.ui.components.MapSoFarTiles
+import com.desarrollodroide.adventurelog.feature.home.ui.components.RecentPlacesCarousel
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
 import kotlinx.datetime.LocalDate
@@ -470,16 +472,7 @@ private fun StackedDashboard(
                     trailing = "See all",
                     onTrailingClick = onSeeAllPlaces
                 )
-                // A strip that runs off the edge, so the photographs stay photographs instead of
-                // becoming a column of thumbnails a phone screen deep.
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    dashboard.recentLocations.forEach { location ->
-                        PlaceMiniCard(location, onClick = { onAdventureClick(location) })
-                    }
-                }
+                RecentPlacesCarousel(dashboard.recentLocations, onClick = onAdventureClick)
             }
         }
     }
@@ -691,7 +684,7 @@ private fun YourMapSoFar(dashboard: Dashboard, onSeeWorld: () -> Unit) {
         ) {
             Text("$places \u00b7 $countries visited", style = MaterialTheme.typography.labelLarge)
         }
-        StatsCard(dashboard)
+        MapSoFarTiles(dashboard.stats)
     }
 }
 
@@ -702,156 +695,6 @@ private fun tripDates(trip: UltraSlimCollection): String? {
     val short = { d: String -> d.split("-").let { if (it.size == 3) "${it[2]}/${it[1]}" else d } }
     return if (to != null && to != from) "${short(from)} \u2013 ${short(to)}" else short(from)
 }
-
-/**
- * A trip further out than the featured one - same information as TripCard, in the compact row
- * shape the events list already uses, since a full-size card per trip would push everything else
- * off the first screen.
- */
-@Composable
-private fun TripRow(
-    trip: UltraSlimCollection,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = trip.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (trip.adventureCount > 0) {
-                    Text(
-                        text = if (trip.adventureCount == 1) "1 place" else "${trip.adventureCount} places",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = tripSubtitle(trip),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-/**
- * Four figures, each against the total it is a fraction of. A bare "8" says nothing; "8 of 5,322"
- * is the whole point of the number.
- */
-@Composable
-private fun StatsCard(
-    dashboard: Dashboard,
-    modifier: Modifier = Modifier,
-    title: String? = null
-) {
-    val stats = dashboard.stats
-    val rows = listOf(
-        Triple("Countries", stats.visitedCountryCount, stats.totalCountries),
-        Triple("Regions", stats.visitedRegionCount, stats.totalRegions),
-        Triple("Cities", stats.visitedCityCount, stats.totalCities),
-        Triple("Places visited", stats.visitedLocationCount, stats.locationCount)
-    )
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        // No icons. Four of them down the left edge added a column of decoration and pushed the
-        // numbers - the only part anyone reads - into the middle of the card.
-        BoxWithConstraints {
-            val perRow = when {
-                maxWidth >= 900.dp -> 4
-                maxWidth >= 560.dp -> 2
-                else -> 1
-            }
-            Column(
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 13.dp),
-                verticalArrangement = Arrangement.spacedBy(9.dp)
-            ) {
-                if (title != null) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                rows.chunked(perRow).forEach { chunk ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        chunk.forEach { (label, visited, total) ->
-                            StatRow(label, visited, total, Modifier.weight(1f))
-                        }
-                        repeat(perRow - chunk.size) { Spacer(Modifier.weight(1f)) }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatRow(
-    label: String,
-    visited: Int,
-    total: Int,
-    modifier: Modifier = Modifier
-) {
-    val fraction = if (total > 0) (visited.toFloat() / total).coerceIn(0f, 1f) else 0f
-
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
-            )
-            // Monospaced, so four rows of counts line up as a column of figures rather than
-            // drifting with the width of each number.
-            Text(
-                text = visited.grouped(),
-                style = MaterialTheme.typography.titleMedium,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = " / ${total.grouped()}",
-                style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Spacer(Modifier.height(6.dp))
-        LinearProgressIndicator(
-            progress = { fraction },
-            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            gapSize = 0.dp,
-            drawStopIndicator = {}
-        )
-    }
-}
-
 @Composable
 private fun EventRow(
     event: CalendarEvent,
@@ -1066,110 +909,6 @@ private fun ComingUpRow(entry: ComingUp, modifier: Modifier = Modifier) {
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-            }
-        }
-    }
-}
-
-/**
- * A place in the home strip: photograph on top, its four facts underneath on white.
- *
- * Not the card the places list uses. Text laid over a photograph disappears whenever the
- * photograph is pale - the name of a white village against a bright sky - and at this size there
- * is no room to darken it enough to fix that without losing the photograph too.
- *
- * The photograph gets a ratio, 4:3, not a height: the old 72dp band was a sliver too thin to show
- * the place. Without a photograph the same 4:3 slot stays, filled by [LocationPlaceholder] with a
- * hairline along its bottom that anchors it to the writing, so a strip mixing both keeps one height.
- */
-private val PlaceMiniCardWidth = 176.dp
-private const val PlaceMiniPhotoRatio = 4f / 3f
-
-@Composable
-private fun PlaceMiniCard(
-    location: Location,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val imageLoader = LocalImageLoader.current
-    val photo = location.images.firstOrNull()?.image?.takeIf { it.isNotBlank() }
-
-    Card(
-        onClick = onClick,
-        modifier = modifier.width(PlaceMiniCardWidth),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        if (photo != null) {
-            Image(
-                painter = rememberAsyncImagePainter(model = photo, imageLoader = imageLoader),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().aspectRatio(PlaceMiniPhotoRatio)
-            )
-        } else {
-            val edge = placeholderColors(hasCategory = !location.category?.icon.isNullOrBlank()).edge
-            LocationPlaceholder(
-                icon = location.category?.icon,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(PlaceMiniPhotoRatio)
-                    // Drawn inside the slot, not below it: a divider would make this card 1dp
-                    // taller than the photographs beside it.
-                    .drawWithContent {
-                        drawContent()
-                        val y = size.height - 0.5.dp.toPx()
-                        drawLine(edge, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
-                    }
-            )
-        }
-        Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 10.dp)) {
-            Text(
-                text = location.name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            // Every line is drawn, empty or not. These cards stand side by side in a row, and a
-            // place with no category or no label was a card a line shorter than its neighbours.
-            Text(
-                text = location.location?.takeIf { it.isNotBlank() }.orEmpty(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.outline,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            val rating = location.rating?.toInt() ?: 0
-            // The category as the user made it, emoji and name. "No category" only on a card
-            // with no photograph, where the neutral pin above would otherwise go unexplained.
-            val category = location.category?.let { "${it.icon} ${it.displayName}".trim() }
-                ?: if (photo == null) "No category" else ""
-            // The full line height, untrimmed: the stars come from a fallback font taller than
-            // Quicksand, and a trimmed line made a rated card 1dp taller than its neighbours.
-            val rowStyle = MaterialTheme.typography.labelSmall.copy(
-                lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None)
-            )
-            Spacer(Modifier.height(5.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (rating > 0) {
-                    Text(
-                        text = "\u2605".repeat(rating),
-                        style = rowStyle,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.width(6.dp))
-                }
-                Text(
-                    text = category,
-                    style = rowStyle,
-                    color = MaterialTheme.colorScheme.outline,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
     }
