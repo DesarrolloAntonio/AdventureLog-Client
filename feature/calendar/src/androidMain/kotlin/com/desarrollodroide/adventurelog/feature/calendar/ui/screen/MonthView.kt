@@ -1,5 +1,12 @@
 package com.desarrollodroide.adventurelog.feature.calendar.ui.screen
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.graphicsLayer
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -119,6 +126,7 @@ fun CalendarModeToggle(mode: CalendarMode, onMode: (CalendarMode) -> Unit, modif
  * A month as the canvas draws it: the days in a grid, a trip as a band across the days it covers,
  * today inked, and under the grid the chosen day's events, which open as they do in the agenda.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MonthView(state: CalendarUiState, onOpen: (EventTarget) -> Unit, modifier: Modifier = Modifier) {
     val start = state.today ?: state.days.firstOrNull()?.date ?: LocalDate(2026, 1, 1)
@@ -136,8 +144,17 @@ fun MonthView(state: CalendarUiState, onOpen: (EventTarget) -> Unit, modifier: M
         month = moved.month.ordinal + 1
     }
 
-    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 120.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 12.dp)) {
+    val cookie = MaterialShapes.Cookie9Sided.toShape()
+    Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 8.dp, bottom = 120.dp)) {
+      // The month on a card of its own, as the canvas draws it.
+      Surface(
+        shape = RoundedCornerShape(28.dp),
+        color = colors.surfaceContainerLowest,
+        border = BorderStroke(1.dp, colors.outlineVariant),
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+       Column(Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = 10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 6.dp, top = 6.dp, bottom = 8.dp)) {
             Text("${MONTH_NAMES[month - 1]} $year", style = AdventureType.display(28.sp), modifier = Modifier.weight(1f))
             FilledTonalIconButton(onClick = { shift(-1) }) {
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous month")
@@ -180,13 +197,26 @@ fun MonthView(state: CalendarUiState, onOpen: (EventTarget) -> Unit, modifier: M
                                         .background(colors.primaryContainer)
                                 )
                             }
+                            // The chosen day springs up inside a cookie from Material's shape library;
+                            // today keeps a ring when something else is chosen.
+                            val grow by animateFloatAsState(
+                                if (isSelected) 1f else 0f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "day"
+                            )
+                            if (grow > 0f) {
+                                Box(
+                                    Modifier
+                                        .size(44.dp)
+                                        .graphicsLayer { scaleX = grow; scaleY = grow; rotationZ = (1f - grow) * -40f }
+                                        .clip(cookie)
+                                        .background(colors.primary)
+                                )
+                            }
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(CircleShape)
-                                    .background(if (isToday) colors.primary else Color.Transparent)
-                                    .then(if (isSelected && !isToday) Modifier.border(2.dp, colors.primary, CircleShape) else Modifier)
+                                    .then(if (isToday && !isSelected) Modifier.border(2.dp, colors.primary, CircleShape) else Modifier)
                                     .clickable { selected = date.toString() }
                                     .semantics {
                                         contentDescription = "${date.day} ${MONTH_NAMES[month - 1]}" +
@@ -196,15 +226,16 @@ fun MonthView(state: CalendarUiState, onOpen: (EventTarget) -> Unit, modifier: M
                             ) {
                                 Text(
                                     date.day.toString(),
-                                    fontWeight = if (events.isNotEmpty() || isToday) FontWeight.Bold else FontWeight.Normal,
+                                    fontWeight = if (events.isNotEmpty() || isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
                                     color = when {
-                                        isToday -> colors.onPrimary
+                                        isSelected -> colors.onPrimary
+                                        isToday -> colors.primary
                                         inSpan -> colors.onPrimaryContainer
                                         else -> colors.onSurface
                                     },
                                 )
                                 if (events.isNotEmpty()) {
-                                    Box(Modifier.size(5.dp).clip(CircleShape).background(if (isToday) colors.onPrimary else colors.primary))
+                                    Box(Modifier.size(5.dp).clip(CircleShape).background(if (isSelected) colors.onPrimary else colors.primary))
                                 }
                             }
                         }
@@ -213,8 +244,11 @@ fun MonthView(state: CalendarUiState, onOpen: (EventTarget) -> Unit, modifier: M
             }
         }
 
+       }
+      }
+
         val day = selected?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
         if (day != null) {
             Text(
                 text = "${day.day} ${MONTH_NAMES[day.month.ordinal]}",
@@ -225,7 +259,9 @@ fun MonthView(state: CalendarUiState, onOpen: (EventTarget) -> Unit, modifier: M
             if (events.isEmpty()) {
                 Text("Nothing on this day.", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { events.forEach { EventCard(it, onOpen) } }
+                Column(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                    events.forEachIndexed { i, event -> EventCard(event, onOpen, SegmentedListDefaults.shapeFor(i, events.size)) }
+                }
             }
         }
     }

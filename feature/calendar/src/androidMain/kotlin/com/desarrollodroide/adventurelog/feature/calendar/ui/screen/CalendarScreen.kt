@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.calendar.ui.screen
 
+import androidx.compose.material3.Surface
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.foundation.clickable
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
 import androidx.compose.foundation.layout.widthIn
 import com.desarrollodroide.adventurelog.feature.ui.components.DateTile
@@ -169,8 +173,11 @@ fun CalendarScreen(
                         modifier = Modifier.fillMaxSize(),
                         state = listState,
                         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 120.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)
                     ) {
+                        // Each month's days are one segmented group: outer corners round, a thin
+                        // gap between days.
+                        val segments = daySegments(items)
                         items.forEach { agendaItem ->
                             item(key = agendaItem.key) {
                                 when (agendaItem) {
@@ -178,11 +185,15 @@ fun CalendarScreen(
                                     AgendaItem.Earlier -> EarlierRow(state, onShowEarlier)
                                     is AgendaItem.Month -> MonthHeading(agendaItem.date)
                                     is AgendaItem.Today -> TodayMarker(agendaItem.date)
-                                    is AgendaItem.Day -> DayRow(
-                                        day = agendaItem.day,
-                                        isToday = agendaItem.day.date == state.today,
-                                        onOpen = onOpen
-                                    )
+                                    is AgendaItem.Day -> {
+                                        val (index, count) = segments.getValue(agendaItem.key)
+                                        DayRow(
+                                            day = agendaItem.day,
+                                            isToday = agendaItem.day.date == state.today,
+                                            shape = SegmentedListDefaults.shapeFor(index, count),
+                                            onOpen = onOpen
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -262,6 +273,14 @@ internal fun agendaItems(state: CalendarUiState): List<AgendaItem> = buildList {
 }
 
 private fun monthKey(date: LocalDate) = "${date.year}-${date.monthNumber}"
+
+/** Where each day sits in its run of consecutive days: (index, count), by item key. */
+internal fun daySegments(items: List<AgendaItem>): Map<String, Pair<Int, Int>> = buildMap {
+    var run = mutableListOf<String>()
+    fun flush() { run.forEachIndexed { i, key -> put(key, i to run.size) }; run = mutableListOf() }
+    items.forEach { if (it is AgendaItem.Day) run.add(it.key) else flush() }
+    flush()
+}
 
 /** Where the list opens: today's marker. 0 (the top) when there is no today to mark. */
 internal fun todayScrollIndex(state: CalendarUiState): Int =
@@ -375,30 +394,42 @@ private fun MonthHeading(date: LocalDate) {
     )
 }
 
+/**
+ * A day of the agenda as one block of its month's segmented group, as the canvas draws "Coming up":
+ * the date tile inside it on the left - today inked - and the day's events beside it.
+ */
 @Composable
-private fun DayRow(day: CalendarDay, isToday: Boolean, onOpen: (EventTarget) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        // The date as a calendar sheet, today inked in the primary colour, as the canvas draws it.
-        DateTile(
-            month = monthName(day.date.monthNumber).take(3).uppercase(),
-            day = day.date.dayOfMonth,
-            highlighted = isToday,
-            modifier = Modifier.padding(top = 6.dp, end = 12.dp)
-        )
-
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            day.events.forEach { event -> EventCard(event, onOpen) }
+private fun DayRow(day: CalendarDay, isToday: Boolean, shape: Shape, onOpen: (EventTarget) -> Unit) {
+    Surface(shape = shape, color = MaterialTheme.colorScheme.surfaceContainerLowest, modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().padding(start = 12.dp, top = 10.dp, bottom = 10.dp, end = 4.dp)) {
+            DateTile(
+                month = monthName(day.date.monthNumber).take(3).uppercase(),
+                day = day.date.dayOfMonth,
+                highlighted = isToday,
+                modifier = Modifier.padding(top = 2.dp, end = 4.dp)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                day.events.forEach { event -> EventLine(event, onOpen) }
+            }
         }
     }
 }
 
+/** One event inside a day's block: the whole line opens it. */
 @Composable
-internal fun EventCard(event: CalendarEvent, onOpen: (EventTarget) -> Unit) {
+private fun EventLine(event: CalendarEvent, onOpen: (EventTarget) -> Unit) {
     val target = event.target()
-    val shape = RoundedCornerShape(16.dp)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .then(if (target != null) Modifier.clickable { onOpen(target) } else Modifier)
+    ) { EventCardContent(event) }
+}
+
+@Composable
+internal fun EventCard(event: CalendarEvent, onOpen: (EventTarget) -> Unit, shape: Shape = RoundedCornerShape(16.dp)) {
+    val target = event.target()
     val colors = CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
     )
