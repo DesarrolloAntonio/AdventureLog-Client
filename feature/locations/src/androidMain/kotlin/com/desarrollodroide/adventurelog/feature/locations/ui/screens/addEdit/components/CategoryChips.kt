@@ -20,7 +20,9 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +56,15 @@ fun CategoryChips(
     modifier: Modifier = Modifier,
 ) {
     var adding by remember { mutableStateOf(false) }
+    // A category made here is made for this place: once the reloaded list has it, choose it.
+    var justCreated by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(categories, justCreated) {
+        val name = justCreated ?: return@LaunchedEffect
+        categories.firstOrNull { it.displayName == name }?.let {
+            onCategorySelected(it)
+            justCreated = null
+        }
+    }
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Category",
@@ -88,6 +99,7 @@ fun CategoryChips(
             category = null,
             onDismiss = { adding = false },
             onSave = { name, icon ->
+                justCreated = name
                 onAddCategory(name, icon)
                 adding = false
             }
@@ -101,6 +113,8 @@ private fun AddCategoryChip(onClick: () -> Unit) {
     val outline = MaterialTheme.colorScheme.outline
     Box(
         Modifier
+            // The same 48dp row the FilterChips take, so it sits on their line, not above it.
+            .minimumInteractiveComponentSize()
             .height(32.dp)
             .clip(RoundedCornerShape(10.dp))
             .drawBehind {

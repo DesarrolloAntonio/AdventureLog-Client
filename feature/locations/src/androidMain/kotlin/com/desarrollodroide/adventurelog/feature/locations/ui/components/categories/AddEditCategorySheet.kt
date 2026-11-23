@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
@@ -93,6 +94,10 @@ fun AddEditCategorySheet(
                     singleLine = true,
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    // The keyboard's ✓ creates it: with the keyboard up, it is the one button in reach.
+                    keyboardActions = KeyboardActions(onDone = {
+                        if (categoryName.isNotBlank()) onSave(categoryName, selectedIcon)
+                    }),
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Category,
@@ -132,8 +137,10 @@ fun AddEditCategorySheet(
             Spacer(modifier = Modifier.height(16.dp))
             
             // Emoji Picker - Always visible
+            // The picker gives way first: with the keyboard up it shrinks so Cancel and Create stay
+            // on screen instead of being pushed off the bottom of the sheet.
             EmojiPicker(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
                 onEmojiSelected = { emoji ->
                     selectedIcon = emoji
                 },
