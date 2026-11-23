@@ -1,5 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.DialogBadge
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.text.style.TextAlign
@@ -350,21 +356,34 @@ fun SettingsContent(
  */
 @Composable
 private fun SignOutCard(onClick: () -> Unit) {
-    Card(
+    // A row in its own block, like the groups above: the icon in an error-tinted square and the
+    // word in red, on the same card colour - red as a whole card shouted louder than it needs to.
+    val scheme = MaterialTheme.colorScheme
+    val card = if (scheme.background.luminance() < 0.5f) scheme.surfaceContainerLow else scheme.surfaceContainerLowest
+    Surface(
+        onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.padding(top = 4.dp)
+        color = card,
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
     ) {
-        SettingsRow(
-            title = "Sign out",
-            icon = Icons.AutoMirrored.Outlined.Logout,
-            tint = MaterialTheme.colorScheme.onErrorContainer,
-            showChevron = false,
-            onClick = onClick
-        )
+        Row(
+            modifier = Modifier.heightIn(min = 64.dp).padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Box(
+                Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(scheme.errorContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.Logout,
+                    contentDescription = null,
+                    tint = scheme.onErrorContainer,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Text("Sign out", style = MaterialTheme.typography.bodyLarge, color = scheme.error)
+        }
     }
 }
 

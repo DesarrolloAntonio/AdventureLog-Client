@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
@@ -13,7 +14,8 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.MapView
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LocationTransportationSection(
     formData: TransportationFormData,
@@ -55,8 +58,8 @@ fun LocationTransportationSection(
         ) {
             Text(
                 text = "From Location",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Row(
@@ -74,21 +77,20 @@ fun LocationTransportationSection(
                     modifier = Modifier.weight(1f)
                 )
                 
-                IconButton(
-                    onClick = { showFromLocationSearch = true }
+                // A tonal button the size of the field, like the date pickers' buttons beside theirs.
+                FilledTonalIconButton(
+                    onClick = { showFromLocationSearch = true },
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.size(56.dp),
                 ) {
-                    Icon(
-                        Icons.Outlined.Search,
-                        contentDescription = "Search location",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    Icon(Icons.Outlined.Search, contentDescription = "Search location")
                 }
             }
 
             Text(
                 text = "To Location",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Row(
@@ -106,14 +108,13 @@ fun LocationTransportationSection(
                     modifier = Modifier.weight(1f)
                 )
                 
-                IconButton(
-                    onClick = { showToLocationSearch = true }
+                // A tonal button the size of the field, like the date pickers' buttons beside theirs.
+                FilledTonalIconButton(
+                    onClick = { showToLocationSearch = true },
+                    shapes = IconButtonDefaults.shapes(),
+                    modifier = Modifier.size(56.dp),
                 ) {
-                    Icon(
-                        Icons.Outlined.Search,
-                        contentDescription = "Search location",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    Icon(Icons.Outlined.Search, contentDescription = "Search location")
                 }
             }
 

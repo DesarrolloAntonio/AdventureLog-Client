@@ -246,10 +246,11 @@ private fun PersonRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            // A person is a round avatar, as on the People screen; squares are for things.
             Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = colors.surfaceContainerHighest,
-                contentColor = colors.onSurfaceVariant,
+                shape = androidx.compose.foundation.shape.CircleShape,
+                color = colors.secondaryContainer,
+                contentColor = colors.onSecondaryContainer,
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {

@@ -145,6 +145,8 @@ private fun PhotoCarouselItem(
     Box(
         modifier = modifier
             .fillMaxSize()
+            // A tonal tile under the photo: one that is loading, or fails to, still holds its place.
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .clickable { onClick() }
     ) {
         Image(

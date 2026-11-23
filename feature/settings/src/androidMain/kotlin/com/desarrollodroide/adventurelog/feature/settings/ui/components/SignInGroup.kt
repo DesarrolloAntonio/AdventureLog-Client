@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.LocalSettingsSegmentColor
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -42,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.EmailAddress
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.EmailsSectionState
-import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRowDivider
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
 
@@ -74,7 +76,10 @@ fun SignInGroup(
     SettingsGroup(
         title = "Sign-in & email",
         modifier = modifier,
-        busy = emails.isBusy
+        busy = emails.isBusy,
+        // Rows, as every other group: the email list is rows too, so it splits like them.
+        segmented = true,
+        iconContainer = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         SettingsRow(
             title = if (hasPassword) "Change password" else "Set a password",
@@ -87,12 +92,14 @@ fun SignInGroup(
             },
             onClick = { passwordDialogOpen = true }
         )
-        SettingsRowDivider()
 
         when {
             emails.isLoading && emails.addresses.isEmpty() -> {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(LocalSettingsSegmentColor.current ?: Color.Transparent, RoundedCornerShape(6.dp))
+                        .padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     LoadingIndicator(Modifier.size(40.dp))
@@ -114,7 +121,6 @@ fun SignInGroup(
             }
 
             else -> emails.addresses.forEachIndexed { index, address ->
-                if (index > 0) SettingsRowDivider()
                 EmailRow(
                     address = address,
                     // The server refuses to remove the primary address, and refuses to promote an
@@ -128,7 +134,6 @@ fun SignInGroup(
             }
         }
 
-        SettingsRowDivider()
         SettingsRow(
             title = "Add email address",
             icon = Icons.Outlined.Add,
