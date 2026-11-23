@@ -15,7 +15,7 @@ struct RootView: View {
             } else if user == nil {
                 LoginView()
             } else {
-                ContentUnavailableView("AdventureLog", systemImage: "map", description: Text("Signed in."))
+                MainTabView()
             }
         }
         .tint(Theme.accent)
