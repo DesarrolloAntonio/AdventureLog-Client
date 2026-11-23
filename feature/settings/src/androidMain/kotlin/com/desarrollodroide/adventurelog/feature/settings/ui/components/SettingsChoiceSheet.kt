@@ -1,33 +1,52 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
 /**
  * One option out of a list, chosen in a sheet rather than a dropdown.
@@ -45,7 +64,7 @@ data class ChoiceEntry(
     val group: String? = null
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsChoiceSheet(
     title: String,
@@ -57,6 +76,8 @@ fun SettingsChoiceSheet(
     note: String? = null
 ) {
     val listState = rememberLazyListState()
+    // Each group is its own segmented block, so a row's corners depend on where it sits in its group.
+    val placement = remember(entries) { segmentPlacement(entries) }
 
     // Open on the current choice: with 25 styles the selected one is usually below the fold, and
     // a sheet that opens at the top makes you hunt for what you already have.
@@ -71,84 +92,124 @@ fun SettingsChoiceSheet(
         // status bar along with it.
         modifier = modifier.statusBarsPadding(),
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surface
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
-        )
-        if (note != null) {
-            Text(
-                text = note,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
-            )
+        Column(
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(text = title, style = AdventureType.display(34.sp))
+            if (note != null) {
+                Text(
+                    text = note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(bottom = 16.dp)
+                .selectableGroup()
+                .navigationBarsPadding(),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)
         ) {
             itemsIndexed(entries, key = { _, entry -> entry.value }) { index, entry ->
                 val newGroup = entry.group != null && entry.group != entries.getOrNull(index - 1)?.group
-                if (newGroup) {
-                    Text(
-                        text = entry.group.orEmpty(),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(
-                            start = 24.dp, end = 24.dp, top = 16.dp, bottom = 4.dp
+                Column {
+                    if (newGroup) {
+                        Text(
+                            text = entry.group.orEmpty(),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(
+                                start = 8.dp,
+                                top = if (index == 0) 0.dp else 16.dp,
+                                bottom = 8.dp
+                            )
                         )
+                    }
+                    val (inGroup, groupSize) = placement[index]
+                    ChoiceRow(
+                        entry = entry,
+                        selected = entry.value == selected,
+                        shape = SegmentedListDefaults.shapeFor(inGroup, groupSize),
+                        onClick = { onSelect(entry.value) }
                     )
                 }
-                ChoiceRow(
-                    entry = entry,
-                    selected = entry.value == selected,
-                    onClick = { onSelect(entry.value) }
-                )
             }
         }
     }
 }
 
+/** For each entry, its index inside its group and the size of that group. */
+private fun segmentPlacement(entries: List<ChoiceEntry>): List<Pair<Int, Int>> {
+    val result = ArrayList<Pair<Int, Int>>(entries.size)
+    var start = 0
+    while (start < entries.size) {
+        var end = start + 1
+        while (end < entries.size && entries[end].group == entries[start].group) end++
+        for (i in start until end) result += (i - start) to (end - start)
+        start = end
+    }
+    return result
+}
+
 @Composable
-private fun ChoiceRow(entry: ChoiceEntry, selected: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .heightIn(min = 52.dp)
-            .padding(horizontal = 20.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(selected = selected, onClick = onClick)
-        Spacer(Modifier.width(8.dp))
-        if (entry.icon != null) {
-            Icon(
-                imageVector = entry.icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
-            )
-            Spacer(Modifier.width(16.dp))
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = entry.label,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
-            )
-            if (entry.supporting != null) {
+private fun ChoiceRow(entry: ChoiceEntry, selected: Boolean, shape: Shape, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    val effects = MaterialTheme.motionScheme.fastEffectsSpec<Color>()
+    val container by animateColorAsState(
+        if (selected) colors.secondaryContainer else colors.surfaceContainerHigh, effects, label = "row"
+    )
+    val badge by animateColorAsState(
+        if (selected) colors.primary else colors.surfaceContainerHighest, effects, label = "badge"
+    )
+    val badgeContent by animateColorAsState(
+        if (selected) colors.onPrimary else colors.onSurfaceVariant, effects, label = "badgeContent"
+    )
+    Surface(shape = shape, color = container, modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            if (entry.icon != null) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = badge,
+                    contentColor = badgeContent,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(entry.icon, contentDescription = null, modifier = Modifier.size(22.dp))
+                    }
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = entry.supporting,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = entry.label,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (selected) colors.onSecondaryContainer else colors.onSurface
                 )
+                if (entry.supporting != null) {
+                    Text(
+                        text = entry.supporting,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (selected) colors.onSecondaryContainer else colors.onSurfaceVariant
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = selected,
+                enter = scaleIn(MaterialTheme.motionScheme.fastSpatialSpec(), initialScale = 0.3f) + fadeIn(),
+                exit = scaleOut(targetScale = 0.3f) + fadeOut()
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, tint = colors.onSecondaryContainer)
             }
         }
     }

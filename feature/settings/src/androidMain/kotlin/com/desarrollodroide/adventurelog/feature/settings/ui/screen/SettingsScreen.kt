@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.settings.ui.components.DialogBadge
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material.icons.automirrored.filled.Logout
 import com.desarrollodroide.adventurelog.feature.settings.platform.FEEDBACK_ADDRESS
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,6 +73,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.settings.AccountH
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisitedRegionsCard
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     onLogout: () -> Unit,
@@ -302,14 +307,28 @@ fun SettingsContent(
     if (confirmLogout) {
         AlertDialog(
             onDismissRequest = { confirmLogout = false },
-            title = { Text("Sign out?") },
-            text = { Text("You will need your password to sign back in.") },
+            icon = {
+                DialogBadge(
+                    icon = Icons.AutoMirrored.Filled.Logout,
+                    container = MaterialTheme.colorScheme.errorContainer,
+                    content = MaterialTheme.colorScheme.onErrorContainer,
+                )
+            },
+            title = { Text("Sign out?", textAlign = TextAlign.Center) },
+            text = {
+                Text(
+                    "You will need your password to sign back in.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
             confirmButton = {
                 Button(
                     onClick = {
                         confirmLogout = false
                         onLogout()
                     },
+                    shapes = ButtonDefaults.shapes(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = MaterialTheme.colorScheme.onError
@@ -319,7 +338,7 @@ fun SettingsContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmLogout = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmLogout = false }, shapes = ButtonDefaults.shapes()) { Text("Cancel") }
             }
         )
     }
