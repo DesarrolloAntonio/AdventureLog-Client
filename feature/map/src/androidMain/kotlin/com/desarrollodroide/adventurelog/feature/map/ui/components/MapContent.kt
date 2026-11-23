@@ -30,6 +30,7 @@ fun MapContent(
     onAdventureClick: (adventureId: String) -> Unit,
     modifier: Modifier = Modifier,
     selectedId: String? = null,
+    contentPadding: PaddingValues = PaddingValues(),
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -70,15 +71,8 @@ fun MapContent(
             }
             
             else -> {
-                // Map with rounded corners and shadow
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .clip(RoundedCornerShape(24.dp)),
-                    shadowElevation = 8.dp,
-                    shape = RoundedCornerShape(24.dp)
-                ) {
+                // Edge to edge, as the canvas draws the Map tab: the controls float over it.
+                Box(Modifier.fillMaxSize()) {
                     AdventureMapView(
                         locations = locations,
                         visitedCities = visitedCities,
@@ -88,6 +82,8 @@ fun MapContent(
                         onAdventureClick = onAdventureClick,
                         modifier = Modifier.fillMaxSize(),
                         selectedId = selectedId,
+                        contentPadding = contentPadding,
+                        rounded = false,
                     )
                 }
             }

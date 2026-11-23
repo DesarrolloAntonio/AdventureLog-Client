@@ -1,5 +1,14 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellTopOverlay
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
 import androidx.compose.foundation.layout.consumeWindowInsets
 import kotlinx.coroutines.withContext
@@ -305,6 +314,8 @@ fun HomeScreenContent(
 
     val compact = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass ==
         WindowWidthSizeClass.COMPACT
+    // Map runs edge to edge, as the canvas draws it: no bar, and a floating search pill instead.
+    val mapFullBleed = currentScreen == CurrentScreen.MAP
 
     // The phone's floating row: it slides away while content scrolls down, and carries the main
     // action of the screen on show ("Add a place") beside the destinations.
@@ -355,6 +366,7 @@ fun HomeScreenContent(
                 topBar = {
                     // A screen with bars of its own (a place's page) has the shell's put away.
                     if (compact && shellActions.chromeHiddenBy > 0) return@Scaffold
+                    if (mapFullBleed) return@Scaffold
                     // The bar is transparent, so insetting it simply moves the title and the
                     // actions onto the same left and right edge as the content below. Without
                     // this the greeting starts at the window edge while everything under it
@@ -517,7 +529,9 @@ fun HomeScreenContent(
                 // unspecified and text falls back to black - invisible on the dark theme's
                 // backdrop. The gradient is the background here, so say what sits on it.
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                // Edge to edge on Map: the map itself pads for the bars.
+                contentWindowInsets = if (mapFullBleed) WindowInsets(0) else ScaffoldDefaults.contentWindowInsets,
             ) { innerPadding ->
                 val barsPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding(),
@@ -534,6 +548,7 @@ fun HomeScreenContent(
                         // pad for it twice in here.
                         .consumeWindowInsets(barsPadding)
                 ) {
+                    CompositionLocalProvider(LocalShellTopOverlay provides if (mapFullBleed) MapSearchPillClearance else 0.dp) {
                     // Changing section fades through: the five tabs and the account menu's
                     // screens have no order between them, so nothing slides left or right (it
                     // used to, by tab position, and Home alone faded). Going deeper inside a
@@ -1057,6 +1072,38 @@ fun HomeScreenContent(
                             }
                         )
                     }
+                    }
+                    if (mapFullBleed) {
+                        // A fade behind the status bar, so the clock never sits on a map label.
+                        Box(
+                            Modifier
+                                .align(Alignment.TopCenter)
+                                .fillMaxWidth()
+                                .windowInsetsTopHeight(WindowInsets.statusBars)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), Color.Transparent)
+                                    )
+                                )
+                        )
+                        MapSearchPill(
+                            onSearch = { searchOpen = true },
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .statusBarsPadding()
+                                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                        ) {
+                            ProfileMenu(
+                                user = userDetails,
+                                userName = userName,
+                                serverUrl = userDetails?.serverUrl.orEmpty(),
+                                onSettings = { navigateTo(CurrentScreen.SETTINGS) },
+                                onCalendar = { navigateTo(CurrentScreen.CALENDAR) },
+                                onUsers = { navigateTo(CurrentScreen.USERS) },
+                                onLogout = onLogout
+                            )
+                        }
+                    }
                 }
             }
             }
@@ -1162,5 +1209,42 @@ private fun BrandTitle() {
             style = MaterialTheme.typography.titleLarge,
             maxLines = 1
         )
+    }
+}
+
+/** The floating search pill's height and the gap under it: where Map's own controls start. */
+private val MapSearchPillClearance = 72.dp
+
+/**
+ * The Map tab's search, floating over the map as the canvas draws it: the whole pill opens the
+ * search, and the account button sits at its end where the bar used to have it.
+ */
+@Composable
+private fun MapSearchPill(
+    onSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+    trailing: @Composable () -> Unit,
+) {
+    Surface(
+        onClick = onSearch,
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shadowElevation = 6.dp,
+        modifier = modifier
+            .widthIn(max = 560.dp)
+            .fillMaxWidth()
+            .height(56.dp),
+    ) {
+        Row(Modifier.padding(start = 18.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = "Search everything",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            trailing()
+        }
     }
 }

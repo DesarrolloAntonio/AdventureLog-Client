@@ -43,6 +43,10 @@ fun AdventureMapView(
     modifier: Modifier = Modifier,
     /** The pin tapped last, drawn as a label with its name. */
     selectedId: String? = null,
+    /** Room the map keeps clear for controls floating over it: its logo and framing stay visible. */
+    contentPadding: PaddingValues = PaddingValues(),
+    /** False when the map runs edge to edge (the Map tab); true as a card inside a page. */
+    rounded: Boolean = true,
 ) {
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
@@ -134,8 +138,9 @@ fun AdventureMapView(
     GoogleMap(
         modifier = modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(24.dp)),
+            .then(if (rounded) Modifier.clip(RoundedCornerShape(24.dp)) else Modifier),
         cameraPositionState = cameraPositionState,
+        contentPadding = contentPadding,
         properties = mapProperties,
         uiSettings = uiSettings
     ) {

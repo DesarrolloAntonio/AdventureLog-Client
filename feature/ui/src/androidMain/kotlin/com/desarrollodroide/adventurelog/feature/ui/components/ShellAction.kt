@@ -10,6 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /** A screen's main action ("Add a place"), drawn by the shell beside its floating toolbar. */
@@ -31,6 +33,12 @@ class ShellActionHost {
 
 /** Provided by the shell only where it draws a floating toolbar (a phone); null elsewhere. */
 val LocalShellActionHost = staticCompositionLocalOf<ShellActionHost?> { null }
+
+/**
+ * How far below the status bar a screen's own floating controls must start: on a screen the shell
+ * draws edge to edge (Map), its floating search pill sits at the top. 0 everywhere else.
+ */
+val LocalShellTopOverlay = compositionLocalOf { 0.dp }
 
 /**
  * Hands this screen's main action to the shell's floating toolbar, for as long as the screen is

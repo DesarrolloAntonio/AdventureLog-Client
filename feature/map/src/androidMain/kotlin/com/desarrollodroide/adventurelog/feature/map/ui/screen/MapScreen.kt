@@ -1,5 +1,13 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.screen
 
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.platform.LocalDensity
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellTopOverlay
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
@@ -66,6 +74,12 @@ fun MapScreen(
     // The map fills the tab, as the canvas draws it, and its controls float over it: what to show
     // with the counts, and the layers. (The stats used to stand in a card above the map, which
     // the canvas folds into the counts on these buttons.)
+    // Edge to edge under the shell's floating search: the controls start below it and the map
+    // keeps its logo and its framing clear of everything floating over it.
+    val topOverlay = LocalShellTopOverlay.current
+    val density = LocalDensity.current
+    val statusTop = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
+    val navBottom = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
     Box(modifier = Modifier.fillMaxSize()) {
         MapContent(
             locations = filteredAdventures,
@@ -79,11 +93,16 @@ fun MapScreen(
             onAdventureClick = { selectedId = it },
             modifier = Modifier.fillMaxSize(),
             selectedId = selectedId,
+            contentPadding = PaddingValues(top = statusTop + topOverlay + 72.dp, bottom = navBottom + 96.dp),
         )
 
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .padding(top = topOverlay)
+                .statusBarsPadding()
+                // As wide as the search pill above, not the whole of a tablet.
+                .widthIn(max = 592.dp)
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
