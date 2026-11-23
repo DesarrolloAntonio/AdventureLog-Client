@@ -34,7 +34,8 @@ class DiscardOnLeaveTest {
         CompositionLocalProvider(LocalImageLoader provides ImageLoader(context)) { content() }
     }
 
-    private fun ComposeUiTest.cancel() = onNodeWithText("Cancel").performScrollTo().performClick()
+    // Cancel is pinned under the form: on screen without scrolling to it, however long the form.
+    private fun ComposeUiTest.cancel() = onNodeWithText("Cancel").assertIsDisplayed().performClick()
 
     @Test
     fun aTypedCollectionIsNotThrownAwayWithoutAsking() = runComposeUiTest {

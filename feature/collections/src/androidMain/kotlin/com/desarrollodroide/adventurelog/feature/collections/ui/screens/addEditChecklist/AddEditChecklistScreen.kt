@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditChecklist
 
+import com.desarrollodroide.adventurelog.feature.ui.components.FormActionBar
 import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
 import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import com.desarrollodroide.adventurelog.feature.ui.components.date.DatePickerField
@@ -118,132 +119,128 @@ fun AddEditChecklistScreen(
     }
     Box(modifier = modifier.fillMaxSize()) {
         ContentColumn {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(verticalAlignment = Alignment.Bottom) {
-                    FormHeader(
-                        title = if (existingChecklist == null) "New checklist" else "Edit checklist",
-                        onClose = leave,
-                        modifier = Modifier.weight(1f)
+            Column(Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f).fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        FormHeader(
+                            title = if (existingChecklist == null) "New checklist" else "Edit checklist",
+                            onClose = leave,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (state.lines.isNotEmpty()) {
+                            Text(
+                                text = "${state.doneCount} / ${state.lines.size}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    SectionCard(
+                        // The rows below it already sit inside the form's 16dp; the card added its own and
+                        // came out narrower than everything else on the page (QA CO-19).
+                        inset = 0.dp,
+                        title = "The list",
+                        icon = Icons.Default.Checklist,
+                        expanded = listOpen,
+                        onExpandedChange = { listOpen = it }
+                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StyledTextField(
+                        value = state.name,
+                        onValueChange = viewModel::onNameChange,
+                        label = "Title",
+                        icon = Icons.Default.Title,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    if (state.lines.isNotEmpty()) {
-                        Text(
-                            text = "${state.doneCount} / ${state.lines.size}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.primary
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                            state.lines.forEachIndexed { index, line ->
+                                ChecklistLineRow(
+                                    name = line.name,
+                                    checked = line.checked,
+                                    onToggle = { viewModel.toggleLine(index) },
+                                    onRemove = { viewModel.removeLine(index) }
+                                )
+                            }
+
+                            if (state.lines.isEmpty()) {
+                                Text(
+                                    text = "Nothing on the list yet.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        StyledTextField(
+                            value = state.draft,
+                            onValueChange = viewModel::onDraftChange,
+                            label = "Add an item",
+                            icon = Icons.Default.Add,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Button(
+                            onClick = viewModel::addLine,
+                            enabled = state.draft.isNotBlank(),
+                            shape = RoundedCornerShape(22.dp)
+                        ) {
+                            Text("Add")
+                        }
+                    }
+
+                    }
+                    }
+
+                    DatePickerField(
+                        label = "Date (optional)",
+                        value = state.date,
+                        onValueChange = viewModel::onDateChange,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        PublicSwitchRow(
+                            title = "Public checklist",
+                            checked = state.isPublic,
+                            onCheckedChange = viewModel::onPublicChange
                         )
                     }
-                }
 
-                SectionCard(
-                    // The rows below it already sit inside the form's 16dp; the card added its own and
-                    // came out narrower than everything else on the page (QA CO-19).
-                    inset = 0.dp,
-                    title = "The list",
-                    icon = Icons.Default.Checklist,
-                    expanded = listOpen,
-                    onExpandedChange = { listOpen = it }
-                ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                StyledTextField(
-                    value = state.name,
-                    onValueChange = viewModel::onNameChange,
-                    label = "Title",
-                    icon = Icons.Default.Title,
-                    modifier = Modifier.fillMaxWidth()
+                }
+                // Save and Cancel pinned under the form, as the canvas draws it.
+                FormActionBar(
+                    onClick = { viewModel.save(collectionId) },
+                    text = if (state.isSaving) "Saving…" else "Save",
+                    enabled = state.canSave,
+                    onCancel = leave
                 )
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(vertical = 6.dp)) {
-                        state.lines.forEachIndexed { index, line ->
-                            ChecklistLineRow(
-                                name = line.name,
-                                checked = line.checked,
-                                onToggle = { viewModel.toggleLine(index) },
-                                onRemove = { viewModel.removeLine(index) }
-                            )
-                        }
-
-                        if (state.lines.isEmpty()) {
-                            Text(
-                                text = "Nothing on the list yet.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                            )
-                        }
-                    }
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    StyledTextField(
-                        value = state.draft,
-                        onValueChange = viewModel::onDraftChange,
-                        label = "Add an item",
-                        icon = Icons.Default.Add,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Button(
-                        onClick = viewModel::addLine,
-                        enabled = state.draft.isNotBlank(),
-                        shape = RoundedCornerShape(22.dp)
-                    ) {
-                        Text("Add")
-                    }
-                }
-
-                }
-                }
-
-                DatePickerField(
-                    label = "Date (optional)",
-                    value = state.date,
-                    onValueChange = viewModel::onDateChange,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    PublicSwitchRow(
-                        title = "Public checklist",
-                        checked = state.isPublic,
-                        onCheckedChange = viewModel::onPublicChange
-                    )
-                }
-
-                // The same pair as the collection and transport forms: Save across the form,
-                // Cancel under it. These three had a small Save and Cancel side by side on the
-                // left (QA CO-19).
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    PrimaryButton(
-                        onClick = { viewModel.save(collectionId) },
-                        text = if (state.isSaving) "Saving…" else "Save",
-                        enabled = state.canSave
-                    )
-                    TextButton(onClick = leave, modifier = Modifier.fillMaxWidth()) {
-                        Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
             }
         }
 

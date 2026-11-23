@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation
 
+import com.desarrollodroide.adventurelog.feature.ui.components.FormActionBar
 import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
 import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import androidx.compose.foundation.layout.Arrangement
@@ -164,82 +165,68 @@ fun AddEditTransportationContent(
     // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
     // box the length of the screen holding a place name, and the eye loses the line it is on.
     ContentColumn(modifier) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Every other item form says what it is making; this one opened straight on its first
-        // section (QA CO-19).
-        FormHeader(
-            title = if (isEditMode) "Edit transport" else "New transport",
-            onClose = leave,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-
-        BasicInfoTransportationSection(
-            formData = formData,
-            transportationTypes = transportationTypes,
-            onFormDataChange = { formData = it },
-            onGenerateDescription = {
-                onGenerateDescription(formData.name) { generatedDescription ->
-                    formData = formData.copy(description = generatedDescription)
-                }
-            },
-            isGeneratingDescription = isGeneratingDescription
-        )
-
-        DateTransportationSection(
-            formData = formData,
-            onFormDataChange = { formData = it },
-            collectionStart = collectionStart,
-            collectionEnd = collectionEnd
-        )
-
-        LocationTransportationSection(
-            formData = formData,
-            onFormDataChange = { formData = it },
-            locationSearchResults = locationSearchResults,
-            isSearchingLocation = isSearchingLocation,
-            onSearchLocation = onSearchLocation,
-            onClearLocationSearch = onClearLocationSearch
-        )
-
-        ImagesSection(
-            images = formData.images,
-            onImagesChange = { updatedImages ->
-                formData = formData.copy(images = updatedImages)
-            },
-            wikipediaImageState = wikipediaImageState,
-            onSearchWikipediaImage = onSearchWikipediaImage,
-            onResetWikipediaState = onResetWikipediaState
-        )
-
+    Column(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .weight(1f).fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
-            PrimaryButton(
-                onClick = { onSave(formData) },
-                text = if (isEditMode) "Update Transportation" else "Create Transportation"
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Every other item form says what it is making; this one opened straight on its first
+            // section (QA CO-19).
+            FormHeader(
+                title = if (isEditMode) "Edit transport" else "New transport",
+                onClose = leave,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            TextButton(
-                onClick = leave,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Cancel",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+            BasicInfoTransportationSection(
+                formData = formData,
+                transportationTypes = transportationTypes,
+                onFormDataChange = { formData = it },
+                onGenerateDescription = {
+                    onGenerateDescription(formData.name) { generatedDescription ->
+                        formData = formData.copy(description = generatedDescription)
+                    }
+                },
+                isGeneratingDescription = isGeneratingDescription
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            DateTransportationSection(
+                formData = formData,
+                onFormDataChange = { formData = it },
+                collectionStart = collectionStart,
+                collectionEnd = collectionEnd
+            )
+
+            LocationTransportationSection(
+                formData = formData,
+                onFormDataChange = { formData = it },
+                locationSearchResults = locationSearchResults,
+                isSearchingLocation = isSearchingLocation,
+                onSearchLocation = onSearchLocation,
+                onClearLocationSearch = onClearLocationSearch
+            )
+
+            ImagesSection(
+                images = formData.images,
+                onImagesChange = { updatedImages ->
+                    formData = formData.copy(images = updatedImages)
+                },
+                wikipediaImageState = wikipediaImageState,
+                onSearchWikipediaImage = onSearchWikipediaImage,
+                onResetWikipediaState = onResetWikipediaState
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+        // Save and Cancel pinned under the form, as the canvas draws it.
+        FormActionBar(
+            onClick = { onSave(formData) },
+            text = if (isEditMode) "Update Transportation" else "Create Transportation",
+            onCancel = leave
+        )
     }
     }
 }

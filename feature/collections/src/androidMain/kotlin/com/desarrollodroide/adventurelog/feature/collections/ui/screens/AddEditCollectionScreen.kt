@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import com.desarrollodroide.adventurelog.feature.ui.components.FormActionBar
 import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
 import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import androidx.compose.foundation.layout.Arrangement
@@ -55,57 +56,43 @@ fun AddEditCollectionScreen(
     // A form is the clearest case for the content column: a text field drawn 1200dp wide is a
     // box the length of the screen holding a place name, and the eye loses the line it is on.
     ContentColumn(modifier) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        FormHeader(
-            title = if (initialData != null) "Edit collection" else "New collection",
-            onClose = leave,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-
-        BasicInfoSection(
-            formData = formData,
-            onFormDataChange = { formData = it }
-        )
-
-        DateSection(
-            formData = formData,
-            onFormDataChange = { formData = it }
-        )
-
+    Column(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .weight(1f).fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
-            PrimaryButton(
-                onClick = { onSave(formData) },
-                text = when {
-                    isSaving -> "Saving…"
-                    initialData != null -> "Update Collection"
-                    else -> "Create Collection"
-                },
-                enabled = formData.name.isNotBlank() && !isSaving
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FormHeader(
+                title = if (initialData != null) "Edit collection" else "New collection",
+                onClose = leave,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            TextButton(
-                onClick = leave,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Cancel",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+            BasicInfoSection(
+                formData = formData,
+                onFormDataChange = { formData = it }
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            DateSection(
+                formData = formData,
+                onFormDataChange = { formData = it }
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+        // Save and Cancel pinned under the form, as the canvas draws it.
+        FormActionBar(
+            onClick = { onSave(formData) },
+            text = when {
+                isSaving -> "Saving…"
+                initialData != null -> "Update Collection"
+                else -> "Create Collection"
+            },
+            enabled = formData.name.isNotBlank() && !isSaving,
+            onCancel = leave
+        )
     }
     }
 }

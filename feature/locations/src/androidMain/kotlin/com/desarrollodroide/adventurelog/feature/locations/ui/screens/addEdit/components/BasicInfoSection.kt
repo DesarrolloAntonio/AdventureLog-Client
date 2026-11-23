@@ -126,7 +126,7 @@ fun BasicInfoSection(
                 )
             )
             
-            CategoryDropdown(
+            CategoryChips(
                 categories = categories,
                 selectedCategory = formData.category,
                 onCategorySelected = {
