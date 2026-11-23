@@ -1,6 +1,13 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,9 +38,12 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -159,7 +169,6 @@ fun MainToolbarRow(
             .padding(bottom = MainToolbarDefaults.BottomGap)
             .onSizeChanged { scroll.limitPx = (it.height + gap + navBar).toFloat() }
             .offset { IntOffset(0, scroll.hiddenPx.roundToInt()) },
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         MainToolbar(
@@ -168,15 +177,47 @@ fun MainToolbarRow(
             showLabel = showLabel,
             modifier = Modifier.testTag(MainToolbarDefaults.TestTag),
         )
-        if (action != null) {
-            FloatingActionButton(
-                onClick = action.onClick,
-                modifier = Modifier.size(MainToolbarDefaults.ActionSize),
-                shape = RoundedCornerShape(18.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(action.icon, contentDescription = action.description)
+        // The button scales up from its centre and back down, as Material's FAB does (it used to
+        // appear and vanish in a single frame). Its slot opens and closes with it, unclipped, so
+        // the toolbar re-centres smoothly while the button itself only grows - no wipe from the
+        // side. The last action is kept while it leaves: by then the screen has taken it back.
+        var lastAction by remember { mutableStateOf(action) }
+        if (action != null) lastAction = action
+        // Leaving starts in the same frame as composing the next screen, which can take longer
+        // than the whole animation: the button sat still for a few frames and then was gone.
+        // So it waits for two frames to be drawn before it starts to shrink.
+        var shown by remember { mutableStateOf(action != null) }
+        LaunchedEffect(action != null) {
+            if (action != null) {
+                shown = true
+            } else {
+                withFrameNanos { }
+                withFrameNanos { }
+                shown = false
+            }
+        }
+        val motion = MaterialTheme.motionScheme
+        AnimatedVisibility(
+            visible = shown,
+            enter = expandHorizontally(motion.defaultSpatialSpec(), expandFrom = Alignment.Start, clip = false) +
+                scaleIn(motion.defaultSpatialSpec(), initialScale = 0.2f) +
+                fadeIn(motion.fastEffectsSpec()),
+            exit = shrinkHorizontally(motion.fastSpatialSpec(), shrinkTowards = Alignment.Start, clip = false) +
+                scaleOut(motion.defaultSpatialSpec(), targetScale = 0.2f) +
+                fadeOut(motion.defaultEffectsSpec()),
+        ) {
+            lastAction?.let { shown ->
+                FloatingActionButton(
+                    onClick = shown.onClick,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(MainToolbarDefaults.ActionSize),
+                    shape = RoundedCornerShape(18.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ) {
+                    Icon(shown.icon, contentDescription = shown.description)
+                }
             }
         }
     }

@@ -11,6 +11,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -202,5 +205,56 @@ class MainToolbarTest {
         }
 
         onNodeWithText("Places").assertIsDisplayed()
+    }
+
+    private val addPlace = ShellAction(Icons.Default.Add, "Add a place") {}
+
+    @Test
+    fun theActionGrowsInAndTheToolbarMovesOverSmoothly() = runComposeUiTest {
+        var action by mutableStateOf<ShellAction?>(null)
+        setContent {
+            Box(Modifier.width(412.dp).fillMaxSize()) {
+                MainToolbarRow(
+                    current = CurrentScreen.MAP, onSelect = {}, action = action,
+                    scroll = rememberToolbarScrollState(), modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
+        }
+        val before = onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot().left
+
+        mainClock.autoAdvance = false
+        action = addPlace
+        mainClock.advanceTimeByFrame()
+        mainClock.advanceTimeBy(48)
+        // Mid-way: the button is there and the toolbar is on its way left, not already there.
+        onNodeWithContentDescription("Add a place").assertExists()
+        val during = onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot().left
+
+        mainClock.advanceTimeBy(2_000)
+        val after = onNodeWithTag(MainToolbarDefaults.TestTag).getUnclippedBoundsInRoot().left
+        assertTrue("toolbar left before $before, during $during, after $after", before > during && during > after)
+    }
+
+    @Test
+    fun theActionShrinksAwayRatherThanVanishing() = runComposeUiTest {
+        var action by mutableStateOf<ShellAction?>(addPlace)
+        setContent {
+            Box(Modifier.width(412.dp).fillMaxSize()) {
+                MainToolbarRow(
+                    current = CurrentScreen.MAP, onSelect = {}, action = action,
+                    scroll = rememberToolbarScrollState(), modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
+        }
+        onNodeWithContentDescription("Add a place").assertIsDisplayed()
+
+        mainClock.autoAdvance = false
+        action = null
+        mainClock.advanceTimeByFrame()
+        mainClock.advanceTimeBy(48)
+        onNodeWithContentDescription("Add a place").assertExists()
+
+        mainClock.advanceTimeBy(2_000)
+        onNodeWithContentDescription("Add a place").assertDoesNotExist()
     }
 }

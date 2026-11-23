@@ -257,7 +257,13 @@ fun HomeScreenContent(
     // Set by Home's invitation banner and cleared once Collections has opened on Invites.
     var openCollectionInvites by rememberSaveable { mutableStateOf(false) }
 
+    // The screen on show hands its main action to the phone's toolbar. Moving to another
+    // destination takes it back at once: left to the old screen, the "+" lingered for the whole
+    // transition and only then shrank away. The new screen hands over its own as it appears.
+    val shellActions = remember { ShellActionHost() }
+
     val navigateTo: (CurrentScreen) -> Unit = { screen ->
+        if (screen != currentScreen) shellActions.action = null
         navController.navigate(screen.route) {
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
@@ -299,7 +305,6 @@ fun HomeScreenContent(
     // The phone's floating row: it slides away while content scrolls down, and carries the main
     // action of the screen on show ("Add a place") beside the destinations.
     val toolbarScroll = rememberToolbarScrollState()
-    val shellActions = remember { ShellActionHost() }
     LaunchedEffect(currentScreen) { toolbarScroll.show() }
     // A screen with bars of its own scrolls too, and the nested scroll reaches the shell's bars
     // while they are put away: back on the list, the app bar was folded and the toolbar gone.
