@@ -13,7 +13,7 @@ struct RootView: View {
             if !checked {
                 ProgressView()
             } else if user == nil {
-                ContentUnavailableView("Sign in", systemImage: "person.crop.circle", description: Text("Login comes next."))
+                LoginView()
             } else {
                 ContentUnavailableView("AdventureLog", systemImage: "map", description: Text("Signed in."))
             }
