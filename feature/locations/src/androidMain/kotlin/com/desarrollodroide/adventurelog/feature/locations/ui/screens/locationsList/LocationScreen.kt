@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList
 
+import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel.CategoriesState
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.categories.ManageCategoriesDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -107,6 +109,8 @@ fun LocationListScreen(
 
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
     var showSort by remember { mutableStateOf(false) }
+    var showCategories by remember { mutableStateOf(false) }
+    var showManageCategories by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
     val libraryCounts by viewModel.libraryCounts.collectAsStateWithLifecycle()
@@ -144,6 +148,26 @@ fun LocationListScreen(
             )
         }
 
+        if (showCategories) {
+            PlacesCategorySheet(
+                categoriesState = categoriesState,
+                selected = filters.categoryNames,
+                onChange = { viewModel.onFiltersChanged(filters.copy(categoryNames = it)) },
+                onManage = { showManageCategories = true },
+                onRetry = viewModel::retryLoadCategories,
+                onDismiss = { showCategories = false },
+            )
+        }
+        if (showManageCategories) {
+            ManageCategoriesDialog(
+                categoriesState = categoriesState,
+                onDismiss = { showManageCategories = false },
+                onAddCategory = viewModel::createCategory,
+                onEditCategory = viewModel::updateCategory,
+                onDeleteCategory = viewModel::deleteCategory,
+                onRetryLoadCategories = viewModel::retryLoadCategories,
+            )
+        }
         if (showSort) {
             PlacesSortSheet(
                 sortField = filters.sortField,
@@ -181,10 +205,14 @@ fun LocationListScreen(
         libraryCounts = libraryCounts,
         visitedFilter = filters.visitedFilter,
         onVisitedFilterChange = { viewModel.onFiltersChanged(filters.copy(visitedFilter = it)) },
-        categoryNames = filters.categoryNames,
+        // The chip reads the names people gave them ("Hiking"), not the server's slugs ("hiking").
+        categoryNames = filters.categoryNames.map { name ->
+            (categoriesState as? CategoriesState.Success)?.categories?.firstOrNull { it.name == name }?.displayName ?: name
+        },
         sortField = filters.sortField,
         sortDirection = filters.sortDirection,
         onShowSort = { showSort = true },
+        onShowCategories = { showCategories = true },
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
@@ -305,6 +333,7 @@ private fun AdventureListContent(
     sortField: LocationSortField = LocationSortField.UPDATED_AT,
     sortDirection: SortDirection = SortDirection.DESCENDING,
     onShowSort: () -> Unit = onShowFilters,
+    onShowCategories: () -> Unit = onShowFilters,
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -366,6 +395,7 @@ private fun AdventureListContent(
                 sortDirection = sortDirection,
                 onOpen = onShowFilters,
                 onOpenSort = onShowSort,
+                onOpenCategories = onShowCategories,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
           }

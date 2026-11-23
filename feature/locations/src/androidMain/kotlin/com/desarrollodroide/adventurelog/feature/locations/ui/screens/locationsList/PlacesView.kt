@@ -94,6 +94,7 @@ internal fun PlacesFilterChips(
     modifier: Modifier = Modifier,
     sortDirection: SortDirection = SortDirection.DESCENDING,
     onOpenSort: () -> Unit = onOpen,
+    onOpenCategories: () -> Unit = onOpen,
 ) {
     Row(
         modifier
@@ -111,7 +112,7 @@ internal fun PlacesFilterChips(
         )
         FilterChip(
             selected = categoryNames.isNotEmpty(),
-            onClick = onOpen,
+            onClick = onOpenCategories,
             label = { Text(categoryLabel(categoryNames)) },
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
             shape = RoundedCornerShape(10.dp),

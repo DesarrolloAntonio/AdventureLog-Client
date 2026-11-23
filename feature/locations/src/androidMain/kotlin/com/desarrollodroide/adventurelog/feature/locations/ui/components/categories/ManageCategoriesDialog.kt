@@ -270,12 +270,12 @@ private fun CategoryRow(
 /** An emoji on a four-lobed cookie in the tonal colour, the categories' badge. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun CookieIcon(icon: String, size: Int) {
+internal fun CookieIcon(icon: String, size: Int, color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.secondaryContainer) {
     Box(
         Modifier
             .size(size.dp)
             .clip(MaterialShapes.Cookie4Sided.toShape())
-            .background(MaterialTheme.colorScheme.secondaryContainer),
+            .background(color),
         contentAlignment = Alignment.Center,
     ) { Text(icon, fontSize = (size * 0.45f).sp) }
 }
