@@ -56,7 +56,7 @@ internal fun Int.groupedThousands(): String =
 
 /**
  * "Your map so far" in Expressive pieces: how much of what you saved you have visited, as a wavy
- * ring, then countries, regions and cities each in a shape of its own from Material's shape
+ * ring around what is still to visit, then countries, regions and cities each in a shape of its own from Material's shape
  * library - a cookie, a clover, a sun - with the total beneath.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -93,6 +93,7 @@ internal fun MapSoFarTiles(stats: UserStats, modifier: Modifier = Modifier) {
 private fun PlacesVisitedCard(visited: Int, total: Int) {
     val colors = MaterialTheme.colorScheme
     val fraction = if (total > 0) (visited.toFloat() / total).coerceIn(0f, 1f) else 0f
+    val remaining = (total - visited).coerceAtLeast(0)
     val stroke = with(LocalDensity.current) { Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round) }
     Surface(
         shape = RoundedCornerShape(28.dp),
@@ -116,12 +117,21 @@ private fun PlacesVisitedCard(visited: Int, total: Int) {
                     stroke = stroke,
                     trackStroke = stroke,
                 )
-                Text(visited.groupedThousands(), style = AdventureType.display(34.sp), color = colors.onPrimaryContainer)
+                // What is left, not what is done: the headline above already says how many places
+                // have been visited, and the card said it again in the same words.
+                Text(remaining.groupedThousands(), style = AdventureType.display(34.sp), color = colors.onPrimaryContainer)
             }
             Column {
-                Text(if (visited == 1) "place visited" else "places visited", style = AdventureType.display(28.sp))
                 Text(
-                    text = "of ${total.groupedThousands()} saved",
+                    text = when {
+                        total == 0 -> "nothing saved yet"
+                        remaining == 0 -> "all visited"
+                        else -> "still to visit"
+                    },
+                    style = AdventureType.display(28.sp),
+                )
+                Text(
+                    text = "${visited.groupedThousands()} of ${total.groupedThousands()} visited",
                     style = MaterialTheme.typography.bodyLarge,
                     color = colors.onPrimaryContainer.copy(alpha = 0.8f),
                 )

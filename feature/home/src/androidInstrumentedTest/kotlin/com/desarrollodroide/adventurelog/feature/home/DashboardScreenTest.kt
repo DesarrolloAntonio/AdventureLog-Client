@@ -187,9 +187,12 @@ class DashboardScreenTest {
 
         // assertExists, not assertIsDisplayed: the stats sit below the fold on a phone, and
         // whether they have been scrolled to is not what this test is about.
-        // Places visited round the wavy ring, then countries, regions and cities in their shapes.
-        onNodeWithText("places visited", useUnmergedTree = true).assertExists()
-        onNodeWithText("of 22 saved", useUnmergedTree = true).assertExists()
+        // What is still to visit inside the wavy ring - the headline already says what was
+        // visited - then countries, regions and cities in their shapes.
+        onNodeWithText("5", useUnmergedTree = true).assertExists()
+        onNodeWithText("still to visit", useUnmergedTree = true).assertExists()
+        onNodeWithText("17 of 22 visited", useUnmergedTree = true).assertExists()
+        onNodeWithText("places visited", useUnmergedTree = true).assertDoesNotExist()
         onNodeWithText("countries", useUnmergedTree = true).assertExists()
         onNodeWithText("of 250", useUnmergedTree = true).assertExists()
         onNodeWithText("regions", useUnmergedTree = true).assertExists()
