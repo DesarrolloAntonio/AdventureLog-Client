@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.LaunchedEffect
@@ -366,8 +371,10 @@ fun PlaceActionsToolbar(
     onOpenWebsite: (() -> Unit)?,
     onEdit: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    /** "+ Visit", the canvas's tonal pill: adds a visit through the form's dates. */
+    onAddVisit: (() -> Unit)? = null,
 ) {
-    if (onOpenMaps == null && onOpenWebsite == null && onEdit == null) return
+    if (onOpenMaps == null && onOpenWebsite == null && onEdit == null && onAddVisit == null) return
     val colors = MaterialTheme.colorScheme
     val toolbarColors = FloatingToolbarDefaults.standardFloatingToolbarColors(
         toolbarContainerColor = colors.inverseSurface,
@@ -382,10 +389,25 @@ fun PlaceActionsToolbar(
         onOpenWebsite?.let {
             IconButton(onClick = it) { Icon(Icons.Default.Public, contentDescription = "Website") }
         }
+        onAddVisit?.let {
+            FilledTonalButton(
+                onClick = it,
+                shapes = ButtonDefaults.shapes(),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = colors.primaryContainer,
+                    contentColor = colors.onPrimaryContainer,
+                ),
+                contentPadding = PaddingValues(start = 14.dp, end = 18.dp),
+                modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Add visit" },
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                Text("Visit", modifier = Modifier.padding(start = 6.dp), fontWeight = FontWeight.Bold)
+            }
+        }
     }
     if (onEdit != null) {
         HorizontalFloatingToolbar(
-            expanded = onOpenMaps != null || onOpenWebsite != null,
+            expanded = onOpenMaps != null || onOpenWebsite != null || onAddVisit != null,
             floatingActionButton = {
                 FloatingToolbarDefaults.StandardFloatingActionButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit place")

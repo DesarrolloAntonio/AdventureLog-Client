@@ -58,7 +58,9 @@ fun AdventureDetailScreenRoute(
     /** Opens the edit form for the place; null hides Edit. */
     onEditClick: ((Location) -> Unit)? = null,
     /** Opens the edit form on its images. Null falls back to [onEditClick]. */
-    onAddPhotoClick: ((Location) -> Unit)? = null
+    onAddPhotoClick: ((Location) -> Unit)? = null,
+    /** Opens the edit form on its dates, for the toolbar's "Visit". Null hides it. */
+    onAddVisitClick: ((Location) -> Unit)? = null
 ) {
     val viewModel = koinViewModel<AdventureDetailViewModel>()
     // The page has its own photo and toolbar, as the canvas draws it: inside the shell on a phone,
@@ -105,6 +107,7 @@ fun AdventureDetailScreenRoute(
                     onBackClick = onBackClick,
                     onEditClick = onEditClick?.let { edit -> { edit(state.location) } },
                     onAddPhotoClick = (onAddPhotoClick ?: onEditClick)?.let { add -> { add(state.location) } },
+                    onAddVisitClick = onAddVisitClick?.let { add -> { add(state.location) } },
                     // The old callback reached a view model method that only wrote a log line,
                     // so the row had never opened anything.
                     onOpenMap = { _: String, _: String -> mapsFor = state.location },
@@ -166,6 +169,7 @@ fun AdventureDetailScreen(
     onBackClick: () -> Unit,
     onEditClick: (() -> Unit)? = null,
     onAddPhotoClick: (() -> Unit)? = onEditClick,
+    onAddVisitClick: (() -> Unit)? = null,
     onOpenMap: (String, String) -> Unit,
     onOpenLink: (String) -> Unit,
     openingAttachmentId: String? = null,
@@ -309,6 +313,7 @@ fun AdventureDetailScreen(
                 onOpenMaps = if (hasCoordinates) ({ onOpenMap(lat!!, lon!!) }) else null,
                 onOpenWebsite = link?.let { url -> { onOpenLink(url) } },
                 onEdit = onEditClick,
+                onAddVisit = onAddVisitClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()

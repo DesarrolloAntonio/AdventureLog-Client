@@ -76,6 +76,8 @@ fun PlacesPane(
     onEditPlace: (Location) -> Unit,
     /** The edit form opened on its images, for a place's "Add photo". */
     onAddPhoto: (Location) -> Unit,
+    /** Opens the form on its dates, for the place page's "Visit". */
+    onAddVisit: ((Location) -> Unit)? = null,
     onCollectionClick: (UltraSlimCollection) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -133,7 +135,8 @@ fun PlacesPane(
                     onCollectionClick = onCollectionClick,
                     showBack = !twoPanes,
                     onEditClick = onEditPlace,
-                    onAddPhotoClick = onAddPhoto
+                    onAddPhotoClick = onAddPhoto,
+                    onAddVisitClick = onAddVisit
                 )
             }
         }

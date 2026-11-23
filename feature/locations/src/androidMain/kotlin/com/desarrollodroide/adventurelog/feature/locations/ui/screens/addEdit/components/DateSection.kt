@@ -36,9 +36,11 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun DateSection(
     formData: LocationFormData,
-    onFormDataChange: (LocationFormData) -> Unit
+    onFormDataChange: (LocationFormData) -> Unit,
+    /** Open from the start, for a form reached by the place page's "Visit". */
+    initiallyExpanded: Boolean = false
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(initiallyExpanded) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
     var showStartTimePicker by remember { mutableStateOf(false) }

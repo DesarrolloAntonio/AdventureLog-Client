@@ -67,9 +67,9 @@ fun AdventureLogNavGraph(
             )
         }
 
-        override fun navigateToEditLocation(location: Location, openImages: Boolean) {
+        override fun navigateToEditLocation(location: Location, openImages: Boolean, openVisits: Boolean) {
             navController.navigate(
-                NavigationRoutes.Locations.createEditRoute(location.id, json.encodeToString(location), openImages)
+                NavigationRoutes.Locations.createEditRoute(location.id, json.encodeToString(location), openImages, openVisits)
             ) { launchSingleTop = true }
         }
     }

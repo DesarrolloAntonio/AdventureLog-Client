@@ -652,6 +652,15 @@ fun HomeScreenContent(
                                         )
                                     )
                                 },
+                                onAddVisit = { location ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            location.id,
+                                            json.encodeToString(location),
+                                            openVisits = true
+                                        )
+                                    )
+                                },
                                 onCollectionClick = { collection ->
                                     navController.navigate(
                                         NavigationRoutes.Collections.createDetailRoute(

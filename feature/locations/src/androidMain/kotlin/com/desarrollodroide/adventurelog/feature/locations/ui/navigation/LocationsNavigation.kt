@@ -101,12 +101,17 @@ fun NavGraphBuilder.locationsScreen(
             navArgument("openImages") {
                 type = NavType.BoolType
                 defaultValue = false
+            },
+            navArgument("openVisits") {
+                type = NavType.BoolType
+                defaultValue = false
             }
         )
     ) { backStackEntry ->
         val adventureId = backStackEntry.savedStateHandle.get<String>("adventureId") ?: ""
         val adventureJson = backStackEntry.savedStateHandle.get<String>("adventureJson") ?: ""
         val openImages = backStackEntry.savedStateHandle.get<Boolean>("openImages") ?: false
+        val openVisits = backStackEntry.savedStateHandle.get<Boolean>("openVisits") ?: false
         
         val location = if (adventureJson.isNotEmpty()) {
             json.decodeFromString<Location>(adventureJson)
@@ -119,6 +124,7 @@ fun NavGraphBuilder.locationsScreen(
                 locationId = adventureId,
                 location = location,
                 openImages = openImages,
+                openVisits = openVisits,
                 onNavigateBack = {
                     navigator.navigateBack()
                 }

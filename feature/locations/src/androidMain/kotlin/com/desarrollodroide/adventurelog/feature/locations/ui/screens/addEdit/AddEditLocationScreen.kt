@@ -85,6 +85,8 @@ fun AddEditLocationScreen(
     onNavigateBack: () -> Unit,
     /** Open on the images section, scrolled to it: the form was reached by "Add photo". */
     openImages: Boolean = false,
+    /** Open on the dates, for the place page's "Visit". */
+    openVisits: Boolean = false,
     /** A new place started from a trip goes into that trip. */
     intoCollectionId: String? = null
 ) {
@@ -113,6 +115,7 @@ fun AddEditLocationScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         AddEditLocationContent(
             openImages = openImages,
+            openVisits = openVisits,
             isEditMode = locationId != null,
             existingLocation = uiState.existingLocation,
             categories = uiState.categories,
@@ -162,6 +165,8 @@ fun AddEditLocationScreen(
 @Composable
 fun AddEditLocationContent(
     openImages: Boolean = false,
+    /** Open on the dates, for the place page's "Visit". */
+    openVisits: Boolean = false,
     isEditMode: Boolean = false,
     existingLocation: Location? = null,
     categories: List<Category>,
@@ -273,6 +278,15 @@ fun AddEditLocationContent(
             scrolledToImages = true
         }
     }
+    var visitsTop by remember { mutableStateOf<Int?>(null) }
+    var scrolledToVisits by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(visitsTop) {
+        val top = visitsTop
+        if (openVisits && !scrolledToVisits && top != null) {
+            scrollState.animateScrollTo(top)
+            scrolledToVisits = true
+        }
+    }
 
     ContentColumn(modifier) {
     Column(Modifier.fillMaxSize()) {
@@ -337,10 +351,13 @@ fun AddEditLocationContent(
 
             // Visits are saved after the location, against /api/visits/ - they cannot be nested in
             // the location payload because each one needs a location id that does not exist yet.
-            DateSection(
-                formData = formData,
-                onFormDataChange = { formData = it }
-            )
+            Box(Modifier.onPlaced { visitsTop = it.positionInParent().y.roundToInt() }) {
+                DateSection(
+                    formData = formData,
+                    onFormDataChange = { formData = it },
+                    initiallyExpanded = openVisits
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
         }
