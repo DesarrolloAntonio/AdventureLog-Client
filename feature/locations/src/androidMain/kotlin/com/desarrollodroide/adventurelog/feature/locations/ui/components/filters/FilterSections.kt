@@ -177,6 +177,10 @@ internal fun SortChoice(
     }
 }
 
+/** The direction an order is usually read in: names A → Z, dates and ratings newest/highest first. */
+internal fun naturalDirection(field: LocationSortField): SortDirection =
+    if (field == LocationSortField.NAME) SortDirection.ASCENDING else SortDirection.DESCENDING
+
 internal fun fieldLabel(field: LocationSortField) = when (field) {
     LocationSortField.UPDATED_AT -> "Recently updated"
     LocationSortField.VISIT_DATE -> "Visit date"

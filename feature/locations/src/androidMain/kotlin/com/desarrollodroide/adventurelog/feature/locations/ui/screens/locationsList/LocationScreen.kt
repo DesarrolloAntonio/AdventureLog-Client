@@ -61,6 +61,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.lazy.LazyColumn
 import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
+import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.feature.locations.model.LocationSortField
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
@@ -105,6 +106,7 @@ fun LocationListScreen(
     val categoryOperationState by viewModel.categoryOperationState.collectAsStateWithLifecycle()
 
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
+    var showSort by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
     val libraryCounts by viewModel.libraryCounts.collectAsStateWithLifecycle()
@@ -142,6 +144,17 @@ fun LocationListScreen(
             )
         }
 
+        if (showSort) {
+            PlacesSortSheet(
+                sortField = filters.sortField,
+                sortDirection = filters.sortDirection,
+                onChange = { field, direction ->
+                    viewModel.onFiltersChanged(filters.copy(sortField = field, sortDirection = direction))
+                },
+                onDismiss = { showSort = false },
+            )
+        }
+
     AdventureListContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
@@ -170,6 +183,8 @@ fun LocationListScreen(
         onVisitedFilterChange = { viewModel.onFiltersChanged(filters.copy(visitedFilter = it)) },
         categoryNames = filters.categoryNames,
         sortField = filters.sortField,
+        sortDirection = filters.sortDirection,
+        onShowSort = { showSort = true },
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
@@ -288,6 +303,8 @@ private fun AdventureListContent(
     onVisitedFilterChange: (VisitedFilter) -> Unit = {},
     categoryNames: List<String> = emptyList(),
     sortField: LocationSortField = LocationSortField.UPDATED_AT,
+    sortDirection: SortDirection = SortDirection.DESCENDING,
+    onShowSort: () -> Unit = onShowFilters,
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -346,7 +363,9 @@ private fun AdventureListContent(
                 sheetFilterCount = sheetFilterCount,
                 categoryNames = categoryNames,
                 sortField = sortField,
+                sortDirection = sortDirection,
                 onOpen = onShowFilters,
+                onOpenSort = onShowSort,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
           }

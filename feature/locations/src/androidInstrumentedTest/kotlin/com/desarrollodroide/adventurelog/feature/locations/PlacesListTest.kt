@@ -208,6 +208,6 @@ class PlacesListTest {
 
         onNodeWithText("Filters").assertIsDisplayed()
         onNodeWithText("Category").assertIsDisplayed()
-        onNodeWithText("Sort: Recently updated").assertIsDisplayed()
+        onNodeWithText("Sort: Updated").assertIsDisplayed()
     }
 }

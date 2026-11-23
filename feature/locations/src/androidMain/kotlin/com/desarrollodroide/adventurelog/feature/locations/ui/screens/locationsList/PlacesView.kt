@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList
 
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import com.desarrollodroide.adventurelog.core.model.SortDirection
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -65,7 +68,7 @@ internal fun PlacesViewToggle(view: PlacesView, onChange: (PlacesView) -> Unit, 
 
 /** What a sort reads as on its chip. */
 internal fun sortLabel(field: LocationSortField): String = when (field) {
-    LocationSortField.UPDATED_AT -> "Recently updated"
+    LocationSortField.UPDATED_AT -> "Updated" // short: the chip row has three chips to fit
     LocationSortField.VISIT_DATE -> "Visit date"
     LocationSortField.NAME -> "Name"
     LocationSortField.RATING -> "Rating"
@@ -89,6 +92,8 @@ internal fun PlacesFilterChips(
     sortField: LocationSortField,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
+    sortDirection: SortDirection = SortDirection.DESCENDING,
+    onOpenSort: () -> Unit = onOpen,
 ) {
     Row(
         modifier
@@ -111,11 +116,19 @@ internal fun PlacesFilterChips(
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
             shape = RoundedCornerShape(10.dp),
         )
+        // Sort has a sheet of its own; the arrow says which way the list runs.
         FilterChip(
-            selected = sortField != LocationSortField.UPDATED_AT,
-            onClick = onOpen,
+            selected = sortField != LocationSortField.UPDATED_AT || sortDirection != SortDirection.DESCENDING,
+            onClick = onOpenSort,
             label = { Text("Sort: ${sortLabel(sortField)}") },
-            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
+            leadingIcon = {
+                Icon(
+                    if (sortDirection == SortDirection.ASCENDING) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    contentDescription = null,
+                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                )
+            },
+            // The direction arrow leads; a drop-down arrow too pushed the chip off the row.
             shape = RoundedCornerShape(10.dp),
         )
     }

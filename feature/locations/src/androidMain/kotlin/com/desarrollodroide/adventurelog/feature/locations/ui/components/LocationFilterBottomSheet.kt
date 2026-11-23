@@ -47,6 +47,7 @@ import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.ManageCategoriesButton
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.SortChoice
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.VisitChoice
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.naturalDirection
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel.CategoriesState
 import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -169,7 +170,7 @@ internal fun LocationsFilterContent(
                 SortChoice(
                     sortField = filters.sortField,
                     sortDirection = filters.sortDirection,
-                    onFieldChange = { onFiltersChanged(filters.copy(sortField = it)) },
+                    onFieldChange = { onFiltersChanged(filters.copy(sortField = it, sortDirection = naturalDirection(it))) },
                     onDirectionChange = { onFiltersChanged(filters.copy(sortDirection = it)) },
                 )
             }
