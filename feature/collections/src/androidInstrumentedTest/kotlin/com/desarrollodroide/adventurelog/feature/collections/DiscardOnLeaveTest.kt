@@ -94,7 +94,9 @@ class DiscardOnLeaveTest {
         onNodeWithText("Discard this transport?").assertIsDisplayed()
         assertEquals(0, left)
         onNodeWithText("Keep editing").performClick()
-        onNode(hasSetTextAction() and hasText("QA_Train")).assertIsDisplayed()
+        // Still there - scrolled to, since Cancel sits below a taller Save and the field can be
+        // above the fold by then.
+        onNode(hasSetTextAction() and hasText("QA_Train")).performScrollTo().assertIsDisplayed()
         assertEquals(0, left)
     }
 
