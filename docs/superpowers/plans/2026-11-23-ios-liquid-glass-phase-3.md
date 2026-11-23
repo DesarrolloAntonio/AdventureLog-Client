@@ -23,7 +23,7 @@
 - Kotlin called from Swift catches its own exceptions or is `@Throws`.
 - No shared ViewModel changes unless a task names them; `scripts/check-common-compose.sh` keeps passing.
 - Look comes from the canvas (accent `#007A85`, New York serif display titles, SF text); every screen is compared with its artboard in light and dark.
-- Simulator: a dedicated device named `AL iOS 26` (create it if missing); never drive a simulator another session is using.
+- Simulator: a dedicated device named `AL iOS` (iPhone 17 Pro, the iOS 27 runtime installed here; create it if missing); never drive a simulator another session is using.
 - Branch `feat/ios-liquid-glass` off `develop`; one commit per task.
 
 ## Review Focus
@@ -66,7 +66,7 @@
 
 - [ ] **Step 1:** Convert the app target's folder to a synchronized root group with `App/`, `Core/`, `Features/`.
 - [ ] **Step 2:** Implement `ViewModelHost`, `Theme`, `RootView` (Login placeholder for now).
-- [ ] **Step 3: Build** `xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -destination 'platform=iOS Simulator,name=AL iOS 26' build` — BUILD SUCCEEDED.
+- [ ] **Step 3: Build** `xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -destination 'platform=iOS Simulator,name=AL iOS' build` — BUILD SUCCEEDED.
 - [ ] **Step 4:** Add the CI step; check the hosted runner's Xcode has the iOS 26 SDK (spec: "checked then"); if not, pin `macos-26` or record why the step is skipped.
 - [ ] **Step 5: Commit** `feat(ios): app skeleton, theme and CI build`.
 
@@ -77,7 +77,7 @@
 **Interfaces:** Consumes `IosViewModelOwner.loginViewModel()`; `LoginViewModel.uiState: StateFlow<LoginUiState>` (`CheckingSession`, `Empty`, `Loading`, `Error(message)`, `Success(userDetails)`), `loginFormState`, `updateServerUrl/UserName/Password/RememberSession`, `login()`. Logged-out detection: `UserRepository.getUserSession()` emitting null — add `IosViewModelOwner.sessionFlow()` returning that flow.
 
 - [ ] **Step 1: Write the UI tests** — `testSignInDisabledUntilAllFieldsFilled`, `testTypingFastKeepsEveryCharacter` (types `https://example.test` at full speed, asserts the field's value), `testUnreachableServerEndsInTheFormWithAnError` (launch argument pointing at `http://127.0.0.1:9`, asserts the error text and no spinner after 15 s).
-- [ ] **Step 2: Run** `xcodebuild test -scheme iosApp -destination 'platform=iOS Simulator,name=AL iOS 26' -only-testing:iosAppUITests` — FAIL.
+- [ ] **Step 2: Run** `xcodebuild test -scheme iosApp -destination 'platform=iOS Simulator,name=AL iOS' -only-testing:iosAppUITests` — FAIL.
 - [ ] **Step 3: Implement `LoginView`** from `iOS-Login` (title in serif, server field with the canvas's hint, Sign In, "How do I set up a server?"), and `RootView` switching on `sessionFlow()` so a lost session returns to Login.
 - [ ] **Step 4: Run the tests** — PASS. Simulator check light/dark against the artboard; sign in with the demo account from the project's QA notes (never a real password typed by Claude outside that account).
 - [ ] **Step 5: Commit** `feat(ios): login and session gate`.
