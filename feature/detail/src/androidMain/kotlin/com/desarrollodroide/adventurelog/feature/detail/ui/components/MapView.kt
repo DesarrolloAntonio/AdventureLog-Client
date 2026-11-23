@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.model.CameraPosition
@@ -38,6 +39,16 @@ fun MapView(
         position = CameraPosition.fromLatLngZoom(latLng, 15f)
     }
     
+    // The camera is only placed when the state is first created. On a tablet the detail pane stays
+    // composed while the list picks another place, so the map kept showing the previous one (seen:
+    // Trolltunga's page over a map of Kyoto). Follow the coordinates instead.
+    LaunchedEffect(latLng) {
+        if (cameraPositionState.position.target != latLng) {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
+        }
+    }
+    val markerState = remember(latLng) { MarkerState(position = latLng) }
+
     val rendering = rememberMapRendering()
 
     // Create Google Map with a marker
@@ -47,7 +58,7 @@ fun MapView(
         properties = MapProperties(mapType = rendering.toGoogleMapType())
     ) {
         Marker(
-            state = MarkerState(position = latLng),
+            state = markerState,
             title = "Adventure Location"
         )
     }

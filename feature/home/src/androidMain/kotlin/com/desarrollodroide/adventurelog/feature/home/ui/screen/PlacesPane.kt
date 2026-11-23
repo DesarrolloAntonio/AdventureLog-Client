@@ -5,7 +5,6 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
-import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -81,7 +80,7 @@ fun PlacesPane(
     modifier: Modifier = Modifier
 ) {
     val backStack = rememberNavBackStack(placesNavConfiguration, PlacesList)
-    val listDetail = rememberListDetailSceneStrategy<NavKey>()
+    val listDetail = rememberQuietListDetailSceneStrategy<NavKey>()
 
     // The detail is a pane beside the list, not a screen on top of it, whenever the window is
     // wide enough for the strategy to show both - and a back arrow pointing at a list that never
