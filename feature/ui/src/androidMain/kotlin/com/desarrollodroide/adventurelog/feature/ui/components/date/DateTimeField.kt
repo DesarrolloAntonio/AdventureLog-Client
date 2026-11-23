@@ -1,8 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.components.date
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarToday
@@ -12,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.common.utils.formatDateForDisplay
 
@@ -36,7 +35,7 @@ fun DateTimeField(
                 placeholder = {
                     Text(
                         text = "dd/mm/yyyy",
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 modifier = Modifier
@@ -47,28 +46,13 @@ fun DateTimeField(
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
                     disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledPlaceholderColor = Color.Gray,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledContainerColor = Color.Transparent
                 )
             )
             
             // Date button
-            IconButton(
-                onClick = onDateClick,
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.CalendarToday,
-                    contentDescription = "Select date",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
+            PickerButton(Icons.Outlined.CalendarToday, "Select date", onDateClick)
         }
     } else {
         // For timed events, show combined field with two buttons
@@ -87,7 +71,7 @@ fun DateTimeField(
                 placeholder = {
                     Text(
                         text = "dd/mm/yyyy, --:--",
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 modifier = Modifier
@@ -98,47 +82,30 @@ fun DateTimeField(
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
                     disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledPlaceholderColor = Color.Gray,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     disabledContainerColor = Color.Transparent
                 ),
                 singleLine = true
             )
             
             // Date button
-            IconButton(
-                onClick = onDateClick,
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.CalendarToday,
-                    contentDescription = "Select date",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
+            PickerButton(Icons.Outlined.CalendarToday, "Select date", onDateClick)
             
             // Time button
-            IconButton(
-                onClick = onTimeClick,
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Schedule,
-                    contentDescription = "Select time",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
+            PickerButton(Icons.Outlined.Schedule, "Select time", onTimeClick)
         }
+    }
+}
+
+/** The filled button beside the field that opens the date or time picker. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PickerButton(icon: ImageVector, description: String, onClick: () -> Unit) {
+    FilledIconButton(
+        onClick = onClick,
+        shapes = IconButtonDefaults.shapes(),
+        modifier = Modifier.size(48.dp)
+    ) {
+        Icon(imageVector = icon, contentDescription = description, modifier = Modifier.size(22.dp))
     }
 }

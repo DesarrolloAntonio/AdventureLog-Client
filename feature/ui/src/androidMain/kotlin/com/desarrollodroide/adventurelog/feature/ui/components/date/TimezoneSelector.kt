@@ -1,21 +1,58 @@
 package com.desarrollodroide.adventurelog.feature.ui.components.date
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.common.data.TimezoneData
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import com.desarrollodroide.adventurelog.feature.ui.components.StandardSearchField
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import kotlinx.datetime.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +62,7 @@ fun TimezoneDropdown(
     onTimezoneSelected: (String) -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
-    
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = "Timezone",
@@ -33,15 +70,15 @@ fun TimezoneDropdown(
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+    
         OutlinedTextField(
             value = selectedTimezone,
             onValueChange = { },
             placeholder = { 
                 Text(
                     text = "Select timezone",
-                    color = Color.Gray
-                ) 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -53,20 +90,20 @@ fun TimezoneDropdown(
                 Icon(
                     imageVector = Icons.Outlined.Schedule,
                     contentDescription = null,
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface,
                 disabledBorderColor = MaterialTheme.colorScheme.outline,
-                disabledPlaceholderColor = Color.Gray,
+                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 disabledContainerColor = Color.Transparent,
-                disabledLeadingIconColor = Color.Gray
+                disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
     }
-    
+
     if (showBottomSheet) {
         TimezoneBottomSheet(
             currentTimezone = selectedTimezone,
@@ -79,6 +116,10 @@ fun TimezoneDropdown(
     }
 }
 
+/**
+ * The zones as single-choice rows: the device's own and the one in use on top as a short block,
+ * then every zone, filtered by what is typed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimezoneBottomSheet(
@@ -87,7 +128,8 @@ private fun TimezoneBottomSheet(
     onDismiss: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    
+    val systemTimezone = TimeZone.currentSystemDefault().id
+
     // Filter timezones based on search query
     val filteredTimezones = remember(searchQuery) {
         if (searchQuery.isEmpty()) {
@@ -98,7 +140,7 @@ private fun TimezoneBottomSheet(
             }
         }
     }
-    
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -106,152 +148,128 @@ private fun TimezoneBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp),
+                .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Title
-            Text(
-                text = "Select Timezone",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            
-            // Search field
-            OutlinedTextField(
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(text = "Timezone", style = AdventureType.display(34.sp))
+                if (currentTimezone.isNotBlank()) {
+                    Text(
+                        text = currentTimezone,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            StandardSearchField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Search timezone...") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Schedule,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                )
+                placeholder = "Search timezone..."
             )
-            
-            // Current timezone (if different from system)
-            if (currentTimezone != TimeZone.currentSystemDefault().id) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onTimezoneSelected(currentTimezone) },
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+
+            // The device's zone, and the one in use when it is another: the two most often wanted.
+            val shortcuts = buildList {
+                add(Triple(systemTimezone, "System default", Icons.Outlined.PhoneAndroid))
+                if (currentTimezone.isNotBlank() && currentTimezone != systemTimezone) {
+                    add(Triple(currentTimezone, "Current", Icons.Outlined.History))
+                }
+            }
+            Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                shortcuts.forEachIndexed { index, (zone, label, icon) ->
+                    TimezoneRow(
+                        title = label,
+                        supporting = zone,
+                        icon = icon,
+                        selected = zone == currentTimezone,
+                        index = index,
+                        count = shortcuts.size,
+                        onClick = { onTimezoneSelected(zone) }
                     )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Current: $currentTimezone",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
             }
-            
-            // System timezone
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onTimezoneSelected(TimeZone.currentSystemDefault().id) },
-                colors = CardDefaults.cardColors(
-                    containerColor = if (currentTimezone == TimeZone.currentSystemDefault().id) 
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "System Default",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = TimeZone.currentSystemDefault().id,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (currentTimezone == TimeZone.currentSystemDefault().id) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-            
-            HorizontalDivider()
-            
-            // Timezone list
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(400.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                    .height(400.dp)
+                    .selectableGroup(),
+                verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)
             ) {
-                items(filteredTimezones) { timezone ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onTimezoneSelected(timezone) },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (timezone == currentTimezone) 
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                            else Color.Transparent
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = timezone,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            if (timezone == currentTimezone) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
+                itemsIndexed(filteredTimezones) { index, timezone ->
+                    TimezoneRow(
+                        title = timezone,
+                        supporting = null,
+                        icon = null,
+                        selected = timezone == currentTimezone,
+                        index = index,
+                        count = filteredTimezones.size,
+                        onClick = { onTimezoneSelected(timezone) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimezoneRow(
+    title: String,
+    supporting: String?,
+    icon: ImageVector?,
+    selected: Boolean,
+    index: Int,
+    count: Int,
+    onClick: () -> Unit
+) {
+    val colors = MaterialTheme.colorScheme
+    val effects = MaterialTheme.motionScheme.fastEffectsSpec<Color>()
+    val container by animateColorAsState(if (selected) colors.secondaryContainer else colors.surfaceContainerHigh, effects, label = "row")
+    val badge by animateColorAsState(if (selected) colors.primary else colors.surfaceContainerHighest, effects, label = "badge")
+    val badgeContent by animateColorAsState(if (selected) colors.onPrimary else colors.onSurfaceVariant, effects, label = "badgeContent")
+    Surface(
+        shape = SegmentedListDefaults.shapeFor(index, count),
+        color = container,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            Modifier
+                .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
+                // A bare zone name is one line; the shortcuts carry a badge and a second line.
+                .heightIn(min = if (icon != null) 64.dp else 52.dp)
+                .padding(horizontal = if (icon != null) 12.dp else 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            if (icon != null) {
+                Surface(shape = RoundedCornerShape(12.dp), color = badge, contentColor = badgeContent, modifier = Modifier.size(40.dp)) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp))
                     }
                 }
+            }
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = if (icon != null) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+                    color = if (selected) colors.onSecondaryContainer else colors.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                supporting?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (selected) colors.onSecondaryContainer else colors.onSurfaceVariant
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = selected,
+                enter = scaleIn(MaterialTheme.motionScheme.fastSpatialSpec(), initialScale = 0.3f) + fadeIn(),
+                exit = scaleOut(targetScale = 0.3f) + fadeOut()
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, tint = colors.onSecondaryContainer)
             }
         }
     }

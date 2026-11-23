@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -24,16 +27,18 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.PhotoLibrary
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,9 +47,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
@@ -56,13 +63,12 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.compose.SubcomposeAsyncImage
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
-import androidx.compose.material3.CircularProgressIndicator
 import kotlin.collections.plus
 import co.touchlab.kermit.Logger
 
 private val logger = Logger.withTag("ImagesSection")
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ImagesSection(
     images: List<ImageFormData>,
@@ -88,39 +94,23 @@ fun ImagesSection(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Image source tabs
-            TabRow(
-                selectedTabIndex = selectedTab,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text("Upload") }
-                )
-                Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text("URL") }
-                )
-                Tab(
-                    selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
-                    text = { Text("Wikipedia") }
-                )
-            }
+            // Where the image comes from: a connected group, one chosen.
+            ImageSourceChoice(
+                options = listOf("Upload", "URL", "Wikipedia"),
+                selectedIndex = selectedTab,
+                onSelect = { selectedTab = it }
+            )
 
             // Tab content
             when (selectedTab) {
                 0 -> {
                     // Upload from device
                     if (images.size >= 10) {
-                        Card(
+                        Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
-                            )
+                            shape = RoundedCornerShape(20.dp),
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
                         ) {
                             Box(
                                 modifier = Modifier
@@ -130,8 +120,7 @@ fun ImagesSection(
                             ) {
                                 Text(
                                     text = "Maximum of 10 images reached",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         }
@@ -140,81 +129,18 @@ fun ImagesSection(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Gallery option
-                            Card(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(120.dp)
-                                    .clickable { showImagePicker = true },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                        alpha = 0.3f
-                                    )
-                                ),
-                                border = CardDefaults.outlinedCardBorder()
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.PhotoLibrary,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(32.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            text = "GALLERY",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                            }
-
-                            // Camera option
-                            Card(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(120.dp)
-                                    .clickable { showCameraCapture = true },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                        alpha = 0.3f
-                                    )
-                                ),
-                                border = CardDefaults.outlinedCardBorder()
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.PhotoCamera,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(32.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            text = "CAMERA",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                            }
+                            SourceTile(
+                                icon = Icons.Outlined.PhotoLibrary,
+                                label = "Gallery",
+                                onClick = { showImagePicker = true },
+                                modifier = Modifier.weight(1f)
+                            )
+                            SourceTile(
+                                icon = Icons.Outlined.PhotoCamera,
+                                label = "Camera",
+                                onClick = { showCameraCapture = true },
+                                modifier = Modifier.weight(1f)
+                            )
                         }
                     }
                 }
@@ -239,18 +165,9 @@ fun ImagesSection(
                             keyboardOptions = KeyboardOptions(
                                 imeAction = ImeAction.Done
                             ),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                    alpha = 0.3f
-                                ),
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                    alpha = 0.3f
-                                ),
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = Color.Transparent,
-                                errorBorderColor = MaterialTheme.colorScheme.error
-                            ),
+                            // Outlined like the form's other fields (StyledTextField).
+                            shape = RoundedCornerShape(14.dp),
+                            colors = formFieldColors(),
                             isError = urlError != null,
                             supportingText = urlError?.let { { Text(it) } }
                         )
@@ -291,7 +208,7 @@ fun ImagesSection(
                                             modifier = Modifier.fillMaxSize(),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            CircularProgressIndicator()
+                                            LoadingIndicator()
                                         }
                                     },
                                     error = {
@@ -302,11 +219,8 @@ fun ImagesSection(
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxSize()
-                                                .background(
-                                                    MaterialTheme.colorScheme.errorContainer.copy(
-                                                        alpha = 0.1f
-                                                    )
-                                                ),
+                                                .clip(RoundedCornerShape(20.dp))
+                                                .background(MaterialTheme.colorScheme.errorContainer),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Column(
@@ -317,12 +231,12 @@ fun ImagesSection(
                                                     imageVector = Icons.Default.Image,
                                                     contentDescription = null,
                                                     modifier = Modifier.size(48.dp),
-                                                    tint = MaterialTheme.colorScheme.error
+                                                    tint = MaterialTheme.colorScheme.onErrorContainer
                                                 )
                                                 Text(
                                                     text = "Failed to load image",
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.error
+                                                    color = MaterialTheme.colorScheme.onErrorContainer
                                                 )
                                             }
                                         }
@@ -375,17 +289,9 @@ fun ImagesSection(
                             keyboardOptions = KeyboardOptions(
                                 imeAction = ImeAction.Search
                             ),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                    alpha = 0.3f
-                                ),
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                                    alpha = 0.3f
-                                ),
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = Color.Transparent
-                            )
+                            // Outlined like the form's other fields (StyledTextField).
+                            shape = RoundedCornerShape(14.dp),
+                            colors = formFieldColors()
                         )
 
                         PrimaryButton(
@@ -419,83 +325,11 @@ fun ImagesSection(
                             }
 
                             is WikipediaImageResult.NotFound -> {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(
-                                            alpha = 0.1f
-                                        )
-                                    ),
-                                    border = CardDefaults.outlinedCardBorder().copy(
-                                        width = 1.dp,
-                                        brush = SolidColor(
-                                            MaterialTheme.colorScheme.error.copy(
-                                                alpha = 0.5f
-                                            )
-                                        )
-                                    )
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Error,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = "No image found for \"$wikipediaQuery\"",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
+                                SearchProblem("No image found for \"$wikipediaQuery\"")
                             }
 
                             is WikipediaImageResult.Error -> {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(
-                                            alpha = 0.1f
-                                        )
-                                    ),
-                                    border = CardDefaults.outlinedCardBorder().copy(
-                                        width = 1.dp,
-                                        brush = SolidColor(
-                                            MaterialTheme.colorScheme.error.copy(
-                                                alpha = 0.5f
-                                            )
-                                        )
-                                    )
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Error,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.error,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text(
-                                            text = wikipediaImageState.message,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
+                                SearchProblem(wikipediaImageState.message)
                             }
 
                             else -> {}
@@ -506,51 +340,39 @@ fun ImagesSection(
 
             // Images gallery
             if (images.isNotEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            text = "Selected images (${images.size})",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Selected images (${images.size})",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
 
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalArrangement = Arrangement.Top,
-                            maxItemsInEachRow = 3
-                        ) {
-                            images.forEachIndexed { index, image ->
-                                ImageItem(
-                                    image = image,
-                                    isPrimary = image.isPrimary,
-                                    onDelete = {
-                                        val updatedImages = images.toMutableList().apply {
-                                            removeAt(index)
-                                        }
-                                        if (image.isPrimary && updatedImages.isNotEmpty()) {
-                                            updatedImages[0] = updatedImages[0].copy(isPrimary = true)
-                                        }
-                                        onImagesChange(updatedImages)
-                                    },
-                                    onSetPrimary = {
-                                        val updatedImages = images.mapIndexed { i, img ->
-                                            img.copy(isPrimary = i == index)
-                                        }
-                                        onImagesChange(updatedImages)
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalArrangement = Arrangement.Top,
+                        maxItemsInEachRow = 3
+                    ) {
+                        images.forEachIndexed { index, image ->
+                            ImageItem(
+                                image = image,
+                                isPrimary = image.isPrimary,
+                                onDelete = {
+                                    val updatedImages = images.toMutableList().apply {
+                                        removeAt(index)
                                     }
-                                )
-                            }
+                                    if (image.isPrimary && updatedImages.isNotEmpty()) {
+                                        updatedImages[0] = updatedImages[0].copy(isPrimary = true)
+                                    }
+                                    onImagesChange(updatedImages)
+                                },
+                                onSetPrimary = {
+                                    val updatedImages = images.mapIndexed { i, img ->
+                                        img.copy(isPrimary = i == index)
+                                    }
+                                    onImagesChange(updatedImages)
+                                }
+                            )
                         }
                     }
                 }
@@ -595,6 +417,7 @@ fun ImagesSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ImageItem(
     image: ImageFormData,
@@ -602,25 +425,22 @@ private fun ImageItem(
     onDelete: () -> Unit,
     onSetPrimary: () -> Unit
 ) {
-    Card(
+    val shape = RoundedCornerShape(16.dp)
+    Box(
         modifier = Modifier
             .fillMaxWidth(1f / 3f)
             .aspectRatio(1f)
             .padding(end = 8.dp, bottom = 8.dp)
-            .clickable { onSetPrimary() }
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .then(
                 if (isPrimary) {
-                    Modifier.border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(12.dp)
-                    )
+                    Modifier.border(width = 3.dp, color = MaterialTheme.colorScheme.primary, shape = shape)
                 } else {
                     Modifier
                 }
-            ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            )
+            .clickable { onSetPrimary() }
     ) {
         Box(
             modifier = Modifier.fillMaxSize()
@@ -642,27 +462,24 @@ private fun ImageItem(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                                 contentAlignment = Alignment.Center
                             ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp
-                                )
+                                LoadingIndicator(modifier = Modifier.size(32.dp))
                             }
                         },
                         error = {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)),
+                                    .background(MaterialTheme.colorScheme.errorContainer),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Image,
                                     contentDescription = null,
                                     modifier = Modifier.size(32.dp),
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = MaterialTheme.colorScheme.onErrorContainer
                                 )
                             }
                         }
@@ -692,22 +509,21 @@ private fun ImageItem(
                 }
             }
 
-            // Delete button
+            // Delete button: a small round chip over the photo's corner.
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
+                    .padding(4.dp)
                     .size(28.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                        shape = RoundedCornerShape(bottomStart = 12.dp)
-                    )
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.9f))
                     .clickable { onDelete() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -717,20 +533,109 @@ private fun ImageItem(
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
+                        .padding(6.dp)
                         .background(
                             color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(topEnd = 12.dp)
+                            shape = RoundedCornerShape(8.dp)
                         )
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "Primary",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
         }
     }
 }
+
+/** Gallery or camera: a tile with its icon on a cookie, the way into each source. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun SourceTile(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = modifier.height(120.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
+        ) {
+            CookieBadge(
+                icon = icon,
+                container = MaterialTheme.colorScheme.primaryContainer,
+                content = MaterialTheme.colorScheme.onPrimaryContainer,
+                size = 52.dp,
+                polygon = MaterialShapes.Cookie4Sided
+            )
+            Text(text = label, style = MaterialTheme.typography.titleSmall)
+        }
+    }
+}
+
+/** Upload, URL or Wikipedia: a connected group of toggle buttons, one chosen. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ImageSourceChoice(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+        options.forEachIndexed { index, label ->
+            ToggleButton(
+                checked = index == selectedIndex,
+                onCheckedChange = { if (it) onSelect(index) },
+                shapes = when (index) {
+                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                },
+                colors = ToggleButtonDefaults.colors(
+                    containerColor = colors.surfaceContainerHighest,
+                    contentColor = colors.onSurfaceVariant,
+                    checkedContainerColor = colors.primary,
+                    checkedContentColor = colors.onPrimary,
+                ),
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+            ) {
+                Text(label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
+/** "No image found" or the search's error, in the error container. */
+@Composable
+private fun SearchProblem(text: String) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(imageVector = Icons.Default.Error, contentDescription = null, modifier = Modifier.size(20.dp))
+            Text(text = text, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+/** The form's outlined field colours: no fill, the outline taking the primary colour on focus. */
+@Composable
+private fun formFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent,
+    focusedBorderColor = MaterialTheme.colorScheme.primary,
+    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+    errorBorderColor = MaterialTheme.colorScheme.error
+)
