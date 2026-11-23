@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -93,7 +94,7 @@ fun MapView(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = MapProperties(mapType = rendering.toGoogleMapType()),
+        properties = rememberThemedMapProperties(rendering),
         onMapClick = { onMapClick(it.latitude, it.longitude) }
     ) {
         origin?.let { Marker(state = MarkerState(position = it), title = "From") }

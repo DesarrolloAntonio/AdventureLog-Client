@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import com.google.maps.android.compose.MarkerComposable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -74,7 +75,7 @@ fun MapView(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = MapProperties(mapType = rendering.toGoogleMapType())
+        properties = rememberThemedMapProperties(rendering)
     ) {
         // The Map tab's pin, not Google's red drop: a rounded square on a short point, inked
         // once visited, with the category's emoji.

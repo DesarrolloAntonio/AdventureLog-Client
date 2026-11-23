@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import com.desarrollodroide.adventurelog.feature.map.ui.state.markerLabel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,12 +108,7 @@ fun AdventureMapView(
     }
     
     val rendering = rememberMapRendering()
-    val mapProperties = remember(rendering) {
-        MapProperties(
-            isMyLocationEnabled = false,
-            mapType = rendering.toGoogleMapType()
-        )
-    }
+    val mapProperties = rememberThemedMapProperties(rendering)
     
     val uiSettings = remember {
         MapUiSettings(
