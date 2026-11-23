@@ -1,5 +1,12 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -91,7 +98,7 @@ fun collectionBadge(collection: UltraSlimCollection): String? = when {
  * stub on the left, a dashed tear line, then the name with its badge and the DATES and PLACES it
  * would have printed. The actions open from the menu or a long press.
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SlimCollectionItem(
     collection: UltraSlimCollection,
@@ -112,11 +119,23 @@ fun SlimCollectionItem(
     val colors = MaterialTheme.colorScheme
     val dash = colors.outlineVariant
 
+    // Expressive press: the ticket's corners tighten and it gives a little under the finger,
+    // springing back on release.
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val motion = MaterialTheme.motionScheme
+    val corner by animateDpAsState(if (pressed) 12.dp else 24.dp, motion.fastSpatialSpec(), label = "corner")
+    val scale by animateFloatAsState(if (pressed) 0.97f else 1f, motion.fastSpatialSpec(), label = "scale")
     Surface(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(corner),
         color = colors.surfaceContainerLowest,
         border = BorderStroke(1.dp, colors.outlineVariant),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
     ) {
         // The photo and the tear line fill the ticket's height whatever the text makes it: they sit
         // in a layer matched to the card's size. (An intrinsic-height Row asked the placeholder,
@@ -124,7 +143,12 @@ fun SlimCollectionItem(
         Box(
             Modifier
                 .heightIn(min = 120.dp)
-                .combinedClickable(onClick = onClick, onLongClick = { showMenu = true })
+                .combinedClickable(
+                    interactionSource = interaction,
+                    indication = LocalIndication.current,
+                    onClick = onClick,
+                    onLongClick = { showMenu = true },
+                )
         ) {
             Box(Modifier.matchParentSize()) {
                 CollectionPhoto(collection, Modifier.width(PhotoWidth).fillMaxHeight())

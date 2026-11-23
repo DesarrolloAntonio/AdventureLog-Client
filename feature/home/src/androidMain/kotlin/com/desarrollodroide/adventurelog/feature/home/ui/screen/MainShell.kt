@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.UserDetails
@@ -85,6 +86,7 @@ import com.desarrollodroide.adventurelog.resources.Res
 import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.navigation.NavBackStackEntry
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.isSectionSwitch
@@ -438,9 +440,10 @@ fun HomeScreenContent(
                                         // app's mark and name, as the canvas draws it.
                                         BrandTitle()
                                     } else {
+                                        // The canvas's page title: condensed and heavy.
                                         Text(
                                             text = screen.title,
-                                            style = MaterialTheme.typography.headlineSmall,
+                                            style = AdventureType.display(34.sp),
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
                                         )
