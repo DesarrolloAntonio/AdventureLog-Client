@@ -48,6 +48,28 @@ fun collectionMoment(start: String?, end: String?, today: LocalDate): Collection
     }
 }
 
+/** The big figure on the ticket's stub and the word under it. */
+data class TicketStub(val figure: String, val label: String)
+
+/**
+ * What the ticket's stub says, whatever the trip's moment: the days to go before it, the day it
+ * has reached while it runs, how long it lasted once over - and, for a folder with no dates, how
+ * many places are in it. Always something, so the ticket always has its stub.
+ */
+fun ticketStub(start: String?, end: String?, today: LocalDate, places: Int): TicketStub {
+    val from = day(start) ?: return TicketStub(places.toString(), if (places == 1) "PLACE" else "PLACES")
+    val to = day(end) ?: from
+    val length = (to.toEpochDays() - from.toEpochDays()).toInt() + 1
+    return when {
+        today < from -> {
+            val days = (from.toEpochDays() - today.toEpochDays()).toInt()
+            TicketStub(days.toString(), if (days == 1) "DAY TO GO" else "DAYS TO GO")
+        }
+        today <= to -> TicketStub(((today.toEpochDays() - from.toEpochDays()).toInt() + 1).toString(), "DAY OF $length")
+        else -> TicketStub(length.toString(), if (length == 1) "DAY" else "DAYS")
+    }
+}
+
 private val MONTHS = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
 
 private fun stamp(date: LocalDate) = "${date.day} ${MONTHS[date.month.ordinal]}"

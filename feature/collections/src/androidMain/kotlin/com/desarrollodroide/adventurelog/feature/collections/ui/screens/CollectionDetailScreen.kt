@@ -1,5 +1,12 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.PathEffect
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketStub
 import androidx.compose.foundation.lazy.itemsIndexed
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
@@ -949,48 +956,74 @@ fun CollectionHeader(
         }
         Text(text = collection.name, style = AdventureType.display(58.sp), maxLines = 3, overflow = TextOverflow.Ellipsis)
 
-        if (moment.daysToGo != null || dates != null || checklist != null) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = colors.surfaceContainerLowest,
-                border = BorderStroke(1.dp, colors.outlineVariant),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+        // The ticket, as the canvas draws it: a stub with one big figure, a torn edge, then the
+        // dates and the packing list filling up.
+        val stub = ticketStub(collection.startDate, collection.endDate, today, collection.locations.size)
+        val background = colors.background
+        val edge = colors.outlineVariant
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = colors.surfaceContainerLowest,
+            border = BorderStroke(1.dp, edge),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(Modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
+                Column(
+                    Modifier.width(116.dp).padding(start = 20.dp, top = 16.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    moment.daysToGo?.let { days ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(days.toString(), style = AdventureType.display(52.sp), color = colors.primary)
-                            Text(
-                                text = if (days == 1) "DAY TO GO" else "DAYS TO GO",
-                                fontSize = 11.sp,
-                                lineHeight = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.2.sp,
-                                color = colors.onSurfaceVariant
+                    Text(stub.figure, style = AdventureType.display(60.sp), color = colors.primary, maxLines = 1)
+                    Text(
+                        text = stub.label,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp,
+                        color = colors.onSurfaceVariant
+                    )
+                }
+                // The tear: a dashed line with a notch bitten out at each end.
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .width(2.dp)
+                        .drawBehind {
+                            drawLine(
+                                edge, Offset(size.width / 2, 18.dp.toPx()), Offset(size.width / 2, size.height - 18.dp.toPx()),
+                                strokeWidth = 2.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
                             )
+                            val r = 12.dp.toPx()
+                            drawCircle(background, r, Offset(size.width / 2, -1.dp.toPx()))
+                            drawCircle(background, r, Offset(size.width / 2, size.height + 1.dp.toPx()))
                         }
-                    }
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        dates?.let { Text(it, style = AdventureType.display(24.sp)) }
-                        checklist?.let { list ->
-                            val done = list.items.count { it.isChecked }
-                            Text(
-                                text = "${list.name} \u00b7 $done of ${list.items.size}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colors.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            // Expressive's wavy progress: the list filling up as the trip nears.
-                            LinearWavyProgressIndicator(
-                                progress = { done.toFloat() / list.items.size },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                )
+                Column(
+                    Modifier.weight(1f).padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(dates ?: "No dates", style = AdventureType.display(24.sp))
+                    if (checklist != null) {
+                        val done = checklist.items.count { it.isChecked }
+                        Text(
+                            text = "${checklist.name} \u00b7 $done of ${checklist.items.size}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        // Expressive's wavy progress: the list filling up as the trip nears.
+                        LinearWavyProgressIndicator(
+                            progress = { done.toFloat() / checklist.items.size },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        val places = collection.locations.size
+                        Text(
+                            text = if (places == 1) "1 place" else "$places places",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.onSurfaceVariant
+                        )
                     }
                 }
             }
