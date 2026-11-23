@@ -1,6 +1,12 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material3.toShape
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -157,6 +163,66 @@ fun CountryRow(country: Country, shape: Shape, onClick: (String) -> Unit, modifi
                 )
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.onSurfaceVariant)
+        }
+    }
+}
+
+/** The shapes stamps are inked in, in turn: from Material's shape library, none of them a box. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private val StampShapes = listOf(
+    MaterialShapes.Cookie9Sided, MaterialShapes.SoftBurst, MaterialShapes.Clover8Leaf,
+    MaterialShapes.Sunny, MaterialShapes.Cookie6Sided, MaterialShapes.Flower,
+)
+
+/**
+ * The countries visited, as stamps across a passport page: each its code in a shape of its own,
+ * inked in one of the theme's colours and pressed on at a slight angle. Tapping one opens it.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun StampsStrip(countries: List<Country>, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.colorScheme
+    val inks = listOf(
+        colors.primary to colors.onPrimary,
+        colors.tertiaryContainer to colors.onTertiaryContainer,
+        colors.secondaryContainer to colors.onSecondaryContainer,
+        colors.primaryContainer to colors.onPrimaryContainer,
+    )
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("Your stamps", style = AdventureType.display(26.sp))
+        // Sized so a fifth stamp shows cut at the edge on a phone: the cut says the row goes on.
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            itemsIndexed(countries, key = { _, c -> c.countryCode }) { index, country ->
+                val (ink, onInk) = inks[index % inks.size]
+                val shape = StampShapes[index % StampShapes.size].toShape()
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .width(76.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable(onClickLabel = "Open") { onClick(country.countryCode) }
+                        .semantics(mergeDescendants = true) {}
+                        .padding(vertical = 4.dp),
+                ) {
+                    Box(
+                        Modifier
+                            .size(70.dp)
+                            .graphicsLayer { rotationZ = if (index % 2 == 0) -6f else 5f }
+                            .clip(shape)
+                            .background(ink),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(country.countryCode, style = AdventureType.stamp().copy(fontSize = 24.sp), color = onInk)
+                    }
+                    Text(
+                        country.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
+            }
         }
     }
 }

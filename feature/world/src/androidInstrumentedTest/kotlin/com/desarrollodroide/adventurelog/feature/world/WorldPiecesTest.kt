@@ -10,6 +10,7 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import com.desarrollodroide.adventurelog.core.model.Country
 import com.desarrollodroide.adventurelog.feature.world.ui.components.CountryRow
 import com.desarrollodroide.adventurelog.feature.world.ui.components.PassportCard
+import com.desarrollodroide.adventurelog.feature.world.ui.components.StampsStrip
 import com.desarrollodroide.adventurelog.feature.world.ui.components.WorldFilterGroup
 import com.desarrollodroide.adventurelog.feature.world.ui.state.FilterMode
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
@@ -67,5 +68,19 @@ class WorldPiecesTest {
         onNodeWithContentDescription("All").assertIsOn()
         onNodeWithText("Partial").performClick()
         assertEquals(FilterMode.PARTIAL, chosen)
+    }
+
+    @Test
+    fun theVisitedCountriesAreStampsThatOpen() = runComposeUiTest {
+        var opened: String? = null
+        setContent {
+            StampsStrip(listOf(country("NO", "Norway", 15, 3), country("JP", "Japan", 47, 3)), onClick = { opened = it })
+        }
+
+        onNodeWithText("Your stamps").assertIsDisplayed()
+        onNodeWithText("NO", useUnmergedTree = true).assertIsDisplayed()
+        onNodeWithText("Japan", useUnmergedTree = true).assertIsDisplayed()
+        onNodeWithText("Japan", useUnmergedTree = true).performClick()
+        assertEquals("JP", opened)
     }
 }

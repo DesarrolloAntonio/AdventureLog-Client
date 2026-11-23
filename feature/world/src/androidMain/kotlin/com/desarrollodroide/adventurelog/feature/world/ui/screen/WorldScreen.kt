@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.world.ui.screen
 import com.desarrollodroide.adventurelog.feature.world.ui.components.CountryRow
 import com.desarrollodroide.adventurelog.feature.world.ui.components.WorldFilterGroup
 import com.desarrollodroide.adventurelog.feature.world.ui.components.PassportCard
+import com.desarrollodroide.adventurelog.feature.world.ui.components.StampsStrip
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -187,6 +188,17 @@ private fun WorldScreenContent(
                             partial = uiState.partiallyVisitedCount,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
+                    }
+
+                    // What has been visited comes first, as stamps - the full list below opens
+                    // on 244 empty ones. Not while searching or filtering: the list is the answer.
+                    val stamped = uiState.countries.filter { it.numVisits > 0 }
+                    if (stamped.isNotEmpty() && uiState.searchQuery.isBlank() && !hasActiveFilters &&
+                        uiState.selectedRegion == WorldRegion.ALL
+                    ) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            StampsStrip(stamped, onClick = onCountryClick, modifier = Modifier.padding(top = 8.dp, bottom = 16.dp))
+                        }
                     }
 
                     // Filter chips
