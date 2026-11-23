@@ -1,48 +1,84 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.components.categories
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.outlined.AddReaction
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.feature.ui.components.StandardTextField
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** The icons a travel category usually wants, one tap each; the full picker is behind "More". */
+private val SuggestedIcons = listOf("🌍", "🏔️", "🏖️", "🏛️", "🏰", "🌋", "🏕️", "🍜", "🍷", "🎢", "🛍️")
+
+/**
+ * Creating or renaming a category. The chosen icon sits in a cookie stamp that turns whenever it
+ * changes, next to the chip the category will be on a place; the icons a trip usually wants are
+ * one tap away and the full emoji picker opens only when asked for.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddEditCategorySheet(
     category: Category?,
@@ -51,131 +87,190 @@ fun AddEditCategorySheet(
 ) {
     var categoryName by remember { mutableStateOf(category?.displayName ?: "") }
     var selectedIcon by remember { mutableStateOf(category?.icon ?: "🌍") }
-    
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+    var allEmoji by remember { mutableStateOf(false) }
+    val save = { if (categoryName.isNotBlank()) onSave(categoryName.trim(), selectedIcon) }
 
     ModalBottomSheet(
-        sheetState = sheetState,
-        onDismissRequest = onDismiss
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = onDismiss,
     ) {
+        // The sheet is its own window: its focus and keyboard are these, not the form's behind it.
+        val focus = LocalFocusManager.current
+        val keyboard = LocalSoftwareKeyboardController.current
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
+                .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text(
-                text = if (category == null) "Add New Category" else "Edit Category",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                IconStamp(selectedIcon)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = if (category == null) "New category" else "Edit category",
+                        style = AdventureType.display(30.sp),
+                    )
+                    ChipPreview(icon = selectedIcon, name = categoryName)
+                }
+            }
+
+            StandardTextField(
+                value = categoryName,
+                onValueChange = { categoryName = it },
+                placeholder = "Category name",
+                leadingIcon = Icons.Default.Category,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Done,
+                ),
+                // The keyboard's ✓ creates it: with the keyboard up, it is the one button in reach.
+                keyboardActions = KeyboardActions(onDone = { save() }),
             )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Category name field
-                OutlinedTextField(
-                    value = categoryName,
-                    onValueChange = { categoryName = it },
-                    placeholder = { 
-                        Text(
-                            text = "Category name",
-                            color = Color.Gray
-                        ) 
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(55.dp),
-                    singleLine = true,
-                    maxLines = 1,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    // The keyboard's ✓ creates it: with the keyboard up, it is the one button in reach.
-                    keyboardActions = KeyboardActions(onDone = {
-                        if (categoryName.isNotBlank()) onSave(categoryName, selectedIcon)
-                    }),
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Category,
-                            contentDescription = null,
-                            tint = Color.Gray
-                        )
-                    },
-                    shape = RoundedCornerShape(30.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent
-                    )
+
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    "Icon",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                
-                // Icon selector
-                Surface(
-                    modifier = Modifier.size(55.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    border = BorderStroke(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                // What is chosen is always on show, even when it came from the full picker.
+                val icons = (if (selectedIcon in SuggestedIcons) SuggestedIcons else listOf(selectedIcon) + SuggestedIcons)
+                    .take(SuggestedIcons.size)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth().selectableGroup(),
+                    maxItemsInEachRow = TilesPerRow,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = selectedIcon,
-                            fontSize = 24.sp,
-                            textAlign = TextAlign.Center
-                        )
+                    icons.forEach { icon ->
+                        IconTile(selected = icon == selectedIcon, onClick = { selectedIcon = icon }) {
+                            Text(icon, fontSize = 22.sp)
+                        }
+                    }
+                    IconTile(
+                        selected = allEmoji,
+                        onClick = {
+                            allEmoji = !allEmoji
+                            // The picker needs the room the keyboard takes.
+                            if (allEmoji) { focus.clearFocus(); keyboard?.hide() }
+                        },
+                        label = if (allEmoji) "Hide all emoji" else "All emoji",
+                        role = Role.Button,
+                    ) {
+                        Icon(Icons.Outlined.AddReaction, contentDescription = null)
                     }
                 }
             }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Emoji Picker - Always visible
+
             // The picker gives way first: with the keyboard up it shrinks so Cancel and Create stay
             // on screen instead of being pushed off the bottom of the sheet.
-            EmojiPicker(
-                modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
-                onEmojiSelected = { emoji ->
-                    selectedIcon = emoji
-                },
-                onDismiss = {
-                    // No need to dismiss, emojis are always visible
-                }
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            AnimatedVisibility(
+                visible = allEmoji,
+                enter = expandVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) + fadeIn(),
+                exit = shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec()) + fadeOut(),
+                modifier = Modifier.weight(1f, fill = false),
             ) {
+                EmojiPicker(
+                    modifier = Modifier.fillMaxWidth(),
+                    onEmojiSelected = { selectedIcon = it },
+                    onDismiss = { allEmoji = false },
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Cancel")
-                }
-                
+                    shapes = ButtonDefaults.shapes(),
+                    modifier = Modifier.weight(1f).height(56.dp),
+                ) { Text("Cancel") }
                 Button(
-                    onClick = {
-                        if (categoryName.isNotBlank()) {
-                            onSave(categoryName, selectedIcon)
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    enabled = categoryName.isNotBlank()
-                ) {
-                    Text(if (category == null) "Create" else "Save")
-                }
+                    onClick = save,
+                    enabled = categoryName.isNotBlank(),
+                    shapes = ButtonDefaults.shapes(),
+                    modifier = Modifier.weight(1f).height(56.dp),
+                ) { Text(if (category == null) "Create" else "Save") }
             }
-            
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
+}
+
+/** The icon on a cookie stamp that turns a ninth of a revolution each time it changes. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun IconStamp(icon: String) {
+    val turn = remember { Animatable(0f) }
+    var first by remember { mutableStateOf(true) }
+    val spin = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val pop = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+    LaunchedEffect(icon) {
+        if (first) first = false else turn.animateTo(turn.targetValue + 40f, spin)
+    }
+    Box(Modifier.size(84.dp), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer { rotationZ = turn.value }
+                .clip(MaterialShapes.Cookie9Sided.toShape())
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        )
+        AnimatedContent(
+            targetState = icon,
+            transitionSpec = {
+                (scaleIn(pop, initialScale = 0.4f) + fadeIn()) togetherWith
+                    (scaleOut(targetScale = 0.4f) + fadeOut())
+            },
+            label = "icon",
+        ) { Text(it, fontSize = 38.sp) }
+    }
+}
+
+/** The category as it will read on a place's chip, updating as it is typed. */
+@Composable
+private fun ChipPreview(icon: String, name: String) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+    ) {
+        Text(
+            text = "$icon ${name.ifBlank { "Name" }}",
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        )
+    }
+}
+
+private const val TilesPerRow = 6
+
+/** An icon choice sharing the row's width: a rounded square at rest, a circle once chosen. */
+@Composable
+private fun androidx.compose.foundation.layout.FlowRowScope.IconTile(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: String? = null,
+    role: Role = Role.RadioButton,
+    content: @Composable () -> Unit,
+) {
+    val corner by animateFloatAsState(
+        if (selected) 50f else 30f,
+        MaterialTheme.motionScheme.fastSpatialSpec(),
+        label = "corner",
+    )
+    val container by animateColorAsState(
+        if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
+        MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "container",
+    )
+    Box(
+        Modifier
+            .weight(1f)
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(corner.toInt()))
+            .background(container)
+            .selectable(selected = selected, onClick = onClick, role = role)
+            .then(if (label != null) Modifier.semantics { contentDescription = label } else Modifier),
+        contentAlignment = Alignment.Center,
+    ) { content() }
 }
