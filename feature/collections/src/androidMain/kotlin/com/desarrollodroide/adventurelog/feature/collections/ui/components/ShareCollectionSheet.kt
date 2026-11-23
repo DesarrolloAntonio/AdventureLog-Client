@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -143,20 +144,7 @@ fun ShareCollectionSheet(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(MaterialShapes.Cookie9Sided.toShape())
-                            .background(MaterialTheme.colorScheme.secondaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Outlined.Group,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
+                    CookieBadge(icon = Icons.Outlined.Group, container = MaterialTheme.colorScheme.secondaryContainer, content = MaterialTheme.colorScheme.onSecondaryContainer, size = 72.dp)
                     Text(
                         text = "Nobody else on this server has a public profile, so there is no one " +
                             "to share with yet. A profile becomes public in that person's own " +

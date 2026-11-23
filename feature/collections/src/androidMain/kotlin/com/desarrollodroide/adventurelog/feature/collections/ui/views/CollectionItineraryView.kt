@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.views
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -311,20 +312,7 @@ private fun NoDatesCard() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(MaterialShapes.Cookie9Sided.toShape())
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Timeline,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+            CookieBadge(icon = Icons.Default.Timeline, container = MaterialTheme.colorScheme.secondaryContainer, content = MaterialTheme.colorScheme.onSecondaryContainer, size = 72.dp)
             Text(
                 text = "This trip has no dates",
                 style = AdventureType.display(28.sp),

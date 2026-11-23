@@ -139,7 +139,7 @@ fun SignInGroup(
             icon = Icons.Outlined.Add,
             enabled = !emails.isBusy,
             showChevron = false,
-            tint = MaterialTheme.colorScheme.primary,
+            // Untinted, so it gets its icon square like every other row of the group.
             onClick = { addDialogOpen = true }
         )
     }

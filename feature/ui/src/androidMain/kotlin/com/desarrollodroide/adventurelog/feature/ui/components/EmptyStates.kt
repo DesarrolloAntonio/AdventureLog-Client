@@ -145,27 +145,3 @@ private fun StateMessage(
         }
     }
 }
-
-/**
- * An icon on a cookie in a tonal colour: the badge of the empty and error states and of the
- * dialogs that ask before something is lost.
- */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-internal fun CookieBadge(
-    icon: ImageVector,
-    container: Color,
-    content: Color,
-    size: Dp,
-    polygon: RoundedPolygon = MaterialShapes.Cookie9Sided,
-) {
-    Box(
-        Modifier
-            .size(size)
-            .clip(polygon.toShape())
-            .background(container),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(size * 0.45f))
-    }
-}

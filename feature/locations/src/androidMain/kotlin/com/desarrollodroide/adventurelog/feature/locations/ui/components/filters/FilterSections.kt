@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.components.filters
 
+import com.desarrollodroide.adventurelog.feature.ui.components.ConnectedChoice
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,46 +68,6 @@ internal fun FilterSection(
             trailing?.invoke()
         }
         content()
-    }
-}
-
-/** A connected group of toggle buttons, one chosen: the Expressive segmented control. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-internal fun <T> ConnectedChoice(
-    options: List<Pair<T, String>>,
-    selected: T,
-    onSelect: (T) -> Unit,
-    modifier: Modifier = Modifier,
-    icon: (@Composable (T) -> Unit)? = null,
-) {
-    val colors = MaterialTheme.colorScheme
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        options.forEachIndexed { index, (value, label) ->
-            ToggleButton(
-                checked = selected == value,
-                onCheckedChange = { if (it) onSelect(value) },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-                colors = ToggleButtonDefaults.colors(
-                    containerColor = colors.surfaceContainerHighest,
-                    contentColor = colors.onSurfaceVariant,
-                    checkedContainerColor = colors.primary,
-                    checkedContentColor = colors.onPrimary,
-                ),
-                contentPadding = PaddingValues(horizontal = 8.dp),
-                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-            ) {
-                icon?.let {
-                    it(value)
-                    Box(Modifier.size(6.dp))
-                }
-                Text(label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
     }
 }
 

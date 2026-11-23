@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -153,13 +154,5 @@ internal fun DialogBadge(
     container: Color = MaterialTheme.colorScheme.secondaryContainer,
     content: Color = MaterialTheme.colorScheme.onSecondaryContainer
 ) {
-    Box(
-        Modifier
-            .size(56.dp)
-            .clip(MaterialShapes.Cookie9Sided.toShape())
-            .background(container),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, contentDescription = null, tint = content, modifier = Modifier.size(28.dp))
-    }
+    CookieBadge(icon = icon, container = container, content = content, size = 56.dp)
 }

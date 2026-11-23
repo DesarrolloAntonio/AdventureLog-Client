@@ -582,30 +582,7 @@ private fun SourceTile(icon: ImageVector, label: String, onClick: () -> Unit, mo
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ImageSourceChoice(options: List<String>, selectedIndex: Int, onSelect: (Int) -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        options.forEachIndexed { index, label ->
-            ToggleButton(
-                checked = index == selectedIndex,
-                onCheckedChange = { if (it) onSelect(index) },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-                colors = ToggleButtonDefaults.colors(
-                    containerColor = colors.surfaceContainerHighest,
-                    contentColor = colors.onSurfaceVariant,
-                    checkedContainerColor = colors.primary,
-                    checkedContentColor = colors.onPrimary,
-                ),
-                contentPadding = PaddingValues(horizontal = 8.dp),
-                modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-            ) {
-                Text(label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
-    }
+    ConnectedChoice(options = options.mapIndexed { i, label -> i to label }, selected = selectedIndex, onSelect = onSelect)
 }
 
 /** "No image found" or the search's error, in the error container. */

@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.ConnectedChoice
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
@@ -213,39 +214,6 @@ private fun SheetSection(title: String, content: @Composable () -> Unit) {
             color = MaterialTheme.colorScheme.primary
         )
         content()
-    }
-}
-
-/**
- * A connected group of toggle buttons, one chosen: the Expressive segmented control. The same as
- * the places filters' own; that one is internal to feature/locations.
- */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun <T> ConnectedChoice(options: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-        options.forEachIndexed { index, (value, label) ->
-            ToggleButton(
-                checked = selected == value,
-                onCheckedChange = { if (it) onSelect(value) },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-                colors = ToggleButtonDefaults.colors(
-                    containerColor = colors.surfaceContainerHighest,
-                    contentColor = colors.onSurfaceVariant,
-                    checkedContainerColor = colors.primary,
-                    checkedContentColor = colors.onPrimary
-                ),
-                contentPadding = PaddingValues(horizontal = 8.dp),
-                modifier = Modifier.weight(1f).heightIn(min = 48.dp)
-            ) {
-                Text(label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
     }
 }
 

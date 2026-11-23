@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.feature.locations.model.LocationSortField
-import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.ConnectedChoice
+import com.desarrollodroide.adventurelog.feature.ui.components.ConnectedChoice
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.FilterSection
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.directionLabels
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.fieldLabel

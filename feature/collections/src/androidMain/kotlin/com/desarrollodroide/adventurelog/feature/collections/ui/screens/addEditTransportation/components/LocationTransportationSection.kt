@@ -56,11 +56,6 @@ fun LocationTransportationSection(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "From Location",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -87,11 +82,6 @@ fun LocationTransportationSection(
                 }
             }
 
-            Text(
-                text = "To Location",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

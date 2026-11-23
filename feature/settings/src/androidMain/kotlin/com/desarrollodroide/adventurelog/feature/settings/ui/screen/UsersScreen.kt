@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -98,9 +100,12 @@ fun UsersScreen(
                 }
             }
 
-            else -> ContentColumn {
+            else -> ContentColumn { BoxWithConstraints {
+                // The column count Adaptive(300.dp) would pick, worked out here so the rows know
+                // whether they stack (one segmented block) or sit side by side (each card whole).
+                val columns = ((maxWidth - 32.dp + 10.dp) / (300.dp + 10.dp)).toInt().coerceAtLeast(1)
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 300.dp),
+                    columns = GridCells.Fixed(columns),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = 16.dp,
@@ -108,7 +113,7 @@ fun UsersScreen(
                         top = 8.dp,
                         bottom = 96.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap),
+                    verticalArrangement = Arrangement.spacedBy(if (columns == 1) SegmentedListDefaults.Gap else 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -142,13 +147,13 @@ fun UsersScreen(
                         items(people.size, key = { people[it].uuid }) { index ->
                             UserCard(
                                 people[index],
-                                shape = SegmentedListDefaults.shapeFor(index, people.size),
+                                shape = if (columns == 1) SegmentedListDefaults.shapeFor(index, people.size) else SegmentedListDefaults.single,
                                 onClick = { viewModel.openProfile(people[index]) }
                             )
                         }
                     }
                 }
-            }
+            } }
         }
     }
 
@@ -188,15 +193,7 @@ private fun StateMessage(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            Modifier
-                .size(88.dp)
-                .clip(MaterialShapes.Cookie9Sided.toShape())
-                .background(badgeColor),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(icon, contentDescription = null, tint = badgeContent, modifier = Modifier.size(40.dp))
-        }
+        CookieBadge(icon = icon, container = badgeColor, content = badgeContent, size = 88.dp)
         Text(text = title, style = AdventureType.display(28.sp), textAlign = TextAlign.Center)
         Text(
             text = body,

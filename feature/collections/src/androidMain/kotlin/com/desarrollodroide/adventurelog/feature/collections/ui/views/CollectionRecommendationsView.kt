@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.views
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -304,20 +305,7 @@ private fun EmptyResults(hasSearched: Boolean) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(MaterialShapes.Cookie9Sided.toShape())
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Explore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+            CookieBadge(icon = Icons.Default.Explore, container = MaterialTheme.colorScheme.secondaryContainer, content = MaterialTheme.colorScheme.onSecondaryContainer, size = 72.dp)
             Text(
                 text = if (hasSearched) "Nothing found around there"
                 else "Nothing searched for yet",

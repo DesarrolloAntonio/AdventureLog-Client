@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -239,20 +240,7 @@ private fun Message(text: String, icon: ImageVector? = null) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         if (icon != null) {
-            Box(
-                Modifier
-                    .size(72.dp)
-                    .clip(MaterialShapes.Cookie9Sided.toShape())
-                    .background(MaterialTheme.colorScheme.secondaryContainer),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(32.dp),
-                )
-            }
+            CookieBadge(icon = icon, container = MaterialTheme.colorScheme.secondaryContainer, content = MaterialTheme.colorScheme.onSecondaryContainer, size = 72.dp)
         }
         Text(
             text = text,

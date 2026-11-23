@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.components.categories
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -271,13 +272,7 @@ private fun CategoryRow(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun CookieIcon(icon: String, size: Int, color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.secondaryContainer) {
-    Box(
-        Modifier
-            .size(size.dp)
-            .clip(MaterialShapes.Cookie4Sided.toShape())
-            .background(color),
-        contentAlignment = Alignment.Center,
-    ) { Text(icon, fontSize = (size * 0.45f).sp) }
+    CookieBadge(emoji = icon, size = size.dp, container = color)
 }
 
 @Composable
