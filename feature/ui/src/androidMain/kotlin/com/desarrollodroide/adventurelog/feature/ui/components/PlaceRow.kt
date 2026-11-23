@@ -1,5 +1,14 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.toShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -77,15 +86,26 @@ fun PlaceRow(
     var showMenu by remember { mutableStateOf(false) }
     val colors = MaterialTheme.colorScheme
 
+    // Expressive press: the row gives a little under the finger and springs back.
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) 0.97f else 1f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "press")
     Surface(
         shape = shape,
         color = colors.surfaceContainerLowest,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer { scaleX = scale; scaleY = scale },
     ) {
         Row(
             modifier = Modifier
                 .heightIn(min = 76.dp)
-                .combinedClickable(onClick = onClick, onLongClick = if (showActions) ({ showMenu = true }) else null)
+                .combinedClickable(
+                    interactionSource = interaction,
+                    indication = LocalIndication.current,
+                    onClick = onClick,
+                    onLongClick = if (showActions) ({ showMenu = true }) else null,
+                )
                 .padding(start = 10.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -136,10 +156,16 @@ fun PlaceRow(
     )
 }
 
+/**
+ * The thumbnail's shape says where the place stands: visited, a cookie from Material's shape
+ * library - stamped, done; planned, a plain circle still waiting.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PlaceThumbnail(location: Location) {
     val photo = location.images.firstOrNull()?.image?.takeIf { it.isNotBlank() }
-    Box(Modifier.size(56.dp).clip(RoundedCornerShape(18.dp))) {
+    val shape = if (location.isVisited) MaterialShapes.Cookie4Sided.toShape() else CircleShape
+    Box(Modifier.size(56.dp).clip(shape)) {
         if (photo != null) {
             Image(
                 painter = rememberAsyncImagePainter(model = photo, imageLoader = LocalImageLoader.current),

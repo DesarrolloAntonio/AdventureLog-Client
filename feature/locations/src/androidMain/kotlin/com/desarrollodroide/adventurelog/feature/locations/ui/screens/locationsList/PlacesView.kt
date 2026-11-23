@@ -1,5 +1,21 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
+import com.desarrollodroide.adventurelog.feature.locations.model.LocationSortField
 import android.content.Context
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ViewList
@@ -45,4 +61,62 @@ internal fun PlacesViewToggle(view: PlacesView, onChange: (PlacesView) -> Unit, 
         PlacesView.PHOTOS -> Triple(Icons.AutoMirrored.Outlined.ViewList, "Show as a list", PlacesView.ROWS)
     }
     SearchBarAction(icon = icon, contentDescription = description, onClick = { onChange(next) }, modifier = modifier)
+}
+
+/** What a sort reads as on its chip. */
+internal fun sortLabel(field: LocationSortField): String = when (field) {
+    LocationSortField.UPDATED_AT -> "Recently updated"
+    LocationSortField.VISIT_DATE -> "Visit date"
+    LocationSortField.NAME -> "Name"
+    LocationSortField.RATING -> "Rating"
+}
+
+/** "Hiking", "Hiking +2", or just "Category" when none is chosen. */
+internal fun categoryLabel(names: List<String>): String = when (names.size) {
+    0 -> "Category"
+    1 -> names.first()
+    else -> "${names.first()} +${names.size - 1}"
+}
+
+/**
+ * The places filters as a row of chips, as the canvas draws them: the count of what is on, the
+ * category, the sort. Each opens the filter sheet; one that is set reads as selected.
+ */
+@Composable
+internal fun PlacesFilterChips(
+    sheetFilterCount: Int,
+    categoryNames: List<String>,
+    sortField: LocationSortField,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        FilterChip(
+            selected = sheetFilterCount > 0,
+            onClick = onOpen,
+            label = { Text(if (sheetFilterCount > 0) "Filters · $sheetFilterCount" else "Filters") },
+            leadingIcon = { Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
+            shape = RoundedCornerShape(10.dp),
+        )
+        FilterChip(
+            selected = categoryNames.isNotEmpty(),
+            onClick = onOpen,
+            label = { Text(categoryLabel(categoryNames)) },
+            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
+            shape = RoundedCornerShape(10.dp),
+        )
+        FilterChip(
+            selected = sortField != LocationSortField.UPDATED_AT,
+            onClick = onOpen,
+            label = { Text("Sort: ${sortLabel(sortField)}") },
+            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
+            shape = RoundedCornerShape(10.dp),
+        )
+    }
 }

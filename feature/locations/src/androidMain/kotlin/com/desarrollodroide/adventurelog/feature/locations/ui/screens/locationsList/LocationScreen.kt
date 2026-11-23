@@ -61,6 +61,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.lazy.LazyColumn
 import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
+import com.desarrollodroide.adventurelog.feature.locations.model.LocationSortField
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
@@ -167,6 +168,8 @@ fun LocationListScreen(
         libraryCounts = libraryCounts,
         visitedFilter = filters.visitedFilter,
         onVisitedFilterChange = { viewModel.onFiltersChanged(filters.copy(visitedFilter = it)) },
+        categoryNames = filters.categoryNames,
+        sortField = filters.sortField,
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
@@ -283,6 +286,8 @@ private fun AdventureListContent(
     libraryCounts: UserStats? = null,
     visitedFilter: VisitedFilter = VisitedFilter.ALL,
     onVisitedFilterChange: (VisitedFilter) -> Unit = {},
+    categoryNames: List<String> = emptyList(),
+    sortField: LocationSortField = LocationSortField.UPDATED_AT,
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
@@ -328,22 +333,21 @@ private fun AdventureListContent(
                 )
                 Spacer(Modifier.width(10.dp))
                 PlacesViewToggle(view, onViewChange)
-                Spacer(Modifier.width(8.dp))
-                SearchBarAction(
-                    icon = Icons.Default.FilterList,
-                    contentDescription = "Filters",
-                    // Visited / Planned is already shown by the group below; the badge counts the
-                    // rest, the filters only the sheet shows.
-                    active = sheetFilterCount > 0,
-                    badgeCount = sheetFilterCount,
-                    onClick = onShowFilters
-                )
             }
             VisitedFilterGroup(
                 counts = libraryCounts,
                 selected = visitedFilter,
                 onSelect = onVisitedFilterChange,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+            )
+            // The filters the sheet holds, said as chips, as the canvas draws them: what is on
+            // reads at a glance, and each one opens the sheet.
+            PlacesFilterChips(
+                sheetFilterCount = sheetFilterCount,
+                categoryNames = categoryNames,
+                sortField = sortField,
+                onOpen = onShowFilters,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
           }
         },

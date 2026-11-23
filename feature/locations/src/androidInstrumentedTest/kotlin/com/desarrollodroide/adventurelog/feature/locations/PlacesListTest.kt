@@ -31,6 +31,8 @@ import com.desarrollodroide.adventurelog.core.testing.testLocation
 import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.VisitedFilterGroup
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.PlacesView
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.PlacesFilterChips
+import com.desarrollodroide.adventurelog.feature.locations.model.LocationSortField
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.PlacesViewToggle
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.rememberPlacesView
 import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
@@ -180,5 +182,32 @@ class PlacesListTest {
         onNodeWithContentDescription("Show as a list").assertIsDisplayed()
 
         onNodeWithContentDescription("Show as a list").performClick()
+    }
+
+    @Test
+    fun theFilterChipsSayWhatIsOnAndOpenTheSheet() = runComposeUiTest {
+        var opened = 0
+        setContent {
+            PlacesFilterChips(
+                sheetFilterCount = 2,
+                categoryNames = listOf("Hiking", "City"),
+                sortField = LocationSortField.RATING,
+                onOpen = { opened++ },
+            )
+        }
+
+        onNodeWithText("Filters · 2").assertIsDisplayed()
+        onNodeWithText("Hiking +1").assertIsDisplayed()
+        onNodeWithText("Sort: Rating").performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test
+    fun withNothingChosenTheChipsReadPlain() = runComposeUiTest {
+        setContent { PlacesFilterChips(0, emptyList(), LocationSortField.UPDATED_AT, onOpen = {}) }
+
+        onNodeWithText("Filters").assertIsDisplayed()
+        onNodeWithText("Category").assertIsDisplayed()
+        onNodeWithText("Sort: Recently updated").assertIsDisplayed()
     }
 }
