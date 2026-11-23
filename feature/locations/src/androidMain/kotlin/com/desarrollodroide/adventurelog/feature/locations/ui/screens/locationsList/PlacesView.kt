@@ -72,6 +72,7 @@ internal fun sortLabel(field: LocationSortField): String = when (field) {
     LocationSortField.VISIT_DATE -> "Visit date"
     LocationSortField.NAME -> "Name"
     LocationSortField.RATING -> "Rating"
+    LocationSortField.COUNTRY -> "Country"
 }
 
 /** "Hiking", "Hiking +2", or just "Category" when none is chosen. */

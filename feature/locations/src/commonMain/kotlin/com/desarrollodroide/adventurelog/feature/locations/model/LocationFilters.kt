@@ -22,7 +22,13 @@ enum class LocationSortField(val apiValue: String) {
      */
     VISIT_DATE("date"),
     NAME("name"),
-    RATING("rating")
+    RATING("rating"),
+
+    /**
+     * Grouped under their countries. The server has no such order, so the list groups the whole
+     * library itself ([countryGroups]); the paged request asks for names meanwhile.
+     */
+    COUNTRY("name")
 }
 
 enum class VisitedFilter {

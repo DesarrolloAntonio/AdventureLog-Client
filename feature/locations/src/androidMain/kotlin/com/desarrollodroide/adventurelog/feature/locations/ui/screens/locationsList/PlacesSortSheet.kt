@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.Button
@@ -163,6 +164,7 @@ private fun fieldIcon(field: LocationSortField): ImageVector = when (field) {
     LocationSortField.VISIT_DATE -> Icons.Outlined.Event
     LocationSortField.NAME -> Icons.Default.SortByAlpha
     LocationSortField.RATING -> Icons.Outlined.StarOutline
+    LocationSortField.COUNTRY -> Icons.Outlined.Public
 }
 
 /** "Name · A → Z": the order and its direction in the words the sheet uses. */

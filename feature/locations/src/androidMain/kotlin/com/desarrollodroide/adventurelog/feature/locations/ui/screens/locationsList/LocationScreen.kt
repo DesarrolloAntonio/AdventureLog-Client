@@ -1,5 +1,8 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList
 
+import androidx.compose.material3.LoadingIndicator
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel.CategoriesState
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.categories.ManageCategoriesDialog
 import androidx.compose.foundation.layout.Arrangement
@@ -97,6 +100,7 @@ fun LocationListScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val actualSearchQuery by viewModel.actualSearchQuery.collectAsStateWithLifecycle()
     val filters by viewModel.filters.collectAsStateWithLifecycle()
+    val countryGroups by viewModel.countryGroups.collectAsStateWithLifecycle()
     val showFilters by viewModel.showFilters.collectAsStateWithLifecycle()
     val categoriesState by viewModel.categoriesState.collectAsStateWithLifecycle()
     val collections by viewModel.collections.collectAsStateWithLifecycle()
@@ -212,6 +216,7 @@ fun LocationListScreen(
         sortField = filters.sortField,
         sortDirection = filters.sortDirection,
         onShowSort = { showSort = true },
+        countryGroups = countryGroups,
         onShowCategories = { showCategories = true },
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
@@ -333,6 +338,8 @@ private fun AdventureListContent(
     sortField: LocationSortField = LocationSortField.UPDATED_AT,
     sortDirection: SortDirection = SortDirection.DESCENDING,
     onShowSort: () -> Unit = onShowFilters,
+    /** Non-null while "Country" is the order: the list is grouped instead of paged. */
+    countryGroups: LocationsViewModel.CountryGroupsState? = null,
     onShowCategories: () -> Unit = onShowFilters,
     modifier: Modifier = Modifier
 ) {
@@ -430,6 +437,25 @@ private fun AdventureListContent(
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
             when {
+                countryGroups != null -> when (countryGroups) {
+                    is LocationsViewModel.CountryGroupsState.Loading -> CountryGroupsLoading()
+                    is LocationsViewModel.CountryGroupsState.Error -> ErrorState(message = countryGroups.message, onRetry = onRefresh)
+                    is LocationsViewModel.CountryGroupsState.Ready -> if (countryGroups.groups.isEmpty()) {
+                        NoSearchResultsState(searchQuery = actualSearchQuery, hasFilters = activeFilterCount > 0)
+                    } else {
+                        CountryGroupedList(
+                            groups = countryGroups.groups,
+                            onPlaceClick = onAdventureClick,
+                            onEdit = onEditAdventure,
+                            onAddPhoto = onAddPhoto,
+                            onDuplicate = onDuplicateAdventure,
+                            onShare = onShareAdventure,
+                            onDelete = onDeleteAdventure,
+                            onManageCollections = onManageCollections,
+                        )
+                    }
+                }
+
                 // Show existing content during pull to refresh
                 isRefreshing && pagingItems.itemCount > 0 -> {
                     AdventuresPagingList(
@@ -582,7 +608,7 @@ private fun AdventuresPagingList(
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        LoadingIndicator(modifier = Modifier.size(40.dp))
                     }
                 }
 
@@ -646,7 +672,7 @@ private fun PlacesPhotoGrid(
             when (val append = pagingItems.loadState.append) {
                 is LoadStateLoading -> item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        LoadingIndicator(modifier = Modifier.size(40.dp))
                     }
                 }
                 is LoadStateError -> item(span = { GridItemSpan(maxLineSpan) }) {
