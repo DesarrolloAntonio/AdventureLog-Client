@@ -25,7 +25,6 @@ import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -44,7 +43,7 @@ import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 /**
  * Adventure photos carousel with fullscreen view and menu options
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AdventurePhotosCarousel(
     images: List<ContentImage>,
@@ -68,17 +67,17 @@ fun AdventurePhotosCarousel(
             
             // Add button - only show if callback is provided
             onAddPhoto?.let {
-                IconButton(
+                FilledTonalIconButton(
                     onClick = it,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                    shapes = IconButtonDefaults.shapes(),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add photo",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -112,7 +111,7 @@ fun AdventurePhotosCarousel(
                 },
                 modifier = Modifier
                     .fillMaxSize()
-                    .maskClip(RoundedCornerShape(16.dp))
+                    .maskClip(RoundedCornerShape(20.dp))
             )
         }
     }
@@ -131,6 +130,7 @@ fun AdventurePhotosCarousel(
 /**
  * Individual carousel item with optional menu
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PhotoCarouselItem(
     image: ContentImage,
@@ -163,14 +163,14 @@ private fun PhotoCarouselItem(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(8.dp),
-                shape = RoundedCornerShape(4.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary
             ) {
                 Text(
                     text = "Primary",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                 )
             }
         }
@@ -180,29 +180,30 @@ private fun PhotoCarouselItem(
             Box(
                 modifier = Modifier.align(Alignment.TopEnd)
             ) {
-                IconButton(
+                // Over the photo, as the hero's own buttons sit over it: a light disc, dark glyph.
+                FilledIconButton(
                     onClick = { showMenu = true },
+                    shapes = IconButtonDefaults.shapes(),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
                     modifier = Modifier
-                        .size(32.dp)
                         .padding(4.dp)
+                        .size(32.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "More options",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.5f),
-                                CircleShape
-                            )
-                            .padding(2.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-                
+
                 DropdownMenu(
                     expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
+                    onDismissRequest = { showMenu = false },
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
                     DropdownMenuItem(
                         text = { Text("Delete") },
@@ -239,8 +240,10 @@ private class ZoomableImageState {
 }
 
 /**
- * Fullscreen image viewer with zoom support
+ * Fullscreen image viewer with zoom support. Black and white on purpose: a photo is looked at on
+ * black, whatever the theme.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FullscreenImageViewer(
     images: List<ContentImage>,
@@ -305,7 +308,7 @@ private fun FullscreenImageViewer(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Close button
-                        IconButton(onClick = onDismiss) {
+                        IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Close",
@@ -322,7 +325,8 @@ private fun FullscreenImageViewer(
                                 onClick = {
                                     onDeletePhoto(selectedImage)
                                     onDismiss()
-                                }
+                                },
+                                shapes = IconButtonDefaults.shapes()
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,

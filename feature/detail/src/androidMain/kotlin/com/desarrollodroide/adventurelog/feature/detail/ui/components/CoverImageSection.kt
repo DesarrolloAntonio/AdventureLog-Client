@@ -12,8 +12,12 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,7 +33,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.feature.ui.components.LocationPlaceholder
@@ -157,18 +160,17 @@ fun CompactPlaceBar(
             }
             BarButton(icon = Icons.Default.Share, description = "Share", onClick = onShareClick)
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun BarButton(icon: ImageVector, description: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+    IconButton(
+        onClick = onClick,
+        shapes = IconButtonDefaults.shapes(),
+        modifier = Modifier.size(48.dp)
     ) {
         Icon(
             imageVector = icon,
@@ -185,13 +187,15 @@ private fun BarButton(icon: ImageVector, description: String, onClick: () -> Uni
  * Laid across rather than as a tall block, so it doesn't take the height the cover gave back. There
  * is no upload here: photos are added in the place editor, so the button opens that.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NoPhotoCard(
     categoryIcon: String?,
     onAddPhoto: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(18.dp)
+    val corner = 24.dp
+    val shape = RoundedCornerShape(corner)
     val dash = MaterialTheme.colorScheme.outlineVariant
     Row(
         modifier = modifier
@@ -204,7 +208,7 @@ fun NoPhotoCard(
                     color = dash,
                     topLeft = Offset(stroke / 2, stroke / 2),
                     size = Size(size.width - stroke, size.height - stroke),
-                    cornerRadius = CornerRadius(18.dp.toPx()),
+                    cornerRadius = CornerRadius(corner.toPx()),
                     style = Stroke(
                         width = stroke,
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
@@ -217,13 +221,12 @@ fun NoPhotoCard(
     ) {
         LocationPlaceholder(
             icon = categoryIcon,
-            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(14.dp))
+            modifier = Modifier.size(56.dp).clip(RoundedCornerShape(16.dp))
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "No photo yet",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium
             )
             Spacer(Modifier.height(2.dp))
             Text(
@@ -234,7 +237,7 @@ fun NoPhotoCard(
         }
         Button(
             onClick = onAddPhoto,
-            shape = RoundedCornerShape(22.dp),
+            shapes = ButtonDefaults.shapes(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text("Add photo", style = MaterialTheme.typography.labelLarge)

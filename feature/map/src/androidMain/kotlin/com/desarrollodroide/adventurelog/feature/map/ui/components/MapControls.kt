@@ -12,11 +12,13 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -109,6 +111,7 @@ fun MapVisibilityGroup(
  * Open. Tapping a pin used to open the page at once, which left no way to look at the map around
  * a place without leaving it.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MapPlaceCard(
     location: Location,
@@ -132,19 +135,19 @@ fun MapPlaceCard(
                     showActions = false,
                     modifier = Modifier.weight(1f),
                 )
-                IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, contentDescription = "Close") }
+                IconButton(onClick = onDismiss, shapes = IconButtonDefaults.shapes()) { Icon(Icons.Default.Close, contentDescription = "Close") }
             }
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (onDirections != null) {
-                    FilledTonalButton(onClick = onDirections, modifier = Modifier.weight(1f)) {
+                    FilledTonalButton(onClick = onDirections, shapes = ButtonDefaults.shapes(), modifier = Modifier.weight(1f)) {
                         Icon(Icons.Default.Directions, contentDescription = null)
                         Text("Directions", modifier = Modifier.padding(start = 8.dp))
                     }
                 }
-                Button(onClick = onOpen, modifier = Modifier.weight(1f)) {
+                Button(onClick = onOpen, shapes = ButtonDefaults.shapes(), modifier = Modifier.weight(1f)) {
                     Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
                     Text("Open", modifier = Modifier.padding(start = 8.dp))
                 }

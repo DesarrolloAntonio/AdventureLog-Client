@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.desarrollodroide.adventurelog.feature.ui.components.OpenInMapsSheet
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AdventureDetailScreenRoute(
     locationId: String,
@@ -93,7 +94,7 @@ fun AdventureDetailScreenRoute(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = androidx.compose.ui.Alignment.Center
             ) {
-                CircularProgressIndicator()
+                LoadingIndicator()
             }
         }
         is LocationState.Success -> {
