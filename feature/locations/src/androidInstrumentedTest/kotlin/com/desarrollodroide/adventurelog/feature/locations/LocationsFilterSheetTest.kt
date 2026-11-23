@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.locations
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -72,11 +73,11 @@ class LocationsFilterSheetTest {
             )
         }
 
-        onNodeWithText("Collection Locations").performScrollTo()
+        onNodeWithText("Places in collections").performScrollTo()
         // The one switch in the sheet. It shows on, because that is the default, and the point
         // of the test is that what it shows and what it sends are the same thing.
-        onNode(isToggleable()).assertIsOn()
-        onNode(isToggleable()).performClick()
+        onNode(isToggleable() and hasText("Places in collections")).assertIsOn()
+        onNode(isToggleable() and hasText("Places in collections")).performClick()
 
         assertEquals(false, latest?.includeCollections)
     }
@@ -94,8 +95,8 @@ class LocationsFilterSheetTest {
             )
         }
 
-        onNodeWithText("Not Visited").performScrollTo()
-        onNodeWithText("Not Visited").performClick()
+        onNodeWithText("Planned").performScrollTo()
+        onNodeWithText("Planned").performClick()
 
         assertEquals(VisitedFilter.NOT_VISITED, latest?.visitedFilter)
     }
@@ -138,7 +139,7 @@ class LocationsFilterSheetTest {
             )
         }
 
-        onNodeWithText("Apply Filters").performClick()
+        onNodeWithText("Apply").performClick()
         onNodeWithText("Cancel").performClick()
 
         assertEquals(1, applied)
