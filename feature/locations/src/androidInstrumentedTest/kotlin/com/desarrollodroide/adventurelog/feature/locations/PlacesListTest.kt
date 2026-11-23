@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.SemanticsActions
@@ -13,6 +16,7 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,6 +30,9 @@ import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.testing.testLocation
 import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.VisitedFilterGroup
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.PlacesView
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.PlacesViewToggle
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList.rememberPlacesView
 import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
@@ -137,5 +144,41 @@ class PlacesListTest {
 
         onNodeWithText("Visited", useUnmergedTree = true).performClick()
         assertTrue(chosen == VisitedFilter.VISITED)
+    }
+
+    @Test
+    fun theViewToggleSwitchesBetweenRowsAndPhotos() = runComposeUiTest {
+        var chosen: PlacesView? = null
+        setContent { PlacesViewToggle(PlacesView.ROWS, onChange = { chosen = it }) }
+
+        onNodeWithContentDescription("Show photos").performClick()
+        assertEquals(PlacesView.PHOTOS, chosen)
+    }
+
+    @Test
+    fun theChosenViewIsRememberedNextTime() = runComposeUiTest {
+        var shown by mutableStateOf(true)
+        setContent {
+            WithImages {
+                if (shown) {
+                    val (view, onChange) = rememberPlacesView()
+                    PlacesViewToggle(view, onChange)
+                }
+            }
+        }
+        // Start from the rows, whatever an earlier run left.
+        if (onAllNodesWithContentDescription("Show as a list").fetchSemanticsNodes().isNotEmpty()) {
+            onNodeWithContentDescription("Show as a list").performClick()
+        }
+        onNodeWithContentDescription("Show photos").performClick()
+        onNodeWithContentDescription("Show as a list").assertIsDisplayed()
+
+        // Gone and back, as on leaving Places and coming back to it.
+        shown = false
+        waitForIdle()
+        shown = true
+        onNodeWithContentDescription("Show as a list").assertIsDisplayed()
+
+        onNodeWithContentDescription("Show as a list").performClick()
     }
 }

@@ -57,6 +57,7 @@ import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.LocationsFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
+import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.lazy.LazyColumn
 import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
@@ -287,6 +288,7 @@ private fun AdventureListContent(
     val pullToRefreshState = rememberPullToRefreshState()
 
     val handedToShell = rememberShellAction(Icons.Default.Add, "Add a place", onAddAdventureClick)
+    val (view, onViewChange) = rememberPlacesView()
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -325,6 +327,8 @@ private fun AdventureListContent(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(10.dp))
+                PlacesViewToggle(view, onViewChange)
+                Spacer(Modifier.width(8.dp))
                 SearchBarAction(
                     icon = Icons.Default.FilterList,
                     contentDescription = "Filters",
@@ -377,6 +381,7 @@ private fun AdventureListContent(
                 isRefreshing && pagingItems.itemCount > 0 -> {
                     AdventuresPagingList(
                         pagingItems = pagingItems,
+                        view = view,
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
@@ -404,6 +409,7 @@ private fun AdventureListContent(
                 pagingItems.loadState.refresh is LoadStateError && pagingItems.itemCount > 0 -> {
                     AdventuresPagingList(
                         pagingItems = pagingItems,
+                        view = view,
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
@@ -442,6 +448,7 @@ private fun AdventureListContent(
                         else -> {
                             AdventuresPagingList(
                                 pagingItems = pagingItems,
+                                view = view,
                                 collections = collections,
                                 onAdventureClick = onAdventureClick,
                                 onEditAdventure = onEditAdventure,
@@ -462,6 +469,7 @@ private fun AdventureListContent(
 @Composable
 private fun AdventuresPagingList(
     pagingItems: LazyPagingItems<Location>,
+    view: PlacesView,
     collections: List<UltraSlimCollection>,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
@@ -471,6 +479,19 @@ private fun AdventuresPagingList(
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit
 ) {
+    if (view == PlacesView.PHOTOS) {
+        PlacesPhotoGrid(
+            pagingItems = pagingItems,
+            onAdventureClick = onAdventureClick,
+            onEditAdventure = onEditAdventure,
+            onAddPhoto = onAddPhoto,
+            onDuplicateAdventure = onDuplicateAdventure,
+            onShareAdventure = onShareAdventure,
+            onDeleteAdventure = onDeleteAdventure,
+            onManageCollections = onManageCollections,
+        )
+        return
+    }
     // Rows, as the canvas draws Places: a photograph is a thumbnail here and the place's own page
     // is where it is shown large. One column at every width, capped like every other screen; in the
     // two-pane layout the list side is narrower than the cap anyway.
@@ -525,6 +546,65 @@ private fun AdventuresPagingList(
                     }
                 }
 
+                else -> {}
+            }
+        }
+    }
+}
+
+/**
+ * The photographs view: each place as the card the list used before the redesign, its photograph
+ * across the whole width. One column on a phone; the window decides how many fit on a tablet.
+ */
+@Composable
+private fun PlacesPhotoGrid(
+    pagingItems: LazyPagingItems<Location>,
+    onAdventureClick: (Location) -> Unit,
+    onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit,
+    onDuplicateAdventure: (Location) -> Unit,
+    onShareAdventure: (Location) -> Unit,
+    onDeleteAdventure: (Location) -> Unit,
+    onManageCollections: (Location) -> Unit,
+) {
+    ContentColumn {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 300.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(count = pagingItems.itemCount, key = pagingItems.itemKey { it.id }) { index ->
+                val adventure = pagingItems[index]
+                if (adventure != null) {
+                    AdventureItem(
+                        location = adventure,
+                        onClick = { onAdventureClick(adventure) },
+                        onEdit = { onEditAdventure(adventure) },
+                        onAddPhoto = { onAddPhoto(adventure) },
+                        onDuplicate = { onDuplicateAdventure(adventure) },
+                        onShare = { onShareAdventure(adventure) },
+                        onDelete = { onDeleteAdventure(adventure) },
+                        onManageCollections = { onManageCollections(adventure) },
+                    )
+                }
+            }
+            when (val append = pagingItems.loadState.append) {
+                is LoadStateLoading -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    }
+                }
+                is LoadStateError -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = placesLoadErrorMessage(append.error),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
                 else -> {}
             }
         }
