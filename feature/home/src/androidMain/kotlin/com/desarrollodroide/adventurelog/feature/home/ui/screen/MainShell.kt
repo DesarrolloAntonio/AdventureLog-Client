@@ -85,7 +85,9 @@ import com.desarrollodroide.adventurelog.resources.Res
 import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
-import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.navigation.NavBackStackEntry
+import com.desarrollodroide.adventurelog.feature.home.ui.navigation.isSectionSwitch
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScreen
@@ -529,26 +531,34 @@ fun HomeScreenContent(
                         // pad for it twice in here.
                         .consumeWindowInsets(barsPadding)
                 ) {
-                    // NavHost to manage the content on each screen with animations
-                    AnimatedDirectionalNavHost(
+                    // Changing section fades through: the five tabs and the account menu's
+                    // screens have no order between them, so nothing slides left or right (it
+                    // used to, by tab position, and Home alone faded). Going deeper inside a
+                    // section - a collection, a country, a form - slides forward and back.
+                    fun switching(scope: AnimatedContentTransitionScope<NavBackStackEntry>) =
+                        isSectionSwitch(scope.initialState.destination.route, scope.targetState.destination.route)
+                    NavHost(
                         navController = navController,
                         startDestination = NavigationRoutes.Home.screen,
                         modifier = Modifier.fillMaxSize(),
-                        // Map routes to indices for directional navigation
-                        routeToIndexMapper = { route ->
-                            if (route.startsWith("collection/")) {
-                                CurrentScreen.COLLECTIONS.index
-                            } else {
-                                CurrentScreen.fromRoute(route).index
-                            }
-                        }
+                        enterTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughEnter()
+                            else NavigationAnimations.enterTransition(this)
+                        },
+                        exitTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughExit()
+                            else NavigationAnimations.exitTransition(this)
+                        },
+                        popEnterTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughEnter()
+                            else NavigationAnimations.popEnterTransition(this)
+                        },
+                        popExitTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughExit()
+                            else NavigationAnimations.popExitTransition(this)
+                        },
                     ) {
-                        composable(
-                            route = NavigationRoutes.Home.screen,
-                            // Individual animations can be overridden for specific routes
-                            enterTransition = NavigationAnimations.enterTransitionFade,
-                            exitTransition = NavigationAnimations.exitTransitionFade
-                        ) {
+                        composable(route = NavigationRoutes.Home.screen) {
                             // This entry's lifecycle: started again on returning from another tab, a
                             // place's page, an add screen or the background.
                             LifecycleStartEffect(Unit) {

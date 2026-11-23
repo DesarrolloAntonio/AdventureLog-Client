@@ -9,6 +9,9 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
@@ -137,6 +140,18 @@ object NavigationAnimations {
         )
     }
     
+    /**
+     * Material's fade through, for moving between top-level destinations - sections with no order
+     * between them, so nothing slides left or right. The outgoing screen fades out over the first
+     * 90ms; the incoming one then fades in and grows from 92% over the remaining 210ms.
+     */
+    fun fadeThroughEnter(): EnterTransition =
+        fadeIn(tween(durationMillis = 210, delayMillis = 90, easing = LinearOutSlowInEasing)) +
+            scaleIn(tween(durationMillis = 210, delayMillis = 90, easing = standardEasing), initialScale = 0.92f)
+
+    fun fadeThroughExit(): ExitTransition =
+        fadeOut(tween(durationMillis = 90, easing = FastOutLinearInEasing))
+
     /**
      * Fade-only enter transition for overlays
      */
