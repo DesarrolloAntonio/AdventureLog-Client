@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · Edit checklist</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.mist{background:radial-gradient(120% 55% at 0% 0%,#FCE2D2 0%,rgba(252,226,210,0) 55%),radial-gradient(95% 55% at 100% 6%,#D6E6FA 0%,rgba(214,230,250,0) 60%),radial-gradient(120% 60% at 25% 100%,#CFEFEA 0%,rgba(207,239,234,0) 60%),#F1F4F6}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.08);box-sizing:border-box}
+.hero{background:radial-gradient(80% 120% at 100% 0%,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0) 55%),linear-gradient(135deg,#12838D 0%,#0A4E66 100%);box-shadow:0 10px 22px rgba(10,78,102,0.3),inset 0 1px 0 rgba(255,255,255,0.3);color:#FFFFFF}
+.it{height:50px;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:16px;position:relative}
+.ln{flex-grow:1;height:50px;display:flex;align-items:center;border-bottom:0.5px solid rgba(16,32,39,0.1)}
+.on{width:24px;height:24px;border-radius:12px;background:#0B7A84;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.off{width:24px;height:24px;border-radius:12px;border:2px solid #B9C6CB;box-sizing:border-box;flex-shrink:0}
+.done{color:#6E7B82;text-decoration:line-through}
+.cb{position:absolute;opacity:0;width:1px;height:1px}
+</style>
+</helmet>
+<div class="mist" style="width: 390px; height: 844px; position: relative; overflow: hidden; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(12,30,36,0.22)"></div>
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px 16px 0 0; background: rgba(255,255,255,0.45)"></div>
+
+  <div class="mist" style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; border-radius: 38px 38px 0 0; box-shadow: 0 -10px 40px rgba(12,30,36,0.18); overflow: hidden">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="card" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#102027" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span style="flex-grow: 1; display: flex; flex-direction: column; align-items: center"><span style="font-size: 17px; font-weight: 700">Edit Checklist</span><span style="font-size: 12px; color: #56656C">Cinque Terre</span></span>
+      <button class="hero" aria-label="Save" style="border: 0; width: 44px; height: 44px; border-radius: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></button>
+    </div>
+
+    <form style="padding: 18px 16px 0; display: flex; flex-direction: column; gap: 14px">
+      <div class="hero" style="height: 92px; border-radius: 24px; padding: 0 18px; display: flex; align-items: center; gap: 14px">
+        <svg viewBox="0 0 56 56" width="56" height="56" role="img" aria-label="3 of 7 packed" style="flex-shrink: 0"><circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="7"/><circle cx="28" cy="28" r="22" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-dasharray="59.2 138.2" transform="rotate(-90 28 28)"/></svg>
+        <span style="flex-grow: 1; display: flex; flex-direction: column">
+          <input value="Packing List" aria-label="Title" style="all: unset; font-size: 22px; line-height: 28px; font-weight: 800; color: #FFFFFF">
+          <span style="font-size: 14px; color: rgba(255,255,255,0.9)">3 of 7 packed · 4 to go</span>
+        </span>
+      </div>
+
+      <div class="card" style="border-radius: 20px; overflow: hidden">
+        <label class="it"><span class="on" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked class="cb"><span class="ln done">Passport</span></label>
+        <label class="it"><span class="on" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked class="cb"><span class="ln done">Hiking shoes</span></label>
+        <label class="it"><span class="on" aria-hidden="true"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></span><input type="checkbox" checked class="cb"><span class="ln done">Rain jacket</span></label>
+        <label class="it"><span class="off" aria-hidden="true"></span><input type="checkbox" class="cb"><span class="ln">Train tickets</span></label>
+        <label class="it"><span class="off" aria-hidden="true"></span><input type="checkbox" class="cb"><span class="ln">Swimsuit</span></label>
+        <label class="it"><span class="off" aria-hidden="true"></span><input type="checkbox" class="cb"><span class="ln">Sun cream</span></label>
+        <label class="it"><span class="off" aria-hidden="true"></span><input type="checkbox" class="cb"><span class="ln">Power adapter</span></label>
+        <label class="it">
+          <span style="width: 24px; height: 24px; border-radius: 12px; background: rgba(11,122,132,0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+          <input placeholder="Add an item" aria-label="Add an item" style="all: unset; flex-grow: 1; font-size: 16px">
+        </label>
+      </div>
+    </form>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

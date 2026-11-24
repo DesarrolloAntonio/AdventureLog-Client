@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · Collections</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.mist{background:radial-gradient(120% 55% at 0% 0%,#FCE2D2 0%,rgba(252,226,210,0) 55%),radial-gradient(95% 55% at 100% 6%,#D6E6FA 0%,rgba(214,230,250,0) 60%),radial-gradient(120% 60% at 25% 100%,#CFEFEA 0%,rgba(207,239,234,0) 60%),#F1F4F6}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.08);box-sizing:border-box}
+.hero{background:radial-gradient(80% 120% at 100% 0%,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0) 55%),linear-gradient(135deg,#12838D 0%,#0A4E66 100%);box-shadow:0 14px 30px rgba(10,78,102,0.3),inset 0 1px 0 rgba(255,255,255,0.3);color:#FFFFFF}
+.bar{background:rgba(255,255,255,0.7);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,0.95);box-shadow:0 10px 30px rgba(20,70,90,0.14);box-sizing:border-box}
+.sec{font-size:13px;font-weight:600;color:#56656C}
+</style>
+</helmet>
+<div class="mist" style="width: 390px; height: 844px; position: relative; overflow: hidden; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 16px; right: 12px; top: 54px; height: 44px; display: flex; align-items: center">
+    <span style="flex-grow: 1"></span>
+    <button aria-label="New collection" style="all: unset; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 96px; display: flex; flex-direction: column">
+    <h1 style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 800; letter-spacing: -0.6px">Collections</h1>
+    <span style="font-size: 15px; color: #56656C">8 places across 3 trips</span>
+  </div>
+
+  <div role="tablist" aria-label="Collections" style="position: absolute; left: 16px; right: 16px; top: 170px; height: 34px; border-radius: 10px; background: rgba(16,32,39,0.06); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 2px; box-sizing: border-box">
+    <button role="tab" aria-selected="true" style="all: unset; border-radius: 8px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(20,70,90,0.12); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer">Mine</button>
+    <button role="tab" aria-selected="false" style="all: unset; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; cursor: pointer">Shared</button>
+    <button role="tab" aria-selected="false" style="all: unset; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; cursor: pointer">Archived</button>
+    <button role="tab" aria-selected="false" style="all: unset; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; cursor: pointer">Invites</button>
+  </div>
+
+  <a href="Mist-Trip.dc.html" class="hero" style="position: absolute; left: 16px; right: 16px; top: 222px; height: 146px; border-radius: 24px; padding: 16px 16px 16px 18px; box-sizing: border-box; display: flex; gap: 14px; text-decoration: none">
+    <span style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0">
+      <span style="display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; letter-spacing: 0.9px; color: rgba(255,255,255,0.9)">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        UP NEXT · IN 8 DAYS
+      </span>
+      <span style="display: flex; flex-direction: column">
+        <span style="font-size: 26px; line-height: 30px; font-weight: 800; letter-spacing: -0.5px">Cinque Terre</span>
+        <span style="font-size: 14px; color: rgba(255,255,255,0.9)">5–9 Sep · 2 places · Liguria</span>
+      </span>
+    </span>
+    <svg viewBox="0 0 52 52" width="92" height="114" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Photo of Vernazza" style="border-radius: 16px; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(255,255,255,0.5)">
+      <defs><linearGradient id="mc-vsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22335E"/><stop offset="1" stop-color="#C98A78"/></linearGradient></defs>
+      <rect width="52" height="34" fill="url(#mc-vsky)"/>
+      <rect y="34" width="52" height="18" fill="#1B2750"/>
+      <path d="M6 34 C12 24 22 16 52 12 V34Z" fill="#1A2224"/>
+      <path d="M14 26h6v8h-6z" fill="#A8524A"/><path d="M20 22h6v12h-6z" fill="#C8946A"/><path d="M26 24h6v10h-6z" fill="#7C9C9E"/><path d="M32 20h6v14h-6z" fill="#BD6A54"/><path d="M38 18h7v16h-7z" fill="#D4AE68"/><path d="M45 16h7v18h-7z" fill="#A35447"/>
+      <path d="M16 29h1.5v2H16z M23 26h1.5v2H23z M29 28h1.5v2H29z M35 24h1.5v2H35z M41 27h1.5v2H41z M48 22h1.5v2H48z" fill="#FFD08A"/>
+    </svg>
+  </a>
+
+  <div class="sec" style="position: absolute; left: 22px; top: 388px">Planned</div>
+  <a href="Mist-Trip.dc.html" class="card" style="position: absolute; left: 16px; right: 16px; top: 410px; height: 88px; border-radius: 20px; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 12px; text-decoration: none; color: #102027">
+    <svg viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Photo of the Andes" style="border-radius: 14px; flex-shrink: 0">
+      <rect width="64" height="64" fill="#BFD7E0"/>
+      <path d="M0 40 L14 22 L24 32 L36 14 L50 30 L64 20 V64 H0Z" fill="#5E8A6A"/>
+      <path d="M36 14 L41 20 L33 21Z" fill="#EEF3F0"/>
+      <path d="M0 50 C16 44 30 50 64 44 V64 H0Z" fill="#3E6A4E"/>
+      <rect y="30" width="64" height="8" fill="#FFFFFF" opacity="0.35"/>
+    </svg>
+    <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 17px; font-weight: 600">Peru</span>
+      <span style="font-size: 13px; color: #56656C">10–22 Oct · 3 places</span>
+      <span style="align-self: flex-start; height: 22px; padding: 0 9px; border-radius: 11px; background: #FCE3D9; color: #B23F22; font-size: 12px; font-weight: 600; display: flex; align-items: center">Planned</span>
+    </span>
+    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+  </a>
+
+  <div class="sec" style="position: absolute; left: 22px; top: 518px">Past</div>
+  <a href="Mist-Trip.dc.html" class="card" style="position: absolute; left: 16px; right: 16px; top: 540px; height: 88px; border-radius: 20px; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 12px; text-decoration: none; color: #102027">
+    <svg viewBox="0 0 240 240" preserveAspectRatio="xMidYMid slice" width="64" height="64" role="img" aria-label="Photo of Geirangerfjord" style="border-radius: 14px; flex-shrink: 0">
+      <rect width="240" height="150" fill="#A9BFCE"/>
+      <path d="M60 122 L96 70 L118 92 L140 60 L170 98 L188 84 L210 122Z" fill="#8EA3B4"/>
+      <rect y="150" width="240" height="90" fill="#1F5458"/>
+      <path d="M0 36 C30 58 62 100 92 150 L108 200 L0 240Z" fill="#2E4A44"/>
+      <path d="M240 28 C206 60 178 104 150 150 L134 200 L240 240Z" fill="#26403B"/>
+    </svg>
+    <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+      <span style="font-size: 17px; font-weight: 600">Norwegian Fjords</span>
+      <span style="font-size: 13px; color: #56656C">3–11 Jul 2026 · 3 places</span>
+      <span style="align-self: flex-start; height: 22px; padding: 0 9px; border-radius: 11px; background: #DCF3E5; color: #1F7A48; font-size: 12px; font-weight: 600; display: flex; align-items: center">Completed</span>
+    </span>
+    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+  </a>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 24px; display: flex; gap: 10px; align-items: center">
+    <nav class="bar" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px">
+      <a href="Mist-Home.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1Z"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="Mist-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="Mist-Collections.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(11,122,132,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #0B7A84">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3" fill="#0B7A84"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5" fill="none" stroke="#0B7A84" stroke-width="1.8"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="Mist-Map.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="#search" class="bar" aria-label="Search" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

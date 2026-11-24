@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · People</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.mist{background:radial-gradient(120% 55% at 0% 0%,#FCE2D2 0%,rgba(252,226,210,0) 55%),radial-gradient(95% 55% at 100% 6%,#D6E6FA 0%,rgba(214,230,250,0) 60%),radial-gradient(120% 60% at 25% 100%,#CFEFEA 0%,rgba(207,239,234,0) 60%),#F1F4F6}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.08);box-sizing:border-box}
+.sec{font-size:13px;font-weight:600;color:#56656C}
+.pr{height:68px;display:flex;align-items:center;gap:12px;padding:0 14px;text-decoration:none;color:#102027}
+.av{width:42px;height:42px;border-radius:21px;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ln{flex-grow:1;height:68px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid rgba(16,32,39,0.1);min-width:0}
+</style>
+</helmet>
+<div class="mist" style="width: 390px; height: 844px; position: relative; overflow: hidden; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 8px; right: 16px; top: 54px; height: 44px; display: flex; align-items: center">
+    <a href="Mist-Settings.dc.html" style="height: 44px; padding: 0 8px 0 4px; display: flex; align-items: center; gap: 2px; font-size: 17px; text-decoration: none">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+      Settings
+    </a>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 96px; display: flex; flex-direction: column">
+    <h1 style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 800; letter-spacing: -0.6px">People</h1>
+    <span style="font-size: 15px; color: #56656C">Travellers with a public profile on this server</span>
+  </div>
+
+  <label class="card" style="position: absolute; left: 16px; right: 16px; top: 168px; height: 38px; border-radius: 12px; display: flex; align-items: center; gap: 8px; padding: 0 12px; box-shadow: 0 2px 10px rgba(20,70,90,0.05)">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="#56656C" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    <input placeholder="Search people" aria-label="Search people" style="all: unset; flex-grow: 1; font-size: 15px">
+  </label>
+
+  <div style="position: absolute; left: 22px; right: 22px; top: 226px; display: flex">
+    <span class="sec" style="flex-grow: 1">On this server</span>
+    <span style="font-size: 13px; color: #6E7B82">4</span>
+  </div>
+  <div class="card" style="position: absolute; left: 16px; right: 16px; top: 248px; border-radius: 20px; overflow: hidden">
+    <a href="#ana" class="pr">
+      <span class="av" style="background: #FCE3D9; color: #B23F22">AR</span>
+      <span class="ln"><span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-size: 16px; font-weight: 600">Ana Ruiz</span><span style="font-size: 13px; color: #56656C">@ana</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; font-size: 13px; color: #56656C; font-variant-numeric: tabular-nums"><span><b style="color: #102027; font-weight: 600">41</b> places</span><span><b style="color: #102027; font-weight: 600">12</b> countries</span></span></span>
+    </a>
+    <a href="#kenji" class="pr">
+      <span class="av" style="background: #DCE9FB; color: #2B63B8">KS</span>
+      <span class="ln"><span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-size: 16px; font-weight: 600">Kenji Sato</span><span style="font-size: 13px; color: #56656C">@kenji</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; font-size: 13px; color: #56656C; font-variant-numeric: tabular-nums"><span><b style="color: #102027; font-weight: 600">18</b> places</span><span><b style="color: #102027; font-weight: 600">5</b> countries</span></span></span>
+    </a>
+    <a href="#marta" class="pr">
+      <span class="av" style="background: #FBEFD3; color: #8A5E0E">MS</span>
+      <span class="ln"><span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0"><span style="font-size: 16px; font-weight: 600">Marta Silva</span><span style="font-size: 13px; color: #56656C">@marta</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; font-size: 13px; color: #56656C; font-variant-numeric: tabular-nums"><span><b style="color: #102027; font-weight: 600">9</b> places</span><span><b style="color: #102027; font-weight: 600">3</b> countries</span></span></span>
+    </a>
+    <a href="#me" class="pr">
+      <span class="av" style="background: linear-gradient(135deg, #12838D, #0A4E66); color: #FFFFFF">JD</span>
+      <span class="ln" style="border-bottom: 0"><span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0"><span style="display: flex; align-items: center; gap: 6px"><span style="font-size: 16px; font-weight: 600">John Doe</span><span style="height: 20px; padding: 0 7px; border-radius: 10px; background: #D7F0EE; color: #0B6A73; font-size: 11px; font-weight: 700; display: flex; align-items: center">You</span></span><span style="font-size: 13px; color: #56656C">@claude</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; font-size: 13px; color: #56656C; font-variant-numeric: tabular-nums"><span><b style="color: #102027; font-weight: 600">22</b> places</span><span><b style="color: #102027; font-weight: 600">7</b> countries</span></span></span>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

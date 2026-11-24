@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · New transport</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.mist{background:radial-gradient(120% 55% at 0% 0%,#FCE2D2 0%,rgba(252,226,210,0) 55%),radial-gradient(95% 55% at 100% 6%,#D6E6FA 0%,rgba(214,230,250,0) 60%),radial-gradient(120% 60% at 25% 100%,#CFEFEA 0%,rgba(207,239,234,0) 60%),#F1F4F6}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.08);box-sizing:border-box}
+.hero{background:radial-gradient(80% 120% at 100% 0%,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0) 55%),linear-gradient(135deg,#12838D 0%,#0A4E66 100%);box-shadow:0 10px 22px rgba(10,78,102,0.3),inset 0 1px 0 rgba(255,255,255,0.3);color:#FFFFFF}
+.sec{font-size:13px;font-weight:600;color:#56656C;margin:16px 6px 6px}
+.fr{min-height:50px;display:flex;align-items:center;gap:10px;padding:0 16px;font-size:16px;box-sizing:border-box}
+.hl{border-bottom:0.5px solid rgba(16,32,39,0.1)}
+.pill{height:32px;padding:0 10px;border-radius:9px;background:rgba(16,32,39,0.06);display:flex;align-items:center;font-size:15px;font-variant-numeric:tabular-nums}
+.tp{height:62px;border-radius:16px;font:inherit;font-size:12px;font-weight:600;color:#102027;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;cursor:pointer}
+</style>
+</helmet>
+<div class="mist" style="width: 390px; height: 844px; position: relative; overflow: hidden; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(12,30,36,0.22)"></div>
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px 16px 0 0; background: rgba(255,255,255,0.45)"></div>
+
+  <div class="mist" style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; border-radius: 38px 38px 0 0; box-shadow: 0 -10px 40px rgba(12,30,36,0.18); overflow: hidden; display: flex; flex-direction: column">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="card" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#102027" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span style="flex-grow: 1; display: flex; flex-direction: column; align-items: center"><span style="font-size: 17px; font-weight: 700">New Transport</span><span style="font-size: 12px; color: #56656C">Cinque Terre</span></span>
+      <button class="hero" aria-label="Save" style="border: 0; width: 44px; height: 44px; border-radius: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></button>
+    </div>
+
+    <form style="padding: 18px 16px 0; display: flex; flex-direction: column">
+      <div role="radiogroup" aria-label="Type" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px">
+        <button type="button" role="radio" aria-checked="false" class="card tp"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" fill="none" stroke="#3A4A50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16V11l2-5h10l2 5v5Z M3 16h18M7 19v-3M17 19v-3"/><circle cx="8" cy="13" r="0.8" fill="#3A4A50"/><circle cx="16" cy="13" r="0.8" fill="#3A4A50"/></svg>Car</button>
+        <button type="button" role="radio" aria-checked="true" class="hero tp" style="border: 0; color: #FFFFFF"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="4"/><path d="M5 11h14M9 21l-2-4M15 21l2-4"/></svg>Train</button>
+        <button type="button" role="radio" aria-checked="false" class="card tp"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" fill="none" stroke="#3A4A50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15 13 11V5a1.5 1.5 0 0 0-3 0v6l-7 4v2l7-2v4l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-4l8 2Z"/></svg>Plane</button>
+        <button type="button" role="radio" aria-checked="false" class="card tp"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" fill="none" stroke="#3A4A50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 21v-3M16 21v-3"/></svg>Bus</button>
+        <button type="button" role="radio" aria-checked="false" class="card tp"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" fill="none" stroke="#3A4A50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h18l-2 4H5Z M6 17V9h12v8 M12 9V4M12 4h4"/></svg>Boat</button>
+      </div>
+
+      <div class="card" style="margin-top: 14px; border-radius: 20px; position: relative">
+        <label class="fr hl"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 5px; background: #0B7A84"></span><span style="width: 42px; color: #56656C">From</span><input value="La Spezia Centrale" aria-label="From" style="all: unset; flex-grow: 1; font-size: 16px"></label>
+        <label class="fr"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 5px; background: #C4482A"></span><span style="width: 42px; color: #56656C">To</span><input value="Vernazza" aria-label="To" style="all: unset; flex-grow: 1; font-size: 16px"></label>
+        <button type="button" class="card" aria-label="Swap from and to" style="position: absolute; right: 14px; top: 31px; width: 38px; height: 38px; border-radius: 19px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #FFFFFF">
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16M4 8l4-4 4 4M16 20V4M12 16l4 4 4-4"/></svg>
+        </button>
+      </div>
+
+      <div class="sec">When</div>
+      <div class="card" style="border-radius: 20px; overflow: hidden">
+        <div class="fr hl">Departs<span style="flex-grow: 1"></span><span style="display: flex; gap: 6px"><span class="pill">5 Sep 2026</span><span class="pill">10:40</span></span></div>
+        <div class="fr hl">Arrives<span style="flex-grow: 1"></span><span style="display: flex; gap: 6px"><span class="pill">5 Sep 2026</span><span class="pill" style="color: #6E7B82">—</span></span></div>
+        <label class="fr" style="position: relative">Keep to trip dates<span style="flex-grow: 1"></span>
+          <input type="checkbox" checked aria-label="Keep to trip dates" style="position: absolute; opacity: 0; width: 1px; height: 1px">
+          <span aria-hidden="true" style="width: 51px; height: 31px; border-radius: 16px; background: #0B7A84; display: flex; align-items: center; justify-content: flex-end; padding: 2px; box-sizing: border-box"><span style="width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2)"></span></span>
+        </label>
+      </div>
+
+      <div class="sec">Details</div>
+      <div class="card" style="border-radius: 20px; overflow: hidden">
+        <label class="fr hl"><input value="La Spezia → Vernazza" aria-label="Name" style="all: unset; flex-grow: 1; font-size: 16px"></label>
+        <label class="fr">
+          <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#56656C" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+          <input placeholder="Link" aria-label="Link" style="all: unset; flex-grow: 1; font-size: 16px">
+        </label>
+      </div>
+    </form>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

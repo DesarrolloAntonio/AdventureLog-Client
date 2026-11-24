@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · Settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.mist{background:radial-gradient(120% 55% at 0% 0%,#FCE2D2 0%,rgba(252,226,210,0) 55%),radial-gradient(95% 55% at 100% 6%,#D6E6FA 0%,rgba(214,230,250,0) 60%),radial-gradient(120% 60% at 25% 100%,#CFEFEA 0%,rgba(207,239,234,0) 60%),#F1F4F6}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.08);box-sizing:border-box}
+.sec{font-size:13px;font-weight:600;color:#56656C}
+.row{height:46px;display:flex;align-items:center;gap:12px;padding:0 14px;text-decoration:none;color:#102027;font-size:16px}
+.ic{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ln{flex-grow:1;height:46px;display:flex;align-items:center;gap:6px;border-bottom:0.5px solid rgba(16,32,39,0.1)}
+.val{color:#56656C}
+.edge{position:absolute;left:0;right:0;bottom:0;height:110px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);-webkit-mask-image:linear-gradient(to top,#000 30%,transparent);mask-image:linear-gradient(to top,#000 30%,transparent);background:linear-gradient(to top,rgba(220,240,238,0.9),rgba(220,240,238,0));pointer-events:none}
+</style>
+</helmet>
+<div class="mist" style="width: 390px; height: 844px; position: relative; overflow: hidden; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 8px; right: 16px; top: 54px; height: 44px; display: flex; align-items: center">
+    <a href="Mist-Home.dc.html" style="height: 44px; padding: 0 8px 0 4px; display: flex; align-items: center; gap: 2px; font-size: 17px; text-decoration: none">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+      Home
+    </a>
+  </div>
+
+  <h1 style="position: absolute; left: 20px; top: 96px; margin: 0; font-size: 34px; line-height: 40px; font-weight: 800; letter-spacing: -0.6px">Settings</h1>
+
+  <a href="#profile" class="card" style="position: absolute; left: 16px; right: 16px; top: 150px; height: 70px; border-radius: 20px; display: flex; align-items: center; gap: 12px; padding: 0 14px 0 12px; text-decoration: none; color: #102027">
+    <span style="width: 48px; height: 48px; border-radius: 24px; background: linear-gradient(135deg, #12838D, #0A4E66); color: #FFFFFF; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 6px 14px rgba(10,78,102,0.25)">JD</span>
+    <span style="flex-grow: 1; display: flex; flex-direction: column">
+      <span style="font-size: 17px; font-weight: 600">John Doe</span>
+      <span style="font-size: 13px; color: #56656C">@claude · [YOUR SERVER]</span>
+    </span>
+    <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+  </a>
+
+  <div class="sec" style="position: absolute; left: 22px; top: 238px">Appearance</div>
+  <div class="card" style="position: absolute; left: 16px; right: 16px; top: 258px; border-radius: 20px; overflow: hidden">
+    <a href="#theme" class="row"><span class="ic" style="background: #DCE9FB"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#2B63B8" stroke-width="2.2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="#2B63B8"/></svg></span><span class="ln">Theme<span style="flex-grow: 1"></span><span class="val">System</span></span></a>
+    <a href="#map-style" class="row"><span class="ic" style="background: #D7F0EE"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2.2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg></span><span class="ln" style="border-bottom: 0">Map style<span style="flex-grow: 1"></span><span class="val">Standard</span></span></a>
+  </div>
+
+  <div class="sec" style="position: absolute; left: 22px; top: 368px">Units</div>
+  <div class="card" style="position: absolute; left: 16px; right: 16px; top: 388px; border-radius: 20px; overflow: hidden">
+    <a href="#units" class="row"><span class="ic" style="background: #FBEFD3"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#9A6A12" stroke-width="2.2" stroke-linecap="round"><path d="M3 15h18v4H3z M7 15v-3M11 15v-4M15 15v-3M19 15v-4"/></svg></span><span class="ln">Units<span style="flex-grow: 1"></span><span class="val">Metric</span></span></a>
+    <a href="#currency" class="row"><span class="ic" style="background: #DCF3E5"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#1F7A48" stroke-width="2.2" stroke-linecap="round"><path d="M17 6.5A6.5 6.5 0 1 0 17 17.5M4 10.5h9M4 13.5h9"/></svg></span><span class="ln" style="border-bottom: 0">Currency<span style="flex-grow: 1"></span><span class="val">EUR</span></span></a>
+  </div>
+
+  <div class="sec" style="position: absolute; left: 22px; top: 498px">Account</div>
+  <div class="card" style="position: absolute; left: 16px; right: 16px; top: 518px; border-radius: 20px; overflow: hidden">
+    <a href="#sign-in" class="row"><span class="ic" style="background: #DCE9FB"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#2B63B8" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 7 9 6 9-6"/></svg></span><span class="ln">Sign-in &amp; email<span style="flex-grow: 1"></span><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+    <label class="row"><span class="ic" style="background: #D7F0EE"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></span><span class="ln">Public profile<span style="flex-grow: 1"></span><input type="checkbox" checked aria-label="Public profile" style="position: absolute; opacity: 0; width: 1px; height: 1px"><span aria-hidden="true" style="width: 51px; height: 31px; border-radius: 16px; background: #0B7A84; display: flex; align-items: center; justify-content: flex-end; padding: 2px; box-sizing: border-box"><span style="width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2)"></span></span></span></label>
+    <a href="Mist-Users.dc.html" class="row"><span class="ic" style="background: #FCE3D9"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#C4482A" stroke-width="2.2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 4 6"/></svg></span><span class="ln" style="border-bottom: 0">People<span style="flex-grow: 1"></span><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+  </div>
+
+  <div class="sec" style="position: absolute; left: 22px; top: 674px">About</div>
+  <div class="card" style="position: absolute; left: 16px; right: 16px; top: 694px; border-radius: 20px; overflow: hidden">
+    <a href="#source" class="row"><span class="ic" style="background: #E7ECEE"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#3A4A50" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg></span><span class="ln">Source code<span style="flex-grow: 1"></span><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span></a>
+    <a href="#feedback" class="row"><span class="ic" style="background: #FBEFD3"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#9A6A12" stroke-width="2.2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4Z"/></svg></span><span class="ln">Send feedback<span style="flex-grow: 1"></span><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+    <a href="Mist-Legal.dc.html" class="row"><span class="ic" style="background: #DCE9FB"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="#2B63B8" stroke-width="2.2" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6Z M14 3v5h5"/></svg></span><span class="ln" style="border-bottom: 0">Terms &amp; privacy<span style="flex-grow: 1"></span><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#8A979D" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></span></a>
+  </div>
+
+  <button class="card" style="position: absolute; left: 16px; right: 16px; top: 852px; height: 50px; border-radius: 20px; font: inherit; font-size: 16px; font-weight: 600; color: #B23F22; cursor: pointer">Sign out</button>
+
+  <div class="edge" aria-hidden="true"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
