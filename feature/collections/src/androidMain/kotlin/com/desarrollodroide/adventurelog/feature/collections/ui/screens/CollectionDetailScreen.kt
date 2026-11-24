@@ -130,6 +130,8 @@ fun CollectionDetailScreen(
      * back but the system gesture.
      */
     showTitle: Boolean = false,
+    /** False in a pane beside the collections list: Back there would point at a list still on screen. */
+    showBack: Boolean = true,
     /** Opens the collection's editor from the header. */
     onEditCollection: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -222,6 +224,7 @@ fun CollectionDetailScreen(
                     currentUserId = currentUserId,
                     collection = uiState.collection!!,
                     showTitle = showTitle || onPhoneInShell,
+                    showBack = showBack,
                     onBackClick = onBackClick,
                     onHomeClick = onHomeClick,
                     onEditCollection = onEditCollection,
@@ -332,6 +335,7 @@ fun CollectionDetailScreen(
 fun CollectionDetailContent(
     collection: Collection,
     showTitle: Boolean = false,
+    showBack: Boolean = true,
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
     onEditCollection: (() -> Unit)? = null,
@@ -390,6 +394,7 @@ fun CollectionDetailContent(
             CollectionHeader(
                 collection,
                 showTitle = showTitle,
+                showBack = showBack,
                 onBackClick = onBackClick,
                 onHomeClick = onHomeClick,
                 onEditCollection = onEditCollection
@@ -860,6 +865,7 @@ fun CollectionHeader(
     collection: Collection,
     modifier: Modifier = Modifier,
     showTitle: Boolean = false,
+    showBack: Boolean = true,
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
     /** Opens the collection's editor; null where there is nowhere to edit it from. */
@@ -878,9 +884,9 @@ fun CollectionHeader(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (showTitle || onEditCollection != null) {
+        if ((showTitle && showBack) || onEditCollection != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (showTitle) {
+                if (showTitle && showBack) {
                     FilledIconButton(
                         onClick = onBackClick,
                         colors = IconButtonDefaults.filledIconButtonColors(

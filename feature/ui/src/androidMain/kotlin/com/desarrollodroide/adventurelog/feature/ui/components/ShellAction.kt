@@ -37,19 +37,26 @@ class ShellActionHost {
 val LocalShellActionHost = staticCompositionLocalOf<ShellActionHost?> { null }
 
 /**
+ * Where a screen's main action goes on a wide window: the top of the navigation rail. Kept apart
+ * from [LocalShellActionHost], whose presence also means "a phone" (the shell hides its chrome for
+ * pages with bars of their own only there).
+ */
+val LocalShellRailActionHost = staticCompositionLocalOf<ShellActionHost?> { null }
+
+/**
  * How far below the status bar a screen's own floating controls must start: on a screen the shell
  * draws edge to edge (Map), its floating search pill sits at the top. 0 everywhere else.
  */
 val LocalShellTopOverlay = compositionLocalOf { 0.dp }
 
 /**
- * Hands this screen's main action to the shell's floating toolbar, for as long as the screen is
- * shown. Returns false when there is no toolbar (a tablet, a preview, a test), and the screen
- * then draws its own button as before.
+ * Hands this screen's main action to the shell - its floating toolbar on a phone, the top of its
+ * rail on a wider window - for as long as the screen is shown. Returns false when the shell has
+ * neither (a preview, a test), and the screen then draws its own button as before.
  */
 @Composable
 fun rememberShellAction(icon: ImageVector, description: String, onClick: () -> Unit): Boolean {
-    val host = LocalShellActionHost.current ?: return false
+    val host = LocalShellActionHost.current ?: LocalShellRailActionHost.current ?: return false
     val latestOnClick by rememberUpdatedState(onClick)
     DisposableEffect(host, icon, description) {
         val action = ShellAction(icon, description) { latestOnClick() }

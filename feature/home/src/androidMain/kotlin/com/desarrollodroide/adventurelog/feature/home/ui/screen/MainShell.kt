@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import androidx.compose.material3.FloatingActionButton
+import com.desarrollodroide.adventurelog.feature.ui.components.ShellAction
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellRailActionHost
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.WindowInsets
@@ -59,7 +62,7 @@ import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
-import com.desarrollodroide.adventurelog.feature.home.ui.components.homeNavigationItems
+import com.desarrollodroide.adventurelog.feature.home.ui.components.HomeRailItems
 import com.desarrollodroide.adventurelog.feature.home.ui.components.ProfileMenu
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
@@ -340,6 +343,7 @@ fun HomeScreenContent(
     val appBarExpanded = remember(scrollBehavior) { { scrollBehavior.state.heightOffset >= -0.5f } }
     CompositionLocalProvider(
         LocalShellActionHost provides if (compact) shellActions else null,
+        LocalShellRailActionHost provides if (compact) null else shellActions,
         LocalShellAppBarExpanded provides appBarExpanded,
     ) {
     Box(
@@ -362,11 +366,25 @@ fun HomeScreenContent(
 
             // The five destinations are a floating toolbar on a phone (drawn below, over the
             // content) and a rail on anything wider. The suite only ever draws the rail.
+            val suiteType = if (compact) NavigationSuiteType.None else NavigationSuiteType.WideNavigationRailCollapsed
             NavigationSuiteScaffold(
-                navigationSuiteItems = { homeNavigationItems(currentScreen) { navigateTo(it) } },
-                layoutType = if (compact) NavigationSuiteType.None else NavigationSuiteType.NavigationRail,
+                navigationItems = { HomeRailItems(currentScreen, suiteType) { navigateTo(it) } },
+                navigationSuiteType = suiteType,
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                // On a wide window the screen's main action heads the rail, as the canvas draws it:
+                // Add a place on Home and Places, New collection on Collections. A phone carries it
+                // beside its floating toolbar instead.
+                primaryActionContent = {
+                    if (!compact) {
+                        val action = shellActions.action ?: if (currentScreen == CurrentScreen.HOME) {
+                            ShellAction(Icons.Default.Add, "Add a place") {
+                                navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
+                            }
+                        } else null
+                        action?.let { RailAction(it) }
+                    }
+                }
             ) {
             BoxWithConstraints {
             val appBarWidth = maxWidth
@@ -475,26 +493,7 @@ fun HomeScreenContent(
                             }
                         },
                         actions = {
-                            // The redesign puts adding a place in the bar on a wide window, where
-                            // there is room for a labelled button; on a phone the same action is
-                            // the floating button the list screens already carry.
-                            if (currentScreen == CurrentScreen.HOME && appBarWidth >= 1000.dp) {
-                                Button(
-                                    onClick = { navController.navigate(NavigationRoutes.Locations.add) },
-                                    shape = RoundedCornerShape(22.dp),
-                                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("Add place", style = MaterialTheme.typography.labelLarge)
-                                }
-                                Spacer(Modifier.width(12.dp))
-                            }
-
+                            // Add a place heads the rail on a wide window; no second copy up here.
                             // Not on a screen with a search field of its own: two searches one
                             // above the other read as the same thing twice.
                             if (currentScreen !in ScreensWithOwnSearch) Surface(
@@ -1271,5 +1270,18 @@ private fun MapSearchPill(
             )
             trailing()
         }
+    }
+}
+
+/** A screen's main action at the head of the rail: the canvas's square teal button. */
+@Composable
+private fun RailAction(action: ShellAction) {
+    FloatingActionButton(
+        onClick = action.onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Icon(action.icon, contentDescription = action.description)
     }
 }

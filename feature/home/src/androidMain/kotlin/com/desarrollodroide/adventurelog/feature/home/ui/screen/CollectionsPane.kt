@@ -154,6 +154,7 @@ fun CollectionsPane(
                     onAddLodging = onAddLodging,
                     onEditLodging = onEditLodging,
                     showTitle = true,
+                    showBack = !twoPanes,
                     onEditCollection = { onEditCollectionById(key.collectionId) }
                 )
             }
