@@ -15,6 +15,7 @@ struct RootView: View {
     @StateObject private var host = ViewModelHost()
     @State private var user: UserDetails?
     @State private var checked = false
+    @State private var theme: CommonThemeMode = .auto
 
     var body: some View {
         Group {
@@ -27,6 +28,9 @@ struct RootView: View {
             }
         }
         .tint(Theme.accent)
+        // The theme chosen in Settings; System leaves it to the phone.
+        .preferredColorScheme(theme == .light ? .light : theme == .dark ? .dark : nil)
+        .task { for await t in host.owner.settingsViewModel().themeMode { theme = t } }
         .task {
             for await session in host.owner.sessionFlow() {
                 user = session

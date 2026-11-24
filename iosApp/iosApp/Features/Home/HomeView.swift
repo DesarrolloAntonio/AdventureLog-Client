@@ -62,9 +62,7 @@ struct HomeView: View {
         .navigationDestination(item: $openTrip) { TripView(collectionId: $0.id, name: $0.name, subtitle: dates($0)) }
         .task { for await s in vm.uiState { state = s } }
         .task { for await u in vm.userDetails { user = u } }
-        .sheet(isPresented: $showAccount) {
-            AccountSheet(user: user, onSignOut: { vm.logout() })
-        }
+        .navigationDestination(isPresented: $showAccount) { SettingsView(onSignOut: { vm.logout() }) }
     }
 
     /// The library in one line; a placeholder of the same height until it has loaded, so the
@@ -311,38 +309,3 @@ private struct RecentRow: View {
     }
 }
 
-/// The account behind the avatar: who is signed in, and signing out (asked first).
-private struct AccountSheet: View {
-    let user: UserDetails?
-    let onSignOut: () -> Void
-    @Environment(\.dismiss) private var dismiss
-    @State private var confirming = false
-
-    var body: some View {
-        NavigationStack {
-            List {
-                if let user {
-                    Section {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text([user.firstName, user.lastName].filter { !$0.isEmpty }.joined(separator: " "))
-                                .font(.title2.weight(.heavy))
-                            Text("@\(user.username)").foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                Section {
-                    Button("Sign Out", role: .destructive) { confirming = true }
-                }
-            }
-            .navigationTitle("Account")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .confirmationDialog("Sign out?", isPresented: $confirming, titleVisibility: .visible) {
-                Button("Sign Out", role: .destructive) { onSignOut(); dismiss() }
-            } message: {
-                Text("You will need your password to sign back in.")
-            }
-        }
-        .presentationDetents([.medium])
-    }
-}
