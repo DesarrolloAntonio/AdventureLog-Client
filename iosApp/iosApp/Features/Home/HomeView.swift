@@ -88,7 +88,10 @@ struct HomeView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
                                 ForEach(dashboard.recentLocations, id: \.id) { place in
-                                    RecentPlaceCard(place: place)
+                                    NavigationLink { PlaceView(placeId: place.id, name: place.name) } label: {
+                                        RecentPlaceCard(place: place)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .padding(.horizontal, 16)

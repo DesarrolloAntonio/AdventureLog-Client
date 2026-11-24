@@ -50,8 +50,8 @@ struct PlacesView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .navigationDestination(for: Location.self) { ComingSoon(title: $0.name) }
-        .navigationDestination(item: $selected) { ComingSoon(title: $0.name) }
+        .navigationDestination(for: Location.self) { PlaceView(placeId: $0.id, name: $0.name) }
+        .navigationDestination(item: $selected) { PlaceView(placeId: $0.id, name: $0.name) }
         .navigationDestination(isPresented: $creating) { ComingSoon(title: "New Place") }
         .sheet(isPresented: $showFilters) {
             if let filters {
