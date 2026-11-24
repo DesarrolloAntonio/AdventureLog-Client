@@ -75,26 +75,12 @@ struct HomeView: View {
 
     private func content(_ dashboard: Dashboard) -> some View {
             VStack(alignment: .leading, spacing: 0) {
-                Button { open(.search) } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "magnifyingglass").font(.subheadline.weight(.semibold))
-                        Text("Search places and collections")
-                        Spacer()
-                    }
-                    .foregroundStyle(Theme.muted)
-                    .padding(.horizontal, 12)
-                    .frame(minHeight: 40)
-                    .mistCard(radius: Theme.Radius.field)
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 4)
-
                 let trip = dashboard.activeTrip ?? dashboard.upcomingTrips.first
                 TripCard(trip: trip, isActive: dashboard.activeTrip != nil) {
                     // The trip itself when there is one; Collections to plan one when there isn't.
                     if let trip { openTrip = trip } else { open(.collections) }
                 }
-                .padding(.top, 16)
+                .padding(.top, 4)
 
                 SectionLabel(text: "Quick access").padding(.top, 20).padding(.bottom, 8)
                 quickAccess(dashboard.stats)
@@ -130,16 +116,26 @@ struct HomeView: View {
         }
     }
 
+    /// A strip that runs off the screen's edge, like Android's: the photographs stay photographs
+    /// instead of shrinking into a column of thumbnails.
     private func recent(_ places: [Location]) -> some View {
-        VStack(spacing: 0) {
-            ForEach(Array(places.prefix(5).enumerated()), id: \.element.id) { index, place in
-                NavigationLink { PlaceView(placeId: place.id, name: place.name, subtitle: whereabouts(place)) } label: {
-                    RecentRow(place: place, last: index == min(places.count, 5) - 1)
+        ScrollView(.horizontal) {
+            LazyHStack(alignment: .top, spacing: 10) {
+                ForEach(places, id: \.id) { place in
+                    NavigationLink { PlaceView(placeId: place.id, name: place.name, subtitle: whereabouts(place)) } label: {
+                        RecentCard(place: place)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .scrollTargetLayout()
         }
-        .mistCard()
+        .scrollIndicators(.hidden)
+        .scrollTargetBehavior(.viewAligned)
+        .contentMargins(.horizontal, 16, for: .scrollContent)
+        // Out to the screen's edges; the margins above keep the first card in line with the rest.
+        .padding(.horizontal, -16)
+        .scrollClipDisabled()
     }
 
     private var initials: String {
@@ -247,6 +243,8 @@ private struct QuickTile: View {
     }
 }
 
+/// A tile the way Reminders draws its lists: the badge and the count on top, the word alone on
+/// the line below with the whole tile's width, so it never shares room with the number.
 private struct QuickTileLabel: View {
     let title: String
     let systemImage: String
@@ -254,52 +252,72 @@ private struct QuickTileLabel: View {
     let count: Int32?
 
     var body: some View {
-        HStack(spacing: 10) {
-            ToneBadge(systemImage: systemImage, tone: tone)
-            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.ink)
-            Spacer(minLength: 4)
-            if let count {
-                Text("\(count)").font(.footnote).foregroundStyle(Theme.faint).monospacedDigit()
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center) {
+                ToneBadge(systemImage: systemImage, tone: tone)
+                Spacer(minLength: 4)
+                if let count {
+                    Text("\(count)").font(.title2.weight(.bold)).foregroundStyle(Theme.ink).monospacedDigit()
+                } else {
+                    Image(systemName: "chevron.right").font(.footnote.weight(.bold)).foregroundStyle(Theme.glyph)
+                }
             }
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.muted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
         }
-        .padding(.horizontal, 12)
-        .frame(maxWidth: .infinity, minHeight: 52)
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .mistCard(radius: 18)
         .accessibilityElement(children: .combine)
     }
 }
 
-/// A recently visited place: thumbnail, name, "Region, Country · 6 Jul", chevron.
-private struct RecentRow: View {
+/// A recently visited place as a card: the photo at 4:3, then its name, where it is and when it
+/// was last visited, and its rating and category. Every line is drawn, empty or not, so cards
+/// side by side keep one height.
+private struct RecentCard: View {
     let place: Location
-    let last: Bool
+    @ScaledMetric(relativeTo: .body) private var width: CGFloat = 176
 
     var body: some View {
-        HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             RemoteImage(url: primaryPhoto(place)) {
-                Rectangle().fill(Theme.Tone.teal.fill).overlay(Text(place.category?.icon ?? "📍"))
+                Rectangle().fill(Theme.Tone.teal.fill)
+                    .overlay(Text(place.category?.icon ?? "📍").font(.largeTitle))
             }
-            .frame(width: 40, height: 40)
-            .clipShape(.rect(cornerRadius: 10, style: .continuous))
+            .aspectRatio(4 / 3, contentMode: .fit)
 
-            HStack {
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(place.name).font(.body.weight(.medium)).foregroundStyle(Theme.ink)
-                    Text(caption).font(.footnote).foregroundStyle(Theme.muted)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(place.name).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.ink)
+                Text(caption.isEmpty ? " " : caption).font(.caption).foregroundStyle(Theme.muted)
+                HStack(spacing: 6) {
+                    let rating = Int(place.rating?.doubleValue ?? 0)
+                    if rating > 0 {
+                        Text(String(repeating: "★", count: min(rating, 5))).foregroundStyle(Theme.Tone.amber.ink)
+                    }
+                    Text(category).foregroundStyle(Theme.muted)
                 }
-                Spacer(minLength: 8)
-                Image(systemName: "chevron.right").font(.footnote.weight(.bold)).foregroundStyle(Theme.glyph)
+                .font(.caption2)
+                .padding(.top, 3)
             }
-            .padding(.vertical, 10)
-            .frame(minHeight: 60)
-            .overlay(alignment: .bottom) {
-                if !last { Rectangle().fill(Theme.separator).frame(height: 0.5) }
-            }
+            .lineLimit(1)
+            .padding(.horizontal, 10)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
         }
-        .padding(.leading, 12)
-        .padding(.trailing, 14)
-        .contentShape(.rect)
+        .frame(width: min(width, 260))
+        .mistCard(radius: 16)
+        .clipShape(.rect(cornerRadius: 16, style: .continuous))
+        .contentShape(.rect(cornerRadius: 16))
         .accessibilityElement(children: .combine)
+    }
+
+    private var category: String {
+        guard let c = place.category else { return " " }
+        return "\(c.icon) \(c.displayName)".trimmingCharacters(in: .whitespaces)
     }
 
     private var caption: String {
