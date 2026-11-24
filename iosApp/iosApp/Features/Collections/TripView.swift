@@ -55,6 +55,7 @@ struct TripView: View {
             .padding(.bottom, 120)
         }
         .mistBackground()
+        .navigationBarTitleDisplayMode(.large)
         .navigationTitle(state.collection?.name ?? name)
         .navigationSubtitle(state.collection.map(Self.subtitle) ?? subtitle)
         .toolbar {
@@ -103,24 +104,33 @@ struct TripView: View {
 
     @ViewBuilder
     private func itinerary(_ collection: ComposeApp.Collection) -> some View {
-        if let list = collection.checklists.first {
-            ChecklistCard(list: list).padding(.bottom, 20)
+        let hero = collection.checklists.first
+        if let hero {
+            Button { page = .lists } label: { ChecklistCard(list: hero) }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens the lists")
+                .padding(.bottom, 20)
         }
 
         let plan = IosTrip.shared.plan(collection: collection)
-        let days = plan.days.filter { !$0.items.isEmpty }
+        // The list on the teal card isn't drawn a second time as a row.
+        let shown: (ItineraryItem) -> Bool = { item in
+            item.kind != .checklist || collection.itinerary.first { $0.id == item.entryId }?.itemId != hero?.id
+        }
+        let context = plan.tripContext.filter(shown)
+        let days = plan.days.map { ($0, $0.items.filter(shown)) }.filter { !$0.1.isEmpty }
 
-        if !plan.tripContext.isEmpty {
-            SectionLabel(text: "For the whole trip", trailing: "\(plan.tripContext.count)").padding(.bottom, 8)
-            itemsCard(plan.tripContext, in: collection).padding(.bottom, 20)
+        if !context.isEmpty {
+            SectionLabel(text: "For the whole trip", trailing: "\(context.count)").padding(.bottom, 8)
+            itemsCard(context, in: collection).padding(.bottom, 20)
         }
 
-        ForEach(days, id: \.dayNumber) { day in
-            SectionLabel(text: dayLabel(day), trailing: "\(day.items.count)").padding(.bottom, 8)
-            itemsCard(day.items, in: collection).padding(.bottom, 20)
+        ForEach(days, id: \.0.dayNumber) { day, items in
+            SectionLabel(text: dayLabel(day), trailing: "\(items.count)").padding(.bottom, 8)
+            itemsCard(items, in: collection).padding(.bottom, 20)
         }
 
-        if days.isEmpty && plan.tripContext.isEmpty {
+        if plan.isEmpty {
             if plan.canAutoGenerate {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("No itinerary yet").font(.headline).foregroundStyle(Theme.ink)

@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var user: UserDetails?
     @State private var showAccount = false
     @State private var creating = false
+    @State private var openTrip: UltraSlimCollection?
     @Environment(\.dynamicTypeSize) private var typeSize
 
     private var vm: HomeViewModel { host.owner.homeViewModel() }
@@ -50,6 +51,7 @@ struct HomeView: View {
             .sharedBackgroundVisibility(.hidden)
         }
         .navigationDestination(isPresented: $creating) { ComingSoon(title: "New Place") }
+        .navigationDestination(item: $openTrip) { TripView(collectionId: $0.id, name: $0.name, subtitle: dates($0)) }
         .task { for await s in vm.uiState { state = s } }
         .task { for await u in vm.userDetails { user = u } }
         .sheet(isPresented: $showAccount) {
@@ -76,8 +78,10 @@ struct HomeView: View {
                 .buttonStyle(.plain)
                 .padding(.top, 16)
 
-                TripCard(trip: dashboard.activeTrip ?? dashboard.upcomingTrips.first, isActive: dashboard.activeTrip != nil) {
-                    open(.collections)
+                let trip = dashboard.activeTrip ?? dashboard.upcomingTrips.first
+                TripCard(trip: trip, isActive: dashboard.activeTrip != nil) {
+                    // The trip itself when there is one; Collections to plan one when there isn't.
+                    if let trip { openTrip = trip } else { open(.collections) }
                 }
                 .padding(.top, 16)
 
@@ -231,7 +235,7 @@ private struct TripCard: View {
     }
 
     private func detail(_ trip: UltraSlimCollection) -> String {
-        let range = DayRange(start: trip.startDate, end: trip.endDate)?.text
+        let range = DayRange(start: trip.startDate, end: trip.endDate)?.shortText
         if isActive {
             return ["day of the trip", range].compactMap { $0 }.joined(separator: " · ")
         }
