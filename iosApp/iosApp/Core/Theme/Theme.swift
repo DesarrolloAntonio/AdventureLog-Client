@@ -11,6 +11,9 @@ import UIKit
 enum Theme {
     /// `#0B7A84`, the accent of every Mist artboard.
     static let accent = Color(light: 0x0B7A84, dark: 0x3FB8C2)
+    /// Text on an accent fill: white on the deep teal, deep sea on the bright teal of dark mode,
+    /// where white had too little contrast to read.
+    static let onAccent = Color(light: 0xFFFFFF, dark: 0x062A2E)
 
     /// Body text, `#102027`.
     static let ink = Color(light: 0x102027, dark: 0xEEF3F5)
@@ -139,6 +142,9 @@ extension View {
     /// Paints the mist behind a screen.
     func mistBackground() -> some View {
         background { MistBackground() }
+            // Content fades under the bar. Left to the system, the bar cut it off with a hard
+            // line and a hairline once the large title folded - a slab across the mist.
+            .scrollEdgeEffectStyle(.soft, for: .top)
     }
 }
 

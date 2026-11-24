@@ -108,8 +108,12 @@ struct CollectionsView: View {
                         .buttonStyle(.plain)
                         .contextMenu { menu(next) }
                 }
-                ForEach(groups(excluding: next?.id), id: \.title) { group in
-                    SectionLabel(text: group.title).padding(.top, 20).padding(.bottom, 8)
+                let groups = groups(excluding: next?.id)
+                ForEach(groups, id: \.title) { group in
+                    // Under the picker the first label needs no gap of its own: 16 + 20 stood out.
+                    SectionLabel(text: group.title)
+                        .padding(.top, next == nil && group.title == groups.first?.title ? 4 : 20)
+                        .padding(.bottom, 8)
                     VStack(spacing: 10) {
                         ForEach(group.items, id: \.id) { collection in
                             CollectionCard(collection: collection, menu: { menu(collection) })
@@ -140,7 +144,15 @@ struct CollectionsView: View {
         let rest = mine.filter { $0.id != id }
         let order: [(TripStatus, String)] = [(.inProgress, "On now"), (.upcoming, "Planned"), (.completed, "Past"), (.folder, "Folders")]
         return order.compactMap { status, title in
-            let items = rest.filter { $0.status == status }
+            // In date order, as the headings promise: the server sends them by last update, which
+            // put a 2025 trip between two from 2026.
+            let items = rest.filter { $0.status == status }.sorted { a, b in
+                switch status {
+                case .completed: (a.endDate ?? a.startDate ?? "") > (b.endDate ?? b.startDate ?? "")
+                case .upcoming, .inProgress: (a.startDate ?? "~") < (b.startDate ?? "~")
+                default: a.name.localizedCaseInsensitiveCompare(b.name) == .orderedAscending
+                }
+            }
             return items.isEmpty ? nil : Group(title: title, items: items)
         }
     }

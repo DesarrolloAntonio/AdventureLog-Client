@@ -73,7 +73,7 @@ struct PlaceView: View {
 
     private func content(_ place: Location) -> some View {
             VStack(alignment: .leading, spacing: 0) {
-                tags(place).padding(.horizontal, 4)
+                tags(place)
 
                 if !place.images.isEmpty {
                     PhotoCarousel(urls: place.images.map(\.image))
@@ -122,7 +122,7 @@ struct PlaceView: View {
     private func tags(_ place: Location) -> some View {
         FlowTags {
             if let rating = place.rating?.doubleValue, rating > 0 {
-                ToneTag(text: rating.formatted(.number.precision(.fractionLength(1))), tone: .amber, systemImage: "star.fill")
+                ToneTag(text: rating.formatted(.number.precision(.fractionLength(0...1))), tone: .amber, systemImage: "star.fill")
             }
             if let category = place.category {
                 ToneTag(text: category.displayName, tone: categoryTone(category.name))

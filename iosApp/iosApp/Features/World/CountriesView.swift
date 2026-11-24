@@ -31,7 +31,8 @@ struct CountriesView: View {
                 } else {
                     // Under the large title rather than as the bar's subtitle, which the switch in
                     // the bar would show a second time.
-                    Text(subtitle).font(.subheadline).foregroundStyle(Theme.muted).padding(.horizontal, 4)
+                    // Sized and placed like the bar subtitle on the other tabs, so the two read the same.
+                    Text(subtitle).font(.footnote).foregroundStyle(Theme.muted).padding(.top, -6)
                     hero.padding(.top, 14)
                     continents
                     visitedList

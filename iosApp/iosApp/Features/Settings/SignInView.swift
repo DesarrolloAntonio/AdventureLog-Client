@@ -92,7 +92,8 @@ struct SignInView: View {
         .scrollDismissesKeyboard(.interactively)
         .mistBackground()
         .navigationTitle("Sign-in & email")
-        .navigationBarTitleDisplayMode(.inline)
+        // Large, like People beside it in Settings.
+        .navigationBarTitleDisplayMode(.large)
         .confirmationDialog("Remove \(removing?.email ?? "")?", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }),
                             titleVisibility: .visible) {
             Button("Remove", role: .destructive) { if let removing { vm.removeEmail(address: removing.email) } }

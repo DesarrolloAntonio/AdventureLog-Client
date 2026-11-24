@@ -67,7 +67,7 @@ struct CountryView: View {
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text("\(done)").font(.system(size: 40, weight: .heavy)).monospacedDigit()
-                Text("of \(state.regions.count) · \(share.formatted(.percent.precision(.fractionLength(0)))) of \(country.name)")
+                Text("of \(state.regions.count) · \(share.formatted(.percent.precision(.fractionLength(0...1)))) of \(country.name)")
                     .font(.subheadline.weight(.semibold))
             }
             ProgressView(value: share)

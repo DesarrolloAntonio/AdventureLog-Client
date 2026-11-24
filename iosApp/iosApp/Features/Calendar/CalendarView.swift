@@ -106,6 +106,8 @@ struct CalendarView: View {
                 Text(month.formatted(.dateTime.month(.wide).year()))
                     .font(.title3.weight(.bold))
                     .foregroundStyle(Theme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 Spacer()
                 Button { shift(-1) } label: { Image(systemName: "chevron.left") }
                     .accessibilityLabel("Previous month")
@@ -127,6 +129,9 @@ struct CalendarView: View {
             }
         }
         .padding(14)
+        // A month is seven columns whatever the text size; past this the days were cut to "…".
+        // The day's own list below carries the full size.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .mistCard()
         .gesture(DragGesture(minimumDistance: 30).onEnded { value in
             if abs(value.translation.width) > abs(value.translation.height) { shift(value.translation.width < 0 ? 1 : -1) }
@@ -153,7 +158,7 @@ struct CalendarView: View {
                 Text("\(cal.component(.day, from: day))")
                     .font(.callout.weight(isToday || isSelected ? .bold : .regular))
                     .monospacedDigit()
-                    .foregroundStyle(isSelected ? .white : onTrip ? Theme.Tone.teal.ink : inMonth ? Theme.ink : Theme.faint.opacity(0.6))
+                    .foregroundStyle(isSelected ? Theme.onAccent : onTrip ? Theme.Tone.teal.ink : inMonth ? Theme.ink : Theme.faint.opacity(0.6))
                     .frame(width: 34, height: 34)
                     .background {
                         if isSelected { Circle().fill(Theme.accent) }

@@ -233,7 +233,7 @@ private struct Chip: View {
         Button(action: action) {
             Text(title)
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(selected ? .white : Theme.ink)
+                .foregroundStyle(selected ? Theme.onAccent : Theme.ink)
                 .padding(.horizontal, 14)
                 .frame(minHeight: 34)
                 .background {
@@ -272,9 +272,6 @@ private struct PlaceRow: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.bottom, 12)
-                    .overlay(alignment: .bottom) {
-                        if !last { Rectangle().fill(Theme.separator).frame(height: 0.5) }
-                    }
                 }
                 .contentShape(.rect)
             }
@@ -297,12 +294,17 @@ private struct PlaceRow: View {
         .padding(.leading, 12)
         .padding(.trailing, 6)
         .padding(.top, 12)
+        // Under the text and the menu both, to the card's edge, as on the other lists; under
+        // the text alone it stopped short of the menu.
+        .overlay(alignment: .bottom) {
+            if !last { Rectangle().fill(Theme.separator).frame(height: 0.5).padding(.leading, 72) }
+        }
     }
 
     private var subtitle: String {
         let whereabouts = whereabouts(place)
         guard let rating = place.rating?.doubleValue, rating > 0 else { return whereabouts }
-        let stars = "★ " + rating.formatted(.number.precision(.fractionLength(1)))
+        let stars = "★ " + rating.formatted(.number.precision(.fractionLength(0...1)))
         return whereabouts.isEmpty ? stars : "\(whereabouts) · \(stars)"
     }
 

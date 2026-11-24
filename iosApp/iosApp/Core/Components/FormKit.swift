@@ -149,7 +149,7 @@ struct ChoiceChips: View {
                     Button { selection = option.value } label: {
                         Text(option.label)
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(on ? .white : Theme.ink)
+                            .foregroundStyle(on ? Theme.onAccent : Theme.ink)
                             .padding(.horizontal, 14)
                             .frame(minHeight: 34)
                             .background { if on { Capsule().fill(Theme.accent) } }

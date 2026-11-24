@@ -174,7 +174,7 @@ struct TripView: View {
             VStack(spacing: 0) {
                 ForEach(Array(unplanned.enumerated()), id: \.element.id) { index, place in
                     NavigationLink(value: place) {
-                        TripRow(kind: .location, title: place.name, subtitle: whereabouts(place),
+                        TripRow(kind: .location, title: place.name, subtitle: whereabouts(place), showsKind: false,
                                 last: index == unplanned.count - 1, chevron: true)
                     }
                     .buttonStyle(.plain)
@@ -214,7 +214,7 @@ struct TripView: View {
                 VStack(spacing: 0) {
                     ForEach(Array(collection.locations.enumerated()), id: \.element.id) { index, place in
                         NavigationLink(value: place) {
-                            TripRow(kind: .location, title: place.name, subtitle: whereabouts(place),
+                            TripRow(kind: .location, title: place.name, subtitle: whereabouts(place), showsKind: false,
                                     last: index == collection.locations.count - 1, chevron: true)
                         }
                         .buttonStyle(.plain)
@@ -394,6 +394,7 @@ private struct TripRow: View {
     let kind: ItineraryItemKind
     let title: String
     let subtitle: String?
+    var showsKind = true
     let last: Bool
     let chevron: Bool
 
@@ -403,7 +404,7 @@ private struct TripRow: View {
             HStack {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title).foregroundStyle(Theme.ink)
-                    Text([kindName, subtitle].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                    Text([showsKind ? kindName : nil, subtitle].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
                         .font(.footnote).foregroundStyle(Theme.muted).lineLimit(2)
                 }
                 Spacer(minLength: 8)
