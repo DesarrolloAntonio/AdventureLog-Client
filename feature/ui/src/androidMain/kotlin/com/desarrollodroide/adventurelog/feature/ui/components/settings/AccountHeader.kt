@@ -48,7 +48,8 @@ fun AccountHeader(
     user: UserDetails?,
     primaryEmail: String?,
     serverUrl: String,
-    onClick: () -> Unit,
+    /** Null where something else on screen already leads to the same place: no tap, no icon. */
+    onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
     actionIcon: ImageVector = Icons.Outlined.Edit,
     actionDescription: String = "Edit your name and username"
@@ -66,7 +67,7 @@ fun AccountHeader(
             containerColor = MaterialTheme.colorScheme.inverseSurface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
+        modifier = modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(20.dp),
@@ -105,13 +106,15 @@ fun AccountHeader(
                     )
                 }
             }
-            Spacer(Modifier.width(8.dp))
-            Icon(
-                imageVector = actionIcon,
-                contentDescription = actionDescription,
-                tint = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
-                modifier = Modifier.size(24.dp)
-            )
+            if (onClick != null) {
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    imageVector = actionIcon,
+                    contentDescription = actionDescription,
+                    tint = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }

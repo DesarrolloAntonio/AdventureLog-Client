@@ -93,12 +93,8 @@ fun ProfileMenu(
                     user = user,
                     primaryEmail = user?.email,
                     serverUrl = serverUrl,
-                    actionIcon = Icons.Outlined.Settings,
-                    actionDescription = "Open settings",
-                    onClick = {
-                        open = false
-                        onSettings()
-                    },
+                    // Settings is the row just below; the card's own gear opened the same screen.
+                    onClick = null,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
