@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -83,6 +85,9 @@ fun CountryDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: CountryDetailViewModel = koinViewModel()
 ) {
+    // It brings its own header (Back, the stamp, the name), as a trip and a place do: the shell's
+    // "World" title stood over it as a second heading, and its toolbar over the region list.
+    if (LocalShellActionHost.current != null) HideShellChrome()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(countryCode) { viewModel.load(countryCode) }

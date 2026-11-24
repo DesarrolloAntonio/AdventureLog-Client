@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.views
 
+import androidx.compose.foundation.shape.CircleShape
+import com.desarrollodroide.adventurelog.feature.ui.components.bleedHorizontally
 import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -149,7 +151,8 @@ private fun SearchCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    // Out to the card's edge, not sliced at its 20dp padding ("Sacsayhuamá").
+                    modifier = Modifier.bleedHorizontally(20.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     anchors.forEach { place ->
@@ -184,7 +187,8 @@ private fun SearchCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                // Out to the card's edge, not sliced at its 20dp padding ("Sacsayhuamá").
+                    modifier = Modifier.bleedHorizontally(20.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 RecommendationCategory.entries.forEach { category ->
@@ -202,7 +206,8 @@ private fun SearchCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                // Out to the card's edge, not sliced at its 20dp padding ("Sacsayhuamá").
+                    modifier = Modifier.bleedHorizontally(20.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Radii.forEach { metres ->
@@ -346,7 +351,7 @@ private fun PickChip(selected: Boolean, onClick: () -> Unit, label: String) {
         leadingIcon = if (selected) {
             { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
         } else null,
-        shape = RoundedCornerShape(10.dp),
+        shape = CircleShape, // pills, as every other choice chip
         colors = FilterChipDefaults.filterChipColors(
             selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
