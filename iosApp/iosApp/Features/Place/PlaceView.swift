@@ -184,7 +184,7 @@ struct PlaceView: View {
                 if !collections.isEmpty {
                     if lastVisit != nil { RowSeparator() }
                     NavigationLink {
-                        if collections.count == 1 { TripView(collectionId: collections[0].id, name: collections[0].name, subtitle: dates(collections[0])) } else { ComingSoon(title: "Collections") }
+                        if collections.count == 1 { TripView(collectionId: collections[0].id, name: collections[0].name, subtitle: dates(collections[0])) } else { PlaceCollections(placeName: loaded?.name ?? name, collections: collections) }
                     } label: {
                         DetailRow(systemImage: "rectangle.stack", tone: .mint, title: collections.count == 1 ? "Collection" : "Collections") {
                             HStack(spacing: 6) {
@@ -286,5 +286,46 @@ private struct DetailRow<Value: View>: View {
         .frame(minHeight: 52)
         .contentShape(.rect)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// The collections a place is in, when it is in more than one.
+private struct PlaceCollections: View {
+    let placeName: String
+    let collections: [UltraSlimCollection]
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(Array(collections.enumerated()), id: \.element.id) { index, collection in
+                    NavigationLink {
+                        TripView(collectionId: collection.id, name: collection.name, subtitle: dates(collection))
+                    } label: {
+                        HStack(spacing: 12) {
+                            ToneBadge(systemImage: "rectangle.stack", tone: .mint)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(collection.name).foregroundStyle(Theme.ink)
+                                Text(dates(collection)).font(.footnote).foregroundStyle(Theme.muted)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.footnote.weight(.bold)).foregroundStyle(Theme.glyph)
+                        }
+                        .padding(.horizontal, 14)
+                        .frame(minHeight: 58)
+                        .overlay(alignment: .bottom) {
+                            if index < collections.count - 1 { Rectangle().fill(Theme.separator).frame(height: 0.5).padding(.leading, 60) }
+                        }
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .mistCard()
+            .padding(16)
+        }
+        .mistBackground()
+        .navigationTitle("Collections")
+        .navigationSubtitle(placeName)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

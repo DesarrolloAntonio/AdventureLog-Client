@@ -123,7 +123,7 @@ struct HomeView: View {
             QuickTile(title: "Visited", systemImage: "checkmark", tone: .green, count: stats.visitedLocationCount) { open(.places) }
             QuickTile(title: "Planned", systemImage: "mappin", tone: .coral, count: stats.locationCount - stats.visitedLocationCount) { open(.places) }
             QuickTile(title: "Countries", systemImage: "globe", tone: .blue, count: stats.visitedCountryCount) { open(.world) }
-            NavigationLink { ComingSoon(title: "Calendar") } label: {
+            NavigationLink { CalendarView() } label: {
                 QuickTileLabel(title: "Calendar", systemImage: "calendar", tone: .amber, count: nil)
             }
             .buttonStyle(.plain)
@@ -304,7 +304,12 @@ private struct RecentRow: View {
 
     private var caption: String {
         let latest = place.visits.compactMap { $0.startDate.flatMap(DayRange.day) }.max()
-        let when = latest.map { $0.formatted(.dateTime.day().month(.abbreviated)) }
+        // The year only when it isn't this one: "9 Nov" for a visit a year ago read as last fortnight.
+        let when = latest.map {
+            Calendar.current.isDate($0, equalTo: .now, toGranularity: .year)
+                ? $0.formatted(.dateTime.day().month(.abbreviated))
+                : $0.formatted(.dateTime.day().month(.abbreviated).year())
+        }
         return [whereabouts(place), when].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 }

@@ -6,15 +6,16 @@ package com.desarrollodroide.adventurelog.feature.settings.ui.components
  * still reading "Effective as of [Insert Date Here]" that said the app reached no third party.
  * Every factual line was checked against the code that day; change it when what the app does
  * changes - the permissions, the services it contacts, what it keeps on the phone.
+ * Public: the SwiftUI Terms and privacy screen shows the same texts.
  */
-internal data class LegalSection(val heading: String, val body: String)
+data class LegalSection(val heading: String, val body: String)
 
-internal data class LegalText(val title: String, val effective: String, val sections: List<LegalSection>)
+data class LegalText(val title: String, val effective: String, val sections: List<LegalSection>)
 
-internal const val LEGAL_EFFECTIVE = "Effective 6 October 2026."
-internal const val LEGAL_CONTACT = "desarrollodroide@gmail.com"
+const val LEGAL_EFFECTIVE = "Effective 6 October 2026."
+const val LEGAL_CONTACT = "desarrollodroide@gmail.com"
 
-internal val TermsOfUse = LegalText(
+val TermsOfUse = LegalText(
     title = "Terms of Use",
     effective = LEGAL_EFFECTIVE,
     sections = listOf(
@@ -56,7 +57,7 @@ internal val TermsOfUse = LegalText(
     )
 )
 
-internal val PrivacyPolicy = LegalText(
+val PrivacyPolicy = LegalText(
     title = "Privacy Policy",
     effective = LEGAL_EFFECTIVE,
     sections = listOf(

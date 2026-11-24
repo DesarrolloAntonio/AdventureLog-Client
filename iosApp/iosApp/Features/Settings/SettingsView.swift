@@ -51,7 +51,7 @@ struct SettingsView: View {
                 }
 
                 group("Account") {
-                    NavigationLink { ComingSoon(title: "Sign-in & email") } label: {
+                    NavigationLink { SignInView() } label: {
                         SettingRow(systemImage: "envelope", tone: .blue, title: "Sign-in & email", chevron: true)
                     }
                     .buttonStyle(.plain)
@@ -85,7 +85,7 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     Divider().padding(.leading, 56)
-                    NavigationLink { ComingSoon(title: "Terms & privacy") } label: {
+                    NavigationLink { LegalView() } label: {
                         SettingRow(systemImage: "doc.text", tone: .mint, title: "Terms & privacy", chevron: true)
                     }
                     .buttonStyle(.plain)

@@ -23,20 +23,9 @@ struct MainTabView: View {
                 NavigationStack { WorldView() }
             }
             Tab(value: .search, role: .search) {
-                NavigationStack { ComingSoon(title: "Search") }
+                NavigationStack { SearchView() }
             }
         }
         .tint(Theme.accent)
-    }
-}
-
-/// A screen still to be built in this phase.
-struct ComingSoon: View {
-    let title: String
-    var body: some View {
-        ContentUnavailableView(title, systemImage: "hammer", description: Text("Coming in the next steps of the iOS app."))
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .mistBackground()
-            .navigationTitle(title)
     }
 }
