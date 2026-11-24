@@ -57,8 +57,7 @@ fun WorldPane(
 ) {
     val backStack = rememberNavBackStack(worldNavConfiguration, WorldList)
     val listDetail = rememberQuietListDetailSceneStrategy<NavKey>()
-    val twoPanes = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass !=
-        WindowWidthSizeClass.COMPACT
+    val twoPanes = rememberShowsTwoPanes()
     val selected = (backStack.lastOrNull() as? CountryDetail)?.countryCode
 
     fun open(code: String) {

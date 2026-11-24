@@ -35,3 +35,14 @@ internal fun <T : Any> rememberQuietListDetailSceneStrategy(): ListDetailSceneSt
     rememberListDetailSceneStrategy(
         directive = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2()).withoutAutoFocus()
     )
+
+/**
+ * Whether the list-detail strategy is showing both panes right now - read from the same directive
+ * the strategy lays out with. "Wider than compact" is not the same thing: a tablet held upright
+ * (about 700dp) is medium width yet gets one pane, and screens that thought otherwise opened the
+ * first item over their list with no Back arrow to leave it.
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+internal fun rememberShowsTwoPanes(): Boolean =
+    calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2()).maxHorizontalPartitions > 1

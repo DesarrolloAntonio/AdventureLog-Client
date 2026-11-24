@@ -87,8 +87,7 @@ fun PlacesPane(
     // The detail is a pane beside the list, not a screen on top of it, whenever the window is
     // wide enough for the strategy to show both - and a back arrow pointing at a list that never
     // went anywhere is just a wrong button.
-    val twoPanes = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass !=
-        WindowWidthSizeClass.COMPACT
+    val twoPanes = rememberShowsTwoPanes()
 
     NavDisplay(
         modifier = modifier,

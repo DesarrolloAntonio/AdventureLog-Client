@@ -86,8 +86,7 @@ fun CollectionsPane(
     val backStack = rememberNavBackStack(collectionsNavConfiguration, CollectionsList)
     val listDetail = rememberQuietListDetailSceneStrategy<NavKey>()
 
-    val twoPanes = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass !=
-        WindowWidthSizeClass.COMPACT
+    val twoPanes = rememberShowsTwoPanes()
 
     NavDisplay(
         modifier = modifier,
