@@ -16,6 +16,7 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import com.desarrollodroide.adventurelog.core.domain.repository.UserRepository
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditChecklistViewModel
@@ -109,6 +110,13 @@ class IosViewModelOwner : ViewModelStoreOwner, SavedStateRegistryOwner {
         val vm = locationsViewModel()
         PagingListPresenter(vm.adventuresPagingData, vm.viewModelScope)
     } as PagingListPresenter<Location>
+
+    /** The collections list (the Mine tab), paged; one per owner, in the CollectionsViewModel's scope. */
+    @Suppress("UNCHECKED_CAST")
+    fun collectionsPresenter(): PagingListPresenter<UltraSlimCollection> = presenters.getOrPut("collections") {
+        val vm = collectionsViewModel()
+        PagingListPresenter(vm.collectionsPagingData, vm.viewModelScope)
+    } as PagingListPresenter<UltraSlimCollection>
 
     /** The signed-in user, or null once signed out or the session is lost: the app's root gate. */
     fun sessionFlow(): Flow<UserDetails?> = KoinPlatform.getKoin().get<UserRepository>().getUserSession()

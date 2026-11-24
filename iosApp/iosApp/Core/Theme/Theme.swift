@@ -212,6 +212,8 @@ struct ToneTag: View {
         .padding(.horizontal, 8)
         .frame(minHeight: 22)
         .background(tone.fill, in: .rect(cornerRadius: 7, style: .continuous))
+        // A one-word tag: past this it breaks mid-word ("Com-pleted").
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
     }
 }
 

@@ -176,7 +176,7 @@ struct PlaceView: View {
                 if !collections.isEmpty {
                     if lastVisit != nil { RowSeparator() }
                     NavigationLink {
-                        ComingSoon(title: collections.count == 1 ? collections[0].name : "Collections")
+                        if collections.count == 1 { TripView(collectionId: collections[0].id, name: collections[0].name, subtitle: dates(collections[0])) } else { ComingSoon(title: "Collections") }
                     } label: {
                         DetailRow(systemImage: "rectangle.stack", tone: .mint, title: collections.count == 1 ? "Collection" : "Collections") {
                             HStack(spacing: 6) {

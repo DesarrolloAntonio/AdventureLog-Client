@@ -17,7 +17,7 @@ struct MainTabView: View {
                 NavigationStack { PlacesView() }
             }
             Tab("Collections", systemImage: "rectangle.stack", value: .collections) {
-                NavigationStack { ComingSoon(title: "Collections") }
+                NavigationStack { CollectionsView() }
             }
             Tab("World", systemImage: "globe", value: .world) {
                 NavigationStack { WorldView() }
