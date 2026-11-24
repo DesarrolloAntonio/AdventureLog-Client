@@ -4,6 +4,14 @@ import ComposeApp
 /// The app's gate: Login until there is a session, then the tabs. It watches the session itself,
 /// so a session lost anywhere (signed out, expired on the server) brings Login back.
 struct RootView: View {
+    /// `-showLogin` on a debug build shows Login over a live session, so the screen can be looked
+    /// at without signing out.
+    #if DEBUG
+    private static let showLoginForReview = ProcessInfo.processInfo.arguments.contains("-showLogin")
+    #else
+    private static let showLoginForReview = false
+    #endif
+
     @StateObject private var host = ViewModelHost()
     @State private var user: UserDetails?
     @State private var checked = false
@@ -12,7 +20,7 @@ struct RootView: View {
         Group {
             if !checked {
                 ProgressView()
-            } else if user == nil {
+            } else if user == nil || Self.showLoginForReview {
                 LoginView()
             } else {
                 MainTabView()

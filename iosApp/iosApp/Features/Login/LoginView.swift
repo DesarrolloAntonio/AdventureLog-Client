@@ -1,8 +1,8 @@
 import SwiftUI
 import ComposeApp
 
-/// Sign-in, as the iOS-Login artboard draws it: a fjord at sunset behind everything, the app's
-/// glass tile and serif name at the top, and the form on a glass card at the bottom.
+/// Sign-in, as the Mist-Login artboard draws it: the app's teal tile and name over the mist, and
+/// the form on a frosted card: "Connect to server", three fields, a teal Sign in.
 ///
 /// The fields keep their text here, in `@State`, and push each change to the ViewModel; they never
 /// show the value echoed back from its StateFlow, which dropped characters when typed fast.
@@ -18,11 +18,11 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            SunsetFjord().ignoresSafeArea()
+            MistBackground()
 
             switch onEnum(of: state) {
             case .checkingSession:
-                ProgressView().tint(.white).controlSize(.large)
+                ProgressView().controlSize(.large)
             default:
                 content
             }
@@ -44,30 +44,44 @@ struct LoginView: View {
     }
 
     private var content: some View {
-        VStack(spacing: 0) {
-            header.padding(.top, 56)
-            Spacer()
-            card
-                .padding(.horizontal, 14)
-                .padding(.bottom, 8)
+        ScrollView {
+            VStack(spacing: 0) {
+                header.padding(.top, 64)
+                card.padding(.top, 34)
+                Label("Your data stays on your server", systemImage: "lock.shield.fill")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.muted)
+                    .padding(.top, 28)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 24)
+            .frame(maxWidth: 480)
+            .frame(maxWidth: .infinity)
         }
+        .scrollBounceBehavior(.basedOnSize)
     }
 
     private var header: some View {
-        VStack(spacing: 6) {
-            Image(systemName: "map")
-                .font(.system(size: 34, weight: .semibold))
+        VStack(spacing: 4) {
+            Image(systemName: "mountain.2.fill")
+                .font(.system(size: 36, weight: .semibold))
                 .foregroundStyle(.white)
-                .frame(width: 72, height: 72)
-                .glassEffect(.regular, in: .rect(cornerRadius: 22))
+                .frame(width: 84, height: 84)
+                .background { HeroGlow().clipShape(.rect(cornerRadius: 22)) }
+                .heroCard(radius: 22)
+                .accessibilityHidden(true)
             Text("AdventureLog")
-                .font(Theme.display(40))
-                .foregroundStyle(.white)
-                .padding(.top, 12)
+                .font(Theme.title())
+                .tracking(-0.5)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .foregroundStyle(Theme.ink)
+                .padding(.top, 14)
             Text("Your travels, on your own server.")
-                .font(.body)
-                .foregroundStyle(.white.opacity(0.9))
+                .font(.subheadline)
+                .foregroundStyle(Theme.muted)
         }
+        .multilineTextAlignment(.center)
     }
 
     private var isLoading: Bool {
@@ -86,69 +100,69 @@ struct LoginView: View {
     }
 
     private var card: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Server").font(.footnote.weight(.semibold)).foregroundStyle(.white).padding(.leading, 6)
-                    .shadow(color: .black.opacity(0.25), radius: 2)
-                FieldRow(systemImage: "globe") {
-                    TextField("https://your-server", text: $server)
-                        .textContentType(.URL)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .accessibilityIdentifier("server")
-                }
-                .background(.white.opacity(0.9), in: .rect(cornerRadius: 16))
+        VStack(spacing: 10) {
+            VStack(spacing: 2) {
+                Text("Connect to server").font(.headline).foregroundStyle(Theme.ink)
+                Text("Sign in with your AdventureLog account").font(.footnote).foregroundStyle(Theme.muted)
             }
+            .multilineTextAlignment(.center)
+            .padding(.bottom, 6)
 
-            VStack(spacing: 0) {
-                FieldRow(systemImage: "person") {
-                    TextField("Username", text: $username)
-                        .textContentType(.username)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .accessibilityIdentifier("username")
-                }
-                Divider().padding(.leading, 44)
-                FieldRow(systemImage: "lock") {
-                    SecureField("Password", text: $password)
-                        .textContentType(.password)
-                        .accessibilityIdentifier("password")
-                        .onSubmit(signIn)
-                }
+            FieldRow(systemImage: "link") {
+                TextField("https://your-server", text: $server)
+                    .textContentType(.URL)
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .accessibilityLabel("Server")
+                    .accessibilityIdentifier("server")
             }
-            .background(.white.opacity(0.9), in: .rect(cornerRadius: 16))
+            FieldRow(systemImage: "person") {
+                TextField("Username", text: $username)
+                    .textContentType(.username)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .accessibilityIdentifier("username")
+            }
+            FieldRow(systemImage: "lock") {
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+                    .accessibilityIdentifier("password")
+                    .onSubmit(signIn)
+            }
 
             if let errorText {
-                Text(errorText)
+                Label(errorText, systemImage: "exclamationmark.circle.fill")
                     .font(.footnote.weight(.medium))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
+                    .foregroundStyle(Theme.Tone.coral.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
                     .accessibilityIdentifier("loginError")
             }
 
             Button(action: signIn) {
                 ZStack {
-                    Text("Sign In").opacity(isLoading ? 0 : 1)
+                    Text("Sign in").opacity(isLoading ? 0 : 1)
                     if isLoading { ProgressView().tint(.white) }
                 }
                 .font(.headline)
-                .frame(maxWidth: .infinity, minHeight: 54)
+                .frame(maxWidth: .infinity, minHeight: 50)
+                .background { HeroGlow().clipShape(.rect(cornerRadius: 16)) }
+                .heroCard(radius: 16)
             }
-            .buttonStyle(.glassProminent)
-            .tint(Theme.accent)
+            .buttonStyle(.plain)
             .disabled(!canSignIn)
-            .padding(.top, 4)
+            .opacity(canSignIn || isLoading ? 1 : 0.55)
+            .padding(.top, 6)
             .accessibilityIdentifier("signIn")
 
             // The same guide Settings links to: the upstream AdventureLog project.
             Link("How do I set up a server?", destination: URL(string: "https://github.com/seanmorley15/AdventureLog")!)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .font(.subheadline.weight(.semibold))
+                .frame(minHeight: 40)
         }
-        .padding(EdgeInsets(top: 22, leading: 18, bottom: 14, trailing: 18))
-        .glassEffect(.regular, in: .rect(cornerRadius: 36))
+        .padding(EdgeInsets(top: 20, leading: 18, bottom: 12, trailing: 18))
+        .mistCard(radius: 26)
         .onChange(of: server) { _, v in vm.updateServerUrl(newUrl: v) }
         .onChange(of: username) { _, v in vm.updateUserName(newUserName: v) }
         .onChange(of: password) { _, v in vm.updatePassword(newPassword: v) }
@@ -160,7 +174,7 @@ struct LoginView: View {
     }
 }
 
-/// One field of the form: its icon, then the control, at the canvas's 50-point height.
+/// One field of the form: its icon, then the control, on a near-white rounded box 46 points high.
 private struct FieldRow<Content: View>: View {
     let systemImage: String
     @ViewBuilder let content: Content
@@ -168,55 +182,16 @@ private struct FieldRow<Content: View>: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: systemImage)
-                .foregroundStyle(Color(white: 0.39))
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Theme.muted)
                 .frame(width: 20)
             content
-                .foregroundStyle(.black)
+                .foregroundStyle(Theme.ink)
                 .tint(Theme.accent)
         }
-        .padding(.horizontal, 14)
-        .frame(height: 50)
-        // The fields are light in both themes, as the artboard draws them; a dark scheme would
-        // paint white placeholders on white.
-        .environment(\.colorScheme, .light)
-    }
-}
-
-/// The artboard's illustration: a dusk sky over a lake, a low sun and its reflection.
-private struct SunsetFjord: View {
-    var body: some View {
-        GeometryReader { geo in
-            let h = geo.size.height, w = geo.size.width
-            ZStack(alignment: .top) {
-                LinearGradient(
-                    stops: [
-                        .init(color: Color(red: 0.24, green: 0.36, blue: 0.54), location: 0),
-                        .init(color: Color(red: 0.85, green: 0.60, blue: 0.53), location: 0.45),
-                        .init(color: Color(red: 0.96, green: 0.81, blue: 0.66), location: 0.62),
-                    ],
-                    startPoint: .top, endPoint: .bottom
-                )
-                RadialGradient(
-                    colors: [Color(red: 1, green: 0.95, blue: 0.84), Color(red: 1, green: 0.88, blue: 0.71).opacity(0)],
-                    center: .center, startRadius: 0, endRadius: w * 0.23
-                )
-                .frame(width: w * 0.46, height: w * 0.46)
-                .position(x: w * 0.69, y: h * 0.557)
-                Circle()
-                    .fill(Color(red: 1, green: 0.95, blue: 0.87))
-                    .frame(width: w * 0.113)
-                    .position(x: w * 0.69, y: h * 0.557)
-                LinearGradient(
-                    colors: [Color(red: 0.37, green: 0.50, blue: 0.60), Color(red: 0.08, green: 0.13, blue: 0.18)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: h * 0.36)
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                Rectangle()
-                    .fill(Color(red: 0.97, green: 0.80, blue: 0.65).opacity(0.4))
-                    .frame(width: w * 0.041, height: h * 0.095)
-                    .position(x: w * 0.69, y: h * 0.69)
-            }
-        }
+        .padding(.horizontal, 12)
+        .frame(minHeight: 46)
+        .background(Color(light: 0xFFFFFF, dark: 0x1B262C).opacity(0.85), in: .rect(cornerRadius: Theme.Radius.field, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.field, style: .continuous).strokeBorder(Theme.ink.opacity(0.08)))
     }
 }

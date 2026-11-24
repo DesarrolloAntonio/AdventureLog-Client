@@ -1,8 +1,8 @@
 import SwiftUI
 import ComposeApp
 
-/// Home, as the iOS-Home artboard draws it: the next trip's photo filling the top with its name
-/// in serif over it, then a sheet rising over the photo with the library's three counts and the
+/// Home, as the Mist-Home artboard draws it: the library in one line under the app's name, a
+/// search field, the next trip as a teal card counting the days down, four quick ways in, and the
 /// places visited most recently.
 struct HomeView: View {
     let open: (AppTab) -> Void
@@ -11,12 +11,8 @@ struct HomeView: View {
     @State private var state: HomeUiState = HomeUiStateLoading.shared
     @State private var user: UserDetails?
     @State private var showAccount = false
+    @State private var creating = false
     @Environment(\.dynamicTypeSize) private var typeSize
-
-    /// At the accessibility sizes rows become columns, so labels wrap instead of truncating.
-    private var stacked: AnyLayout {
-        typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(spacing: 10))
-    }
 
     private var vm: HomeViewModel { host.owner.homeViewModel() }
 
@@ -24,7 +20,7 @@ struct HomeView: View {
         Group {
             switch onEnum(of: state) {
             case .loading:
-                ProgressView().controlSize(.large)
+                ProgressView().controlSize(.large).frame(maxWidth: .infinity, maxHeight: .infinity)
             case .error(let e):
                 ContentUnavailableView {
                     Label("Couldn't load home", systemImage: "wifi.exclamationmark")
@@ -34,11 +30,26 @@ struct HomeView: View {
                     Button("Try again") { vm.loadDashboard() }.buttonStyle(.glassProminent)
                 }
             case .success(let s):
-                content(s)
+                content(s.dashboard)
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
-        .background(Color(.systemGroupedBackground))
+        .mistBackground()
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button { creating = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel("New place")
+                Button { showAccount = true } label: {
+                    Text(initials)
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(Theme.accent)
+                        .frame(width: 32, height: 32)
+                        .background(Theme.Tone.mint.fill, in: .circle)
+                }
+                .accessibilityLabel("Account and settings")
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+        .navigationDestination(isPresented: $creating) { ComingSoon(title: "New Place") }
         .task { for await s in vm.uiState { state = s } }
         .task { for await u in vm.userDetails { user = u } }
         .sheet(isPresented: $showAccount) {
@@ -46,84 +57,99 @@ struct HomeView: View {
         }
     }
 
-    private func content(_ s: HomeUiStateSuccess) -> some View {
-        let dashboard = s.dashboard
-        let trip = dashboard.activeTrip ?? dashboard.upcomingTrips.first
-        return ScrollView {
-            VStack(spacing: 0) {
-                Hero(
-                    trip: trip,
-                    isActive: dashboard.activeTrip != nil,
-                    greetingName: s.userName,
-                    // With no trip ahead, the latest place's photo carries the top instead.
-                    fallbackPhoto: dashboard.recentLocations.first.flatMap(primaryPhoto)
-                )
-                .overlay(alignment: .topTrailing) { heroButtons.padding(.horizontal, 16).padding(.top, 58) }
-                    .onTapGesture { if trip != nil { open(.collections) } }
+    private func content(_ dashboard: Dashboard) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                header(dashboard.stats)
 
-                VStack(alignment: .leading, spacing: 0) {
-                    stacked {
-                        StatTile(value: dashboard.stats.locationCount, label: "Places", systemImage: "mappin", tint: Theme.accent) { open(.places) }
-                        NavigationLink { ComingSoon(title: "World") } label: {
-                            StatTileLabel(value: dashboard.stats.visitedCountryCount, label: "Countries", systemImage: "globe", tint: .orange)
-                        }
-                        .buttonStyle(.plain)
-                        StatTile(value: dashboard.stats.tripsCount, label: "Collections", systemImage: "rectangle.stack", tint: .indigo) { open(.collections) }
+                Button { open(.search) } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass").font(.subheadline.weight(.semibold))
+                        Text("Search places and collections")
+                        Spacer()
                     }
-
-                    (typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline))) {
-                        Text("Recently Visited").font(Theme.display(24))
-                        Spacer(minLength: 0)
-                        Button("See All") { open(.places) }
-                    }
-                    .padding(.horizontal, 4)
-                    .padding(.top, 24)
-                    .padding(.bottom, 12)
-
-                    if dashboard.recentLocations.isEmpty {
-                        Text("Places you visit show up here.")
-                            .foregroundStyle(.secondary)
-                            .padding(.horizontal, 4)
-                    } else {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(dashboard.recentLocations, id: \.id) { place in
-                                    NavigationLink { PlaceView(placeId: place.id, name: place.name) } label: {
-                                        RecentPlaceCard(place: place)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                        }
-                        .padding(.horizontal, -16)
-                    }
+                    .foregroundStyle(Theme.muted)
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: 40)
+                    .mistCard(radius: Theme.Radius.field)
                 }
-                .padding(EdgeInsets(top: 22, leading: 16, bottom: 120, trailing: 16))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.systemGroupedBackground), in: UnevenRoundedRectangle(topLeadingRadius: 34, topTrailingRadius: 34))
-                .padding(.top, -28)
+                .buttonStyle(.plain)
+                .padding(.top, 16)
+
+                TripCard(trip: dashboard.activeTrip ?? dashboard.upcomingTrips.first, isActive: dashboard.activeTrip != nil) {
+                    open(.collections)
+                }
+                .padding(.top, 16)
+
+                SectionLabel(text: "Quick access").padding(.top, 20).padding(.bottom, 8)
+                quickAccess(dashboard.stats)
+
+                if !dashboard.recentLocations.isEmpty {
+                    HStack(alignment: .firstTextBaseline) {
+                        SectionLabel(text: "Recently visited")
+                        Button("See all") { open(.places) }
+                            .font(.footnote.weight(.semibold))
+                            .padding(.trailing, 6)
+                    }
+                    .padding(.top, 20)
+                    .padding(.bottom, 8)
+                    recent(dashboard.recentLocations)
+                }
             }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 120)
         }
-        .ignoresSafeArea(edges: .top)
         .refreshable { vm.refreshDashboard() }
     }
 
-    private var heroButtons: some View {
-        HStack(spacing: 10) {
-            Spacer()
-            Button { showAccount = true } label: {
-                Text(initials)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
-            }
-            // A fixed 44-point circle: two initials can't grow with the text.
-            .dynamicTypeSize(...DynamicTypeSize.xLarge)
-            // Tinted so white initials read over a pale sky as well as a dark sea.
-            .glassEffect(.regular.tint(.black.opacity(0.25)).interactive(), in: .circle)
-            .accessibilityLabel("Account")
+    private func header(_ stats: UserStats) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("YOUR TRAVELS")
+                .font(.caption.weight(.bold))
+                .tracking(1)
+                .foregroundStyle(Theme.muted)
+                // A small label over the title: past this it would outgrow the title itself.
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            Text("AdventureLog")
+                .font(Theme.title())
+                .tracking(-0.6)
+                // One word: shrunk to fit rather than broken across two lines.
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+                .foregroundStyle(Theme.ink)
+            Text("\(plural(stats.locationCount, "place")) · \(plural(stats.visitedCountryCount, "country", "countries")) · \(plural(stats.tripsCount, "collection"))")
+                .font(.subheadline)
+                .foregroundStyle(Theme.muted)
         }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func quickAccess(_ stats: UserStats) -> some View {
+        let columns = typeSize.isAccessibilitySize
+            ? [GridItem(.flexible())]
+            : [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+        return LazyVGrid(columns: columns, spacing: 10) {
+            QuickTile(title: "Visited", systemImage: "checkmark", tone: .green, count: stats.visitedLocationCount) { open(.places) }
+            QuickTile(title: "Planned", systemImage: "mappin", tone: .coral, count: stats.locationCount - stats.visitedLocationCount) { open(.places) }
+            QuickTile(title: "Countries", systemImage: "globe", tone: .blue, count: stats.visitedCountryCount) { open(.world) }
+            NavigationLink { ComingSoon(title: "Calendar") } label: {
+                QuickTileLabel(title: "Calendar", systemImage: "calendar", tone: .amber, count: nil)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func recent(_ places: [Location]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(places.prefix(5).enumerated()), id: \.element.id) { index, place in
+                NavigationLink { PlaceView(placeId: place.id, name: place.name, subtitle: whereabouts(place)) } label: {
+                    RecentRow(place: place, last: index == min(places.count, 5) - 1)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .mistCard()
     }
 
     private var initials: String {
@@ -134,152 +160,162 @@ struct HomeView: View {
     }
 }
 
-/// The top of Home: the trip's photo full-bleed, a glass pill saying when, its name in serif.
-private struct Hero: View {
-    let trip: UltraSlimCollection?
-    let isActive: Bool
-    let greetingName: String
-    let fallbackPhoto: String?
-
-    var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            RemoteImage(url: trip?.featuredImage ?? fallbackPhoto) {
-                LinearGradient(colors: [Color(red: 0.50, green: 0.74, blue: 0.88), Color(red: 0.06, green: 0.29, blue: 0.37)], startPoint: .top, endPoint: .bottom)
-            }
-            .frame(height: 440)
-            .frame(maxWidth: .infinity)
-            .clipped()
-            .overlay {
-                LinearGradient(colors: [.clear, .black.opacity(0.45)], startPoint: .center, endPoint: .bottom)
-            }
-
-            VStack(alignment: .leading, spacing: 6) {
-                if let trip {
-                    Label(when(trip), systemImage: isActive ? "location.fill" : "airplane")
-                        .font(.footnote.weight(.semibold))
-                        .padding(.horizontal, 12)
-                        .frame(height: 28)
-                        .glassEffect(.regular.tint(.black.opacity(0.2)), in: .capsule)
-                    Text(trip.name)
-                        .font(Theme.display(40))
-                        .lineLimit(2)
-                    Text(subtitle(trip))
-                        .font(.callout.weight(.medium))
-                        .opacity(0.92)
-                } else {
-                    Text("Hello, \(greetingName.isEmpty ? "traveller" : greetingName)")
-                        .font(Theme.display(40))
-                    Text("No trip planned yet")
-                        .font(.callout.weight(.medium))
-                        .opacity(0.92)
-                }
-            }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 52)
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private func when(_ trip: UltraSlimCollection) -> String {
-        if isActive { return "On this trip now" }
-        guard let days = trip.daysUntilStart?.intValue else { return "Next trip" }
-        switch days {
-        case ...0: return "Next trip · today"
-        case 1: return "Next trip · tomorrow"
-        default: return "Next trip · in \(days) days"
-        }
-    }
-
-    private func subtitle(_ trip: UltraSlimCollection) -> String {
-        let places = trip.adventureCount == 1 ? "1 place" : "\(trip.adventureCount) places"
-        guard let range = DayRange(start: trip.startDate, end: trip.endDate) else { return places }
-        return "\(range.text) · \(places)"
-    }
+private func plural(_ n: Int32, _ one: String, _ many: String? = nil) -> String {
+    n == 1 ? "1 \(one)" : "\(n) \(many ?? one + "s")"
 }
 
-/// One of the three counts: a coloured icon square, the number in rounded type, its label.
-private struct StatTile: View {
-    let value: Int32
-    let label: String
-    let systemImage: String
-    let tint: Color
+/// The next trip in teal: when it is, and how many days are left; or, on a trip, which day of it.
+private struct TripCard: View {
+    let trip: UltraSlimCollection?
+    let isActive: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            StatTileLabel(value: value, label: label, systemImage: systemImage, tint: tint)
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 7) {
+                    Image(systemName: "calendar")
+                    Text(eyebrow).lineLimit(2)
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.right").fontWeight(.bold)
+                }
+                .font(.caption.weight(.bold))
+                .tracking(0.9)
+                .foregroundStyle(.white.opacity(0.9))
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+
+                if let trip, let big = big(trip) {
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text(big)
+                            .font(.system(size: 44, weight: .heavy))
+                            .tracking(-1.5)
+                            .monospacedDigit()
+                        Text(detail(trip))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.92))
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(trip?.name ?? "Nothing planned yet").font(.title2.weight(.heavy))
+                        Text(trip == nil ? "Plan your next trip in Collections." : detail(trip!))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white.opacity(0.92))
+                    }
+                }
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background { HeroGlow().clipShape(.rect(cornerRadius: Theme.Radius.hero)) }
+            .heroCard()
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var eyebrow: String {
+        guard let trip else { return "YOUR NEXT TRIP" }
+        return (isActive ? "ON THIS TRIP · " : "NEXT TRIP · ") + trip.name.uppercased()
+    }
+
+    /// The big number: days to go, or the day of the trip it is.
+    private func big(_ trip: UltraSlimCollection) -> String? {
+        if isActive {
+            guard let start = trip.startDate.flatMap(DayRange.day) else { return nil }
+            let day = (Calendar.current.dateComponents([.day], from: start, to: .now).day ?? 0) + 1
+            return "\(max(day, 1))"
+        }
+        guard let days = trip.daysUntilStart?.intValue, days > 0 else { return nil }
+        return "\(days)"
+    }
+
+    private func detail(_ trip: UltraSlimCollection) -> String {
+        let range = DayRange(start: trip.startDate, end: trip.endDate)?.text
+        if isActive {
+            return ["day of the trip", range].compactMap { $0 }.joined(separator: " · ")
+        }
+        let days = trip.daysUntilStart?.intValue ?? 0
+        let lead = days == 1 ? "day to go" : days > 1 ? "days to go" : "starts today"
+        return [lead, range].compactMap { $0 }.joined(separator: " · ")
+    }
+}
+
+/// A quick way in: a soft badge, a name and its count.
+private struct QuickTile: View {
+    let title: String
+    let systemImage: String
+    let tone: Theme.Tone
+    let count: Int32?
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            QuickTileLabel(title: title, systemImage: systemImage, tone: tone, count: count)
         }
         .buttonStyle(.plain)
     }
 }
 
-private struct StatTileLabel: View {
-    let value: Int32
-    let label: String
+private struct QuickTileLabel: View {
+    let title: String
     let systemImage: String
-    let tint: Color
-    @Environment(\.dynamicTypeSize) private var typeSize
+    let tone: Theme.Tone
+    let count: Int32?
 
     var body: some View {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 30, height: 30)
-                    .background(tint, in: .rect(cornerRadius: 9))
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("\(value)").font(.system(size: 26, weight: .bold, design: .rounded))
-                    Text(label).font(.footnote).foregroundStyle(.secondary).lineLimit(typeSize.isAccessibilitySize ? nil : 1).minimumScaleFactor(0.8)
-                }
+        HStack(spacing: 10) {
+            ToneBadge(systemImage: systemImage, tone: tone)
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Theme.ink)
+            Spacer(minLength: 4)
+            if let count {
+                Text("\(count)").font(.footnote).foregroundStyle(Theme.faint).monospacedDigit()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
-            .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: Theme.Radius.card))
-            .accessibilityElement(children: .combine)
+        }
+        .padding(.horizontal, 12)
+        .frame(maxWidth: .infinity, minHeight: 52)
+        .mistCard(radius: 18)
+        .accessibilityElement(children: .combine)
     }
 }
 
-/// A recently visited place: its photo, and a glass caption with where and when.
-private struct RecentPlaceCard: View {
+/// A recently visited place: thumbnail, name, "Region, Country · 6 Jul", chevron.
+private struct RecentRow: View {
     let place: Location
-    @Environment(\.dynamicTypeSize) private var typeSize
+    let last: Bool
 
     var body: some View {
-        // Bigger text gets a bigger card, so the caption still leaves some of the photo.
-        let large = typeSize.isAccessibilitySize
-        RemoteImage(url: primaryPhoto(place)) {
-            Rectangle().fill(Color(.tertiarySystemFill))
-                .overlay(Image(systemName: "photo").foregroundStyle(.secondary))
-        }
-        .frame(width: large ? 300 : 190, height: large ? 240 : 142)
-        .clipShape(.rect(cornerRadius: 24))
-        .overlay(alignment: .bottom) {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(place.name).font(.subheadline.weight(.semibold)).lineLimit(1)
-                if !caption.isEmpty {
-                    Text(caption).font(.caption).opacity(0.9).lineLimit(1)
-                }
+        HStack(spacing: 12) {
+            RemoteImage(url: primaryPhoto(place)) {
+                Rectangle().fill(Theme.Tone.teal.fill).overlay(Text(place.category?.icon ?? "📍"))
             }
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .frame(minHeight: 46)
-            .glassEffect(.regular.tint(.black.opacity(0.25)), in: .rect(cornerRadius: 16))
-            .padding(8)
-            // Past this the caption would cover the whole photo.
-            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            .frame(width: 40, height: 40)
+            .clipShape(.rect(cornerRadius: 10, style: .continuous))
+
+            HStack {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(place.name).font(.body.weight(.medium)).foregroundStyle(Theme.ink)
+                    Text(caption).font(.footnote).foregroundStyle(Theme.muted)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right").font(.footnote.weight(.bold)).foregroundStyle(Theme.glyph)
+            }
+            .padding(.vertical, 10)
+            .frame(minHeight: 60)
+            .overlay(alignment: .bottom) {
+                if !last { Rectangle().fill(Theme.separator).frame(height: 0.5) }
+            }
         }
+        .padding(.leading, 12)
+        .padding(.trailing, 14)
+        .contentShape(.rect)
         .accessibilityElement(children: .combine)
     }
 
-    /// "Norway · Jul 2026": the country, then the month of the latest visit.
     private var caption: String {
-        let country = place.country?.name
-        let latest = place.visits.compactMap { $0.startDate }.max()
-        let month = latest.flatMap(DayRange.monthYear)
-        return [country, month].compactMap { $0 }.joined(separator: " · ")
+        let latest = place.visits.compactMap { $0.startDate.flatMap(DayRange.day) }.max()
+        let when = latest.map { $0.formatted(.dateTime.day().month(.abbreviated)) }
+        return [whereabouts(place), when].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 }
 
@@ -297,7 +333,7 @@ private struct AccountSheet: View {
                     Section {
                         VStack(alignment: .leading, spacing: 2) {
                             Text([user.firstName, user.lastName].filter { !$0.isEmpty }.joined(separator: " "))
-                                .font(Theme.display(24))
+                                .font(.title2.weight(.heavy))
                             Text("@\(user.username)").foregroundStyle(.secondary)
                         }
                     }
@@ -316,44 +352,5 @@ private struct AccountSheet: View {
             }
         }
         .presentationDetents([.medium])
-    }
-}
-
-/// A place's cover: the photo marked primary, or its first.
-func primaryPhoto(_ place: Location) -> String? {
-    place.images.first(where: { $0.isPrimary })?.image ?? place.images.first?.image
-}
-
-/// Dates as the canvas writes them: "5–9 September", "28 August – 3 September", "Jul 2026".
-enum DayRange {
-    case range(Date, Date)
-
-    init?(start: String?, end: String?) {
-        guard let s = start.flatMap(DayRange.day) else { return nil }
-        self = .range(s, end.flatMap(DayRange.day) ?? s)
-    }
-
-    var text: String {
-        guard case let .range(a, b) = self else { return "" }
-        let cal = Calendar.current
-        let day = Date.FormatStyle().day()
-        let dayMonth = Date.FormatStyle().day().month(.wide)
-        if cal.isDate(a, inSameDayAs: b) { return a.formatted(dayMonth) }
-        if cal.component(.month, from: a) == cal.component(.month, from: b) {
-            return "\(a.formatted(day))–\(b.formatted(dayMonth))"
-        }
-        return "\(a.formatted(dayMonth)) – \(b.formatted(dayMonth))"
-    }
-
-    static func day(_ iso: String) -> Date? {
-        let f = DateFormatter()
-        f.calendar = Calendar(identifier: .gregorian)
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd"
-        return f.date(from: String(iso.prefix(10)))
-    }
-
-    static func monthYear(_ iso: String) -> String? {
-        day(iso).map { $0.formatted(.dateTime.month(.abbreviated).year()) }
     }
 }
