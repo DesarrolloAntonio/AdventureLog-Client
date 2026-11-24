@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsListTabs
 import androidx.compose.foundation.lazy.LazyColumn
+import com.desarrollodroide.adventurelog.feature.ui.components.shellAppBarExpanded
 import com.desarrollodroide.adventurelog.feature.ui.components.PullableStateBox
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.InvitesBanner
 import androidx.compose.foundation.layout.Arrangement
@@ -390,6 +391,7 @@ private fun CollectionsContent(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             state = pullToRefreshState,
+            enabled = shellAppBarExpanded(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())

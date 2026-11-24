@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
@@ -71,4 +73,18 @@ fun HideShellChrome() {
         host.chromeHiddenBy++
         onDispose { host.chromeHiddenBy-- }
     }
+}
+
+/**
+ * Whether the shell's large title is fully open. The shell's app bar takes a downward drag only
+ * after the screen's own pull-to-refresh has had it, so without this a slow drag back to the top
+ * started a refresh while the title was still folded away. True outside the shell.
+ */
+val LocalShellAppBarExpanded = staticCompositionLocalOf<() -> Boolean> { { true } }
+
+/** For a screen's pull-to-refresh `enabled`: only once the shell's title is fully open. */
+@Composable
+fun shellAppBarExpanded(): Boolean {
+    val expanded = LocalShellAppBarExpanded.current
+    return remember(expanded) { derivedStateOf(expanded) }.value
 }

@@ -3,6 +3,7 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList
 
 import androidx.compose.material3.LoadingIndicator
+import com.desarrollodroide.adventurelog.feature.ui.components.shellAppBarExpanded
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel.CategoriesState
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.categories.ManageCategoriesDialog
 import androidx.compose.foundation.layout.Arrangement
@@ -432,6 +433,7 @@ private fun AdventureListContent(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             state = pullToRefreshState,
+            enabled = shellAppBarExpanded(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())

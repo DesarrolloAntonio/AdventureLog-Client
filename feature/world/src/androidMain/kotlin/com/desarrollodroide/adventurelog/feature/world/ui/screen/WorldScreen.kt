@@ -6,6 +6,7 @@ import com.desarrollodroide.adventurelog.feature.world.ui.components.PassportCar
 import com.desarrollodroide.adventurelog.feature.world.ui.components.StampsStrip
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import androidx.compose.foundation.layout.Arrangement
+import com.desarrollodroide.adventurelog.feature.ui.components.shellAppBarExpanded
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -113,6 +114,7 @@ private fun WorldScreenContent(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         state = pullToRefreshState,
+        enabled = shellAppBarExpanded(),
         modifier = modifier.fillMaxSize()
     ) {
         when {

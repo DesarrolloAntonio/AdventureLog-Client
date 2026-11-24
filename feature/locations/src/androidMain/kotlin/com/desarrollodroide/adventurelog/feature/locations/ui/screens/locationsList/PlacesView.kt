@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.FilterChip
@@ -109,14 +109,14 @@ internal fun PlacesFilterChips(
             onClick = onOpen,
             label = { Text(if (sheetFilterCount > 0) "Filters · $sheetFilterCount" else "Filters") },
             leadingIcon = { Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
-            shape = RoundedCornerShape(10.dp),
+            shape = CircleShape,
         )
         FilterChip(
             selected = categoryNames.isNotEmpty(),
             onClick = onOpenCategories,
             label = { Text(categoryLabel(categoryNames)) },
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) },
-            shape = RoundedCornerShape(10.dp),
+            shape = CircleShape,
         )
         // Sort has a sheet of its own; the arrow says which way the list runs.
         FilterChip(
@@ -131,7 +131,7 @@ internal fun PlacesFilterChips(
                 )
             },
             // The direction arrow leads; a drop-down arrow too pushed the chip off the row.
-            shape = RoundedCornerShape(10.dp),
+            shape = CircleShape,
         )
     }
 }

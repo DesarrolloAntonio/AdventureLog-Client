@@ -35,6 +35,7 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbarRow
 import com.desarrollodroide.adventurelog.feature.home.ui.components.rememberToolbarScrollState
 import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellAppBarExpanded
 import com.desarrollodroide.adventurelog.feature.ui.components.ShellActionHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -168,6 +169,11 @@ fun MainShellRoute(
         onLogout = viewModel::logout
     )
 }
+
+/** Screens that carry a search field of their own, where the bar's global search is left out. */
+private val ScreensWithOwnSearch = setOf(
+    CurrentScreen.PLACES, CurrentScreen.COLLECTIONS, CurrentScreen.TRAVEL, CurrentScreen.USERS,
+)
 
 /**
  * Helper function to reset scroll behavior
@@ -330,7 +336,12 @@ fun HomeScreenContent(
         }
     }
 
-    CompositionLocalProvider(LocalShellActionHost provides if (compact) shellActions else null) {
+    // Read by the screens' pull-to-refresh: a downward drag opens the title first, then refreshes.
+    val appBarExpanded = remember(scrollBehavior) { { scrollBehavior.state.heightOffset >= -0.5f } }
+    CompositionLocalProvider(
+        LocalShellActionHost provides if (compact) shellActions else null,
+        LocalShellAppBarExpanded provides appBarExpanded,
+    ) {
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -484,7 +495,9 @@ fun HomeScreenContent(
                                 Spacer(Modifier.width(12.dp))
                             }
 
-                            Surface(
+                            // Not on a screen with a search field of its own: two searches one
+                            // above the other read as the same thing twice.
+                            if (currentScreen !in ScreensWithOwnSearch) Surface(
                                 onClick = { searchOpen = true },
                                 shape = CircleShape,
                                 color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -499,7 +512,7 @@ fun HomeScreenContent(
                                     )
                                 }
                             }
-                            Spacer(Modifier.width(10.dp))
+                            if (currentScreen !in ScreensWithOwnSearch) Spacer(Modifier.width(10.dp))
                             ProfileMenu(
                                 user = userDetails,
                                 userName = userName,
