@@ -15,7 +15,7 @@ struct MainTabView: View {
                 NavigationStack { HomeView(open: { selection = $0 }) }
             }
             Tab("Places", systemImage: "mappin.and.ellipse", value: .places) {
-                NavigationStack { ComingSoon(title: "Places") }
+                NavigationStack { PlacesView() }
             }
             Tab("Collections", systemImage: "rectangle.stack", value: .collections) {
                 NavigationStack { ComingSoon(title: "Collections") }
