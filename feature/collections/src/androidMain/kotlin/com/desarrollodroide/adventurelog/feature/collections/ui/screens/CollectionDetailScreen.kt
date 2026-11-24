@@ -44,6 +44,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -101,6 +102,7 @@ import androidx.compose.material.icons.filled.DeleteOutline
 import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Checklist
 import com.desarrollodroide.adventurelog.core.model.Lodging
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketDateRange
 
 @Composable
 fun CollectionDetailScreen(
@@ -403,7 +405,8 @@ fun CollectionDetailContent(
                 modifier = Modifier.padding(top = 8.dp),
                 selectedView = selectedView,
                 onViewSelected = onViewSelected,
-                views = CollectionView.entries
+                views = CollectionView.entries,
+                bleed = 16.dp,
             )
         }
 
@@ -576,27 +579,11 @@ fun CollectionDetailContent(
                     )
                 }
                 
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Transportations",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(onClick = onAddTransportation) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add transportation"
-                            )
-                        }
-                    }
-                }
-
+                // In All, a kind shows only when the trip has some: an empty "Transport" heading
+                // sat at the end of every trip without journeys, while Lodging, Notes and
+                // Checklists were left out of All altogether.
                 if (transportations.isNotEmpty()) {
+                    item { TabHeading("Transport", onAdd = onAddTransportation) }
                     
                     items(transportations) { transportation ->
                         TransportationItemCard(
@@ -611,6 +598,19 @@ fun CollectionDetailContent(
                             }
                         )
                     }
+                }
+
+                if (collection.lodging.isNotEmpty()) {
+                    item { TabHeading("Lodging", onAdd = onAddLodging) }
+                    lodgingItems(collection.lodging, onEditLodging, onDeleteLodging)
+                }
+                if (collection.notes.isNotEmpty()) {
+                    item { TabHeading("Notes", onAdd = onAddNote) }
+                    noteItems(collection.notes, onEditNote, onDeleteNote)
+                }
+                if (collection.checklists.isNotEmpty()) {
+                    item { TabHeading("Checklists", onAdd = onAddChecklist) }
+                    checklistItems(collection.checklists, onEditChecklist, onDeleteChecklist)
                 }
             }
             
@@ -706,7 +706,7 @@ fun CollectionDetailContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Transportations",
+                            text = "Transport",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -792,21 +792,7 @@ fun CollectionDetailContent(
                 if (collection.lodging.isEmpty()) {
                     item { EmptyTab("No lodging in this collection yet.") }
                 } else {
-                    items(collection.lodging, key = { it.id }) { stay ->
-                        SimpleEntryCard(
-                            onClick = { onEditLodging(stay) },
-                            onDelete = { onDeleteLodging(stay) },
-                            kind = "stay",
-                            title = stay.name,
-                            lines = listOfNotNull(
-                                stay.location?.takeIf { it.isNotBlank() },
-                                lodgingDates(stay.checkIn, stay.checkOut),
-                                stay.reservationNumber?.takeIf { it.isNotBlank() }
-                                    ?.let { "Reservation $it" }
-                            ),
-                            badge = stay.type.replaceFirstChar { c -> c.uppercase() }
-                        )
-                    }
+                    lodgingItems(collection.lodging, onEditLodging, onDeleteLodging)
                 }
             }
 
@@ -815,19 +801,7 @@ fun CollectionDetailContent(
                 if (collection.notes.isEmpty()) {
                     item { EmptyTab("No notes in this collection yet.") }
                 } else {
-                    items(collection.notes, key = { it.id }) { note ->
-                        SimpleEntryCard(
-                            title = note.name,
-                            lines = listOfNotNull(
-                                note.content?.takeIf { it.isNotBlank() },
-                                note.date?.substringBefore('T')?.takeIf { it.isNotBlank() }
-                            ),
-                            badge = null,
-                            onClick = { onEditNote(note) },
-                            onDelete = { onDeleteNote(note) },
-                            kind = "note"
-                        )
-                    }
+                    noteItems(collection.notes, onEditNote, onDeleteNote)
                 }
             }
 
@@ -836,26 +810,7 @@ fun CollectionDetailContent(
                 if (collection.checklists.isEmpty()) {
                     item { EmptyTab("No checklists in this collection yet.") }
                 } else {
-                    items(collection.checklists, key = { it.id }) { checklist ->
-                        val done = checklist.items.count { it.isChecked }
-                        SimpleEntryCard(
-                            onClick = { onEditChecklist(checklist) },
-                            onDelete = { onDeleteChecklist(checklist) },
-                            kind = "checklist",
-                            title = checklist.name,
-                            lines = checklist.items.take(4).map { item ->
-                                (if (item.isChecked) "\u2713 " else "\u25cb ") + item.name
-                            } + listOfNotNull(
-                                "and ${checklist.items.size - 4} more"
-                                    .takeIf { checklist.items.size > 4 }
-                            ),
-                            badge = if (checklist.items.isEmpty()) {
-                                null
-                            } else {
-                                "$done / ${checklist.items.size}"
-                            }
-                        )
-                    }
+                    checklistItems(collection.checklists, onEditChecklist, onDeleteChecklist)
                 }
             }
 
@@ -1037,7 +992,7 @@ fun CollectionHeader(
             )
         }
 
-        // The two facts about the collection itself, in the same chips the rest of the app uses.
+        // Facts about the collection itself, in the same chips the rest of the app uses.
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1047,10 +1002,11 @@ fun CollectionHeader(
                 text = if (collection.isPublic) "\uD83C\uDF0D Public" else "\uD83D\uDD12 Private",
                 tone = if (collection.isPublic) ChipTone.NEUTRAL else ChipTone.WARNING
             )
-            MetaChip(
-                text = if (collection.isArchived) "\uD83D\uDCE6 Archived" else "\u2705 Active",
-                tone = if (collection.isArchived) ChipTone.NEUTRAL else ChipTone.POSITIVE
-            )
+            // Archived only when it is: "✅ Active" was every trip's default, and beside a
+            // COMPLETED status it read as a contradiction.
+            if (collection.isArchived) {
+                MetaChip(text = "\uD83D\uDCE6 Archived", tone = ChipTone.NEUTRAL)
+            }
         }
     }
 }
@@ -1582,17 +1538,77 @@ private fun SimpleEntryCard(
     }
 }
 
-/** "12/09 - 15/09", or one of the two when only one is set. */
-private fun lodgingDates(checkIn: String?, checkOut: String?): String? {
-    val short = { d: String? ->
-        d?.substringBefore('T')?.split("-")?.takeIf { it.size == 3 }?.let { "${it[2]}/${it[1]}" }
+/**
+ * "1–3 Dec", "28 Nov – 3 Dec", or the one day that is set: the trip's own dates are written this
+ * way on its ticket, and "01/12 – 03/12" read as a different app (and as January to some).
+ */
+private fun lodgingDates(checkIn: String?, checkOut: String?): String? =
+    ticketDateRange(checkIn ?: checkOut, checkOut)
+        ?.replace(Regex("\\b([A-Z])([A-Z]{2})\\b")) { it.groupValues[1] + it.groupValues[2].lowercase() }
+
+// The rows of each kind, shared by its own tab and by All.
+
+private fun LazyListScope.lodgingItems(
+    lodging: List<Lodging>,
+    onEdit: (Lodging) -> Unit,
+    onDelete: (Lodging) -> Unit,
+) {
+    items(lodging, key = { "lodging-${it.id}" }) { stay ->
+        SimpleEntryCard(
+            onClick = { onEdit(stay) },
+            onDelete = { onDelete(stay) },
+            kind = "stay",
+            title = stay.name,
+            lines = listOfNotNull(
+                stay.location?.takeIf { it.isNotBlank() },
+                lodgingDates(stay.checkIn, stay.checkOut),
+                stay.reservationNumber?.takeIf { it.isNotBlank() }
+                    ?.let { "Reservation $it" }
+            ),
+            badge = stay.type.replaceFirstChar { c -> c.uppercase() }
+        )
     }
-    val a = short(checkIn)
-    val b = short(checkOut)
-    return when {
-        a != null && b != null && a != b -> "$a \u2013 $b"
-        a != null -> a
-        b != null -> b
-        else -> null
+}
+
+private fun LazyListScope.noteItems(
+    notes: List<Note>,
+    onEdit: (Note) -> Unit,
+    onDelete: (Note) -> Unit,
+) {
+    items(notes, key = { "note-${it.id}" }) { note ->
+        SimpleEntryCard(
+            title = note.name,
+            lines = listOfNotNull(
+                note.content?.takeIf { it.isNotBlank() },
+                note.date?.substringBefore('T')?.takeIf { it.isNotBlank() }
+            ),
+            badge = null,
+            onClick = { onEdit(note) },
+            onDelete = { onDelete(note) },
+            kind = "note"
+        )
+    }
+}
+
+private fun LazyListScope.checklistItems(
+    checklists: List<Checklist>,
+    onEdit: (Checklist) -> Unit,
+    onDelete: (Checklist) -> Unit,
+) {
+    items(checklists, key = { "checklist-${it.id}" }) { checklist ->
+        val done = checklist.items.count { it.isChecked }
+        SimpleEntryCard(
+            onClick = { onEdit(checklist) },
+            onDelete = { onDelete(checklist) },
+            kind = "checklist",
+            title = checklist.name,
+            lines = checklist.items.take(4).map { item ->
+                (if (item.isChecked) "✓ " else "○ ") + item.name
+            } + listOfNotNull(
+                "and ${checklist.items.size - 4} more"
+                    .takeIf { checklist.items.size > 4 }
+            ),
+            badge = if (checklist.items.isEmpty()) null else "$done / ${checklist.items.size}"
+        )
     }
 }

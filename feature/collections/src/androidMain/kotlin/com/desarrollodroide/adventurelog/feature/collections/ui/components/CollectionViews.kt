@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.layout
 import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -57,10 +59,23 @@ fun CollectionViewSwitcher(
     selectedView: CollectionView,
     onViewSelected: (CollectionView) -> Unit,
     modifier: Modifier = Modifier,
-    views: List<CollectionView> = CollectionView.entries
+    views: List<CollectionView> = CollectionView.entries,
+    /** The page margin the row sits in; it scrolls out to the screen's edges through it. */
+    bleed: Dp = 0.dp,
 ) {
     Row(
-        modifier = modifier.horizontalScroll(rememberScrollState()),
+        modifier = modifier
+            // Out over the page's margin, so the last view slides off the screen's edge instead
+            // of being sliced at the margin ("Calend"); the padding puts the first one back in line.
+            .layout { measurable, constraints ->
+                val extra = bleed.roundToPx()
+                val placeable = measurable.measure(
+                    constraints.copy(maxWidth = constraints.maxWidth + 2 * extra, minWidth = constraints.minWidth)
+                )
+                layout((placeable.width - 2 * extra).coerceAtLeast(0), placeable.height) { placeable.place(-extra, 0) }
+            }
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = bleed),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

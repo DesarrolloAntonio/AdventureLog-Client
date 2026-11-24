@@ -189,17 +189,28 @@ private fun DayCard(day: ItineraryDay, onAdd: () -> Unit, onRemove: (String) -> 
             }
 
             Column(modifier = Modifier.weight(1f)) {
+                // "Day 1" over "Day 1 of 13 · 0 items" over "Nothing planned for this day" said the
+                // same thing three times. A day with no name of its own is "Day 1 of 13"; the count
+                // shows only when there is something to count.
+                val position = "Day ${day.dayNumber} of ${day.totalDays}"
+                val named = day.label != "Day ${day.dayNumber}"
+                val count = when (day.items.size) {
+                    0 -> null
+                    1 -> "1 item"
+                    else -> "${day.items.size} items"
+                }
                 Text(
-                    text = day.label,
+                    text = if (named) day.label else position,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                Text(
-                    text = "Day ${day.dayNumber} of ${day.totalDays} · " +
-                        if (day.items.size == 1) "1 item" else "${day.items.size} items",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                listOfNotNull(position.takeIf { named }, count).joinToString(" · ").takeIf { it.isNotEmpty() }?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             AddButton(onAdd)
