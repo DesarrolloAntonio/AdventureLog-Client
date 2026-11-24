@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.components
 
+import androidx.compose.foundation.layout.PaddingValues
+import com.desarrollodroide.adventurelog.feature.ui.components.bleedHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material3.toShape
@@ -190,8 +192,13 @@ fun StampsStrip(countries: List<Country>, onClick: (String) -> Unit, modifier: M
     )
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("Your stamps", style = AdventureType.display(26.sp))
-        // Sized so a fifth stamp shows cut at the edge on a phone: the cut says the row goes on.
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        // Sized so a fifth stamp shows cut at the edge on a phone: the cut says the row goes on. The
+        // cut is the screen's edge, not the page margin, which sliced the stamp as if by mistake.
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            modifier = Modifier.bleedHorizontally(16.dp),
+        ) {
             itemsIndexed(countries, key = { _, c -> c.countryCode }) { index, country ->
                 val (ink, onInk) = inks[index % inks.size]
                 val shape = StampShapes[index % StampShapes.size].toShape()
