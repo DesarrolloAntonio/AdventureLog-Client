@@ -58,7 +58,7 @@ struct HomeView: View {
             }
             .sharedBackgroundVisibility(.hidden)
         }
-        .navigationDestination(isPresented: $creating) { ComingSoon(title: "New Place") }
+        .sheet(isPresented: $creating) { PlaceFormView { vm.refreshDashboard() } }
         .navigationDestination(item: $openTrip) { TripView(collectionId: $0.id, name: $0.name, subtitle: dates($0)) }
         .task { for await s in vm.uiState { state = s } }
         .task { for await u in vm.userDetails { user = u } }

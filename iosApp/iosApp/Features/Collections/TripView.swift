@@ -12,11 +12,27 @@ struct TripView: View {
 
     enum Page: Hashable { case itinerary, lists, notes }
 
+    /// A form over the trip: something new in it, or one of its things to edit.
+    enum Form: Identifiable {
+        case place, transport(String?), lodging(String?), note(String?), checklist(String?), trip
+        var id: String {
+            switch self {
+            case .place: "place"
+            case .transport(let id): "transport-\(id ?? "")"
+            case .lodging(let id): "lodging-\(id ?? "")"
+            case .note(let id): "note-\(id ?? "")"
+            case .checklist(let id): "checklist-\(id ?? "")"
+            case .trip: "trip"
+            }
+        }
+    }
+
     @StateObject private var host = ViewModelHost()
     @State private var state = CollectionDetailUiState(collection: nil, isLoading: true, errorMessage: nil)
     @State private var page: Page = .itinerary
     @State private var working = false
     @State private var message: String?
+    @State private var form: Form?
 
     private var vm: CollectionDetailViewModel { host.owner.collectionDetailViewModel() }
 
@@ -61,15 +77,32 @@ struct TripView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    NavigationLink { ComingSoon(title: "New Place") } label: { Label("Place", systemImage: "mappin") }
-                    NavigationLink { ComingSoon(title: "New Transport") } label: { Label("Transport", systemImage: "airplane") }
-                    NavigationLink { ComingSoon(title: "New Lodging") } label: { Label("Lodging", systemImage: "bed.double") }
-                    NavigationLink { ComingSoon(title: "New Note") } label: { Label("Note", systemImage: "note.text") }
-                    NavigationLink { ComingSoon(title: "New Checklist") } label: { Label("Checklist", systemImage: "checklist") }
+                    Button { form = .place } label: { Label("Place", systemImage: "mappin") }
+                    Button { form = .transport(nil) } label: { Label("Transport", systemImage: "airplane") }
+                    Button { form = .lodging(nil) } label: { Label("Lodging", systemImage: "bed.double") }
+                    Button { form = .note(nil) } label: { Label("Note", systemImage: "note.text") }
+                    Button { form = .checklist(nil) } label: { Label("Checklist", systemImage: "checklist") }
                 } label: {
                     Image(systemName: "plus")
                 }
                 .accessibilityLabel("Add to trip")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { form = .trip } label: { Image(systemName: "pencil") }
+                    .accessibilityLabel("Edit trip")
+                    .disabled(state.collection == nil)
+            }
+        }
+        .sheet(item: $form) { form in
+            let tripName = state.collection?.name ?? name
+            let reload = { vm.loadCollection(collectionId: collectionId) }
+            switch form {
+            case .place: PlaceFormView(intoCollectionId: collectionId, onSaved: reload)
+            case .transport(let id): TransportFormView(collectionId: collectionId, collectionName: tripName, transportationId: id, onSaved: reload)
+            case .lodging(let id): LodgingFormView(collectionId: collectionId, collectionName: tripName, lodgingId: id, onSaved: reload)
+            case .note(let id): NoteFormView(collectionId: collectionId, collectionName: tripName, noteId: id, onSaved: reload)
+            case .checklist(let id): ChecklistFormView(collectionId: collectionId, collectionName: tripName, checklistId: id, onSaved: reload)
+            case .trip: CollectionFormView(collectionId: collectionId, onSaved: reload)
             }
         }
         .navigationDestination(for: Location.self) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
@@ -128,6 +161,27 @@ struct TripView: View {
         ForEach(days, id: \.0.dayNumber) { day, items in
             SectionLabel(text: dayLabel(day), trailing: "\(items.count)").padding(.bottom, 8)
             itemsCard(items, in: collection).padding(.bottom, 20)
+        }
+
+        // Places added after the plan was laid out have no day yet; without this they were
+        // nowhere on the trip.
+        let planned = Set(collection.itinerary.map(\.itemId))
+        let unplanned = plan.isEmpty ? [] : collection.locations.filter { place in
+            !planned.contains(place.id) && !place.visits.contains { planned.contains($0.id) }
+        }
+        if !unplanned.isEmpty {
+            SectionLabel(text: "Not in the plan", trailing: "\(unplanned.count)").padding(.bottom, 8)
+            VStack(spacing: 0) {
+                ForEach(Array(unplanned.enumerated()), id: \.element.id) { index, place in
+                    NavigationLink(value: place) {
+                        TripRow(kind: .location, title: place.name, subtitle: whereabouts(place),
+                                last: index == unplanned.count - 1, chevron: true)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .mistCard()
+            .padding(.bottom, 20)
         }
 
         if plan.isEmpty {
@@ -191,6 +245,11 @@ struct TripView: View {
                         TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle ?? whereabouts(place), last: last, chevron: true)
                     }
                     .buttonStyle(.plain)
+                } else if let edit = edit(for: item, in: collection) {
+                    Button { form = edit } label: {
+                        TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle, last: last, chevron: true)
+                    }
+                    .buttonStyle(.plain)
                 } else {
                     TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle, last: last, chevron: false)
                 }
@@ -206,6 +265,18 @@ struct TripView: View {
         return collection.locations.first { $0.id == entry.itemId || $0.visits.contains { $0.id == entry.itemId } }
     }
 
+    /// The form that edits what an itinerary entry points at, for the kinds that have one.
+    private func edit(for item: ItineraryItem, in collection: ComposeApp.Collection) -> Form? {
+        guard let id = collection.itinerary.first(where: { $0.id == item.entryId })?.itemId else { return nil }
+        switch item.kind {
+        case .transportation: return .transport(id)
+        case .lodging: return .lodging(id)
+        case .note: return .note(id)
+        case .checklist: return .checklist(id)
+        default: return nil
+        }
+    }
+
     // MARK: Lists
 
     @ViewBuilder
@@ -217,14 +288,20 @@ struct TripView: View {
             VStack(spacing: 14) {
                 ForEach(collection.checklists, id: \.id) { list in
                     VStack(alignment: .leading, spacing: 0) {
-                        HStack {
-                            Text(list.name).font(.headline).foregroundStyle(Theme.ink)
-                            Spacer()
-                            Text("\(list.items.filter(\.isChecked).count) of \(list.items.count)")
-                                .font(.footnote).foregroundStyle(Theme.faint).monospacedDigit()
+                        Button { form = .checklist(list.id) } label: {
+                            HStack {
+                                Text(list.name).font(.headline).foregroundStyle(Theme.ink)
+                                Spacer()
+                                Text("\(list.items.filter(\.isChecked).count) of \(list.items.count)")
+                                    .font(.footnote).foregroundStyle(Theme.faint).monospacedDigit()
+                                Image(systemName: "pencil").font(.footnote.weight(.bold)).foregroundStyle(Theme.glyph)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .contentShape(.rect)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Edit \(list.name)")
                         ForEach(list.items, id: \.id) { item in
                             HStack(spacing: 12) {
                                 Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
@@ -258,6 +335,7 @@ struct TripView: View {
         } else {
             VStack(spacing: 14) {
                 ForEach(collection.notes, id: \.id) { note in
+                    Button { form = .note(note.id) } label: {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(alignment: .firstTextBaseline) {
                             Text(note.name).font(.headline).foregroundStyle(Theme.ink)
@@ -274,6 +352,9 @@ struct TripView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
                     .mistCard()
+                    .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }

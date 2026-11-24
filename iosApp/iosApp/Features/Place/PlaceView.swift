@@ -18,6 +18,8 @@ struct PlaceView: View {
     @State private var state: LocationState = LocationState.Loading.shared
     @State private var collections: [UltraSlimCollection] = []
     @State private var message: String?
+    @State private var editing = false
+    @State private var addingVisit = false
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -53,6 +55,12 @@ struct PlaceView: View {
         .task { for await s in vm.locationState { state = s } }
         .task { for await c in vm.collections { collections = c } }
         .task { for await m in vm.attachmentMessage { message = m } }
+        .sheet(isPresented: $editing) {
+            PlaceFormView(placeId: placeId) { vm.loadLocation(locationId: placeId) }
+        }
+        .sheet(isPresented: $addingVisit) {
+            VisitFormView(placeId: placeId, placeName: loaded?.name ?? name) { vm.loadLocation(locationId: placeId) }
+        }
         .alert(message ?? "", isPresented: Binding(get: { message != nil }, set: { if !$0 { vm.clearAttachmentMessage() } })) {
             Button("OK", role: .cancel) {}
         }
@@ -97,8 +105,8 @@ struct PlaceView: View {
                 Button { vm.shareLocation(location: place) } label: { Image(systemName: "square.and.arrow.up") }
                     .accessibilityLabel("Share")
                 Menu {
-                    NavigationLink { ComingSoon(title: "Edit \(place.name)") } label: { Label("Edit", systemImage: "pencil") }
-                    NavigationLink { ComingSoon(title: "New visit") } label: { Label("Add visit", systemImage: "plus") }
+                    Button { editing = true } label: { Label("Edit", systemImage: "pencil") }
+                    Button { addingVisit = true } label: { Label("Add visit", systemImage: "plus") }
                     if let link = place.link.flatMap(URL.init(string:)) {
                         Button("Open website", systemImage: "safari") { openURL(link) }
                     }
@@ -141,7 +149,7 @@ struct PlaceView: View {
                 }
                 .buttonStyle(.plain)
             }
-            NavigationLink { ComingSoon(title: "New visit") } label: {
+            Button { addingVisit = true } label: {
                 HStack(spacing: 10) {
                     ToneBadge(systemImage: "plus", tone: .coral, size: 28)
                     Text("Add visit").font(.headline).foregroundStyle(Theme.ink)

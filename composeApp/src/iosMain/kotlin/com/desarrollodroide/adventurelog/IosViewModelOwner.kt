@@ -20,6 +20,9 @@ import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditChecklistViewModel
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditCollectionViewModel
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditTransportationViewModel
+import com.desarrollodroide.adventurelog.feature.locations.viewmodel.AddEditAdventureViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditLodgingViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.AddEditNoteViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
@@ -37,6 +40,8 @@ import com.desarrollodroide.adventurelog.feature.world.viewmodel.CountryDetailVi
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.WorldViewModel
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.KoinInternalApi
+import org.koin.core.parameter.ParametersDefinition
+import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform
 import org.koin.viewmodel.resolveViewModel
 import kotlin.reflect.KClass
@@ -71,11 +76,12 @@ class IosViewModelOwner : ViewModelStoreOwner, SavedStateRegistryOwner {
     }
 
     @OptIn(KoinInternalApi::class)
-    fun <T : ViewModel> get(kClass: KClass<T>): T = resolveViewModel(
+    fun <T : ViewModel> get(kClass: KClass<T>, parameters: ParametersDefinition? = null): T = resolveViewModel(
         vmClass = kClass,
         viewModelStore = viewModelStore,
         extras = extras,
         scope = KoinPlatform.getKoin().scopeRegistry.rootScope,
+        parameters = parameters,
     )
 
     /** Ends every ViewModel this screen made. */
@@ -95,6 +101,15 @@ class IosViewModelOwner : ViewModelStoreOwner, SavedStateRegistryOwner {
     fun addEditNoteViewModel(): AddEditNoteViewModel = get(AddEditNoteViewModel::class)
     fun addEditChecklistViewModel(): AddEditChecklistViewModel = get(AddEditChecklistViewModel::class)
     fun addEditLodgingViewModel(): AddEditLodgingViewModel = get(AddEditLodgingViewModel::class)
+    /** The collection form; [collectionId] null for a new one. */
+    fun addEditCollectionViewModel(collectionId: String?): AddEditCollectionViewModel =
+        get(AddEditCollectionViewModel::class) { parametersOf(collectionId) }
+    /** The journey form; [transportationId] null for a new one, which then belongs to [collectionId]. */
+    fun addEditTransportationViewModel(transportationId: String?, collectionId: String?): AddEditTransportationViewModel =
+        get(AddEditTransportationViewModel::class) { parametersOf(transportationId, null, collectionId) }
+    /** The place form; [adventureId] null for a new place. */
+    fun addEditAdventureViewModel(adventureId: String?): AddEditAdventureViewModel =
+        get(AddEditAdventureViewModel::class) { parametersOf(adventureId, null) }
     fun mapViewModel(): MapViewModel = get(MapViewModel::class)
     fun calendarViewModel(): CalendarViewModel = get(CalendarViewModel::class)
     fun worldViewModel(): WorldViewModel = get(WorldViewModel::class)

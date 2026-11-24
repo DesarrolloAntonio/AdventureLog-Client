@@ -44,7 +44,7 @@ struct PlacesView: View {
             }
         }
         .navigationDestination(for: Location.self) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
-        .navigationDestination(isPresented: $creating) { ComingSoon(title: "New Place") }
+        .sheet(isPresented: $creating) { PlaceFormView { presenter.refresh() } }
         .sheet(isPresented: $showFilters) {
             if let filters { PlacesFilterSheet(vm: vm, initial: filters) }
         }

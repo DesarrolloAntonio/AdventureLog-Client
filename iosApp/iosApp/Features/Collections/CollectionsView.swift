@@ -15,6 +15,7 @@ struct CollectionsView: View {
     @State private var message: String?
     @State private var deleting: UltraSlimCollection?
     @State private var creating = false
+    @State private var editingId: String?
 
     private var vm: CollectionsViewModel { host.owner.collectionsViewModel() }
     private var presenter: PagingListPresenter<UltraSlimCollection> { host.owner.collectionsPresenter() }
@@ -51,7 +52,10 @@ struct CollectionsView: View {
             }
         }
         .navigationDestination(for: UltraSlimCollection.self) { TripView(collectionId: $0.id, name: $0.name, subtitle: dates($0)) }
-        .navigationDestination(isPresented: $creating) { ComingSoon(title: "New Collection") }
+        .sheet(isPresented: $creating) { CollectionFormView { presenter.refresh() } }
+        .sheet(isPresented: Binding(get: { editingId != nil }, set: { if !$0 { editingId = nil } })) {
+            CollectionFormView(collectionId: editingId) { presenter.refresh() }
+        }
         .refreshable {
             if tab == .mine { presenter.refresh() } else { vm.refresh() }
         }
@@ -203,6 +207,7 @@ struct CollectionsView: View {
 
     @ViewBuilder
     private func menu(_ collection: UltraSlimCollection) -> some View {
+        Button("Edit", systemImage: "pencil") { editingId = collection.id }
         Button("Duplicate", systemImage: "plus.square.on.square") { vm.duplicateCollection(collection: collection) }
         if collection.isArchived {
             Button("Restore", systemImage: "tray.and.arrow.up") { vm.setArchived(collection: collection, archived: false) }
