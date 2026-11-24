@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -71,7 +72,8 @@ fun CategoryChips(
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Pills, as the filter chips are; no row spacing on top of the chips' own touch margin.
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             categories.forEach { category ->
                 val chosen = category.id == selectedCategory?.id
                 FilterChip(
@@ -81,7 +83,7 @@ fun CategoryChips(
                     leadingIcon = if (chosen) {
                         { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
                     } else null,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = CircleShape,
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                         selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -116,11 +118,11 @@ private fun AddCategoryChip(onClick: () -> Unit) {
             // The same 48dp row the FilterChips take, so it sits on their line, not above it.
             .minimumInteractiveComponentSize()
             .height(32.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(CircleShape)
             .drawBehind {
                 drawRoundRect(
                     color = outline,
-                    cornerRadius = CornerRadius(10.dp.toPx()),
+                    cornerRadius = CornerRadius(size.height / 2),
                     style = Stroke(
                         width = 1.5.dp.toPx(),
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))

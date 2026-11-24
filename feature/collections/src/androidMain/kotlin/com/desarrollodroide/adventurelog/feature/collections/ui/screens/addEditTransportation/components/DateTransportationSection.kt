@@ -50,7 +50,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.date.DateTimeFiel
 fun DateTransportationSection(
     formData: TransportationFormData,
     onFormDataChange: (TransportationFormData) -> Unit,
-    /** The collection's dates. "Constrain to Collection Dates" only appears when there are both. */
+    /** The collection's dates. "Constrain to collection dates" only appears when there are both. */
     collectionStart: String? = null,
     collectionEnd: String? = null
 ) {
@@ -68,7 +68,7 @@ fun DateTransportationSection(
     var showArrivalTimePicker by remember { mutableStateOf(false) }
 
     SectionCard(
-        title = "Date Information",
+        title = "Date information",
         icon = Icons.Outlined.DateRange,
         expanded = expanded,
         onExpandedChange = { expanded = it }
@@ -84,7 +84,7 @@ fun DateTransportationSection(
 
             // The rows are the switches (as CO-11): a tap on the words did nothing.
             SwitchRow(
-                title = "All Day",
+                title = "All day",
                 checked = formData.isAllDay,
                 onCheckedChange = { allDay ->
                     onFormDataChange(
@@ -99,14 +99,14 @@ fun DateTransportationSection(
 
             if (collectionRange != null) {
                 SwitchRow(
-                    title = "Constrain to Collection Dates",
+                    title = "Constrain to collection dates",
                     checked = formData.constrainToCollectionDates,
                     onCheckedChange = { onFormDataChange(formData.copy(constrainToCollectionDates = it)) }
                 )
             }
 
             Text(
-                text = "Date Selection",
+                text = "Date selection",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary
             )

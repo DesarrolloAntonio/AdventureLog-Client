@@ -63,7 +63,7 @@ fun BasicInfoTransportationSection(
     var typeDropdownExpanded by remember { mutableStateOf(false) }
 
     SectionCard(
-        title = "Basic Information",
+        title = "Basic information",
         icon = Icons.Outlined.Info,
         expanded = expanded,
         onExpandedChange = { expanded = it },
@@ -88,7 +88,7 @@ fun BasicInfoTransportationSection(
             StyledTextField(
                 value = formData.name,
                 onValueChange = { onFormDataChange(formData.copy(name = it)) },
-                label = "Transportation Name",
+                label = "Transportation name",
                 icon = Icons.Outlined.Title
             )
 
@@ -152,7 +152,7 @@ fun BasicInfoTransportationSection(
                 StyledTextField(
                     value = formData.flightNumber,
                     onValueChange = { onFormDataChange(formData.copy(flightNumber = it)) },
-                    label = "Flight Number",
+                    label = "Flight number",
                     icon = Icons.Outlined.Flight
                 )
             }

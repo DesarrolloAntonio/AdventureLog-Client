@@ -48,7 +48,7 @@ fun LocationTransportationSection(
     var showToLocationSearch by remember { mutableStateOf(false) }
 
     SectionCard(
-        title = "Location Information",
+        title = "Location information",
         icon = Icons.Outlined.LocationOn,
         expanded = expanded,
         onExpandedChange = { expanded = it }
@@ -67,7 +67,7 @@ fun LocationTransportationSection(
                     onValueChange = { 
                         onFormDataChange(formData.copy(fromLocation = it))
                     },
-                    label = "From Location",
+                    label = "From location",
                     icon = Icons.Outlined.FlightTakeoff,
                     modifier = Modifier.weight(1f)
                 )
@@ -93,7 +93,7 @@ fun LocationTransportationSection(
                     onValueChange = { 
                         onFormDataChange(formData.copy(toLocation = it))
                     },
-                    label = "To Location",
+                    label = "To location",
                     icon = Icons.Outlined.FlightLand,
                     modifier = Modifier.weight(1f)
                 )
@@ -109,7 +109,7 @@ fun LocationTransportationSection(
             }
 
             Text(
-                text = "Route Map",
+                text = "Route map",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )

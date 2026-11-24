@@ -56,7 +56,7 @@ fun DateSection(
     var showEndDatePicker by remember { mutableStateOf(false) }
     
     SectionCard(
-        title = "Date Information",
+        title = "Date information",
         icon = Icons.Outlined.CalendarMonth,
         expanded = expanded,
         onExpandedChange = { expanded = it }

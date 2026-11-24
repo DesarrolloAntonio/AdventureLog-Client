@@ -225,7 +225,7 @@ fun AdventureItem(
                             AddChip(text = "Category", onClick = onEdit, color = ink)
                         }
                         if (!location.isPublic) {
-                            MetaChip(text = "\uD83D\uDD12 Private", tone = ChipTone.WARNING)
+                            MetaChip(text = "\uD83D\uDD12 Private", tone = ChipTone.NEUTRAL) // the default, not a warning
                         }
                         val visibleCollections = collectionNames.take(2)
                         visibleCollections.forEach { name ->

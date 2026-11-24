@@ -132,7 +132,7 @@ class CollectionTabsTest {
         setContent { Content(CollectionTab.LODGING) }
         onNodeWithText("Hotel Monasterio").assertIsDisplayed()
         onNodeWithText("Cusco, Peru").assertIsDisplayed()
-        onNodeWithText("10/10 – 13/10").assertIsDisplayed()
+        onNodeWithText("10–13 Oct").assertIsDisplayed()
     }
 
     @OptIn(ExperimentalTestApi::class)

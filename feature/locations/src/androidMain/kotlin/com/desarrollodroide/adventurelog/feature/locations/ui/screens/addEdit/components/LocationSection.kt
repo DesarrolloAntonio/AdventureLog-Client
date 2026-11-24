@@ -110,7 +110,7 @@ fun LocationSection(
             if (showSearchResults && locationSearchResults.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Search Results",
+                        text = "Search results",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -215,7 +215,7 @@ fun LocationSection(
                             verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             Text(
-                                text = "Location Set",
+                                text = "Location set",
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(

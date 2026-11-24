@@ -88,7 +88,7 @@ fun AddEditCollectionScreen(
             text = when {
                 isSaving -> "Saving…"
                 initialData != null -> "Update Collection"
-                else -> "Create Collection"
+                else -> "Create collection"
             },
             enabled = formData.name.isNotBlank() && !isSaving,
             onCancel = leave

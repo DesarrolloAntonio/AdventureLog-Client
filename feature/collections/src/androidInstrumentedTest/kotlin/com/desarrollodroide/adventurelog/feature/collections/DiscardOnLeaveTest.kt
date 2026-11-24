@@ -42,7 +42,7 @@ class DiscardOnLeaveTest {
         var left = 0
         setContent { WithAppLocals { AddEditCollectionScreen(onNavigateBack = { left++ }, onSave = {}) } }
 
-        onNode(hasSetTextAction() and hasText("Collection Name")).performTextInput("QA_Trip")
+        onNode(hasSetTextAction() and hasText("Collection name")).performTextInput("QA_Trip")
         cancel()
 
         onNodeWithText("Discard this collection?").assertIsDisplayed()
@@ -58,7 +58,7 @@ class DiscardOnLeaveTest {
 
         // The form opens on what it is making, with Close at the top, as the canvas draws it.
         onNodeWithText("New collection").assertIsDisplayed()
-        onNode(hasSetTextAction() and hasText("Collection Name")).performTextInput("QA_Trip")
+        onNode(hasSetTextAction() and hasText("Collection name")).performTextInput("QA_Trip")
         onNodeWithContentDescription("Close").performClick()
 
         onNodeWithText("Discard this collection?").assertIsDisplayed()
@@ -89,7 +89,7 @@ class DiscardOnLeaveTest {
         var left = 0
         setContent { WithAppLocals { TransportForm { left++ } } }
 
-        onNode(hasSetTextAction() and hasText("Transportation Name")).performTextInput("QA_Train")
+        onNode(hasSetTextAction() and hasText("Transportation name")).performTextInput("QA_Train")
         cancel()
 
         onNodeWithText("Discard this transport?").assertIsDisplayed()

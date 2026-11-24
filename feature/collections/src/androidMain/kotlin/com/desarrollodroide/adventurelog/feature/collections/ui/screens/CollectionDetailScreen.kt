@@ -1000,7 +1000,8 @@ fun CollectionHeader(
         ) {
             MetaChip(
                 text = if (collection.isPublic) "\uD83C\uDF0D Public" else "\uD83D\uDD12 Private",
-                tone = if (collection.isPublic) ChipTone.NEUTRAL else ChipTone.WARNING
+                // Private is the default, not a problem: the error container shouted it in red at night.
+                tone = ChipTone.NEUTRAL
             )
             // Archived only when it is: "✅ Active" was every trip's default, and beside a
             // COMPLETED status it read as a contradiction.

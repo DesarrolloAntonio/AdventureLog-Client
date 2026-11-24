@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.PublicToggleRow
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -101,7 +102,7 @@ fun BasicInfoSection(
     }
     
     SectionCard(
-        title = "Basic Information",
+        title = "Basic information",
         icon = Icons.Outlined.Description,
         expanded = expanded,
         onExpandedChange = { expanded = it },
@@ -174,7 +175,7 @@ fun BasicInfoSection(
                     onFormDataChange(formData.copy(link = newValue))
                     validateUrl(newValue)
                 },
-                label = "Website Link",
+                label = "Website link",
                 icon = Icons.Outlined.Link,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Uri,
@@ -224,54 +225,8 @@ fun BasicInfoSection(
                 }
             }
             
-            PublicPlaceRow(
-                checked = formData.isPublic,
+            PublicToggleRow(title = "Public place", checked = formData.isPublic,
                 onCheckedChange = { onFormDataChange(formData.copy(isPublic = it)) }
-            )
-        }
-    }
-}
-
-/**
- * Whether the place is public, as a settings row: the whole row toggles it, not only the switch
- * (the collections' Public rows learnt this in QA CO-11).
- */
-@Composable
-private fun PublicPlaceRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .toggleable(value = checked, onValueChange = onCheckedChange, role = Role.Switch)
-                .heightIn(min = 64.dp)
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Public, contentDescription = null, modifier = Modifier.size(22.dp))
-                }
-            }
-            Text(
-                text = "Public place",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            Switch(
-                checked = checked,
-                onCheckedChange = null,
-                thumbContent = if (checked) {
-                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(SwitchDefaults.IconSize)) }
-                } else null
             )
         }
     }

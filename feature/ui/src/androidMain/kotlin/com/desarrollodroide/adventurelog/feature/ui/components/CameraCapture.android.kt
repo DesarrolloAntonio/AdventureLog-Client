@@ -88,7 +88,7 @@ fun CameraCapture(
                     size = 56.dp,
                 )
             },
-            title = { Text(text = "Camera Permission Required", textAlign = TextAlign.Center) },
+            title = { Text(text = "Camera permission required", textAlign = TextAlign.Center) },
             text = {
                 Text(
                     text = "This app needs camera permission to take photos. Please grant the permission in app settings.",

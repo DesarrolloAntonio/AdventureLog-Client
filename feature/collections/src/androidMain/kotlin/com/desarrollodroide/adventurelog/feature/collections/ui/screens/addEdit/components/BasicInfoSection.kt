@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEdit.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.PublicToggleRow
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,7 @@ fun BasicInfoSection(
     var expanded by remember { mutableStateOf(true) }
     
     SectionCard(
-        title = "Collection Information",
+        title = "Collection information",
         icon = Icons.Outlined.Folder,
         expanded = expanded,
         onExpandedChange = { expanded = it },
@@ -76,7 +77,7 @@ fun BasicInfoSection(
                 onValueChange = { 
                     onFormDataChange(formData.copy(name = it))
                 },
-                label = "Collection Name",
+                label = "Collection name",
                 icon = Icons.Outlined.Title,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
@@ -90,55 +91,12 @@ fun BasicInfoSection(
                 }
             )
             
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-                ),
-                border = CardDefaults.outlinedCardBorder()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        // The row is the switch (QA 04, CO-11): a tap on the words did nothing.
-                        .toggleable(
-                            value = formData.isPublic,
-                            role = Role.Switch,
-                            onValueChange = { onFormDataChange(formData.copy(isPublic = it)) }
-                        )
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f).padding(end = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Public,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = "Public Collection",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    Switch(
-                        checked = formData.isPublic,
-                        onCheckedChange = null,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    )
-                }
-            }
-            
+            PublicToggleRow(
+                title = "Public collection",
+                checked = formData.isPublic,
+                onCheckedChange = { onFormDataChange(formData.copy(isPublic = it)) },
+            )
+
             StyledTextField(
                 value = formData.link,
                 onValueChange = { 

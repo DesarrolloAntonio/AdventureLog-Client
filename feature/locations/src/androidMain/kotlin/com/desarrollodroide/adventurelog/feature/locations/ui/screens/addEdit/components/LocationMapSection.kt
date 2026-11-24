@@ -63,7 +63,7 @@ fun LocationMapSection(
         if (latitude != null && longitude != null) {
             Marker(
                 state = MarkerState(position = latLng),
-                title = "Selected Location"
+                title = "Selected location"
             )
         }
     }
