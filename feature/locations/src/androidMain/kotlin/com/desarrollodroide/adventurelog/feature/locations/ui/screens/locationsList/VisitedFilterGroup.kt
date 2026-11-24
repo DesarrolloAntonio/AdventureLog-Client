@@ -57,12 +57,13 @@ fun VisitedFilterGroup(
                     options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 },
-                // The canvas: the chosen one in primary, the others in the secondary container.
+                // The app's one selection ink: the chosen option dark (inverse surface), the rest
+                // neutral - as Map's same filter, Collections' tabs and a trip's views draw it.
                 colors = ToggleButtonDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    checkedContainerColor = MaterialTheme.colorScheme.primary,
-                    checkedContentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    checkedContainerColor = MaterialTheme.colorScheme.inverseSurface,
+                    checkedContentColor = MaterialTheme.colorScheme.inverseOnSurface,
                 ),
                 modifier = Modifier
                     .weight(1f)

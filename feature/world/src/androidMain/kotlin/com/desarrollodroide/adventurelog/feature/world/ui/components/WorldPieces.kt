@@ -109,11 +109,12 @@ fun WorldFilterGroup(selected: FilterMode, onSelect: (FilterMode) -> Unit, modif
                     modes.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 },
+                // The app's one selection ink: the chosen option dark, the rest neutral.
                 colors = ToggleButtonDefaults.colors(
-                    containerColor = colors.secondaryContainer,
-                    contentColor = colors.onSecondaryContainer,
-                    checkedContainerColor = colors.primary,
-                    checkedContentColor = colors.onPrimary,
+                    containerColor = colors.surfaceContainerHighest,
+                    contentColor = colors.onSurfaceVariant,
+                    checkedContainerColor = colors.inverseSurface,
+                    checkedContentColor = colors.inverseOnSurface,
                 ),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 6.dp),
                 modifier = Modifier.weight(if (mode == FilterMode.NOT_VISITED) 1.3f else 1f).heightIn(min = 48.dp)

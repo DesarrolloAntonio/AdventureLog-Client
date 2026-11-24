@@ -56,8 +56,9 @@ fun <T> ConnectedChoice(
                 colors = ToggleButtonDefaults.colors(
                     containerColor = colors.surfaceContainerHighest,
                     contentColor = colors.onSurfaceVariant,
-                    checkedContainerColor = colors.primary,
-                    checkedContentColor = colors.onPrimary,
+                    // The app's one selection ink: the chosen option dark, as every other group.
+                    checkedContainerColor = colors.inverseSurface,
+                    checkedContentColor = colors.inverseOnSurface,
                 ),
                 contentPadding = PaddingValues(horizontal = 8.dp),
                 modifier = Modifier.weight(1f).heightIn(min = 48.dp),
