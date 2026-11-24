@@ -3,7 +3,7 @@ import MapKit
 import ComposeApp
 
 /// World, as the Mist canvas splits it: a Map of every place and the Countries visited, under one
-/// switch at the top. Countries is still to be built; Map shows the places with their photos.
+/// switch at the top.
 struct WorldView: View {
     enum Page: Hashable { case map, countries }
 
@@ -13,7 +13,7 @@ struct WorldView: View {
         Group {
             switch page {
             case .map: WorldMap()
-            case .countries: ComingSoon(title: "Countries").mistBackground()
+            case .countries: CountriesView().mistBackground()
             }
         }
         .toolbar {
@@ -26,7 +26,11 @@ struct WorldView: View {
                 .frame(width: 220)
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
+        // Large on both pages: a mode switched at runtime never opened the title out, and
+        // screens pushed from an inline bar open with their own large titles folded.
+        // The map runs under the bar with no title over it.
+        .navigationTitle(page == .countries ? "World" : "")
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 

@@ -18,10 +18,13 @@ struct HomeView: View {
     private var vm: HomeViewModel { host.owner.homeViewModel() }
 
     var body: some View {
-        Group {
+        // The app's name is the bar's large title, with the library's totals under it. A bar
+        // without a large title made every screen pushed from Home open with its own title
+        // folded into the bar; the canvas's "Your travels" label over the name goes with it.
+        ScrollView {
             switch onEnum(of: state) {
             case .loading:
-                ProgressView().controlSize(.large).frame(maxWidth: .infinity, maxHeight: .infinity)
+                ProgressView().controlSize(.large).frame(maxWidth: .infinity).padding(.top, 120)
             case .error(let e):
                 ContentUnavailableView {
                     Label("Couldn't load home", systemImage: "wifi.exclamationmark")
@@ -30,11 +33,16 @@ struct HomeView: View {
                 } actions: {
                     Button("Try again") { vm.loadDashboard() }.buttonStyle(.glassProminent)
                 }
+                .padding(.top, 60)
             case .success(let s):
                 content(s.dashboard)
             }
         }
+        .refreshable { vm.refreshDashboard() }
         .mistBackground()
+        .navigationTitle("AdventureLog")
+        .navigationSubtitle(subtitle)
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button { creating = true } label: { Image(systemName: "plus") }
@@ -59,11 +67,16 @@ struct HomeView: View {
         }
     }
 
-    private func content(_ dashboard: Dashboard) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                header(dashboard.stats)
+    /// The library in one line; a placeholder of the same height until it has loaded, so the
+    /// large title doesn't change size under the reader.
+    private var subtitle: String {
+        guard case .success(let s) = onEnum(of: state) else { return "Your travels" }
+        let stats = s.dashboard.stats
+        return "\(plural(stats.locationCount, "place")) · \(plural(stats.visitedCountryCount, "country", "countries")) · \(plural(stats.tripsCount, "collection"))"
+    }
 
+    private func content(_ dashboard: Dashboard) -> some View {
+            VStack(alignment: .leading, spacing: 0) {
                 Button { open(.search) } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass").font(.subheadline.weight(.semibold))
@@ -76,7 +89,7 @@ struct HomeView: View {
                     .mistCard(radius: Theme.Radius.field)
                 }
                 .buttonStyle(.plain)
-                .padding(.top, 16)
+                .padding(.top, 4)
 
                 let trip = dashboard.activeTrip ?? dashboard.upcomingTrips.first
                 TripCard(trip: trip, isActive: dashboard.activeTrip != nil) {
@@ -102,31 +115,6 @@ struct HomeView: View {
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 120)
-        }
-        .refreshable { vm.refreshDashboard() }
-    }
-
-    private func header(_ stats: UserStats) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("YOUR TRAVELS")
-                .font(.caption.weight(.bold))
-                .tracking(1)
-                .foregroundStyle(Theme.muted)
-                // A small label over the title: past this it would outgrow the title itself.
-                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
-            Text("AdventureLog")
-                .font(Theme.title())
-                .tracking(-0.6)
-                // One word: shrunk to fit rather than broken across two lines.
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-                .foregroundStyle(Theme.ink)
-            Text("\(plural(stats.locationCount, "place")) · \(plural(stats.visitedCountryCount, "country", "countries")) · \(plural(stats.tripsCount, "collection"))")
-                .font(.subheadline)
-                .foregroundStyle(Theme.muted)
-        }
-        .padding(.horizontal, 4)
-        .accessibilityElement(children: .combine)
     }
 
     private func quickAccess(_ stats: UserStats) -> some View {
@@ -165,7 +153,7 @@ struct HomeView: View {
 }
 
 private func plural(_ n: Int32, _ one: String, _ many: String? = nil) -> String {
-    n == 1 ? "1 \(one)" : "\(n) \(many ?? one + "s")"
+    plural(Int(n), one, many)
 }
 
 /// The next trip in teal: when it is, and how many days are left; or, on a trip, which day of it.
