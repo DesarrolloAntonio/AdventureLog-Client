@@ -28,8 +28,17 @@ class ServerOriginTest {
     }
 
     @Test
-    fun `a different port is a different origin`() {
-        assertFalse(isSameOrigin("https://nas.example.net:3445/media/a.webp", server))
+    fun `another port on the same host still matches`() {
+        // Signed in through the web frontend (:3445), photos still come from the backend (:3447).
+        // Cookies ignore the port too; the host is what says whose server it is.
+        assertTrue(isSameOrigin("https://nas.example.net:3447/media/a.webp", "https://nas.example.net:3445"))
+        assertTrue(isSameOrigin("https://nas.example.net/media/a.webp", server))
+    }
+
+    @Test
+    fun `an IPv6 host keeps its brackets and compares without the port`() {
+        assertTrue(isSameOrigin("http://[fd7a::1]:3447/media/a.webp", "http://[fd7a::1]:3445"))
+        assertFalse(isSameOrigin("http://[fd7a::2]:3447/media/a.webp", "http://[fd7a::1]:3447"))
     }
 
     @Test
