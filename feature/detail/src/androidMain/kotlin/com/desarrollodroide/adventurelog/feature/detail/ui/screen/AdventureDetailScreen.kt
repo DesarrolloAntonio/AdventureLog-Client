@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.detail.ui.screen
 import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
 import androidx.compose.foundation.layout.navigationBarsPadding
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.placeFacts
+import com.desarrollodroide.adventurelog.feature.detail.ui.components.longDate
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.PlacePhotoHero
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.PlaceHeadline
 import com.desarrollodroide.adventurelog.feature.detail.ui.components.PlaceFactsStrip
@@ -254,7 +255,7 @@ fun AdventureDetailScreen(
 
                         if (hasCoordinates) {
                             DetailSection(title = "Where") {
-                                MapBody(latitude = lat!!, longitude = lon!!, onOpenMap = onOpenMap, emoji = location.category?.icon, visited = location.isVisited)
+                                MapBody(latitude = lat!!, longitude = lon!!, emoji = location.category?.icon, visited = location.isVisited)
                             }
                         }
 
@@ -302,11 +303,25 @@ fun AdventureDetailScreen(
                                     value = "${Currencies.formatAmount(price)} $code"
                                 )
                             }
-                            FactRow(label = "Added", value = location.createdAt.take(10))
-                            FactRow(label = "Last updated", value = location.updatedAt.take(10))
+                            // Dates as the rest of the page writes them ("9 Nov 2025"), not ISO.
+                            FactRow(label = "Added", value = longDate(location.createdAt))
+                            FactRow(label = "Last updated", value = longDate(location.updatedAt))
                         }
                     }
                 }
+            }
+
+            // The page runs edge to edge under the status bar. With a photo there is no bar of
+            // its own, so the title scrolled up into the clock and the icons; this keeps that
+            // strip the page's colour, as the space above the photo already is.
+            if (cover != null) {
+                Box(
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .windowInsetsTopHeight(WindowInsets.statusBars)
+                        .background(MaterialTheme.colorScheme.surface)
+                )
             }
 
             PlaceActionsToolbar(

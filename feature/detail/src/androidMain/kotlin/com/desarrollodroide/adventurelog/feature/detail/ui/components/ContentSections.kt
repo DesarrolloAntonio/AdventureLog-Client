@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -47,14 +46,13 @@ fun AboutBody(description: String, modifier: Modifier = Modifier) {
 }
 
 /**
- * The map, and the way out of it. The map itself is a still preview - the callback that hands the
- * coordinates to a real maps app was already being passed in and was never called.
+ * The map. The way out to a maps app is the page's toolbar ("Open in maps"); a row saying the
+ * same under the map put it on screen twice.
  */
 @Composable
 fun MapBody(
     latitude: String,
     longitude: String,
-    onOpenMap: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     emoji: String? = null,
     visited: Boolean = true,
@@ -76,12 +74,6 @@ fun MapBody(
                 visited = visited
             )
         }
-        Spacer(Modifier.height(8.dp))
-        ActionRow(
-            icon = Icons.Outlined.Map,
-            text = "Open in Maps",
-            onClick = { onOpenMap(latitude, longitude) }
-        )
     }
 }
 

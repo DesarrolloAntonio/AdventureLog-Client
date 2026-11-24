@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
 import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -75,7 +76,10 @@ fun MapView(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = rememberThemedMapProperties(rendering)
+        properties = rememberThemedMapProperties(rendering),
+        // A preview in a card: pinch still zooms, but Google's +/- buttons and its own
+        // "open in Maps" toolbar crowded a 200dp map and repeated the page's toolbar.
+        uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
     ) {
         // The Map tab's pin, not Google's red drop: a rounded square on a short point, inked
         // once visited, with the category's emoji.
