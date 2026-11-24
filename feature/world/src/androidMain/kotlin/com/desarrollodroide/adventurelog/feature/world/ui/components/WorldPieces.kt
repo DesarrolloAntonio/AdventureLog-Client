@@ -131,10 +131,11 @@ fun WorldFilterGroup(selected: FilterMode, onSelect: (FilterMode) -> Unit, modif
  * is visited, dashed when none is - its name, and how many of its regions are visited.
  */
 @Composable
-fun CountryRow(country: Country, shape: Shape, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
+fun CountryRow(country: Country, shape: Shape, onClick: (String) -> Unit, modifier: Modifier = Modifier, selected: Boolean = false) {
     val colors = MaterialTheme.colorScheme
     val visited = country.numVisits > 0
-    Surface(shape = shape, color = colors.surfaceContainerLowest, modifier = modifier.fillMaxWidth()) {
+    // The one open beside the list on a tablet reads as chosen, as the place list's row does.
+    Surface(shape = shape, color = if (selected) colors.secondaryContainer else colors.surfaceContainerLowest, modifier = modifier.fillMaxWidth()) {
         Row(
             Modifier.clickable { onClick(country.countryCode) }.heightIn(min = 72.dp).padding(start = 12.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically,

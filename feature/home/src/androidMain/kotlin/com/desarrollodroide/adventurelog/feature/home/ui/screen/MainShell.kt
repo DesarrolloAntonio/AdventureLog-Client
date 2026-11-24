@@ -1072,7 +1072,10 @@ fun HomeScreenContent(
 
                         settingsScreen(onLogout = onLogout)
 
-                        worldGraph(navController)
+                        // The World tab is the country list and a country side by side on a tablet.
+                        worldGraph(navController, worldTab = {
+                            WorldPane(onMapClick = { navigateTo(CurrentScreen.MAP) })
+                        })
 
                         mapScreen(
                             navController = navController,

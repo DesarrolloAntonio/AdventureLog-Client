@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.world.navigation
 
+import androidx.compose.runtime.Composable
 import com.desarrollodroide.adventurelog.feature.ui.navigation.routeArgument
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -10,13 +11,16 @@ import com.desarrollodroide.adventurelog.feature.world.ui.screen.CountryDetailSc
 import com.desarrollodroide.adventurelog.feature.world.ui.screen.WorldScreen
 
 fun NavGraphBuilder.worldGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    /** The World tab itself, when the shell draws it (the list and a country side by side). */
+    worldTab: (@Composable () -> Unit)? = null,
 ) {
     navigation(
         startDestination = NavigationRoutes.Travel.route,
         route = "world_graph"
     ) {
         composable(NavigationRoutes.Travel.route) {
+            if (worldTab != null) { worldTab(); return@composable }
             WorldScreen(
                 onCountryClick = { countryCode ->
                     navController.navigate("${NavigationRoutes.Travel.route}/$countryCode")
