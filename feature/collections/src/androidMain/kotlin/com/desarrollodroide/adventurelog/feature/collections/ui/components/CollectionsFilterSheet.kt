@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -65,10 +66,8 @@ import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 /**
  * Everything that narrows the list, in the one place you go to narrow it.
  *
- * The screen used to carry two full-width rows of controls above the list - a tab bar for which
- * set of collections, and a chip row for trip status - which is a third of a phone spent on
- * chrome, permanently, for two choices that are rarely made. Both live here now, next to the
- * sorting that was already here, and the screen says which of them are set.
+ * Trip status and the order. Which set of collections (Mine, Shared, Archived) is the screen's
+ * own tabs; it was asked here as well, and two controls for one setting read as two settings.
  *
  * Choices apply as they are made and the sheet stays open, so several can be adjusted in one
  * visit; there is nothing to confirm and nothing to lose by closing it.
@@ -86,8 +85,8 @@ fun CollectionsFilterSheet(
     onDismiss: () -> Unit
 ) {
     val sets = listOf(CollectionsTab.MINE, CollectionsTab.SHARED, CollectionsTab.ARCHIVED)
-    val isDefault = tab == CollectionsTab.MINE &&
-        statusFilter == null &&
+    // Which set of collections is the screen's tabs, not this sheet's: Reset leaves it alone.
+    val isDefault = statusFilter == null &&
         sortOptions == CollectionSortOptions()
 
     ModalBottomSheet(
@@ -116,23 +115,12 @@ fun CollectionsFilterSheet(
                 }
             }
 
-            SheetSection("Show") {
-                ConnectedChoice(
-                    options = sets.map { it to it.label },
-                    // Invites is not one of the three: it shows as Mine, as the tabs here always did.
-                    selected = if (tab in sets) tab else CollectionsTab.MINE,
-                    onSelect = onTabSelected
-                )
-            }
-
             // Status is computed per collection from its dates, and only the user's own
             // collections come back paged; the shared and archived lists are short and whole.
             if (tab == CollectionsTab.MINE) {
                 SheetSection("Trip status") {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    // No vertical spacing: the chips' own touch margin already parts the rows.
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         StatusOptions.forEach { (status, label) ->
                             val on = statusFilter == status
                             // A chip says on or off to a screen reader too, not by colour alone
@@ -144,7 +132,7 @@ fun CollectionsFilterSheet(
                                 leadingIcon = if (on) {
                                     { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
                                 } else null,
-                                shape = RoundedCornerShape(10.dp),
+                                shape = CircleShape,
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -172,8 +160,10 @@ fun CollectionsFilterSheet(
             }
 
             SheetSection("Direction") {
+                val (ascending, descending) = directionLabels(sortOptions.sortField)
                 ConnectedChoice(
-                    options = listOf(SortDirection.DESCENDING to "Descending", SortDirection.ASCENDING to "Ascending"),
+                    // Said the way the field reads, in the same order as Places' sort.
+                    options = listOf(SortDirection.ASCENDING to ascending, SortDirection.DESCENDING to descending),
                     selected = sortOptions.sortDirection,
                     onSelect = { onSortOptionsChanged(sortOptions.copy(sortDirection = it)) }
                 )
@@ -197,6 +187,12 @@ private val SortFields = listOf(
     CollectionSortField.START_DATE to "Start date",
     CollectionSortField.NAME to "Name"
 )
+
+/** Ascending and descending as Places says them: "A → Z" for a name, "Newest first" for a date. */
+private fun directionLabels(field: CollectionSortField): Pair<String, String> = when (field) {
+    CollectionSortField.NAME -> "A → Z" to "Z → A"
+    CollectionSortField.START_DATE, CollectionSortField.UPDATED_AT -> "Oldest first" to "Newest first"
+}
 
 private fun sortIcon(field: CollectionSortField): ImageVector = when (field) {
     CollectionSortField.UPDATED_AT -> Icons.Outlined.Update

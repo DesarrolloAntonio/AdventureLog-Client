@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -195,7 +196,9 @@ internal fun CategoryFilterChips(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // No vertical spacing: each chip already carries 8dp of touch margin above and below,
+            // and 8dp more set the rows twice as far apart as the chips beside each other.
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 categoriesState.categories.forEach { category ->
                     val on = category.name in selected
                     val count = category.numAdventures.toIntOrNull() ?: 0
@@ -214,7 +217,7 @@ internal fun CategoryFilterChips(
                         leadingIcon = if (on) {
                             { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
                         } else null,
-                        shape = RoundedCornerShape(10.dp),
+                        shape = CircleShape,
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                             selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,

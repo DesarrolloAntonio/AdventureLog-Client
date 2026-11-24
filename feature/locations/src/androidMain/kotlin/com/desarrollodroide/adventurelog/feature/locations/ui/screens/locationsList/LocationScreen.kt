@@ -370,7 +370,11 @@ private fun AdventureListContent(
                     modifier = Modifier.padding(start = 20.dp, top = 4.dp)
                 )
             }
-            val sheetFilterCount = activeFilterCount - if (visitedFilter != VisitedFilter.ALL) 1 else 0
+            // The Filters chip counts what its sheet holds; visited and the order show on their own controls.
+            val sortChanged = sortField != LocationSortField.UPDATED_AT || sortDirection != SortDirection.DESCENDING
+            val sheetFilterCount = activeFilterCount -
+                (if (visitedFilter != VisitedFilter.ALL) 1 else 0) -
+                (if (sortChanged) 1 else 0)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

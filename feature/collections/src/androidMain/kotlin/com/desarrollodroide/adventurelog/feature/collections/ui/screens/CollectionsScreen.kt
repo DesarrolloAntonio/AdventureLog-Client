@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsListTabs
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionSortOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import com.desarrollodroide.adventurelog.feature.ui.components.shellAppBarExpanded
 import com.desarrollodroide.adventurelog.feature.ui.components.PullableStateBox
@@ -187,7 +188,11 @@ fun CollectionsScreen(
             onStatusFilterChanged = viewModel::onStatusFilterChanged,
             sortOptions = sortOptions,
             onSortOptionsChanged = viewModel::onSortOptionsChanged,
-            onReset = viewModel::resetFilters,
+            // The sheet's own settings only; the tab on show stays.
+            onReset = {
+                viewModel.onStatusFilterChanged(null)
+                viewModel.onSortOptionsChanged(CollectionSortOptions())
+            },
             onDismiss = viewModel::hideSortSheet
         )
     }

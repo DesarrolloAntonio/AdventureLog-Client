@@ -111,9 +111,10 @@ fun LocationsFilterBottomSheet(
 }
 
 /**
- * The place list's filters: a display title with how many are on and a reset, then what to show,
- * how to sort and which categories, each as Expressive controls instead of cards of radio
- * buttons, and Apply pinned under them.
+ * The place list's filters: a display title with how many are on and a reset, the categories and
+ * whether places in collections show, with Apply pinned under them. Visited/Planned and the order
+ * are not here: the screen has its own button group and Sort sheet for those, and asking twice
+ * read as two different settings.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -147,7 +148,11 @@ internal fun LocationsFilterContent(
                 )
             }
             FilledTonalIconButton(
-                onClick = { onFiltersChanged(LocationFilters()) },
+                // Only what this sheet holds: the visited group and the sort keep their settings.
+                onClick = {
+                    val defaults = LocationFilters()
+                    onFiltersChanged(filters.copy(categoryNames = defaults.categoryNames, includeCollections = defaults.includeCollections))
+                },
                 enabled = active > 0,
                 shapes = IconButtonDefaults.shapes(),
             ) {
@@ -163,17 +168,6 @@ internal fun LocationsFilterContent(
                 .padding(horizontal = 24.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            FilterSection("Show") {
-                VisitChoice(filters.visitedFilter) { onFiltersChanged(filters.copy(visitedFilter = it)) }
-            }
-            FilterSection("Sort by") {
-                SortChoice(
-                    sortField = filters.sortField,
-                    sortDirection = filters.sortDirection,
-                    onFieldChange = { onFiltersChanged(filters.copy(sortField = it, sortDirection = naturalDirection(it))) },
-                    onDirectionChange = { onFiltersChanged(filters.copy(sortDirection = it)) },
-                )
-            }
             FilterSection(
                 title = if (filters.categoryNames.isEmpty()) "Categories" else "Categories · ${filters.categoryNames.size} chosen",
                 trailing = if (categoriesState is CategoriesState.Success) {
@@ -227,9 +221,6 @@ private fun activeFiltersLabel(count: Int): String = when (count) {
 private fun getActiveFiltersCount(filters: LocationFilters): Int {
     var count = 0
     if (filters.categoryNames.isNotEmpty()) count++
-    if (filters.sortField != LocationSortField.UPDATED_AT) count++
-    if (filters.sortDirection != SortDirection.DESCENDING) count++
-    if (filters.visitedFilter != VisitedFilter.ALL) count++
     // Counting this when it is *on* was right while off was the default. It is on by default
     // now, so an untouched sheet announced one active filter, and the reset button could not
     // clear it.
