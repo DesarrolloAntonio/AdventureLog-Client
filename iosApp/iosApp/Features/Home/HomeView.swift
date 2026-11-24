@@ -1,8 +1,8 @@
 import SwiftUI
 import ComposeApp
 
-/// Home, as the Mist-Home artboard draws it: the library in one line under the app's name, a
-/// search field, the next trip as a teal card counting the days down, four quick ways in, and the
+/// Home, as the Mist-Home artboard draws it: the library in one line under the app's name, search
+/// in the bar, the next trip as a teal card counting the days down, four quick ways in, and the
 /// places visited most recently.
 struct HomeView: View {
     let open: (AppTab) -> Void
@@ -11,7 +11,7 @@ struct HomeView: View {
     @State private var state: HomeUiState = HomeUiStateLoading.shared
     @State private var user: UserDetails?
     @State private var showAccount = false
-    @State private var creating = false
+    @State private var searching = false
     @State private var openTrip: UltraSlimCollection?
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -45,8 +45,10 @@ struct HomeView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                Button { creating = true } label: { Image(systemName: "plus") }
-                    .accessibilityLabel("New place")
+                // Search lives here, not in the tab bar: the bar is for going places, and new
+                // places are added from Places and Collections, where they end up.
+                Button { searching = true } label: { Image(systemName: "magnifyingglass") }
+                    .accessibilityLabel("Search")
                 Button { showAccount = true } label: {
                     Text(initials)
                         .font(.footnote.weight(.bold))
@@ -58,7 +60,7 @@ struct HomeView: View {
             }
             .sharedBackgroundVisibility(.hidden)
         }
-        .sheet(isPresented: $creating) { PlaceFormView { vm.refreshDashboard() } }
+        .navigationDestination(isPresented: $searching) { SearchView() }
         .navigationDestination(item: $openTrip) { TripView(collectionId: $0.id, name: $0.name, subtitle: dates($0)) }
         .task { for await s in vm.uiState { state = s } }
         .task { for await u in vm.userDetails { user = u } }
@@ -280,6 +282,7 @@ private struct QuickTileLabel: View {
 /// side by side keep one height.
 private struct RecentCard: View {
     let place: Location
+    @Environment(\.colorScheme) private var scheme
     @ScaledMetric(relativeTo: .body) private var width: CGFloat = 176
 
     var body: some View {
@@ -309,8 +312,17 @@ private struct RecentCard: View {
             .padding(.bottom, 10)
         }
         .frame(width: min(width, 260))
-        .mistCard(radius: 16)
+        // Clipped first, so the photo takes the corners; the card and its shadow go on outside
+        // the clip, which would otherwise cut the shadow off.
         .clipShape(.rect(cornerRadius: 16, style: .continuous))
+        .mistCard(radius: 16)
+        // A deeper shadow than a plain card's, so the photos lift off the mist. It hangs off a
+        // solid shape underneath: on the translucent card itself it would fall under the text too.
+        .background {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(scheme == .dark ? Color(white: 0.12) : .white)
+                .shadow(color: Color(light: 0x0A4E66, dark: 0x000000).opacity(scheme == .dark ? 0.5 : 0.18), radius: 12, y: 7)
+        }
         .contentShape(.rect(cornerRadius: 16))
         .accessibilityElement(children: .combine)
     }

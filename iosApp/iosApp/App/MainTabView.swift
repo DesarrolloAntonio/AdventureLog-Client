@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// The tabs of the Coast Mist bar: Home, Places, Collections and World, with the system search tab
-/// beside them. The map is not a tab of its own; it is half of World. Each tab keeps its own
+/// The tabs of the Coast Mist bar: Home, Places, Collections and World. Search is not a tab: the
+/// bar is for moving between places in the app, and Home opens search from its own bar. The map is not a tab of its own; it is half of World. Each tab keeps its own
 /// navigation stack; switching tabs keeps where each one was.
-enum AppTab: Hashable { case home, places, collections, world, search }
+enum AppTab: Hashable { case home, places, collections, world }
 
 struct MainTabView: View {
     @State private var selection: AppTab = .home
@@ -21,9 +21,6 @@ struct MainTabView: View {
             }
             Tab("World", systemImage: "globe", value: .world) {
                 NavigationStack { WorldView() }
-            }
-            Tab(value: .search, role: .search) {
-                NavigationStack { SearchView() }
             }
         }
         .tint(Theme.accent)

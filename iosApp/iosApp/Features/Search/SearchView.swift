@@ -1,12 +1,17 @@
 import SwiftUI
 import ComposeApp
 
-/// The search tab: the system search field over everything the server finds, places and
+/// Search, opened from Home: the system search field over everything the server finds, places and
 /// collections first, each row opening what it names.
 struct SearchView: View {
     @StateObject private var host = ViewModelHost()
     @State private var query = ""
     @State private var state: GlobalSearchState?
+    /// Opened from Home's magnifying glass, so the field takes the keyboard straight away.
+    @FocusState private var fieldFocused: Bool
+    /// The hit being opened. Pushed by item, like Home pushed this screen: a value-based link
+    /// on top of that tore Search down and opened it again, empty, instead of the hit.
+    @State private var opened: SearchHit?
 
     private var vm: GlobalSearchViewModel { host.owner.globalSearchViewModel() }
 
@@ -24,8 +29,10 @@ struct SearchView: View {
         .navigationBarTitleDisplayMode(.large)
         // Always showing: the default hides the field until the list is pulled down.
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Places, collections, notes")
+        .searchFocused($fieldFocused)
+        .onAppear { if query.isEmpty { fieldFocused = true } }
         .onChange(of: query) { _, q in vm.onQueryChange(query: q) }
-        .navigationDestination(for: SearchHit.self) { hit in
+        .navigationDestination(item: $opened) { hit in
             if hit.type == SearchHit.companion.LOCATION {
                 PlaceView(placeId: hit.id, name: hit.title, subtitle: hit.subtitle)
             } else {
@@ -104,7 +111,7 @@ struct SearchView: View {
         .contentShape(.rect)
 
         if opens {
-            NavigationLink(value: hit) { label }.buttonStyle(.plain)
+            Button { opened = hit } label: { label }.buttonStyle(.plain)
         } else {
             label.accessibilityElement(children: .combine)
         }
