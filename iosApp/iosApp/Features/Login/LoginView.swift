@@ -34,9 +34,16 @@ struct LoginView: View {
         .task {
             // Sessions stay signed in on this phone, as the Android app does by default.
             vm.updateRememberSession(value: true)
+            // A stored session also arrives as Success at start; only one that follows a sign-in
+            // (sent, or waiting for its code) counts as signing in.
+            var signingIn = false
             for await s in vm.uiState {
                 state = s
-                if case .success = onEnum(of: s) { onSignedIn() }
+                switch onEnum(of: s) {
+                case .loading, .codeRequired: signingIn = true
+                case .success: if signingIn { onSignedIn() }
+                default: break
+                }
             }
         }
         .task {
