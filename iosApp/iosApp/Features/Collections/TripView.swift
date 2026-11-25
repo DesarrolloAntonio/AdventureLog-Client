@@ -158,6 +158,13 @@ struct TripView: View {
             itemsCard(context, in: collection).padding(.bottom, 20)
         }
 
+        // Server 0.14's Ideas: on the trip, on no day yet.
+        let ideas = plan.ideas.filter(shown)
+        if !ideas.isEmpty {
+            SectionLabel(text: "Ideas", trailing: "\(ideas.count)").padding(.bottom, 8)
+            itemsCard(ideas, in: collection).padding(.bottom, 20)
+        }
+
         ForEach(days, id: \.0.dayNumber) { day, items in
             SectionLabel(text: dayLabel(day), trailing: "\(items.count)").padding(.bottom, 8)
             itemsCard(items, in: collection).padding(.bottom, 20)
