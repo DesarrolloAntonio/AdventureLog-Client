@@ -4,6 +4,8 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginCodeError
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.ProviderSignInError
+import com.desarrollodroide.adventurelog.core.model.ProviderSignInOptions
 import com.desarrollodroide.adventurelog.core.domain.usecase.LoginCodeFailure
 import com.desarrollodroide.adventurelog.core.domain.usecase.VerifyLoginCodeUseCase
 import com.desarrollodroide.adventurelog.core.model.LoginResult
@@ -32,6 +34,15 @@ class VerifyLoginCodeUseCaseTest {
         override fun cancelPendingLogin() {
             cancelled++
         }
+
+        override suspend fun getSignInProviders(url: String): ProviderSignInOptions? = error("not part of this step")
+
+        override suspend fun redeemProviderSignIn(
+            url: String,
+            code: String,
+            codeVerifier: String,
+            redirectUri: String,
+        ): Either<ProviderSignInError, UserDetails> = error("not part of this step")
     }
 
     private val repository = FakeLoginRepository()

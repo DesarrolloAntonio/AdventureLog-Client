@@ -21,6 +21,11 @@ private val jsonSecretRegexes = jsonSecrets.map { field ->
 } + listOf(
     // A second-factor code. Only digits: allauth's error codes ("code": "incorrect_code") stay readable.
     Regex("(\"code\"\\s*:\\s*)\"\\d+\"", RegexOption.IGNORE_CASE),
+    // A provider sign-in's one-time code (43 url-safe characters) and its PKCE verifier. An
+    // error code is lowercase words ("username_password_mismatch"): one capital or digit is enough
+    // to tell the code apart.
+    Regex("(\"code\"\\s*:\\s*)\"(?=[A-Za-z0-9_-]*[A-Z0-9])[A-Za-z0-9_-]{20,}\""),
+    Regex("(\"code_verifier\"\\s*:\\s*)\"[^\"]*\"", RegexOption.IGNORE_CASE),
 )
 
 private val cookieValueRegex =

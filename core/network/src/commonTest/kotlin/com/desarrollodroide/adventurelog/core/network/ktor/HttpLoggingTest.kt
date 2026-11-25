@@ -86,4 +86,15 @@ class HttpLoggingTest {
         val error = """{"errors":[{"message":"Incorrect code.","code":"incorrect_code","param":"code"}]}"""
         assertEquals(error, redactSecrets(error))
     }
+
+    @Test
+    fun `redacts a provider sign-in's code and verifier but not error codes`() {
+        val body = """{"code":"Xk3_tR9vQm2LpZ8wYc4nBf7hJd1sAe6uGo5iKy0qWlM","code_verifier":"dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk","redirect_uri":"adventurelog://auth/callback"}"""
+        val redacted = redactSecrets(body)
+        assertFalse(redacted.contains("Xk3_tR9v"), redacted)
+        assertFalse(redacted.contains("dBjftJeZ"), redacted)
+        assertTrue(redacted.contains("adventurelog://auth/callback"), redacted)
+        val error = """{"detail":"Unable to log in.","code":"username_password_mismatch_for_this_user"}"""
+        assertEquals(error, redactSecrets(error))
+    }
 }

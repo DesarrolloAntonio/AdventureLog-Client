@@ -18,6 +18,12 @@ interface AuthApi {
         code: String
     ): UserDetailsDTO
 
+    /**
+     * Trades a provider sign-in's one-time [code] and its PKCE [codeVerifier] for a session token
+     * (`POST /api/auth/mobile/token/`). The answer names no user.
+     */
+    suspend fun redeemMobileCode(code: String, codeVerifier: String, redirectUri: String): String
+
     /** Ends [sessionToken]'s session on the server at [baseUrl]. */
     suspend fun logout(baseUrl: String, sessionToken: String)
 }
