@@ -66,7 +66,7 @@ are from the work in progress, and more will follow as screens are finished.
   </tr>
 </table>
 
-<sub>iOS 26 simulator (iPhone 17).</sub>
+<sub>iPhone 17 simulator.</sub>
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-features.png"><img src="docs/readme/light/h-features.png" alt="Features" width="100%"></picture>
 
