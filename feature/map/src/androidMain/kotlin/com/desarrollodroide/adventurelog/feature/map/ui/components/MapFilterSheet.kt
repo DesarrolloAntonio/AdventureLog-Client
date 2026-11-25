@@ -1,27 +1,57 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
-import androidx.compose.material3.Switch
-import androidx.compose.ui.semantics.Role
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.feature.map.ui.state.MapFilters
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * What the map shows: categories as chips, then the four layers as one segmented block of
+ * switches. Each flip applies at once, so the map behind already shows it.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun MapFilterSheet(
     filters: MapFilters,
@@ -34,251 +64,189 @@ fun MapFilterSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = MaterialTheme.colorScheme
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = MaterialTheme.colorScheme.surface
     ) {
+        // No drag handle of its own: ModalBottomSheet draws one, and the sheet showed two
+        // stacked bars (QA 06, screenshot).
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp)
+                .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // No drag handle of its own: ModalBottomSheet draws one, and the sheet showed two
-            // stacked bars (QA 06, screenshot).
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Title
-            Text(
-                text = "View Options",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 24.dp)
+            // What is on, said under the title: it used to be a card of its own above the button.
+            val activeFilters = listOfNotNull(
+                "Visited".takeIf { filters.showVisited },
+                "Planned".takeIf { filters.showPlanned },
+                "Regions".takeIf { filters.showRegions },
+                "Cities".takeIf { filters.showCities },
             )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("View Options", style = AdventureType.display(34.sp))
+                Text(
+                    text = if (activeFilters.isEmpty()) "Every layer is off" else activeFilters.joinToString(" · "),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (activeFilters.isEmpty()) colors.onSurfaceVariant else colors.primary,
+                )
+            }
 
             // Categories, as the web keeps them - with how many places each holds, so it is
             // clear which are worth narrowing to.
             if (categoryCounts.isNotEmpty()) {
-                Text(
-                    text = "Categories",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-                )
-
-                @OptIn(ExperimentalLayoutApi::class)
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 12.dp)
-                ) {
-                    categoryCounts.forEach { (name, count) ->
-                        FilterChip(
-                            selected = name in filters.selectedCategories,
-                            onClick = { onToggleCategory(name) },
-                            label = { Text("$name ($count)") }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Layers",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-            )
-
-            // Filter options section
-            Column(
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                // Visited filter
-                FilterOption(
-                    icon = Icons.Default.CheckCircle,
-                    title = "Visited",
-                    count = filters.visitedCount,
-                    isSelected = filters.showVisited,
-                    onClick = onToggleVisited,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // Planned filter
-                FilterOption(
-                    icon = Icons.Default.Schedule,
-                    title = "Planned",
-                    count = filters.plannedCount,
-                    isSelected = filters.showPlanned,
-                    onClick = onTogglePlanned,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // Regions filter
-                FilterOption(
-                    icon = Icons.Default.Map,
-                    title = "Visited regions",
-                    count = filters.regionCount,
-                    isSelected = filters.showRegions,
-                    onClick = onToggleShowRegions,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                FilterOption(
-                    icon = Icons.Default.LocationCity,
-                    title = "Visited cities",
-                    count = filters.cityCount,
-                    isSelected = filters.showCities,
-                    onClick = onToggleShowCities,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Active filters summary
-            val activeFilters = listOf(
-                if (filters.showVisited) "Visited" else null,
-                if (filters.showPlanned) "Planned" else null,
-                if (filters.showRegions) "Regions" else null
-            ).filterNotNull()
-
-            if (activeFilters.isNotEmpty()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                SheetSection("Categories") {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column {
-                            Text(
-                                text = "Active Filters",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        categoryCounts.forEach { (name, count) ->
+                            val on = name in filters.selectedCategories
+                            FilterChip(
+                                selected = on,
+                                onClick = { onToggleCategory(name) },
+                                label = { Text("$name ($count)") },
+                                leadingIcon = if (on) {
+                                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
+                                } else null,
+                                shape = RoundedCornerShape(10.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = colors.secondaryContainer,
+                                    selectedLabelColor = colors.onSecondaryContainer,
+                                    selectedLeadingIconColor = colors.onSecondaryContainer,
+                                ),
                             )
-                            Text(
-                                text = activeFilters.joinToString(", "),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Badge(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ) {
-                            Text(activeFilters.size.toString())
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            SheetSection("Layers") {
+                Column(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                    LayerRow(
+                        icon = Icons.Default.CheckCircle,
+                        title = "Visited",
+                        count = filters.visitedCount,
+                        isSelected = filters.showVisited,
+                        onClick = onToggleVisited,
+                        accent = colors.primary,
+                        onAccent = colors.onPrimary,
+                        index = 0,
+                    )
+                    LayerRow(
+                        icon = Icons.Default.Schedule,
+                        title = "Planned",
+                        count = filters.plannedCount,
+                        isSelected = filters.showPlanned,
+                        onClick = onTogglePlanned,
+                        accent = colors.tertiary,
+                        onAccent = colors.onTertiary,
+                        index = 1,
+                    )
+                    LayerRow(
+                        icon = Icons.Default.Map,
+                        title = "Visited regions",
+                        count = filters.regionCount,
+                        isSelected = filters.showRegions,
+                        onClick = onToggleShowRegions,
+                        accent = colors.secondary,
+                        onAccent = colors.onSecondary,
+                        index = 2,
+                    )
+                    LayerRow(
+                        icon = Icons.Default.LocationCity,
+                        title = "Visited cities",
+                        count = filters.cityCount,
+                        isSelected = filters.showCities,
+                        onClick = onToggleShowCities,
+                        accent = colors.tertiary,
+                        onAccent = colors.onTertiary,
+                        index = 3,
+                    )
+                }
+            }
 
-            // Apply button
             Button(
                 onClick = onDismiss,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text(
-                    text = "Apply Filters",
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
-            }
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+            ) { Text("Apply Filters") }
         }
     }
 }
 
+/** A part of the sheet: its name in the label voice, then what it holds. */
 @Composable
-private fun FilterOption(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun SheetSection(title: String, content: @Composable () -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+        content()
+    }
+}
+
+private const val LAYER_COUNT = 4
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun LayerRow(
+    icon: ImageVector,
     title: String,
     count: Int,
     isSelected: Boolean,
     onClick: () -> Unit,
-    color: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier
+    accent: Color,
+    onAccent: Color,
+    index: Int,
 ) {
-    // A layer is on or off, so the row is a switch: it says so to a screen reader, and the tick
-    // that used to lead the row no longer sits beside the Visited layer's own tick icon (QA 06,
-    // screenshot: "✓ ✓ Visited").
+    val colors = MaterialTheme.colorScheme
+    val effects = MaterialTheme.motionScheme.fastEffectsSpec<Color>()
+    // The square takes the layer's own colour when it is on: the colour it has on the map.
+    val badge by animateColorAsState(if (isSelected) accent else colors.surfaceContainerHighest, effects, label = "badge")
+    val badgeContent by animateColorAsState(if (isSelected) onAccent else colors.onSurfaceVariant, effects, label = "badgeContent")
+
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .toggleable(value = isSelected, role = Role.Switch, onValueChange = { onClick() }),
-        color = if (isSelected) {
-            color.copy(alpha = 0.12f)
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        }
+        shape = SegmentedListDefaults.shapeFor(index, LAYER_COUNT),
+        color = colors.surfaceContainerHigh,
+        modifier = Modifier.fillMaxWidth(),
     ) {
+        // A layer is on or off, so the row is a switch: it says so to a screen reader, and the tick
+        // that used to lead the row no longer sits beside the Visited layer's own tick icon (QA 06,
+        // screenshot: "✓ ✓ Visited").
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            Modifier
+                .toggleable(value = isSelected, role = Role.Switch, onValueChange = { onClick() })
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // Icon
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (isSelected) color else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
+            Surface(shape = RoundedCornerShape(12.dp), color = badge, contentColor = badgeContent, modifier = Modifier.size(40.dp)) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp))
+                }
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
             )
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
-            // Title and count
-            Column(modifier = Modifier.weight(1f)) {
+            if (count > 0) {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+                    text = count.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.onSurfaceVariant
                 )
             }
-            
-            // Count badge
-            if (count > 0) {
-                Badge(
-                    containerColor = if (isSelected) color else MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                ) {
-                    Text(
-                        text = count.toString(),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-            }
-
-            Switch(checked = isSelected, onCheckedChange = null)
+            Switch(
+                checked = isSelected,
+                onCheckedChange = null,
+                thumbContent = if (isSelected) {
+                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(SwitchDefaults.IconSize)) }
+                } else null,
+            )
         }
     }
 }

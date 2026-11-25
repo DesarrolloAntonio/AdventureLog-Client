@@ -1,44 +1,36 @@
-# 🏕️ Adventure Log
+<div align="center">
 
-![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=main)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-blue.svg)
-![KMP](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-purple.svg)
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/banner.png"><img src="docs/readme/light/banner.png" alt="AdventureLog - every trip, in one journal" width="100%"></picture>
 
-A mobile client for [AdventureLog](https://github.com/seanmorley15/AdventureLog), the self-hosted
-travel journal, built with Kotlin Multiplatform: shared logic, Jetpack Compose on Android and
-SwiftUI on iOS. Log the places you have been, group them into trips, and see it all on a map,
-a calendar and a world of visited countries.
+<p>
+<a href="https://play.google.com/store/apps/details?id=com.desarrollodroide.adventurelog"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/btn-play.png"><img src="docs/readme/light/btn-play.png" alt="Get it on Google Play" height="48"></picture></a>
+<a href="https://github.com/DesarrolloAntonio/AdventureLog-Client/releases/latest"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/btn-apk.png"><img src="docs/readme/light/btn-apk.png" alt="Download the APK" height="48"></picture></a>
+<a href="https://github.com/seanmorley15/AdventureLog"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/btn-server.png"><img src="docs/readme/light/btn-server.png" alt="Host the AdventureLog server" height="48"></picture></a>
+</p>
 
-**Android** is the primary platform and is where everything is tested. **iOS** is a SwiftUI app
-that is still a placeholder and is not distributed yet.
+<p>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/badge-selfhosted.png"><img src="docs/readme/light/badge-selfhosted.png" alt="Self-hosted" height="26"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/badge-kmp.png"><img src="docs/readme/light/badge-kmp.png" alt="Kotlin Multiplatform" height="26"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/badge-m3e.png"><img src="docs/readme/light/badge-m3e.png" alt="Material 3 Expressive" height="26"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/badge-android.png"><img src="docs/readme/light/badge-android.png" alt="Android 7.0 and up" height="26"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/badge-ios.png"><img src="docs/readme/light/badge-ios.png" alt="iOS under construction" height="26"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/badge-servers.png"><img src="docs/readme/light/badge-servers.png" alt="AdventureLog servers 0.13 and 0.14" height="26"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/badge-mit.png"><img src="docs/readme/light/badge-mit.png" alt="MIT licence" height="26"></picture>
+</p>
 
-## 🌟 Features
+[![CI](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DesarrolloAntonio/AdventureLog-Client/actions/workflows/ci.yml)
 
-- **Places**: add, edit and search them, with photos, notes, links, dates and categories
-- **Collections**: trips that gather their own places, transport and lodging
-- **Map**: everything with coordinates, clustered and filterable
-- **Calendar**: everything with a date on it, as an agenda you can scroll and filter
-- **World**: countries, regions and cities visited, with statistics
-- **Search**: one box for places, collections, cities and countries
-- **Sharing**: invite someone with a public profile to a collection, or remove them again
-- **Markdown descriptions**: rendered as written on the web
-- **Tablets**: navigation rail, adaptive grids and list-detail panes for Places and Collections
+</div>
 
-## 📲 Install
+A mobile client for [AdventureLog](https://github.com/seanmorley15/AdventureLog), the self-hosted travel journal. Log the places you have
+been, group them into trips, and see it all on a map, a calendar and a world of visited countries -
+on your own server.
 
-This is a *client*: it needs a
-[self-hosted AdventureLog server](https://github.com/seanmorley15/AdventureLog) to talk to.
+The logic is shared through Kotlin Multiplatform; the interface is not. **Android** is Jetpack
+Compose in Material 3 Expressive, on phones and tablets, and is what is released. **iOS** is a
+SwiftUI app in Liquid Glass, under construction and not distributed yet.
 
-<a href="https://play.google.com/store/apps/details?id=com.desarrollodroide.adventurelog"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="80" alt="Get it on Google Play"/></a>
-
-Get it on [Google Play](https://play.google.com/store/apps/details?id=com.desarrollodroide.adventurelog),
-or download the APK from the [latest release](https://github.com/DesarrolloAntonio/AdventureLog-Client/releases/latest).
-Android 7.0 and up. Then sign in with your server's address and your account.
-
-Bug reports are welcome as [issues](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/new):
-what you did, what happened instead, and the device and Android version. A screenshot helps.
-
-## 📱 Screenshots
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-screenshots.png"><img src="docs/readme/light/h-screenshots.png" alt="Screenshots" width="100%"></picture>
 
 <table>
   <tr>
@@ -48,7 +40,7 @@ what you did, what happened instead, and the device and Android version. A scree
   </tr>
   <tr>
     <td align="center" width="33%"><img src="docs/screenshots/collections.png" width="235" alt="Collections"/><br/><sub><b>Collections</b><br/>trips, each gathering its own places</sub></td>
-    <td align="center" width="33%"><img src="docs/screenshots/collection_detail.png" width="235" alt="Inside a collection"/><br/><sub><b>Inside a collection</b><br/>places, transport and lodging</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/collection_detail.png" width="235" alt="Inside a collection"/><br/><sub><b>Inside a collection</b><br/>places, transport, lodging and a daily plan</sub></td>
     <td align="center" width="33%"><img src="docs/screenshots/calendar.png" width="235" alt="Calendar"/><br/><sub><b>Calendar</b><br/>the journal by date</sub></td>
   </tr>
   <tr>
@@ -61,11 +53,83 @@ what you did, what happened instead, and the device and Android version. A scree
 <sub>Android, on a Pixel 6a, light and dark theme. Photos come from Wikimedia Commons through the
 server's own image search.</sub>
 
-## 🏗️ Architecture
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-ios.png"><img src="docs/readme/light/h-ios.png" alt="iOS - under construction" width="100%"></picture>
+
+The iOS app is being built in SwiftUI with Liquid Glass (iOS 26). It shares the ViewModels and
+everything below them with Android, and draws its own screens. It is not distributed yet; these
+are from the work in progress, and more will follow as screens are finished.
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/screenshots/ios-login.png" width="235" alt="Sign-in on iOS"/><br/><sub><b>Sign-in</b><br/>light</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/ios-login-dark.png" width="235" alt="Sign-in on iOS, dark"/><br/><sub><b>Sign-in</b><br/>dark</sub></td>
+  </tr>
+</table>
+
+<sub>iPhone 17 simulator.</sub>
+
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-features.png"><img src="docs/readme/light/h-features.png" alt="Features" width="100%"></picture>
+
+<div align="center">
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/card-places.png"><img src="docs/readme/light/card-places.png" alt="Places" width="49%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/card-collections.png"><img src="docs/readme/light/card-collections.png" alt="Collections" width="49%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/card-map.png"><img src="docs/readme/light/card-map.png" alt="Map and calendar" width="49%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/card-world.png"><img src="docs/readme/light/card-world.png" alt="World" width="49%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/card-search.png"><img src="docs/readme/light/card-search.png" alt="Search" width="49%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/card-tablets.png"><img src="docs/readme/light/card-tablets.png" alt="Phones and tablets" width="49%"></picture>
+</div>
+
+<details>
+<summary><b>Everything it does</b></summary>
+<br>
+
+- **Places**: add, edit and search them, with photos, notes, links, dates, ratings and categories
+- **Collections**: trips that gather their own places, transport, lodging, notes and checklists
+- **Itinerary**: a day-by-day plan inside each collection
+- **Map**: everything with coordinates, clustered and filterable; on a tablet, the places in view beside it
+- **Calendar**: everything with a date on it, as an agenda or a month
+- **World**: countries, regions and cities visited, with statistics and a stamp per country
+- **Search**: one box for places, collections, cities and countries
+- **Sharing**: invite someone with a public profile to a collection, or remove them again
+- **Markdown descriptions**: rendered as written on the web
+- **Tablets**: navigation rail, adaptive grids, and list and detail side by side in Places, Collections and World
+- **Sign-in**: password, two-step verification, and the server's providers (OIDC, GitHub...) on 0.14
+- **Servers**: AdventureLog 0.13 and 0.14
+
+</details>
+
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-install.png"><img src="docs/readme/light/h-install.png" alt="Install" width="100%"></picture>
+
+This is a *client*: it needs a [self-hosted AdventureLog server](https://github.com/seanmorley15/AdventureLog) to talk to.
+
+Get it on [Google Play](https://play.google.com/store/apps/details?id=com.desarrollodroide.adventurelog), or download the APK from the [latest release](https://github.com/DesarrolloAntonio/AdventureLog-Client/releases/latest).
+Android 7.0 and up. Then sign in with your server's address and your account.
+
+Bug reports are welcome as [issues](https://github.com/DesarrolloAntonio/AdventureLog-Client/issues/new):
+what you did, what happened instead, and the device and Android version. A screenshot helps.
+
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-architecture.png"><img src="docs/readme/light/h-architecture.png" alt="Architecture" width="100%"></picture>
 
 Clean Architecture split into Gradle modules: `core` holds the domain, data and network layers,
 and each screen lives in its own `feature` module. ViewModels expose immutable UI state as
 `StateFlow`.
+
+UI is per platform: ViewModels and everything below them are shared, every `@Composable` lives in
+`androidMain`, and iOS is SwiftUI, which sees the shared code through [SKIE](https://skie.touchlab.co/).
+See the [design](docs/superpowers/specs/2026-11-21-native-ui-split-design.md).
+
+**Stack:** [Jetpack Compose](https://developer.android.com/jetpack/compose) with Material 3
+Expressive · [Compose Navigation](https://developer.android.com/guide/navigation/design), with
+[Navigation 3](https://developer.android.com/guide/navigation/navigation-3) for the list-detail panes ·
+[Koin](https://insert-koin.io/) · [Ktor](https://ktor.io/) (OkHttp on Android, Darwin on iOS) ·
+[Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization) ·
+[Coil](https://coil-kt.github.io/coil/) ·
+[Multiplatform Settings](https://github.com/russhwolf/multiplatform-settings) · Coroutines and Flow ·
+SwiftUI on iOS
+
+<details>
+<summary><b>Project layout</b></summary>
+<br>
 
 ```
 AdventureLog/
@@ -94,17 +158,7 @@ AdventureLog/
     └── world/            # Countries, regions and cities
 ```
 
-UI is per platform: ViewModels and everything below them are shared, every `@Composable` lives in
-`androidMain`, and iOS is SwiftUI. See the
-[design](docs/superpowers/specs/2026-11-21-native-ui-split-design.md).
-
-**Stack:** [Jetpack Compose](https://developer.android.com/jetpack/compose) with
-Material 3 · [Compose Navigation](https://developer.android.com/guide/navigation/design), with
-[Navigation 3](https://developer.android.com/guide/navigation/navigation-3) for the list-detail panes ·
-[Koin](https://insert-koin.io/) · [Ktor](https://ktor.io/) ·
-[Kotlinx Serialization](https://github.com/Kotlin/kotlinx.serialization) ·
-[Coil](https://coil-kt.github.io/coil/) ·
-[Multiplatform Settings](https://github.com/russhwolf/multiplatform-settings) · Coroutines and Flow
+</details>
 
 ### Module Graph
 
@@ -134,12 +188,12 @@ graph LR
   :feature:collections --> :feature:map
   :feature:collections --> :feature:ui
   :feature:collections --> :core:testing
+  :feature:locations --> :core:testing
+  :feature:locations --> :core:model
   :feature:locations --> :core:common
   :feature:locations --> :core:domain
-  :feature:locations --> :core:model
   :feature:locations --> :feature:detail
   :feature:locations --> :feature:ui
-  :feature:locations --> :core:testing
   :feature:settings --> :core:common
   :feature:settings --> :core:domain
   :feature:settings --> :core:model
@@ -194,19 +248,19 @@ graph LR
   :feature:ui --> :core:common
   :feature:ui --> :core:domain
   :feature:ui --> :core:model
+  :feature:detail --> :core:testing
+  :feature:detail --> :core:model
   :feature:detail --> :core:common
   :feature:detail --> :core:domain
-  :feature:detail --> :core:model
   :feature:detail --> :feature:ui
-  :feature:detail --> :core:testing
+  :feature:map --> :core:testing
+  :feature:map --> :core:model
   :feature:map --> :core:common
   :feature:map --> :core:domain
-  :feature:map --> :core:model
   :feature:map --> :feature:ui
   :feature:map --> :core:data
-  :feature:map --> :core:testing
 ```
-## 🚀 Building
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-build.png"><img src="docs/readme/light/h-build.png" alt="Build from source" width="100%"></picture>
 
 **Requirements:** an Android Studio recent enough for AGP 9.2, JDK 17, and Xcode 26 for iOS
 (iOS 26 minimum).
@@ -214,20 +268,22 @@ graph LR
 ```bash
 git clone https://github.com/DesarrolloAntonio/AdventureLog-Client.git
 cd AdventureLog-Client
+./gradlew :composeApp:assembleDebug
 ```
 
 - **Android**: open the project in Android Studio and run the `composeApp` configuration.
-- **iOS**: a placeholder for now. Run `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, then open
-  `iosApp/iosApp.xcodeproj` in Xcode and run it.
+- **iOS**: run `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, then open
+  `iosApp/iosApp.xcodeproj` in Xcode and run it. The SwiftUI screens are still under construction.
 
-## 🧪 Tests
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-tests.png"><img src="docs/readme/light/h-tests.png" alt="Tests" width="100%"></picture>
 
 - **Unit tests** (`commonTest`, on Android and iOS): models, mappers, use cases, the network and
   data layers, and every feature's ViewModels, using the fakes in `core/testing`. Tests of
   Android-only UI logic live in `androidUnitTest`.
 - **Shared-code check**: `scripts/check-common-compose.sh` fails if Compose reaches `commonMain`.
 - **UI tests** (`androidInstrumentedTest`, need a device or emulator): screens and shared
-  components in `collections`, `home`, `calendar`, `locations` and `ui`.
+  components in every feature module - `calendar`, `collections`, `detail`, `home`, `locations`,
+  `login`, `map`, `settings`, `ui` and `world`.
 - **Flows**: one Maestro flow in `.maestro/`.
 
 ```bash
@@ -235,13 +291,16 @@ cd AdventureLog-Client
 ./gradlew connectedDebugAndroidTest       # UI tests, with a device attached
 ```
 
-CI runs the unit tests and builds the app; the UI tests and the Maestro flow run locally.
+CI runs the unit tests, compiles the iOS framework and builds the app; the UI tests and the Maestro
+flow run locally.
 
-## ⚠️ Known issues
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-issues.png"><img src="docs/readme/light/h-issues.png" alt="Known issues" width="100%"></picture>
 
-- **MFA and SSO**: accounts that use them cannot sign in yet.
-- **iOS**: the SwiftUI app is a placeholder; the real screens come in a later phase.
+- **Sign-in providers** (OIDC, GitHub...) need server 0.14: 0.13 has no way for an app to use them.
+  The server must also list `adventurelog://auth/callback` in `MOBILE_AUTH_REDIRECT_URIS`, which
+  it does unless that setting was changed.
+- **iOS**: the SwiftUI app is under construction and not distributed yet.
 
-## 📄 License
+### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-license.png"><img src="docs/readme/light/h-license.png" alt="License" width="100%"></picture>
 
 MIT - see [LICENSE](LICENSE).

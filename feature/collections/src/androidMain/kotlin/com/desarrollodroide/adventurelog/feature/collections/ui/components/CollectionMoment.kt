@@ -1,0 +1,132 @@
+package com.desarrollodroide.adventurelog.feature.collections.ui.components
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Notes
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.DirectionsBus
+import androidx.compose.material.icons.outlined.Hotel
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import kotlinx.datetime.LocalDate
+
+/** Where a collection stands against today: "PLANNED" and the days to go, or how it stands now. */
+data class CollectionMoment(val eyebrow: String?, val daysToGo: Int?)
+
+private fun day(iso: String?): LocalDate? =
+    iso?.substringBefore('T')?.takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+
+/**
+ * The header's "PLANNED · 8 DAYS TO GO". The detail screen's [com.desarrollodroide.adventurelog.core.model.Collection]
+ * carries no status of its own (the list's slim collection does), so it is worked out here from the
+ * dates against [today]. No dates: a folder, which says nothing.
+ */
+fun collectionMoment(start: String?, end: String?, today: LocalDate): CollectionMoment {
+    val from = day(start) ?: return CollectionMoment(null, null)
+    val to = day(end) ?: from
+    return when {
+        today < from -> CollectionMoment("PLANNED", (from.toEpochDays() - today.toEpochDays()).toInt())
+        today <= to -> CollectionMoment("HAPPENING NOW", null)
+        else -> CollectionMoment("COMPLETED", null)
+    }
+}
+
+/** The big figure on the ticket's stub and the word under it. */
+data class TicketStub(val figure: String, val label: String)
+
+/**
+ * What the ticket's stub says, whatever the trip's moment: the days to go before it, the day it
+ * has reached while it runs, how long it lasted once over - and, for a folder with no dates, how
+ * many places are in it. Always something, so the ticket always has its stub.
+ */
+fun ticketStub(start: String?, end: String?, today: LocalDate, places: Int): TicketStub {
+    val from = day(start) ?: return TicketStub(places.toString(), if (places == 1) "PLACE" else "PLACES")
+    val to = day(end) ?: from
+    val length = (to.toEpochDays() - from.toEpochDays()).toInt() + 1
+    return when {
+        today < from -> {
+            val days = (from.toEpochDays() - today.toEpochDays()).toInt()
+            TicketStub(days.toString(), if (days == 1) "DAY TO GO" else "DAYS TO GO")
+        }
+        today <= to -> TicketStub(((today.toEpochDays() - from.toEpochDays()).toInt() + 1).toString(), "DAY OF $length")
+        else -> TicketStub(length.toString(), if (length == 1) "DAY" else "DAYS")
+    }
+}
+
+private val MONTHS = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+
+private fun stamp(date: LocalDate) = "${date.day} ${MONTHS[date.month.ordinal]}"
+
+/** "5 SEP → 9 SEP", as the canvas prints a trip's span; one date when it is one day. */
+fun arrowDates(start: String?, end: String?): String? {
+    val from = day(start) ?: return null
+    val to = day(end)
+    return if (to == null || to == from) stamp(from) else "${stamp(from)} → ${stamp(to)}"
+}
+
+/**
+ * The collection's "+": Material's FAB menu, opening onto the five kinds of thing a collection
+ * holds. One button where the canvas draws one; the per-section "+" headings stay for adding from
+ * where you are reading. [icon] is its closed face: "+" on a phone, "add to list" beside the list
+ * on a tablet, where the rail's "+" already means a new collection.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun AddToCollectionMenu(
+    onAddPlace: () -> Unit,
+    onAddTransportation: () -> Unit,
+    onAddLodging: () -> Unit,
+    onAddNote: () -> Unit,
+    onAddChecklist: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Filled.Add,
+) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    BackHandler(expanded) { expanded = false }
+    val items: List<Triple<String, ImageVector, () -> Unit>> = listOf(
+        Triple("Place", Icons.Outlined.Place, onAddPlace),
+        Triple("Transport", Icons.Outlined.DirectionsBus, onAddTransportation),
+        Triple("Lodging", Icons.Outlined.Hotel, onAddLodging),
+        Triple("Note", Icons.AutoMirrored.Outlined.Notes, onAddNote),
+        Triple("Checklist", Icons.Outlined.Checklist, onAddChecklist),
+    )
+    FloatingActionButtonMenu(
+        expanded = expanded,
+        modifier = modifier,
+        button = {
+            ToggleFloatingActionButton(
+                checked = expanded,
+                onCheckedChange = { expanded = it },
+                modifier = Modifier.semantics { contentDescription = "Add to collection" },
+            ) {
+                val face = if (checkedProgress > 0.5f) Icons.Filled.Close else icon
+                Icon(face, contentDescription = null, modifier = Modifier.animateIcon({ checkedProgress }))
+            }
+        },
+    ) {
+        items.forEach { (label, icon, onClick) ->
+            FloatingActionButtonMenuItem(
+                onClick = { expanded = false; onClick() },
+                text = { Text(label) },
+                icon = { Icon(icon, contentDescription = null) },
+            )
+        }
+    }
+}

@@ -4,7 +4,7 @@ import com.desarrollodroide.adventurelog.feature.map.ui.components.statText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** What the map card says (QA 06). */
+/** What the map's count buttons say (QA 06). */
 class MapLabelsTest {
 
     @Test

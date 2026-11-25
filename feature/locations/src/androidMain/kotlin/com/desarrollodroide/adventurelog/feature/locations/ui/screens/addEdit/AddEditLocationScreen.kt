@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit
 
+import com.desarrollodroide.adventurelog.feature.ui.components.DiscardChangesDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.FormActionBar
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.datetime.TimeZone
@@ -81,6 +85,8 @@ fun AddEditLocationScreen(
     onNavigateBack: () -> Unit,
     /** Open on the images section, scrolled to it: the form was reached by "Add photo". */
     openImages: Boolean = false,
+    /** Open on the dates, for the place page's "Visit". */
+    openVisits: Boolean = false,
     /** A new place started from a trip goes into that trip. */
     intoCollectionId: String? = null
 ) {
@@ -109,6 +115,7 @@ fun AddEditLocationScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         AddEditLocationContent(
             openImages = openImages,
+            openVisits = openVisits,
             isEditMode = locationId != null,
             existingLocation = uiState.existingLocation,
             categories = uiState.categories,
@@ -158,6 +165,8 @@ fun AddEditLocationScreen(
 @Composable
 fun AddEditLocationContent(
     openImages: Boolean = false,
+    /** Open on the dates, for the place page's "Visit". */
+    openVisits: Boolean = false,
     isEditMode: Boolean = false,
     existingLocation: Location? = null,
     categories: List<Category>,
@@ -239,33 +248,19 @@ fun AddEditLocationContent(
     }
 
     PlatformBackHandler(enabled = hasChanges) { confirmDiscard = true }
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
 
     if (confirmDiscard) {
-        AlertDialog(
-            onDismissRequest = { confirmDiscard = false },
-            title = { Text(if (isEditMode) "Discard changes?" else "Discard this place?") },
-            text = {
-                Text(
-                    if (isEditMode) {
-                        "The changes you have made will not be saved."
-                    } else {
-                        "Nothing has been created yet, and what you have typed will be lost."
-                    }
-                )
+        // The same question every form asks, in the same Expressive dialog.
+        DiscardChangesDialog(
+            thing = "place",
+            isEditing = isEditMode,
+            onDiscard = {
+                confirmDiscard = false
+                onNavigateBack()
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        confirmDiscard = false
-                        onNavigateBack()
-                    }
-                ) {
-                    Text("Discard", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDiscard = false }) { Text("Keep editing") }
-            }
+            onKeepEditing = { confirmDiscard = false },
         )
     }
 
@@ -283,99 +278,102 @@ fun AddEditLocationContent(
             scrolledToImages = true
         }
     }
+    var visitsTop by remember { mutableStateOf<Int?>(null) }
+    var scrolledToVisits by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(visitsTop) {
+        val top = visitsTop
+        if (openVisits && !scrolledToVisits && top != null) {
+            scrollState.animateScrollTo(top)
+            scrolledToVisits = true
+        }
+    }
 
     ContentColumn(modifier) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        BasicInfoSection(
-            formData = formData,
-            categories = categories,
-            onFormDataChange = { formData = it },
-            onNavigateBack = { leave() },
-            onGenerateDescription = {
-                onGenerateDescription(formData.name) { generatedDescription ->
-                    formData = formData.copy(description = generatedDescription)
-                }
-            },
-            isGeneratingDescription = isGeneratingDescription,
-            onAddCategory = onAddCategory
-        )
-
-        LocationSection(
-            formData = formData,
-            onFormDataChange = { formData = it },
-            locationSearchResults = locationSearchResults,
-            isSearchingLocation = isSearchingLocation,
-            onSearchLocation = onSearchLocation,
-            onClearLocationSearch = onClearLocationSearch,
-            onReverseGeocode = onReverseGeocode
-        )
-
-        TagsSection(
-            formData = formData,
-            onFormDataChange = { formData = it }
-        )
-
-        TrailsSection(
-            formData = formData,
-            onFormDataChange = { formData = it }
-        )
-
-        Box(Modifier.onPlaced { imagesTop = it.positionInParent().y.roundToInt() }) {
-            ImagesSection(
-                images = formData.images,
-                onImagesChange = { updatedImages ->
-                    formData = formData.copy(images = updatedImages)
-                },
-                wikipediaImageState = wikipediaImageState,
-                onSearchWikipediaImage = onSearchWikipediaImage,
-                onResetWikipediaState = onResetWikipediaState,
-                initiallyExpanded = openImages
-            )
-        }
-
-        // Visits are saved after the location, against /api/visits/ - they cannot be nested in
-        // the location payload because each one needs a location id that does not exist yet.
-        DateSection(
-            formData = formData,
-            onFormDataChange = { formData = it }
-        )
-
+    Column(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .weight(1f).fillMaxWidth()
+                .verticalScroll(scrollState)
         ) {
-            PrimaryButton(
-                onClick = { onSave(formData) },
-                text = when {
-                    isSaving -> "Saving…"
-                    isEditMode -> "Save changes"
-                    else -> "Create place"
-                },
-                // Held while a save runs: nothing showed one was under way, and a second tap made a
-                // second place.
-                enabled = !isSaving
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FormHeader(
+                title = if (isEditMode) "Edit place" else "New place",
+                onClose = { leave() },
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            TextButton(
-                onClick = { leave() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Cancel",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            BasicInfoSection(
+                formData = formData,
+                categories = categories,
+                onFormDataChange = { formData = it },
+                onGenerateDescription = {
+                    onGenerateDescription(formData.name) { generatedDescription ->
+                        formData = formData.copy(description = generatedDescription)
+                    }
+                },
+                isGeneratingDescription = isGeneratingDescription,
+                onAddCategory = onAddCategory
+            )
+
+            LocationSection(
+                formData = formData,
+                onFormDataChange = { formData = it },
+                locationSearchResults = locationSearchResults,
+                isSearchingLocation = isSearchingLocation,
+                onSearchLocation = onSearchLocation,
+                onClearLocationSearch = onClearLocationSearch,
+                onReverseGeocode = onReverseGeocode
+            )
+
+            TagsSection(
+                formData = formData,
+                onFormDataChange = { formData = it }
+            )
+
+            TrailsSection(
+                formData = formData,
+                onFormDataChange = { formData = it }
+            )
+
+            Box(Modifier.onPlaced { imagesTop = it.positionInParent().y.roundToInt() }) {
+                ImagesSection(
+                    images = formData.images,
+                    onImagesChange = { updatedImages ->
+                        formData = formData.copy(images = updatedImages)
+                    },
+                    wikipediaImageState = wikipediaImageState,
+                    onSearchWikipediaImage = onSearchWikipediaImage,
+                    onResetWikipediaState = onResetWikipediaState,
+                    initiallyExpanded = openImages
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.height(32.dp))
+            // Visits are saved after the location, against /api/visits/ - they cannot be nested in
+            // the location payload because each one needs a location id that does not exist yet.
+            Box(Modifier.onPlaced { visitsTop = it.positionInParent().y.roundToInt() }) {
+                DateSection(
+                    formData = formData,
+                    onFormDataChange = { formData = it },
+                    initiallyExpanded = openVisits
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+        // Save and Cancel pinned under the form, as the canvas draws it.
+        FormActionBar(
+            onClick = { onSave(formData) },
+            text = when {
+                isSaving -> "Saving…"
+                isEditMode -> "Save changes"
+                else -> "Create place"
+            },
+            // Held while a save runs: nothing showed one was under way, and a second tap made a
+            // second place.
+            enabled = !isSaving,
+            onCancel = { leave() }
+        )
     }
     }
 }

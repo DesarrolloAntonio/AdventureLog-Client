@@ -1,5 +1,13 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,27 +73,37 @@ private fun CollectionTabChip(
     isEnabled: Boolean,
     onClick: () -> Unit
 ) {
-    val container = when {
-        !isEnabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        isSelected -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
+    // As the canvas draws them: the chosen one dark, a pill, with a check; the rest tonal with
+    // tighter corners. The corners and the colour move on the expressive springs.
+    val motion = MaterialTheme.motionScheme
+    val container by animateColorAsState(
+        when {
+            !isEnabled -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            isSelected -> MaterialTheme.colorScheme.inverseSurface
+            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+        },
+        motion.defaultEffectsSpec(), label = "chip"
+    )
     val content = when {
         !isEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-        isSelected -> MaterialTheme.colorScheme.onPrimary
+        isSelected -> MaterialTheme.colorScheme.inverseOnSurface
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
+    val corner by animateDpAsState(if (isSelected) 20.dp else 12.dp, motion.fastSpatialSpec(), label = "corner")
 
     Surface(
         modifier = if (isEnabled) Modifier.clickable(onClick = onClick) else Modifier,
         color = container,
-        shape = RoundedCornerShape(percent = 50)
+        shape = RoundedCornerShape(corner)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier.heightIn(min = 40.dp).padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            if (isSelected) {
+                Icon(Icons.Default.Check, contentDescription = null, tint = content, modifier = Modifier.size(18.dp))
+            }
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,

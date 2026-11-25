@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog.feature.calendar
 
 import com.desarrollodroide.adventurelog.feature.calendar.ui.screen.AgendaItem
 import com.desarrollodroide.adventurelog.feature.calendar.ui.screen.agendaItems
+import com.desarrollodroide.adventurelog.feature.calendar.ui.screen.daySegments
 import com.desarrollodroide.adventurelog.feature.calendar.ui.screen.todayScrollIndex
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.Earlier
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.CalendarDay
@@ -141,5 +142,23 @@ class TodayScrollIndexTest {
     @Test
     fun noTodayMeansTheTop() {
         assertEquals(0, todayScrollIndex(state(listOf("2026-03-01"), today = null)))
+    }
+
+    @Test
+    fun eachMonthsDaysAreOneSegmentedGroup() {
+        // March: the 1st and 4th; April: the 2nd. The heading between them starts a new group.
+        val items = agendaItems(state(listOf("2026-03-01", "2026-03-04", "2026-04-02"), today = null))
+        val segments = daySegments(items)
+        assertEquals(0 to 2, segments.getValue("day-2026-03-01"))
+        assertEquals(1 to 2, segments.getValue("day-2026-03-04"))
+        assertEquals(0 to 1, segments.getValue("day-2026-04-02"))
+    }
+
+    @Test
+    fun todaysMarkerSplitsTheGroup() {
+        val items = agendaItems(state(listOf("2026-03-01", "2026-03-20"), today = "2026-03-10"))
+        val segments = daySegments(items)
+        assertEquals(0 to 1, segments.getValue("day-2026-03-01"))
+        assertEquals(0 to 1, segments.getValue("day-2026-03-20"))
     }
 }

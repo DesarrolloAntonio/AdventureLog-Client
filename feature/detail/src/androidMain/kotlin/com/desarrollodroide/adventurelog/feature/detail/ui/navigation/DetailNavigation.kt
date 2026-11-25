@@ -37,6 +37,9 @@ fun NavGraphBuilder.detailNavGraph(
                 onEditClick = { location -> navigator.navigateToEditLocation(location) },
                 onAddPhotoClick = { location ->
                     navigator.navigateToEditLocation(location, openImages = true)
+                },
+                onAddVisitClick = { location ->
+                    navigator.navigateToEditLocation(location, openVisits = true)
                 }
             )
         }

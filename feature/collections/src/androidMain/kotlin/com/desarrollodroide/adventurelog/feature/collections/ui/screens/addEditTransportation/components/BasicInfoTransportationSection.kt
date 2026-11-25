@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,20 +17,22 @@ import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Flight
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,13 +48,14 @@ import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 import com.desarrollodroide.adventurelog.feature.ui.components.RatingBar
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BasicInfoTransportationSection(
     formData: TransportationFormData,
     transportationTypes: List<String>,
     onFormDataChange: (TransportationFormData) -> Unit,
-    onNavigateBack: () -> Unit,
+    /** The old in-card back arrow; the form's own header has Close now, so callers leave it out. */
+    onNavigateBack: (() -> Unit)? = null,
     onGenerateDescription: () -> Unit,
     isGeneratingDescription: Boolean
 ) {
@@ -59,13 +63,14 @@ fun BasicInfoTransportationSection(
     var typeDropdownExpanded by remember { mutableStateOf(false) }
 
     SectionCard(
-        title = "Basic Information",
+        title = "Basic information",
         icon = Icons.Outlined.Info,
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        leadingContent = {
+        leadingContent = onNavigateBack?.let { back -> {
             IconButton(
-                onClick = onNavigateBack,
+                onClick = back,
+                shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
@@ -75,7 +80,7 @@ fun BasicInfoTransportationSection(
                     modifier = Modifier.size(20.dp)
                 )
             }
-        }
+        } }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -83,7 +88,7 @@ fun BasicInfoTransportationSection(
             StyledTextField(
                 value = formData.name,
                 onValueChange = { onFormDataChange(formData.copy(name = it)) },
-                label = "Transportation Name",
+                label = "Transportation name",
                 icon = Icons.Outlined.Title
             )
 
@@ -96,24 +101,24 @@ fun BasicInfoTransportationSection(
                     modifier = Modifier
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                         .fillMaxWidth()
-                        .height(55.dp),
+                        .heightIn(min = 56.dp),
                     value = getTransportationDisplayName(formData.type),
                     onValueChange = {},
                     readOnly = true,
                     placeholder = { Text("Type") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeDropdownExpanded) },
-                    shape = RoundedCornerShape(30.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     ),
                     leadingIcon = {
                         Icon(
                             Icons.Outlined.DirectionsCar,
                             contentDescription = null,
-                            tint = Color.Gray
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     singleLine = true
@@ -147,7 +152,7 @@ fun BasicInfoTransportationSection(
                 StyledTextField(
                     value = formData.flightNumber,
                     onValueChange = { onFormDataChange(formData.copy(flightNumber = it)) },
-                    label = "Flight Number",
+                    label = "Flight number",
                     icon = Icons.Outlined.Flight
                 )
             }
@@ -174,17 +179,12 @@ fun BasicInfoTransportationSection(
                         color = MaterialTheme.colorScheme.onSurface
                     )
 
-                    Button(
+                    TextButton(
                         onClick = onGenerateDescription,
                         enabled = formData.name.isNotBlank() && !isGeneratingDescription,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
+                        shapes = ButtonDefaults.shapes()
                     ) {
-                        Text(
-                            text = if (isGeneratingDescription) "Generating..." else "Generate",
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        Text(text = if (isGeneratingDescription) "Generating..." else "Generate")
                     }
                 }
 
@@ -197,10 +197,10 @@ fun BasicInfoTransportationSection(
                         .height(120.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     ),
                     // No leading icon: in a multi-line field Material centres it vertically, far from the text.
                     minLines = 3,

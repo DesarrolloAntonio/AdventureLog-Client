@@ -22,6 +22,13 @@ internal const val SESSION_TOKEN_HEADER = "X-Session-Token"
 internal const val LOGIN_PATH = "/auth/app/v1/auth/login"
 
 /**
+ * The second step of a sign-in for an account with two-step verification: the code goes here with
+ * the half-done session from the login's 401 as X-Session-Token. Same app client, so 0.14 moves it
+ * under /api like the login.
+ */
+internal const val MFA_AUTHENTICATE_PATH = "/auth/app/v1/auth/2fa/authenticate"
+
+/**
  * allauth's browser session: GET is the session, DELETE is signing out. Not the app client's: its
  * DELETE answers 401 and leaves the session alive (measured on 0.13.1, direct and proxied).
  */
@@ -32,6 +39,21 @@ internal const val SESSION_PATH = "/auth/browser/v1/auth/session"
  * its own HTML 404 - that is how the app knows its requests go through the frontend's proxy.
  */
 internal const val CSRF_PROBE_PATH = "/csrf/"
+
+/**
+ * What the sign-in screen needs before anyone is signed in, the providers among it. 0.14.0 only;
+ * an anonymous GET, sent as it is.
+ */
+internal const val AUTH_CONFIG_PATH = "/api/auth/config/"
+
+/** Where the browser starts a provider sign-in for the app (upstream's "Mobile app sign-in"). */
+internal const val MOBILE_START_PATH = "/accounts/mobile/start/"
+
+/** Trades the code a provider sign-in brought back for a session. */
+internal const val MOBILE_TOKEN_PATH = "/api/auth/mobile/token/"
+
+/** In `/api/server-info/`'s `capabilities` when the server signs the app in through providers. */
+internal const val MOBILE_AUTH_CAPABILITY = "mobile_auth_v1"
 
 internal const val CSRF_HEADER = "X-CSRFToken"
 
@@ -91,6 +113,9 @@ internal fun HeadersBuilder.commonHeaders(sessionToken: String?) {
 
 internal val defaultJson = Json {
     ignoreUnknownKeys = true
+    // Server 0.14 sends null for fields 0.13 always filled (a flag, an image, a day's date):
+    // those DTO fields keep a default, and a null takes it instead of failing the whole answer.
+    coerceInputValues = true
     isLenient = true
     encodeDefaults = true  // Include fields with default values
     explicitNulls = true   // Include null values in JSON

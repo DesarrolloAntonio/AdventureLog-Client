@@ -4,7 +4,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.SettingsScreen
-import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.settings.ui.screen.UsersScreen
 
 /**
@@ -15,17 +14,12 @@ fun NavGraphBuilder.settingsScreen(
 ) {
     composable(
         route = NavigationRoutes.Settings.route,
-        // Settings appears from bottom for a distinctive style
-        enterTransition = NavigationAnimations.enterTransitionVertical,
-        exitTransition = NavigationAnimations.exitTransitionVertical,
     ) {
         SettingsScreen(onLogout = onLogout)
     }
 
     composable(
         route = NavigationRoutes.Users.route,
-        enterTransition = NavigationAnimations.enterTransitionVertical,
-        exitTransition = NavigationAnimations.exitTransitionVertical,
     ) {
         UsersScreen()
     }

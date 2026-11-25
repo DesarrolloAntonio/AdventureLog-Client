@@ -69,14 +69,14 @@ fun StyledTextField(
                 null
             },
             isError = isError,
-            shape = RoundedCornerShape(30.dp),
+            // Outlined, as the canvas draws its fields: a 14dp box with its label riding the line,
+            // on the white of the form's section, the border taking the primary colour when focused.
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                // A solid container tone, not a 30% wash. Against the flat surface the redesign
-                // uses, a translucent fill left the field barely distinguishable from the page.
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
                 focusedBorderColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = if (isError) MaterialTheme.colorScheme.error else Color.Transparent
+                unfocusedBorderColor = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
             )
         )
         if (isError && errorMessage.isNotEmpty()) {

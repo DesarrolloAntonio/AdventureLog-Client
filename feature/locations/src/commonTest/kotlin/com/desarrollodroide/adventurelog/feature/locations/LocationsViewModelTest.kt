@@ -13,6 +13,7 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteCategoryUseCa
 import com.desarrollodroide.adventurelog.core.domain.usecase.DeleteLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.DuplicateLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllCollectionsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetCategoriesUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsPagingUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetShareImageUseCase
@@ -184,7 +185,8 @@ class LocationsViewModelTest {
             getShareImageUseCase = GetShareImageUseCase(locations),
             platformFiles = files,
             getUserStatsUseCase = GetUserStatsUseCase(FakeUserRepository(stats = stats)),
-            userRepository = FakeUserRepository(stats = stats)
+            userRepository = FakeUserRepository(stats = stats),
+            getAllLocationsUseCase = GetAllLocationsUseCase(locations)
         )
     }
 
@@ -494,5 +496,41 @@ class LocationsViewModelTest {
         testScheduler.advanceUntilIdle()
 
         assertEquals(22, vm.libraryCounts.value?.locationCount)
+    }
+
+    // --- grouped by country ---------------------------------------------------------------
+
+    @Test
+    fun noGroupsUntilCountryIsTheOrderThenTheWholeLibraryGrouped() = runTest(dispatcher) {
+        var allCalls = 0
+        val locations = object : LocationsRepositoryStub() {
+            override fun getLocationsPagingData(): Flow<PagingData<Location>> = flowOf(PagingData.empty())
+            override fun getLocationsPagingDataFiltered(
+                categoryNames: List<String>?, sortBy: String?, sortOrder: String?,
+                isVisited: Boolean?, searchQuery: String?, includeCollections: Boolean
+            ): Flow<PagingData<Location>> = flowOf(PagingData.empty())
+            override suspend fun getAllLocations(): Either<ApiResponse, List<Location>> {
+                allCalls++
+                return Either.Right(
+                    listOf(
+                        com.desarrollodroide.adventurelog.core.testing.testLocation("Trolltunga", country = "Norway"),
+                        com.desarrollodroide.adventurelog.core.testing.testLocation("Fushimi Inari", country = "Japan"),
+                    )
+                )
+            }
+        }
+        val vm = viewModel(locations)
+        val job = launch { vm.countryGroups.collect { } }
+        testScheduler.advanceUntilIdle()
+        assertEquals(null, vm.countryGroups.value)
+        assertEquals(0, allCalls)
+
+        vm.onFiltersChanged(LocationFilters(sortField = LocationSortField.COUNTRY, sortDirection = SortDirection.ASCENDING))
+        testScheduler.advanceUntilIdle()
+
+        val ready = vm.countryGroups.value as LocationsViewModel.CountryGroupsState.Ready
+        assertEquals(listOf("Japan", "Norway"), ready.groups.map { it.country })
+        assertEquals(1, allCalls)
+        job.cancel()
     }
 }

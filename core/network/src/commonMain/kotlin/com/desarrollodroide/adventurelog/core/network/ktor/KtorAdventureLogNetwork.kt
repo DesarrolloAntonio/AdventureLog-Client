@@ -19,10 +19,12 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserDetails
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
@@ -66,6 +68,12 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorGeocodingApi
 import com.desarrollodroide.adventurelog.core.network.api.AuthApi
 import com.desarrollodroide.adventurelog.core.network.api.TransportationApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
+import com.desarrollodroide.adventurelog.core.network.model.response.LoginOutcomeDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.AuthConfigDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.ServerInfoDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.SignInProvidersDTO
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.isSuccess
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTransportationApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
@@ -97,6 +105,12 @@ class KtorAdventureLogNetwork(
     private val json = defaultJson
 
     private var sessionToken: String? = null
+
+    /**
+     * The half-done session of a sign-in waiting for its second factor. Not [sessionToken]: it
+     * signs nobody in, and no other request may carry it.
+     */
+    private var pendingLoginToken: String? = null
     private var baseUrl: String? = null
 
     private val rejections = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -105,8 +119,31 @@ class KtorAdventureLogNetwork(
     private val csrfToken = newCsrfToken()
 
     /** Null until the first request to a server finds out; reset whenever the server changes. */
-    private var behindWebProxy: Boolean? = null
+    private var serverProfile: ServerProfile? = null
     private val probeLock = Mutex()
+
+    /** The profile of the server at [origin], probing it the first time (see [probeServer]). */
+    private suspend fun profileOf(origin: String): ServerProfile =
+        serverProfile ?: probeLock.withLock {
+            serverProfile ?: probeServer { path ->
+                // Marked, so the interceptor sends it as it is: no session, no probe of its own.
+                adventurelogClient.get("$origin$path") {
+                    attributes.put(ProbeRequest, Unit)
+                    header("X-Is-Mobile", "true")
+                    header(HttpHeaders.Accept, "application/json")
+                }.call
+            }.also {
+                logger.d {
+                    "Server at $origin: API ${it.api}, " +
+                        if (it.behindWebProxy) "behind the web frontend's proxy" else "Django directly"
+                }
+                serverProfile = it
+            }
+        }
+
+    /** Which API the signed-in server speaks, for the calls whose bodies differ between them. */
+    private suspend fun serverApi(): ServerApi =
+        profileOf(Url(baseUrl ?: error("No server to ask")).origin()).api
 
     init {
         // One place sees every answer, so no screen has to recognise an ended session on its own.
@@ -115,29 +152,26 @@ class KtorAdventureLogNetwork(
         adventurelogClient.plugin(HttpSend).intercept { request ->
             // The session comes from the request's own header, not from sessionToken: sign-out
             // sends its DELETE in the background after clearSession() has already emptied it.
+            if (request.attributes.contains(ProbeRequest)) {
+                return@intercept execute(request)
+            }
             val requestSession = request.headers[SESSION_TOKEN_HEADER]
             val toOwnServer = baseUrl?.let { Url(it).origin() == request.url.build().origin() } == true
             if (requestSession != null || toOwnServer) {
-                val origin = request.url.build().origin()
-                val proxied = behindWebProxy ?: probeLock.withLock {
-                    behindWebProxy ?: run {
-                        val probe = HttpRequestBuilder().apply {
-                            url("$origin$CSRF_PROBE_PATH")
-                            header("X-Is-Mobile", "true")
-                        }
-                        val answer = execute(probe).response
-                        (answer.contentType()?.match(ContentType.Text.Html) == true).also {
-                            logger.d { "Server at $origin: ${if (it) "behind the web frontend's proxy" else "Django directly"}" }
-                            behindWebProxy = it
-                        }
+                val profile = profileOf(request.url.build().origin())
+                when {
+                    profile.api == ServerApi.V014 -> {
+                        request.rewriteFor014()
+                        request.attachTokenSession(profile.behindWebProxy)
                     }
+                    profile.behindWebProxy -> request.attachProxiedSession(requestSession)
+                    else -> request.attachDjangoSession(requestSession, csrfToken)
                 }
-                if (proxied) request.attachProxiedSession(requestSession)
-                else request.attachDjangoSession(requestSession, csrfToken)
             }
             val call = execute(request)
-            val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_PATH)
-            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut) {
+            val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_SUFFIX)
+            val signingIn = request.attributes.contains(AuthStageRequest)
+            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut && !signingIn) {
                 logger.w { "Server rejected the session (401 on ${call.request.url.encodedPath})" }
                 rejections.tryEmit(Unit)
             }
@@ -151,6 +185,9 @@ class KtorAdventureLogNetwork(
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
             onSessionTokenReceived = { token ->
                 sessionToken = token
+            },
+            onPendingLogin = { token ->
+                pendingLoginToken = token
             },
             json = json
         )
@@ -235,7 +272,8 @@ class KtorAdventureLogNetwork(
     private val itineraryDataSource: ItineraryApi by lazy {
         KtorItineraryApi(
             httpClient = adventurelogClient,
-            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            serverApi = ::serverApi,
         )
     }
 
@@ -276,7 +314,7 @@ class KtorAdventureLogNetwork(
         sessionToken: String?
     ) {
         this.baseUrl = serverUrl.trimEnd('/')
-        behindWebProxy = null
+        serverProfile = null
         this.sessionToken = sessionToken
         logger.d {
             "Network initialized from existing session - BaseURL: ${this.baseUrl}, " +
@@ -298,8 +336,9 @@ class KtorAdventureLogNetwork(
 
     override fun clearSession() {
         sessionToken = null
+        pendingLoginToken = null
         baseUrl = null
-        behindWebProxy = null
+        serverProfile = null
         logger.d { "Network session cleared - all tokens and base URL reset" }
     }
 
@@ -307,18 +346,82 @@ class KtorAdventureLogNetwork(
         url: String,
         username: String,
         password: String
+    ): LoginOutcomeDTO {
+        baseUrl = url.trimEnd('/')
+        serverProfile = null
+        pendingLoginToken = null
+        // The authDataSource reads baseUrl through its sessionProvider; a new session token or a
+        // pending sign-in comes back through its callbacks.
+        val outcome = authDataSource.login(username, password)
+        if (outcome is LoginOutcomeDTO.SignedIn) {
+            logger.d { "Login completed successfully for user: ${outcome.user.username}" }
+        }
+        return outcome
+    }
+
+    override suspend fun sendSecondFactorCode(code: String): UserDetailsDTO {
+        // Same server as the password step: baseUrl and its profile stay as they are.
+        val pending = pendingLoginToken
+            ?: throw HttpException(HttpStatusCode.Gone.value, "No sign-in is waiting for a code")
+        val userDetails = authDataSource.authenticateSecondFactor(pending, code)
+        pendingLoginToken = null
+        return userDetails
+    }
+
+    override fun cancelPendingLogin() {
+        pendingLoginToken = null
+    }
+
+    override suspend fun getSignInProviders(url: String): SignInProvidersDTO {
+        val server = url.trimEnd('/')
+        val none = SignInProvidersDTO.none(server)
+        val info = anonymousJson<ServerInfoDTO>("$server$SERVER_INFO_PATH") ?: return none
+        if (MOBILE_AUTH_CAPABILITY !in info.capabilities) return none
+        val config = anonymousJson<AuthConfigDTO>("$server$AUTH_CONFIG_PATH") ?: return none
+        return SignInProvidersDTO(
+            browserBaseUrl = browserBaseUrl(info.publicUrl, typed = server),
+            providers = config.socialProviders
+                .filter { it.id.isNotBlank() }
+                .map { SignInProvidersDTO.Provider(it.id, it.name.ifBlank { it.provider.ifBlank { it.id } }) },
+        )
+    }
+
+    /**
+     * A GET to another server than the signed-in one, perhaps, and before anyone is signed in:
+     * marked as a probe so the interceptor neither attaches the session nor probes the server.
+     * Null for anything but a JSON answer it can read (the web frontend's HTML, a 404 on 0.13).
+     */
+    private suspend inline fun <reified T> anonymousJson(url: String): T? {
+        val response = adventurelogClient.get(url) {
+            attributes.put(ProbeRequest, Unit)
+            header("X-Is-Mobile", "true")
+            header(HttpHeaders.Accept, "application/json")
+        }
+        if (!response.status.isSuccess()) return null
+        return runCatching { json.decodeFromString<T>(response.bodyAsText()) }.getOrNull()
+    }
+
+    override suspend fun redeemProviderSignIn(
+        url: String,
+        code: String,
+        codeVerifier: String,
+        redirectUri: String,
     ): UserDetailsDTO {
         baseUrl = url.trimEnd('/')
-        behindWebProxy = null
-        // Initialize the session info before calling login
-        // The authDataSource will use the sessionProvider to get the baseUrl
-        
-        val userDetails = authDataSource.login(username, password)
-        
-        // The session token is already updated via the onSessionTokenReceived callback
-        logger.d { "Login completed successfully for user: ${userDetails.username}" }
-        
-        return userDetails
+        serverProfile = null
+        pendingLoginToken = null
+        sessionToken = null
+        // The session comes back through onSessionTokenReceived, like a password login's.
+        authDataSource.redeemMobileCode(code, codeVerifier, redirectUri)
+        return try {
+            // The exchange names nobody: who signed in is the account the session belongs to.
+            userDataSource.getUserDetails().copy(sessionToken = sessionToken)
+        } catch (e: Exception) {
+            // A session nobody will use: end it rather than leave it listed on the server.
+            endServerSession()
+            sessionToken = null
+            throw e
+        }
     }
 
     override suspend fun getUserDetails(): UserDetailsDTO {
@@ -846,9 +949,9 @@ class KtorAdventureLogNetwork(
         return itineraryDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
     }
 
-    override suspend fun deleteItineraryEntry(entryId: String) {
+    override suspend fun deleteItineraryEntry(collectionId: String, entryId: String) {
         ensureInitialized()
-        itineraryDataSource.deleteItineraryEntry(entryId)
+        itineraryDataSource.deleteItineraryEntry(collectionId, entryId)
     }
 
     override suspend fun getRecommendations(

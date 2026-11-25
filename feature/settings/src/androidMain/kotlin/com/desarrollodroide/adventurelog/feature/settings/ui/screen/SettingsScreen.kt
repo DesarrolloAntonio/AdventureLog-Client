@@ -1,5 +1,21 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxDashboardWidth
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.background
+import com.desarrollodroide.adventurelog.feature.settings.ui.components.DialogBadge
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material.icons.automirrored.filled.Logout
 import com.desarrollodroide.adventurelog.feature.settings.platform.FEEDBACK_ADDRESS
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,6 +54,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.runtime.SideEffect
+import androidx.core.view.WindowCompat
 import com.desarrollodroide.adventurelog.core.constants.ADVENTURELOG_CLIENT_GITHUB_URL
 import com.desarrollodroide.adventurelog.core.constants.ADVENTURELOG_GITHUB_URL
 import com.desarrollodroide.adventurelog.core.constants.ThemeMode
@@ -64,6 +85,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.settings.AccountH
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
 import com.desarrollodroide.adventurelog.feature.settings.ui.components.VisitedRegionsCard
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     onLogout: () -> Unit,
@@ -166,32 +188,26 @@ fun SettingsContent(
         ?: user?.email
 
     Box(modifier = Modifier.fillMaxSize()) {
-                // Settings is a column of rows; on a tablet it was one row per 1200dp line.
-        ContentColumn {
-    LazyColumn(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                item {
+    val account: @Composable () -> Unit = {
                     AccountHeader(
                         user = user,
                         primaryEmail = primaryEmail,
                         serverUrl = serverUrl,
                         onClick = { editProfileOpen = true }
                     )
-                }
-                item {
+    }
+    val preferences: @Composable () -> Unit = {
                     PreferencesGroup(state = profile, onChange = onChangeProfile)
-                }
-                item {
+    }
+    val appearance: @Composable () -> Unit = {
                     AppearanceGroup(
                         themeMode = themeMode,
                         onThemeModeChanged = onThemeModeChanged,
                         dynamicColors = dynamicColors,
                         onDynamicColorsChanged = onDynamicColorsChanged
                     )
-                }
-                item {
+    }
+    val signIn: @Composable () -> Unit = {
                     SignInGroup(
                         hasPassword = user?.hasPassword ?: true,
                         isChangingPassword = isChangingPassword,
@@ -203,19 +219,19 @@ fun SettingsContent(
                         onRemoveEmail = onRemoveEmail,
                         onRetryEmails = onReloadEmails
                     )
-                }
-                item {
+    }
+    val yourData: @Composable () -> Unit = {
                     VisitedRegionsCard(
                         isRefreshing = regionsRefreshing,
                         onRefresh = onRefreshRegions,
                         isBackingUp = backupInProgress,
                         onDownloadBackup = onDownloadBackup
                     )
-                }
-                item {
+    }
+    val storage: @Composable () -> Unit = {
                     StorageSection(state = storage, onRetry = onReloadStorage)
-                }
-                item {
+    }
+    val about: @Composable () -> Unit = {
                     AboutSection(
                         user = user,
                         serverUrl = serverUrl,
@@ -236,13 +252,52 @@ fun SettingsContent(
                         onNavigateToTermsOfUse = { legalPage = LegalPage.TERMS },
                         onNavigateToPrivacyPolicy = { legalPage = LegalPage.PRIVACY }
                     )
-                }
-                item {
+    }
+    val signOut: @Composable () -> Unit = {
                     SignOutCard(onClick = { confirmLogout = true })
+    }
+
+    // On a wide window the sections stand in two columns under the account card - the canvas's
+    // tablet Settings asks for its width to be used, and one column of 1000dp rows wasted it.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val twoColumns = maxWidth >= 840.dp
+        ContentColumn(maxWidth = if (twoColumns) MaxDashboardWidth else MaxContentWidth) {
+            if (twoColumns) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 16.dp, end = 16.dp, bottom = 48.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    account()
+                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                            preferences(); appearance(); signIn()
+                        }
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                            yourData(); storage(); about(); signOut()
+                        }
+                    }
                 }
-                item { Spacer(Modifier.height(24.dp)) }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    item { account() }
+                    item { preferences() }
+                    item { appearance() }
+                    item { signIn() }
+                    item { yourData() }
+                    item { storage() }
+                    item { about() }
+                    item { signOut() }
+                    item { Spacer(Modifier.height(24.dp)) }
+                }
             }
         }
+    }
 
         SnackbarHost(
             hostState = snackbarHostState,
@@ -273,8 +328,20 @@ fun SettingsContent(
     legalPage?.let { page ->
         Dialog(
             onDismissRequest = { legalPage = null },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+            properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
         ) {
+            // Drawn edge to edge, the dialog's own window keeps the default light icons: on the
+            // daylight page they vanish. Match them to the page, as the activity does.
+            val view = LocalView.current
+            val lightPage = MaterialTheme.colorScheme.background.luminance() > 0.5f
+            SideEffect {
+                (view.parent as? DialogWindowProvider)?.window?.let { window ->
+                    WindowCompat.getInsetsController(window, view).apply {
+                        isAppearanceLightStatusBars = lightPage
+                        isAppearanceLightNavigationBars = lightPage
+                    }
+                }
+            }
             when (page) {
                 LegalPage.TERMS -> TermsOfUseScreen(onBack = { legalPage = null })
                 LegalPage.PRIVACY -> PrivacyPolicyScreen(onBack = { legalPage = null })
@@ -285,14 +352,28 @@ fun SettingsContent(
     if (confirmLogout) {
         AlertDialog(
             onDismissRequest = { confirmLogout = false },
-            title = { Text("Sign out?") },
-            text = { Text("You will need your password to sign back in.") },
+            icon = {
+                DialogBadge(
+                    icon = Icons.AutoMirrored.Filled.Logout,
+                    container = MaterialTheme.colorScheme.errorContainer,
+                    content = MaterialTheme.colorScheme.onErrorContainer,
+                )
+            },
+            title = { Text("Sign out?", textAlign = TextAlign.Center) },
+            text = {
+                Text(
+                    "You will need your password to sign back in.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
             confirmButton = {
                 Button(
                     onClick = {
                         confirmLogout = false
                         onLogout()
                     },
+                    shapes = ButtonDefaults.shapes(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = MaterialTheme.colorScheme.onError
@@ -302,7 +383,7 @@ fun SettingsContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmLogout = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmLogout = false }, shapes = ButtonDefaults.shapes()) { Text("Cancel") }
             }
         )
     }
@@ -314,21 +395,34 @@ fun SettingsContent(
  */
 @Composable
 private fun SignOutCard(onClick: () -> Unit) {
-    Card(
+    // A row in its own block, like the groups above: the icon in an error-tinted square and the
+    // word in red, on the same card colour - red as a whole card shouted louder than it needs to.
+    val scheme = MaterialTheme.colorScheme
+    val card = if (scheme.background.luminance() < 0.5f) scheme.surfaceContainerLow else scheme.surfaceContainerLowest
+    Surface(
+        onClick = onClick,
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        modifier = Modifier.padding(top = 4.dp)
+        color = card,
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
     ) {
-        SettingsRow(
-            title = "Sign out",
-            icon = Icons.AutoMirrored.Outlined.Logout,
-            tint = MaterialTheme.colorScheme.onErrorContainer,
-            showChevron = false,
-            onClick = onClick
-        )
+        Row(
+            modifier = Modifier.heightIn(min = 64.dp).padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Box(
+                Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(scheme.errorContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.Logout,
+                    contentDescription = null,
+                    tint = scheme.onErrorContainer,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Text("Sign out", style = MaterialTheme.typography.bodyLarge, color = scheme.error)
+        }
     }
 }
 

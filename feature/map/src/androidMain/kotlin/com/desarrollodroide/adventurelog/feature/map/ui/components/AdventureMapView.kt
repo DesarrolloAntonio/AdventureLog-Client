@@ -1,5 +1,15 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
+import android.graphics.Point
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import com.desarrollodroide.adventurelog.feature.map.ui.state.markerLabel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +50,15 @@ fun AdventureMapView(
     showCities: Boolean,
     showRegions: Boolean,
     onAdventureClick: (adventureId: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** The pin tapped last, drawn as a label with its name. */
+    selectedId: String? = null,
+    /** Room the map keeps clear for controls floating over it: its logo and framing stay visible. */
+    contentPadding: PaddingValues = PaddingValues(),
+    /** False when the map runs edge to edge (the Map tab); true as a card inside a page. */
+    rounded: Boolean = true,
+    /** The area on screen whenever the camera settles, for a list of the places in view. */
+    onVisibleBoundsChanged: ((LatLngBounds) -> Unit)? = null,
 ) {
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
@@ -100,13 +118,31 @@ fun AdventureMapView(
         }
     }
     
-    val rendering = rememberMapRendering()
-    val mapProperties = remember(rendering) {
-        MapProperties(
-            isMyLocationEnabled = false,
-            mapType = rendering.toGoogleMapType()
-        )
+    // Whenever the camera comes to rest - the first fit included - say what is on screen. Not the
+    // projection's visible region: that leaves out the padding, so the strip under the floating
+    // search and filters counted as off screen. The corners of the view itself, less only the
+    // start padding (where a sheet covers the map).
+    var mapSize by remember { mutableStateOf(IntSize.Zero) }
+    val startInset = with(LocalDensity.current) {
+        contentPadding.calculateStartPadding(LocalLayoutDirection.current).roundToPx()
     }
+    if (onVisibleBoundsChanged != null) {
+        LaunchedEffect(cameraPositionState.isMoving, mapSize, startInset) {
+            val projection = cameraPositionState.projection
+            if (!cameraPositionState.isMoving && projection != null && mapSize != IntSize.Zero) {
+                val corners = listOf(
+                    Point(startInset, 0), Point(mapSize.width, 0),
+                    Point(startInset, mapSize.height), Point(mapSize.width, mapSize.height),
+                )
+                val builder = LatLngBounds.Builder()
+                corners.forEach { builder.include(projection.fromScreenLocation(it)) }
+                onVisibleBoundsChanged(builder.build())
+            }
+        }
+    }
+
+    val rendering = rememberMapRendering()
+    val mapProperties = rememberThemedMapProperties(rendering)
     
     val uiSettings = remember {
         MapUiSettings(
@@ -132,8 +168,10 @@ fun AdventureMapView(
     GoogleMap(
         modifier = modifier
             .fillMaxSize()
-            .clip(RoundedCornerShape(24.dp)),
+            .onSizeChanged { mapSize = it }
+            .then(if (rounded) Modifier.clip(RoundedCornerShape(24.dp)) else Modifier),
         cameraPositionState = cameraPositionState,
+        contentPadding = contentPadding,
         properties = mapProperties,
         uiSettings = uiSettings
     ) {
@@ -173,11 +211,11 @@ fun AdventureMapView(
 
         // Clustered rather than one pin per place: two hundred markers over one country pile
         // into an unreadable blob, which is why the web clusters too. Zooming in splits them.
-        val clusterItems = remember(adventuresWithLocation) {
+        val clusterItems = remember(adventuresWithLocation, selectedId) {
             adventuresWithLocation.mapNotNull { adventure ->
                 val lat = adventure.latitude?.toDoubleOrNull()
                 val lng = adventure.longitude?.toDoubleOrNull()
-                if (lat == null || lng == null) null else LocationClusterItem(adventure, lat, lng)
+                if (lat == null || lng == null) null else LocationClusterItem(adventure, lat, lng, adventure.id == selectedId)
             }
         }
 
@@ -187,11 +225,13 @@ fun AdventureMapView(
                 onAdventureClick(item.location.id)
                 false
             },
-            clusterContent = { cluster -> ClusterBubble(count = cluster.size) },
+            clusterContent = { cluster -> ExpressiveClusterBubble(count = cluster.size) },
             clusterItemContent = { item ->
-                AdventureMarker(
-                    location = item.location,
-                    isVisited = item.location.isVisited
+                ExpressivePin(
+                    name = item.location.name,
+                    emoji = item.location.category?.icon,
+                    visited = item.location.isVisited,
+                    selected = item.selected,
                 )
             }
         )
@@ -202,56 +242,13 @@ fun AdventureMapView(
 private data class LocationClusterItem(
     val location: Location,
     private val lat: Double,
-    private val lng: Double
+    private val lng: Double,
+    // Part of the item so a new selection is a new item, and the clustering draws it again.
+    val selected: Boolean = false,
 ) : ClusterItem {
     override fun getPosition(): LatLng = LatLng(lat, lng)
     override fun getTitle(): String = location.name
     override fun getSnippet(): String = location.location.orEmpty()
-}
-
-/** How many places are stacked at this point. Grows a little with the count, as the web's does. */
-@Composable
-private fun ClusterBubble(count: Int, modifier: Modifier = Modifier) {
-    val size = when {
-        count >= 100 -> 56.dp
-        count >= 25 -> 48.dp
-        else -> 40.dp
-    }
-
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary)
-            .border(2.dp, Color.White, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = count.toString(),
-            color = MaterialTheme.colorScheme.onPrimary,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun AdventureMarker(
-    location: Location,
-    isVisited: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val markerColor = if (isVisited) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.tertiary
-    }
-    
-    SimpleMapMarker(
-        color = markerColor,
-        emoji = location.category?.icon,
-        modifier = modifier
-    )
 }
 
 @Composable

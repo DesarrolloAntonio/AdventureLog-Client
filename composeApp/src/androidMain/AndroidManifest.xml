@@ -54,6 +54,26 @@
             </intent-filter>
         </activity>
         
+        <!-- Where a provider sign-in (OIDC, GitHub…) comes back from the browser. The address is the
+             server's default MOBILE_AUTH_REDIRECT_URIS entry; the server only redirects to one it
+             has registered. -->
+        <activity
+            android:name=".ProviderSignInRedirectActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="adventurelog"
+                    android:host="auth"
+                    android:path="/callback" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

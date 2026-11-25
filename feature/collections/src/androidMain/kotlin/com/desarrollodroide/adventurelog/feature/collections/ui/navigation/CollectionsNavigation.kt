@@ -3,7 +3,8 @@ package com.desarrollodroide.adventurelog.feature.collections.ui.navigation
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
@@ -58,6 +59,7 @@ interface CollectionsNavigator {
 /**
  * Extension function to add collections screens to a navigation graph
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun NavGraphBuilder.collectionsScreen(
     navigator: CollectionsNavigator,
     // The two-pane collections screen registers the list itself, so it can wrap it.
@@ -118,6 +120,7 @@ fun NavGraphBuilder.collectionsScreen(
         CollectionDetailScreen(
             collectionId = collectionId,
             showTitle = standalone,
+            onEditCollection = { navigator.navigateToEditCollection(collectionId) },
             modifier = if (standalone) Modifier.statusBarsPadding() else Modifier,
             onBackClick = { 
                 navigator.navigateBack()
@@ -200,7 +203,7 @@ fun NavGraphBuilder.collectionsScreen(
         
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {
-                CircularProgressIndicator(
+                LoadingIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
@@ -258,7 +261,7 @@ fun NavGraphBuilder.collectionsScreen(
         
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {
-                CircularProgressIndicator(
+                LoadingIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {

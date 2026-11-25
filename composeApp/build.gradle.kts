@@ -75,7 +75,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.activity.ktx)
             implementation(libs.koin.android)
-            implementation(libs.ktor.client.android)
+            implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.android)
         }
 

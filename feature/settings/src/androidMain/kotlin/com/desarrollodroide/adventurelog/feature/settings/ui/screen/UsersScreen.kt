@@ -1,55 +1,71 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.Group
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.settings.viewmodel.ProfileState
 import androidx.compose.ui.unit.Dp
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.foundation.Image
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
 import com.desarrollodroide.adventurelog.core.model.PublicUser
+import com.desarrollodroide.adventurelog.feature.settings.viewmodel.ProfileState
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.UsersViewModel
 import com.desarrollodroide.adventurelog.feature.ui.components.ContentColumn
-import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import com.desarrollodroide.adventurelog.feature.ui.components.SimpleSearchBar
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -58,6 +74,7 @@ import org.koin.compose.viewmodel.koinViewModel
  * The call was already here: collection sharing uses the same list to decide who a collection can
  * be shared with. Nothing had ever shown it on its own.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun UsersScreen(
     modifier: Modifier = Modifier,
@@ -67,25 +84,28 @@ fun UsersScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
-            state.isLoading -> LoadingDialog(isLoading = true, showMessage = false)
+            state.isLoading -> LoadingIndicator(Modifier.align(Alignment.Center))
 
-            state.error != null -> Column(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            state.error != null -> StateMessage(
+                icon = Icons.Outlined.CloudOff,
+                title = "Couldn't load people",
+                body = state.error.orEmpty(),
+                badgeColor = MaterialTheme.colorScheme.errorContainer,
+                badgeContent = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier.fillMaxSize().padding(32.dp)
             ) {
-                Text(
-                    text = state.error.orEmpty(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(8.dp))
-                TextButton(onClick = viewModel::load) { Text("Try again") }
+                Button(onClick = viewModel::load, shapes = ButtonDefaults.shapes()) {
+                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text("Try again", modifier = Modifier.padding(start = 8.dp))
+                }
             }
 
-            else -> ContentColumn {
+            else -> ContentColumn { BoxWithConstraints {
+                // The column count Adaptive(300.dp) would pick, worked out here so the rows know
+                // whether they stack (one segmented block) or sit side by side (each card whole).
+                val columns = ((maxWidth - 32.dp + 10.dp) / (300.dp + 10.dp)).toInt().coerceAtLeast(1)
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 300.dp),
+                    columns = GridCells.Fixed(columns),
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         start = 16.dp,
@@ -93,7 +113,7 @@ fun UsersScreen(
                         top = 8.dp,
                         bottom = 96.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (columns == 1) SegmentedListDefaults.Gap else 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -123,12 +143,17 @@ fun UsersScreen(
                     if (state.users.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) { NobodyYet() }
                     } else {
-                        items(state.filtered, key = { it.uuid }) { user ->
-                            UserCard(user, onClick = { viewModel.openProfile(user) })
+                        val people = state.filtered
+                        items(people.size, key = { people[it].uuid }) { index ->
+                            UserCard(
+                                people[index],
+                                shape = if (columns == 1) SegmentedListDefaults.shapeFor(index, people.size) else SegmentedListDefaults.single,
+                                onClick = { viewModel.openProfile(people[index]) }
+                            )
                         }
                     }
                 }
-            }
+            } }
         }
     }
 
@@ -143,58 +168,73 @@ fun UsersScreen(
 
 @Composable
 private fun NobodyYet() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    StateMessage(
+        icon = Icons.Outlined.Group,
+        title = "Nobody has a public profile yet.",
+        body = "When other travellers make their profile public, they show up here.",
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 48.dp)
+    )
+}
+
+/** An empty or failed screen: its icon on a cookie, what happened, and what to do about it. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun StateMessage(
+    icon: ImageVector,
+    title: String,
+    body: String,
+    modifier: Modifier = Modifier,
+    badgeColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    badgeContent: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    action: (@Composable () -> Unit)? = null
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Nobody has a public profile yet.",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "When other travellers make their profile public, they show up here.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+        CookieBadge(icon = icon, container = badgeColor, content = badgeContent, size = 88.dp)
+        Text(text = title, style = AdventureType.display(28.sp), textAlign = TextAlign.Center)
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        if (action != null) {
+            Box(Modifier.padding(top = 4.dp)) { action() }
         }
     }
 }
 
 @Composable
-private fun UserCard(user: PublicUser, onClick: () -> Unit) {
-    Card(
+private fun UserCard(user: PublicUser, shape: Shape, onClick: () -> Unit) {
+    // A row of one segmented group, as the canvas draws People, in the settings rows' colour:
+    // white against the daylight backdrop, one step up from black against the dark one.
+    val scheme = MaterialTheme.colorScheme
+    val rowColor = if (scheme.background.luminance() < 0.5f) {
+        scheme.surfaceContainerLow
+    } else {
+        scheme.surfaceContainerLowest
+    }
+    Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        shape = shape,
+        color = rowColor
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .heightIn(min = 72.dp)
+                .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Avatar(user, size = 44.dp)
-
-            Spacer(Modifier.width(12.dp))
-
+            Avatar(user, size = 48.dp)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = user.displayName,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -206,6 +246,12 @@ private fun UserCard(user: PublicUser, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -244,7 +290,7 @@ private fun Avatar(user: PublicUser, size: Dp) {
  * opens. Their public places and collections, the page's second half, are not here yet - each would
  * need a way to open another person's record, which the app does not have.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ProfileSheet(profile: ProfileState, onRetry: () -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(
@@ -255,16 +301,20 @@ private fun ProfileSheet(profile: ProfileState, onRetry: () -> Unit, onDismiss: 
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Avatar(profile.person, size = 56.dp)
-                Spacer(Modifier.width(14.dp))
-                Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Avatar(profile.person, size = 64.dp)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         text = profile.person.displayName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
+                        style = AdventureType.display(30.sp),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = "@${profile.person.username}",
@@ -274,17 +324,19 @@ private fun ProfileSheet(profile: ProfileState, onRetry: () -> Unit, onDismiss: 
                 }
             }
 
-            Spacer(Modifier.height(20.dp))
-
             val stats = profile.stats
             when {
-                profile.isLoading -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+                profile.isLoading -> Box(
+                    Modifier.fillMaxWidth().heightIn(min = 120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingIndicator()
                 }
 
                 profile.error != null -> Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
                         text = profile.error,
@@ -292,7 +344,10 @@ private fun ProfileSheet(profile: ProfileState, onRetry: () -> Unit, onDismiss: 
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center
                     )
-                    TextButton(onClick = onRetry) { Text("Try again") }
+                    OutlinedButton(onClick = onRetry, shapes = ButtonDefaults.shapes()) {
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text("Try again", modifier = Modifier.padding(start = 8.dp))
+                    }
                 }
 
                 stats != null -> Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -315,15 +370,15 @@ private fun ProfileSheet(profile: ProfileState, onRetry: () -> Unit, onDismiss: 
 @Composable
 private fun ProfileNumber(label: String, value: String, modifier: Modifier = Modifier) {
     Surface(
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 12.dp),
+            modifier = Modifier.padding(vertical = 14.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(text = value, style = AdventureType.display(if (value.length > 3) 24.sp else 30.sp), maxLines = 1)
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,

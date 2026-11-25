@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsListTabs
+import com.desarrollodroide.adventurelog.feature.collections.model.CollectionSortOptions
+import androidx.compose.foundation.lazy.LazyColumn
+import com.desarrollodroide.adventurelog.feature.ui.components.shellAppBarExpanded
 import com.desarrollodroide.adventurelog.feature.ui.components.PullableStateBox
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.InvitesBanner
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +49,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberShellAction
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -183,7 +188,11 @@ fun CollectionsScreen(
             onStatusFilterChanged = viewModel::onStatusFilterChanged,
             sortOptions = sortOptions,
             onSortOptionsChanged = viewModel::onSortOptionsChanged,
-            onReset = viewModel::resetFilters,
+            // The sheet's own settings only; the tab on show stays.
+            onReset = {
+                viewModel.onStatusFilterChanged(null)
+                viewModel.onSortOptionsChanged(CollectionSortOptions())
+            },
             onDismiss = viewModel::hideSortSheet
         )
     }
@@ -307,6 +316,7 @@ private fun CollectionsContent(
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
+    val handedToShell = rememberShellAction(Icons.Default.Add, "Add collection", onAddCollectionClick)
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -332,34 +342,38 @@ private fun CollectionsContent(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(10.dp))
+                // The tab is on screen in the tabs below; the badge counts what only the sheet shows.
+                val sheetFilterCount = activeFilterCount - if (tab != CollectionsTab.MINE) 1 else 0
                 SearchBarAction(
                     icon = Icons.Default.Tune,
                     contentDescription = "Filter and sort",
-                    active = activeFilterCount > 0,
-                    badgeCount = activeFilterCount,
+                    active = sheetFilterCount > 0,
+                    badgeCount = sheetFilterCount,
                     onClick = onShowSort
                 )
             }
 
-            // Nothing above the list unless something is actually narrowing it. Each chip says
-            // what is on and takes it off again.
-            ActiveFilters(
-                tab = tab,
-                statusFilter = statusFilter,
-                onClearTab = { onTabSelected(CollectionsTab.MINE) },
-                onClearStatus = { onStatusFilterChanged(null) }
+            // What is shown is always on screen, as the canvas draws it: the tabs take over from
+            // the sheet's "Show" and from the invitations banner (Invites carries the count).
+            CollectionsListTabs(
+                selected = tab,
+                pendingInvites = pendingInvites.size,
+                onSelect = onTabSelected,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
             )
 
-            if (pendingInvites.isNotEmpty() && tab != CollectionsTab.INVITES) {
-                InvitesBanner(
-                    count = pendingInvites.size,
-                    onClick = { onTabSelected(CollectionsTab.INVITES) }
-                )
-            }
+            // A trip-status filter from the sheet still shows itself, and takes itself off again.
+            ActiveFilters(
+                tab = CollectionsTab.MINE,
+                statusFilter = statusFilter,
+                onClearTab = {},
+                onClearStatus = { onStatusFilterChanged(null) }
+            )
           }
         },
         floatingActionButton = {
-            FloatingActionButton(
+            // On a phone the shell draws this beside its floating toolbar, as the canvas does.
+            if (!handedToShell) FloatingActionButton(
                 onClick = onAddCollectionClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -382,6 +396,7 @@ private fun CollectionsContent(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             state = pullToRefreshState,
+            enabled = shellAppBarExpanded(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
@@ -499,20 +514,13 @@ private fun CollectionsPagingList(
     busyLabel: String? = null,
     currentUserId: String? = null,
 ) {
-    // Same reasoning as the places list: let the width decide the column count.
-        // Same single content column as everywhere else.
+    // One ticket per row at every width, capped like the rest of the app; the two-pane layout's
+    // list side is narrower than the cap anyway.
     ContentColumn {
-    LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 300.dp),
+        LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 80.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items(
                 count = pagingItems.itemCount,
@@ -539,43 +547,30 @@ private fun CollectionsPagingList(
                 }
             }
 
-            when (pagingItems.loadState.append) {
-                is LoadStateLoading -> {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+            when (val append = pagingItems.loadState.append) {
+                is LoadStateLoading -> item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     }
                 }
 
-                is LoadStateError -> {
-                    val error = pagingItems.loadState.append as LoadStateError
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = collectionsLoadErrorMessage(error.error),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
+                is LoadStateError -> item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = collectionsLoadErrorMessage(append.error),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
 
-                is LoadStateNotLoading -> {
-                    // Nothing to do
-                }
+                else -> {}
             }
         }
     }

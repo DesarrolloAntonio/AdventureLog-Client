@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,7 +55,7 @@ fun LocationMapSection(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = MapProperties(mapType = rendering.toGoogleMapType()),
+        properties = rememberThemedMapProperties(rendering),
         onMapClick = { clickedLatLng ->
             onMapClick(clickedLatLng.latitude, clickedLatLng.longitude)
         }
@@ -62,7 +63,7 @@ fun LocationMapSection(
         if (latitude != null && longitude != null) {
             Marker(
                 state = MarkerState(position = latLng),
-                title = "Selected Location"
+                title = "Selected location"
             )
         }
     }

@@ -27,6 +27,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.contentOrNull
@@ -111,9 +114,12 @@ internal class KtorCollectionApi(
         val responseText = response.body<String>()
         
         try {
-            val collections = json.decodeFromString<List<UltraSlimCollectionDTO>>(responseText)
+            val (collections, paged) = decodeCollectionList(responseText)
             logger.d { "Fetched ${collections.size} collections from /all endpoint" }
-            return collections
+            // 0.13's /all/ was every collection of the user's, archived ones too. 0.14 has no such
+            // route; its list (the one /all/ is rewritten to, and recognisable by being paged)
+            // leaves the archived ones out, so they come in a second call.
+            return if (paged) collections + getArchivedCollections() else collections
         } catch (e: Exception) {
             logJsonError("All collections JSON parse error", responseText, e)
             throw e
@@ -318,7 +324,19 @@ internal class KtorCollectionApi(
     override suspend fun getSharedCollections(): List<UltraSlimCollectionDTO> =
         listOf("shared")
 
-    /** Both of these answer a bare array rather than a paged envelope. */
+    /**
+     * 0.13 answers these with a bare array; 0.14 with a page of its collection list, which is
+     * what the routes are rewritten to there.
+     */
+    private fun decodeCollectionList(body: String): Pair<List<UltraSlimCollectionDTO>, Boolean> {
+        val root = json.parseToJsonElement(body)
+        return if (root is JsonObject) {
+            json.decodeFromJsonElement<List<UltraSlimCollectionDTO>>(root["results"] ?: JsonArray(emptyList())) to true
+        } else {
+            json.decodeFromJsonElement<List<UltraSlimCollectionDTO>>(root) to false
+        }
+    }
+
     private suspend fun listOf(action: String): List<UltraSlimCollectionDTO> {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/collections/$action/"
@@ -336,7 +354,7 @@ internal class KtorCollectionApi(
             )
         }
 
-        return json.decodeFromString<List<UltraSlimCollectionDTO>>(response.body<String>())
+        return decodeCollectionList(response.body<String>()).first
     }
 
     override suspend fun getInvites(): List<CollectionInviteDTO> {
@@ -363,8 +381,12 @@ internal class KtorCollectionApi(
 
     override suspend fun declineInvite(collectionId: String) = respondToInvite(collectionId, false)
 
+    /**
+     * 0.13 takes the user from the path and ignores the body; 0.14 (`POST {id}/invites/`, where
+     * the route is rewritten to) takes it from the body, with the default role, editor.
+     */
     override suspend fun shareCollection(collectionId: String, userUuid: String) =
-        post("$collectionId/share/$userUuid", "share the collection")
+        post("$collectionId/share/$userUuid", "share the collection", body = """{"user":"$userUuid"}""")
 
     override suspend fun unshareCollection(collectionId: String, userUuid: String) =
         post("$collectionId/unshare/$userUuid", "stop sharing the collection")
@@ -377,7 +399,7 @@ internal class KtorCollectionApi(
      * share with yourself" - which is more use than anything this layer could invent, so it is
      * carried out rather than replaced.
      */
-    private suspend fun post(path: String, what: String) {
+    private suspend fun post(path: String, what: String, body: String = "{}") {
         val session = sessionProvider()
         val url = "${session.baseUrl}/api/collections/$path/"
 
@@ -386,18 +408,19 @@ internal class KtorCollectionApi(
         val response = httpClient.post(url) {
             contentType(ContentType.Application.Json)
             headers { commonHeaders(session.sessionToken) }
-            setBody("{}")
+            setBody(body)
         }
 
         if (!response.status.isSuccess()) {
-            val body = try { response.body<String>() } catch (_: Exception) { "" }
-            throw HttpException(response.status.value, serverError(body) ?: "Could not $what.")
+            val answer = try { response.body<String>() } catch (_: Exception) { "" }
+            throw HttpException(response.status.value, serverError(answer) ?: "Could not $what.")
         }
     }
 
-    /** The `{"error": "..."}` these endpoints answer with, when they answer with one. */
+    /** The `{"error": "..."}` (0.13) or `{"detail": "..."}` (0.14) these endpoints answer with. */
     private fun serverError(body: String): String? = try {
-        json.parseToJsonElement(body).jsonObject["error"]?.jsonPrimitive?.contentOrNull
+        val root = json.parseToJsonElement(body).jsonObject
+        (root["error"] ?: root["detail"])?.jsonPrimitive?.contentOrNull
     } catch (_: Exception) {
         null
     }

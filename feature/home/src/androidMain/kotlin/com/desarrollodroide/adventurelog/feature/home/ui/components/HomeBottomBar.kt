@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.components
 
+import androidx.compose.runtime.Composable
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.Explore
@@ -52,7 +55,31 @@ fun NavigationSuiteScope.homeNavigationItems(
     }
 }
 
-private enum class Destination(
+/** The same five destinations as rail items, for the scaffold that also carries a primary action. */
+@Composable
+fun HomeRailItems(
+    current: CurrentScreen,
+    navigationSuiteType: NavigationSuiteType,
+    onSelect: (CurrentScreen) -> Unit
+) {
+    Destination.entries.forEach { destination ->
+        val selected = destination.screen == current
+        NavigationSuiteItem(
+            selected = selected,
+            onClick = { onSelect(destination.screen) },
+            icon = {
+                Icon(
+                    imageVector = if (selected) destination.selectedIcon else destination.icon,
+                    contentDescription = null
+                )
+            },
+            label = { Text(destination.label) },
+            navigationSuiteType = navigationSuiteType
+        )
+    }
+}
+
+internal enum class Destination(
     val screen: CurrentScreen,
     val label: String,
     val icon: ImageVector,

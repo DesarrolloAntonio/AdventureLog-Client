@@ -33,11 +33,10 @@ fun EmojiPicker(
         modifier = modifier
             .fillMaxWidth()
             .height(300.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         AndroidView(
             modifier = Modifier.fillMaxWidth(),

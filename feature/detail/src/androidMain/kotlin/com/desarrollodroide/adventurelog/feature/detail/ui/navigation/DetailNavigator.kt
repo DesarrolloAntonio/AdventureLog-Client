@@ -15,6 +15,8 @@ interface DetailNavigator {
     /** [openImages] opens the form on its images, for "Add photo". */
     fun navigateToEditLocation(
         location: com.desarrollodroide.adventurelog.core.model.Location,
-        openImages: Boolean = false
+        openImages: Boolean = false,
+        /** Opens the form on its dates, for "Visit". */
+        openVisits: Boolean = false
     )
 }

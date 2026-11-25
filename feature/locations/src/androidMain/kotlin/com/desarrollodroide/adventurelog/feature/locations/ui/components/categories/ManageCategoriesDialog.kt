@@ -1,38 +1,41 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.components.categories
 
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,13 +43,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel.CategoriesState
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * The categories, one segmented block: each row its icon on a cookie, its name and how many places
+ * use it. A tap on the row edits it; deleting asks first and says what it will touch.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ManageCategoriesDialog(
     categoriesState: CategoriesState,
@@ -60,138 +71,89 @@ fun ManageCategoriesDialog(
     var categoryToDelete by remember { mutableStateOf<Category?>(null) }
     var categoryToEdit by remember { mutableStateOf<Category?>(null) }
 
-    AlertDialog(
+    ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
-        modifier = Modifier.fillMaxWidth(),
-        title = {
-            Text(
-                text = "Manage Categories",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-            ) {
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Categories", style = AdventureType.display(34.sp))
+                (categoriesState as? CategoriesState.Success)?.categories?.let { categories ->
+                    val places = categories.sumOf { it.numAdventures.toIntOrNull() ?: 0 }
+                    Text(
+                        text = "${plural(categories.size, "category", "categories")} · ${plural(places, "place", "places")}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Box(Modifier.weight(1f, fill = false).fillMaxWidth()) {
                 when (categoriesState) {
-                    is CategoriesState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    
-                    is CategoriesState.Error -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(32.dp)
-                                )
-                                Text(
-                                    text = categoriesState.message,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.error,
-                                    textAlign = TextAlign.Center
-                                )
-                                OutlinedButton(onClick = onRetryLoadCategories) {
-                                    Icon(
-                                        imageVector = Icons.Default.Refresh,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Retry")
-                                }
+                    is CategoriesState.Loading -> CenteredBox { LoadingIndicator() }
+                    is CategoriesState.Error -> CenteredBox {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                categoriesState.message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center,
+                            )
+                            OutlinedButton(onClick = onRetryLoadCategories, shapes = ButtonDefaults.shapes()) {
+                                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Text("Retry", modifier = Modifier.padding(start = 8.dp))
                             }
                         }
                     }
-                    
-                    is CategoriesState.Success -> {
-                        if (categoriesState.categories.isEmpty()) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Category,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(48.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = "No categories",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = "Add your first category",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
+                    is CategoriesState.Success -> if (categoriesState.categories.isEmpty()) {
+                        CenteredBox {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                CookieIcon("🗂️", size = 72)
+                                Text("No categories yet", style = MaterialTheme.typography.titleMedium)
                             }
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                categoriesState.categories.forEach { category ->
-                                    CategoryManageItem(
-                                        category = category,
-                                        onEdit = { categoryToEdit = category },
-                                        onDelete = { categoryToDelete = category }
-                                    )
-                                }
+                        }
+                    } else {
+                        val categories = categoriesState.categories
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                            itemsIndexed(categories, key = { _, it -> it.id }) { index, category ->
+                                CategoryRow(
+                                    category = category,
+                                    index = index,
+                                    count = categories.size,
+                                    onEdit = { categoryToEdit = category },
+                                    onDelete = { categoryToDelete = category },
+                                    modifier = Modifier.animateItem(),
+                                )
                             }
                         }
                     }
                 }
             }
-        },
-        confirmButton = {
-            if (categoriesState is CategoriesState.Success) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    shapes = ButtonDefaults.shapes(),
+                    modifier = Modifier.weight(1f).height(56.dp),
+                ) { Text("Close") }
+                Button(
+                    onClick = { showAddCategorySheet = true },
+                    enabled = categoriesState is CategoriesState.Success,
+                    shapes = ButtonDefaults.shapes(),
+                    modifier = Modifier.weight(1f).height(56.dp),
                 ) {
-                    OutlinedButton(onClick = onDismiss) {
-                        Text("Close")
-                    }
-                    Button(
-                        onClick = { showAddCategorySheet = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add")
-                    }
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text("New category", modifier = Modifier.padding(start = 8.dp))
                 }
             }
         }
-    )
+    }
 
-    // Add Category Sheet
     if (showAddCategorySheet) {
         AddEditCategorySheet(
             category = null,
@@ -203,7 +165,6 @@ fun ManageCategoriesDialog(
         )
     }
 
-    // Edit Category Sheet
     categoryToEdit?.let { category ->
         AddEditCategorySheet(
             category = category,
@@ -215,98 +176,108 @@ fun ManageCategoriesDialog(
         )
     }
 
-    // Delete Confirmation Dialog
     categoryToDelete?.let { category ->
+        val places = category.numAdventures.toIntOrNull() ?: 0
         AlertDialog(
             onDismissRequest = { categoryToDelete = null },
-            title = { Text("Delete Category") },
-            text = { 
-                Text("Are you sure you want to delete \"${category.displayName}\"? This action cannot be undone.")
+            icon = { CookieIcon(category.icon.ifEmpty { "📁" }, size = 56) },
+            title = { Text("Delete “${category.displayName}”?", textAlign = TextAlign.Center) },
+            text = {
+                Text(
+                    text = if (places > 0) {
+                        "${plural(places, "place uses", "places use")} it. This can't be undone."
+                    } else {
+                        "No place uses it. This can't be undone."
+                    },
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         onDeleteCategory(category.id)
                         categoryToDelete = null
-                    }
-                ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
-                }
+                    },
+                    shapes = ButtonDefaults.shapes(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                    ),
+                ) { Text("Delete") }
             },
             dismissButton = {
-                TextButton(onClick = { categoryToDelete = null }) {
-                    Text("Cancel")
-                }
+                TextButton(onClick = { categoryToDelete = null }, shapes = ButtonDefaults.shapes()) { Text("Cancel") }
             }
         )
     }
 }
 
 @Composable
-private fun CategoryManageItem(
+private fun CategoryRow(
     category: Category,
+    index: Int,
+    count: Int,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        )
+    val places = category.numAdventures.toIntOrNull() ?: 0
+    Surface(
+        shape = SegmentedListDefaults.shapeFor(index, count),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            Modifier
+                .clickable(onClickLabel = "Edit ${category.displayName}", onClick = onEdit)
+                .heightIn(min = 72.dp)
+                .padding(start = 12.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Text(
-                text = category.icon.ifEmpty { "📁" },
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(end = 12.dp)
-            )
-            
-            Column(modifier = Modifier.weight(1f)) {
+            CookieIcon(category.icon.ifEmpty { "📁" }, size = 48)
+            Column(Modifier.weight(1f)) {
                 Text(
-                    text = category.displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    category.displayName,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
-                val locationCount = category.numAdventures.toIntOrNull() ?: 0
                 Text(
-                    text = when (locationCount) {
-                        1 -> "1 location"
-                        else -> "${category.numAdventures} locations"
-                    },
+                    if (places == 0) "Not used yet" else plural(places, "place", "places"),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            
-            IconButton(
-                onClick = onEdit,
-                modifier = Modifier.size(36.dp)
-            ) {
+            Icon(
+                Icons.Outlined.Edit,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+            IconButton(onClick = onDelete) {
                 Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.error
+                    Icons.Outlined.Delete,
+                    contentDescription = "Delete ${category.displayName}",
+                    // Quiet on every row; the red belongs to the question that follows.
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
     }
 }
+
+/** An emoji on a four-lobed cookie in the tonal colour, the categories' badge. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun CookieIcon(icon: String, size: Int, color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.secondaryContainer) {
+    CookieBadge(emoji = icon, size = size.dp, container = color)
+}
+
+@Composable
+private fun CenteredBox(content: @Composable () -> Unit) {
+    Box(Modifier.fillMaxWidth().heightIn(min = 200.dp), contentAlignment = Alignment.Center) { content() }
+}
+
+private fun plural(n: Int, one: String, many: String) = if (n == 1) "1 $one" else "$n $many"

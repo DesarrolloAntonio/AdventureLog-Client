@@ -5,16 +5,25 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
@@ -22,6 +31,8 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CameraCapture(
     onImageCaptured: (ImageFormData) -> Unit,
@@ -69,14 +80,29 @@ fun CameraCapture(
                 showPermissionDialog = false
                 onDismiss()
             },
-            title = { Text(text = "Camera Permission Required") },
-            text = { Text(text = "This app needs camera permission to take photos. Please grant the permission in app settings.") },
+            icon = {
+                CookieBadge(
+                    icon = Icons.Outlined.PhotoCamera,
+                    container = MaterialTheme.colorScheme.secondaryContainer,
+                    content = MaterialTheme.colorScheme.onSecondaryContainer,
+                    size = 56.dp,
+                )
+            },
+            title = { Text(text = "Camera permission required", textAlign = TextAlign.Center) },
+            text = {
+                Text(
+                    text = "This app needs camera permission to take photos. Please grant the permission in app settings.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         showPermissionDialog = false
                         onDismiss()
-                    }
+                    },
+                    shapes = ButtonDefaults.shapes(),
                 ) {
                     Text("OK")
                 }

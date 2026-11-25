@@ -50,11 +50,16 @@ data class LoginUserData(
     val disablePassword: Boolean? = null
 )
 
+/**
+ * One way the user proved who they are. A password records the username; a second factor records
+ * its `type` (totp, recovery_codes) and no username, so nothing past [method] is guaranteed.
+ */
 @Serializable
 data class LoginMethod(
     val method: String,
-    val at: Double,
-    val username: String
+    val at: Double? = null,
+    val username: String? = null,
+    val type: String? = null,
 )
 
 @Serializable
@@ -64,4 +69,55 @@ data class LoginMeta(
     /** Only the app client sends it; it is the Django session key. */
     @SerialName("session_token")
     val sessionToken: String? = null
+)
+
+/**
+ * allauth's 401 to a login that is not finished: no user yet, the steps still open in
+ * `data.flows`, and - for the app client - the half-done session in `meta.session_token`.
+ */
+@Serializable
+data class PendingLoginResponse(
+    val status: Int,
+    val data: PendingLoginData = PendingLoginData(),
+    val meta: LoginMeta? = null,
+) {
+    /** The account has two-step verification and the password step is done. */
+    val needsSecondFactor: Boolean
+        get() = data.flows.any { it.id == MFA_AUTHENTICATE_FLOW && it.isPending }
+}
+
+@Serializable
+data class PendingLoginData(
+    val flows: List<LoginFlow> = emptyList(),
+)
+
+@Serializable
+data class LoginFlow(
+    val id: String,
+    @SerialName("is_pending")
+    val isPending: Boolean = false,
+)
+
+/** A TOTP code or a recovery code: allauth takes both in the same field. */
+@Serializable
+data class SecondFactorRequest(
+    val code: String,
+)
+
+const val MFA_AUTHENTICATE_FLOW = "mfa_authenticate"
+
+/** The last step of a provider sign-in: the code the browser brought back, and its PKCE verifier. */
+@Serializable
+data class MobileTokenRequest(
+    val code: String,
+    @SerialName("code_verifier")
+    val codeVerifier: String,
+    @SerialName("redirect_uri")
+    val redirectUri: String,
+)
+
+/** What `/api/auth/mobile/token/` answers: a session and nothing else, no user. */
+@Serializable
+data class MobileTokenResponse(
+    val meta: LoginMeta,
 )

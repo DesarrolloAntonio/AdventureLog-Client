@@ -1,5 +1,9 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.views
 
+import androidx.compose.foundation.shape.CircleShape
+import com.desarrollodroide.adventurelog.feature.ui.components.bleedHorizontally
+import com.desarrollodroide.adventurelog.feature.ui.components.CookieBadge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -16,24 +21,33 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Recommendation
 import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsUiState
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
 /**
  * What is near the trip that is not in it yet.
@@ -43,6 +57,7 @@ import com.desarrollodroide.adventurelog.feature.collections.viewmodel.Recommend
  * the only anchor whose coordinates are exact. Typing a name instead asks the server to geocode
  * it, which is the fallback for a trip that has no places yet.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CollectionRecommendationsView(
     state: RecommendationsUiState,
@@ -70,11 +85,15 @@ fun CollectionRecommendationsView(
         )
 
         state.errorMessage?.let { message ->
-            RecommendationCard {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -86,7 +105,7 @@ fun CollectionRecommendationsView(
                     modifier = Modifier.fillMaxWidth().padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    LoadingIndicator()
                 }
             }
 
@@ -104,6 +123,7 @@ fun CollectionRecommendationsView(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SearchCard(
     state: RecommendationsUiState,
@@ -116,13 +136,12 @@ private fun SearchCard(
 ) {
     RecommendationCard {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 text = "Find places nearby",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                style = AdventureType.display(28.sp)
             )
 
             if (anchors.isNotEmpty()) {
@@ -132,11 +151,12 @@ private fun SearchCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    // Out to the card's edge, not sliced at its 20dp padding ("Sacsayhuamá").
+                    modifier = Modifier.bleedHorizontally(20.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     anchors.forEach { place ->
-                        FilterChip(
+                        PickChip(
                             selected = state.anchorLocationId == place.id,
                             onClick = {
                                 onAnchorSelected(
@@ -145,7 +165,7 @@ private fun SearchCard(
                                     if (state.anchorLocationId == place.id) null else place.id
                                 )
                             },
-                            label = { Text(place.name) }
+                            label = place.name
                         )
                     }
                 }
@@ -157,7 +177,8 @@ private fun SearchCard(
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(if (anchors.isEmpty()) "Where to look" else "Or somewhere else") },
                 placeholder = { Text("A city, an address, a landmark") },
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp)
             )
 
             Text(
@@ -166,14 +187,15 @@ private fun SearchCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                // Out to the card's edge, not sliced at its 20dp padding ("Sacsayhuamá").
+                    modifier = Modifier.bleedHorizontally(20.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 RecommendationCategory.entries.forEach { category ->
-                    FilterChip(
+                    PickChip(
                         selected = state.category == category,
                         onClick = { onCategorySelected(category) },
-                        label = { Text(category.label) }
+                        label = category.label
                     )
                 }
             }
@@ -184,14 +206,15 @@ private fun SearchCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                // Out to the card's edge, not sliced at its 20dp padding ("Sacsayhuamá").
+                    modifier = Modifier.bleedHorizontally(20.dp).horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Radii.forEach { metres ->
-                    FilterChip(
+                    PickChip(
                         selected = state.radiusMetres == metres,
                         onClick = { onRadiusSelected(metres) },
-                        label = { Text(radiusLabel(metres)) }
+                        label = radiusLabel(metres)
                     )
                 }
             }
@@ -199,7 +222,8 @@ private fun SearchCard(
             Button(
                 onClick = onSearch,
                 enabled = !state.isSearching,
-                modifier = Modifier.fillMaxWidth()
+                shapes = ButtonDefaults.shapes(),
+                modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -212,6 +236,7 @@ private fun SearchCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ResultCard(
     recommendation: Recommendation,
@@ -255,27 +280,28 @@ private fun ResultCard(
             }
 
             when {
-                isAdding -> CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp
-                )
+                isAdding -> LoadingIndicator(modifier = Modifier.size(32.dp))
                 isAdded -> Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Already added",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
+                // The row is the button; this only says what a tap does.
                 else -> Text(
                     text = "Add",
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(percent = 50))
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EmptyResults(hasSearched: Boolean) {
     RecommendationCard {
@@ -284,17 +310,12 @@ private fun EmptyResults(hasSearched: Boolean) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Explore,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(40.dp)
-            )
+            CookieBadge(icon = Icons.Default.Explore, container = MaterialTheme.colorScheme.secondaryContainer, content = MaterialTheme.colorScheme.onSecondaryContainer, size = 72.dp)
             Text(
                 text = if (hasSearched) "Nothing found around there"
                 else "Nothing searched for yet",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center
             )
             Text(
                 text = if (hasSearched) "Try a wider radius, or a different kind of place."
@@ -311,12 +332,32 @@ private fun EmptyResults(hasSearched: Boolean) {
 private fun RecommendationCard(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        // Lowest, as the collection page's own cards are.
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) { content() }
+}
+
+/** A single-choice chip in the filters' style: squarer corners, tonal and ticked when chosen. */
+@Composable
+private fun PickChip(selected: Boolean, onClick: () -> Unit, label: String) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        leadingIcon = if (selected) {
+            { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(FilterChipDefaults.IconSize)) }
+        } else null,
+        shape = CircleShape, // pills, as every other choice chip
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    )
 }
 
 private val Radii = listOf(1000, 2000, 5000, 10000, 25000)

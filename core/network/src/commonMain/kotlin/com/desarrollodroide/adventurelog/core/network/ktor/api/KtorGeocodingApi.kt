@@ -7,6 +7,10 @@ import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.model.response.GeocodeSearchResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 import io.ktor.client.HttpClient
+import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -37,7 +41,7 @@ class KtorGeocodingApi(
         }
         
         if (response.status.isSuccess()) {
-            return response.body()
+            return searchResults(response.body<String>())
         } else {
             logger.e { "Failed to search locations with status: ${response.status}" }
             throw HttpException(
@@ -47,6 +51,16 @@ class KtorGeocodingApi(
         }
     }
     
+    /**
+     * 0.13 answers a bare array; 0.14 (`/api/places/search/`) an object whose `results` may hold
+     * places with no coordinates or name, which the app has no use for and skips.
+     */
+    private fun searchResults(body: String): List<GeocodeSearchResultDTO> {
+        val root = defaultJson.parseToJsonElement(body)
+        val items = (if (root is JsonObject) root["results"] else root) as? JsonArray ?: return emptyList()
+        return items.mapNotNull { runCatching { defaultJson.decodeFromJsonElement<GeocodeSearchResultDTO>(it) }.getOrNull() }
+    }
+
     override suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResultDTO {
         val sessionInfo = sessionProvider()
         val url = "${sessionInfo.baseUrl}/api/reverse-geocode/reverse_geocode/"

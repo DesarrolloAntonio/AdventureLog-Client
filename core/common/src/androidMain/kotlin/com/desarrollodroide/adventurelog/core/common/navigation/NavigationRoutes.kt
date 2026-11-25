@@ -43,11 +43,11 @@ object NavigationRoutes {
         /** [add] with the trip the new place goes into, when it is started from one (QA HM-09). */
         const val addRoute = "adventures/add?collectionId={collectionId}"
         fun createAddRoute(collectionId: String): String = "adventures/add?collectionId=${routeArg(collectionId)}"
-        const val editRoute = "adventures/edit?adventureId={adventureId}&adventureJson={adventureJson}&openImages={openImages}"
+        const val editRoute = "adventures/edit?adventureId={adventureId}&adventureJson={adventureJson}&openImages={openImages}&openVisits={openVisits}"
 
         /** [openImages] opens the form on its images section, for "Add photo" rather than "Edit". */
-        fun createEditRoute(adventureId: String, adventureJson: String, openImages: Boolean = false): String {
-            return "adventures/edit?adventureId=${routeArg(adventureId)}&adventureJson=${routeArg(adventureJson)}&openImages=$openImages"
+        fun createEditRoute(adventureId: String, adventureJson: String, openImages: Boolean = false, openVisits: Boolean = false): String {
+            return "adventures/edit?adventureId=${routeArg(adventureId)}&adventureJson=${routeArg(adventureJson)}&openImages=$openImages&openVisits=$openVisits"
         }
     }
 

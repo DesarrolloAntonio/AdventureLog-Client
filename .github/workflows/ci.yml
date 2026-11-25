@@ -3,9 +3,17 @@ name: CI/CD
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore: [ '**.md', 'docs/**' ]
   pull_request:
     branches: [ main, develop ]
+    paths-ignore: [ '**.md', 'docs/**' ]
   workflow_dispatch:
+
+# A newer push to the same branch or pull request makes the older run pointless: cancel it.
+# Never on main, where a run can be publishing a release.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   contents: write

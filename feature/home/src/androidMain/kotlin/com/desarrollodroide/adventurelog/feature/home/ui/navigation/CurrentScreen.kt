@@ -55,3 +55,14 @@ enum class CurrentScreen(val route: String, val index: Int, val title: String) {
         }
     }
 }
+
+/**
+ * Whether going from [from] to [to] changes section to land on a top-level screen - a tab, or
+ * Calendar, Settings or People from the account menu. Those fade through; going deeper inside a
+ * section (a collection, a country, a form) keeps its slide.
+ */
+fun isSectionSwitch(from: String?, to: String?): Boolean {
+    if (from == null || to == null) return false
+    if (CurrentScreen.entries.none { it.route == to }) return false
+    return CurrentScreen.fromRoute(from) != CurrentScreen.fromRoute(to)
+}

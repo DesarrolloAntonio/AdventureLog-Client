@@ -34,7 +34,7 @@ data class AddEditTransportationUiState(
     val locationSearchResults: List<GeocodeSearchResult> = emptyList(),
     val isSearchingLocation: Boolean = false,
     val wikipediaImageState: WikipediaImageResult = WikipediaImageResult.Idle,
-    /** The collection's own dates, for "Constrain to Collection Dates"; null when it has none. */
+    /** The collection's own dates, for "Constrain to collection dates"; null when it has none. */
     val collectionStart: String? = null,
     val collectionEnd: String? = null
 )
@@ -69,7 +69,7 @@ class AddEditTransportationViewModel(
     }
 
     /**
-     * "Constrain to Collection Dates" was a switch that nothing read (QA 04). The web limits the
+     * "Constrain to collection dates" was a switch that nothing read (QA 04). The web limits the
      * pickers to the collection's dates, so the form needs them.
      */
     private fun loadCollectionDates(id: String) {

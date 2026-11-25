@@ -3,7 +3,7 @@ package com.desarrollodroide.adventurelog.feature.ui.components.date
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TimePickerDialog(
     onDismiss: () -> Unit,
@@ -23,16 +23,17 @@ fun TimePickerDialog(
             TimePicker(state = timePickerState)
         },
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
                     onConfirm(timePickerState.hour, timePickerState.minute)
-                }
+                },
+                shapes = ButtonDefaults.shapes()
             ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = onDismiss, shapes = ButtonDefaults.shapes()) {
                 Text("Cancel")
             }
         }

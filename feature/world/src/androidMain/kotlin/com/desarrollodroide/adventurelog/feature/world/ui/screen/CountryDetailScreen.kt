@@ -1,5 +1,25 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.Surface
+import androidx.compose.material3.toShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.semantics.Role
@@ -22,8 +42,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -65,8 +83,13 @@ fun CountryDetailScreen(
     countryCode: String,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    /** False in a pane beside the country list: there is no list to go back to. */
+    showBack: Boolean = true,
     viewModel: CountryDetailViewModel = koinViewModel()
 ) {
+    // It brings its own header (Back, the stamp, the name), as a trip and a place do: the shell's
+    // "World" title stood over it as a second heading, and its toolbar over the region list.
+    if (LocalShellActionHost.current != null) HideShellChrome()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(countryCode) { viewModel.load(countryCode) }
@@ -107,21 +130,30 @@ fun CountryDetailScreen(
                         top = 8.dp,
                         bottom = 96.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    // The regions are one segmented group, split by the thin gap.
+                    verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
+                    if (showBack) item(span = { GridItemSpan(maxLineSpan) }) {
                         // onNavigateBack reached this screen and nothing drew it: the only way
                         // back was the system gesture (QA 05, screenshot).
                         // In a Box: a grid item centres what it holds, and the arrow sat mid-screen.
                         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                            IconButton(onClick = onNavigateBack, modifier = Modifier.padding(top = 4.dp)) {
+                            FilledIconButton(
+                                onClick = onNavigateBack,
+                                modifier = Modifier.padding(top = 4.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                             }
                         }
                     }
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         CountryHeader(
+                            code = countryCode.uppercase(),
                             name = state.country?.name ?: countryCode.uppercase(),
                             capital = state.country?.capital,
                             visited = state.visitedCount,
@@ -150,8 +182,14 @@ fun CountryDetailScreen(
                             )
                         }
                     } else {
-                        items(state.filtered, key = { it.region.id }) { row ->
-                            RegionCard(row, onClick = { viewModel.onRegionToggled(row.region.id) })
+                        val rows = state.filtered
+                        items(rows.size, key = { rows[it].region.id }) { index ->
+                            val row = rows[index]
+                            RegionCard(
+                                row,
+                                shape = SegmentedListDefaults.shapeFor(index, rows.size),
+                                onClick = { viewModel.onRegionToggled(row.region.id) }
+                            )
                         }
                     }
                 }
@@ -165,122 +203,124 @@ fun CountryDetailScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CountryHeader(
+    code: String,
     name: String,
     capital: String?,
     visited: Int,
     total: Int
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            if (!capital.isNullOrBlank()) {
-                Text(
-                    text = capital,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+    val colors = MaterialTheme.colorScheme
+    // As the canvas draws it: the country's code as a stamp beside its name, then the regions
+    // visited out of all on a dark card, on Expressive's wavy progress.
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(
+                Modifier
+                    .size(72.dp)
+                    .clip(MaterialShapes.Cookie9Sided.toShape())
+                    .background(colors.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(code, style = AdventureType.stamp().copy(fontSize = 26.sp), color = colors.onPrimary)
+            }
+            Column(Modifier.weight(1f)) {
+                Text(text = name, style = AdventureType.display(52.sp), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (!capital.isNullOrBlank()) {
+                    Text(text = capital, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
+                }
+            }
+        }
+        Spacer(Modifier.height(18.dp))
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = colors.inverseSurface,
+            contentColor = colors.inverseOnSurface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(visited.toString(), style = AdventureType.display(56.sp), color = colors.inversePrimary)
+                    Text("/ $total", style = AdventureType.display(26.sp), color = colors.inverseOnSurface.copy(alpha = 0.7f),
+                        modifier = Modifier.padding(bottom = 6.dp))
+                    Text("regions visited", style = MaterialTheme.typography.bodyMedium,
+                        color = colors.inverseOnSurface.copy(alpha = 0.7f), modifier = Modifier.padding(bottom = 9.dp))
+                }
+                LinearWavyProgressIndicator(
+                    progress = { if (total > 0) visited.toFloat() / total else 0f },
+                    color = colors.inversePrimary,
+                    trackColor = colors.inverseOnSurface.copy(alpha = 0.2f),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            Spacer(Modifier.height(12.dp))
-            Row {
-                Text(
-                    text = "Regions visited",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f).alignByBaseline()
-                )
-                Text(
-                    modifier = Modifier.alignByBaseline(),
-                    text = "$visited",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    modifier = Modifier.alignByBaseline(),
-                    text = " / $total",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.height(6.dp))
-            LinearProgressIndicator(
-                progress = { if (total > 0) visited.toFloat() / total else 0f },
-                modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                gapSize = 0.dp,
-                drawStopIndicator = {}
-            )
         }
     }
 }
 
 @Composable
-private fun RegionCard(row: RegionRow, onClick: () -> Unit) {
+private fun RegionCard(row: RegionRow, shape: androidx.compose.ui.graphics.Shape, onClick: () -> Unit) {
     // A checkbox, not a button with an icon that says "Visited": a screen reader now hears the
-    // region, whether it is ticked, and that a tap changes it (QA 05, WO-03).
+    // region, whether it is ticked, and that a tap changes it (QA 05, WO-03). The pill on the end
+    // says it to the eye, as the canvas draws it.
+    val colors = MaterialTheme.colorScheme
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(shape)
             .toggleable(value = row.visited, role = Role.Checkbox, onValueChange = { onClick() }),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-        ),
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = colors.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            modifier = Modifier.heightIn(min = 60.dp).padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = if (row.visited) {
-                    Icons.Default.CheckCircle
-                } else {
-                    Icons.Default.RadioButtonUnchecked
-                },
-                contentDescription = null,
-                tint = if (row.visited) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.outlineVariant
-                },
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = row.region.name,
                     style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (row.visited) FontWeight.Bold else FontWeight.Normal,
+                    color = if (row.visited) colors.onSurface else colors.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (row.region.numCities > 0) {
                     Text(
-                        text = if (row.region.numCities == 1) {
-                            "1 city"
-                        } else {
-                            "${row.region.numCities} cities"
-                        },
+                        text = if (row.region.numCities == 1) "1 city" else "${row.region.numCities} cities",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = colors.onSurfaceVariant
                     )
                 }
             }
+            Spacer(Modifier.width(12.dp))
+            VisitedPill(row.visited)
         }
+    }
+}
+
+/** "✓ Visited" inked, or "Mark visited" outlined; colour and corners move on the springs. */
+@Composable
+private fun VisitedPill(visited: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    val motion = MaterialTheme.motionScheme
+    val container by animateColorAsState(if (visited) colors.primary else Color.Transparent, motion.defaultEffectsSpec(), label = "pill")
+    val corner by animateDpAsState(if (visited) 16.dp else 10.dp, motion.fastSpatialSpec(), label = "corner")
+    val ink = if (visited) colors.onPrimary else colors.onSurfaceVariant
+    Row(
+        Modifier
+            .clearAndSetSemantics { }
+            .height(32.dp)
+            .clip(RoundedCornerShape(corner))
+            .background(container)
+            .then(if (visited) Modifier else Modifier.border(1.dp, colors.outlineVariant, RoundedCornerShape(corner)))
+            .padding(start = if (visited) 8.dp else 12.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        if (visited) Icon(Icons.Default.Check, contentDescription = null, tint = ink, modifier = Modifier.size(16.dp))
+        Text(if (visited) "Visited" else "Mark visited", style = MaterialTheme.typography.labelLarge, color = ink)
     }
 }

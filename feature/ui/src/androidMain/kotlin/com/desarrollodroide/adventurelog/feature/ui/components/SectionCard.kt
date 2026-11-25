@@ -1,5 +1,14 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.sp
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -40,12 +49,13 @@ fun SectionCard(
     inset: Dp = 16.dp,
     content: @Composable () -> Unit
 ) {
+    val motion = MaterialTheme.motionScheme
     Card(
         // [modifier] was declared and never applied.
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = inset, vertical = 8.dp),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(24.dp),
         // surfaceContainerLowest with no shadow, like every other card since the redesign. This
         // was a translucent `surface` with a 1dp elevation - the same colour as the page it sits
         // on, separated only by a shadow, which on the flat background reads as a smudge rather
@@ -75,30 +85,42 @@ fun SectionCard(
                 ) {
                     leadingContent?.invoke()
                     
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    // The section's icon in a tinted rounded square, as the settings rows carry theirs.
+                    Box(
+                        Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    // The canvas's section voice: condensed and heavy.
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        style = AdventureType.display(22.sp),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
+                // One chevron that turns on the expressive spring, not two icons swapped.
+                val turn by animateFloatAsState(if (expanded) 180f else 0f, motion.defaultSpatialSpec(), label = "chevron")
                 Icon(
-                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    imageVector = Icons.Default.ExpandMore,
                     contentDescription = if (expanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.graphicsLayer { rotationZ = turn }
                 )
             }
             
             AnimatedVisibility(
                 visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
+                enter = expandVertically(motion.defaultSpatialSpec()) + fadeIn(motion.defaultEffectsSpec()),
+                exit = shrinkVertically(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec())
             ) {
                 Column(
                     modifier = Modifier.padding(top = 16.dp),

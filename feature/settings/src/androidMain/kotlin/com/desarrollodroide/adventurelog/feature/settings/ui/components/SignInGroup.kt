@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.settings.LocalSettingsSegmentColor
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,13 +15,20 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.MarkEmailRead
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -31,10 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.EmailAddress
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.EmailsSectionState
-import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRowDivider
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
 
@@ -45,6 +55,7 @@ import com.desarrollodroide.adventurelog.feature.ui.components.settings.Settings
  * The three text buttons each address used to carry are an overflow menu now - only one of them
  * ever applies to a given address, and a row of greyed-out verbs reads like a broken screen.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SignInGroup(
     hasPassword: Boolean,
@@ -65,7 +76,10 @@ fun SignInGroup(
     SettingsGroup(
         title = "Sign-in & email",
         modifier = modifier,
-        busy = emails.isBusy
+        busy = emails.isBusy,
+        // Rows, as every other group: the email list is rows too, so it splits like them.
+        segmented = true,
+        iconContainer = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         SettingsRow(
             title = if (hasPassword) "Change password" else "Set a password",
@@ -78,15 +92,17 @@ fun SignInGroup(
             },
             onClick = { passwordDialogOpen = true }
         )
-        SettingsRowDivider()
 
         when {
             emails.isLoading && emails.addresses.isEmpty() -> {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(LocalSettingsSegmentColor.current ?: Color.Transparent, RoundedCornerShape(6.dp))
+                        .padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
+                    LoadingIndicator(Modifier.size(40.dp))
                 }
             }
 
@@ -98,12 +114,13 @@ fun SignInGroup(
                     tint = MaterialTheme.colorScheme.error,
                     onClick = onRetryEmails,
                     showChevron = false,
-                    trailing = { TextButton(onClick = onRetryEmails) { Text("Retry") } }
+                    trailing = {
+                        TextButton(onClick = onRetryEmails, shapes = ButtonDefaults.shapes()) { Text("Retry") }
+                    }
                 )
             }
 
             else -> emails.addresses.forEachIndexed { index, address ->
-                if (index > 0) SettingsRowDivider()
                 EmailRow(
                     address = address,
                     // The server refuses to remove the primary address, and refuses to promote an
@@ -117,13 +134,12 @@ fun SignInGroup(
             }
         }
 
-        SettingsRowDivider()
         SettingsRow(
             title = "Add email address",
             icon = Icons.Outlined.Add,
             enabled = !emails.isBusy,
             showChevron = false,
-            tint = MaterialTheme.colorScheme.primary,
+            // Untinted, so it gets its icon square like every other row of the group.
             onClick = { addDialogOpen = true }
         )
     }
@@ -153,27 +169,46 @@ fun SignInGroup(
     pendingRemoval?.let { address ->
         AlertDialog(
             onDismissRequest = { pendingRemoval = null },
-            title = { Text("Remove address?") },
+            icon = {
+                DialogBadge(
+                    Icons.Outlined.DeleteOutline,
+                    container = MaterialTheme.colorScheme.errorContainer,
+                    content = MaterialTheme.colorScheme.onErrorContainer
+                )
+            },
+            title = { Text("Remove address?", textAlign = TextAlign.Center) },
             text = {
-                Text("$address will no longer receive anything from this server.")
+                Text(
+                    "$address will no longer receive anything from this server.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             },
             confirmButton = {
                 Button(
                     onClick = {
                         pendingRemoval = null
                         onRemoveEmail(address)
-                    }
+                    },
+                    shapes = ButtonDefaults.shapes(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
                 ) {
                     Text("Remove")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { pendingRemoval = null }) { Text("Cancel") }
+                TextButton(onClick = { pendingRemoval = null }, shapes = ButtonDefaults.shapes()) {
+                    Text("Cancel")
+                }
             }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EmailRow(
     address: EmailAddress,
@@ -198,13 +233,23 @@ private fun EmailRow(
         supportingColor = if (address.verified) null else MaterialTheme.colorScheme.error,
         trailing = {
             Box {
-                IconButton(onClick = { menuOpen = true }, enabled = enabled) {
+                IconButton(
+                    onClick = { menuOpen = true },
+                    enabled = enabled,
+                    shapes = IconButtonDefaults.shapes()
+                ) {
                     Icon(Icons.Outlined.MoreVert, contentDescription = "Actions for ${address.email}")
                 }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenu(
+                    expanded = menuOpen,
+                    onDismissRequest = { menuOpen = false },
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
                     if (!address.verified) {
                         DropdownMenuItem(
                             text = { Text("Send verification email") },
+                            leadingIcon = { Icon(Icons.Outlined.MarkEmailRead, contentDescription = null) },
                             onClick = {
                                 menuOpen = false
                                 onVerify()
@@ -214,6 +259,7 @@ private fun EmailRow(
                     if (!address.primary && address.verified) {
                         DropdownMenuItem(
                             text = { Text("Make primary") },
+                            leadingIcon = { Icon(Icons.Outlined.Star, contentDescription = null) },
                             onClick = {
                                 menuOpen = false
                                 onSetPrimary()
@@ -224,6 +270,13 @@ private fun EmailRow(
                         DropdownMenuItem(
                             text = {
                                 Text("Remove", color = MaterialTheme.colorScheme.error)
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Outlined.DeleteOutline,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
                             },
                             onClick = {
                                 menuOpen = false
@@ -237,6 +290,7 @@ private fun EmailRow(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AddEmailDialog(
     isSaving: Boolean,
@@ -248,7 +302,8 @@ private fun AddEmailDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isSaving) onDismiss() },
-        title = { Text("Add email address") },
+        icon = { DialogBadge(Icons.Outlined.MailOutline) },
+        title = { Text("Add email address", textAlign = TextAlign.Center) },
         text = {
             OutlinedTextField(
                 value = address,
@@ -266,13 +321,16 @@ private fun AddEmailDialog(
         confirmButton = {
             Button(
                 onClick = { onConfirm(address) },
-                enabled = looksLikeAnAddress && !isSaving
+                enabled = looksLikeAnAddress && !isSaving,
+                shapes = ButtonDefaults.shapes()
             ) {
                 Text("Add")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isSaving) { Text("Cancel") }
+            TextButton(onClick = onDismiss, enabled = !isSaving, shapes = ButtonDefaults.shapes()) {
+                Text("Cancel")
+            }
         }
     )
 }

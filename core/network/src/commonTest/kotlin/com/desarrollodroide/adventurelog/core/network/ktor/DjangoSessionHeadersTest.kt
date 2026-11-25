@@ -47,7 +47,10 @@ class DjangoSessionHeadersTest {
         var probes = 0
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         val client = HttpClient(MockEngine { request ->
-            if (request.url.encodedPath == "/csrf/") {
+            if (request.url.encodedPath.startsWith("/api/server-info")) {
+                // An old server: no such route (Django's 404 page, or the frontend's).
+                respond("<!doctype html>", HttpStatusCode.NotFound, headersOf(HttpHeaders.ContentType, "text/html"))
+            } else if (request.url.encodedPath == "/csrf/") {
                 probes++
                 if (proxied) respond("<!doctype html>", HttpStatusCode.NotFound, headersOf(HttpHeaders.ContentType, "text/html"))
                 else respond("""{"csrfToken":"x"}""", HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
