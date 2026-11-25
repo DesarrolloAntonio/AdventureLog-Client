@@ -31,8 +31,8 @@ class SignOutTest {
         // allauth answers a successful DELETE on the session with 401.
         val network = KtorAdventureLogNetwork(
             HttpClient(MockEngine { request ->
-                // The /csrf/ probe that tells a direct Django from the web frontend's proxy.
-                if (request.url.encodedPath != "/csrf/") requests += request
+                // The probes (/api/server-info/, /csrf/) that tell a direct Django from the web frontend's proxy.
+                if (request.url.encodedPath != "/csrf/" && !request.url.encodedPath.startsWith("/api/server-info")) requests += request
                 respond("", HttpStatusCode.Unauthorized)
             }),
             backgroundScope = scope
