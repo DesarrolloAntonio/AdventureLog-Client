@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS login</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#FFFFFF}a:hover{color:#E5E5EA}
+.glass{background:rgba(255,255,255,0.16);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:0.5px solid rgba(255,255,255,0.5);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.7),0 16px 40px rgba(0,0,0,0.25)}
+.glass-d{background:rgba(255,255,255,0.16);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:0.5px solid rgba(255,255,255,0.5);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.7),0 16px 40px rgba(0,0,0,0.25)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #22374A; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 390 844" width="390" height="844" role="img" aria-label="Illustration of a fjord at sunset" style="position: absolute; inset: 0">
+    <defs>
+      <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3D5B8A"/><stop offset="0.45" stop-color="#D99A88"/><stop offset="0.62" stop-color="#F6CFA8"/></linearGradient>
+      <linearGradient id="gLake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5E7F99"/><stop offset="1" stop-color="#14222F"/></linearGradient>
+      <radialGradient id="gSun" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FFF1D6"/><stop offset="0.4" stop-color="#FFE1B5" stop-opacity="0.7"/><stop offset="1" stop-color="#FFE1B5" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="390" height="844" fill="url(#gSky)"/>
+    <circle cx="270" cy="470" r="90" fill="url(#gSun)"/>
+    <circle cx="270" cy="470" r="22" fill="#FFF3DE"/>
+    <path d="M0 470 L60 430 L120 456 L190 410 L250 448 L310 418 L360 442 L390 430 V844 H0Z" fill="#B094A3" opacity="0.8"/>
+    <path d="M0 520 L80 476 L150 506 L224 466 L292 500 L350 482 L390 492 V844 H0Z" fill="#6E6880"/>
+    <rect y="540" width="390" height="304" fill="url(#gLake)"/>
+    <rect x="262" y="544" width="16" height="80" fill="#F7CDA6" opacity="0.4"/>
+    <path d="M0 844 V540 L130 516 L238 506 L250 518 L150 536 L90 844Z" fill="#231F20"/>
+    <circle cx="230" cy="494" r="3.4" fill="#0E0E0E"/>
+    <path d="M227.5 497.5 h5 l1 9 h-2 l-1 -4 l-1 4 h-2Z" fill="#0E0E0E"/>
+  </svg>
+
+  <div style="position: absolute; left: 0; right: 0; top: 96px; display: flex; flex-direction: column; align-items: center; text-align: center">
+    <span class="glass" style="width: 72px; height: 72px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="38" height="38" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#FFFFFF"/></svg>
+    </span>
+    <h1 style="margin: 18px 0 0; font-family: ui-serif, 'New York', Georgia, serif; font-size: 40px; line-height: 44px; font-weight: 700">AdventureLog</h1>
+    <p style="margin: 6px 0 0; font-size: 17px; color: rgba(255,255,255,0.9)">Your travels, on your own server.</p>
+  </div>
+
+  <form class="glass" style="position: absolute; left: 14px; right: 14px; bottom: 34px; border-radius: 36px; padding: 22px 18px 14px; display: flex; flex-direction: column; gap: 12px">
+    <label style="display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 13px; font-weight: 600; padding-left: 6px">Server</span>
+      <span style="height: 50px; border-radius: 16px; background: rgba(255,255,255,0.9); display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #000000">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <input value="https://[YOUR SERVER]" aria-label="Server" style="all: unset; flex-grow: 1; font-size: 17px">
+        <svg viewBox="0 0 24 24" width="20" height="20" role="img" aria-label="Server found"><circle cx="12" cy="12" r="10" fill="#34C759"/><path d="M7.5 12.5 10.5 15.5 16.5 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </label>
+    <div style="border-radius: 16px; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; color: #000000; overflow: hidden">
+      <label style="height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 0.5px solid #D1D1D6">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+        <input value="claude" aria-label="Username" style="all: unset; flex-grow: 1; font-size: 17px">
+      </label>
+      <label style="height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 14px">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input type="password" value="password" aria-label="Password" style="all: unset; flex-grow: 1; font-size: 17px; letter-spacing: 2px">
+      </label>
+    </div>
+    <button type="submit" style="all: unset; margin-top: 4px; height: 54px; border-radius: 27px; background: #007A85; color: #FFFFFF; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 8px 20px rgba(0,122,133,0.4); cursor: pointer">Sign In</button>
+    <a href="#server-guide" style="height: 44px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; text-decoration: none">How do I set up a server?</a>
+  </form>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #22374A; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 390 844" width="390" height="844" role="img" aria-label="Illustration of a fjord at sunset" style="position: absolute; inset: 0">
+    <defs>
+      <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3D5B8A"/><stop offset="0.45" stop-color="#D99A88"/><stop offset="0.62" stop-color="#F6CFA8"/></linearGradient>
+      <linearGradient id="gLake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5E7F99"/><stop offset="1" stop-color="#14222F"/></linearGradient>
+      <radialGradient id="gSun" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FFF1D6"/><stop offset="0.4" stop-color="#FFE1B5" stop-opacity="0.7"/><stop offset="1" stop-color="#FFE1B5" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="390" height="844" fill="url(#gSky)"/>
+    <circle cx="270" cy="470" r="90" fill="url(#gSun)"/>
+    <circle cx="270" cy="470" r="22" fill="#FFF3DE"/>
+    <path d="M0 470 L60 430 L120 456 L190 410 L250 448 L310 418 L360 442 L390 430 V844 H0Z" fill="#B094A3" opacity="0.8"/>
+    <path d="M0 520 L80 476 L150 506 L224 466 L292 500 L350 482 L390 492 V844 H0Z" fill="#6E6880"/>
+    <rect y="540" width="390" height="304" fill="url(#gLake)"/>
+    <rect x="262" y="544" width="16" height="80" fill="#F7CDA6" opacity="0.4"/>
+    <path d="M0 844 V540 L130 516 L238 506 L250 518 L150 536 L90 844Z" fill="#231F20"/>
+    <circle cx="230" cy="494" r="3.4" fill="#0E0E0E"/>
+    <path d="M227.5 497.5 h5 l1 9 h-2 l-1 -4 l-1 4 h-2Z" fill="#0E0E0E"/>
+  </svg>
+
+  <div style="position: absolute; left: 0; right: 0; top: 96px; display: flex; flex-direction: column; align-items: center; text-align: center">
+    <span class="glass-d" style="width: 72px; height: 72px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="38" height="38" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#FFFFFF"/></svg>
+    </span>
+    <h1 style="margin: 18px 0 0; font-family: ui-serif, 'New York', Georgia, serif; font-size: 40px; line-height: 44px; font-weight: 700">AdventureLog</h1>
+    <p style="margin: 6px 0 0; font-size: 17px; color: rgba(255,255,255,0.9)">Your travels, on your own server.</p>
+  </div>
+
+  <form class="glass-d" style="position: absolute; left: 14px; right: 14px; bottom: 34px; border-radius: 36px; padding: 22px 18px 14px; display: flex; flex-direction: column; gap: 12px">
+    <label style="display: flex; flex-direction: column; gap: 6px">
+      <span style="font-size: 13px; font-weight: 600; padding-left: 6px">Server</span>
+      <span style="height: 50px; border-radius: 16px; background: rgba(28,28,30,0.82); display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #FFFFFF">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#98989D" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <input value="https://[YOUR SERVER]" aria-label="Server" style="all: unset; flex-grow: 1; font-size: 17px">
+        <svg viewBox="0 0 24 24" width="20" height="20" role="img" aria-label="Server found"><circle cx="12" cy="12" r="10" fill="#34C759"/><path d="M7.5 12.5 10.5 15.5 16.5 9" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    </label>
+    <div style="border-radius: 16px; background: rgba(28,28,30,0.82); display: flex; flex-direction: column; color: #FFFFFF; overflow: hidden">
+      <label style="height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 0.5px solid #38383A">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#98989D" stroke-width="2"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+        <input value="claude" aria-label="Username" style="all: unset; flex-grow: 1; font-size: 17px">
+      </label>
+      <label style="height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 14px">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#98989D" stroke-width="2" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input type="password" value="password" aria-label="Password" style="all: unset; flex-grow: 1; font-size: 17px; letter-spacing: 2px">
+      </label>
+    </div>
+    <button type="submit" style="all: unset; margin-top: 4px; height: 54px; border-radius: 27px; background: #007A85; color: #FFFFFF; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 8px 20px rgba(0,122,133,0.4); cursor: pointer">Sign In</button>
+    <a href="#server-guide" style="height: 44px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; text-decoration: none">How do I set up a server?</a>
+  </form>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

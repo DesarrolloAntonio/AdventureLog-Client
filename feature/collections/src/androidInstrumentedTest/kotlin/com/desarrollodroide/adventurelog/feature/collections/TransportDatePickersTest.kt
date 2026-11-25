@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.collections
 
+import java.text.DateFormatSymbols
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +36,7 @@ class TransportDatePickersTest {
             var form by remember { mutableStateOf(TransportationFormData(departureDate = "2026-10-05T00:00:00Z", isAllDay = true)) }
             DateTransportationSection(formData = form, onFormDataChange = { form = it })
         }
-        onNodeWithText("Date Information").performClick()
+        onNodeWithText("Date information").performClick()
         onNodeWithText("Cancel").assertDoesNotExist()
 
         onAllNodesWithContentDescriptionFirst("Select date").performClick()
@@ -58,7 +61,7 @@ class TransportDatePickersTest {
             }
             DateTransportationSection(formData = form, onFormDataChange = { form = it; stored = it.departureDate })
         }
-        onNodeWithText("Date Information").performClick()
+        onNodeWithText("Date information").performClick()
 
         onAllNodesWithContentDescriptionFirst("Select time").performClick()
         onNodeWithText("Select time").assertExists()
@@ -81,7 +84,7 @@ class TransportDatePickersTest {
                 onFormDataChange = {}
             )
         }
-        onNodeWithText("Date Information").performClick()
+        onNodeWithText("Date information").performClick()
 
         onNodeWithText("05/10/2026").assertIsDisplayed()
         onNodeWithText("07/10/2026").assertIsDisplayed()
@@ -97,25 +100,31 @@ class TransportDatePickersTest {
                 collectionStart = "2026-10-01", collectionEnd = "2026-10-20"
             )
         }
-        onNodeWithText("Date Information").performClick()
+        onNodeWithText("Date information").performClick()
         // The words toggle it, not only the switch (as CO-11).
-        onNodeWithText("Constrain to Collection Dates").performClick()
+        onNodeWithText("Constrain to collection dates").performClick()
         onAllNodesWithContentDescriptionFirst("Select date").performClick()
 
-        // A day's name ("Sunday, October 25, 2026") is its text or its description depending on
-        // the Material version; either will do.
-        fun day(name: String) = hasText(name, substring = true) or hasContentDescription(name, substring = true)
-        onAllNodes(day("October 25, 2026"), useUnmergedTree = true)[0].assertIsNotEnabled()
-        onAllNodes(day("October 15, 2026"), useUnmergedTree = true)[0].assertIsEnabled()
+        // A day's name ("Sunday, October 25, 2026", "domingo, 25 de octubre de 2026") is its text or
+        // its description depending on the Material version, and in the phone's language: match the
+        // day, the year and October as this phone spells it, so a Spanish test phone passes too.
+        val october = DateFormatSymbols.getInstance().months[9]
+        fun day(d: Int) = SemanticsMatcher("October $d, 2026") { node ->
+            val said = node.config.getOrElse(SemanticsProperties.ContentDescription) { emptyList() } +
+                node.config.getOrElse(SemanticsProperties.Text) { emptyList() }.map { it.text }
+            said.any { it.contains(Regex("\\b$d\\b")) && "2026" in it && it.contains(october, ignoreCase = true) }
+        }
+        onAllNodes(day(25), useUnmergedTree = true)[0].assertIsNotEnabled()
+        onAllNodes(day(15), useUnmergedTree = true)[0].assertIsEnabled()
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun withoutCollectionDatesThereIsNothingToConstrainTo() = runComposeUiTest {
         setContent { DateTransportationSection(formData = TransportationFormData(), onFormDataChange = {}) }
-        onNodeWithText("Date Information").performClick()
+        onNodeWithText("Date information").performClick()
 
-        onNodeWithText("Constrain to Collection Dates").assertDoesNotExist()
+        onNodeWithText("Constrain to collection dates").assertDoesNotExist()
     }
 
     @OptIn(ExperimentalTestApi::class)

@@ -479,9 +479,9 @@ class CollectionsRepositoryImpl(
         networkDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
     }
 
-    override suspend fun deleteItineraryEntry(entryId: String): Either<ApiResponse, Unit> =
+    override suspend fun deleteItineraryEntry(collectionId: String, entryId: String): Either<ApiResponse, Unit> =
         noteCall {
-            networkDataSource.deleteItineraryEntry(entryId)
+            networkDataSource.deleteItineraryEntry(collectionId, entryId)
         }
 
     /**

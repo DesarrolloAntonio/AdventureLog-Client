@@ -35,6 +35,10 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
         androidInstrumentedTest.dependencies {
+            // Fixtures and the model: the instrumented set does not inherit commonTest's.
+            implementation(projects.core.testing)
+            implementation(projects.core.model)
+            implementation(libs.coil.compose)
             implementation(compose.uiTest)
             implementation(libs.androidx.test.runner)
             implementation(libs.junit)
@@ -50,14 +54,17 @@ kotlin {
             api(projects.core.domain)
             implementation(projects.feature.detail)
             implementation(projects.feature.ui)
-            implementation(libs.koin.composeVM)
-            implementation(libs.navigation.compose)
+            implementation(libs.koin.core.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.multiplatform.paging.compose)
+            implementation(libs.multiplatform.paging.common)
             implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
+            implementation(libs.koin.composeVM)
+            implementation(libs.navigation.compose)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.multiplatform.paging.compose)
             implementation(libs.coil.compose)
             implementation(libs.androidx.ui.tooling)
             implementation(libs.maps.compose)

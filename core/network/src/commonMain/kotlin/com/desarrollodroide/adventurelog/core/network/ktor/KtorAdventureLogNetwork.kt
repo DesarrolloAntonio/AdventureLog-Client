@@ -19,10 +19,12 @@ import com.desarrollodroide.adventurelog.core.network.model.response.UserDetails
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
@@ -105,8 +107,31 @@ class KtorAdventureLogNetwork(
     private val csrfToken = newCsrfToken()
 
     /** Null until the first request to a server finds out; reset whenever the server changes. */
-    private var behindWebProxy: Boolean? = null
+    private var serverProfile: ServerProfile? = null
     private val probeLock = Mutex()
+
+    /** The profile of the server at [origin], probing it the first time (see [probeServer]). */
+    private suspend fun profileOf(origin: String): ServerProfile =
+        serverProfile ?: probeLock.withLock {
+            serverProfile ?: probeServer { path ->
+                // Marked, so the interceptor sends it as it is: no session, no probe of its own.
+                adventurelogClient.get("$origin$path") {
+                    attributes.put(ProbeRequest, Unit)
+                    header("X-Is-Mobile", "true")
+                    header(HttpHeaders.Accept, "application/json")
+                }.call
+            }.also {
+                logger.d {
+                    "Server at $origin: API ${it.api}, " +
+                        if (it.behindWebProxy) "behind the web frontend's proxy" else "Django directly"
+                }
+                serverProfile = it
+            }
+        }
+
+    /** Which API the signed-in server speaks, for the calls whose bodies differ between them. */
+    private suspend fun serverApi(): ServerApi =
+        profileOf(Url(baseUrl ?: error("No server to ask")).origin()).api
 
     init {
         // One place sees every answer, so no screen has to recognise an ended session on its own.
@@ -115,28 +140,24 @@ class KtorAdventureLogNetwork(
         adventurelogClient.plugin(HttpSend).intercept { request ->
             // The session comes from the request's own header, not from sessionToken: sign-out
             // sends its DELETE in the background after clearSession() has already emptied it.
+            if (request.attributes.contains(ProbeRequest)) {
+                return@intercept execute(request)
+            }
             val requestSession = request.headers[SESSION_TOKEN_HEADER]
             val toOwnServer = baseUrl?.let { Url(it).origin() == request.url.build().origin() } == true
             if (requestSession != null || toOwnServer) {
-                val origin = request.url.build().origin()
-                val proxied = behindWebProxy ?: probeLock.withLock {
-                    behindWebProxy ?: run {
-                        val probe = HttpRequestBuilder().apply {
-                            url("$origin$CSRF_PROBE_PATH")
-                            header("X-Is-Mobile", "true")
-                        }
-                        val answer = execute(probe).response
-                        (answer.contentType()?.match(ContentType.Text.Html) == true).also {
-                            logger.d { "Server at $origin: ${if (it) "behind the web frontend's proxy" else "Django directly"}" }
-                            behindWebProxy = it
-                        }
+                val profile = profileOf(request.url.build().origin())
+                when {
+                    profile.api == ServerApi.V014 -> {
+                        request.rewriteFor014()
+                        request.attachTokenSession(profile.behindWebProxy)
                     }
+                    profile.behindWebProxy -> request.attachProxiedSession(requestSession)
+                    else -> request.attachDjangoSession(requestSession, csrfToken)
                 }
-                if (proxied) request.attachProxiedSession(requestSession)
-                else request.attachDjangoSession(requestSession, csrfToken)
             }
             val call = execute(request)
-            val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_PATH)
+            val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_SUFFIX)
             if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut) {
                 logger.w { "Server rejected the session (401 on ${call.request.url.encodedPath})" }
                 rejections.tryEmit(Unit)
@@ -235,7 +256,8 @@ class KtorAdventureLogNetwork(
     private val itineraryDataSource: ItineraryApi by lazy {
         KtorItineraryApi(
             httpClient = adventurelogClient,
-            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            serverApi = ::serverApi,
         )
     }
 
@@ -276,7 +298,7 @@ class KtorAdventureLogNetwork(
         sessionToken: String?
     ) {
         this.baseUrl = serverUrl.trimEnd('/')
-        behindWebProxy = null
+        serverProfile = null
         this.sessionToken = sessionToken
         logger.d {
             "Network initialized from existing session - BaseURL: ${this.baseUrl}, " +
@@ -299,7 +321,7 @@ class KtorAdventureLogNetwork(
     override fun clearSession() {
         sessionToken = null
         baseUrl = null
-        behindWebProxy = null
+        serverProfile = null
         logger.d { "Network session cleared - all tokens and base URL reset" }
     }
 
@@ -309,7 +331,7 @@ class KtorAdventureLogNetwork(
         password: String
     ): UserDetailsDTO {
         baseUrl = url.trimEnd('/')
-        behindWebProxy = null
+        serverProfile = null
         // Initialize the session info before calling login
         // The authDataSource will use the sessionProvider to get the baseUrl
         
@@ -846,9 +868,9 @@ class KtorAdventureLogNetwork(
         return itineraryDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
     }
 
-    override suspend fun deleteItineraryEntry(entryId: String) {
+    override suspend fun deleteItineraryEntry(collectionId: String, entryId: String) {
         ensureInitialized()
-        itineraryDataSource.deleteItineraryEntry(entryId)
+        itineraryDataSource.deleteItineraryEntry(collectionId, entryId)
     }
 
     override suspend fun getRecommendations(

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android world</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; justify-content: flex-end; height: 48px">
+      <button aria-label="Search countries" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#171D1E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      </button>
+    </div>
+    <h1 style="margin: 0 4px; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">World</h1>
+
+    <div style="margin-top: 16px; border-radius: 28px; background: #2B3133; color: #ECF2F3; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; align-items: flex-end; gap: 14px">
+        <span style="font-size: 88px; line-height: 0.8; font-weight: 800; font-stretch: 38%; color: #9EEFFC">7</span>
+        <span style="display: flex; flex-direction: column; padding-bottom: 2px">
+          <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">countries visited</span>
+          <span style="font-size: 14px; color: #BFC8CA; margin-top: 4px">2 more planned</span>
+        </span>
+      </div>
+      <div aria-hidden="true" style="border-top: 2px dashed #3F484A"></div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">REGIONS</span><span style="font-size: 28px; font-weight: 800; font-stretch: 38%">14</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">PLACES</span><span style="font-size: 28px; font-weight: 800; font-stretch: 38%">22</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #BFC8CA">CONTINENTS</span><span style="font-size: 28px; font-weight: 800; font-stretch: 38%">3</span></span>
+      </div>
+    </div>
+
+    <div role="group" aria-label="Filter" style="margin-top: 16px; display: flex; gap: 2px">
+      <button aria-pressed="true" style="all: unset; flex-grow: 1; height: 48px; border-radius: 24px; background: #006973; color: #FFFFFF; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+        Visited 7
+      </button>
+      <button aria-pressed="false" style="all: unset; flex-grow: 1; height: 48px; border-radius: 8px; background: #CDE7EC; color: #334B4F; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">Planned 2</button>
+      <button aria-pressed="false" style="all: unset; flex-grow: 1; height: 48px; border-radius: 8px 24px 24px 8px; background: #CDE7EC; color: #334B4F; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">All</button>
+    </div>
+
+    <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 3px">
+      <a href="#country-no" style="height: 72px; border-radius: 24px 24px 6px 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #171D1E">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #006973; color: #FFFFFF; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">NO</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Norway</span><span style="font-size: 13px; color: #3F484A">3 regions · 3 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-jp" style="height: 72px; border-radius: 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #171D1E">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #006973; color: #FFFFFF; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">JP</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Japan</span><span style="font-size: 13px; color: #3F484A">3 regions · 4 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-is" style="height: 72px; border-radius: 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #171D1E">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #006973; color: #FFFFFF; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">IS</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Iceland</span><span style="font-size: 13px; color: #3F484A">2 regions · 4 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-ma" style="height: 72px; border-radius: 6px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #171D1E">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #006973; color: #FFFFFF; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">MA</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Morocco</span><span style="font-size: 13px; color: #3F484A">3 regions · 3 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-jo" style="height: 72px; border-radius: 6px 6px 24px 24px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #171D1E">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #006973; color: #FFFFFF; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">JO</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Jordan</span><span style="font-size: 13px; color: #3F484A">1 region · 1 place</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center">
+    <nav aria-label="Main" style="height: 64px; border-radius: 32px; background: #2B3133; display: flex; align-items: center; gap: 2px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <a href="Main.dc.html" aria-label="Home" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+      </a>
+      <a href="Android-Places.dc.html" aria-label="Places" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5Z"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" aria-label="Collections" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+      </a>
+      <a href="Android-Map.dc.html" aria-label="Map" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+      </a>
+      <a href="Android-World.dc.html" aria-current="page" style="height: 48px; border-radius: 24px; background: #9EEFFC; color: #004F57; padding: 0 16px 0 12px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; font-weight: 700">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#004F57"/><ellipse cx="12" cy="12" rx="4" ry="10" fill="none" stroke="#9EEFFC" stroke-width="1.6"/><path d="M2 12h20" stroke="#9EEFFC" stroke-width="1.6"/></svg>
+        World
+      </a>
+    </nav>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="padding: 40px 16px 0; display: flex; flex-direction: column">
+    <div style="display: flex; justify-content: flex-end; height: 48px">
+      <button aria-label="Search countries" style="all: unset; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#DEE3E4" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      </button>
+    </div>
+    <h1 style="margin: 0 4px; font-size: 58px; line-height: 1; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">World</h1>
+
+    <div style="margin-top: 16px; border-radius: 28px; background: #DEE3E4; color: #2B3133; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; align-items: flex-end; gap: 14px">
+        <span style="font-size: 88px; line-height: 0.8; font-weight: 800; font-stretch: 38%; color: #006973">7</span>
+        <span style="display: flex; flex-direction: column; padding-bottom: 2px">
+          <span style="font-size: 26px; line-height: 1; font-weight: 800; font-stretch: 38%">countries visited</span>
+          <span style="font-size: 14px; color: #3F484A; margin-top: 4px">2 more planned</span>
+        </span>
+      </div>
+      <div aria-hidden="true" style="border-top: 2px dashed #BFC8CA"></div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">REGIONS</span><span style="font-size: 28px; font-weight: 800; font-stretch: 38%">14</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">PLACES</span><span style="font-size: 28px; font-weight: 800; font-stretch: 38%">22</span></span>
+        <span style="display: flex; flex-direction: column"><span style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #3F484A">CONTINENTS</span><span style="font-size: 28px; font-weight: 800; font-stretch: 38%">3</span></span>
+      </div>
+    </div>
+
+    <div role="group" aria-label="Filter" style="margin-top: 16px; display: flex; gap: 2px">
+      <button aria-pressed="true" style="all: unset; flex-grow: 1; height: 48px; border-radius: 24px; background: #81D3E0; color: #00363C; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#00363C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+        Visited 7
+      </button>
+      <button aria-pressed="false" style="all: unset; flex-grow: 1; height: 48px; border-radius: 8px; background: #334B4F; color: #CDE7EC; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">Planned 2</button>
+      <button aria-pressed="false" style="all: unset; flex-grow: 1; height: 48px; border-radius: 8px 24px 24px 8px; background: #334B4F; color: #CDE7EC; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">All</button>
+    </div>
+
+    <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 3px">
+      <a href="#country-no" style="height: 72px; border-radius: 24px 24px 6px 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #DEE3E4">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #81D3E0; color: #00363C; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">NO</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Norway</span><span style="font-size: 13px; color: #BFC8CA">3 regions · 3 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-jp" style="height: 72px; border-radius: 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #DEE3E4">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #81D3E0; color: #00363C; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">JP</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Japan</span><span style="font-size: 13px; color: #BFC8CA">3 regions · 4 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-is" style="height: 72px; border-radius: 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #DEE3E4">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #81D3E0; color: #00363C; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">IS</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Iceland</span><span style="font-size: 13px; color: #BFC8CA">2 regions · 4 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-ma" style="height: 72px; border-radius: 6px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #DEE3E4">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #81D3E0; color: #00363C; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">MA</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Morocco</span><span style="font-size: 13px; color: #BFC8CA">3 regions · 3 places</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+      <a href="#country-jo" style="height: 72px; border-radius: 6px 6px 24px 24px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 16px 0 12px; text-decoration: none; color: #DEE3E4">
+        <span style="width: 52px; height: 44px; border-radius: 12px; background: #81D3E0; color: #00363C; font-size: 20px; font-weight: 800; font-stretch: 50%; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">JO</span>
+        <span style="display: flex; flex-direction: column; flex-grow: 1"><span style="font-size: 16px; font-weight: 700">Jordan</span><span style="font-size: 13px; color: #BFC8CA">1 region · 1 place</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center">
+    <nav aria-label="Main" style="height: 64px; border-radius: 32px; background: #DEE3E4; display: flex; align-items: center; gap: 2px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <a href="Main.dc.html" aria-label="Home" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+      </a>
+      <a href="Android-Places.dc.html" aria-label="Places" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5Z"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" aria-label="Collections" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+      </a>
+      <a href="Android-Map.dc.html" aria-label="Map" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+      </a>
+      <a href="Android-World.dc.html" aria-current="page" style="height: 48px; border-radius: 24px; background: #004F57; color: #9EEFFC; padding: 0 16px 0 12px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; font-weight: 700">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#9EEFFC"/><ellipse cx="12" cy="12" rx="4" ry="10" fill="none" stroke="#006973" stroke-width="1.6"/><path d="M2 12h20" stroke="#006973" stroke-width="1.6"/></svg>
+        World
+      </a>
+    </nav>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

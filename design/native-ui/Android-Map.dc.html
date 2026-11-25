@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #A8D3DE; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 412 915" width="412" height="915" role="img" aria-label="Map of saved places in Scandinavia" style="position: absolute; inset: 0">
+    <rect width="412" height="915" fill="#A8D3DE"/>
+    <path d="M130 0 C150 50 118 100 160 150 C140 190 186 214 160 262 C206 288 182 336 226 372 C258 408 236 470 292 508 C326 532 352 580 412 596 V0Z" fill="#EEF2EC"/>
+    <path d="M300 0 C310 80 340 140 380 190 C396 210 412 214 412 214 V0Z" fill="#E1EADB"/>
+    <path d="M230 220 C262 206 304 240 314 286 C292 310 250 298 230 262Z" fill="#D3E6CB"/>
+    <path d="M0 640 C60 610 120 630 160 680 C190 720 170 780 220 820 L260 915 H0Z" fill="#EEF2EC"/>
+    <path d="M160 262 C186 268 214 252 246 258" fill="none" stroke="#A8D3DE" stroke-width="8" stroke-linecap="round"/>
+    <path d="M226 372 C248 360 280 372 306 354" fill="none" stroke="#A8D3DE" stroke-width="7" stroke-linecap="round"/>
+    <path d="M412 80 C350 110 316 190 306 260 C296 330 340 400 350 500" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+    <path d="M190 150 C232 162 262 194 306 196" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+    <text x="318" y="140" font-size="12" font-weight="700" letter-spacing="2" fill="#6F797A" font-family="'Roboto Flex', Roboto, sans-serif">NORWAY</text>
+    <text x="40" y="700" font-size="12" font-weight="700" letter-spacing="2" fill="#6F797A" font-family="'Roboto Flex', Roboto, sans-serif">ICELAND</text>
+  </svg>
+
+  <a href="Android-Place.dc.html" aria-label="Trolltunga" style="position: absolute; left: 234px; top: 304px; display: flex; flex-direction: column; align-items: center; text-decoration: none">
+    <span style="width: 40px; height: 40px; border-radius: 14px; background: #006973; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.25)">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#FFFFFF"/></svg>
+    </span>
+    <span style="width: 10px; height: 10px; background: #006973; transform: rotate(45deg); margin-top: -6px"></span>
+  </a>
+  <a href="Android-Place.dc.html" aria-label="Geirangerfjord, selected" style="position: absolute; left: 176px; top: 184px; display: flex; flex-direction: column; align-items: center; text-decoration: none">
+    <span style="height: 44px; padding: 0 14px 0 8px; border-radius: 16px; background: #2B3133; color: #ECF2F3; display: flex; align-items: center; gap: 8px; box-shadow: 0 6px 14px rgba(0,0,0,0.3); font-size: 18px; font-weight: 800; font-stretch: 38%; white-space: nowrap">
+      <span style="width: 30px; height: 30px; border-radius: 10px; background: #9EEFFC; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#004F57"/></svg>
+      </span>
+      Geirangerfjord
+    </span>
+    <span style="width: 10px; height: 10px; background: #2B3133; transform: rotate(45deg); margin-top: -6px"></span>
+  </a>
+  <span style="position: absolute; left: 316px; top: 70px; width: 40px; height: 40px; border-radius: 14px; background: #FFFFFF; border: 2px solid #006973; box-sizing: border-box; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.18)">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#006973"/></svg>
+  </span>
+  <span aria-label="4 places in Iceland" style="position: absolute; left: 70px; top: 650px; width: 52px; height: 52px; border-radius: 26px; background: #9EEFFC; border: 3px solid #FFFFFF; color: #004F57; font-size: 24px; font-weight: 800; font-stretch: 38%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.22)">4</span>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 40px; display: flex; flex-direction: column; gap: 10px">
+    <label style="height: 56px; border-radius: 28px; background: #FFFFFF; display: flex; align-items: center; gap: 12px; padding: 0 6px 0 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.14)">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <input placeholder="Search your map" style="all: unset; flex-grow: 1; font-size: 16px">
+      <span style="width: 44px; height: 44px; border-radius: 22px; background: #D9E2FF; color: #3A4664; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">JD</span>
+    </label>
+    <div style="display: flex; gap: 8px">
+      <div role="group" aria-label="Filter" style="display: flex; gap: 2px">
+        <button aria-pressed="true" style="all: unset; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; background: #2B3133; color: #ECF2F3; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15)">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="#9EEFFC" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+          All
+        </button>
+        <button aria-pressed="false" style="all: unset; height: 40px; padding: 0 14px; border-radius: 8px; background: #FFFFFF; font-size: 14px; font-weight: 600; color: #3F484A; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1)">Visited</button>
+        <button aria-pressed="false" style="all: unset; height: 40px; padding: 0 16px 0 14px; border-radius: 8px 20px 20px 8px; background: #FFFFFF; font-size: 14px; font-weight: 600; color: #3F484A; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1)">Planned</button>
+      </div>
+      <span style="flex-grow: 1"></span>
+      <button aria-label="Map layers" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2.5 8.5 12 14l9.5-5.5Z M2.5 13 12 18.5 21.5 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <button aria-label="My location" style="all: unset; position: absolute; right: 16px; top: 586px; width: 56px; height: 56px; border-radius: 18px; background: #D9E2FF; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.18); cursor: pointer">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#3A4664" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+  </button>
+
+  <a href="Android-Place.dc.html" style="position: absolute; left: 16px; right: 16px; top: 656px; height: 112px; border-radius: 28px; background: #FFFFFF; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 12px; text-decoration: none; color: #171D1E; box-shadow: 0 6px 20px rgba(0,0,0,0.16)">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="88" height="88" role="img" aria-label="Photo of Geirangerfjord" style="border-radius: 20px; flex-shrink: 0"><rect width="176" height="132" fill="#CFE6EE"/><path d="M0 70 L30 30 L58 62 L84 22 L120 66 L150 34 L176 58 V132 H0Z" fill="#7FA3AE"/><path d="M0 132 V80 L40 52 L70 96 L0 132Z" fill="#3E6670"/><path d="M176 132 V70 L132 58 L104 100 Z" fill="#2E5560"/><path d="M0 132 L70 96 L104 100 L176 132Z" fill="#2F7F8C"/></svg>
+    <span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0">
+      <span style="font-size: 28px; line-height: 1; font-weight: 800; font-stretch: 38%">Geirangerfjord</span>
+      <span style="font-size: 13px; color: #3F484A; margin-top: 4px">Møre og Romsdal · ★ 5 · visited</span>
+      <span style="margin-top: 10px; display: flex; gap: 8px">
+        <span style="height: 32px; padding: 0 14px; border-radius: 16px; background: #006973; color: #FFFFFF; font-size: 13px; font-weight: 700; display: flex; align-items: center">Directions</span>
+        <span style="height: 32px; padding: 0 14px; border-radius: 16px; background: #CDE7EC; color: #334B4F; font-size: 13px; font-weight: 700; display: flex; align-items: center">Open</span>
+      </span>
+    </span>
+  </a>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center">
+    <nav aria-label="Main" style="height: 64px; border-radius: 32px; background: #2B3133; display: flex; align-items: center; gap: 2px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <a href="Main.dc.html" aria-label="Home" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+      </a>
+      <a href="Android-Places.dc.html" aria-label="Places" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5Z"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" aria-label="Collections" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+      </a>
+      <a href="Android-Map.dc.html" aria-current="page" style="height: 48px; border-radius: 24px; background: #9EEFFC; color: #004F57; padding: 0 16px 0 12px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; font-weight: 700">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z" fill="#004F57"/><path d="M9 4v14 M15 6v14" stroke="#9EEFFC" stroke-width="1.6"/></svg>
+        Map
+      </a>
+      <a href="Android-World.dc.html" aria-label="World" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#ECF2F3" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+      </a>
+    </nav>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #1B3640; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 412 915" width="412" height="915" role="img" aria-label="Map of saved places in Scandinavia" style="position: absolute; inset: 0">
+    <rect width="412" height="915" fill="#1B3640"/>
+    <path d="M130 0 C150 50 118 100 160 150 C140 190 186 214 160 262 C206 288 182 336 226 372 C258 408 236 470 292 508 C326 532 352 580 412 596 V0Z" fill="#262B2A"/>
+    <path d="M300 0 C310 80 340 140 380 190 C396 210 412 214 412 214 V0Z" fill="#232826"/>
+    <path d="M230 220 C262 206 304 240 314 286 C292 310 250 298 230 262Z" fill="#24342A"/>
+    <path d="M0 640 C60 610 120 630 160 680 C190 720 170 780 220 820 L260 915 H0Z" fill="#262B2A"/>
+    <path d="M160 262 C186 268 214 252 246 258" fill="none" stroke="#1B3640" stroke-width="8" stroke-linecap="round"/>
+    <path d="M226 372 C248 360 280 372 306 354" fill="none" stroke="#1B3640" stroke-width="7" stroke-linecap="round"/>
+    <path d="M412 80 C350 110 316 190 306 260 C296 330 340 400 350 500" fill="none" stroke="#3A4043" stroke-width="6"/>
+    <path d="M190 150 C232 162 262 194 306 196" fill="none" stroke="#3A4043" stroke-width="4"/>
+    <text x="318" y="140" font-size="12" font-weight="700" letter-spacing="2" fill="#6F797A" font-family="'Roboto Flex', Roboto, sans-serif">NORWAY</text>
+    <text x="40" y="700" font-size="12" font-weight="700" letter-spacing="2" fill="#6F797A" font-family="'Roboto Flex', Roboto, sans-serif">ICELAND</text>
+  </svg>
+
+  <a href="Android-Place.dc.html" aria-label="Trolltunga" style="position: absolute; left: 234px; top: 304px; display: flex; flex-direction: column; align-items: center; text-decoration: none">
+    <span style="width: 40px; height: 40px; border-radius: 14px; background: #81D3E0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.25)">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#00363C"/></svg>
+    </span>
+    <span style="width: 10px; height: 10px; background: #81D3E0; transform: rotate(45deg); margin-top: -6px"></span>
+  </a>
+  <a href="Android-Place.dc.html" aria-label="Geirangerfjord, selected" style="position: absolute; left: 176px; top: 184px; display: flex; flex-direction: column; align-items: center; text-decoration: none">
+    <span style="height: 44px; padding: 0 14px 0 8px; border-radius: 16px; background: #DEE3E4; color: #2B3133; display: flex; align-items: center; gap: 8px; box-shadow: 0 6px 14px rgba(0,0,0,0.3); font-size: 18px; font-weight: 800; font-stretch: 38%; white-space: nowrap">
+      <span style="width: 30px; height: 30px; border-radius: 10px; background: #004F57; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#9EEFFC"/></svg>
+      </span>
+      Geirangerfjord
+    </span>
+    <span style="width: 10px; height: 10px; background: #DEE3E4; transform: rotate(45deg); margin-top: -6px"></span>
+  </a>
+  <span style="position: absolute; left: 316px; top: 70px; width: 40px; height: 40px; border-radius: 14px; background: #1B2122; border: 2px solid #81D3E0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.18)">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#81D3E0"/></svg>
+  </span>
+  <span aria-label="4 places in Iceland" style="position: absolute; left: 70px; top: 650px; width: 52px; height: 52px; border-radius: 26px; background: #004F57; border: 3px solid #1B2122; color: #9EEFFC; font-size: 24px; font-weight: 800; font-stretch: 38%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.22)">4</span>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 40px; display: flex; flex-direction: column; gap: 10px">
+    <label style="height: 56px; border-radius: 28px; background: #1B2122; display: flex; align-items: center; gap: 12px; padding: 0 6px 0 18px; box-shadow: 0 4px 14px rgba(0,0,0,0.14)">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <input placeholder="Search your map" style="all: unset; flex-grow: 1; font-size: 16px">
+      <span style="width: 44px; height: 44px; border-radius: 22px; background: #3A4664; color: #D9E2FF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">JD</span>
+    </label>
+    <div style="display: flex; gap: 8px">
+      <div role="group" aria-label="Filter" style="display: flex; gap: 2px">
+        <button aria-pressed="true" style="all: unset; height: 40px; padding: 0 16px 0 12px; border-radius: 20px; background: #DEE3E4; color: #2B3133; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15)">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="#006973" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>
+          All
+        </button>
+        <button aria-pressed="false" style="all: unset; height: 40px; padding: 0 14px; border-radius: 8px; background: #1B2122; font-size: 14px; font-weight: 600; color: #BFC8CA; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1)">Visited</button>
+        <button aria-pressed="false" style="all: unset; height: 40px; padding: 0 16px 0 14px; border-radius: 8px 20px 20px 8px; background: #1B2122; font-size: 14px; font-weight: 600; color: #BFC8CA; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1)">Planned</button>
+      </div>
+      <span style="flex-grow: 1"></span>
+      <button aria-label="Map layers" style="all: unset; width: 40px; height: 40px; border-radius: 20px; background: #1B2122; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2.5 8.5 12 14l9.5-5.5Z M2.5 13 12 18.5 21.5 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <button aria-label="My location" style="all: unset; position: absolute; right: 16px; top: 586px; width: 56px; height: 56px; border-radius: 18px; background: #3A4664; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.18); cursor: pointer">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#D9E2FF" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+  </button>
+
+  <a href="Android-Place.dc.html" style="position: absolute; left: 16px; right: 16px; top: 656px; height: 112px; border-radius: 28px; background: #1B2122; display: flex; align-items: center; gap: 14px; padding: 0 14px 0 12px; text-decoration: none; color: #DEE3E4; box-shadow: 0 6px 20px rgba(0,0,0,0.16)">
+    <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="88" height="88" role="img" aria-label="Photo of Geirangerfjord" style="border-radius: 20px; flex-shrink: 0"><rect width="176" height="132" fill="#CFE6EE"/><path d="M0 70 L30 30 L58 62 L84 22 L120 66 L150 34 L176 58 V132 H0Z" fill="#7FA3AE"/><path d="M0 132 V80 L40 52 L70 96 L0 132Z" fill="#3E6670"/><path d="M176 132 V70 L132 58 L104 100 Z" fill="#2E5560"/><path d="M0 132 L70 96 L104 100 L176 132Z" fill="#2F7F8C"/></svg>
+    <span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0">
+      <span style="font-size: 28px; line-height: 1; font-weight: 800; font-stretch: 38%">Geirangerfjord</span>
+      <span style="font-size: 13px; color: #BFC8CA; margin-top: 4px">Møre og Romsdal · ★ 5 · visited</span>
+      <span style="margin-top: 10px; display: flex; gap: 8px">
+        <span style="height: 32px; padding: 0 14px; border-radius: 16px; background: #81D3E0; color: #00363C; font-size: 13px; font-weight: 700; display: flex; align-items: center">Directions</span>
+        <span style="height: 32px; padding: 0 14px; border-radius: 16px; background: #334B4F; color: #CDE7EC; font-size: 13px; font-weight: 700; display: flex; align-items: center">Open</span>
+      </span>
+    </span>
+  </a>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center">
+    <nav aria-label="Main" style="height: 64px; border-radius: 32px; background: #DEE3E4; display: flex; align-items: center; gap: 2px; padding: 0 8px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28)">
+      <a href="Main.dc.html" aria-label="Home" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+      </a>
+      <a href="Android-Places.dc.html" aria-label="Places" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13.5 13.5 8.5 15.5 10.5 10.5Z"/></svg>
+      </a>
+      <a href="Android-Collection.dc.html" aria-label="Collections" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+      </a>
+      <a href="Android-Map.dc.html" aria-current="page" style="height: 48px; border-radius: 24px; background: #004F57; color: #9EEFFC; padding: 0 16px 0 12px; display: flex; align-items: center; gap: 8px; text-decoration: none; font-size: 15px; font-weight: 700">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z" fill="#9EEFFC"/><path d="M9 4v14 M15 6v14" stroke="#006973" stroke-width="1.6"/></svg>
+        Map
+      </a>
+      <a href="Android-World.dc.html" aria-label="World" style="width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#2B3133" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+      </a>
+    </nav>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

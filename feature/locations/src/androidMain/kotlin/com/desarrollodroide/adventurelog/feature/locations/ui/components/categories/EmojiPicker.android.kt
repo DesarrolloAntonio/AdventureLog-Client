@@ -18,9 +18,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.emoji2.emojipicker.EmojiPickerView
 import com.desarrollodroide.adventurelog.feature.locations.R
 
+/**
+ * Emoji picker for a category, backed by the AndroidX `EmojiPickerView`.
+ */
 @Composable
-actual fun EmojiPicker(
-    modifier: Modifier,
+fun EmojiPicker(
+    modifier: Modifier = Modifier,
     onEmojiSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -30,11 +33,10 @@ actual fun EmojiPicker(
         modifier = modifier
             .fillMaxWidth()
             .height(300.dp),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         AndroidView(
             modifier = Modifier.fillMaxWidth(),

@@ -11,7 +11,7 @@ data class LocationImageDTO(
     val id: String,
     
     @SerialName("image")
-    val image: String,
+    val image: String = "", // nullable on 0.14
     
     @SerialName("is_primary")
     val isPrimary: Boolean,

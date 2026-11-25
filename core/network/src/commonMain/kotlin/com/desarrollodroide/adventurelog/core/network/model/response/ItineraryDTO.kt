@@ -57,8 +57,9 @@ data class ItineraryDayDTO(
     @SerialName("collection")
     val collection: String? = null,
 
+    /** Null on 0.14 for a day of a trip planned by days with no dates yet. */
     @SerialName("date")
-    val date: String,
+    val date: String = "",
 
     @SerialName("name")
     val name: String? = null,

@@ -459,7 +459,7 @@ interface AdventureLogNetwork {
     ): com.desarrollodroide.adventurelog.core.model.ItineraryEntry
 
     /** Take an entry off its day, leaving the item itself alone. */
-    suspend fun deleteItineraryEntry(entryId: String)
+    suspend fun deleteItineraryEntry(collectionId: String, entryId: String)
 
     /**
      * Places near a point that are not in the account yet. Either the coordinates or [place] must

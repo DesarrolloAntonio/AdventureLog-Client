@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS collection</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#007A85}a:hover{color:#005A62}
+.glass{background:rgba(255,255,255,0.2);-webkit-backdrop-filter:blur(12px) saturate(180%);backdrop-filter:blur(12px) saturate(180%);border:0.5px solid rgba(255,255,255,0.6);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.85),inset 0 -1px 1px rgba(255,255,255,0.25),0 8px 24px rgba(0,0,0,0.16)}
+.glass-bar{background:rgba(250,250,252,0.55);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.8);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.95),0 12px 32px rgba(0,0,0,0.16)}
+.glass-d{background:rgba(255,255,255,0.2);-webkit-backdrop-filter:blur(12px) saturate(180%);backdrop-filter:blur(12px) saturate(180%);border:0.5px solid rgba(255,255,255,0.6);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.85),inset 0 -1px 1px rgba(255,255,255,0.25),0 8px 24px rgba(0,0,0,0.16)}
+.glass-bar-d{background:rgba(36,36,40,0.55);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.16);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),0 12px 32px rgba(0,0,0,0.16)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F2F2F7; color: #000000; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 390 340" width="390" height="340" role="img" aria-label="Photo of Manarola, Cinque Terre" style="position: absolute; left: 0; top: 0; display: block">
+    <defs>
+      <linearGradient id="cSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3B38C"/><stop offset="1" stop-color="#FBE3C6"/></linearGradient>
+      <linearGradient id="cSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E8EA8"/><stop offset="1" stop-color="#123F55"/></linearGradient>
+    </defs>
+    <rect width="390" height="340" fill="url(#cSky)"/>
+    <path d="M0 120 C90 80 170 96 240 120 C300 140 350 104 390 110 V340 H0Z" fill="#5F7A47"/>
+    <path d="M70 150 C130 136 220 140 300 160 L300 250 H70Z" fill="#7E6E58"/>
+    <path d="M86 156h30v94H86z" fill="#F0B65E"/><path d="M116 138h32v112h-32z" fill="#C95B4A"/><path d="M148 160h28v90h-28z" fill="#E9CF8C"/><path d="M176 146h32v104h-32z" fill="#86B3B7"/><path d="M208 164h30v86h-30z" fill="#E07B55"/><path d="M238 150h30v100h-30z" fill="#F2D27B"/><path d="M268 168h28v82h-28z" fill="#D45F45"/>
+    <path d="M94 176h6v8h-6z M126 160h6v8h-6z M156 180h6v8h-6z M186 166h6v8h-6z M216 184h6v8h-6z M246 170h6v8h-6z M276 188h6v8h-6z M126 196h6v8h-6z M186 200h6v8h-6z M246 204h6v8h-6z" fill="#5B4636" opacity="0.5"/>
+    <path d="M0 250 C60 236 90 246 110 252 L0 262Z M300 248 C340 236 370 240 390 246 V262 H300Z" fill="#6E5F4C"/>
+    <rect y="250" width="390" height="90" fill="url(#cSea)"/>
+    <path d="M150 272 h28 l-5 6 h-18z" fill="#F7F3EA"/>
+  </svg>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; gap: 10px">
+    <a href="iOS-Home.dc.html" class="glass" aria-label="Back" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+    </a>
+    <span style="flex-grow: 1"></span>
+    <div class="glass" style="height: 44px; border-radius: 22px; display: flex; align-items: center; padding: 0 2px">
+      <button aria-label="Add to collection" style="all: unset; width: 42px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button aria-label="More" style="all: unset; width: 42px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="#FFFFFF"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 190px; display: flex; flex-direction: column; color: #FFFFFF">
+    <span class="glass" style="align-self: flex-start; height: 28px; padding: 0 12px; border-radius: 14px; display: flex; align-items: center; font-size: 13px; font-weight: 600">Planned · in 8 days</span>
+    <h1 style="margin: 8px 0 0; font-family: ui-serif, 'New York', Georgia, serif; font-size: 40px; line-height: 44px; font-weight: 700; letter-spacing: -0.3px">Cinque Terre</h1>
+    <span style="font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.92)">5–9 September · Liguria, Italy</span>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 314px; bottom: 0; background: #F2F2F7; border-radius: 34px 34px 0 0; padding: 18px 16px 0; display: flex; flex-direction: column">
+    <div role="tablist" aria-label="Collection views" style="margin-right: -16px; display: flex; gap: 8px; white-space: nowrap; overflow: hidden">
+      <button role="tab" aria-selected="true" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #1C1C1E; color: #FFFFFF; font-size: 15px; font-weight: 600; display: flex; align-items: center">All</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #FFFFFF; color: #1C1C1E; font-size: 15px; display: flex; align-items: center">Places</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #FFFFFF; color: #1C1C1E; font-size: 15px; display: flex; align-items: center">Transport</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #FFFFFF; color: #1C1C1E; font-size: 15px; display: flex; align-items: center">Lodging</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #FFFFFF; color: #1C1C1E; font-size: 15px; display: flex; align-items: center">Notes</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #FFFFFF; color: #1C1C1E; font-size: 15px; display: flex; align-items: center">Checklists</button>
+    </div>
+
+    <div style="margin-top: 14px; border-radius: 24px; background: #FFFFFF; padding: 12px 16px 12px 12px; display: flex; align-items: center; gap: 14px">
+      <svg viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Packing list 3 of 7 done">
+        <circle cx="24" cy="24" r="19" fill="none" stroke="#E5E5EA" stroke-width="7"/>
+        <circle cx="24" cy="24" r="19" fill="none" stroke="#34C759" stroke-width="7" stroke-linecap="round" stroke-dasharray="51 120" transform="rotate(-90 24 24)"/>
+      </svg>
+      <span style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 17px; font-weight: 600">Packing List</span>
+        <span style="font-size: 14px; color: #636366">3 of 7 packed</span>
+      </span>
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#AEAEB2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+
+    <div style="margin: 18px 4px 8px; display: flex; align-items: baseline; gap: 8px">
+      <span style="font-family: ui-serif, 'New York', Georgia, serif; font-size: 22px; font-weight: 700">Saturday</span>
+      <span style="font-size: 15px; color: #636366">5 Sep · Day 1</span>
+    </div>
+    <div style="position: relative; display: flex; flex-direction: column; gap: 8px; padding-left: 26px">
+      <span aria-hidden="true" style="position: absolute; left: 8px; top: 22px; bottom: 22px; width: 2px; border-radius: 1px; background: #C7C7CC"></span>
+      <div style="position: relative; height: 58px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+        <span aria-hidden="true" style="position: absolute; left: -24px; top: 23px; width: 12px; height: 12px; border-radius: 6px; background: #5856D6; border: 2px solid #F2F2F7"></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="4"/><path d="M5 11h14M9 21l-2-4M15 21l2-4"/></svg>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 16px; font-weight: 500">La Spezia → Vernazza</span>
+          <span style="font-size: 13px; color: #636366">Train</span>
+        </span>
+      </div>
+      <a href="iOS-Place.dc.html" style="position: relative; height: 64px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; gap: 12px; padding: 0 14px 0 8px; text-decoration: none; color: #000000">
+        <span aria-hidden="true" style="position: absolute; left: -24px; top: 26px; width: 12px; height: 12px; border-radius: 6px; background: #007A85; border: 2px solid #F2F2F7"></span>
+        <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="48" height="48" role="img" aria-label="Photo of Vernazza" style="border-radius: 14px; flex-shrink: 0"><rect width="176" height="132" fill="#BFDDEA"/><path d="M30 64h22v40H30z" fill="#E8A25B"/><path d="M52 56h20v48H52z" fill="#D9644A"/><path d="M72 66h24v38H72z" fill="#F1D27A"/><path d="M96 58h18v46H96z" fill="#9FC6C9"/><rect y="104" width="176" height="28" fill="#1F7088"/></svg>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 16px; font-weight: 500">Vernazza</span>
+          <span style="font-size: 13px; color: #636366">Place · Liguria</span>
+        </span>
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#AEAEB2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <div style="margin: 18px 4px 8px; display: flex; align-items: baseline; gap: 8px">
+      <span style="font-family: ui-serif, 'New York', Georgia, serif; font-size: 22px; font-weight: 700">Sunday</span>
+      <span style="font-size: 15px; color: #636366">6 Sep · Day 2</span>
+    </div>
+    <div style="position: relative; padding-left: 26px">
+      <a href="iOS-Place.dc.html" style="position: relative; height: 64px; border-radius: 20px; background: #FFFFFF; display: flex; align-items: center; gap: 12px; padding: 0 14px 0 8px; text-decoration: none; color: #000000">
+        <span aria-hidden="true" style="position: absolute; left: -24px; top: 26px; width: 12px; height: 12px; border-radius: 6px; background: #007A85; border: 2px solid #F2F2F7"></span>
+        <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="48" height="48" role="img" aria-label="Photo of Manarola" style="border-radius: 14px; flex-shrink: 0"><rect width="176" height="132" fill="#F3B38C"/><path d="M40 58h20v46H40z" fill="#F0B65E"/><path d="M60 48h22v56H60z" fill="#C95B4A"/><path d="M82 60h18v44H82z" fill="#E9CF8C"/><path d="M100 52h22v52h-22z" fill="#86B3B7"/><rect y="104" width="176" height="28" fill="#1E5F78"/></svg>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 16px; font-weight: 500">Manarola</span>
+          <span style="font-size: 13px; color: #636366">Place · Liguria</span>
+        </span>
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#AEAEB2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 26px; display: flex; gap: 10px; align-items: center">
+    <nav class="glass-bar" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <a href="iOS-Home.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="iOS-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="iOS-Collection.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(255,255,255,0.85); box-shadow: inset 0 1px 0.5px #FFFFFF, 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #007A85">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3" fill="#007A85"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5" fill="none" stroke="#007A85" stroke-width="1.8"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="#map" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Map</span>
+      </a>
+      <a href="#world" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #1C1C1E">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="iOS-Places.dc.html" class="glass-bar" aria-label="Search places" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 390 340" width="390" height="340" role="img" aria-label="Photo of Manarola, Cinque Terre" style="position: absolute; left: 0; top: 0; display: block">
+    <defs>
+      <linearGradient id="cSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F3B38C"/><stop offset="1" stop-color="#FBE3C6"/></linearGradient>
+      <linearGradient id="cSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E8EA8"/><stop offset="1" stop-color="#123F55"/></linearGradient>
+    </defs>
+    <rect width="390" height="340" fill="url(#cSky)"/>
+    <path d="M0 120 C90 80 170 96 240 120 C300 140 350 104 390 110 V340 H0Z" fill="#5F7A47"/>
+    <path d="M70 150 C130 136 220 140 300 160 L300 250 H70Z" fill="#7E6E58"/>
+    <path d="M86 156h30v94H86z" fill="#F0B65E"/><path d="M116 138h32v112h-32z" fill="#C95B4A"/><path d="M148 160h28v90h-28z" fill="#E9CF8C"/><path d="M176 146h32v104h-32z" fill="#86B3B7"/><path d="M208 164h30v86h-30z" fill="#E07B55"/><path d="M238 150h30v100h-30z" fill="#F2D27B"/><path d="M268 168h28v82h-28z" fill="#D45F45"/>
+    <path d="M94 176h6v8h-6z M126 160h6v8h-6z M156 180h6v8h-6z M186 166h6v8h-6z M216 184h6v8h-6z M246 170h6v8h-6z M276 188h6v8h-6z M126 196h6v8h-6z M186 200h6v8h-6z M246 204h6v8h-6z" fill="#5B4636" opacity="0.5"/>
+    <path d="M0 250 C60 236 90 246 110 252 L0 262Z M300 248 C340 236 370 240 390 246 V262 H300Z" fill="#6E5F4C"/>
+    <rect y="250" width="390" height="90" fill="url(#cSea)"/>
+    <path d="M150 272 h28 l-5 6 h-18z" fill="#F7F3EA"/>
+  </svg>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; gap: 10px">
+    <a href="iOS-Home.dc.html" class="glass-d" aria-label="Back" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
+    </a>
+    <span style="flex-grow: 1"></span>
+    <div class="glass-d" style="height: 44px; border-radius: 22px; display: flex; align-items: center; padding: 0 2px">
+      <button aria-label="Add to collection" style="all: unset; width: 42px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button aria-label="More" style="all: unset; width: 42px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="#FFFFFF"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 190px; display: flex; flex-direction: column; color: #FFFFFF">
+    <span class="glass-d" style="align-self: flex-start; height: 28px; padding: 0 12px; border-radius: 14px; display: flex; align-items: center; font-size: 13px; font-weight: 600">Planned · in 8 days</span>
+    <h1 style="margin: 8px 0 0; font-family: ui-serif, 'New York', Georgia, serif; font-size: 40px; line-height: 44px; font-weight: 700; letter-spacing: -0.3px">Cinque Terre</h1>
+    <span style="font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.92)">5–9 September · Liguria, Italy</span>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 314px; bottom: 0; background: #000000; border-radius: 34px 34px 0 0; padding: 18px 16px 0; display: flex; flex-direction: column">
+    <div role="tablist" aria-label="Collection views" style="margin-right: -16px; display: flex; gap: 8px; white-space: nowrap; overflow: hidden">
+      <button role="tab" aria-selected="true" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #000000; color: #FFFFFF; font-size: 15px; font-weight: 600; display: flex; align-items: center">All</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #1C1C1E; color: #F2F2F7; font-size: 15px; display: flex; align-items: center">Places</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #1C1C1E; color: #F2F2F7; font-size: 15px; display: flex; align-items: center">Transport</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #1C1C1E; color: #F2F2F7; font-size: 15px; display: flex; align-items: center">Lodging</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #1C1C1E; color: #F2F2F7; font-size: 15px; display: flex; align-items: center">Notes</button>
+      <button role="tab" aria-selected="false" style="all: unset; height: 34px; padding: 0 15px; border-radius: 17px; background: #1C1C1E; color: #F2F2F7; font-size: 15px; display: flex; align-items: center">Checklists</button>
+    </div>
+
+    <div style="margin-top: 14px; border-radius: 24px; background: #1C1C1E; padding: 12px 16px 12px 12px; display: flex; align-items: center; gap: 14px">
+      <svg viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Packing list 3 of 7 done">
+        <circle cx="24" cy="24" r="19" fill="none" stroke="#E5E5EA" stroke-width="7"/>
+        <circle cx="24" cy="24" r="19" fill="none" stroke="#34C759" stroke-width="7" stroke-linecap="round" stroke-dasharray="51 120" transform="rotate(-90 24 24)"/>
+      </svg>
+      <span style="display: flex; flex-direction: column; flex-grow: 1">
+        <span style="font-size: 17px; font-weight: 600">Packing List</span>
+        <span style="font-size: 14px; color: #98989D">3 of 7 packed</span>
+      </span>
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+    </div>
+
+    <div style="margin: 18px 4px 8px; display: flex; align-items: baseline; gap: 8px">
+      <span style="font-family: ui-serif, 'New York', Georgia, serif; font-size: 22px; font-weight: 700">Saturday</span>
+      <span style="font-size: 15px; color: #98989D">5 Sep · Day 1</span>
+    </div>
+    <div style="position: relative; display: flex; flex-direction: column; gap: 8px; padding-left: 26px">
+      <span aria-hidden="true" style="position: absolute; left: 8px; top: 22px; bottom: 22px; width: 2px; border-radius: 1px; background: #C7C7CC"></span>
+      <div style="position: relative; height: 58px; border-radius: 20px; background: #1C1C1E; display: flex; align-items: center; gap: 12px; padding: 0 14px">
+        <span aria-hidden="true" style="position: absolute; left: -24px; top: 23px; width: 12px; height: 12px; border-radius: 6px; background: #5856D6; border: 2px solid #000000"></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="4"/><path d="M5 11h14M9 21l-2-4M15 21l2-4"/></svg>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 16px; font-weight: 500">La Spezia → Vernazza</span>
+          <span style="font-size: 13px; color: #98989D">Train</span>
+        </span>
+      </div>
+      <a href="iOS-Place.dc.html" style="position: relative; height: 64px; border-radius: 20px; background: #1C1C1E; display: flex; align-items: center; gap: 12px; padding: 0 14px 0 8px; text-decoration: none; color: #FFFFFF">
+        <span aria-hidden="true" style="position: absolute; left: -24px; top: 26px; width: 12px; height: 12px; border-radius: 6px; background: #007A85; border: 2px solid #000000"></span>
+        <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="48" height="48" role="img" aria-label="Photo of Vernazza" style="border-radius: 14px; flex-shrink: 0"><rect width="176" height="132" fill="#BFDDEA"/><path d="M30 64h22v40H30z" fill="#E8A25B"/><path d="M52 56h20v48H52z" fill="#D9644A"/><path d="M72 66h24v38H72z" fill="#F1D27A"/><path d="M96 58h18v46H96z" fill="#9FC6C9"/><rect y="104" width="176" height="28" fill="#1F7088"/></svg>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 16px; font-weight: 500">Vernazza</span>
+          <span style="font-size: 13px; color: #98989D">Place · Liguria</span>
+        </span>
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <div style="margin: 18px 4px 8px; display: flex; align-items: baseline; gap: 8px">
+      <span style="font-family: ui-serif, 'New York', Georgia, serif; font-size: 22px; font-weight: 700">Sunday</span>
+      <span style="font-size: 15px; color: #98989D">6 Sep · Day 2</span>
+    </div>
+    <div style="position: relative; padding-left: 26px">
+      <a href="iOS-Place.dc.html" style="position: relative; height: 64px; border-radius: 20px; background: #1C1C1E; display: flex; align-items: center; gap: 12px; padding: 0 14px 0 8px; text-decoration: none; color: #FFFFFF">
+        <span aria-hidden="true" style="position: absolute; left: -24px; top: 26px; width: 12px; height: 12px; border-radius: 6px; background: #007A85; border: 2px solid #000000"></span>
+        <svg viewBox="0 0 176 132" preserveAspectRatio="xMidYMid slice" width="48" height="48" role="img" aria-label="Photo of Manarola" style="border-radius: 14px; flex-shrink: 0"><rect width="176" height="132" fill="#F3B38C"/><path d="M40 58h20v46H40z" fill="#F0B65E"/><path d="M60 48h22v56H60z" fill="#C95B4A"/><path d="M82 60h18v44H82z" fill="#E9CF8C"/><path d="M100 52h22v52h-22z" fill="#86B3B7"/><rect y="104" width="176" height="28" fill="#1E5F78"/></svg>
+        <span style="display: flex; flex-direction: column; flex-grow: 1">
+          <span style="font-size: 16px; font-weight: 500">Manarola</span>
+          <span style="font-size: 13px; color: #98989D">Place · Liguria</span>
+        </span>
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#636366" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 26px; display: flex; gap: 10px; align-items: center">
+    <nav class="glass-bar-d" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 4px; box-sizing: border-box">
+      <a href="iOS-Home.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 11 L12 3.8 L20.5 11 V19.5 a1.5 1.5 0 0 1 -1.5 1.5 H5 a1.5 1.5 0 0 1 -1.5 -1.5Z"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="iOS-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="iOS-Collection.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(255,255,255,0.16); box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #5AC8D4">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3" fill="#5AC8D4"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5" fill="none" stroke="#5AC8D4" stroke-width="1.8"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="#map" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2Z M9 4v14 M15 6v14"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Map</span>
+      </a>
+      <a href="#world" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-decoration: none; color: #F2F2F7">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="iOS-Places.dc.html" class="glass-bar-d" aria-label="Search places" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

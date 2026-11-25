@@ -1,11 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.components
 
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-
 /**
  * The Terms of Use and the Privacy Policy, approved by the owner on 2026-10-06 (QA #4). They replace
  * texts copied from another app: terms that named "Shiori" under the wrong licence, and a policy
@@ -115,10 +109,14 @@ internal val PrivacyPolicy = LegalText(
     )
 )
 
-internal fun LegalText.annotated(): AnnotatedString = buildAnnotatedString {
+/**
+ * The whole text as one string: the date, then each heading and body. The Android screens show
+ * the same text with the headings in bold (annotated(), in androidMain).
+ */
+internal fun LegalText.plainText(): String = buildString {
     append("$effective\n\n")
     sections.forEach { section ->
-        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("${section.heading}\n\n") }
+        append("${section.heading}\n\n")
         append("${section.body}\n\n")
     }
 }

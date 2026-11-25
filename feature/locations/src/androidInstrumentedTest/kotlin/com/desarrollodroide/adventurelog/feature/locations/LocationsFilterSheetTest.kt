@@ -3,9 +3,12 @@ package com.desarrollodroide.adventurelog.feature.locations
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -45,10 +48,10 @@ class LocationsFilterSheetTest {
     }
 
     @Test
-    fun choosingAVisitStatusCountsAsOneFilter() = runComposeUiTest {
+    fun choosingACategoryCountsAsOneFilter() = runComposeUiTest {
         setContent {
             LocationsFilterContent(
-                filters = LocationFilters(visitedFilter = VisitedFilter.VISITED),
+                filters = LocationFilters(categoryNames = listOf("Nature")),
                 categoriesState = noCategories(),
                 onFiltersChanged = {},
                 onApply = {},
@@ -72,32 +75,31 @@ class LocationsFilterSheetTest {
             )
         }
 
-        onNodeWithText("Collection Locations").performScrollTo()
+        onNodeWithText("Places in collections").performScrollTo()
         // The one switch in the sheet. It shows on, because that is the default, and the point
         // of the test is that what it shows and what it sends are the same thing.
-        onNode(isToggleable()).assertIsOn()
-        onNode(isToggleable()).performClick()
+        onNode(isToggleable() and hasText("Places in collections")).assertIsOn()
+        onNode(isToggleable() and hasText("Places in collections")).performClick()
 
         assertEquals(false, latest?.includeCollections)
     }
 
     @Test
-    fun pickingAVisitStatusReportsIt() = runComposeUiTest {
-        var latest: LocationFilters? = null
+    fun visitStatusAndOrderAreLeftToTheScreen() = runComposeUiTest {
         setContent {
             LocationsFilterContent(
-                filters = LocationFilters(),
+                filters = LocationFilters(visitedFilter = VisitedFilter.VISITED, sortDirection = SortDirection.ASCENDING),
                 categoriesState = noCategories(),
-                onFiltersChanged = { latest = it },
+                onFiltersChanged = {},
                 onApply = {},
                 onCancel = {}
             )
         }
 
-        onNodeWithText("Not Visited").performScrollTo()
-        onNodeWithText("Not Visited").performClick()
-
-        assertEquals(VisitedFilter.NOT_VISITED, latest?.visitedFilter)
+        // The screen's button group and Sort sheet hold these; the sheet neither asks nor counts them.
+        onAllNodesWithText("Planned").assertCountEquals(0)
+        onAllNodesWithText("Newest first").assertCountEquals(0)
+        onNodeWithText("No filters applied").assertIsDisplayed()
     }
 
     @Test
@@ -119,8 +121,12 @@ class LocationsFilterSheetTest {
 
         onNodeWithContentDescription("Reset filters").performClick()
 
-        // Not "everything off": the defaults, which include collections being visible.
-        assertEquals(LocationFilters(), latest)
+        // Not "everything off": the defaults, which include collections being visible. Only for
+        // what the sheet holds - the visit status and the order belong to the screen and stay.
+        assertEquals(
+            LocationFilters(visitedFilter = VisitedFilter.VISITED, sortDirection = SortDirection.ASCENDING),
+            latest
+        )
         assertEquals(true, latest?.includeCollections)
     }
 
@@ -138,7 +144,7 @@ class LocationsFilterSheetTest {
             )
         }
 
-        onNodeWithText("Apply Filters").performClick()
+        onNodeWithText("Apply").performClick()
         onNodeWithText("Cancel").performClick()
 
         assertEquals(1, applied)

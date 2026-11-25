@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,11 +18,11 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
-actual fun LocationMapSection(
+fun LocationMapSection(
     latitude: String?,
     longitude: String?,
     onMapClick: (lat: Double, lon: Double) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     val defaultLocation = LatLng(40.4168, -3.7038) // Madrid as default
     
@@ -54,7 +55,7 @@ actual fun LocationMapSection(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = MapProperties(mapType = rendering.toGoogleMapType()),
+        properties = rememberThemedMapProperties(rendering),
         onMapClick = { clickedLatLng ->
             onMapClick(clickedLatLng.latitude, clickedLatLng.longitude)
         }
@@ -62,7 +63,7 @@ actual fun LocationMapSection(
         if (latitude != null && longitude != null) {
             Marker(
                 state = MarkerState(position = latLng),
-                title = "Selected Location"
+                title = "Selected location"
             )
         }
     }

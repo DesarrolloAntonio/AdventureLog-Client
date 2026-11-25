@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.util
 
-import coil3.PlatformContext
+import org.koin.core.scope.Scope
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
@@ -63,5 +63,5 @@ class IOSPlatformFiles : PlatformFiles {
         }
 }
 
-actual fun createPlatformFiles(platformContext: PlatformContext): PlatformFiles =
+actual fun Scope.createPlatformFiles(): PlatformFiles =
     IOSPlatformFiles()

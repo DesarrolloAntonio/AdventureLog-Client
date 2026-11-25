@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog Android login</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#006973}a:hover{color:#004F57}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #F5FAFB; color: #171D1E; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 40px; height: 300px; border-radius: 36px; overflow: hidden">
+    <svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" width="388" height="300" role="img" aria-label="Illustration of a fjord at sunset" style="display: block">
+      <defs>
+        <linearGradient id="lSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7F9BC4"/><stop offset="0.6" stop-color="#EDB59B"/><stop offset="1" stop-color="#F8D9B4"/></linearGradient>
+      </defs>
+      <rect width="390" height="300" fill="url(#lSky)"/>
+      <circle cx="290" cy="150" r="18" fill="#FFF3DE"/>
+      <path d="M0 170 L50 140 L104 160 L170 124 L236 156 L300 130 L352 150 L390 136 V300 H0Z" fill="#B49AA6" opacity="0.8"/>
+      <path d="M0 200 L70 168 L140 192 L214 160 L282 188 L340 172 L390 182 V300 H0Z" fill="#7A7389"/>
+      <rect y="214" width="390" height="86" fill="#3E5A72"/>
+      <path d="M0 300 V210 L140 194 L258 186 L270 196 L168 212 L104 300Z" fill="#2F2A2A"/>
+      <circle cx="250" cy="176" r="3" fill="#141414"/>
+    </svg>
+    <span style="position: absolute; left: 16px; top: 16px; height: 36px; padding: 0 14px 0 6px; border-radius: 18px; background: #FFFFFF; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700">
+      <span style="width: 26px; height: 26px; border-radius: 9px; background: #006973; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#FFFFFF"/></svg></span>
+      AdventureLog
+    </span>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 360px; padding: 0 20px; display: flex; flex-direction: column">
+    <h1 style="margin: 0; font-size: 50px; line-height: 0.95; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Your travels,<br>on <span style="color: #006973">your</span> server</h1>
+    <p style="margin: 10px 0 0; font-size: 15px; color: #3F484A">Sign in to the AdventureLog instance you host.</p>
+
+    <form style="margin-top: 22px; display: flex; flex-direction: column; gap: 14px">
+      <label style="position: relative; display: block">
+        <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #F5FAFB; font-size: 12px; font-weight: 600; color: #006973">Server</span>
+        <span style="height: 56px; border-radius: 16px; border: 2px solid #006973; display: flex; align-items: center; gap: 10px; padding: 0 14px; box-sizing: border-box">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+          <input value="https://[YOUR SERVER]" aria-label="Server" style="all: unset; flex-grow: 1; font-size: 16px">
+          <span style="height: 26px; padding: 0 8px; border-radius: 8px; background: #9EEFFC; color: #004F57; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px">
+            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#004F57" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>Found
+          </span>
+        </span>
+      </label>
+      <label style="position: relative; display: block">
+        <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #F5FAFB; font-size: 12px; font-weight: 600; color: #3F484A">Username</span>
+        <span style="height: 56px; border-radius: 16px; border: 1px solid #6F797A; display: flex; align-items: center; gap: 10px; padding: 0 14px; box-sizing: border-box">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+          <input value="claude" aria-label="Username" style="all: unset; flex-grow: 1; font-size: 16px">
+        </span>
+      </label>
+      <label style="position: relative; display: block">
+        <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #F5FAFB; font-size: 12px; font-weight: 600; color: #3F484A">Password</span>
+        <span style="height: 56px; border-radius: 16px; border: 1px solid #6F797A; display: flex; align-items: center; gap: 10px; padding: 0 6px 0 14px; box-sizing: border-box">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input type="password" value="password" aria-label="Password" style="all: unset; flex-grow: 1; font-size: 16px; letter-spacing: 2px">
+          <button type="button" aria-label="Show password" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#3F484A" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </span>
+      </label>
+      <button type="submit" style="all: unset; margin-top: 6px; height: 60px; border-radius: 30px; background: #006973; color: #FFFFFF; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer">
+        Sign in
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <a href="#server-guide" style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; text-decoration: none">How do I set up a server?</a>
+    </form>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 412px; height: 915px; position: relative; overflow: hidden; background: #0E1415; color: #DEE3E4; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 40px; height: 300px; border-radius: 36px; overflow: hidden">
+    <svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" width="388" height="300" role="img" aria-label="Illustration of a fjord at sunset" style="display: block">
+      <defs>
+        <linearGradient id="lSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7F9BC4"/><stop offset="0.6" stop-color="#EDB59B"/><stop offset="1" stop-color="#F8D9B4"/></linearGradient>
+      </defs>
+      <rect width="390" height="300" fill="url(#lSky)"/>
+      <circle cx="290" cy="150" r="18" fill="#FFF3DE"/>
+      <path d="M0 170 L50 140 L104 160 L170 124 L236 156 L300 130 L352 150 L390 136 V300 H0Z" fill="#B49AA6" opacity="0.8"/>
+      <path d="M0 200 L70 168 L140 192 L214 160 L282 188 L340 172 L390 182 V300 H0Z" fill="#7A7389"/>
+      <rect y="214" width="390" height="86" fill="#3E5A72"/>
+      <path d="M0 300 V210 L140 194 L258 186 L270 196 L168 212 L104 300Z" fill="#2F2A2A"/>
+      <circle cx="250" cy="176" r="3" fill="#141414"/>
+    </svg>
+    <span style="position: absolute; left: 16px; top: 16px; height: 36px; padding: 0 14px 0 6px; border-radius: 18px; background: #1B2122; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700">
+      <span style="width: 26px; height: 26px; border-radius: 9px; background: #81D3E0; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M2.5 19 L9.5 7 L13.2 13.2 L15.6 9.8 L21.5 19 Z" fill="#00363C"/></svg></span>
+      AdventureLog
+    </span>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 360px; padding: 0 20px; display: flex; flex-direction: column">
+    <h1 style="margin: 0; font-size: 50px; line-height: 0.95; font-weight: 800; font-stretch: 38%; letter-spacing: -0.5px">Your travels,<br>on <span style="color: #81D3E0">your</span> server</h1>
+    <p style="margin: 10px 0 0; font-size: 15px; color: #BFC8CA">Sign in to the AdventureLog instance you host.</p>
+
+    <form style="margin-top: 22px; display: flex; flex-direction: column; gap: 14px">
+      <label style="position: relative; display: block">
+        <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #0E1415; font-size: 12px; font-weight: 600; color: #81D3E0">Server</span>
+        <span style="height: 56px; border-radius: 16px; border: 2px solid #81D3E0; display: flex; align-items: center; gap: 10px; padding: 0 14px; box-sizing: border-box">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+          <input value="https://[YOUR SERVER]" aria-label="Server" style="all: unset; flex-grow: 1; font-size: 16px">
+          <span style="height: 26px; padding: 0 8px; border-radius: 8px; background: #004F57; color: #9EEFFC; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px">
+            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#9EEFFC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg>Found
+          </span>
+        </span>
+      </label>
+      <label style="position: relative; display: block">
+        <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #0E1415; font-size: 12px; font-weight: 600; color: #BFC8CA">Username</span>
+        <span style="height: 56px; border-radius: 16px; border: 1px solid #899294; display: flex; align-items: center; gap: 10px; padding: 0 14px; box-sizing: border-box">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+          <input value="claude" aria-label="Username" style="all: unset; flex-grow: 1; font-size: 16px">
+        </span>
+      </label>
+      <label style="position: relative; display: block">
+        <span style="position: absolute; left: 12px; top: -8px; padding: 0 4px; background: #0E1415; font-size: 12px; font-weight: 600; color: #BFC8CA">Password</span>
+        <span style="height: 56px; border-radius: 16px; border: 1px solid #899294; display: flex; align-items: center; gap: 10px; padding: 0 6px 0 14px; box-sizing: border-box">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2" stroke-linejoin="round"><rect x="5" y="10" width="14" height="10" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input type="password" value="password" aria-label="Password" style="all: unset; flex-grow: 1; font-size: 16px; letter-spacing: 2px">
+          <button type="button" aria-label="Show password" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#BFC8CA" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </span>
+      </label>
+      <button type="submit" style="all: unset; margin-top: 6px; height: 60px; border-radius: 30px; background: #81D3E0; color: #00363C; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer">
+        Sign in
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#00363C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <a href="#server-guide" style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; text-decoration: none">How do I set up a server?</a>
+    </form>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":412,"height":915}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

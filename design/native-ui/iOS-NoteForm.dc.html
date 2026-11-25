@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS new note</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#007A85}a:hover{color:#005A62}
+.glass-bar{background:rgba(250,250,252,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.85);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.95),0 8px 24px rgba(0,0,0,0.12)}
+.glass-bar-d{background:rgba(36,36,40,0.6);-webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%);border:0.5px solid rgba(255,255,255,0.16);box-shadow:inset 0 1px 0.5px rgba(255,255,255,0.22),0 8px 24px rgba(0,0,0,0.12)}
+</style>
+</helmet>
+<sc-if value="{{light}}" hint-placeholder-val="{{ true }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #1C1C1E; color: #000000; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px; background: #5A5A5E"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; background: #FFFFFF; border-radius: 38px 38px 0 0; overflow: hidden; display: flex; flex-direction: column">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="glass-bar" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#000000" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span style="flex-grow: 1; text-align: center; display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 600">New Note</span><span style="font-size: 12px; color: #636366">Cinque Terre</span></span>
+      <button aria-label="Save" style="all: unset; width: 44px; height: 44px; border-radius: 22px; background: #007A85; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 6px 14px rgba(0,122,133,0.3); cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></button>
+    </div>
+
+    <form style="padding: 22px 24px 0; display: flex; flex-direction: column">
+      <button type="button" style="all: unset; align-self: flex-start; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(118,118,128,0.12); font-size: 14px; color: #3A3A3C; display: flex; align-items: center; gap: 6px">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#3A3A3C" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        Sun 6 Sep 2026
+      </button>
+      <input value="Trail between villages" aria-label="Title" style="all: unset; margin-top: 14px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 30px; line-height: 36px; font-weight: 700">
+      <p style="margin: 12px 0 0; font-size: 18px; line-height: 27px; color: #1C1C1E">Check which coastal paths are open before setting off; some sections close after rain.<span style="display: inline-block; width: 2px; height: 22px; background: #007A85; vertical-align: -4px; margin-left: 1px"></span></p>
+    </form>
+  </div>
+
+  <div class="glass-bar" role="toolbar" aria-label="Formatting" style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 34px; height: 52px; border-radius: 26px; display: flex; align-items: center; gap: 2px; padding: 0 6px">
+    <button aria-label="Bold" style="all: unset; width: 44px; height: 44px; border-radius: 22px; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">B</button>
+    <button aria-label="Italic" style="all: unset; width: 44px; height: 44px; border-radius: 22px; font-size: 18px; font-style: italic; font-family: ui-serif, Georgia, serif; display: flex; align-items: center; justify-content: center">I</button>
+    <button aria-label="List" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="#1C1C1E"/><circle cx="4.5" cy="12" r="1" fill="#1C1C1E"/><circle cx="4.5" cy="18" r="1" fill="#1C1C1E"/></svg></button>
+    <button aria-label="Add link" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+    <span aria-hidden="true" style="width: 0.5px; height: 24px; background: rgba(0,0,0,0.2); margin: 0 4px"></span>
+    <button aria-label="Make public" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#1C1C1E" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></button>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{dark}}" hint-placeholder-val="{{ false }}">
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #000000; color: #FFFFFF; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+  <div aria-hidden="true" style="position: absolute; left: 16px; right: 16px; top: 46px; height: 40px; border-radius: 16px; background: #2C2C2E"></div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 58px; bottom: 0; background: #1C1C1E; border-radius: 38px 38px 0 0; overflow: hidden; display: flex; flex-direction: column">
+    <div style="padding: 14px 16px 0; display: flex; align-items: center">
+      <button class="glass-bar-d" aria-label="Cancel" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <span style="flex-grow: 1; text-align: center; display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 600">New Note</span><span style="font-size: 12px; color: #98989D">Cinque Terre</span></span>
+      <button aria-label="Save" style="all: unset; width: 44px; height: 44px; border-radius: 22px; background: #007A85; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 0.5px rgba(255,255,255,0.45), 0 6px 14px rgba(0,122,133,0.3); cursor: pointer"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17 19 7"/></svg></button>
+    </div>
+
+    <form style="padding: 22px 24px 0; display: flex; flex-direction: column">
+      <button type="button" style="all: unset; align-self: flex-start; height: 30px; padding: 0 12px; border-radius: 15px; background: rgba(118,118,128,0.24); font-size: 14px; color: #E5E5EA; display: flex; align-items: center; gap: 6px">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#E5E5EA" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="4"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        Sun 6 Sep 2026
+      </button>
+      <input value="Trail between villages" aria-label="Title" style="all: unset; margin-top: 14px; font-family: ui-serif, 'New York', Georgia, serif; font-size: 30px; line-height: 36px; font-weight: 700">
+      <p style="margin: 12px 0 0; font-size: 18px; line-height: 27px; color: #F2F2F7">Check which coastal paths are open before setting off; some sections close after rain.<span style="display: inline-block; width: 2px; height: 22px; background: #007A85; vertical-align: -4px; margin-left: 1px"></span></p>
+    </form>
+  </div>
+
+  <div class="glass-bar-d" role="toolbar" aria-label="Formatting" style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 34px; height: 52px; border-radius: 26px; display: flex; align-items: center; gap: 2px; padding: 0 6px">
+    <button aria-label="Bold" style="all: unset; width: 44px; height: 44px; border-radius: 22px; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center">B</button>
+    <button aria-label="Italic" style="all: unset; width: 44px; height: 44px; border-radius: 22px; font-size: 18px; font-style: italic; font-family: ui-serif, Georgia, serif; display: flex; align-items: center; justify-content: center">I</button>
+    <button aria-label="List" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="#F2F2F7"/><circle cx="4.5" cy="12" r="1" fill="#F2F2F7"/><circle cx="4.5" cy="18" r="1" fill="#F2F2F7"/></svg></button>
+    <button aria-label="Add link" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="2" stroke-linecap="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg></button>
+    <span aria-hidden="true" style="width: 0.5px; height: 24px; background: rgba(255,255,255,0.2); margin: 0 4px"></span>
+    <button aria-label="Make public" style="all: unset; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#F2F2F7" stroke-width="2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></button>
+  </div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { dark: dark, light: !dark };
+  }
+}
+</script>
+</body>
+</html>

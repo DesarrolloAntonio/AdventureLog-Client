@@ -5,8 +5,13 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.performScrollTo
 import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
@@ -89,13 +94,50 @@ class DashboardScreenTest {
     fun theFeaturedTripLeadsTheScreen() = runComposeUiTest {
         setContent {
             WithAppLocals {
-                DashboardScreen(homeUiState = HomeUiState.Success(dashboard = dashboard))
+                DashboardScreen(homeUiState = HomeUiState.Success(dashboard = dashboard), firstName = "John")
             }
         }
 
+        // The greeting is the headline, the trip a ticket under it with its stubs.
+        onNodeWithText("Hi John, you are in Cinque Terre").assertIsDisplayed()
         onNodeWithText("Cinque Terre").assertIsDisplayed()
-        onNodeWithText("HAPPENING NOW").assertIsDisplayed()
-        onNodeWithText("2 places · 05/09 – 09/09").assertIsDisplayed()
+        onNodeWithText("5 SEP", useUnmergedTree = true).assertExists()
+        onNodeWithText("9 SEP", useUnmergedTree = true).assertExists()
+        onNodeWithText("PLACES", useUnmergedTree = true).assertExists()
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun withNoTripTheHeadlineSaysWhatHasBeenDone() = runComposeUiTest {
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(dashboard = dashboard.copy(activeTrip = null)),
+                    firstName = "John",
+                )
+            }
+        }
+
+        onNodeWithText("Hi John, 17 places visited so far").assertIsDisplayed()
+        onAllNodes(hasText("PLACES")).assertCountEquals(0)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun yourMapOpensTheWorld() = runComposeUiTest {
+        var opened = 0
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(dashboard = dashboard),
+                    onSeeWorld = { opened++ },
+                )
+            }
+        }
+
+        onNodeWithText("Your map").performScrollTo().assertIsDisplayed()
+        onNodeWithText("See world").performScrollTo().performClick()
+        assertEquals(1, opened)
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -111,7 +153,7 @@ class DashboardScreenTest {
             }
         }
 
-        onNodeWithText("Open trip").performClick()
+        onNodeWithText("Cinque Terre").performClick()
         assertEquals("Cinque Terre", opened?.name)
     }
 
@@ -130,7 +172,7 @@ class DashboardScreenTest {
             }
         }
 
-        onNodeWithText("Add a place").performClick()
+        onNodeWithContentDescription("Add a place").performClick()
         assertEquals(1, added)
     }
 
@@ -145,10 +187,17 @@ class DashboardScreenTest {
 
         // assertExists, not assertIsDisplayed: the stats sit below the fold on a phone, and
         // whether they have been scrolled to is not what this test is about.
-        onNodeWithText("Countries").assertExists()
-        onNodeWithText("Regions").assertExists()
-        onNodeWithText(" / 250").assertExists()
-        onNodeWithText(" / 5,322").assertExists()
+        // What is still to visit inside the wavy ring - the headline already says what was
+        // visited - then countries, regions and cities in their shapes.
+        onNodeWithText("5", useUnmergedTree = true).assertExists()
+        onNodeWithText("still to visit", useUnmergedTree = true).assertExists()
+        onNodeWithText("17 of 22 visited", useUnmergedTree = true).assertExists()
+        onNodeWithText("places visited", useUnmergedTree = true).assertDoesNotExist()
+        onNodeWithText("countries", useUnmergedTree = true).assertExists()
+        onNodeWithText("of 250", useUnmergedTree = true).assertExists()
+        onNodeWithText("regions", useUnmergedTree = true).assertExists()
+        onNodeWithText("of 5,322", useUnmergedTree = true).assertExists()
+        onNodeWithText("of 153,728", useUnmergedTree = true).assertExists()
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -217,4 +266,25 @@ class DashboardScreenTest {
         onNodeWithText("Recently updated (22)").assertDoesNotExist()
     }
 
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun theRecentPlacesAreACarouselThatOpensThem() = runComposeUiTest {
+        var opened: String? = null
+        setContent {
+            WithAppLocals {
+                DashboardScreen(
+                    homeUiState = HomeUiState.Success(
+                        dashboard = dashboard.copy(recentLocations = listOf(testLocation("Machu Picchu"), testLocation("Petra")))
+                    ),
+                    onAdventureClick = { opened = it.name },
+                )
+            }
+        }
+
+        // The semantic click: a carousel item lies under the carousel's own drag handling, and
+        // an injected tap in the test window did not reach it (on the phone a tap opens it).
+        onNodeWithContentDescription("Machu Picchu").performScrollTo().assertHasClickAction()
+            .performSemanticsAction(SemanticsActions.OnClick)
+        assertEquals("Machu Picchu", opened)
+    }
 }

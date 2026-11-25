@@ -1,0 +1,22 @@
+package com.desarrollodroide.adventurelog.feature.detail.ui.navigation
+
+/**
+ * What a location's page can navigate to.
+ */
+interface DetailNavigator {
+    fun navigateUp()
+
+    /**
+     * Open one of the collections this location belongs to. The chips were tappable before and
+     * printed the collection's name to stdout.
+     */
+    fun navigateToCollection(collectionId: String, collectionName: String)
+
+    /** [openImages] opens the form on its images, for "Add photo". */
+    fun navigateToEditLocation(
+        location: com.desarrollodroide.adventurelog.core.model.Location,
+        openImages: Boolean = false,
+        /** Opens the form on its dates, for "Visit". */
+        openVisits: Boolean = false
+    )
+}

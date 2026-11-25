@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.ui.util
 
-import coil3.PlatformContext
+import org.koin.core.scope.Scope
 import kotlinx.cinterop.BetaInteropApi
 import platform.Foundation.create
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -53,6 +53,6 @@ class IOSImageBytesProvider : ImageBytesProvider {
     }
 }
 
-actual fun createImageBytesProvider(platformContext: PlatformContext): ImageBytesProvider {
+actual fun Scope.createImageBytesProvider(): ImageBytesProvider {
     return IOSImageBytesProvider()
 }

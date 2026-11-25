@@ -1,0 +1,441 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-22T10:00:00Z"
+  },
+  "title": "AdventureLog — Android & iOS",
+  "launch": {
+    "view": "canvas",
+    "page": "android"
+  },
+  "pages": [
+    {
+      "id": "android",
+      "name": "Android · M3 Expressive"
+    },
+    {
+      "id": "ios",
+      "name": "iOS · Liquid Glass"
+    }
+  ],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Home",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Places.dc.html": {
+      "x": 492,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Places",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Place.dc.html": {
+      "x": 984,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Place detail",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Collection.dc.html": {
+      "x": 1476,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Collection",
+      "page": "android",
+      "radius": 28
+    },
+    "iOS-Home.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Home",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Places.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Places",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Place.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Place detail",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Collection.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Collection",
+      "page": "ios",
+      "radius": 44
+    },
+    "Android-Map.dc.html": {
+      "x": 1968,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Map",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-World.dc.html": {
+      "x": 2460,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · World",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Settings.dc.html": {
+      "x": 2952,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Settings",
+      "page": "android",
+      "radius": 28
+    },
+    "iOS-Map.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Map",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-World.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · World",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Settings.dc.html": {
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Settings",
+      "page": "ios",
+      "radius": 44
+    },
+    "Android-Login.dc.html": {
+      "x": 3444,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Login",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Calendar.dc.html": {
+      "x": 3936,
+      "y": 0,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Calendar",
+      "page": "android",
+      "radius": 28
+    },
+    "iOS-Login.dc.html": {
+      "x": 3290,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Login",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Calendar.dc.html": {
+      "x": 3760,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Calendar",
+      "page": "ios",
+      "radius": 44
+    },
+    "Android-Collections.dc.html": {
+      "x": 0,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Collections",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-PlaceForm.dc.html": {
+      "x": 492,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · New place",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-CollectionForm.dc.html": {
+      "x": 984,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Edit collection",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-LodgingForm.dc.html": {
+      "x": 1476,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · New lodging",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-TransportForm.dc.html": {
+      "x": 1968,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · New transport",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-NoteForm.dc.html": {
+      "x": 2460,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · New note",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-ChecklistForm.dc.html": {
+      "x": 2952,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Edit checklist",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Country.dc.html": {
+      "x": 3444,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Country",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Users.dc.html": {
+      "x": 3936,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Users",
+      "page": "android",
+      "radius": 28
+    },
+    "Android-Legal.dc.html": {
+      "x": 4428,
+      "y": 1315,
+      "w": 412,
+      "h": 915,
+      "title": "Android · Terms / Privacy",
+      "page": "android",
+      "radius": 28
+    },
+    "iOS-Collections.dc.html": {
+      "x": 0,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Collections",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-PlaceForm.dc.html": {
+      "x": 470,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · New place",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-CollectionForm.dc.html": {
+      "x": 940,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Edit collection",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-LodgingForm.dc.html": {
+      "x": 1410,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · New lodging",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-TransportForm.dc.html": {
+      "x": 1880,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · New transport",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-NoteForm.dc.html": {
+      "x": 2350,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · New note",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-ChecklistForm.dc.html": {
+      "x": 2820,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Edit checklist",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Country.dc.html": {
+      "x": 3290,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Country",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Users.dc.html": {
+      "x": 3760,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Users",
+      "page": "ios",
+      "radius": 44
+    },
+    "iOS-Legal.dc.html": {
+      "x": 4230,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "iOS · Terms / Privacy",
+      "page": "ios",
+      "radius": 44
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Android-Places.dc.html",
+    "Android-Place.dc.html",
+    "Android-Collection.dc.html",
+    "iOS-Home.dc.html",
+    "iOS-Places.dc.html",
+    "iOS-Place.dc.html",
+    "iOS-Collection.dc.html",
+    "Android-Map.dc.html",
+    "Android-World.dc.html",
+    "Android-Settings.dc.html",
+    "iOS-Map.dc.html",
+    "iOS-World.dc.html",
+    "iOS-Settings.dc.html",
+    "Android-Login.dc.html",
+    "Android-Calendar.dc.html",
+    "iOS-Login.dc.html",
+    "iOS-Calendar.dc.html",
+    "Android-Collections.dc.html",
+    "Android-PlaceForm.dc.html",
+    "Android-CollectionForm.dc.html",
+    "Android-LodgingForm.dc.html",
+    "Android-TransportForm.dc.html",
+    "Android-NoteForm.dc.html",
+    "Android-ChecklistForm.dc.html",
+    "Android-Country.dc.html",
+    "Android-Users.dc.html",
+    "Android-Legal.dc.html",
+    "iOS-Collections.dc.html",
+    "iOS-PlaceForm.dc.html",
+    "iOS-CollectionForm.dc.html",
+    "iOS-LodgingForm.dc.html",
+    "iOS-TransportForm.dc.html",
+    "iOS-NoteForm.dc.html",
+    "iOS-ChecklistForm.dc.html",
+    "iOS-Country.dc.html",
+    "iOS-Users.dc.html",
+    "iOS-Legal.dc.html"
+  ],
+  "notes": {
+    "androidTitle": {
+      "x": 0,
+      "y": -300,
+      "text": "Android · Material 3 Expressive",
+      "kind": "title1",
+      "maxW": 4348,
+      "page": "android"
+    },
+    "iosTitle": {
+      "x": 0,
+      "y": -300,
+      "text": "iOS 26 · Liquid Glass",
+      "kind": "title1",
+      "maxW": 4150,
+      "page": "ios"
+    },
+    "androidForms": {
+      "x": 0,
+      "y": 1015,
+      "text": "Forms & secondary screens",
+      "kind": "title1",
+      "maxW": 4840,
+      "page": "android"
+    },
+    "iosForms": {
+      "x": 0,
+      "y": 944,
+      "text": "Forms & secondary screens",
+      "kind": "title1",
+      "maxW": 4620,
+      "page": "ios"
+    }
+  },
+  "designSystems": []
+}
