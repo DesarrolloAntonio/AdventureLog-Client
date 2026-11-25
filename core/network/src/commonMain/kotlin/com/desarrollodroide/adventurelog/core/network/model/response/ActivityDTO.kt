@@ -14,7 +14,7 @@ data class ActivityDTO(
     val user: String,
     
     @SerialName("visit")
-    val visit: String,
+    val visit: String = "", // null on 0.14 for an activity on a trip day
     
     @SerialName("trail")
     val trail: String? = null,

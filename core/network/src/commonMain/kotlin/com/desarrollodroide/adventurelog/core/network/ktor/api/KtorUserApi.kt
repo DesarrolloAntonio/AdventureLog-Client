@@ -64,7 +64,17 @@ internal class KtorUserApi(
         }
 
         val responseText = response.body<String>()
-        return json.decodeFromString<UserDetailsDTO>(responseText)
+        return json.decodeFromString<UserDetailsDTO>(profileOf(responseText))
+    }
+
+    /**
+     * Server 0.14.0's `/api/account/` holds the profile under `user`, beside the account's
+     * counters; 0.13's `/auth/user-metadata/` was the profile itself.
+     */
+    private fun profileOf(body: String): String {
+        val root = runCatching { json.parseToJsonElement(body).jsonObject }.getOrNull() ?: return body
+        val inner = root["user"] as? JsonObject
+        return if (inner != null && "username" !in root) inner.toString() else body
     }
 
     override suspend fun updateUserProfile(
@@ -110,14 +120,16 @@ internal class KtorUserApi(
                 ?: "Failed to update user profile with status: ${response.status}")
         }
 
-        return json.decodeFromString<UserDetailsDTO>(responseText)
+        return json.decodeFromString<UserDetailsDTO>(profileOf(responseText))
     }
 
     /**
      * The first message out of a DRF field-error body, or null if the body is not one.
      */
     private fun firstFieldError(body: String): String? = try {
-        json.parseToJsonElement(body).jsonObject.values
+        val root = json.parseToJsonElement(body).jsonObject
+        // 0.14 wraps them: {"detail": "username: ...", "code": "validation_error", "fields": {...}}
+        ((root["fields"] as? JsonObject) ?: root).values
             .firstNotNullOfOrNull { value ->
                 when (value) {
                     is JsonArray -> value.firstOrNull()?.jsonPrimitive?.contentOrNull
