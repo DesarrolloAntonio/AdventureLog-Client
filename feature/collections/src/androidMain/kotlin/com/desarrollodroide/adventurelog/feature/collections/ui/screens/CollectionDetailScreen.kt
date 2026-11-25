@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
@@ -312,7 +313,10 @@ fun CollectionDetailScreen(
                 onAddLodging = { onAddLodging(collectionId) },
                 onAddNote = { onAddNote(collectionId) },
                 onAddChecklist = { onAddChecklist(collectionId) },
-                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding()
+                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding(),
+                // No Back means the collection sits beside the list, under a rail whose "+" is
+                // "New collection": this one adds to the collection, and says so.
+                icon = if (showBack) Icons.Default.Add else Icons.AutoMirrored.Filled.PlaylistAdd,
             )
         }
 

@@ -84,7 +84,8 @@ fun arrowDates(start: String?, end: String?): String? {
 /**
  * The collection's "+": Material's FAB menu, opening onto the five kinds of thing a collection
  * holds. One button where the canvas draws one; the per-section "+" headings stay for adding from
- * where you are reading.
+ * where you are reading. [icon] is its closed face: "+" on a phone, "add to list" beside the list
+ * on a tablet, where the rail's "+" already means a new collection.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -95,6 +96,7 @@ fun AddToCollectionMenu(
     onAddNote: () -> Unit,
     onAddChecklist: () -> Unit,
     modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Filled.Add,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     BackHandler(expanded) { expanded = false }
@@ -114,8 +116,8 @@ fun AddToCollectionMenu(
                 onCheckedChange = { expanded = it },
                 modifier = Modifier.semantics { contentDescription = "Add to collection" },
             ) {
-                val icon = if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
-                Icon(icon, contentDescription = null, modifier = Modifier.animateIcon({ checkedProgress }))
+                val face = if (checkedProgress > 0.5f) Icons.Filled.Close else icon
+                Icon(face, contentDescription = null, modifier = Modifier.animateIcon({ checkedProgress }))
             }
         },
     ) {
