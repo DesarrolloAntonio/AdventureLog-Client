@@ -7,7 +7,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -29,15 +30,41 @@ class ShellAction(
 class ShellActionHost {
     var action: ShellAction? by mutableStateOf(null)
 
-    /** How many shown screens draw their own top and bottom bars; the shell draws neither while > 0. */
-    var chromeHiddenBy: Int by mutableIntStateOf(0)
+    /**
+     * The shown screens that draw their own top and bottom bars; the shell draws neither while one
+     * of them still stands (see [hidesChrome]).
+     */
+    val chromeHiders = mutableStateListOf<ShellChromeHider>()
 
     /**
-     * How many of those are a list-detail pane's page, which takes the title's place where it
-     * stands: the shell fades its title out and in over it rather than folding it away, so the
-     * list beneath does not move while the page slides over it or off it.
+     * Whether the shell's chrome is put away. A hider stops counting as soon as its own place in
+     * the navigation is gone - [isGone] says so for its owner - not when it leaves composition at
+     * the end of its exit slide: so on Back the title and the toolbar come back alongside the
+     * slide, not after it.
      */
-    var chromeHiddenInPlaceBy: Int by mutableIntStateOf(0)
+    fun hidesChrome(isGone: (Any?) -> Boolean): Boolean = chromeHiders.any { !isGone(it.owner) }
+
+    /** Whether one of the standing hiders is a pane's page, which takes the title's place where it stands. */
+    fun hidesChromeInPlace(isGone: (Any?) -> Boolean): Boolean =
+        chromeHiders.any { it.inPlace && !isGone(it.owner) }
+}
+
+/**
+ * One screen holding the shell's chrome away. [owner] is where it sits in the navigation (its
+ * back stack entry, as the lifecycle owner around it); [inPlace] is a list-detail pane's page,
+ * which the shell's title fades over rather than folding away.
+ */
+class ShellChromeHider(val owner: Any?, val inPlace: Boolean)
+
+/** Registers a [ShellChromeHider] for as long as the caller is composed. */
+@Composable
+fun HoldShellChrome(host: ShellActionHost, inPlace: Boolean) {
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(host, owner, inPlace) {
+        val hider = ShellChromeHider(owner, inPlace)
+        host.chromeHiders += hider
+        onDispose { host.chromeHiders -= hider }
+    }
 }
 
 /**
@@ -100,10 +127,7 @@ val LocalShellChromeHiddenByPane = staticCompositionLocalOf { false }
 fun HideShellChrome() {
     val host = LocalShellActionHost.current ?: return
     if (LocalShellChromeHiddenByPane.current) return
-    DisposableEffect(host) {
-        host.chromeHiddenBy++
-        onDispose { host.chromeHiddenBy-- }
-    }
+    HoldShellChrome(host, inPlace = false)
 }
 
 /**

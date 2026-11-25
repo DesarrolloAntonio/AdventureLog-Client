@@ -16,6 +16,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneSt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import com.desarrollodroide.adventurelog.feature.ui.components.HoldShellChrome
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -96,16 +97,7 @@ internal fun panePredictivePopTransition(twoPanes: Boolean): AnimatedContentTran
 @Composable
 internal fun PaneHidesShellChrome(detailShown: Boolean, content: @Composable () -> Unit) {
     val host = LocalShellActionHost.current
-    if (detailShown && host != null) {
-        DisposableEffect(host) {
-            host.chromeHiddenBy++
-            host.chromeHiddenInPlaceBy++
-            onDispose {
-                host.chromeHiddenBy--
-                host.chromeHiddenInPlaceBy--
-            }
-        }
-    }
+    if (detailShown && host != null) HoldShellChrome(host, inPlace = true)
     CompositionLocalProvider(LocalShellChromeHiddenByPane provides true, content = content)
 }
 

@@ -101,6 +101,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellTitleOverlap
 import androidx.compose.foundation.layout.asPaddingValues
@@ -352,7 +353,11 @@ fun HomeScreenContent(
     // The title and the toolbar step aside for a page with bars of its own, and come back, over
     // the same 300ms as the page's slide. They used to vanish and reappear between two frames,
     // and the title's height - the content's top padding - jumped with them.
-    val chromeShown = !(compact && shellActions.chromeHiddenBy > 0)
+    // A screen's hold ends once its back stack entry is popped - at the start of Back, while it
+    // is still sliding out - rather than when it leaves composition at the end.
+    val backStack by navController.currentBackStack.collectAsState()
+    val isGone: (Any?) -> Boolean = { owner -> owner is NavBackStackEntry && owner !in backStack }
+    val chromeShown = !(compact && shellActions.hidesChrome(isGone))
     val chromeFraction by animateFloatAsState(
         targetValue = if (chromeShown) 1f else 0f,
         animationSpec = tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing),
@@ -362,7 +367,7 @@ fun HomeScreenContent(
     // fades over it; a form slides in below it, so the title folds away to the status bar. The
     // answer holds while they come back, until they are fully back.
     val lastInPlace = remember { mutableStateOf(false) }
-    val titleInPlace = if (!chromeShown) shellActions.chromeHiddenInPlaceBy > 0 else lastInPlace.value
+    val titleInPlace = if (!chromeShown) shellActions.hidesChromeInPlace(isGone) else lastInPlace.value
     SideEffect { lastInPlace.value = titleInPlace }
     // A page with bars of its own scrolls too. Its scrolling is kept from the shell's title while
     // that is put away - back on the list, the title is as the list left it, folded or open. A
