@@ -22,6 +22,13 @@ internal const val SESSION_TOKEN_HEADER = "X-Session-Token"
 internal const val LOGIN_PATH = "/auth/app/v1/auth/login"
 
 /**
+ * The second step of a sign-in for an account with two-step verification: the code goes here with
+ * the half-done session from the login's 401 as X-Session-Token. Same app client, so 0.14 moves it
+ * under /api like the login.
+ */
+internal const val MFA_AUTHENTICATE_PATH = "/auth/app/v1/auth/2fa/authenticate"
+
+/**
  * allauth's browser session: GET is the session, DELETE is signing out. Not the app client's: its
  * DELETE answers 401 and leaves the session alive (measured on 0.13.1, direct and proxied).
  */

@@ -2,8 +2,10 @@ package com.desarrollodroide.adventurelog.core.domain
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.domain.repository.LoginCodeError
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginRepository
 import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
+import com.desarrollodroide.adventurelog.core.model.LoginResult
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -13,17 +15,22 @@ import kotlin.test.assertTrue
 class LoginUseCaseTest {
 
     private class FakeLoginRepository : LoginRepository {
-        var sendLoginResult: Either<ApiResponse, UserDetails> = Either.Right(createFakeUserDetails())
+        var sendLoginResult: Either<ApiResponse, LoginResult> = Either.Right(LoginResult.SignedIn(createFakeUserDetails()))
         var lastUrl: String? = null
         var lastUsername: String? = null
         var lastPassword: String? = null
 
-        override suspend fun sendLogin(url: String, username: String, password: String): Either<ApiResponse, UserDetails> {
+        override suspend fun sendLogin(url: String, username: String, password: String): Either<ApiResponse, LoginResult> {
             lastUrl = url
             lastUsername = username
             lastPassword = password
             return sendLoginResult
         }
+
+        override suspend fun sendLoginCode(url: String, code: String): Either<LoginCodeError, UserDetails> =
+            error("not part of the password step")
+
+        override fun cancelPendingLogin() = error("not part of the password step")
     }
 
     private val fakeRepository = FakeLoginRepository()
@@ -32,12 +39,12 @@ class LoginUseCaseTest {
     @Test
     fun `invoke returns success when repository returns user details`() = runTest {
         val expectedUserDetails = createFakeUserDetails()
-        fakeRepository.sendLoginResult = Either.Right(expectedUserDetails)
+        fakeRepository.sendLoginResult = Either.Right(LoginResult.SignedIn(expectedUserDetails))
 
         val result = useCase("https://test.com", "testuser", "testpass")
 
         assertTrue(result is Either.Right)
-        assertEquals(expectedUserDetails, result.value)
+        assertEquals(LoginResult.SignedIn(expectedUserDetails), result.value)
         assertEquals("https://test.com", fakeRepository.lastUrl)
         assertEquals("testuser", fakeRepository.lastUsername)
         assertEquals("testpass", fakeRepository.lastPassword)
@@ -76,7 +83,7 @@ class LoginUseCaseTest {
     @Test
     fun `a login that carries no session is a failure rather than a success`() = runTest {
         // What the web app's proxy produces: 200, the right username, and no set-cookie.
-        fakeRepository.sendLoginResult = Either.Right(createFakeUserDetails().copy(sessionToken = null))
+        fakeRepository.sendLoginResult = Either.Right(LoginResult.SignedIn(createFakeUserDetails().copy(sessionToken = null)))
 
         val result = useCase("https://test.com", "testuser", "testpass")
 
@@ -87,7 +94,7 @@ class LoginUseCaseTest {
     @Test
     fun `a blank session token counts as no session`() = runTest {
         // The DTO maps a missing cookie to "" rather than null, so both shapes reach here.
-        fakeRepository.sendLoginResult = Either.Right(createFakeUserDetails().copy(sessionToken = ""))
+        fakeRepository.sendLoginResult = Either.Right(LoginResult.SignedIn(createFakeUserDetails().copy(sessionToken = "")))
 
         val result = useCase("https://test.com", "testuser", "testpass")
 
@@ -105,6 +112,15 @@ class LoginUseCaseTest {
         assertEquals(url, fakeRepository.lastUrl)
         assertEquals(username, fakeRepository.lastUsername)
         assertEquals(password, fakeRepository.lastPassword)
+    }
+
+    @Test
+    fun `an account with two-step verification asks for its code`() = runTest {
+        fakeRepository.sendLoginResult = Either.Right(LoginResult.CodeRequired)
+
+        val result = useCase("https://test.com", "testuser", "testpass")
+
+        assertEquals(Either.Right(LoginResult.CodeRequired), result)
     }
 
     companion object {

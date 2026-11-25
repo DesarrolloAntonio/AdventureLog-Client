@@ -109,3 +109,9 @@ internal fun HttpRequestBuilder.rewriteFor014() {
  * an ordinary request that has to wait for the probe it is part of (which deadlocked).
  */
 internal val ProbeRequest = AttributeKey<Unit>("AdventureLogProbe")
+
+/**
+ * Marks a request that belongs to a sign-in still in progress (the second factor): it carries a
+ * session token, but a 401 to it is not a signed-in session ending.
+ */
+internal val AuthStageRequest = AttributeKey<Unit>("AdventureLogAuthStage")

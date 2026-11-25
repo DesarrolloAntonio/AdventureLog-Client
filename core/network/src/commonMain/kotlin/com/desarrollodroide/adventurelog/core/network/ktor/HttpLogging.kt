@@ -12,11 +12,16 @@ import io.ktor.client.plugins.logging.Logger
  */
 private const val REDACTED = "\"***\""
 
-private val jsonSecrets = listOf("password", "new_password", "current_password", "token", "key")
+// session_token: the app client's login answer carries the session in its body, and a login
+// waiting for its second factor carries the half-done one.
+private val jsonSecrets = listOf("password", "new_password", "current_password", "token", "session_token", "key")
 
 private val jsonSecretRegexes = jsonSecrets.map { field ->
     Regex("(\"$field\"\\s*:\\s*)\"[^\"]*\"", RegexOption.IGNORE_CASE)
-}
+} + listOf(
+    // A second-factor code. Only digits: allauth's error codes ("code": "incorrect_code") stay readable.
+    Regex("(\"code\"\\s*:\\s*)\"\\d+\"", RegexOption.IGNORE_CASE),
+)
 
 private val cookieValueRegex =
     Regex("((?:sessionid|csrftoken)=)[^;,\\s]+", RegexOption.IGNORE_CASE)

@@ -15,6 +15,7 @@ val loginModule = module {
             initializeSessionUseCase = get(),
             saveSessionUseCase = get(),
             rememberMeCredentialsUseCase = get(),
+            verifyLoginCodeUseCase = get(),
             savedStateHandle = get()
         )
     }

@@ -59,7 +59,10 @@ fun LoginScreenRoute(
         onServerUrlChange = viewModel::updateServerUrl,
         onCheckedRememberSessionChange = viewModel::updateRememberSession,
         onClickLoginButton = viewModel::login,
-        clearErrors = viewModel::clearErrors
+        clearErrors = viewModel::clearErrors,
+        onLoginCodeChange = viewModel::updateLoginCode,
+        onVerifyLoginCode = viewModel::verifyLoginCode,
+        onCancelLoginCode = viewModel::cancelLoginCode,
     )
 }
 
@@ -73,7 +76,10 @@ internal fun LoginScreen(
     onServerUrlChange: (String) -> Unit,
     onCheckedRememberSessionChange: (Boolean) -> Unit,
     onClickLoginButton: () -> Unit,
-    clearErrors: () -> Unit
+    clearErrors: () -> Unit,
+    onLoginCodeChange: (String) -> Unit = {},
+    onVerifyLoginCode: () -> Unit = {},
+    onCancelLoginCode: () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -105,6 +111,15 @@ internal fun LoginScreen(
         return
     }
     if (loginUiState is LoginUiState.Success) {
+        return
+    }
+    if (loginUiState is LoginUiState.CodeRequired) {
+        LoginCodeScreen(
+            state = loginUiState,
+            onCodeChange = onLoginCodeChange,
+            onVerify = onVerifyLoginCode,
+            onBack = onCancelLoginCode,
+        )
         return
     }
 

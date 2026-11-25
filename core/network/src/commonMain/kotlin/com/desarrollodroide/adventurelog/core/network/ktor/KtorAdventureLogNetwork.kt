@@ -68,6 +68,7 @@ import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorGeocodingApi
 import com.desarrollodroide.adventurelog.core.network.api.AuthApi
 import com.desarrollodroide.adventurelog.core.network.api.TransportationApi
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorAuthApi
+import com.desarrollodroide.adventurelog.core.network.model.response.LoginOutcomeDTO
 import com.desarrollodroide.adventurelog.core.network.ktor.api.KtorTransportationApi
 import com.desarrollodroide.adventurelog.core.network.model.response.CalendarEventsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.SearchResultsDTO
@@ -99,6 +100,12 @@ class KtorAdventureLogNetwork(
     private val json = defaultJson
 
     private var sessionToken: String? = null
+
+    /**
+     * The half-done session of a sign-in waiting for its second factor. Not [sessionToken]: it
+     * signs nobody in, and no other request may carry it.
+     */
+    private var pendingLoginToken: String? = null
     private var baseUrl: String? = null
 
     private val rejections = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -158,7 +165,8 @@ class KtorAdventureLogNetwork(
             }
             val call = execute(request)
             val signingOut = request.method == HttpMethod.Delete && call.request.url.encodedPath.endsWith(SESSION_SUFFIX)
-            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut) {
+            val signingIn = request.attributes.contains(AuthStageRequest)
+            if (call.response.status == HttpStatusCode.Unauthorized && request.headers.contains(SESSION_TOKEN_HEADER) && !signingOut && !signingIn) {
                 logger.w { "Server rejected the session (401 on ${call.request.url.encodedPath})" }
                 rejections.tryEmit(Unit)
             }
@@ -172,6 +180,9 @@ class KtorAdventureLogNetwork(
             sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
             onSessionTokenReceived = { token ->
                 sessionToken = token
+            },
+            onPendingLogin = { token ->
+                pendingLoginToken = token
             },
             json = json
         )
@@ -320,6 +331,7 @@ class KtorAdventureLogNetwork(
 
     override fun clearSession() {
         sessionToken = null
+        pendingLoginToken = null
         baseUrl = null
         serverProfile = null
         logger.d { "Network session cleared - all tokens and base URL reset" }
@@ -329,18 +341,30 @@ class KtorAdventureLogNetwork(
         url: String,
         username: String,
         password: String
-    ): UserDetailsDTO {
+    ): LoginOutcomeDTO {
         baseUrl = url.trimEnd('/')
         serverProfile = null
-        // Initialize the session info before calling login
-        // The authDataSource will use the sessionProvider to get the baseUrl
-        
-        val userDetails = authDataSource.login(username, password)
-        
-        // The session token is already updated via the onSessionTokenReceived callback
-        logger.d { "Login completed successfully for user: ${userDetails.username}" }
-        
+        pendingLoginToken = null
+        // The authDataSource reads baseUrl through its sessionProvider; a new session token or a
+        // pending sign-in comes back through its callbacks.
+        val outcome = authDataSource.login(username, password)
+        if (outcome is LoginOutcomeDTO.SignedIn) {
+            logger.d { "Login completed successfully for user: ${outcome.user.username}" }
+        }
+        return outcome
+    }
+
+    override suspend fun sendSecondFactorCode(code: String): UserDetailsDTO {
+        // Same server as the password step: baseUrl and its profile stay as they are.
+        val pending = pendingLoginToken
+            ?: throw HttpException(HttpStatusCode.Gone.value, "No sign-in is waiting for a code")
+        val userDetails = authDataSource.authenticateSecondFactor(pending, code)
+        pendingLoginToken = null
         return userDetails
+    }
+
+    override fun cancelPendingLogin() {
+        pendingLoginToken = null
     }
 
     override suspend fun getUserDetails(): UserDetailsDTO {

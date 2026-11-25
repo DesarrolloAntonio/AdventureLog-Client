@@ -25,7 +25,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 /** The form's one big action: a full-width pill, 60dp, with an arrow. */
 @Composable
 fun LoginButton(
-    onClickLoginButton: () -> Unit
+    onClickLoginButton: () -> Unit,
+    text: String = "Sign in",
 ) {
     Button(
         onClick = onClickLoginButton,
@@ -33,7 +34,7 @@ fun LoginButton(
             .fillMaxWidth()
             .heightIn(min = 60.dp),
     ) {
-        Text("Sign in", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+        Text(text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.width(10.dp))
         Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(20.dp))
     }

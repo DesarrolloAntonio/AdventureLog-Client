@@ -286,7 +286,8 @@ flow run locally.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-issues.png"><img src="docs/readme/light/h-issues.png" alt="Known issues" width="100%"></picture>
 
-- **MFA and SSO**: accounts that use them cannot sign in yet.
+- **SSO**: accounts that sign in through a provider (OIDC, GitHub...) cannot sign in yet. Two-step
+  verification (an authenticator app or a recovery code) works.
 - **iOS**: the SwiftUI app is under construction and not distributed yet.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-license.png"><img src="docs/readme/light/h-license.png" alt="License" width="100%"></picture>

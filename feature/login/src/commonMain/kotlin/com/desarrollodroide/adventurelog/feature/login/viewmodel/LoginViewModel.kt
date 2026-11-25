@@ -8,6 +8,9 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.VerifyLoginCodeUseCase
+import com.desarrollodroide.adventurelog.core.model.LoginResult
+import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import isValidUrl
@@ -22,8 +25,16 @@ class LoginViewModel(
     private val initializeSessionUseCase: InitializeSessionUseCase,
     private val saveSessionUseCase: SaveSessionUseCase,
     private val rememberMeCredentialsUseCase: RememberMeCredentialsUseCase,
-    private val savedStateHandle: SavedStateHandle = SavedStateHandle()
+    private val verifyLoginCodeUseCase: VerifyLoginCodeUseCase,
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
+    // The Android check runs on android.net.Uri, which a host test does not have.
+    private val urlValidator: (String) -> Boolean = ::isValidUrl,
 ) : ViewModel() {
+
+    /** The sign-in a code is being asked for: what the form said when its password went. */
+    private data class PendingSignIn(val url: String, val username: String, val rememberSession: Boolean)
+
+    private var pendingSignIn: PendingSignIn? = null
 
     private val logger = co.touchlab.kermit.Logger.withTag("LoginViewModel")
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.CheckingSession)
@@ -134,7 +145,7 @@ class LoginViewModel(
         savedStateHandle[KEY_SERVER_URL] = newUrl
         _loginFormState.value = _loginFormState.value.copy(
             serverUrl = newUrl,
-            urlError = !isValidUrl(newUrl)
+            urlError = !urlValidator(newUrl)
         )
     }
 
@@ -158,12 +169,12 @@ class LoginViewModel(
         val currentState = _loginFormState.value
         val isValid = currentState.userName.isNotBlank() &&
                 currentState.password.isNotBlank() &&
-                isValidUrl(currentState.serverUrl)
+                urlValidator(currentState.serverUrl)
 
         _loginFormState.value = currentState.copy(
             userNameError = currentState.userName.isBlank(),
             passwordError = currentState.password.isBlank(),
-            urlError = !isValidUrl(currentState.serverUrl)
+            urlError = !urlValidator(currentState.serverUrl)
         )
 
         return isValid
@@ -194,33 +205,13 @@ class LoginViewModel(
                         _uiState.update { LoginUiState.Error(result.value) }
                     }
 
-                    is Either.Right -> {
-                        val userDetails = result.value
-                        logger.d { "Login successful for user: ${userDetails.username}" }
-
-                        // The session must be published on every login - Home reads the user from
-                        // it for the greeting and to load stats. "Remember me" only decides
-                        // whether it also survives an app restart.
-                        // serverUrl is recorded here because the login response does not carry it,
-                        // and the image loader needs it to tell the user's own server apart from
-                        // third-party hosts before attaching the session token.
-                        saveSessionUseCase(
-                            userDetails.copy(serverUrl = url.trimEnd('/')),
-                            persist = rememberSession
-                        )
-
-                        if (rememberSession) {
-                            rememberMeCredentialsUseCase.save(
-                                url = url,
-                                username = username
-                            )
-                            logger.d { "Saved persistent session, server and username - will auto-login next time" }
-                        } else {
-                            rememberMeCredentialsUseCase.clear()
-                            logger.d { "Remember me not checked - session is active for this run only" }
+                    is Either.Right -> when (val step = result.value) {
+                        is LoginResult.SignedIn -> completeSignIn(step.user, url, username, rememberSession)
+                        LoginResult.CodeRequired -> {
+                            logger.d { "The account asks for a second factor" }
+                            pendingSignIn = PendingSignIn(url, username, rememberSession)
+                            _uiState.update { LoginUiState.CodeRequired() }
                         }
-
-                        _uiState.update { LoginUiState.Success(userDetails) }
                     }
                 }
             } catch (e: Exception) {
@@ -228,6 +219,89 @@ class LoginViewModel(
                 _uiState.update { LoginUiState.Error("Unexpected error occurred: ${e.message}") }
             }
         }
+    }
+
+    /** Digits only, as many as a recovery code has: the field takes nothing else. */
+    fun updateLoginCode(newCode: String) {
+        val state = _uiState.value as? LoginUiState.CodeRequired ?: return
+        _uiState.value = state.copy(code = newCode.filter { it.isDigit() }.take(8), error = null)
+    }
+
+    fun verifyLoginCode() {
+        val state = _uiState.value as? LoginUiState.CodeRequired ?: return
+        val pending = pendingSignIn ?: return
+        if (state.verifying) return
+        if (!VerifyLoginCodeUseCase.isWellFormed(state.code)) {
+            _uiState.value = state.copy(error = VerifyLoginCodeUseCase.ENTER_A_CODE)
+            return
+        }
+        _uiState.value = state.copy(verifying = true, error = null)
+
+        viewModelScope.launch {
+            try {
+                when (val result = verifyLoginCodeUseCase(pending.url, state.code)) {
+                    is Either.Right -> {
+                        pendingSignIn = null
+                        completeSignIn(result.value, pending.url, pending.username, pending.rememberSession)
+                    }
+                    is Either.Left -> {
+                        val failure = result.value
+                        logger.e { "Second factor failed: ${failure.message}" }
+                        if (failure.signInAgain) {
+                            pendingSignIn = null
+                            verifyLoginCodeUseCase.cancel()
+                            _uiState.update { LoginUiState.Error(failure.message) }
+                        } else {
+                            _uiState.update { LoginUiState.CodeRequired(error = failure.message) }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                logger.e(e) { "Unexpected error sending the second factor" }
+                _uiState.update { LoginUiState.CodeRequired(error = VerifyLoginCodeUseCase.FAILED) }
+            }
+        }
+    }
+
+    /** Back to the password form; the half-done sign-in is dropped. */
+    fun cancelLoginCode() {
+        if (_uiState.value !is LoginUiState.CodeRequired) return
+        pendingSignIn = null
+        verifyLoginCodeUseCase.cancel()
+        _uiState.update { LoginUiState.Empty }
+    }
+
+    private suspend fun completeSignIn(
+        userDetails: UserDetails,
+        url: String,
+        username: String,
+        rememberSession: Boolean
+    ) {
+        logger.d { "Login successful for user: ${userDetails.username}" }
+
+        // The session must be published on every login - Home reads the user from
+        // it for the greeting and to load stats. "Remember me" only decides
+        // whether it also survives an app restart.
+        // serverUrl is recorded here because the login response does not carry it,
+        // and the image loader needs it to tell the user's own server apart from
+        // third-party hosts before attaching the session token.
+        saveSessionUseCase(
+            userDetails.copy(serverUrl = url.trimEnd('/')),
+            persist = rememberSession
+        )
+
+        if (rememberSession) {
+            rememberMeCredentialsUseCase.save(
+                url = url,
+                username = username
+            )
+            logger.d { "Saved persistent session, server and username - will auto-login next time" }
+        } else {
+            rememberMeCredentialsUseCase.clear()
+            logger.d { "Remember me not checked - session is active for this run only" }
+        }
+
+        _uiState.update { LoginUiState.Success(userDetails) }
     }
 
     private companion object {
