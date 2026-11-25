@@ -101,6 +101,22 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellTitleOverlap
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.util.lerp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.AnimatedVisibility
 import androidx.navigation.NavBackStackEntry
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.isSectionSwitch
 import com.desarrollodroide.adventurelog.core.model.Location
@@ -181,6 +197,9 @@ private val ScreensWithOwnSearch = setOf(
 /**
  * Helper function to reset scroll behavior
  */
+/** Passes nothing to the shell's bars: for while a page with bars of its own is on show. */
+private val NoShellScroll = object : NestedScrollConnection {}
+
 @OptIn(ExperimentalMaterial3Api::class)
 private fun resetScrollBehavior(scrollBehavior: TopAppBarScrollBehavior) {
     scrollBehavior.state.contentOffset = 0f
@@ -330,14 +349,31 @@ fun HomeScreenContent(
     // action of the screen on show ("Add a place") beside the destinations.
     val toolbarScroll = rememberToolbarScrollState()
     LaunchedEffect(currentScreen) { toolbarScroll.show() }
-    // A screen with bars of its own scrolls too, and the nested scroll reaches the shell's bars
-    // while they are put away: back on the list, the app bar was folded and the toolbar gone.
-    LaunchedEffect(shellActions.chromeHiddenBy) {
-        if (shellActions.chromeHiddenBy == 0) {
+    // The title and the toolbar step aside for a page with bars of its own, and come back, over
+    // the same 300ms as the page's slide. They used to vanish and reappear between two frames,
+    // and the title's height - the content's top padding - jumped with them.
+    val chromeShown = !(compact && shellActions.chromeHiddenBy > 0)
+    val chromeFraction by animateFloatAsState(
+        targetValue = if (chromeShown) 1f else 0f,
+        animationSpec = tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing),
+        label = "shellChrome",
+    )
+    // Who put them away decides how: a pane's page stands in the title's place, so the title only
+    // fades over it; a form slides in below it, so the title folds away to the status bar. The
+    // answer holds while they come back, until they are fully back.
+    val lastInPlace = remember { mutableStateOf(false) }
+    val titleInPlace = if (!chromeShown) shellActions.chromeHiddenInPlaceBy > 0 else lastInPlace.value
+    SideEffect { lastInPlace.value = titleInPlace }
+    // A page with bars of its own scrolls too. Its scrolling is kept from the shell's title while
+    // that is put away - back on the list, the title is as the list left it, folded or open. A
+    // form's return still opens it, as before.
+    LaunchedEffect(chromeShown) {
+        if (chromeShown) {
             toolbarScroll.show()
-            resetScrollBehavior(scrollBehavior)
+            if (!titleInPlace) resetScrollBehavior(scrollBehavior)
         }
     }
+    val titleScroll = if (chromeShown) scrollBehavior.nestedScrollConnection else NoShellScroll
 
     // Read by the screens' pull-to-refresh: a downward drag opens the title first, then refreshes.
     val appBarExpanded = remember(scrollBehavior) { { scrollBehavior.state.heightOffset >= -0.5f } }
@@ -349,7 +385,7 @@ fun HomeScreenContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .then(if (compact) Modifier.nestedScroll(toolbarScroll.connection) else Modifier)
+            .then(if (compact) Modifier.nestedScroll(if (chromeShown) toolbarScroll.connection else NoShellScroll) else Modifier)
     ) {
         // Flat, the redesign's #F5FAFB - the theme's own surface.
         //
@@ -390,19 +426,32 @@ fun HomeScreenContent(
             val appBarWidth = maxWidth
             Scaffold(
                 modifier = Modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .nestedScroll(titleScroll)
                     .background(Color.Transparent),  // Ensure Scaffold is transparent
                 topBar = {
                     // A screen with bars of its own (a place's page) has the shell's put away.
-                    if (compact && shellActions.chromeHiddenBy > 0) return@Scaffold
+                    if (!chromeShown && chromeFraction == 0f) return@Scaffold
                     if (mapFullBleed) return@Scaffold
                     // The bar is transparent, so insetting it simply moves the title and the
                     // actions onto the same left and right edge as the content below. Without
                     // this the greeting starts at the window edge while everything under it
                     // starts 120dp further in, which is one width too many for one screen.
                     val gutter = ((appBarWidth - MaxContentWidth) / 2).coerceAtLeast(0.dp)
+                    // While it comes and goes the bar folds down to the status bar's height, which
+                    // is what an empty slot pads the content by: no jump at either end.
+                    val statusBarTop = WindowInsets.statusBars.getTop(LocalDensity.current)
                     TopAppBar(
-                        modifier = Modifier.padding(horizontal = gutter),
+                        modifier = Modifier
+                            .clipToBounds()
+                            .layout { measurable, constraints ->
+                                val bar = measurable.measure(constraints)
+                                val height = if (titleInPlace) bar.height
+                                    else lerp(statusBarTop.coerceAtMost(bar.height), bar.height, chromeFraction)
+                                layout(bar.width, height) {
+                                    bar.placeWithLayer(0, 0) { alpha = chromeFraction }
+                                }
+                            }
+                            .padding(horizontal = gutter),
                         // Back sits in the bar's own navigation slot. Inside the title it was a
                         // clickable icon 28dp wide, and as an IconButton the title's inset still
                         // clipped it to 38dp (measured) - under the 48dp a finger needs.
@@ -560,7 +609,14 @@ fun HomeScreenContent(
                         // pad for it twice in here.
                         .consumeWindowInsets(barsPadding)
                 ) {
-                    CompositionLocalProvider(LocalShellTopOverlay provides if (mapFullBleed) MapSearchPillClearance else 0.dp) {
+                    val titleOverlap = if (compact) {
+                        (barsPadding.calculateTopPadding() - WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+                            .coerceAtLeast(0.dp)
+                    } else 0.dp
+                    CompositionLocalProvider(
+                        LocalShellTopOverlay provides if (mapFullBleed) MapSearchPillClearance else 0.dp,
+                        LocalShellTitleOverlap provides titleOverlap,
+                    ) {
                     // Changing section fades through: the five tabs and the account menu's
                     // screens have no order between them, so nothing slides left or right (it
                     // used to, by tab position, and Home alone faded). Going deeper inside a
@@ -1133,14 +1189,22 @@ fun HomeScreenContent(
             }
             }
 
-            if (compact && shellActions.chromeHiddenBy == 0) {
-                MainToolbarRow(
-                    current = currentScreen,
-                    onSelect = { navigateTo(it) },
-                    action = shellActions.action,
-                    scroll = toolbarScroll,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
+            if (compact) {
+                AnimatedVisibility(
+                    visible = chromeShown,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    enter = slideInVertically(tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing)) { it } +
+                        fadeIn(tween(NavigationAnimations.SLIDE_DURATION_MS)),
+                    exit = slideOutVertically(tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing)) { it } +
+                        fadeOut(tween(NavigationAnimations.SLIDE_DURATION_MS)),
+                ) {
+                    MainToolbarRow(
+                        current = currentScreen,
+                        onSelect = { navigateTo(it) },
+                        action = shellActions.action,
+                        scroll = toolbarScroll,
+                    )
+                }
             }
     }
     }

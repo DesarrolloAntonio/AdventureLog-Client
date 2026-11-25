@@ -31,7 +31,21 @@ class ShellActionHost {
 
     /** How many shown screens draw their own top and bottom bars; the shell draws neither while > 0. */
     var chromeHiddenBy: Int by mutableIntStateOf(0)
+
+    /**
+     * How many of those are a list-detail pane's page, which takes the title's place where it
+     * stands: the shell fades its title out and in over it rather than folding it away, so the
+     * list beneath does not move while the page slides over it or off it.
+     */
+    var chromeHiddenInPlaceBy: Int by mutableIntStateOf(0)
 }
+
+/**
+ * How far the shell's title reaches below the status bar into the content (a phone). A pane's page
+ * that hides the title in place reaches up over it by this much, so it stands where it will stay
+ * while the title fades - and the title can fade, not fold, with nothing moving underneath.
+ */
+val LocalShellTitleOverlap = compositionLocalOf { 0.dp }
 
 /** Provided by the shell only where it draws a floating toolbar (a phone); null elsewhere. */
 val LocalShellActionHost = staticCompositionLocalOf<ShellActionHost?> { null }
@@ -69,6 +83,15 @@ fun rememberShellAction(icon: ImageVector, description: String, onClick: () -> U
 }
 
 /**
+ * True inside a list-detail pane that hides the shell's chrome itself, from its back stack: there
+ * the page's own [HideShellChrome] stands down. A page holds the chrome hidden until it leaves
+ * composition, which on Back is the end of the slide - so the title and the toolbar popped in
+ * after the list had already arrived. The back stack changes as Back starts, and they come in
+ * with it.
+ */
+val LocalShellChromeHiddenByPane = staticCompositionLocalOf { false }
+
+/**
  * For a screen that brings its own top and bottom bars - a place's page, with its photo and its
  * toolbar - shown inside the shell on a phone: the shell's app bar and floating toolbar step aside
  * while it is on screen. Elsewhere (a tablet, or outside the shell) it does nothing.
@@ -76,6 +99,7 @@ fun rememberShellAction(icon: ImageVector, description: String, onClick: () -> U
 @Composable
 fun HideShellChrome() {
     val host = LocalShellActionHost.current ?: return
+    if (LocalShellChromeHiddenByPane.current) return
     DisposableEffect(host) {
         host.chromeHiddenBy++
         onDispose { host.chromeHiddenBy-- }

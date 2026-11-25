@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -89,57 +90,70 @@ fun PlacesPane(
     // went anywhere is just a wrong button.
     val twoPanes = rememberShowsTwoPanes()
 
-    NavDisplay(
-        modifier = modifier,
-        backStack = backStack,
-        sceneStrategies = listOf(listDetail),
-        onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
-        entryProvider = entryProvider {
-            entry<PlacesList>(
-                metadata = ListDetailSceneStrategy.listPane(
-                    detailPlaceholder = { PlaceholderPane() }
-                )
-            ) {
-                LocationListScreen(
-                    onAdventureClick = { location ->
-                        // Replace rather than stack: on two panes the list stays put and only the
-                        // right side changes, so a back press should leave Places, not walk back
-                        // through every place looked at on the way.
-                        if (backStack.lastOrNull() is PlaceDetail) backStack.removeLastOrNull()
-                        backStack.add(PlaceDetail(location.id))
-                    },
-                    onAddAdventureClick = onAddPlace,
-                    onEditAdventure = onEditPlace,
-                    onAddPhoto = onAddPhoto,
-                    // A detail pane holding one sentence of apology is a worse use of half a
-                    // tablet than simply showing the first place. On a phone there is no second
-                    // pane to fill, so nothing opens by itself.
-                    onFirstLoaded = { first ->
-                        if (twoPanes && backStack.size == 1) backStack.add(PlaceDetail(first.id))
-                    },
-                    onPlaceDeleted = { deletedId ->
-                        val kept = backStackWithoutDeleted(backStack.toList(), deletedId)
-                        if (kept.size != backStack.size) {
-                            backStack.clear()
-                            backStack.addAll(kept)
+    val listOnShow = remember { PaneListOnShow() }
+    PaneHidesShellChrome(
+        detailShown = !twoPanes && backStack.lastOrNull() is PlaceDetail && !listOnShow.isOnShow
+    ) {
+        NavDisplay(
+            modifier = modifier,
+            backStack = backStack,
+            // One pane is a scene per page, so the slides above run between them; the list-detail
+            // scene would keep both in one scene and fade its panes itself.
+            sceneStrategies = if (twoPanes) listOf(listDetail) else emptyList(),
+            onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+            transitionSpec = paneTransition(twoPanes),
+            popTransitionSpec = panePopTransition(twoPanes),
+            predictivePopTransitionSpec = panePredictivePopTransition(twoPanes),
+            entryProvider = entryProvider {
+                entry<PlacesList>(
+                    metadata = ListDetailSceneStrategy.listPane(
+                        detailPlaceholder = { PlaceholderPane() }
+                    )
+                ) {
+                    listOnShow.Mark()
+                    LocationListScreen(
+                        onAdventureClick = { location ->
+                            // Replace rather than stack: on two panes the list stays put and only the
+                            // right side changes, so a back press should leave Places, not walk back
+                            // through every place looked at on the way.
+                            if (backStack.lastOrNull() is PlaceDetail) backStack.removeLastOrNull()
+                            backStack.add(PlaceDetail(location.id))
+                        },
+                        onAddAdventureClick = onAddPlace,
+                        onEditAdventure = onEditPlace,
+                        onAddPhoto = onAddPhoto,
+                        // A detail pane holding one sentence of apology is a worse use of half a
+                        // tablet than simply showing the first place. On a phone there is no second
+                        // pane to fill, so nothing opens by itself.
+                        onFirstLoaded = { first ->
+                            if (twoPanes && backStack.size == 1) backStack.add(PlaceDetail(first.id))
+                        },
+                        onPlaceDeleted = { deletedId ->
+                            val kept = backStackWithoutDeleted(backStack.toList(), deletedId)
+                            if (kept.size != backStack.size) {
+                                backStack.clear()
+                                backStack.addAll(kept)
+                            }
                         }
-                    }
-                )
-            }
+                    )
+                }
 
-            entry<PlaceDetail>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
-                AdventureDetailScreenRoute(
-                    locationId = key.locationId,
-                    onBackClick = { backStack.removeLastOrNull() },
-                    onCollectionClick = onCollectionClick,
-                    showBack = !twoPanes,
-                    onEditClick = onEditPlace,
-                    onAddPhotoClick = onAddPhoto,
-                    onAddVisitClick = onAddVisit
-                )
+                entry<PlaceDetail>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
+                    PanePage(twoPanes) {
+                        AdventureDetailScreenRoute(
+                            locationId = key.locationId,
+                            onBackClick = { backStack.removeLastOrNull() },
+                            onCollectionClick = onCollectionClick,
+                            showBack = !twoPanes,
+                            onEditClick = onEditPlace,
+                            onAddPhotoClick = onAddPhoto,
+                            onAddVisitClick = onAddVisit
+                        )
+                    }
+                }
             }
-        }
-    )
+        )
+    }
 }
 
 /** What the right-hand pane shows before anything has been chosen. */

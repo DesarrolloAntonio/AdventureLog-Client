@@ -9,6 +9,7 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -66,34 +67,47 @@ fun WorldPane(
         backStack.add(CountryDetail(code))
     }
 
-    NavDisplay(
-        modifier = modifier,
-        backStack = backStack,
-        sceneStrategies = listOf(listDetail),
-        onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
-        entryProvider = entryProvider {
-            entry<WorldList>(
-                metadata = ListDetailSceneStrategy.listPane(
-                    detailPlaceholder = { CountryPlaceholder() }
-                )
-            ) {
-                WorldScreen(
-                    onCountryClick = ::open,
-                    onMapClick = onMapClick,
-                    selectedCountryCode = if (twoPanes) selected else null,
-                    onFirstLoaded = { code -> if (twoPanes && backStack.size == 1) open(code) }
-                )
-            }
+    val listOnShow = remember { PaneListOnShow() }
+    PaneHidesShellChrome(
+        detailShown = !twoPanes && backStack.lastOrNull() is CountryDetail && !listOnShow.isOnShow
+    ) {
+        NavDisplay(
+            modifier = modifier,
+            backStack = backStack,
+            // One pane is a scene per page, so the slides above run between them; the list-detail
+            // scene would keep both in one scene and fade its panes itself.
+            sceneStrategies = if (twoPanes) listOf(listDetail) else emptyList(),
+            onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+            transitionSpec = paneTransition(twoPanes),
+            popTransitionSpec = panePopTransition(twoPanes),
+            predictivePopTransitionSpec = panePredictivePopTransition(twoPanes),
+            entryProvider = entryProvider {
+                entry<WorldList>(
+                    metadata = ListDetailSceneStrategy.listPane(
+                        detailPlaceholder = { CountryPlaceholder() }
+                    )
+                ) {
+                    listOnShow.Mark()
+                    WorldScreen(
+                        onCountryClick = ::open,
+                        onMapClick = onMapClick,
+                        selectedCountryCode = if (twoPanes) selected else null,
+                        onFirstLoaded = { code -> if (twoPanes && backStack.size == 1) open(code) }
+                    )
+                }
 
-            entry<CountryDetail>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
-                CountryDetailScreen(
-                    countryCode = key.countryCode,
-                    onNavigateBack = { backStack.removeLastOrNull() },
-                    showBack = !twoPanes
-                )
+                entry<CountryDetail>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
+                    PanePage(twoPanes) {
+                        CountryDetailScreen(
+                            countryCode = key.countryCode,
+                            onNavigateBack = { backStack.removeLastOrNull() },
+                            showBack = !twoPanes
+                        )
+                    }
+                }
             }
-        }
-    )
+        )
+    }
 }
 
 /** The right-hand pane before a country has been chosen. */
