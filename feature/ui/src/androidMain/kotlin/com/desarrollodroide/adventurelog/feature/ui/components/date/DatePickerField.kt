@@ -13,11 +13,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
@@ -51,7 +55,7 @@ import kotlinx.datetime.toLocalDateTime
  *
  * [value] and what [onValueChange] receives are `yyyy-MM-dd`, or "" for no date.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 fun DatePickerField(
     label: String,
@@ -71,9 +75,11 @@ fun DatePickerField(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 16.dp, bottom = 4.dp)
         )
+        // Outlined like the form's text fields, so a date reads as one more field of the form.
         Surface(
-            shape = RoundedCornerShape(30.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = RoundedCornerShape(14.dp),
+            color = androidx.compose.ui.graphics.Color.Transparent,
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(55.dp)
@@ -98,7 +104,7 @@ fun DatePickerField(
                     modifier = Modifier.weight(1f)
                 )
                 if (day.isNotBlank()) {
-                    IconButton(onClick = { onValueChange("") }) {
+                    IconButton(onClick = { onValueChange("") }, shapes = IconButtonDefaults.shapes()) {
                         Icon(Icons.Default.Close, contentDescription = "Clear $label", modifier = Modifier.size(20.dp))
                     }
                 }
@@ -120,7 +126,7 @@ fun DatePickerField(
         DatePickerDialog(
             onDismissRequest = { picking = false },
             confirmButton = {
-                TextButton(onClick = {
+                Button(shapes = ButtonDefaults.shapes(), onClick = {
                     picking = false
                     // The picker's millis are that day at 00:00 UTC; read in UTC, never the device zone.
                     state.selectedDateMillis?.let {
@@ -128,7 +134,7 @@ fun DatePickerField(
                     }
                 }) { Text("OK") }
             },
-            dismissButton = { TextButton(onClick = { picking = false }) { Text("Cancel") } }
+            dismissButton = { TextButton(onClick = { picking = false }, shapes = ButtonDefaults.shapes()) { Text("Cancel") } }
         ) {
             DatePicker(state = state)
         }

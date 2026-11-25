@@ -2,28 +2,33 @@ package com.desarrollodroide.adventurelog.feature.login.ui.screen
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Terrain
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.feature.login.ui.components.KeyboardDismissible
 import com.desarrollodroide.adventurelog.feature.login.ui.components.LoginButton
 import com.desarrollodroide.adventurelog.feature.login.ui.components.PasswordTextField
@@ -35,6 +40,7 @@ import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import com.desarrollodroide.adventurelog.feature.login.ui.navigation.LoginNavigator
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
 @Composable
 fun LoginScreenRoute(
@@ -132,6 +138,10 @@ internal fun LoginScreen(
     }
 }
 
+/**
+ * The sign-in page as the canvas draws it: a fjord at sunset in a rounded frame with the app's
+ * mark, "Your travels, on your server" large, then the form on the page itself - no card.
+ */
 @Composable
 fun ContentViews(
     loginFormState: LoginFormState,
@@ -141,193 +151,153 @@ fun ContentViews(
     onCheckedRememberSessionChange: (Boolean) -> Unit,
     onClickLoginButton: () -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-    val backgroundPrimary = getAdjustedPrimary()
+    val colors = MaterialTheme.colorScheme
+    val uriHandler = LocalUriHandler.current
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundPrimary)
-    ) {
-        BubbleBackground(Modifier.fillMaxWidth(), maxHeightFactor = 0.45f)
-
-        // Scrolls, and keeps clear of the status bar (and, inside the card, the keyboard): in landscape the Login
-        // button sat below the bottom of the screen with no way to reach it (measured). At least
-        // the window's height, so the form still sits at the bottom when it fits.
-        BoxWithConstraints(Modifier.fillMaxSize()) {
-        val windowHeight = maxHeight
+    // A Surface, not a painted Box: it also sets the content colour, or the headline came out
+    // black on the dark page.
+    Surface(Modifier.fillMaxSize(), color = colors.background) {
+    BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        // A third of the window at most: in landscape the whole picture left no room for the
+        // form above the keyboard.
+        val heroHeight = minOf(300.dp, maxHeight * 0.36f)
+        // Scrolls and keeps clear of the bars and the keyboard: in landscape the button sat below
+        // the bottom of the screen with no way to reach it (measured).
         Column(
             modifier = Modifier
-                .background(Color.Transparent)
+                .widthIn(max = 520.dp)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .heightIn(min = windowHeight)
-                .statusBarsPadding(),
-            verticalArrangement = Arrangement.Bottom
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(top = 16.dp, bottom = 24.dp)
         ) {
-            Text(
-                modifier = Modifier.padding(horizontal = 30.dp),
-                text = "Hello!",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold
+            FjordHero(
+                Modifier
+                    .padding(horizontal = 12.dp)
+                    .fillMaxWidth()
+                    .height(heroHeight)
             )
-
-            Text(
-                text = "Welcome to AdventureLog",
-                style = MaterialTheme.typography.titleMedium,
-                color = colorScheme.onPrimary,
-                modifier = Modifier
-                    .padding(bottom = 24.dp)
-                    .padding(horizontal = 30.dp)
-            )
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(
-                    topStart = 40.dp,
-                    topEnd = 40.dp,
-                    bottomStart = 0.dp,
-                    bottomEnd = 0.dp
-                ),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorScheme.surfaceVariant
+            Column(Modifier.padding(horizontal = 20.dp)) {
+                Spacer(Modifier.height(20.dp))
+                Text(
+                    text = buildAnnotatedString {
+                        append("Your travels,\non ")
+                        withStyle(SpanStyle(color = colors.primary)) { append("your") }
+                        append(" server")
+                    },
+                    style = AdventureType.display(50.sp),
                 )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp, vertical = 16.dp)
-                        .fillMaxWidth()
-                        // Inside the card, so the card's colour runs down behind the keyboard
-                        // rather than leaving a strip of the backdrop between the two.
-                        .imePadding(),
-                    verticalArrangement = Arrangement.Bottom,
-                ) {
-                    Text(
-                        text = "Login",
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = "Sign in to the AdventureLog instance you host.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(18.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     ServerUrlTextField(
                         serverUrl = loginFormState.serverUrl,
                         serverErrorState = loginFormState.urlError,
                         onValueChange = onServerUrlChange,
                         onClick = { }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                     UserTextField(
                         user = loginFormState.userName,
                         userError = loginFormState.userNameError,
                         onUserChange = onUserNameChange
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
                     PasswordTextField(
                         password = loginFormState.password,
                         passwordError = loginFormState.passwordError,
                         onPasswordChange = onPasswordChange,
                         onDone = onClickLoginButton
                     )
-                    Spacer(Modifier.size(10.dp))
-                    LoginButton(
-                        onClickLoginButton = onClickLoginButton
-                    )
-                    RememberSessionSection(
-                        checked = loginFormState.rememberSession,
-                        onCheckedChange = onCheckedRememberSessionChange
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp)
-                            .padding(horizontal = 10.dp)
-                            .padding(bottom = 16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(buildAnnotatedString {
-                            append("View instructions guide in ")
-                            withLink(LinkAnnotation.Url(url = "https://github.com/seanmorley15/AdventureLog")) {
-                                withStyle(style = SpanStyle(textDecoration = TextDecoration.Underline)) {
-                                    append("website")
-                                }
-                            }
-                        })
-                    }
+                }
+                RememberSessionSection(
+                    checked = loginFormState.rememberSession,
+                    onCheckedChange = onCheckedRememberSessionChange
+                )
+                Spacer(Modifier.height(6.dp))
+                LoginButton(onClickLoginButton = onClickLoginButton)
+                TextButton(
+                    onClick = { uriHandler.openUri("https://github.com/seanmorley15/AdventureLog") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                ) {
+                    Text("How do I set up a server?", fontWeight = FontWeight.Bold)
                 }
             }
         }
+    }
+    }
+}
+
+/**
+ * A fjord at sunset, drawn rather than shipped as an image: the canvas's illustration, its
+ * coordinates on a 390 x 300 board scaled to fill the frame. The same in both themes - it is a
+ * picture, not chrome.
+ */
+@Composable
+private fun FjordHero(modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.colorScheme
+    val chip = if (colors.background.luminance() < 0.5f) colors.surfaceContainer else colors.surfaceContainerLowest
+    Box(modifier.clip(RoundedCornerShape(36.dp))) {
+        Canvas(
+            Modifier
+                .matchParentSize()
+                .semantics { contentDescription = "Illustration of a fjord at sunset" }
+        ) {
+            // "slice": scale to cover, centred.
+            val k = maxOf(size.width / 390f, size.height / 300f)
+            val dx = (size.width - 390f * k) / 2f
+            val dy = (size.height - 300f * k) / 2f
+            fun p(x: Float, y: Float) = Offset(dx + x * k, dy + y * k)
+            fun poly(vararg xy: Float) = Path().apply {
+                moveTo(p(xy[0], xy[1]).x, p(xy[0], xy[1]).y)
+                var i = 2
+                while (i < xy.size) { val o = p(xy[i], xy[i + 1]); lineTo(o.x, o.y); i += 2 }
+                close()
+            }
+            drawRect(
+                Brush.verticalGradient(
+                    0f to Color(0xFF7F9BC4), 0.6f to Color(0xFFEDB59B), 1f to Color(0xFFF8D9B4),
+                    startY = dy, endY = dy + 300f * k,
+                )
+            )
+            drawCircle(Color(0xFFFFF3DE), radius = 18f * k, center = p(290f, 150f))
+            drawPath(poly(0f, 170f, 50f, 140f, 104f, 160f, 170f, 124f, 236f, 156f, 300f, 130f, 352f, 150f, 390f, 136f, 390f, 300f, 0f, 300f), Color(0xFFB49AA6).copy(alpha = 0.8f))
+            drawPath(poly(0f, 200f, 70f, 168f, 140f, 192f, 214f, 160f, 282f, 188f, 340f, 172f, 390f, 182f, 390f, 300f, 0f, 300f), Color(0xFF7A7389))
+            drawRect(Color(0xFF3E5A72), topLeft = p(0f, 214f), size = Size(390f * k, 86f * k))
+            drawPath(poly(0f, 300f, 0f, 210f, 140f, 194f, 258f, 186f, 270f, 196f, 168f, 212f, 104f, 300f), Color(0xFF2F2A2A))
+            drawCircle(Color(0xFF141414), radius = 3f * k, center = p(250f, 176f))
+        }
+        Row(
+            Modifier
+                .padding(16.dp)
+                .height(36.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(chip)
+                .padding(start = 6.dp, end = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Box(
+                Modifier
+                    .size(26.dp)
+                    .clip(RoundedCornerShape(9.dp))
+                    .background(colors.primary),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Default.Terrain, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(16.dp))
+            }
+            Text("AdventureLog", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colors.onSurface)
         }
     }
 }
 
-@Composable
-fun getAdjustedPrimary(): Color {
-    val colorScheme = MaterialTheme.colorScheme
-    val isDarkTheme = isSystemInDarkTheme()
-
-    return if (isDarkTheme) {
-        // Darken the primary color slightly in dark mode
-        colorScheme.primary.copy(
-            red = colorScheme.primary.red * 0.6f,
-            green = colorScheme.primary.green * 0.6f,
-            blue = colorScheme.primary.blue * 0.6f
-        )
-    } else {
-        colorScheme.primary
-    }
-}
-
-@Composable
-fun BubbleBackground(
-    modifier: Modifier = Modifier,
-    maxHeightFactor: Float = 0.5f
-) {
-    val colorScheme = MaterialTheme.colorScheme
-
-    val lighterPrimary = lerp(colorScheme.primary, Color.White, 0.3f)
-    val lighterSecondary = lerp(colorScheme.secondary, Color.White, 0.3f)
-    val lighterTertiary = lerp(colorScheme.tertiary, Color.White, 0.3f)
-
-    Canvas(modifier = modifier.fillMaxSize()) {
-        val width = size.width
-        val height = size.height * maxHeightFactor
-
-        drawCircle(
-            color = lighterPrimary.copy(alpha = 0.6f),
-            radius = width * 0.25f,
-            center = Offset(x = width * 0.2f, y = height * 0.2f)
-        )
-        drawCircle(
-            color = lighterPrimary.copy(alpha = 0.2f),
-            radius = width * 0.3f,
-            center = Offset(x = width * 0.2f, y = height * 0.2f)
-        )
-
-        drawCircle(
-            color = lighterSecondary.copy(alpha = 0.5f),
-            radius = width * 0.2f,
-            center = Offset(x = width * 0.8f, y = height * 0.15f)
-        )
-        drawCircle(
-            color = lighterSecondary.copy(alpha = 0.2f),
-            radius = width * 0.25f,
-            center = Offset(x = width * 0.8f, y = height * 0.15f)
-        )
-
-        drawCircle(
-            color = lighterTertiary.copy(alpha = 0.4f),
-            radius = width * 0.18f,
-            center = Offset(x = width * 0.5f, y = height * 0.35f)
-        )
-        drawCircle(
-            color = lighterTertiary.copy(alpha = 0.15f),
-            radius = width * 0.22f,
-            center = Offset(x = width * 0.5f, y = height * 0.35f)
-        )
-    }
-}
 
 // Previews
 @org.jetbrains.compose.ui.tooling.preview.Preview

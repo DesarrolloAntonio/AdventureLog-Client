@@ -14,16 +14,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.CollectionStats
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
 /**
  * The collection as figures.
@@ -90,6 +93,7 @@ fun CollectionStatsView(
 
 private data class StatEntry(val label: String, val value: String, val caption: String)
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ProgressCard(stats: CollectionStats) {
     StatsCard {
@@ -98,37 +102,29 @@ private fun ProgressCard(stats: CollectionStats) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Visited",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
+            Text(text = "Visited", style = AdventureType.display(24.sp))
             Text(
                 text = "${stats.placesVisited} / ${stats.placesTotal}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = AdventureType.display(24.sp),
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
-        // Drawn rather than a LinearProgressIndicator: at 0/0 the indicator still paints a track
-        // that reads as "nothing done yet" for a collection where there is nothing to do.
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            if (stats.visitedFraction > 0f) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(stats.visitedFraction)
-                        .height(10.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-            }
+        // The wave only when there is something to visit: at 0/0 an indicator still paints a
+        // track that reads as "nothing done yet" for a collection where there is nothing to do.
+        if (stats.placesTotal > 0) {
+            LinearWavyProgressIndicator(
+                progress = { stats.visitedFraction },
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            )
         }
 
         Text(
@@ -147,11 +143,7 @@ private fun ProgressCard(stats: CollectionStats) {
 @Composable
 private fun GeographyCard(stats: CollectionStats) {
     StatsCard {
-        Text(
-            text = "Where it went",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
+        Text(text = "Where it went", style = AdventureType.display(24.sp))
         GeographyGroup("Countries", stats.countries)
         GeographyGroup("Regions", stats.regions)
         GeographyGroup("Cities", stats.cities)
@@ -192,11 +184,7 @@ private fun GeographyGroup(title: String, names: List<String>) {
 @Composable
 private fun StatGrid(title: String, entries: List<StatEntry>) {
     StatsCard {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
+        Text(text = title, style = AdventureType.display(24.sp))
         // Whatever divides the group evenly, so no tile is left alone on a line the width of the
         // card - four go two by two, six go three by three.
         FlowRow(
@@ -219,10 +207,10 @@ private fun StatTile(entry: StatEntry, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                RoundedCornerShape(14.dp)
+                MaterialTheme.colorScheme.surfaceContainerHigh,
+                RoundedCornerShape(16.dp)
             )
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
@@ -232,14 +220,13 @@ private fun StatTile(entry: StatEntry, modifier: Modifier = Modifier) {
         )
         Text(
             text = entry.value,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
+            style = AdventureType.display(32.sp),
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = entry.caption,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -248,7 +235,8 @@ private fun StatTile(entry: StatEntry, modifier: Modifier = Modifier) {
 private fun StatsCard(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        // Lowest, as the collection page's own cards are.
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),

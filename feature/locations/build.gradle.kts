@@ -35,6 +35,10 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
         androidInstrumentedTest.dependencies {
+            // Fixtures and the model: the instrumented set does not inherit commonTest's.
+            implementation(projects.core.testing)
+            implementation(projects.core.model)
+            implementation(libs.coil.compose)
             implementation(compose.uiTest)
             implementation(libs.androidx.test.runner)
             implementation(libs.junit)

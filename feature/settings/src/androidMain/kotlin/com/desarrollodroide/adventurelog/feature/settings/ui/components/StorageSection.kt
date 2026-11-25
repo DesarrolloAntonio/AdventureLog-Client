@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,14 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.MediaUsage
 import com.desarrollodroide.adventurelog.core.model.formatBytes
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.StorageSectionState
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsRow
 import com.desarrollodroide.adventurelog.feature.ui.components.settings.SettingsGroup
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StorageSection(
     state: StorageSectionState,
@@ -40,10 +45,10 @@ fun StorageSection(
         val usage = state.usage
         when {
             state.isLoading && usage == null -> Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
+                LoadingIndicator(Modifier.size(40.dp))
             }
 
             usage == null -> SettingsRow(
@@ -51,7 +56,7 @@ fun StorageSection(
                 supporting = state.error,
                 tint = MaterialTheme.colorScheme.error,
                 showChevron = false,
-                trailing = { TextButton(onClick = onRetry) { Text("Retry") } }
+                trailing = { TextButton(onClick = onRetry, shapes = ButtonDefaults.shapes()) { Text("Retry") } }
             )
 
             else -> UsageBody(usage)
@@ -64,7 +69,8 @@ fun StorageSection(
  *
  * Three separate bars scaled against the largest slice said nothing useful: images are always
  * nearly all of it, so one bar was always full and the other two were always hairlines. Slices of
- * a single bar at least show the proportion honestly.
+ * a single bar at least show the proportion honestly. Each slice is its own rounded segment, split
+ * by the same thin gap the settings rows use.
  */
 @Composable
 private fun UsageBody(usage: MediaUsage) {
@@ -89,8 +95,7 @@ private fun UsageBody(usage: MediaUsage) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
         Text(
             text = formatBytes(usage.totalBytes),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            style = AdventureType.display(34.sp)
         )
         Text(
             text = buildString {
@@ -108,8 +113,8 @@ private fun UsageBody(usage: MediaUsage) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(12.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clip(CircleShape),
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             slices.filter { it.bytes > 0 }.forEach { slice ->
                 // A slice worth a few kilobytes next to a few hundred megabytes rounds to nothing;
@@ -119,12 +124,20 @@ private fun UsageBody(usage: MediaUsage) {
                     modifier = Modifier
                         .weight(fraction)
                         .fillMaxHeight()
+                        .clip(RoundedCornerShape(4.dp))
                         .background(slice.color)
                 )
             }
             val used = slices.sumOf { it.bytes }
             if (used < scale) {
-                Box(Modifier.weight((scale - used).toFloat() / scale.toFloat()))
+                // What is left of the limit is a segment of its own, in the track colour.
+                Box(
+                    Modifier
+                        .weight((scale - used).toFloat() / scale.toFloat())
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                )
             }
         }
 
@@ -144,7 +157,7 @@ private fun LegendRow(slice: Slice) {
         Box(
             modifier = Modifier
                 .size(10.dp)
-                .clip(RoundedCornerShape(3.dp))
+                .clip(CircleShape)
                 .background(slice.color)
         )
         Spacer(Modifier.width(12.dp))

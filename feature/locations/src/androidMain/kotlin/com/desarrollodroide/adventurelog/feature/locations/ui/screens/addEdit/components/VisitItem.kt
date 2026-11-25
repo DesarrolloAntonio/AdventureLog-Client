@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,22 +11,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.common.utils.formatDateForDisplay
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 
+/** One visit as a row of the form's segmented visits block; [shape] is its place in that block. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun VisitItem(
     visit: VisitFormData,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    shape: Shape = RoundedCornerShape(20.dp)
 ) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        )
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         Column(
             modifier = Modifier
@@ -84,36 +86,17 @@ internal fun VisitItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = visit.timezone,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                
+                VisitBadge(
+                    text = visit.timezone,
+                    container = MaterialTheme.colorScheme.secondaryContainer,
+                    content = MaterialTheme.colorScheme.onSecondaryContainer
+                )
                 if (visit.isAllDay) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "All day",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
+                    VisitBadge(
+                        text = "All day",
+                        container = MaterialTheme.colorScheme.tertiaryContainer,
+                        content = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
                 }
             }
             
@@ -134,6 +117,7 @@ internal fun VisitItem(
             ) {
                 TextButton(
                     onClick = onEdit,
+                    shapes = ButtonDefaults.shapes(),
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary
                     )
@@ -149,6 +133,7 @@ internal fun VisitItem(
                 
                 TextButton(
                     onClick = onDelete,
+                    shapes = ButtonDefaults.shapes(),
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
                     )
@@ -163,5 +148,17 @@ internal fun VisitItem(
                 }
             }
         }
+    }
+}
+
+/** A small tonal pill under the dates: the visit's timezone, "All day". */
+@Composable
+private fun VisitBadge(text: String, container: Color, content: Color) {
+    Surface(shape = RoundedCornerShape(8.dp), color = container, contentColor = content) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+        )
     }
 }

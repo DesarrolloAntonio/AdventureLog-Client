@@ -59,7 +59,6 @@ fun AdventureItem(
     onRemoveFromCollection: (() -> Unit)? = null
 ) {
     var showDropdownMenu by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val imageLoader = LocalImageLoader.current
     val hasImage = location.images.firstOrNull()?.image?.isNotEmpty() == true
@@ -226,7 +225,7 @@ fun AdventureItem(
                             AddChip(text = "Category", onClick = onEdit, color = ink)
                         }
                         if (!location.isPublic) {
-                            MetaChip(text = "\uD83D\uDD12 Private", tone = ChipTone.WARNING)
+                            MetaChip(text = "\uD83D\uDD12 Private", tone = ChipTone.NEUTRAL) // the default, not a warning
                         }
                         val visibleCollections = collectionNames.take(2)
                         visibleCollections.forEach { name ->
@@ -280,45 +279,19 @@ fun AdventureItem(
         }
     }
     
-    if (showDropdownMenu) {
-        LocationActionsSheet(
-            locationName = location.name,
-            locationPlace = location.location,
-            onDismiss = { showDropdownMenu = false },
-            onOpenDetails = { showDropdownMenu = false; onOpenDetails() },
-            onEdit = { showDropdownMenu = false; onEdit() },
-            onDuplicate = { showDropdownMenu = false; onDuplicate() },
-            onShare = { showDropdownMenu = false; onShare() },
-            onManageCollections = { showDropdownMenu = false; onManageCollections() },
-            onDelete = { showDropdownMenu = false; showDeleteDialog = true },
-            isOwner = isOwner,
-            onRemoveFromCollection = onRemoveFromCollection?.let { remove -> { showDropdownMenu = false; remove() } }
-        )
-    }
-
-    // Delete confirmation dialog
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete place") },
-            text = { Text("Are you sure you want to delete \"${location.name}\"? This action cannot be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteDialog = false
-                    }
-                ) {
-                    Text("Delete", color = Color(0xFFFF3B30))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
+    PlaceActions(
+        location = location,
+        visible = showDropdownMenu,
+        onDismiss = { showDropdownMenu = false },
+        onOpenDetails = onOpenDetails,
+        onEdit = onEdit,
+        onDuplicate = onDuplicate,
+        onShare = onShare,
+        onManageCollections = onManageCollections,
+        onDelete = onDelete,
+        isOwner = isOwner,
+        onRemoveFromCollection = onRemoveFromCollection,
+    )
 }
 
 // Previews

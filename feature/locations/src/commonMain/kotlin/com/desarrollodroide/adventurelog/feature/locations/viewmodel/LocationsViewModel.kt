@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.locations.viewmodel
 
+import com.desarrollodroide.adventurelog.feature.locations.model.countryGroups
+import com.desarrollodroide.adventurelog.feature.locations.model.CountryGroup
+import com.desarrollodroide.adventurelog.core.domain.usecase.GetAllLocationsUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.paging.PagingData
@@ -59,7 +62,9 @@ class LocationsViewModel(
     private val getShareImageUseCase: GetShareImageUseCase,
     private val platformFiles: PlatformFiles,
     private val getUserStatsUseCase: GetUserStatsUseCase,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    /** The whole library in one call, for the one order the server cannot give: by country. */
+    private val getAllLocationsUseCase: GetAllLocationsUseCase
 ) : ViewModel() {
 
     private val _actionMessage = MutableStateFlow<String?>(null)
@@ -84,6 +89,24 @@ class LocationsViewModel(
 
     private val _filters = MutableStateFlow(LocationFilters())
     val filters: StateFlow<LocationFilters> = _filters.asStateFlow()
+
+    /** The whole library, fetched when "Country" becomes the order; null until then. */
+    private val _allLocations = MutableStateFlow<Either<String, List<Location>>?>(null)
+
+    val countryGroups: StateFlow<CountryGroupsState?> = combine(
+        _filters, _actualSearchQuery, _allLocations
+    ) { filters, query, all ->
+        if (filters.sortField != LocationSortField.COUNTRY) null
+        else when (all) {
+            null -> CountryGroupsState.Loading
+            is Either.Left -> CountryGroupsState.Error(all.value)
+            is Either.Right -> CountryGroupsState.Ready(countryGroups(all.value, filters, query))
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    private fun loadAllLocations() {
+        viewModelScope.launch { _allLocations.value = getAllLocationsUseCase() }
+    }
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -126,6 +149,13 @@ class LocationsViewModel(
     
     private val _categoryOperationState = MutableStateFlow<CategoryOperationState>(CategoryOperationState.Idle)
     val categoryOperationState: StateFlow<CategoryOperationState> = _categoryOperationState.asStateFlow()
+
+    /** The list grouped under countries, while "Country" is the order; null for every other. */
+    sealed interface CountryGroupsState {
+        data object Loading : CountryGroupsState
+        data class Ready(val groups: List<CountryGroup>) : CountryGroupsState
+        data class Error(val message: String) : CountryGroupsState
+    }
 
     sealed class CategoriesState {
         data object Loading : CategoriesState()
@@ -218,7 +248,13 @@ class LocationsViewModel(
     }
 
     fun onFiltersChanged(filters: LocationFilters) {
+        val toCountry = filters.sortField == LocationSortField.COUNTRY && _filters.value.sortField != LocationSortField.COUNTRY
         _filters.value = filters
+        // Fresh each time it is chosen: what was added since the last time shows.
+        if (toCountry) {
+            _allLocations.value = null
+            loadAllLocations()
+        }
     }
 
     fun showFilters() {
@@ -231,6 +267,7 @@ class LocationsViewModel(
 
     fun refresh() {
         _isRefreshing.value = true
+        if (_filters.value.sortField == LocationSortField.COUNTRY) loadAllLocations()
         // The header reads a separate stats call, so a list that has just gained or lost a place
         // would otherwise keep reporting the old number.
         loadLibraryCounts()

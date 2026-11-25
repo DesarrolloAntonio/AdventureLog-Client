@@ -112,7 +112,7 @@ abstract class CollectionsRepositoryStub : CollectionsRepository {
         date: String?,
         order: Int
     ): Either<ApiResponse, ItineraryEntry> = unused()
-    override suspend fun deleteItineraryEntry(entryId: String): Either<ApiResponse, Unit> = unused()
+    override suspend fun deleteItineraryEntry(collectionId: String, entryId: String): Either<ApiResponse, Unit> = unused()
     override suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>> = unused()
     override suspend fun deleteCollection(collectionId: String): Either<ApiResponse, Unit> = unused()
     override suspend fun duplicateCollection(collectionId: String): Either<ApiResponse, Collection> = unused()

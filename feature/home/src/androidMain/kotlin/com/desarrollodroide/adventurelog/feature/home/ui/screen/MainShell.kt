@@ -1,5 +1,17 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import androidx.compose.material3.FloatingActionButton
+import com.desarrollodroide.adventurelog.feature.ui.components.ShellAction
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellRailActionHost
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellTopOverlay
 import com.desarrollodroide.adventurelog.feature.calendar.viewmodel.EventTarget
 import androidx.compose.foundation.layout.consumeWindowInsets
 import kotlinx.coroutines.withContext
@@ -8,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
 import com.desarrollodroide.adventurelog.core.common.navigation.NavigationRoutes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,9 +31,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.window.core.layout.WindowWidthSizeClass
+import com.desarrollodroide.adventurelog.feature.home.ui.components.MainToolbarRow
+import com.desarrollodroide.adventurelog.feature.home.ui.components.rememberToolbarScrollState
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellAppBarExpanded
+import com.desarrollodroide.adventurelog.feature.ui.components.ShellActionHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -32,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.desarrollodroide.adventurelog.core.model.UserDetails
@@ -39,7 +62,7 @@ import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
-import com.desarrollodroide.adventurelog.feature.home.ui.components.homeNavigationItems
+import com.desarrollodroide.adventurelog.feature.home.ui.components.HomeRailItems
 import com.desarrollodroide.adventurelog.feature.home.ui.components.ProfileMenu
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
@@ -59,6 +82,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Terrain
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Home
@@ -75,7 +99,27 @@ import com.desarrollodroide.adventurelog.resources.Res
 import androidx.navigation.compose.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
-import com.desarrollodroide.adventurelog.feature.ui.navigation.AnimatedDirectionalNavHost
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellTitleOverlap
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.util.lerp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.navigation.NavBackStackEntry
+import com.desarrollodroide.adventurelog.feature.home.ui.navigation.isSectionSwitch
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.feature.calendar.navigation.calendarScreen
@@ -146,9 +190,17 @@ fun MainShellRoute(
     )
 }
 
+/** Screens that carry a search field of their own, where the bar's global search is left out. */
+private val ScreensWithOwnSearch = setOf(
+    CurrentScreen.PLACES, CurrentScreen.COLLECTIONS, CurrentScreen.TRAVEL, CurrentScreen.USERS,
+)
+
 /**
  * Helper function to reset scroll behavior
  */
+/** Passes nothing to the shell's bars: for while a page with bars of its own is on show. */
+private val NoShellScroll = object : NestedScrollConnection {}
+
 @OptIn(ExperimentalMaterial3Api::class)
 private fun resetScrollBehavior(scrollBehavior: TopAppBarScrollBehavior) {
     scrollBehavior.state.contentOffset = 0f
@@ -247,7 +299,13 @@ fun HomeScreenContent(
     // Set by Home's invitation banner and cleared once Collections has opened on Invites.
     var openCollectionInvites by rememberSaveable { mutableStateOf(false) }
 
+    // The screen on show hands its main action to the phone's toolbar. Moving to another
+    // destination takes it back at once: left to the old screen, the "+" lingered for the whole
+    // transition and only then shrank away. The new screen hands over its own as it appears.
+    val shellActions = remember { ShellActionHost() }
+
     val navigateTo: (CurrentScreen) -> Unit = { screen ->
+        if (screen != currentScreen) shellActions.action = null
         navController.navigate(screen.route) {
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
@@ -283,7 +341,57 @@ fun HomeScreenContent(
         )
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    val compact = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass ==
+        WindowWidthSizeClass.COMPACT
+    // Map runs edge to edge, as the canvas draws it: no bar, and a floating search pill instead.
+    val mapFullBleed = currentScreen == CurrentScreen.MAP
+
+    // The phone's floating row: it slides away while content scrolls down, and carries the main
+    // action of the screen on show ("Add a place") beside the destinations.
+    val toolbarScroll = rememberToolbarScrollState()
+    LaunchedEffect(currentScreen) { toolbarScroll.show() }
+    // The title and the toolbar step aside for a page with bars of its own, and come back, over
+    // the same 300ms as the page's slide. They used to vanish and reappear between two frames,
+    // and the title's height - the content's top padding - jumped with them.
+    // A screen's hold ends once its back stack entry is popped - at the start of Back, while it
+    // is still sliding out - rather than when it leaves composition at the end.
+    val backStack by navController.currentBackStack.collectAsState()
+    val isGone: (Any?) -> Boolean = { owner -> owner is NavBackStackEntry && owner !in backStack }
+    val chromeShown = !(compact && shellActions.hidesChrome(isGone))
+    val chromeFraction by animateFloatAsState(
+        targetValue = if (chromeShown) 1f else 0f,
+        animationSpec = tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing),
+        label = "shellChrome",
+    )
+    // Who put them away decides how: a pane's page stands in the title's place, so the title only
+    // fades over it; a form slides in below it, so the title folds away to the status bar. The
+    // answer holds while they come back, until they are fully back.
+    val lastInPlace = remember { mutableStateOf(false) }
+    val titleInPlace = if (!chromeShown) shellActions.hidesChromeInPlace(isGone) else lastInPlace.value
+    SideEffect { lastInPlace.value = titleInPlace }
+    // A page with bars of its own scrolls too. Its scrolling is kept from the shell's title while
+    // that is put away - back on the list, the title is as the list left it, folded or open. A
+    // form's return still opens it, as before.
+    LaunchedEffect(chromeShown) {
+        if (chromeShown) {
+            toolbarScroll.show()
+            if (!titleInPlace) resetScrollBehavior(scrollBehavior)
+        }
+    }
+    val titleScroll = if (chromeShown) scrollBehavior.nestedScrollConnection else NoShellScroll
+
+    // Read by the screens' pull-to-refresh: a downward drag opens the title first, then refreshes.
+    val appBarExpanded = remember(scrollBehavior) { { scrollBehavior.state.heightOffset >= -0.5f } }
+    CompositionLocalProvider(
+        LocalShellActionHost provides if (compact) shellActions else null,
+        LocalShellRailActionHost provides if (compact) null else shellActions,
+        LocalShellAppBarExpanded provides appBarExpanded,
+    ) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .then(if (compact) Modifier.nestedScroll(if (chromeShown) toolbarScroll.connection else NoShellScroll) else Modifier)
+    ) {
         // Flat, the redesign's #F5FAFB - the theme's own surface.
         //
         // This was a gradient mixed from the palette's containers, which was the right answer when
@@ -297,27 +405,58 @@ fun HomeScreenContent(
                 .background(MaterialTheme.colorScheme.surface)
         )
 
-            // The five destinations become a bottom bar on a phone and a rail on a tablet.
-            // The suite draws whichever suits the window; nothing below it needs to know which.
+            // The five destinations are a floating toolbar on a phone (drawn below, over the
+            // content) and a rail on anything wider. The suite only ever draws the rail.
+            val suiteType = if (compact) NavigationSuiteType.None else NavigationSuiteType.WideNavigationRailCollapsed
             NavigationSuiteScaffold(
-                navigationSuiteItems = { homeNavigationItems(currentScreen) { navigateTo(it) } },
+                navigationItems = { HomeRailItems(currentScreen, suiteType) { navigateTo(it) } },
+                navigationSuiteType = suiteType,
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                // On a wide window the screen's main action heads the rail, as the canvas draws it:
+                // Add a place on Home and Places, New collection on Collections. A phone carries it
+                // beside its floating toolbar instead.
+                primaryActionContent = {
+                    if (!compact) {
+                        val action = shellActions.action ?: if (currentScreen == CurrentScreen.HOME) {
+                            ShellAction(Icons.Default.Add, "Add a place") {
+                                navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
+                            }
+                        } else null
+                        action?.let { RailAction(it) }
+                    }
+                }
             ) {
             BoxWithConstraints {
             val appBarWidth = maxWidth
             Scaffold(
                 modifier = Modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .nestedScroll(titleScroll)
                     .background(Color.Transparent),  // Ensure Scaffold is transparent
                 topBar = {
+                    // A screen with bars of its own (a place's page) has the shell's put away.
+                    if (!chromeShown && chromeFraction == 0f) return@Scaffold
+                    if (mapFullBleed) return@Scaffold
                     // The bar is transparent, so insetting it simply moves the title and the
                     // actions onto the same left and right edge as the content below. Without
                     // this the greeting starts at the window edge while everything under it
                     // starts 120dp further in, which is one width too many for one screen.
                     val gutter = ((appBarWidth - MaxContentWidth) / 2).coerceAtLeast(0.dp)
+                    // While it comes and goes the bar folds down to the status bar's height, which
+                    // is what an empty slot pads the content by: no jump at either end.
+                    val statusBarTop = WindowInsets.statusBars.getTop(LocalDensity.current)
                     TopAppBar(
-                        modifier = Modifier.padding(horizontal = gutter),
+                        modifier = Modifier
+                            .clipToBounds()
+                            .layout { measurable, constraints ->
+                                val bar = measurable.measure(constraints)
+                                val height = if (titleInPlace) bar.height
+                                    else lerp(statusBarTop.coerceAtMost(bar.height), bar.height, chromeFraction)
+                                layout(bar.width, height) {
+                                    bar.placeWithLayer(0, 0) { alpha = chromeFraction }
+                                }
+                            }
+                            .padding(horizontal = gutter),
                         // Back sits in the bar's own navigation slot. Inside the title it was a
                         // clickable icon 28dp wide, and as an IconButton the title's inset still
                         // clipped it to 38dp (measured) - under the 48dp a finger needs.
@@ -391,50 +530,27 @@ fun HomeScreenContent(
                                     // redesign puts it here rather than in the page, so the
                                     // screen opens on content instead of on a caption.
                                     val screen = CurrentScreen.fromRoute(currentRoute)
-                                    Column {
+                                    if (screen == CurrentScreen.HOME) {
+                                        // Home greets in its own headline, so the bar carries the
+                                        // app's mark and name, as the canvas draws it.
+                                        BrandTitle()
+                                    } else {
+                                        // The canvas's page title: condensed and heavy.
                                         Text(
-                                            text = screen.getTitle(userName),
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            fontWeight = FontWeight.Bold,
+                                            text = screen.title,
+                                            style = AdventureType.display(34.sp),
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
                                         )
-                                        val subtitle = dashboardSubtitle(screen, homeUiState)
-                                        if (subtitle != null) {
-                                            Text(
-                                                text = subtitle,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
                                     }
                                 }
                             }
                         },
                         actions = {
-                            // The redesign puts adding a place in the bar on a wide window, where
-                            // there is room for a labelled button; on a phone the same action is
-                            // the floating button the list screens already carry.
-                            if (currentScreen == CurrentScreen.HOME && appBarWidth >= 1000.dp) {
-                                Button(
-                                    onClick = { navController.navigate(NavigationRoutes.Locations.add) },
-                                    shape = RoundedCornerShape(22.dp),
-                                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("Add place", style = MaterialTheme.typography.labelLarge)
-                                }
-                                Spacer(Modifier.width(12.dp))
-                            }
-
-                            Surface(
+                            // Add a place heads the rail on a wide window; no second copy up here.
+                            // Not on a screen with a search field of its own: two searches one
+                            // above the other read as the same thing twice.
+                            if (currentScreen !in ScreensWithOwnSearch) Surface(
                                 onClick = { searchOpen = true },
                                 shape = CircleShape,
                                 color = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -449,7 +565,7 @@ fun HomeScreenContent(
                                     )
                                 }
                             }
-                            Spacer(Modifier.width(10.dp))
+                            if (currentScreen !in ScreensWithOwnSearch) Spacer(Modifier.width(10.dp))
                             ProfileMenu(
                                 user = userDetails,
                                 userName = userName,
@@ -479,10 +595,14 @@ fun HomeScreenContent(
                 // unspecified and text falls back to black - invisible on the dark theme's
                 // backdrop. The gradient is the background here, so say what sits on it.
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                // Edge to edge on Map: the map itself pads for the bars.
+                contentWindowInsets = if (mapFullBleed) WindowInsets(0) else ScaffoldDefaults.contentWindowInsets,
             ) { innerPadding ->
                 val barsPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding(),
+                    // On a phone the content runs on behind the floating toolbar, which slides away
+                    // while it scrolls down - so a list's last row is uncovered at the end.
                     bottom = innerPadding.calculateBottomPadding()
                 )
                 Box(
@@ -494,26 +614,42 @@ fun HomeScreenContent(
                         // pad for it twice in here.
                         .consumeWindowInsets(barsPadding)
                 ) {
-                    // NavHost to manage the content on each screen with animations
-                    AnimatedDirectionalNavHost(
+                    val titleOverlap = if (compact) {
+                        (barsPadding.calculateTopPadding() - WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+                            .coerceAtLeast(0.dp)
+                    } else 0.dp
+                    CompositionLocalProvider(
+                        LocalShellTopOverlay provides if (mapFullBleed) MapSearchPillClearance else 0.dp,
+                        LocalShellTitleOverlap provides titleOverlap,
+                    ) {
+                    // Changing section fades through: the five tabs and the account menu's
+                    // screens have no order between them, so nothing slides left or right (it
+                    // used to, by tab position, and Home alone faded). Going deeper inside a
+                    // section - a collection, a country, a form - slides forward and back.
+                    fun switching(scope: AnimatedContentTransitionScope<NavBackStackEntry>) =
+                        isSectionSwitch(scope.initialState.destination.route, scope.targetState.destination.route)
+                    NavHost(
                         navController = navController,
                         startDestination = NavigationRoutes.Home.screen,
                         modifier = Modifier.fillMaxSize(),
-                        // Map routes to indices for directional navigation
-                        routeToIndexMapper = { route ->
-                            if (route.startsWith("collection/")) {
-                                CurrentScreen.COLLECTIONS.index
-                            } else {
-                                CurrentScreen.fromRoute(route).index
-                            }
-                        }
+                        enterTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughEnter()
+                            else NavigationAnimations.enterTransition(this)
+                        },
+                        exitTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughExit()
+                            else NavigationAnimations.exitTransition(this)
+                        },
+                        popEnterTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughEnter()
+                            else NavigationAnimations.popEnterTransition(this)
+                        },
+                        popExitTransition = {
+                            if (switching(this)) NavigationAnimations.fadeThroughExit()
+                            else NavigationAnimations.popExitTransition(this)
+                        },
                     ) {
-                        composable(
-                            route = NavigationRoutes.Home.screen,
-                            // Individual animations can be overridden for specific routes
-                            enterTransition = NavigationAnimations.enterTransitionFade,
-                            exitTransition = NavigationAnimations.exitTransitionFade
-                        ) {
+                        composable(route = NavigationRoutes.Home.screen) {
                             // This entry's lifecycle: started again on returning from another tab, a
                             // place's page, an add screen or the background.
                             LifecycleStartEffect(Unit) {
@@ -541,6 +677,8 @@ fun HomeScreenContent(
                                     navigateTo(CurrentScreen.COLLECTIONS)
                                 },
                                 onRetry = onRetryDashboard,
+                                firstName = userDetails?.firstName,
+                                onSeeWorld = { navigateTo(CurrentScreen.TRAVEL) },
                                 onOpenEvent = { target ->
                                     when (target) {
                                         is EventTarget.Place -> onOpenLocationById(target.id)
@@ -584,6 +722,15 @@ fun HomeScreenContent(
                                             location.id,
                                             json.encodeToString(location),
                                             openImages = true
+                                        )
+                                    )
+                                },
+                                onAddVisit = { location ->
+                                    navController.navigate(
+                                        NavigationRoutes.Locations.createEditRoute(
+                                            location.id,
+                                            json.encodeToString(location),
+                                            openVisits = true
                                         )
                                     )
                                 },
@@ -641,6 +788,9 @@ fun HomeScreenContent(
                                     navController.navigate(
                                         NavigationRoutes.Collections.createEditRoute(collection.id)
                                     )
+                                },
+                                onEditCollectionById = { id ->
+                                    navController.navigate(NavigationRoutes.Collections.createEditRoute(id))
                                 },
                                 onAdventureClick = onAdventureClick,
                                 onEditAdventure = { adventure ->
@@ -982,7 +1132,10 @@ fun HomeScreenContent(
 
                         settingsScreen(onLogout = onLogout)
 
-                        worldGraph(navController)
+                        // The World tab is the country list and a country side by side on a tablet.
+                        worldGraph(navController, worldTab = {
+                            WorldPane(onMapClick = { navigateTo(CurrentScreen.MAP) })
+                        })
 
                         mapScreen(
                             navController = navController,
@@ -1004,10 +1157,61 @@ fun HomeScreenContent(
                             }
                         )
                     }
+                    }
+                    if (mapFullBleed) {
+                        // A fade behind the status bar, so the clock never sits on a map label.
+                        Box(
+                            Modifier
+                                .align(Alignment.TopCenter)
+                                .fillMaxWidth()
+                                .windowInsetsTopHeight(WindowInsets.statusBars)
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), Color.Transparent)
+                                    )
+                                )
+                        )
+                        MapSearchPill(
+                            onSearch = { searchOpen = true },
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .statusBarsPadding()
+                                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                        ) {
+                            ProfileMenu(
+                                user = userDetails,
+                                userName = userName,
+                                serverUrl = userDetails?.serverUrl.orEmpty(),
+                                onSettings = { navigateTo(CurrentScreen.SETTINGS) },
+                                onCalendar = { navigateTo(CurrentScreen.CALENDAR) },
+                                onUsers = { navigateTo(CurrentScreen.USERS) },
+                                onLogout = onLogout
+                            )
+                        }
+                    }
                 }
             }
             }
             }
+
+            if (compact) {
+                AnimatedVisibility(
+                    visible = chromeShown,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    enter = slideInVertically(tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing)) { it } +
+                        fadeIn(tween(NavigationAnimations.SLIDE_DURATION_MS)),
+                    exit = slideOutVertically(tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing)) { it } +
+                        fadeOut(tween(NavigationAnimations.SLIDE_DURATION_MS)),
+                ) {
+                    MainToolbarRow(
+                        current = currentScreen,
+                        onSelect = { navigateTo(it) },
+                        action = shellActions.action,
+                        scroll = toolbarScroll,
+                    )
+                }
+            }
+    }
     }
 }
 
@@ -1074,25 +1278,79 @@ private fun HomeScreenErrorPreview() {
 }
 
 
-/**
- * The line under the screen's name: what the numbers say about you right now.
- *
- * Only home has one for the moment - the other screens print their own count inside the page,
- * and two copies of "22 places" one above the other reads as a mistake.
- */
-internal fun dashboardSubtitle(screen: CurrentScreen, state: HomeUiState): String? {
-    if (screen != CurrentScreen.HOME) return null
-    val dashboard = (state as? HomeUiState.Success)?.dashboard ?: return null
-    val visited = dashboard.stats.visitedLocationCount
-    // Ahead means not started: the trip under way is on the card below, not ahead of anyone
-    // (measured: "3 trips ahead" with one in progress and two to come).
-    val trips = dashboard.upcomingTrips.size
-    return listOfNotNull(
-        "$visited places visited",
-        when {
-            trips == 0 -> null
-            trips == 1 -> "1 trip ahead"
-            else -> "$trips trips ahead"
+/** The app's mark - a mountain on the primary colour - and its name. */
+@Composable
+private fun BrandTitle() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Terrain,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(24.dp)
+            )
         }
-    ).joinToString(" \u00b7 ")
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = "AdventureLog",
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1
+        )
+    }
+}
+
+/** The floating search pill's height and the gap under it: where Map's own controls start. */
+private val MapSearchPillClearance = 72.dp
+
+/**
+ * The Map tab's search, floating over the map as the canvas draws it: the whole pill opens the
+ * search, and the account button sits at its end where the bar used to have it.
+ */
+@Composable
+private fun MapSearchPill(
+    onSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+    trailing: @Composable () -> Unit,
+) {
+    Surface(
+        onClick = onSearch,
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        shadowElevation = 6.dp,
+        modifier = modifier
+            .widthIn(max = 560.dp)
+            .fillMaxWidth()
+            .height(56.dp),
+    ) {
+        Row(Modifier.padding(start = 18.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = "Search everything",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            trailing()
+        }
+    }
+}
+
+/** A screen's main action at the head of the rail: the canvas's square teal button. */
+@Composable
+private fun RailAction(action: ShellAction) {
+    FloatingActionButton(
+        onClick = action.onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Icon(action.icon, contentDescription = action.description)
+    }
 }

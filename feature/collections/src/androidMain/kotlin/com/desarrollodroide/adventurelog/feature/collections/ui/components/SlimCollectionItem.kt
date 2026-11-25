@@ -1,24 +1,32 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.PhotoLibrary
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,22 +39,66 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
-import androidx.compose.foundation.layout.Arrangement
 import com.desarrollodroide.adventurelog.core.model.TripStatus
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
+import com.desarrollodroide.adventurelog.feature.ui.components.LocationPlaceholder
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
-import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
-import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
+private val PhotoWidth = 112.dp
+
+private val MONTHS = listOf("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+
+private fun dayMonth(date: String?): Pair<Int, String>? {
+    val parts = date?.substringBefore('T')?.split("-")?.takeIf { it.size == 3 } ?: return null
+    val month = parts[1].toIntOrNull()?.let { MONTHS.getOrNull(it - 1) } ?: return null
+    val day = parts[2].toIntOrNull() ?: return null
+    return day to month
+}
+
+/** "5–9 SEP", "28 SEP – 3 OCT", or "5 SEP" for a single day; null with no start date. */
+fun ticketDateRange(start: String?, end: String?): String? {
+    val (fromDay, fromMonth) = dayMonth(start) ?: return null
+    val to = dayMonth(end)
+    return when {
+        to == null || (to.first == fromDay && to.second == fromMonth) -> "$fromDay $fromMonth"
+        to.second == fromMonth -> "$fromDay–${to.first} $fromMonth"
+        else -> "$fromDay $fromMonth – ${to.first} ${to.second}"
+    }
+}
+
+/**
+ * The ticket's badge: where the trip stands against today. A finished trip or a folder needs none;
+ * an archived one says it is archived, which is what matters on that tab.
+ */
+fun collectionBadge(collection: UltraSlimCollection): String? = when {
+    collection.isArchived -> "ARCHIVED"
+    collection.status == TripStatus.IN_PROGRESS -> "NOW"
+    collection.status == TripStatus.UPCOMING -> when (val days = collection.daysUntilStart) {
+        null -> "PLANNED"
+        0 -> "TODAY"
+        1 -> "TOMORROW"
+        else -> "IN $days DAYS"
+    }
+    else -> null
+}
+
+/**
+ * A collection as a ticket lying on its side, as the canvas draws Collections: the photo is the
+ * stub on the left, a dashed tear line, then the name with its badge and the DATES and PLACES it
+ * would have printed. The actions open from the menu or a long press.
+ */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SlimCollectionItem(
     collection: UltraSlimCollection,
@@ -64,131 +116,83 @@ fun SlimCollectionItem(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val imageLoader = LocalImageLoader.current
-    
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        onClick = onClick
+    val colors = MaterialTheme.colorScheme
+    val dash = colors.outlineVariant
+
+    // Expressive press: the ticket's corners tighten and it gives a little under the finger,
+    // springing back on release.
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val motion = MaterialTheme.motionScheme
+    val corner by animateDpAsState(if (pressed) 12.dp else 24.dp, motion.fastSpatialSpec(), label = "corner")
+    val scale by animateFloatAsState(if (pressed) 0.97f else 1f, motion.fastSpatialSpec(), label = "scale")
+    Surface(
+        shape = RoundedCornerShape(corner),
+        color = colors.surfaceContainerLowest,
+        border = BorderStroke(1.dp, colors.outlineVariant),
+        modifier = modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
     ) {
-        Box {
-            // Use featured image if available
-            if (!collection.featuredImage.isNullOrEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = collection.featuredImage,
-                        imageLoader = imageLoader
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp),
-                    contentScale = ContentScale.Crop
+        // The photo and the tear line fill the ticket's height whatever the text makes it: they sit
+        // in a layer matched to the card's size. (An intrinsic-height Row asked the placeholder,
+        // built on BoxWithConstraints, for an intrinsic size it cannot give.)
+        Box(
+            Modifier
+                .heightIn(min = 120.dp)
+                .combinedClickable(
+                    interactionSource = interaction,
+                    indication = LocalIndication.current,
+                    onClick = onClick,
+                    onLongClick = { showMenu = true },
                 )
-            } else {
-                // Simple but nice design for collections without featured image
-                EmptyCollectionDesign(
-                    collectionName = collection.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
+        ) {
+            Box(Modifier.matchParentSize()) {
+                CollectionPhoto(collection, Modifier.width(PhotoWidth).fillMaxHeight())
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .padding(start = PhotoWidth, top = 12.dp, bottom = 12.dp)
+                        .width(2.dp)
+                        .drawBehind {
+                            drawLine(
+                                dash, Offset(size.width / 2, 0f), Offset(size.width / 2, size.height),
+                                strokeWidth = 2.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
+                            )
+                        }
                 )
             }
-            
-            // Overlay with collection information
             Column(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.6f),
-                                Color.Black.copy(alpha = 0.9f)
-                            ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
-                    )
-                    .padding(16.dp)
+                    .padding(start = PhotoWidth + 2.dp + 16.dp, top = 12.dp, bottom = 12.dp)
+                    .heightIn(min = 96.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = collection.name,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                
-                if (collection.description.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = collection.description,
-                        color = Color.White.copy(alpha = 0.8f),
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = collection.name,
+                        style = AdventureType.display(26.sp),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier.weight(1f)
                     )
-                }
-                
-                Row(
-                    modifier = Modifier.padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    MetaChip(
-                        text = "${collection.adventureCount} " +
-                            if (collection.adventureCount == 1) "place" else "places",
-                        tone = ChipTone.ON_IMAGE
-                    )
-
-                    // Where the trip sits relative to today. A collection with no dates is a
-                    // plain folder and says so, which is how the web labels it too.
-                    val status = collection.status
-                    if (status != TripStatus.FOLDER || collection.startDate == null) {
-                        MetaChip(
-                            text = when (status) {
-                                TripStatus.IN_PROGRESS -> "🎯 In progress"
-                                TripStatus.UPCOMING -> collection.daysUntilStart?.let { days ->
-                                    when (days) {
-                                        0 -> "🚀 Starts today"
-                                        1 -> "🚀 Tomorrow"
-                                        else -> "🚀 In $days days"
-                                    }
-                                } ?: "🚀 Upcoming"
-                                TripStatus.COMPLETED -> "🏁 Completed" // the filter's own label
-                                TripStatus.FOLDER -> "📁 Folder"
-                            },
-                            // Where the trip stands is worth a colour; that it is a folder is not.
-                            tone = when (status) {
-                                TripStatus.IN_PROGRESS -> ChipTone.POSITIVE
-                                TripStatus.UPCOMING -> ChipTone.ACCENT
-                                TripStatus.COMPLETED -> ChipTone.NEUTRAL
-                                TripStatus.FOLDER -> ChipTone.ON_IMAGE
-                            }
-                        )
+                    collectionBadge(collection)?.let { Badge(it, highlighted = it != "ARCHIVED") }
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "More options", tint = colors.onSurfaceVariant)
                     }
                 }
-            }
-            
-            // Menu button
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                IconButton(
-                    onClick = { showMenu = true }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options",
-                        tint = Color.White
-                    )
+                // Dates are the wide stub; a gap keeps "10–22 OCT" from running into the count
+                // when the list is a narrow pane (measured on a tablet: "10–22 OCT3").
+                Row(Modifier.padding(top = 8.dp, end = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ticketDateRange(collection.startDate, collection.endDate)?.let { dates ->
+                        Stub("DATES", dates, Modifier.weight(1.6f))
+                    }
+                    Stub("PLACES", collection.adventureCount.toString(), Modifier.weight(1f))
                 }
-                
             }
         }
     }
@@ -213,110 +217,52 @@ fun SlimCollectionItem(
 }
 
 @Composable
-private fun EmptyCollectionDesign(
-    collectionName: String,
-    modifier: Modifier = Modifier
-) {
-    // Generate a simple but nice design based on collection name
-    val designIndex = remember(collectionName) { 
-        kotlin.math.abs(collectionName.hashCode() % 8)
-    }
-    
-    // Predefined safe color combinations
-    val (backgroundColor, accentColor) = when (designIndex) {
-        0 -> Color(0xFFE8EAF6) to Color(0xFF5C6BC0) // Indigo
-        1 -> Color(0xFFE0F2F1) to Color(0xFF26A69A) // Teal
-        2 -> Color(0xFFFFF3E0) to Color(0xFFFF9800) // Orange
-        3 -> Color(0xFFF3E5F5) to Color(0xFF9C27B0) // Purple
-        4 -> Color(0xFFE8F5E9) to Color(0xFF4CAF50) // Green
-        5 -> Color(0xFFFFEBEE) to Color(0xFFEF5350) // Red
-        6 -> Color(0xFFF1F8E9) to Color(0xFF689F38) // Light Green
-        else -> Color(0xFFFAFAFA) to Color(0xFF607D8B) // Blue Grey
-    }
-    
-    Box(modifier = modifier) {
-        // Gradient background
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            backgroundColor,
-                            backgroundColor.copy(alpha = 0.7f),
-                            Color.White
-                        )
-                    )
-                )
-        )
-        
-        // Simple geometric decoration - just the grid
-        Canvas(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Draw subtle grid lines
-            val gridSize = 100.dp.toPx()
-            val gridAlpha = 0.03f
-            
-            // Vertical lines
-            var x = gridSize
-            while (x < size.width) {
-                drawLine(
-                    color = accentColor.copy(alpha = gridAlpha),
-                    start = Offset(x, 0f),
-                    end = Offset(x, size.height),
-                    strokeWidth = 1.dp.toPx()
-                )
-                x += gridSize
-            }
-            
-            // Horizontal lines
-            var y = gridSize
-            while (y < size.height) {
-                drawLine(
-                    color = accentColor.copy(alpha = gridAlpha),
-                    start = Offset(0f, y),
-                    end = Offset(size.width, y),
-                    strokeWidth = 1.dp.toPx()
-                )
-                y += gridSize
-            }
-        }
-        
-        // Icon positioned higher but avoiding overlay overlap
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 30.dp) // Positioned in upper third to avoid overlay
-        ) {
-            // White circle background
-            Surface(
-                modifier = Modifier.size(100.dp),
-                shape = CircleShape,
-                color = Color.White.copy(alpha = 0.9f),
-                shadowElevation = 4.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    // Colored background for icon
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .background(
-                                color = accentColor.copy(alpha = 0.1f),
-                                shape = CircleShape
-                            )
-                    )
-                    
-                    // Always the same icon - PhotoLibrary
-                    Icon(
-                        imageVector = Icons.Outlined.PhotoLibrary,
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = accentColor.copy(alpha = 0.8f)
-                    )
-                }
-            }
+private fun CollectionPhoto(collection: UltraSlimCollection, modifier: Modifier) {
+    val image = collection.featuredImage?.takeIf { it.isNotBlank() }
+    Box(modifier) {
+        if (image != null) {
+            Image(
+                painter = rememberAsyncImagePainter(model = image, imageLoader = LocalImageLoader.current),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            LocationPlaceholder(icon = null, modifier = Modifier.fillMaxSize())
         }
     }
 }
 
+@Composable
+private fun Badge(text: String, highlighted: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    Text(
+        text = text,
+        color = if (highlighted) colors.onPrimaryContainer else colors.onSurfaceVariant,
+        fontSize = 11.sp,
+        lineHeight = 14.sp,
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = 0.8.sp,
+        maxLines = 1,
+        modifier = Modifier
+            .padding(start = 8.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (highlighted) colors.primaryContainer else colors.surfaceContainerHighest)
+            .padding(horizontal = 8.dp, vertical = 5.dp)
+    )
+}
+
+@Composable
+private fun Stub(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Text(
+            label,
+            fontSize = 10.sp,
+            lineHeight = 13.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.2.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(value, style = AdventureType.display(20.sp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}

@@ -1,6 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.ui.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.EaseIn
@@ -9,6 +10,9 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
@@ -138,6 +142,18 @@ object NavigationAnimations {
     }
     
     /**
+     * Material's fade through, for moving between top-level destinations - sections with no order
+     * between them, so nothing slides left or right. The outgoing screen fades out over the first
+     * 90ms; the incoming one then fades in and grows from 92% over the remaining 210ms.
+     */
+    fun fadeThroughEnter(): EnterTransition =
+        fadeIn(tween(durationMillis = 210, delayMillis = 90, easing = LinearOutSlowInEasing)) +
+            scaleIn(tween(durationMillis = 210, delayMillis = 90, easing = standardEasing), initialScale = 0.92f)
+
+    fun fadeThroughExit(): ExitTransition =
+        fadeOut(tween(durationMillis = 90, easing = FastOutLinearInEasing))
+
+    /**
      * Fade-only enter transition for overlays
      */
     val enterTransitionFade: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
@@ -160,4 +176,28 @@ object NavigationAnimations {
             )
         )
     }
+
+    /**
+     * Forward and back for a Navigation 3 pane on a phone: the page, opaque, slides in from the
+     * right over the list, which drifts a third to the left beneath it; Back slides it off again.
+     * The page itself does not fade - fading a covering page lets the list show through it, and
+     * on Back it seemed to vanish in a frame or two.
+     */
+    // No size animation, and so no clip: a page may reach up over the shell's title.
+    fun forward(): ContentTransform = ContentTransform(
+        targetContentEnter = slideInHorizontally(tween(ANIM_DURATION_MS, easing = standardEasing)) { it },
+        initialContentExit = slideOutHorizontally(tween(ANIM_DURATION_MS, easing = standardEasing)) { -it / 3 } +
+            fadeOut(tween(ANIM_DURATION_MS, easing = easeOut)),
+        sizeTransform = null,
+    )
+
+    fun backward(): ContentTransform = ContentTransform(
+        targetContentEnter = slideInHorizontally(tween(ANIM_DURATION_MS, easing = standardEasing)) { -it / 3 } +
+            fadeIn(tween(ANIM_DURATION_MS, easing = easeIn)),
+        initialContentExit = slideOutHorizontally(tween(ANIM_DURATION_MS, easing = standardEasing)) { it },
+        sizeTransform = null,
+    )
+
+    /** How long [forward] and [backward] take, for anything that moves alongside them. */
+    const val SLIDE_DURATION_MS = ANIM_DURATION_MS
 }

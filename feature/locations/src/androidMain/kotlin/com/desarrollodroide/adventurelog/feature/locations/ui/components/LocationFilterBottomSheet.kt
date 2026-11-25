@@ -1,35 +1,30 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CleaningServices
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -39,18 +34,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.desarrollodroide.adventurelog.core.model.SortDirection
 import com.desarrollodroide.adventurelog.feature.locations.model.LocationFilters
 import com.desarrollodroide.adventurelog.feature.locations.model.LocationSortField
 import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.categories.ManageCategoriesDialog
-import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.CategoryFilterSection
-import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.SortSection
-import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.VisitedFilterSection
-import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.CategoryFilterChips
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.CollectionsSwitchRow
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.FilterSection
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.ManageCategoriesButton
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.SortChoice
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.VisitChoice
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.filters.naturalDirection
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel.CategoriesState
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,7 +72,6 @@ fun LocationsFilterBottomSheet(
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
         contentWindowInsets = { androidx.compose.foundation.layout.WindowInsets(0) }
     ) {
         LocationsFilterContent(
@@ -112,6 +110,13 @@ fun LocationsFilterBottomSheet(
     }
 }
 
+/**
+ * The place list's filters: a display title with how many are on and a reset, the categories and
+ * whether places in collections show, with Apply pinned under them. Visited/Planned and the order
+ * are not here: the screen has its own button group and Sort sheet for those, and asking twice
+ * read as two different settings.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun LocationsFilterContent(
     filters: LocationFilters,
@@ -122,198 +127,87 @@ internal fun LocationsFilterContent(
     onManageCategoriesClick: () -> Unit = {},
     onRetryLoadCategories: () -> Unit = {}
 ) {
+    val active = getActiveFiltersCount(filters)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
     ) {
-        // Header with gradient background
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 16.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("Filters", style = AdventureType.display(34.sp))
+                Text(
+                    text = activeFiltersLabel(active),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (active > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            FilledTonalIconButton(
+                // Only what this sheet holds: the visited group and the sort keep their settings.
+                onClick = {
+                    val defaults = LocationFilters()
+                    onFiltersChanged(filters.copy(categoryNames = defaults.categoryNames, includeCollections = defaults.includeCollections))
+                },
+                enabled = active > 0,
+                shapes = IconButtonDefaults.shapes(),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = "Location Filters",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = activeFiltersLabel(getActiveFiltersCount(filters)),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                
-                IconButton(
-                    onClick = {
-                        onFiltersChanged(LocationFilters())
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CleaningServices,
-                        contentDescription = "Reset filters",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                Icon(Icons.Default.RestartAlt, contentDescription = "Reset filters")
             }
         }
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f, fill = false)
                 .verticalScroll(rememberScrollState())
-                .padding(vertical = 8.dp)
+                .padding(horizontal = 24.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            // Categories Section
-            CategoryFilterSection(
-                selectedCategories = filters.categoryNames,
-                categoriesState = categoriesState,
-                onCategoriesChanged = { categoryNames ->
-                    onFiltersChanged(filters.copy(categoryNames = categoryNames))
-                },
-                onManageCategoriesClick = onManageCategoriesClick,
-                onRetryLoadCategories = onRetryLoadCategories
-            )
-
-            // Sort Section
-            SortSection(
-                sortField = filters.sortField,
-                sortDirection = filters.sortDirection,
-                onSortFieldChanged = { field ->
-                    onFiltersChanged(filters.copy(sortField = field))
-                },
-                onSortDirectionChanged = { direction ->
-                    onFiltersChanged(filters.copy(sortDirection = direction))
-                }
-            )
-
-            // Visited Filter Section
-            VisitedFilterSection(
-                visitedFilter = filters.visitedFilter,
-                onVisitedFilterChanged = { filter ->
-                    onFiltersChanged(filters.copy(visitedFilter = filter))
-                }
-            )
-
-            // Include Collections Section
-            IncludeCollectionsSection(
-                includeCollections = filters.includeCollections,
-                onIncludeCollectionsChanged = { include ->
-                    onFiltersChanged(filters.copy(includeCollections = include))
-                }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Footer with Apply and Cancel buttons - Always visible at bottom
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shadowElevation = 8.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            FilterSection(
+                title = if (filters.categoryNames.isEmpty()) "Categories" else "Categories · ${filters.categoryNames.size} chosen",
+                trailing = if (categoriesState is CategoriesState.Success) {
+                    { ManageCategoriesButton(onManageCategoriesClick) }
+                } else null,
             ) {
-                Button(
-                    onClick = onCancel,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                ) {
-                    Text("Cancel")
-                }
-                Button(
-                    onClick = onApply,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Apply Filters")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun IncludeCollectionsSection(
-    includeCollections: Boolean,
-    onIncludeCollectionsChanged: (Boolean) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Collection Locations",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "Include locations from collections",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                CategoryFilterChips(
+                    selected = filters.categoryNames,
+                    categoriesState = categoriesState,
+                    onChange = { onFiltersChanged(filters.copy(categoryNames = it)) },
+                    onRetry = onRetryLoadCategories,
                 )
             }
-            Switch(
-                checked = includeCollections,
-                onCheckedChange = onIncludeCollectionsChanged,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.primary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            )
+            CollectionsSwitchRow(filters.includeCollections) { onFiltersChanged(filters.copy(includeCollections = it)) }
+        }
+
+        Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
+            Column {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onCancel,
+                        shapes = ButtonDefaults.shapes(),
+                        modifier = Modifier.weight(1f).height(56.dp),
+                    ) { Text("Cancel") }
+                    Button(
+                        onClick = onApply,
+                        shapes = ButtonDefaults.shapes(),
+                        modifier = Modifier.weight(1f).height(56.dp),
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text("Apply", modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -327,9 +221,6 @@ private fun activeFiltersLabel(count: Int): String = when (count) {
 private fun getActiveFiltersCount(filters: LocationFilters): Int {
     var count = 0
     if (filters.categoryNames.isNotEmpty()) count++
-    if (filters.sortField != LocationSortField.UPDATED_AT) count++
-    if (filters.sortDirection != SortDirection.DESCENDING) count++
-    if (filters.visitedFilter != VisitedFilter.ALL) count++
     // Counting this when it is *on* was right while off was the default. It is on by default
     // now, so an untouched sheet announced one active filter, and the reset button could not
     // clear it.

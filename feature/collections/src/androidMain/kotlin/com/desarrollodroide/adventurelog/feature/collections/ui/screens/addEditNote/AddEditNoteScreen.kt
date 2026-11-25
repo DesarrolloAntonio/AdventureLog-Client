@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditNote
 
+import com.desarrollodroide.adventurelog.feature.ui.components.FormActionBar
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import com.desarrollodroide.adventurelog.feature.ui.components.date.DatePickerField
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.PublicSwitchRow
 import androidx.compose.foundation.layout.Arrangement
@@ -68,6 +71,8 @@ fun AddEditNoteScreen(
     var detailsOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingNote?.id) { viewModel.load(collectionId, existingNote?.id) }
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
     val leave = rememberDiscardGuard(
         hasChanges = !state.isLoading && viewModel.hasChanges(state),
         thing = "note",
@@ -102,87 +107,79 @@ fun AddEditNoteScreen(
     }
     Box(modifier = modifier.fillMaxSize()) {
         ContentColumn {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = if (existingNote == null) "New note" else "Edit note",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-
-                SectionCard(
-                    // The rows below it already sit inside the form's 16dp; the card added its own and
-                    // came out narrower than everything else on the page (QA CO-19).
-                    inset = 0.dp,
-                    title = "Note",
-                    icon = Icons.AutoMirrored.Filled.Notes,
-                    expanded = detailsOpen,
-                    onExpandedChange = { detailsOpen = it }
+            Column(Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f).fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                StyledTextField(
-                    value = state.name,
-                    onValueChange = viewModel::onNameChange,
-                    label = "Title",
-                    icon = Icons.Default.Title,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                StyledTextField(
-                    value = state.content,
-                    onValueChange = viewModel::onContentChange,
-                    label = "Note",
-                    icon = Icons.AutoMirrored.Filled.Notes,
-                    singleLine = false,
-                    minLines = 6,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                DatePickerField(
-                    label = "Date (optional)",
-                    value = state.date,
-                    onValueChange = viewModel::onDateChange,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                }
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    PublicSwitchRow(
-                        title = "Public note",
-                        checked = state.isPublic,
-                        onCheckedChange = viewModel::onPublicChange
+                    FormHeader(
+                        title = if (existingNote == null) "New note" else "Edit note",
+                        onClose = leave
                     )
-                }
 
-                Spacer(Modifier.height(4.dp))
-
-                // The same pair as the collection and transport forms: Save across the form,
-                // Cancel under it. These three had a small Save and Cancel side by side on the
-                // left (QA CO-19).
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    PrimaryButton(
-                        onClick = { viewModel.save(collectionId) },
-                        text = if (state.isSaving) "Saving…" else "Save",
-                        enabled = state.canSave
+                    SectionCard(
+                        // The rows below it already sit inside the form's 16dp; the card added its own and
+                        // came out narrower than everything else on the page (QA CO-19).
+                        inset = 0.dp,
+                        title = "Note",
+                        icon = Icons.AutoMirrored.Filled.Notes,
+                        expanded = detailsOpen,
+                        onExpandedChange = { detailsOpen = it }
+                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StyledTextField(
+                        value = state.name,
+                        onValueChange = viewModel::onNameChange,
+                        label = "Title",
+                        icon = Icons.Default.Title,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    TextButton(onClick = leave, modifier = Modifier.fillMaxWidth()) {
-                        Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                    StyledTextField(
+                        value = state.content,
+                        onValueChange = viewModel::onContentChange,
+                        label = "Note",
+                        icon = Icons.AutoMirrored.Filled.Notes,
+                        singleLine = false,
+                        minLines = 6,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    DatePickerField(
+                        label = "Date (optional)",
+                        value = state.date,
+                        onValueChange = viewModel::onDateChange,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        PublicSwitchRow(
+                            title = "Public note",
+                            checked = state.isPublic,
+                            onCheckedChange = viewModel::onPublicChange
+                        )
                     }
                 }
+                // Save and Cancel pinned under the form, as the canvas draws it.
+                FormActionBar(
+                    onClick = { viewModel.save(collectionId) },
+                    text = if (state.isSaving) "Saving…" else "Save",
+                    enabled = state.canSave,
+                    onCancel = leave
+                )
             }
         }
 

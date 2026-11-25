@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
+import com.desarrollodroide.adventurelog.feature.ui.components.PublicToggleRow
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -12,35 +13,39 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.outlined.Payments
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TextButton
-import com.desarrollodroide.adventurelog.core.model.Currencies
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,29 +53,34 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.core.model.Category
+import com.desarrollodroide.adventurelog.core.model.Currencies
+import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.components.DescriptionSection
 import com.desarrollodroide.adventurelog.feature.ui.components.PrimaryButton
+import com.desarrollodroide.adventurelog.feature.ui.components.AddPhotoTile
 import com.desarrollodroide.adventurelog.feature.ui.components.RatingBar
 import com.desarrollodroide.adventurelog.feature.ui.components.SectionCard
 import com.desarrollodroide.adventurelog.feature.ui.components.StyledTextField
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BasicInfoSection(
     formData: LocationFormData,
     categories: List<Category>,
     onFormDataChange: (LocationFormData) -> Unit,
-    onNavigateBack: () -> Unit = {},
+    /** The old in-card back arrow; the form's own header has Close now, so callers leave it out. */
+    onNavigateBack: (() -> Unit)? = null,
     onGenerateDescription: () -> Unit = {},
     isGeneratingDescription: Boolean = false,
     onAddCategory: (name: String, icon: String) -> Unit = { _, _ -> }
 ) {
     var expanded by remember { mutableStateOf(true) }
+    val motion = MaterialTheme.motionScheme
     var linkError by remember { mutableStateOf("") }
     
     fun validateUrl(url: String): Boolean {
@@ -92,13 +102,14 @@ fun BasicInfoSection(
     }
     
     SectionCard(
-        title = "Basic Information",
+        title = "Basic information",
         icon = Icons.Outlined.Description,
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        leadingContent = {
+        leadingContent = onNavigateBack?.let { back -> {
             IconButton(
-                onClick = onNavigateBack,
+                onClick = back,
+                shapes = IconButtonDefaults.shapes(),
                 modifier = Modifier.size(32.dp)
             ) {
                 Icon(
@@ -108,7 +119,7 @@ fun BasicInfoSection(
                     modifier = Modifier.size(20.dp)
                 )
             }
-        }
+        } }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -125,7 +136,7 @@ fun BasicInfoSection(
                 )
             )
             
-            CategoryDropdown(
+            CategoryChips(
                 categories = categories,
                 selectedCategory = formData.category,
                 onCategorySelected = {
@@ -148,13 +159,23 @@ fun BasicInfoSection(
                 }
             )
 
+            AddPhotoTile(
+                photoCount = formData.images.size,
+                onPhotoPicked = { picked ->
+                    // The first photo of a place is its cover, as the Images section does it.
+                    onFormDataChange(
+                        formData.copy(images = formData.images + picked.copy(isPrimary = formData.images.isEmpty()))
+                    )
+                }
+            )
+
             StyledTextField(
                 value = formData.link,
                 onValueChange = { newValue ->
                     onFormDataChange(formData.copy(link = newValue))
                     validateUrl(newValue)
                 },
-                label = "Website Link",
+                label = "Website link",
                 icon = Icons.Outlined.Link,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Uri,
@@ -173,26 +194,23 @@ fun BasicInfoSection(
             
             AnimatedVisibility(
                 visible = formData.name.isNotBlank(),
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
+                enter = expandVertically(motion.defaultSpatialSpec()) + fadeIn(motion.defaultEffectsSpec()),
+                exit = shrinkVertically(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec())
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (isGeneratingDescription) {
+                        // PrimaryButton's height and shape, so the swap does not make the form jump.
                         Button(
                             onClick = { },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(25.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ),
+                                .height(56.dp),
+                            shapes = ButtonDefaults.shapes(),
                             enabled = false
                         ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
+                            LoadingIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = LocalContentColor.current
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Generating...")
@@ -207,50 +225,9 @@ fun BasicInfoSection(
                 }
             }
             
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
-                ),
-                border = CardDefaults.outlinedCardBorder()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f).padding(end = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Public,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = "Public place",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    Switch(
-                        checked = formData.isPublic,
-                        onCheckedChange = {
-                            onFormDataChange(formData.copy(isPublic = it))
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.primary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    )
-                }
-            }
+            PublicToggleRow(title = "Public place", checked = formData.isPublic,
+                onCheckedChange = { onFormDataChange(formData.copy(isPublic = it)) }
+            )
         }
     }
 }
@@ -259,7 +236,7 @@ fun BasicInfoSection(
  * What the place cost, and in which currency. The amount is typed rather than stepped, and only
  * digits and a single separator are accepted so a stray character cannot reach the server.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PriceField(
     price: String,
@@ -293,7 +270,7 @@ private fun PriceField(
         Spacer(modifier = Modifier.width(8.dp))
 
         Box {
-            TextButton(onClick = { currencyMenuOpen = true }) {
+            TextButton(onClick = { currencyMenuOpen = true }, shapes = ButtonDefaults.shapes()) {
                 Text(text = currency)
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
@@ -302,11 +279,17 @@ private fun PriceField(
             }
             DropdownMenu(
                 expanded = currencyMenuOpen,
-                onDismissRequest = { currencyMenuOpen = false }
+                onDismissRequest = { currencyMenuOpen = false },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             ) {
                 Currencies.options.forEach { (code, label) ->
                     DropdownMenuItem(
                         text = { Text("$code - $label") },
+                        // The one in use carries a check, so an open menu says what is chosen.
+                        trailingIcon = if (code == currency) {
+                            { Icon(Icons.Default.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
+                        } else null,
                         onClick = {
                             onCurrencyChange(code)
                             currencyMenuOpen = false

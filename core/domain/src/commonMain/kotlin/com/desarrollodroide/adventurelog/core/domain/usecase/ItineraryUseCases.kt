@@ -48,8 +48,8 @@ class AddItineraryEntryUseCase(
 class DeleteItineraryEntryUseCase(
     private val collectionsRepository: CollectionsRepository
 ) {
-    suspend operator fun invoke(entryId: String): Either<String, Unit> =
-        when (val result = collectionsRepository.deleteItineraryEntry(entryId)) {
+    suspend operator fun invoke(collectionId: String, entryId: String): Either<String, Unit> =
+        when (val result = collectionsRepository.deleteItineraryEntry(collectionId, entryId)) {
             is Either.Right -> Either.Right(Unit)
             is Either.Left -> Either.Left(result.value.itineraryMessage())
         }

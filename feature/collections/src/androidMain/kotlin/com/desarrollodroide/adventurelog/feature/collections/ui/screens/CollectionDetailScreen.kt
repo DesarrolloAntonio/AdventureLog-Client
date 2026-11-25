@@ -1,30 +1,58 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
-import com.desarrollodroide.adventurelog.core.model.ownedBy
-import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,43 +61,57 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
+import com.desarrollodroide.adventurelog.core.model.Checklist
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Lodging
+import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Recommendation
 import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.Transportation
+import com.desarrollodroide.adventurelog.core.model.ownedBy
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.AddToCollectionMenu
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionView
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionViewSwitcher
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsTabs
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.ItineraryItemPicker
-import com.desarrollodroide.adventurelog.feature.collections.ui.state.summary
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.arrowDates
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.collectionMoment
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketDateRange
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketStub
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.agenda
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.itinerary
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.stats
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.summary
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionCalendarView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionItineraryView
-import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionRecommendationsView
-import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsUiState
-import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionMapView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionRecommendationsView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionStatsView
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.DeleteState
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsUiState
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.UpdateCollectionsState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
-import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
-import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
+import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import kotlin.time.ExperimentalTime
+import kotlinx.coroutines.delay
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.viewmodel.koinViewModel
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.DeleteOutline
-import com.desarrollodroide.adventurelog.core.model.Note
-import com.desarrollodroide.adventurelog.core.model.Checklist
-import com.desarrollodroide.adventurelog.core.model.Lodging
 
 @Composable
 fun CollectionDetailScreen(
@@ -97,10 +139,18 @@ fun CollectionDetailScreen(
      * back but the system gesture.
      */
     showTitle: Boolean = false,
+    /** False in a pane beside the collections list: Back there would point at a list still on screen. */
+    showBack: Boolean = true,
+    /** Opens the collection's editor from the header. */
+    onEditCollection: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = koinViewModel(),
     recommendationsViewModel: RecommendationsViewModel = koinViewModel()
 ) {
+    // On a phone inside the shell the collection brings its own header (Back, Edit) and its own
+    // "+", as the canvas draws it; the shell's bars and breadcrumb step aside.
+    val onPhoneInShell = LocalShellActionHost.current != null
+    if (onPhoneInShell) HideShellChrome()
     val uiState by viewModel.uiState.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val selectedView by viewModel.selectedView.collectAsStateWithLifecycle()
@@ -163,10 +213,20 @@ fun CollectionDetailScreen(
     ) {
         when {
             uiState.isLoading -> {
-                LoadingDialog(
-                    isLoading = true,
-                    showMessage = false
-                )
+                // A collection usually arrives while the page is still sliding in: a spinner that
+                // flashed for a quarter of a second only made the page jump. It shows only if the
+                // wait runs longer than that.
+                var slow by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    delay(400)
+                    slow = true
+                }
+                if (slow) {
+                    LoadingDialog(
+                        isLoading = true,
+                        showMessage = false
+                    )
+                }
             }
             uiState.errorMessage != null -> {
                 Text(
@@ -179,66 +239,87 @@ fun CollectionDetailScreen(
                 )
             }
             uiState.collection != null -> {
-                CollectionDetailContent(
-                    currentUserId = currentUserId,
-                    collection = uiState.collection!!,
-                    showTitle = showTitle,
-                    onBackClick = onBackClick,
-                    onHomeClick = onHomeClick,
-                    selectedTab = selectedTab,
-                    onTabSelected = viewModel::onTabSelected,
-                    selectedView = selectedView,
-                    onViewSelected = viewModel::onViewSelected,
-                    itineraryWorking = itineraryWorking,
-                    onAutoGenerateItinerary = viewModel::autoGenerateItinerary,
-                    onAddToItineraryDay = viewModel::openItineraryPicker,
-                    onRemoveFromItinerary = viewModel::removeFromItinerary,
-                    recommendations = recommendations,
-                    onRecommendationAnchor = recommendationsViewModel::onAnchorSelected,
-                    onRecommendationQuery = recommendationsViewModel::onQueryChanged,
-                    onRecommendationCategory = recommendationsViewModel::onCategorySelected,
-                    onRecommendationRadius = recommendationsViewModel::onRadiusSelected,
-                    onRecommendationSearch = { anchor ->
-                        recommendationsViewModel.search(anchor)
-                    },
-                    onRecommendationAdd = { recommendation ->
-                        recommendationsViewModel.addAsPlace(
-                            recommendation = recommendation,
-                            collectionId = collectionId
-                        ) { viewModel.loadCollection(collectionId) }
-                    },
-                    onAdventureClick = onAdventureClick,
-                    onEditAdventure = onEditAdventure,
-                    onAddPhoto = onAddPhoto,
-                    onDeleteAdventure = { adventure -> 
-                        viewModel.deleteAdventure(adventure.id)
-                    },
-                    onManageCollections = { adventure -> 
-                        locationToManageCollections = adventure 
-                    },
-                    onDuplicateAdventure = viewModel::duplicateLocation,
-                    onShareAdventure = viewModel::shareLocation,
-                    onRemoveFromCollection = { adventure -> viewModel.removeFromCollection(adventure, collectionId) },
-                    onAddPlace = onAddPlace,
-                    onAddTransportation = onAddTransportation,
-                    onEditTransportation = onEditTransportation,
-                    onDeleteTransportation = { transportation ->
-                        viewModel.deleteTransportation(transportation.id)
-                    },
-                    onAddNote = { onAddNote(collectionId) },
-                    onEditNote = { note -> onEditNote(collectionId, note) },
-                    onDeleteNote = { note -> viewModel.deleteNote(note.id) },
-                    onAddChecklist = { onAddChecklist(collectionId) },
-                    onEditChecklist = { list -> onEditChecklist(collectionId, list) },
-                    onDeleteChecklist = { list -> viewModel.deleteChecklist(list.id) },
-                    onAddLodging = { onAddLodging(collectionId) },
-                    onEditLodging = { stay -> onEditLodging(collectionId, stay) },
-                    onDeleteLodging = { stay -> viewModel.deleteLodging(stay.id) },
-                    modifier = Modifier.fillMaxSize()
-                )
+                // ...and then fades in, rather than appearing between two frames.
+                val shown = remember { MutableTransitionState(false).apply { targetState = true } }
+                AnimatedVisibility(visibleState = shown, enter = fadeIn(tween(220))) {
+                    CollectionDetailContent(
+                        currentUserId = currentUserId,
+                        collection = uiState.collection!!,
+                        showTitle = showTitle || onPhoneInShell,
+                        showBack = showBack,
+                        onBackClick = onBackClick,
+                        onHomeClick = onHomeClick,
+                        onEditCollection = onEditCollection,
+                        selectedTab = selectedTab,
+                        onTabSelected = viewModel::onTabSelected,
+                        selectedView = selectedView,
+                        onViewSelected = viewModel::onViewSelected,
+                        itineraryWorking = itineraryWorking,
+                        onAutoGenerateItinerary = viewModel::autoGenerateItinerary,
+                        onAddToItineraryDay = viewModel::openItineraryPicker,
+                        onRemoveFromItinerary = viewModel::removeFromItinerary,
+                        recommendations = recommendations,
+                        onRecommendationAnchor = recommendationsViewModel::onAnchorSelected,
+                        onRecommendationQuery = recommendationsViewModel::onQueryChanged,
+                        onRecommendationCategory = recommendationsViewModel::onCategorySelected,
+                        onRecommendationRadius = recommendationsViewModel::onRadiusSelected,
+                        onRecommendationSearch = { anchor ->
+                            recommendationsViewModel.search(anchor)
+                        },
+                        onRecommendationAdd = { recommendation ->
+                            recommendationsViewModel.addAsPlace(
+                                recommendation = recommendation,
+                                collectionId = collectionId
+                            ) { viewModel.loadCollection(collectionId) }
+                        },
+                        onAdventureClick = onAdventureClick,
+                        onEditAdventure = onEditAdventure,
+                        onAddPhoto = onAddPhoto,
+                        onDeleteAdventure = { adventure -> 
+                            viewModel.deleteAdventure(adventure.id)
+                        },
+                        onManageCollections = { adventure -> 
+                            locationToManageCollections = adventure 
+                        },
+                        onDuplicateAdventure = viewModel::duplicateLocation,
+                        onShareAdventure = viewModel::shareLocation,
+                        onRemoveFromCollection = { adventure -> viewModel.removeFromCollection(adventure, collectionId) },
+                        onAddPlace = onAddPlace,
+                        onAddTransportation = onAddTransportation,
+                        onEditTransportation = onEditTransportation,
+                        onDeleteTransportation = { transportation ->
+                            viewModel.deleteTransportation(transportation.id)
+                        },
+                        onAddNote = { onAddNote(collectionId) },
+                        onEditNote = { note -> onEditNote(collectionId, note) },
+                        onDeleteNote = { note -> viewModel.deleteNote(note.id) },
+                        onAddChecklist = { onAddChecklist(collectionId) },
+                        onEditChecklist = { list -> onEditChecklist(collectionId, list) },
+                        onDeleteChecklist = { list -> viewModel.deleteChecklist(list.id) },
+                        onAddLodging = { onAddLodging(collectionId) },
+                        onEditLodging = { stay -> onEditLodging(collectionId, stay) },
+                        onDeleteLodging = { stay -> viewModel.deleteLodging(stay.id) },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
         
+        // The canvas's one "+": a menu of the five kinds, while the collection is a list of them.
+        if (uiState.collection != null && selectedView == CollectionView.ITEMS) {
+            AddToCollectionMenu(
+                onAddPlace = onAddPlace,
+                onAddTransportation = onAddTransportation,
+                onAddLodging = { onAddLodging(collectionId) },
+                onAddNote = { onAddNote(collectionId) },
+                onAddChecklist = { onAddChecklist(collectionId) },
+                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding(),
+                // No Back means the collection sits beside the list, under a rail whose "+" is
+                // "New collection": this one adds to the collection, and says so.
+                icon = if (showBack) Icons.Default.Add else Icons.AutoMirrored.Filled.PlaylistAdd,
+            )
+        }
+
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
@@ -280,8 +361,10 @@ fun CollectionDetailScreen(
 fun CollectionDetailContent(
     collection: Collection,
     showTitle: Boolean = false,
+    showBack: Boolean = true,
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
+    onEditCollection: (() -> Unit)? = null,
     selectedTab: CollectionTab,
     onTabSelected: (CollectionTab) -> Unit,
     selectedView: CollectionView = CollectionView.ITEMS,
@@ -328,7 +411,8 @@ fun CollectionDetailContent(
             start = 16.dp,
             end = 16.dp,
             top = 16.dp,
-            bottom = 80.dp
+            // Room for the "+" menu over the end of the list.
+            bottom = 120.dp
         ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -336,8 +420,10 @@ fun CollectionDetailContent(
             CollectionHeader(
                 collection,
                 showTitle = showTitle,
+                showBack = showBack,
                 onBackClick = onBackClick,
-                onHomeClick = onHomeClick
+                onHomeClick = onHomeClick,
+                onEditCollection = onEditCollection
             )
         }
         
@@ -350,7 +436,8 @@ fun CollectionDetailContent(
                 modifier = Modifier.padding(top = 8.dp),
                 selectedView = selectedView,
                 onViewSelected = onViewSelected,
-                views = CollectionView.entries
+                views = CollectionView.entries,
+                bleed = 16.dp,
             )
         }
 
@@ -483,19 +570,26 @@ fun CollectionDetailContent(
                         }
                     }
                 } else {
-                    items(collection.locations) { adventure ->
-                        AdventureItem(
-                            location = adventure,
-                            onClick = { onAdventureClick(adventure) },
-                            onEdit = { onEditAdventure(adventure) },
-                            onAddPhoto = { onAddPhoto(adventure) },
-                            onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) },
-                            onDuplicate = { onDuplicateAdventure(adventure) },
-                            onShare = { onShareAdventure(adventure) },
-                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
-                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
-                        )
+                    item {
+                        // Rows, as in Places and as the canvas draws a collection's places: one group,
+                        // split by the thin gap rather than the list's 24dp.
+                        Column(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                            collection.locations.forEachIndexed { index, adventure ->
+                            PlaceRow(
+                                location = adventure,
+                                shape = SegmentedListDefaults.shapeFor(index, collection.locations.size),
+                                onClick = { onAdventureClick(adventure) },
+                                onEdit = { onEditAdventure(adventure) },
+                                onAddPhoto = { onAddPhoto(adventure) },
+                                onDelete = { onDeleteAdventure(adventure) },
+                                onManageCollections = { onManageCollections(adventure) },
+                                onDuplicate = { onDuplicateAdventure(adventure) },
+                                onShare = { onShareAdventure(adventure) },
+                                onRemoveFromCollection = { onRemoveFromCollection(adventure) },
+                                isOwner = ownedBy(adventure.user.uuid, currentUserId)
+                                )
+                            }
+                        }
                     }
                 }
                 
@@ -516,27 +610,11 @@ fun CollectionDetailContent(
                     )
                 }
                 
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Transportations",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(onClick = onAddTransportation) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add transportation"
-                            )
-                        }
-                    }
-                }
-
+                // In All, a kind shows only when the trip has some: an empty "Transport" heading
+                // sat at the end of every trip without journeys, while Lodging, Notes and
+                // Checklists were left out of All altogether.
                 if (transportations.isNotEmpty()) {
+                    item { TabHeading("Transport", onAdd = onAddTransportation) }
                     
                     items(transportations) { transportation ->
                         TransportationItemCard(
@@ -551,6 +629,19 @@ fun CollectionDetailContent(
                             }
                         )
                     }
+                }
+
+                if (collection.lodging.isNotEmpty()) {
+                    item { TabHeading("Lodging", onAdd = onAddLodging) }
+                    lodgingItems(collection.lodging, onEditLodging, onDeleteLodging)
+                }
+                if (collection.notes.isNotEmpty()) {
+                    item { TabHeading("Notes", onAdd = onAddNote) }
+                    noteItems(collection.notes, onEditNote, onDeleteNote)
+                }
+                if (collection.checklists.isNotEmpty()) {
+                    item { TabHeading("Checklists", onAdd = onAddChecklist) }
+                    checklistItems(collection.checklists, onEditChecklist, onDeleteChecklist)
                 }
             }
             
@@ -614,19 +705,26 @@ fun CollectionDetailContent(
                         }
                     }
                 } else {
-                    items(collection.locations) { adventure ->
-                        AdventureItem(
-                            location = adventure,
-                            onClick = { onAdventureClick(adventure) },
-                            onEdit = { onEditAdventure(adventure) },
-                            onAddPhoto = { onAddPhoto(adventure) },
-                            onDelete = { onDeleteAdventure(adventure) },
-                            onManageCollections = { onManageCollections(adventure) },
-                            onDuplicate = { onDuplicateAdventure(adventure) },
-                            onShare = { onShareAdventure(adventure) },
-                            onRemoveFromCollection = { onRemoveFromCollection(adventure) },
-                            isOwner = ownedBy(adventure.user.uuid, currentUserId)
-                        )
+                    item {
+                        // Rows, as in Places and as the canvas draws a collection's places: one group,
+                        // split by the thin gap rather than the list's 24dp.
+                        Column(verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)) {
+                            collection.locations.forEachIndexed { index, adventure ->
+                            PlaceRow(
+                                location = adventure,
+                                shape = SegmentedListDefaults.shapeFor(index, collection.locations.size),
+                                onClick = { onAdventureClick(adventure) },
+                                onEdit = { onEditAdventure(adventure) },
+                                onAddPhoto = { onAddPhoto(adventure) },
+                                onDelete = { onDeleteAdventure(adventure) },
+                                onManageCollections = { onManageCollections(adventure) },
+                                onDuplicate = { onDuplicateAdventure(adventure) },
+                                onShare = { onShareAdventure(adventure) },
+                                onRemoveFromCollection = { onRemoveFromCollection(adventure) },
+                                isOwner = ownedBy(adventure.user.uuid, currentUserId)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -639,7 +737,7 @@ fun CollectionDetailContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Transportations",
+                            text = "Transport",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -725,21 +823,7 @@ fun CollectionDetailContent(
                 if (collection.lodging.isEmpty()) {
                     item { EmptyTab("No lodging in this collection yet.") }
                 } else {
-                    items(collection.lodging, key = { it.id }) { stay ->
-                        SimpleEntryCard(
-                            onClick = { onEditLodging(stay) },
-                            onDelete = { onDeleteLodging(stay) },
-                            kind = "stay",
-                            title = stay.name,
-                            lines = listOfNotNull(
-                                stay.location?.takeIf { it.isNotBlank() },
-                                lodgingDates(stay.checkIn, stay.checkOut),
-                                stay.reservationNumber?.takeIf { it.isNotBlank() }
-                                    ?.let { "Reservation $it" }
-                            ),
-                            badge = stay.type.replaceFirstChar { c -> c.uppercase() }
-                        )
-                    }
+                    lodgingItems(collection.lodging, onEditLodging, onDeleteLodging)
                 }
             }
 
@@ -748,19 +832,7 @@ fun CollectionDetailContent(
                 if (collection.notes.isEmpty()) {
                     item { EmptyTab("No notes in this collection yet.") }
                 } else {
-                    items(collection.notes, key = { it.id }) { note ->
-                        SimpleEntryCard(
-                            title = note.name,
-                            lines = listOfNotNull(
-                                note.content?.takeIf { it.isNotBlank() },
-                                note.date?.substringBefore('T')?.takeIf { it.isNotBlank() }
-                            ),
-                            badge = null,
-                            onClick = { onEditNote(note) },
-                            onDelete = { onDeleteNote(note) },
-                            kind = "note"
-                        )
-                    }
+                    noteItems(collection.notes, onEditNote, onDeleteNote)
                 }
             }
 
@@ -769,26 +841,7 @@ fun CollectionDetailContent(
                 if (collection.checklists.isEmpty()) {
                     item { EmptyTab("No checklists in this collection yet.") }
                 } else {
-                    items(collection.checklists, key = { it.id }) { checklist ->
-                        val done = checklist.items.count { it.isChecked }
-                        SimpleEntryCard(
-                            onClick = { onEditChecklist(checklist) },
-                            onDelete = { onDeleteChecklist(checklist) },
-                            kind = "checklist",
-                            title = checklist.name,
-                            lines = checklist.items.take(4).map { item ->
-                                (if (item.isChecked) "\u2713 " else "\u25cb ") + item.name
-                            } + listOfNotNull(
-                                "and ${checklist.items.size - 4} more"
-                                    .takeIf { checklist.items.size > 4 }
-                            ),
-                            badge = if (checklist.items.isEmpty()) {
-                                null
-                            } else {
-                                "$done / ${checklist.items.size}"
-                            }
-                        )
-                    }
+                    checklistItems(collection.checklists, onEditChecklist, onDeleteChecklist)
                 }
             }
 
@@ -832,61 +885,146 @@ fun CollectionDetailContent(
     }
 }
 
+@OptIn(ExperimentalTime::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CollectionHeader(
     collection: Collection,
     modifier: Modifier = Modifier,
     showTitle: Boolean = false,
+    showBack: Boolean = true,
     onBackClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {}
+    onHomeClick: () -> Unit = {},
+    /** Opens the collection's editor; null where there is nowhere to edit it from. */
+    onEditCollection: (() -> Unit)? = null,
+    today: LocalDate = remember {
+        kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    },
 ) {
+    val colors = MaterialTheme.colorScheme
+    val moment = collectionMoment(collection.startDate, collection.endDate, today)
+    val dates = arrowDates(collection.startDate, collection.endDate)
+    // The list worth watching before a trip: the first one with anything on it.
+    val checklist = collection.checklists.firstOrNull { it.items.isNotEmpty() }
+
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (showTitle) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                // IconButtons, for their 48dp touch targets (the clickable icons measured 32dp).
-                IconButton(onClick = onBackClick) {
-                    Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "Back")
+        if ((showTitle && showBack) || onEditCollection != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showTitle && showBack) {
+                    FilledIconButton(
+                        onClick = onBackClick,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = colors.surfaceContainerLowest,
+                            contentColor = colors.onSurface
+                        )
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 }
-                IconButton(onClick = onHomeClick) {
-                    Icon(
-                        imageVector = Icons.Default.Home,
-                        contentDescription = "Home",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                Spacer(Modifier.weight(1f))
+                if (onEditCollection != null) {
+                    FilledTonalIconButton(onClick = onEditCollection) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit collection")
+                    }
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.width(12.dp)
-                )
-                Text(
-                    text = collection.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
 
-        // Description (only if not blank)
+        moment.eyebrow?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.4.sp,
+                color = colors.primary
+            )
+        }
+        Text(text = collection.name, style = AdventureType.display(58.sp), maxLines = 3, overflow = TextOverflow.Ellipsis)
+
+        // The ticket, as the canvas draws it: a stub with one big figure, a torn edge, then the
+        // dates and the packing list filling up.
+        val stub = ticketStub(collection.startDate, collection.endDate, today, collection.locations.size)
+        val background = colors.background
+        val edge = colors.outlineVariant
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = colors.surfaceContainerLowest,
+            border = BorderStroke(1.dp, edge),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(Modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
+                Column(
+                    Modifier.width(116.dp).padding(start = 20.dp, top = 16.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(stub.figure, style = AdventureType.display(60.sp), color = colors.primary, maxLines = 1)
+                    Text(
+                        text = stub.label,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp,
+                        color = colors.onSurfaceVariant
+                    )
+                }
+                // The tear: a dashed line with a notch bitten out at each end.
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .width(2.dp)
+                        .drawBehind {
+                            drawLine(
+                                edge, Offset(size.width / 2, 18.dp.toPx()), Offset(size.width / 2, size.height - 18.dp.toPx()),
+                                strokeWidth = 2.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx()))
+                            )
+                            val r = 12.dp.toPx()
+                            drawCircle(background, r, Offset(size.width / 2, -1.dp.toPx()))
+                            drawCircle(background, r, Offset(size.width / 2, size.height + 1.dp.toPx()))
+                        }
+                )
+                Column(
+                    Modifier.weight(1f).padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(dates ?: "No dates", style = AdventureType.display(24.sp))
+                    if (checklist != null) {
+                        val done = checklist.items.count { it.isChecked }
+                        Text(
+                            text = "${checklist.name} \u00b7 $done of ${checklist.items.size}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        // Expressive's wavy progress: the list filling up as the trip nears.
+                        LinearWavyProgressIndicator(
+                            progress = { done.toFloat() / checklist.items.size },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        val places = collection.locations.size
+                        Text(
+                            text = if (places == 1) "1 place" else "$places places",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
         if (collection.description.isNotBlank()) {
             Text(
                 text = collection.description,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colors.onSurfaceVariant
             )
         }
-        
-        // The two facts about the collection itself, in the same chips the rest of the app uses.
-        // These were the last outlined AssistChips left standing.
+
+        // Facts about the collection itself, in the same chips the rest of the app uses.
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -894,12 +1032,14 @@ fun CollectionHeader(
         ) {
             MetaChip(
                 text = if (collection.isPublic) "\uD83C\uDF0D Public" else "\uD83D\uDD12 Private",
-                tone = if (collection.isPublic) ChipTone.NEUTRAL else ChipTone.WARNING
+                // Private is the default, not a problem: the error container shouted it in red at night.
+                tone = ChipTone.NEUTRAL
             )
-            MetaChip(
-                text = if (collection.isArchived) "\uD83D\uDCE6 Archived" else "\u2705 Active",
-                tone = if (collection.isArchived) ChipTone.NEUTRAL else ChipTone.POSITIVE
-            )
+            // Archived only when it is: "✅ Active" was every trip's default, and beside a
+            // COMPLETED status it read as a contradiction.
+            if (collection.isArchived) {
+                MetaChip(text = "\uD83D\uDCE6 Archived", tone = ChipTone.NEUTRAL)
+            }
         }
     }
 }
@@ -1431,17 +1571,77 @@ private fun SimpleEntryCard(
     }
 }
 
-/** "12/09 - 15/09", or one of the two when only one is set. */
-private fun lodgingDates(checkIn: String?, checkOut: String?): String? {
-    val short = { d: String? ->
-        d?.substringBefore('T')?.split("-")?.takeIf { it.size == 3 }?.let { "${it[2]}/${it[1]}" }
+/**
+ * "1–3 Dec", "28 Nov – 3 Dec", or the one day that is set: the trip's own dates are written this
+ * way on its ticket, and "01/12 – 03/12" read as a different app (and as January to some).
+ */
+private fun lodgingDates(checkIn: String?, checkOut: String?): String? =
+    ticketDateRange(checkIn ?: checkOut, checkOut)
+        ?.replace(Regex("\\b([A-Z])([A-Z]{2})\\b")) { it.groupValues[1] + it.groupValues[2].lowercase() }
+
+// The rows of each kind, shared by its own tab and by All.
+
+private fun LazyListScope.lodgingItems(
+    lodging: List<Lodging>,
+    onEdit: (Lodging) -> Unit,
+    onDelete: (Lodging) -> Unit,
+) {
+    items(lodging, key = { "lodging-${it.id}" }) { stay ->
+        SimpleEntryCard(
+            onClick = { onEdit(stay) },
+            onDelete = { onDelete(stay) },
+            kind = "stay",
+            title = stay.name,
+            lines = listOfNotNull(
+                stay.location?.takeIf { it.isNotBlank() },
+                lodgingDates(stay.checkIn, stay.checkOut),
+                stay.reservationNumber?.takeIf { it.isNotBlank() }
+                    ?.let { "Reservation $it" }
+            ),
+            badge = stay.type.replaceFirstChar { c -> c.uppercase() }
+        )
     }
-    val a = short(checkIn)
-    val b = short(checkOut)
-    return when {
-        a != null && b != null && a != b -> "$a \u2013 $b"
-        a != null -> a
-        b != null -> b
-        else -> null
+}
+
+private fun LazyListScope.noteItems(
+    notes: List<Note>,
+    onEdit: (Note) -> Unit,
+    onDelete: (Note) -> Unit,
+) {
+    items(notes, key = { "note-${it.id}" }) { note ->
+        SimpleEntryCard(
+            title = note.name,
+            lines = listOfNotNull(
+                note.content?.takeIf { it.isNotBlank() },
+                note.date?.substringBefore('T')?.takeIf { it.isNotBlank() }
+            ),
+            badge = null,
+            onClick = { onEdit(note) },
+            onDelete = { onDelete(note) },
+            kind = "note"
+        )
+    }
+}
+
+private fun LazyListScope.checklistItems(
+    checklists: List<Checklist>,
+    onEdit: (Checklist) -> Unit,
+    onDelete: (Checklist) -> Unit,
+) {
+    items(checklists, key = { "checklist-${it.id}" }) { checklist ->
+        val done = checklist.items.count { it.isChecked }
+        SimpleEntryCard(
+            onClick = { onEdit(checklist) },
+            onDelete = { onDelete(checklist) },
+            kind = "checklist",
+            title = checklist.name,
+            lines = checklist.items.take(4).map { item ->
+                (if (item.isChecked) "✓ " else "○ ") + item.name
+            } + listOfNotNull(
+                "and ${checklist.items.size - 4} more"
+                    .takeIf { checklist.items.size > 4 }
+            ),
+            badge = if (checklist.items.isEmpty()) null else "$done / ${checklist.items.size}"
+        )
     }
 }

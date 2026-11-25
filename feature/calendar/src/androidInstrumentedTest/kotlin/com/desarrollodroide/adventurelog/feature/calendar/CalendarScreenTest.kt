@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.calendar
 
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -208,5 +209,36 @@ class CalendarScreenTest {
         onNodeWithText("Jemaa el-Fnaa").performClick()
         assertEquals(EventTarget.Place("place-1"), opened)
         onNodeWithText("Night train").assertHasNoClickAction()
+    }
+
+    @Test
+    fun theMonthViewShowsTheMonthAndADaysEvents() = runComposeUiTest {
+        setContent {
+            show(
+                CalendarUiState(
+                    isLoading = false,
+                    today = LocalDate.parse("2026-09-03"),
+                    days = listOf(day("2026-09-05", "Vernazza"), day("2026-10-10", "Machu Picchu")),
+                )
+            )()
+        }
+
+        onNodeWithText("Month").performClick()
+        onNodeWithText("September 2026").assertIsDisplayed()
+        onNodeWithContentDescription("5 September, 1 event").performClick()
+        onNodeWithText("Vernazza").assertIsDisplayed()
+
+        onNodeWithContentDescription("Next month").performClick()
+        onNodeWithText("October 2026").assertIsDisplayed()
+    }
+
+    @Test
+    fun theAgendaIsStillWhereItOpens() = runComposeUiTest {
+        setContent {
+            show(CalendarUiState(isLoading = false, today = LocalDate.parse("2026-09-03"), days = listOf(day("2026-09-05", "Vernazza"))))()
+        }
+
+        onNodeWithText("Vernazza").assertIsDisplayed()
+        onNodeWithText("Agenda").assertIsDisplayed()
     }
 }

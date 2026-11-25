@@ -174,7 +174,7 @@ fun CategoryTags(
             MetaChip(text = "${it.icon} ${it.displayName}", tone = ChipTone.ACCENT)
         }
         if (!isPublic) {
-            MetaChip(text = "🔒 Private", tone = ChipTone.WARNING)
+            MetaChip(text = "🔒 Private", tone = ChipTone.NEUTRAL) // the default, not a warning
         }
         // Both of these are on the web's header and were missing here: whether the place has been
         // visited at all, and how many times.

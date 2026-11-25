@@ -45,7 +45,7 @@ class PublicRowsTest {
             BasicInfoSection(formData = state, onFormDataChange = { state = it; form = it })
         }
 
-        onNodeWithText("Public Collection").performClick()
+        onNodeWithText("Public collection").performClick()
         waitForIdle()
 
         assertEquals(true, form.isPublic)

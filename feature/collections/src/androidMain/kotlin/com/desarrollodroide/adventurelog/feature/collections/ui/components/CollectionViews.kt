@@ -1,5 +1,14 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.components
 
+import androidx.compose.ui.unit.Dp
+import com.desarrollodroide.adventurelog.feature.ui.components.bleedHorizontally
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -50,10 +59,17 @@ fun CollectionViewSwitcher(
     selectedView: CollectionView,
     onViewSelected: (CollectionView) -> Unit,
     modifier: Modifier = Modifier,
-    views: List<CollectionView> = CollectionView.entries
+    views: List<CollectionView> = CollectionView.entries,
+    /** The page margin the row sits in; it scrolls out to the screen's edges through it. */
+    bleed: Dp = 0.dp,
 ) {
     Row(
-        modifier = modifier.horizontalScroll(rememberScrollState()),
+        modifier = modifier
+            // Out over the page's margin, so the last view slides off the screen's edge instead
+            // of being sliced at the margin ("Calend"); the padding puts the first one back in line.
+            .bleedHorizontally(bleed)
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = bleed),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -67,42 +83,34 @@ fun CollectionViewSwitcher(
     }
 }
 
+/**
+ * A view of the collection as Expressive's toggle button: round while off, its corners tightening
+ * as it is chosen (the button's own shape morph), inked dark when on.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CollectionViewChip(
     view: CollectionView,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val container =
-        if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerHighest
-    val content =
-        if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
-        else MaterialTheme.colorScheme.onSurfaceVariant
-
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        color = container,
-        shape = RoundedCornerShape(percent = 50)
+    val colors = MaterialTheme.colorScheme
+    ToggleButton(
+        checked = isSelected,
+        onCheckedChange = { onClick() },
+        shapes = ToggleButtonDefaults.shapesFor(40.dp),
+        colors = ToggleButtonDefaults.colors(
+            containerColor = colors.surfaceContainerHighest,
+            contentColor = colors.onSurfaceVariant,
+            checkedContainerColor = colors.inverseSurface,
+            checkedContentColor = colors.inverseOnSurface,
+        ),
+        contentPadding = PaddingValues(start = 12.dp, end = 16.dp),
+        modifier = Modifier.heightIn(min = 40.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(
-                imageVector = view.icon,
-                contentDescription = null,
-                tint = content,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = view.title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                color = content
-            )
-        }
+        Icon(imageVector = view.icon, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(text = view.title, style = MaterialTheme.typography.labelLarge)
     }
 }
 

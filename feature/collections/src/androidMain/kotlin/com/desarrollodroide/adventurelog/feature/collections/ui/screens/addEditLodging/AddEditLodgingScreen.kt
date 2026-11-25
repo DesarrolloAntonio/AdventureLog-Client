@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditLodging
 
+import com.desarrollodroide.adventurelog.feature.ui.components.FormActionBar
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.FormHeader
 import com.desarrollodroide.adventurelog.feature.ui.components.date.DatePickerField
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.PublicSwitchRow
 import androidx.compose.foundation.layout.Arrangement
@@ -72,6 +75,8 @@ fun AddEditLodgingScreen(
     var stayOpen by remember { mutableStateOf(true) }
 
     LaunchedEffect(existingLodging?.id) { viewModel.load(collectionId, existingLodging?.id) }
+    // Full screen on a phone, as the canvas draws its forms: Close at the top, no app bars.
+    HideShellChrome()
     val leave = rememberDiscardGuard(
         hasChanges = !state.isLoading && viewModel.hasChanges(state),
         thing = "stay",
@@ -106,84 +111,84 @@ fun AddEditLodgingScreen(
     }
     Box(modifier = modifier.fillMaxSize()) {
         ContentColumn {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = if (existingLodging == null) "New lodging" else "Edit lodging",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-
-                SectionCard(
-                    // The rows below it already sit inside the form's 16dp; the card added its own and
-                    // came out narrower than everything else on the page (QA CO-19).
-                    inset = 0.dp,
-                    title = "The stay",
-                    icon = Icons.Default.Hotel,
-                    expanded = stayOpen,
-                    onExpandedChange = { stayOpen = it }
+            Column(Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f).fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                StyledTextField(
-                    value = state.name,
-                    onValueChange = viewModel::onNameChange,
-                    label = "Name",
-                    icon = Icons.Default.Title,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    FormHeader(
+                        title = if (existingLodging == null) "New lodging" else "Edit lodging",
+                        onClose = leave
+                    )
 
-                Text("Type", style = MaterialTheme.typography.labelLarge)
+                    SectionCard(
+                        // The rows below it already sit inside the form's 16dp; the card added its own and
+                        // came out narrower than everything else on the page (QA CO-19).
+                        inset = 0.dp,
+                        title = "The stay",
+                        icon = Icons.Default.Hotel,
+                        expanded = stayOpen,
+                        onExpandedChange = { stayOpen = it }
+                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StyledTextField(
+                        value = state.name,
+                        onValueChange = viewModel::onNameChange,
+                        label = "Name",
+                        icon = Icons.Default.Title,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                @OptIn(ExperimentalLayoutApi::class)
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    LodgingTypes.forEach { type ->
-                        FilterChip(
-                            selected = state.type == type,
-                            onClick = { viewModel.onTypeChange(type) },
-                            label = { Text(type.replaceFirstChar { it.uppercase() }) }
-                        )
+                    Text("Type", style = MaterialTheme.typography.labelLarge)
+
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        LodgingTypes.forEach { type ->
+                            FilterChip(
+                                selected = state.type == type,
+                                onClick = { viewModel.onTypeChange(type) },
+                                label = { Text(type.replaceFirstChar { it.uppercase() }) }
+                            )
+                        }
                     }
-                }
 
-                // Stacked: side by side on a phone there is no room for a date and its clear button.
-                DatePickerField(
-                    label = "Check-in",
-                    value = state.checkIn,
-                    onValueChange = viewModel::onCheckInChange,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                DatePickerField(
-                    label = "Check-out",
-                    value = state.checkOut,
-                    onValueChange = viewModel::onCheckOutChange,
-                    earliest = state.checkIn,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    // Stacked: side by side on a phone there is no room for a date and its clear button.
+                    DatePickerField(
+                        label = "Check-in",
+                        value = state.checkIn,
+                        onValueChange = viewModel::onCheckInChange,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    DatePickerField(
+                        label = "Check-out",
+                        value = state.checkOut,
+                        onValueChange = viewModel::onCheckOutChange,
+                        earliest = state.checkIn,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                StyledTextField(
-                    value = state.location,
-                    onValueChange = viewModel::onLocationChange,
-                    label = "Where it is",
-                    icon = Icons.Default.Place,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    StyledTextField(
+                        value = state.location,
+                        onValueChange = viewModel::onLocationChange,
+                        label = "Where it is",
+                        icon = Icons.Default.Place,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // One per row: side by side, "Reservation" broke over two lines on a phone.
                     StyledTextField(
                         value = state.reservationNumber,
                         onValueChange = viewModel::onReservationChange,
                         label = "Reservation",
                         icon = Icons.Default.ConfirmationNumber,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     )
                     StyledTextField(
                         value = state.price,
@@ -192,59 +197,53 @@ fun AddEditLodgingScreen(
                         // code, and a plain money icon (QA CO-19).
                         label = state.priceCurrency.takeIf { it.isNotBlank() }?.let { "Price ($it)" } ?: "Price",
                         icon = Icons.Outlined.Payments,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.fillMaxWidth()
                     )
-                }
 
-                StyledTextField(
-                    value = state.link,
-                    onValueChange = viewModel::onLinkChange,
-                    label = "Booking link",
-                    icon = Icons.Default.Link,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                }
-                }
-
-                StyledTextField(
-                    value = state.description,
-                    onValueChange = viewModel::onDescriptionChange,
-                    label = "Notes",
-                    icon = Icons.Default.Notes,
-                    singleLine = false,
-                    minLines = 4,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    PublicSwitchRow(
-                        title = "Public",
-                        checked = state.isPublic,
-                        onCheckedChange = viewModel::onPublicChange
+                    StyledTextField(
+                        value = state.link,
+                        onValueChange = viewModel::onLinkChange,
+                        label = "Booking link",
+                        icon = Icons.Default.Link,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                }
 
-                // The same pair as the collection and transport forms: Save across the form,
-                // Cancel under it. These three had a small Save and Cancel side by side on the
-                // left (QA CO-19).
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    PrimaryButton(
-                        onClick = { viewModel.save(collectionId) },
-                        text = if (state.isSaving) "Saving…" else "Save",
-                        enabled = state.canSave
-                    )
-                    TextButton(onClick = leave, modifier = Modifier.fillMaxWidth()) {
-                        Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
+                    }
+
+                    StyledTextField(
+                        value = state.description,
+                        onValueChange = viewModel::onDescriptionChange,
+                        label = "Notes",
+                        icon = Icons.Default.Notes,
+                        singleLine = false,
+                        minLines = 4,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        PublicSwitchRow(
+                            title = "Public",
+                            checked = state.isPublic,
+                            onCheckedChange = viewModel::onPublicChange
+                        )
+                    }
+
                 }
+                // Save and Cancel pinned under the form, as the canvas draws it.
+                FormActionBar(
+                    onClick = { viewModel.save(collectionId) },
+                    text = if (state.isSaving) "Saving…" else "Save",
+                    enabled = state.canSave,
+                    onCancel = leave
+                )
             }
         }
 

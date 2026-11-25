@@ -91,6 +91,9 @@ internal fun HeadersBuilder.commonHeaders(sessionToken: String?) {
 
 internal val defaultJson = Json {
     ignoreUnknownKeys = true
+    // Server 0.14 sends null for fields 0.13 always filled (a flag, an image, a day's date):
+    // those DTO fields keep a default, and a null takes it instead of failing the whole answer.
+    coerceInputValues = true
     isLenient = true
     encodeDefaults = true  // Include fields with default values
     explicitNulls = true   // Include null values in JSON

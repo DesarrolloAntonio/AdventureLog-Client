@@ -7,6 +7,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -33,20 +34,35 @@ class DiscardOnLeaveTest {
         CompositionLocalProvider(LocalImageLoader provides ImageLoader(context)) { content() }
     }
 
-    private fun ComposeUiTest.cancel() = onNodeWithText("Cancel").performScrollTo().performClick()
+    // Cancel is pinned under the form: on screen without scrolling to it, however long the form.
+    private fun ComposeUiTest.cancel() = onNodeWithText("Cancel").assertIsDisplayed().performClick()
 
     @Test
     fun aTypedCollectionIsNotThrownAwayWithoutAsking() = runComposeUiTest {
         var left = 0
         setContent { WithAppLocals { AddEditCollectionScreen(onNavigateBack = { left++ }, onSave = {}) } }
 
-        onNode(hasSetTextAction() and hasText("Collection Name")).performTextInput("QA_Trip")
+        onNode(hasSetTextAction() and hasText("Collection name")).performTextInput("QA_Trip")
         cancel()
 
         onNodeWithText("Discard this collection?").assertIsDisplayed()
         assertEquals(0, left)
         onNodeWithText("Discard").performClick()
         assertEquals(1, left)
+    }
+
+    @Test
+    fun closeAsksJustAsCancelDoes() = runComposeUiTest {
+        var left = 0
+        setContent { WithAppLocals { AddEditCollectionScreen(onNavigateBack = { left++ }, onSave = {}) } }
+
+        // The form opens on what it is making, with Close at the top, as the canvas draws it.
+        onNodeWithText("New collection").assertIsDisplayed()
+        onNode(hasSetTextAction() and hasText("Collection name")).performTextInput("QA_Trip")
+        onNodeWithContentDescription("Close").performClick()
+
+        onNodeWithText("Discard this collection?").assertIsDisplayed()
+        assertEquals(0, left)
     }
 
     @Test
@@ -73,13 +89,15 @@ class DiscardOnLeaveTest {
         var left = 0
         setContent { WithAppLocals { TransportForm { left++ } } }
 
-        onNode(hasSetTextAction() and hasText("Transportation Name")).performTextInput("QA_Train")
+        onNode(hasSetTextAction() and hasText("Transportation name")).performTextInput("QA_Train")
         cancel()
 
         onNodeWithText("Discard this transport?").assertIsDisplayed()
         assertEquals(0, left)
         onNodeWithText("Keep editing").performClick()
-        onNode(hasSetTextAction() and hasText("QA_Train")).assertIsDisplayed()
+        // Still there - scrolled to, since Cancel sits below a taller Save and the field can be
+        // above the fold by then.
+        onNode(hasSetTextAction() and hasText("QA_Train")).performScrollTo().assertIsDisplayed()
         assertEquals(0, left)
     }
 

@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 
 /**
  * One part of a location's page.
@@ -39,16 +41,11 @@ fun DetailSection(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // The canvas's section voice: condensed and heavy, no rule beside it.
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(Modifier.width(12.dp))
-            HorizontalDivider(
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
+                style = AdventureType.display(28.sp),
+                modifier = Modifier.weight(1f)
             )
             if (trailing != null) {
                 Spacer(Modifier.width(12.dp))

@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
+import com.google.android.gms.maps.model.LatLngBounds
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Button
@@ -16,6 +17,7 @@ import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MapContent(
     locations: List<Location>,
@@ -27,15 +29,18 @@ fun MapContent(
     error: String?,
     onRetry: () -> Unit = {},
     onAdventureClick: (adventureId: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedId: String? = null,
+    contentPadding: PaddingValues = PaddingValues(),
+    onVisibleBoundsChanged: ((LatLngBounds) -> Unit)? = null,
 ) {
     Box(
         modifier = modifier.fillMaxSize()
     ) {
         when {
             isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+                LoadingIndicator(
+                    modifier = Modifier.align(Alignment.Center).size(64.dp)
                 )
             }
             
@@ -68,15 +73,8 @@ fun MapContent(
             }
             
             else -> {
-                // Map with rounded corners and shadow
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .clip(RoundedCornerShape(24.dp)),
-                    shadowElevation = 8.dp,
-                    shape = RoundedCornerShape(24.dp)
-                ) {
+                // Edge to edge, as the canvas draws the Map tab: the controls float over it.
+                Box(Modifier.fillMaxSize()) {
                     AdventureMapView(
                         locations = locations,
                         visitedCities = visitedCities,
@@ -84,7 +82,11 @@ fun MapContent(
                         visitedRegions = visitedRegions,
                         showRegions = showRegions,
                         onAdventureClick = onAdventureClick,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        selectedId = selectedId,
+                        contentPadding = contentPadding,
+                        rounded = false,
+                        onVisibleBoundsChanged = onVisibleBoundsChanged,
                     )
                 }
             }

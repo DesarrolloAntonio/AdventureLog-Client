@@ -1,5 +1,11 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
+
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.locationsList
 
+import androidx.compose.material3.LoadingIndicator
+import com.desarrollodroide.adventurelog.feature.ui.components.shellAppBarExpanded
+import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel.CategoriesState
+import com.desarrollodroide.adventurelog.feature.locations.ui.components.categories.ManageCategoriesDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +29,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import com.desarrollodroide.adventurelog.feature.ui.components.rememberShellAction
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +62,13 @@ import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.core.model.UltraSlimCollection
 import com.desarrollodroide.adventurelog.feature.locations.ui.components.LocationsFilterBottomSheet
 import com.desarrollodroide.adventurelog.feature.locations.viewmodel.LocationsViewModel
+import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
+import androidx.compose.foundation.lazy.LazyColumn
+import com.desarrollodroide.adventurelog.feature.locations.model.VisitedFilter
+import com.desarrollodroide.adventurelog.core.model.SortDirection
+import com.desarrollodroide.adventurelog.feature.locations.model.LocationSortField
 import com.desarrollodroide.adventurelog.feature.ui.components.ErrorState
 import com.desarrollodroide.adventurelog.feature.ui.components.LoadingCard
 import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
@@ -88,6 +101,7 @@ fun LocationListScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val actualSearchQuery by viewModel.actualSearchQuery.collectAsStateWithLifecycle()
     val filters by viewModel.filters.collectAsStateWithLifecycle()
+    val countryGroups by viewModel.countryGroups.collectAsStateWithLifecycle()
     val showFilters by viewModel.showFilters.collectAsStateWithLifecycle()
     val categoriesState by viewModel.categoriesState.collectAsStateWithLifecycle()
     val collections by viewModel.collections.collectAsStateWithLifecycle()
@@ -99,6 +113,9 @@ fun LocationListScreen(
     val categoryOperationState by viewModel.categoryOperationState.collectAsStateWithLifecycle()
 
     var locationToManageCollections by remember { mutableStateOf<Location?>(null) }
+    var showSort by remember { mutableStateOf(false) }
+    var showCategories by remember { mutableStateOf(false) }
+    var showManageCategories by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val actionMessage by viewModel.actionMessage.collectAsStateWithLifecycle()
     val libraryCounts by viewModel.libraryCounts.collectAsStateWithLifecycle()
@@ -136,6 +153,37 @@ fun LocationListScreen(
             )
         }
 
+        if (showCategories) {
+            PlacesCategorySheet(
+                categoriesState = categoriesState,
+                selected = filters.categoryNames,
+                onChange = { viewModel.onFiltersChanged(filters.copy(categoryNames = it)) },
+                onManage = { showManageCategories = true },
+                onRetry = viewModel::retryLoadCategories,
+                onDismiss = { showCategories = false },
+            )
+        }
+        if (showManageCategories) {
+            ManageCategoriesDialog(
+                categoriesState = categoriesState,
+                onDismiss = { showManageCategories = false },
+                onAddCategory = viewModel::createCategory,
+                onEditCategory = viewModel::updateCategory,
+                onDeleteCategory = viewModel::deleteCategory,
+                onRetryLoadCategories = viewModel::retryLoadCategories,
+            )
+        }
+        if (showSort) {
+            PlacesSortSheet(
+                sortField = filters.sortField,
+                sortDirection = filters.sortDirection,
+                onChange = { field, direction ->
+                    viewModel.onFiltersChanged(filters.copy(sortField = field, sortDirection = direction))
+                },
+                onDismiss = { showSort = false },
+            )
+        }
+
     AdventureListContent(
         pagingItems = pagingItems,
         searchQuery = searchQuery,
@@ -160,6 +208,17 @@ fun LocationListScreen(
             viewModel.deleteAdventure(adventure.id)
         },
         libraryCounts = libraryCounts,
+        visitedFilter = filters.visitedFilter,
+        onVisitedFilterChange = { viewModel.onFiltersChanged(filters.copy(visitedFilter = it)) },
+        // The chip reads the names people gave them ("Hiking"), not the server's slugs ("hiking").
+        categoryNames = filters.categoryNames.map { name ->
+            (categoriesState as? CategoriesState.Success)?.categories?.firstOrNull { it.name == name }?.displayName ?: name
+        },
+        sortField = filters.sortField,
+        sortDirection = filters.sortDirection,
+        onShowSort = { showSort = true },
+        countryGroups = countryGroups,
+        onShowCategories = { showCategories = true },
         onManageCollections = { adventure -> locationToManageCollections = adventure },
         onRefresh = {
             viewModel.refresh()
@@ -274,24 +333,36 @@ private fun AdventureListContent(
     onManageCollections: (Location) -> Unit,
     onRefresh: () -> Unit,
     libraryCounts: UserStats? = null,
+    visitedFilter: VisitedFilter = VisitedFilter.ALL,
+    onVisitedFilterChange: (VisitedFilter) -> Unit = {},
+    categoryNames: List<String> = emptyList(),
+    sortField: LocationSortField = LocationSortField.UPDATED_AT,
+    sortDirection: SortDirection = SortDirection.DESCENDING,
+    onShowSort: () -> Unit = onShowFilters,
+    /** Non-null while "Country" is the order: the list is grouped instead of paged. */
+    countryGroups: LocationsViewModel.CountryGroupsState? = null,
+    onShowCategories: () -> Unit = onShowFilters,
     modifier: Modifier = Modifier
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
+    val handedToShell = rememberShellAction(Icons.Default.Add, "Add a place", onAddAdventureClick)
+    val (view, onViewChange) = rememberPlacesView()
     Scaffold(
         modifier = modifier,
         topBar = {
           Column {
             // The whole library, not the page on screen - see LocationsViewModel.libraryCounts.
             libraryCounts?.let { counts ->
+                // Places and countries; the visited count is on the Visited button just below.
                 Text(
                     text = buildString {
                         append(counts.locationCount)
                         append(if (counts.locationCount == 1) " place" else " places")
-                        if (counts.visitedLocationCount > 0) {
+                        if (counts.visitedCountryCount > 0) {
                             append(" · ")
-                            append(counts.visitedLocationCount)
-                            append(" visited")
+                            append(counts.visitedCountryCount)
+                            append(if (counts.visitedCountryCount == 1) " country visited" else " countries visited")
                         }
                     },
                     style = MaterialTheme.typography.labelLarge,
@@ -299,6 +370,11 @@ private fun AdventureListContent(
                     modifier = Modifier.padding(start = 20.dp, top = 4.dp)
                 )
             }
+            // The Filters chip counts what its sheet holds; visited and the order show on their own controls.
+            val sortChanged = sortField != LocationSortField.UPDATED_AT || sortDirection != SortDirection.DESCENDING
+            val sheetFilterCount = activeFilterCount -
+                (if (visitedFilter != VisitedFilter.ALL) 1 else 0) -
+                (if (sortChanged) 1 else 0)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -314,18 +390,31 @@ private fun AdventureListContent(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(10.dp))
-                SearchBarAction(
-                    icon = Icons.Default.FilterList,
-                    contentDescription = "Filters",
-                    active = activeFilterCount > 0,
-                    badgeCount = activeFilterCount,
-                    onClick = onShowFilters
-                )
+                PlacesViewToggle(view, onViewChange)
             }
+            VisitedFilterGroup(
+                counts = libraryCounts,
+                selected = visitedFilter,
+                onSelect = onVisitedFilterChange,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+            )
+            // The filters the sheet holds, said as chips, as the canvas draws them: what is on
+            // reads at a glance, and each one opens the sheet.
+            PlacesFilterChips(
+                sheetFilterCount = sheetFilterCount,
+                categoryNames = categoryNames,
+                sortField = sortField,
+                sortDirection = sortDirection,
+                onOpen = onShowFilters,
+                onOpenSort = onShowSort,
+                onOpenCategories = onShowCategories,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
           }
         },
         floatingActionButton = {
-            FloatingActionButton(
+            // On a phone the shell draws this beside its floating toolbar, as the canvas does.
+            if (!handedToShell) FloatingActionButton(
                 onClick = onAddAdventureClick,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -348,15 +437,36 @@ private fun AdventureListContent(
             isRefreshing = isRefreshing,
             onRefresh = onRefresh,
             state = pullToRefreshState,
+            enabled = shellAppBarExpanded(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
             when {
+                countryGroups != null -> when (countryGroups) {
+                    is LocationsViewModel.CountryGroupsState.Loading -> CountryGroupsLoading()
+                    is LocationsViewModel.CountryGroupsState.Error -> ErrorState(message = countryGroups.message, onRetry = onRefresh)
+                    is LocationsViewModel.CountryGroupsState.Ready -> if (countryGroups.groups.isEmpty()) {
+                        NoSearchResultsState(searchQuery = actualSearchQuery, hasFilters = activeFilterCount > 0)
+                    } else {
+                        CountryGroupedList(
+                            groups = countryGroups.groups,
+                            onPlaceClick = onAdventureClick,
+                            onEdit = onEditAdventure,
+                            onAddPhoto = onAddPhoto,
+                            onDuplicate = onDuplicateAdventure,
+                            onShare = onShareAdventure,
+                            onDelete = onDeleteAdventure,
+                            onManageCollections = onManageCollections,
+                        )
+                    }
+                }
+
                 // Show existing content during pull to refresh
                 isRefreshing && pagingItems.itemCount > 0 -> {
                     AdventuresPagingList(
                         pagingItems = pagingItems,
+                        view = view,
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
@@ -384,6 +494,7 @@ private fun AdventureListContent(
                 pagingItems.loadState.refresh is LoadStateError && pagingItems.itemCount > 0 -> {
                     AdventuresPagingList(
                         pagingItems = pagingItems,
+                        view = view,
                         collections = collections,
                         onAdventureClick = onAdventureClick,
                         onEditAdventure = onEditAdventure,
@@ -422,6 +533,7 @@ private fun AdventureListContent(
                         else -> {
                             AdventuresPagingList(
                                 pagingItems = pagingItems,
+                                view = view,
                                 collections = collections,
                                 onAdventureClick = onAdventureClick,
                                 onEditAdventure = onEditAdventure,
@@ -442,6 +554,7 @@ private fun AdventureListContent(
 @Composable
 private fun AdventuresPagingList(
     pagingItems: LazyPagingItems<Location>,
+    view: PlacesView,
     collections: List<UltraSlimCollection>,
     onAdventureClick: (Location) -> Unit,
     onEditAdventure: (Location) -> Unit,
@@ -451,23 +564,27 @@ private fun AdventuresPagingList(
     onDeleteAdventure: (Location) -> Unit,
     onManageCollections: (Location) -> Unit
 ) {
-    // One card per row is right on a phone and absurd on a tablet, where it stretches a
-    // photograph across 1600px. A minimum width lets the window decide the column count: one on a
-    // phone, two or three on a tablet, without either having to name a device.
-        // Same single content column as everywhere else. In the two-pane layout the list side is
-    // narrower than the cap, so this changes nothing there.
+    if (view == PlacesView.PHOTOS) {
+        PlacesPhotoGrid(
+            pagingItems = pagingItems,
+            onAdventureClick = onAdventureClick,
+            onEditAdventure = onEditAdventure,
+            onAddPhoto = onAddPhoto,
+            onDuplicateAdventure = onDuplicateAdventure,
+            onShareAdventure = onShareAdventure,
+            onDeleteAdventure = onDeleteAdventure,
+            onManageCollections = onManageCollections,
+        )
+        return
+    }
+    // Rows, as the canvas draws Places: a photograph is a thumbnail here and the place's own page
+    // is where it is shown large. One column at every width, capped like every other screen; in the
+    // two-pane layout the list side is narrower than the cap anyway.
     ContentColumn {
-    LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 300.dp),
+        LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = 16.dp,
-                bottom = 80.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap)
         ) {
             items(
                 count = pagingItems.itemCount,
@@ -475,8 +592,11 @@ private fun AdventuresPagingList(
             ) { index ->
                 val adventure = pagingItems[index]
                 if (adventure != null) {
-                    AdventureItem(
+                    PlaceRow(
                         location = adventure,
+                        // One group: the outer corners round, the inner ones barely. A page loaded
+                        // below turns the last row into a middle one, which is what it then is.
+                        shape = SegmentedListDefaults.shapeFor(index, pagingItems.itemCount),
                         onClick = { onAdventureClick(adventure) },
                         onEdit = { onEditAdventure(adventure) },
                         onAddPhoto = { onAddPhoto(adventure) },
@@ -488,43 +608,89 @@ private fun AdventuresPagingList(
                 }
             }
 
-            when (pagingItems.loadState.append) {
-                is LoadStateLoading -> {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+            when (val append = pagingItems.loadState.append) {
+                is LoadStateLoading -> item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        LoadingIndicator(modifier = Modifier.size(40.dp))
                     }
                 }
 
-                is LoadStateError -> {
-                    val error = pagingItems.loadState.append as LoadStateError
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = placesLoadErrorMessage(error.error),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
+                is LoadStateError -> item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = placesLoadErrorMessage(append.error),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
 
-                is LoadStateNotLoading -> {
-                    // Nothing to do
+                else -> {}
+            }
+        }
+    }
+}
+
+/**
+ * The photographs view: each place as the card the list used before the redesign, its photograph
+ * across the whole width. One column on a phone; the window decides how many fit on a tablet.
+ */
+@Composable
+private fun PlacesPhotoGrid(
+    pagingItems: LazyPagingItems<Location>,
+    onAdventureClick: (Location) -> Unit,
+    onEditAdventure: (Location) -> Unit,
+    onAddPhoto: (Location) -> Unit,
+    onDuplicateAdventure: (Location) -> Unit,
+    onShareAdventure: (Location) -> Unit,
+    onDeleteAdventure: (Location) -> Unit,
+    onManageCollections: (Location) -> Unit,
+) {
+    ContentColumn {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 300.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(count = pagingItems.itemCount, key = pagingItems.itemKey { it.id }) { index ->
+                val adventure = pagingItems[index]
+                if (adventure != null) {
+                    AdventureItem(
+                        location = adventure,
+                        onClick = { onAdventureClick(adventure) },
+                        onEdit = { onEditAdventure(adventure) },
+                        onAddPhoto = { onAddPhoto(adventure) },
+                        onDuplicate = { onDuplicateAdventure(adventure) },
+                        onShare = { onShareAdventure(adventure) },
+                        onDelete = { onDeleteAdventure(adventure) },
+                        onManageCollections = { onManageCollections(adventure) },
+                    )
                 }
+            }
+            when (val append = pagingItems.loadState.append) {
+                is LoadStateLoading -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        LoadingIndicator(modifier = Modifier.size(40.dp))
+                    }
+                }
+                is LoadStateError -> item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = placesLoadErrorMessage(append.error),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+                else -> {}
             }
         }
     }

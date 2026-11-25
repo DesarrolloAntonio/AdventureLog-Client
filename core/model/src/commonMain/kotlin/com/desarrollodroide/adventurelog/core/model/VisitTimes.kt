@@ -16,7 +16,7 @@ fun isAllDayBound(isoDateTime: String?): Boolean =
 
 /**
  * A visit is all day only when neither end has a time. Starting and ending on the same date is not
- * enough: the place page showed a visit from 10:30 to 18:45 as "All Day" and hid its times (measured).
+ * enough: the place page showed a visit from 10:30 to 18:45 as "All day" and hid its times (measured).
  */
 fun isAllDayVisit(startDate: String?, endDate: String?): Boolean =
     isAllDayBound(startDate) && isAllDayBound(endDate ?: startDate)

@@ -20,14 +20,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 /**
- * Standard TextField to be used across the entire app for consistency.
- * 
- * This component ensures all text fields have:
- * - Rounded corners (30.dp)
- * - Consistent colors and styling
- * - Proper error handling
- * - Leading/trailing icon support
- * 
+ * A pill-shaped field on a tonal fill, for search boxes and short names inside sheets: no outline
+ * until it has focus or an error, so it reads as part of the sheet rather than as a form.
+ *
  * @param value The current text value
  * @param onValueChange Callback when text changes
  * @param modifier Modifier for the text field
@@ -73,7 +68,7 @@ fun StandardTextField(
                 { 
                     Text(
                         text = it,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     ) 
                 }
@@ -81,7 +76,7 @@ fun StandardTextField(
                 { 
                     Text(
                         text = it,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     ) 
                 }
@@ -91,7 +86,7 @@ fun StandardTextField(
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             },
@@ -106,10 +101,11 @@ fun StandardTextField(
             readOnly = readOnly,
             shape = RoundedCornerShape(30.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f),
-                errorContainerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f),
+                // Every caller puts it on a sheet, whose ground is surfaceContainerLow.
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                errorContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 focusedBorderColor = if (isError) {
                     MaterialTheme.colorScheme.error
                 } else {
@@ -141,6 +137,7 @@ fun StandardTextField(
  * Variant of StandardTextField specifically for search fields.
  * Includes search icon by default and clear button when there's text.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StandardSearchField(
     value: String,
@@ -159,12 +156,13 @@ fun StandardSearchField(
         trailingIcon = if (value.isNotEmpty()) {
             {
                 IconButton(
-                    onClick = { onValueChange("") }
+                    onClick = { onValueChange("") },
+                    shapes = IconButtonDefaults.shapes()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Clear,
                         contentDescription = "Clear",
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

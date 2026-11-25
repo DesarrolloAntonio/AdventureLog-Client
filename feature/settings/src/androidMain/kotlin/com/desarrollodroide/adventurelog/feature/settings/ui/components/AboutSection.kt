@@ -42,7 +42,10 @@ fun AboutSection(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        SettingsGroup(title = "About") {
+        SettingsGroup(
+        segmented = true,
+        iconContainer = MaterialTheme.colorScheme.surfaceContainerHighest,
+        title = "About") {
             SettingsRow(
                 title = "Server",
                 icon = Icons.Outlined.Dns,
@@ -56,7 +59,8 @@ fun AboutSection(
                     icon = Icons.Outlined.Badge,
                     supporting = buildString {
                         append(if (it.isStaff) "Staff" else "Basic user")
-                        val joined = it.dateJoined.take(10)
+                        // "28 Aug 2026", as dates read everywhere else in the app, not ISO.
+                        val joined = readableDay(it.dateJoined)
                         if (joined.isNotBlank()) append(" · joined $joined")
                     },
                     showChevron = false
@@ -114,4 +118,14 @@ fun AboutSection(
             )
         }
     }
+}
+
+private val MonthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/** "28 Aug 2026" from an ISO date or date-time; blank when it is not one. */
+private fun readableDay(iso: String): String {
+    val parts = iso.substringBefore('T').split("-")
+    val month = parts.getOrNull(1)?.toIntOrNull()?.let { MonthNames.getOrNull(it - 1) }
+    val day = parts.getOrNull(2)?.toIntOrNull()
+    return if (parts.size == 3 && month != null && day != null) "$day $month ${parts[0]}" else ""
 }

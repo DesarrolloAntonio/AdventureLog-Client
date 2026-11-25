@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+
 plugins {
     alias(libs.plugins.adventurelog.kotlinMultiplatform)
     alias(libs.plugins.adventurelog.composeMultiplatform)
@@ -30,3 +32,21 @@ kotlin {
     }
 }
 
+
+kotlin {
+    sourceSets {
+        androidInstrumentedTest.dependencies {
+            implementation(compose.uiTest)
+            implementation(libs.androidx.test.runner)
+            implementation(libs.junit)
+            implementation(libs.androidx.espresso.core)
+            implementation(libs.compose.ui.test.manifest)
+        }
+    }
+}
+
+android {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+}
