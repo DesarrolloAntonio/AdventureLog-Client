@@ -72,6 +72,7 @@ struct TripView: View {
         }
         .mistBackground()
         .navigationBarTitleDisplayMode(.large)
+        .opensLargeTitle()
         .navigationTitle(state.collection?.name ?? name)
         .navigationSubtitle(state.collection.map(Self.subtitle) ?? subtitle)
         .toolbar {

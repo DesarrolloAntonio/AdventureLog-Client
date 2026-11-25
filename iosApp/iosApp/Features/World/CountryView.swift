@@ -42,6 +42,7 @@ struct CountryView: View {
         .navigationBarTitleDisplayMode(.large)
         .navigationTitle(country.name)
         .navigationSubtitle(subtitle)
+        .opensLargeTitle()
         .onChange(of: query) { _, v in vm.onSearchQueryChanged(query: v) }
         .alert(state.message ?? "", isPresented: Binding(get: { state.message != nil }, set: { if !$0 { vm.clearMessage() } })) {
             Button("OK", role: .cancel) {}

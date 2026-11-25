@@ -51,6 +51,7 @@ struct PlaceView: View {
         .refreshable { vm.loadLocation(locationId: placeId) }
         .mistBackground()
         .navigationBarTitleDisplayMode(.large)
+        .opensLargeTitle()
         .task { vm.loadLocation(locationId: placeId) }
         .task { for await s in vm.locationState { state = s } }
         .task { for await c in vm.collections { collections = c } }
