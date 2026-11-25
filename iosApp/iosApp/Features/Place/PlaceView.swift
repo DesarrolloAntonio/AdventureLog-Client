@@ -4,7 +4,8 @@ import ComposeApp
 
 /// One place, as the Mist-Place artboard draws it: its name as the title and where it is under
 /// it, tags for its stars, category and visit state, its photos in a card you swipe, Directions
-/// in teal beside Add visit, the details (last visit, collection, coordinates) and what it's about.
+/// in teal beside Add visit, the details (last visit, collection, coordinates), each visit (tap one
+/// to change or delete it), its trails, and what it's about.
 struct PlaceView: View {
     let placeId: String
     /// Shown as the title while the place loads.
@@ -20,6 +21,8 @@ struct PlaceView: View {
     @State private var message: String?
     @State private var editing = false
     @State private var addingVisit = false
+    /// The visit being changed, by id.
+    @State private var editingVisit: String?
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -62,6 +65,9 @@ struct PlaceView: View {
         .sheet(isPresented: $addingVisit) {
             VisitFormView(placeId: placeId, placeName: loaded?.name ?? name) { vm.loadLocation(locationId: placeId) }
         }
+        .sheet(item: Binding(get: { editingVisit.map(EditedVisit.init) }, set: { editingVisit = $0?.id })) { visit in
+            VisitFormView(placeId: placeId, placeName: loaded?.name ?? name, visitId: visit.id) { vm.loadLocation(locationId: placeId) }
+        }
         .alert(message ?? "", isPresented: Binding(get: { message != nil }, set: { if !$0 { vm.clearAttachmentMessage() } })) {
             Button("OK", role: .cancel) {}
         }
@@ -84,6 +90,10 @@ struct PlaceView: View {
                 actions(place).padding(.top, 16)
 
                 details(place)
+
+                visits(place)
+
+                trails(place)
 
                 if let about = place.description_, !about.isEmpty {
                     SectionLabel(text: "About").padding(.top, 22).padding(.bottom, 8)
@@ -208,6 +218,77 @@ struct PlaceView: View {
         }
     }
 
+    // MARK: Visits and trails
+
+    /// Each visit, newest first: its days and its note. Tapping one opens it to change or delete.
+    @ViewBuilder
+    private func visits(_ place: Location) -> some View {
+        let visits = place.visits.sorted { ($0.startDate ?? "") > ($1.startDate ?? "") }
+        if !visits.isEmpty {
+            SectionLabel(text: "Visits", trailing: "\(visits.count)").padding(.top, 22).padding(.bottom, 8)
+            VStack(spacing: 0) {
+                ForEach(Array(visits.enumerated()), id: \.element.id) { index, visit in
+                    if index > 0 { RowSeparator() }
+                    Button { editingVisit = visit.id } label: {
+                        HStack(spacing: 12) {
+                            ToneBadge(systemImage: "calendar", tone: .amber)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(DayRange(start: visit.startDate, end: visit.endDate)?.shortText ?? "No date")
+                                    .foregroundStyle(Theme.ink)
+                                if let notes = visit.notes, !notes.isEmpty {
+                                    Text(notes).font(.footnote).foregroundStyle(Theme.muted).lineLimit(2)
+                                }
+                            }
+                            Spacer(minLength: 8)
+                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.glyph)
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 10)
+                        .frame(minHeight: 52)
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Opens the visit to change or delete it")
+                }
+            }
+            .mistCard()
+        }
+    }
+
+    /// The trails linked to the place; each opens its page (AllTrails, Wanderer...) in the browser.
+    @ViewBuilder
+    private func trails(_ place: Location) -> some View {
+        if !place.trails.isEmpty {
+            SectionLabel(text: "Trails", trailing: "\(place.trails.count)").padding(.top, 22).padding(.bottom, 8)
+            VStack(spacing: 0) {
+                ForEach(Array(place.trails.enumerated()), id: \.element.id) { index, trail in
+                    if index > 0 { RowSeparator() }
+                    let url = [trail.link, trail.wandererLink].compactMap { $0 }.first { !$0.isEmpty }.flatMap(URL.init(string:))
+                    Button { if let url { openURL(url) } } label: {
+                        HStack(spacing: 12) {
+                            ToneBadge(systemImage: "figure.hiking", tone: .mint)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(trail.name).foregroundStyle(Theme.ink)
+                                if let host = url?.host() {
+                                    Text(host).font(.footnote).foregroundStyle(Theme.muted)
+                                }
+                            }
+                            Spacer(minLength: 8)
+                            if url != nil {
+                                Image(systemName: "arrow.up.right").font(.footnote.weight(.semibold)).foregroundStyle(Theme.glyph)
+                            }
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 10)
+                        .frame(minHeight: 52)
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(url == nil)
+                }
+            }
+            .mistCard()
+        }
+    }
+
     /// "60.124° N, 6.740° E"
     private static func format(_ c: CLLocationCoordinate2D) -> String {
         let lat = abs(c.latitude).formatted(.number.precision(.fractionLength(3)))
@@ -220,6 +301,9 @@ struct PlaceView: View {
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 }
+
+/// A visit id as a sheet item.
+private struct EditedVisit: Identifiable { let id: String }
 
 /// The photos in a rounded card, swiped through, with the system's page dots on a capsule.
 private struct PhotoCarousel: View {

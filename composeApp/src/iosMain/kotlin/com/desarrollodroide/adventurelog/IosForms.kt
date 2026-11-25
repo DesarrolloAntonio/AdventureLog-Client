@@ -2,12 +2,15 @@ package com.desarrollodroide.adventurelog
 
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.Transportation
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportDates
 import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportationFormData
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.locationFormOf
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
+import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
 
 /**
  * The form inputs the SwiftUI place and journey forms hand their ViewModels. Swift sees a Kotlin
@@ -66,6 +69,44 @@ object IosForms {
                 notes = notes,
             ),
         )
+
+    /**
+     * [base] with visit [id] moved to [start]-[end] and given [notes]. Its times and time zone stay as
+     * they were, so a visit with hours keeps them.
+     */
+    fun editVisit(base: LocationFormData, id: String, start: String, end: String, notes: String): LocationFormData =
+        base.copy(
+            visits = base.visits.map {
+                if (it.id == id) it.copy(startDate = start, endDate = end.ifBlank { null }, notes = notes) else it
+            },
+        )
+
+    /** [base] without visit [id]; saving deletes it on the server. */
+    fun removeVisit(base: LocationFormData, id: String): LocationFormData =
+        base.copy(visits = base.visits.filterNot { it.id == id })
+
+    /** A trail as the form holds it; [id] is null for one the server has not seen. */
+    fun trail(id: String?, name: String, link: String): TrailFormData = TrailFormData(id = id, name = name, link = link)
+
+    /** [base] with these trails; saving adds, changes and deletes them to match. Blank rows are dropped. */
+    fun withTrails(base: LocationFormData, trails: List<TrailFormData>): LocationFormData =
+        base.copy(trails = trails.filter { it.name.isNotBlank() || it.link.isNotBlank() })
+
+    /** A photo picked on the phone, written to [fileUrl] ("file://..."); saving uploads it. */
+    fun localPhoto(fileUrl: String): ImageFormData = ImageFormData(uri = fileUrl, type = ImageType.LOCAL_FILE)
+
+    /**
+     * [base] with these photos: the server's that are left (a removed one is deleted on save) and
+     * new ones to upload. The first stays the cover if the cover was removed.
+     */
+    fun withPhotos(base: LocationFormData, photos: List<ImageFormData>): LocationFormData {
+        val cover = photos.any { it.isPrimary }
+        return base.copy(
+            images = photos.mapIndexed { i, photo ->
+                if (!cover && i == 0 && photo.serverId != null) photo.copy(isPrimary = true) else photo
+            },
+        )
+    }
 
     fun transport(transportation: Transportation?): TransportationFormData =
         transportation?.let(TransportationFormData::fromTransportation) ?: TransportationFormData()
