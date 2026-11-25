@@ -71,7 +71,7 @@ class ProviderSignInUseCaseTest {
     }
 
     @Test
-    fun `verifiers are long, url-safe and never repeat`() {
+    fun `verifiers are long and url-safe and never repeat`() {
         val verifiers = List(50) { Pkce.newVerifier() }
         verifiers.forEach { v ->
             assertEquals(64, v.length)
@@ -84,7 +84,7 @@ class ProviderSignInUseCaseTest {
     }
 
     @Test
-    fun `start opens the server's public address with the challenge, state and redirect`() {
+    fun `start opens the server's public address with the challenge and state and redirect`() {
         val attempt = useCase.start("https://typed.test/", options, OIDC, rememberSession = true)
 
         assertEquals("https://typed.test", attempt.serverUrl)
@@ -125,7 +125,7 @@ class ProviderSignInUseCaseTest {
     }
 
     @Test
-    fun `the server's errors are said, decoded`() = runTest {
+    fun `the server's errors are said decoded`() = runTest {
         val attempt = attempt()
         assertEquals(
             Either.Left(ProviderSignInUseCase.CANCELLED),

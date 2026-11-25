@@ -338,7 +338,7 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `a server's providers show once the address is typed, and go when it changes`() = runTest(dispatcher) {
+    fun `a server's providers show once the address is typed and go when it changes`() = runTest(dispatcher) {
         val logins = WithProviders()
         val vm = typedServer(logins)
 
@@ -362,7 +362,7 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `a provider opens the browser, and its answer signs in`() = runTest(dispatcher) {
+    fun `a provider opens the browser and its answer signs in`() = runTest(dispatcher) {
         val logins = WithProviders()
         val vm = typedServer(logins)
         val opened = async { vm.browserRequests.first() }
@@ -424,7 +424,7 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `an answer nobody is waiting for is an error, not a sign-in`() = runTest(dispatcher) {
+    fun `an answer nobody is waiting for is an error and not a sign-in`() = runTest(dispatcher) {
         val logins = WithProviders()
         val vm = typedServer(logins)
 

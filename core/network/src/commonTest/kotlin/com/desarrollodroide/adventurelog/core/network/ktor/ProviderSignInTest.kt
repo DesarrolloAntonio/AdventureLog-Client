@@ -68,7 +68,7 @@ class ProviderSignInTest {
     }
 
     @Test
-    fun `without mobile_auth_v1 there are no providers, and auth config is not asked`() = runBlocking {
+    fun `without mobile_auth_v1 there are no providers and auth config is not asked`() = runBlocking {
         val h = Harness(serverInfo = HttpStatusCode.OK to info(capabilities = """["conditional_writes_v1"]"""))
 
         assertTrue(h.network.getSignInProviders("https://typed.test").providers.isEmpty())
@@ -94,7 +94,7 @@ class ProviderSignInTest {
     }
 
     @Test
-    fun `the code and verifier become the session, and the account names the user`() = runBlocking {
+    fun `the code and verifier become the session and the account names the user`() = runBlocking {
         val h = Harness()
 
         val user = h.network.redeemProviderSignIn("https://typed.test/", "the-code", "the-verifier", "adventurelog://auth/callback")
