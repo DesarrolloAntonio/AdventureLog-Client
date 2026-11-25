@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -70,9 +71,14 @@ internal fun LoginCodeScreen(
 ) {
     val colors = MaterialTheme.colorScheme
     val focus = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
     // The keyboard comes up with the screen: the code is the only thing to do here, and the
-    // authenticator's code only lives 30 seconds.
-    LaunchedEffect(Unit) { focus.requestFocus() }
+    // authenticator's code only lives 30 seconds. Focus alone left it down (measured on the
+    // Pixel): the sign-in's progress dialog had taken it away.
+    LaunchedEffect(Unit) {
+        focus.requestFocus()
+        keyboard?.show()
+    }
     PlatformBackHandler(onBack = onBack)
 
     KeyboardDismissible(modifier = Modifier.fillMaxSize()) {
