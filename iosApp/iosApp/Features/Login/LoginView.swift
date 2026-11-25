@@ -1,3 +1,4 @@
+import AuthenticationServices
 import SwiftUI
 import ComposeApp
 
@@ -13,6 +14,8 @@ struct LoginView: View {
     @State private var password = ""
     @State private var state: LoginUiState = LoginUiStateCheckingSession.shared
     @State private var form: LoginFormState?
+    @State private var code = ""
+    @Environment(\.webAuthenticationSession) private var webAuthentication
 
     private var vm: LoginViewModel { host.owner.loginViewModel() }
 
@@ -33,6 +36,11 @@ struct LoginView: View {
             for await s in vm.uiState { state = s }
         }
         .task {
+            // A provider sign-in opens the server's page in an in-app browser sheet; the address it
+            // comes back to goes to the shared code, which trades it for a session.
+            for await url in vm.browserRequests { await signInInBrowser(url) }
+        }
+        .task {
             for await f in vm.loginFormState {
                 form = f
                 // Fill the fields once from what the ViewModel restored (remembered server and
@@ -47,7 +55,14 @@ struct LoginView: View {
         ScrollView {
             VStack(spacing: 0) {
                 header.padding(.top, 64)
-                card.padding(.top, 34)
+                Group {
+                    if case .codeRequired(let step) = onEnum(of: state) {
+                        codeCard(step)
+                    } else {
+                        card
+                    }
+                }
+                .padding(.top, 34)
                 Label("Your data stays on your server", systemImage: "lock.shield.fill")
                     .font(.footnote)
                     .foregroundStyle(Theme.muted)
@@ -156,6 +171,28 @@ struct LoginView: View {
             .padding(.top, 6)
             .accessibilityIdentifier("signIn")
 
+            if let providers = form?.providers, !providers.isEmpty {
+                HStack(spacing: 10) {
+                    Rectangle().fill(Theme.ink.opacity(0.12)).frame(height: 1)
+                    Text("or").font(.footnote).foregroundStyle(Theme.muted)
+                    Rectangle().fill(Theme.ink.opacity(0.12)).frame(height: 1)
+                }
+                .padding(.vertical, 4)
+                ForEach(providers, id: \.id) { provider in
+                    Button { vm.signInWithProvider(provider: provider) } label: {
+                        Text("Continue with \(provider.name)")
+                            .font(.headline)
+                            .foregroundStyle(Theme.ink)
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(Color(light: 0xFFFFFF, dark: 0x1B262C).opacity(0.85), in: .rect(cornerRadius: 16, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Theme.ink.opacity(0.12)))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isLoading)
+                    .accessibilityIdentifier("provider-\(provider.id)")
+                }
+            }
+
             // The same guide Settings links to: the upstream AdventureLog project.
             Link("How do I set up a server?", destination: URL(string: "https://github.com/seanmorley15/AdventureLog")!)
                 .font(.subheadline.weight(.semibold))
@@ -171,6 +208,84 @@ struct LoginView: View {
     private func signIn() {
         guard canSignIn else { return }
         vm.login()
+    }
+
+    /// The second step of an account with two-step verification: the code from the authenticator
+    /// app, or a recovery code. The password step is behind it; Cancel goes back to it.
+    private func codeCard(_ step: LoginUiStateCodeRequired) -> some View {
+        VStack(spacing: 10) {
+            VStack(spacing: 2) {
+                Text("Two-step verification").font(.headline).foregroundStyle(Theme.ink)
+                Text("Enter the code from your authenticator app, or a recovery code.")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.muted)
+            }
+            .multilineTextAlignment(.center)
+            .padding(.bottom, 6)
+
+            FieldRow(systemImage: "lock.shield") {
+                TextField("123456", text: $code)
+                    .textContentType(.oneTimeCode)
+                    .keyboardType(.numberPad)
+                    .font(.title3.monospacedDigit())
+                    .accessibilityLabel("Code")
+                    .accessibilityIdentifier("loginCode")
+                    .onSubmit { vm.verifyLoginCode() }
+            }
+
+            if let error = step.error {
+                Label(error, systemImage: "exclamationmark.circle.fill")
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(Theme.Tone.coral.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
+                    .accessibilityIdentifier("loginCodeError")
+            }
+
+            Button { vm.verifyLoginCode() } label: {
+                ZStack {
+                    Text("Verify").opacity(step.verifying ? 0 : 1)
+                    if step.verifying { ProgressView().tint(.white) }
+                }
+                .font(.headline)
+                .frame(maxWidth: .infinity, minHeight: 50)
+                .background { HeroGlow().clipShape(.rect(cornerRadius: 16)) }
+                .heroCard(radius: 16)
+            }
+            .buttonStyle(.plain)
+            .disabled(step.code.isEmpty || step.verifying)
+            .opacity(step.code.isEmpty && !step.verifying ? 0.55 : 1)
+            .padding(.top, 6)
+            .accessibilityIdentifier("verifyCode")
+
+            Button("Cancel") {
+                code = ""
+                vm.cancelLoginCode()
+            }
+            .font(.subheadline.weight(.semibold))
+            .frame(minHeight: 40)
+        }
+        .padding(EdgeInsets(top: 20, leading: 18, bottom: 12, trailing: 18))
+        .mistCard(radius: 26)
+        .onChange(of: code) { _, v in vm.updateLoginCode(newCode: v) }
+        // The ViewModel keeps digits only and empties the field after a wrong code: follow it.
+        .onChange(of: step.code) { _, v in if v != code { code = v } }
+    }
+
+    /// Opens the provider's sign-in in the system's web-authentication sheet and hands the address
+    /// it comes back to to the shared code. Closing the sheet leaves the form as it was.
+    private func signInInBrowser(_ address: String) async {
+        guard let url = URL(string: address) else { return }
+        do {
+            let callback = try await webAuthentication.authenticate(
+                using: url,
+                callbackURLScheme: "adventurelog",
+                preferredBrowserSession: .ephemeral
+            )
+            host.owner.deliverSignInRedirect(uri: callback.absoluteString)
+        } catch {
+            // Cancelled by the user, or the sheet could not open: nothing was started on the server.
+        }
     }
 }
 

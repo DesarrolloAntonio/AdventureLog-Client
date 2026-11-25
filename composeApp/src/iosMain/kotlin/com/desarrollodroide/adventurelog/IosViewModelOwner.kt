@@ -38,6 +38,7 @@ import com.desarrollodroide.adventurelog.feature.settings.viewmodel.SettingsView
 import com.desarrollodroide.adventurelog.feature.settings.viewmodel.UsersViewModel
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.CountryDetailViewModel
 import com.desarrollodroide.adventurelog.feature.world.viewmodel.WorldViewModel
+import com.desarrollodroide.adventurelog.feature.login.ProviderSignInRedirects
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.KoinInternalApi
 import org.koin.core.parameter.ParametersDefinition
@@ -91,6 +92,14 @@ class IosViewModelOwner : ViewModelStoreOwner, SavedStateRegistryOwner {
     }
 
     fun loginViewModel(): LoginViewModel = get(LoginViewModel::class)
+
+    /**
+     * Hands a provider sign-in's answer - the `adventurelog://auth/callback?…` address the browser
+     * came back to - to the sign-in screen, as Android's deep-link activity does.
+     */
+    fun deliverSignInRedirect(uri: String) {
+        KoinPlatform.getKoin().get<ProviderSignInRedirects>().deliver(uri)
+    }
     fun homeViewModel(): HomeViewModel = get(HomeViewModel::class)
     fun globalSearchViewModel(): GlobalSearchViewModel = get(GlobalSearchViewModel::class)
     fun locationsViewModel(): LocationsViewModel = get(LocationsViewModel::class)
