@@ -70,7 +70,7 @@ class HttpLoggingTest {
     }
 
     @Test
-    fun `redacts the session in an app-client login answer, pending or final`() {
+    fun `redacts the session in an app-client login answer pending or final`() {
         val body = """{"status":401,"data":{"flows":[{"id":"mfa_authenticate","is_pending":true}]},""" +
             """"meta":{"is_authenticated":false,"session_token":"6t3jl998602iah6angnxm0b9xgvkykhy"}}"""
 

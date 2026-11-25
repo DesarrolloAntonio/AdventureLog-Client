@@ -46,7 +46,7 @@ class VerifyLoginCodeUseCaseTest {
     }
 
     @Test
-    fun `an 8-digit recovery code goes to the same place, without the spaces a copy brings`() = runTest {
+    fun `an 8-digit recovery code goes to the same place without the spaces a copy brings`() = runTest {
         useCase("https://qa.test", " 1234 5678 ")
 
         assertEquals(listOf("12345678"), repository.codesSent)
