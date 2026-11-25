@@ -178,7 +178,9 @@ internal fun LoginScreen(
 
 /**
  * The sign-in page as the canvas draws it: a fjord at sunset in a rounded frame with the app's
- * mark, "Your travels, on your server" large, then the form on the page itself - no card.
+ * mark and "Your travels, on your server" over its dark lower half, then the form on the page
+ * itself - no card. The headline used to sit under the picture and pushed a server's sign-in
+ * providers below the fold.
  */
 @Composable
 fun ContentViews(
@@ -219,16 +221,7 @@ fun ContentViews(
                     .height(heroHeight)
             )
             Column(Modifier.padding(horizontal = 20.dp)) {
-                Spacer(Modifier.height(20.dp))
-                Text(
-                    text = buildAnnotatedString {
-                        append("Your travels,\non ")
-                        withStyle(SpanStyle(color = colors.primary)) { append("your") }
-                        append(" server")
-                    },
-                    style = AdventureType.display(50.sp),
-                )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(16.dp))
                 Text(
                     text = "Sign in to the AdventureLog instance you host.",
                     style = MaterialTheme.typography.bodyLarge,
@@ -382,6 +375,30 @@ private fun FjordHero(modifier: Modifier = Modifier) {
             }
             Text("AdventureLog", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colors.onSurface)
         }
+        // A shade over the water and rock so the headline reads on any part of the picture.
+        Box(
+            Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        0.35f to Color.Transparent,
+                        1f to Color.Black.copy(alpha = 0.55f),
+                    )
+                )
+        )
+        Text(
+            text = buildAnnotatedString {
+                append("Your travels,\non ")
+                // The sky's own peach: the app's teal is too dark to read on the water.
+                withStyle(SpanStyle(color = Color(0xFFF8D9B4))) { append("your") }
+                append(" server")
+            },
+            style = AdventureType.display(44.sp),
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 20.dp, end = 20.dp, bottom = 18.dp),
+        )
     }
 }
 
