@@ -55,7 +55,7 @@ internal fun Int.groupedThousands(): String =
     toString().reversed().chunked(3).joinToString(",").reversed()
 
 /**
- * "Your map so far" in Expressive pieces: how much of what you saved you have visited, as a wavy
+ * "Your map" in Expressive pieces: how much of what you saved you have visited, as a wavy
  * ring around what is still to visit, then countries, regions and cities each in a shape of its own from Material's shape
  * library - a cookie, a clover, a sun - with the total beneath.
  */
