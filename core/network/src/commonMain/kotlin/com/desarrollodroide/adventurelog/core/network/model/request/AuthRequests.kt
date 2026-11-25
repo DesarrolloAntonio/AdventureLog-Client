@@ -105,3 +105,19 @@ data class SecondFactorRequest(
 )
 
 const val MFA_AUTHENTICATE_FLOW = "mfa_authenticate"
+
+/** The last step of a provider sign-in: the code the browser brought back, and its PKCE verifier. */
+@Serializable
+data class MobileTokenRequest(
+    val code: String,
+    @SerialName("code_verifier")
+    val codeVerifier: String,
+    @SerialName("redirect_uri")
+    val redirectUri: String,
+)
+
+/** What `/api/auth/mobile/token/` answers: a session and nothing else, no user. */
+@Serializable
+data class MobileTokenResponse(
+    val meta: LoginMeta,
+)

@@ -40,6 +40,21 @@ internal const val SESSION_PATH = "/auth/browser/v1/auth/session"
  */
 internal const val CSRF_PROBE_PATH = "/csrf/"
 
+/**
+ * What the sign-in screen needs before anyone is signed in, the providers among it. 0.14.0 only;
+ * an anonymous GET, sent as it is.
+ */
+internal const val AUTH_CONFIG_PATH = "/api/auth/config/"
+
+/** Where the browser starts a provider sign-in for the app (upstream's "Mobile app sign-in"). */
+internal const val MOBILE_START_PATH = "/accounts/mobile/start/"
+
+/** Trades the code a provider sign-in brought back for a session. */
+internal const val MOBILE_TOKEN_PATH = "/api/auth/mobile/token/"
+
+/** In `/api/server-info/`'s `capabilities` when the server signs the app in through providers. */
+internal const val MOBILE_AUTH_CAPABILITY = "mobile_auth_v1"
+
 internal const val CSRF_HEADER = "X-CSRFToken"
 
 private val CSRF_ALPHABET = ('A'..'Z') + ('a'..'z') + ('0'..'9')

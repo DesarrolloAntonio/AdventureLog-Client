@@ -5,6 +5,10 @@ import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginCodeError
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginRepository
+import com.desarrollodroide.adventurelog.core.domain.repository.ProviderSignInError
+import com.desarrollodroide.adventurelog.core.model.ProviderSignInOptions
+import com.desarrollodroide.adventurelog.core.model.SignInProvider
+import kotlinx.coroutines.CancellationException
 import com.desarrollodroide.adventurelog.core.model.LoginResult
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.core.network.datasource.AdventureLogNetwork
@@ -87,6 +91,57 @@ class LoginRepositoryImpl(
         }
 
     override fun cancelPendingLogin() = adventureLogNetworkDataSource.cancelPendingLogin()
+
+    override suspend fun getSignInProviders(url: String): ProviderSignInOptions? =
+        withContext(ioDispatcher) {
+            try {
+                val found = adventureLogNetworkDataSource.getSignInProviders(url)
+                found.providers.takeIf { it.isNotEmpty() }?.let { providers ->
+                    ProviderSignInOptions(
+                        browserBaseUrl = found.browserBaseUrl,
+                        providers = providers.map { SignInProvider(id = it.id, name = it.name) },
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // An address still being typed, a server that is down: the password form is
+                // still there, so this is no error to show.
+                logger.d { "No sign-in providers from $url: ${e.message}" }
+                null
+            }
+        }
+
+    override suspend fun redeemProviderSignIn(
+        url: String,
+        code: String,
+        codeVerifier: String,
+        redirectUri: String,
+    ): Either<ProviderSignInError, UserDetails> =
+        withContext(ioDispatcher) {
+            try {
+                val user = adventureLogNetworkDataSource.redeemProviderSignIn(url, code, codeVerifier, redirectUri)
+                Either.Right(user.toDomainModel(url))
+            } catch (e: HttpException) {
+                logger.e { "HTTP Error trading the provider sign-in code: ${e.code}" }
+                Either.Left(
+                    when (e.code) {
+                        // invalid_grant: unknown, spent, expired, or the verifier does not match.
+                        400 -> ProviderSignInError.CodeRejected
+                        429 -> ProviderSignInError.TooManyAttempts
+                        else -> ProviderSignInError.Failed
+                    }
+                )
+            } catch (e: IOException) {
+                logger.e(e) { "IO Error trading the provider sign-in code" }
+                Either.Left(ProviderSignInError.CannotReachServer)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                logger.e(e) { "Unexpected error trading the provider sign-in code" }
+                Either.Left(ProviderSignInError.Failed)
+            }
+        }
 
     /**
      * The login response omits first/last name, so the greeting would read as the username until

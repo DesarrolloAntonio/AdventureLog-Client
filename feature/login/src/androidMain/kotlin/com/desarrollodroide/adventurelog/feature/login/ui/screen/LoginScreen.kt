@@ -19,7 +19,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
+import android.content.ActivityNotFoundException
+import androidx.compose.material.icons.automirrored.filled.Login
+import com.desarrollodroide.adventurelog.core.model.SignInProvider
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -49,6 +56,19 @@ fun LoginScreenRoute(
 ) {
     val loginUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val loginFormState by viewModel.loginFormState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    // A provider sign-in opens the system browser in a Custom Tab: the provider's page, its
+    // password manager and passkeys, never a WebView the app could read.
+    LaunchedEffect(viewModel) {
+        viewModel.browserRequests.collect { url ->
+            try {
+                CustomTabsIntent.Builder().setShowTitle(true).build().launchUrl(context, url.toUri())
+            } catch (e: ActivityNotFoundException) {
+                viewModel.browserUnavailable()
+            }
+        }
+    }
 
     LoginScreen(
         loginUiState = loginUiState,
@@ -63,6 +83,7 @@ fun LoginScreenRoute(
         onLoginCodeChange = viewModel::updateLoginCode,
         onVerifyLoginCode = viewModel::verifyLoginCode,
         onCancelLoginCode = viewModel::cancelLoginCode,
+        onProviderClick = viewModel::signInWithProvider,
     )
 }
 
@@ -80,6 +101,7 @@ internal fun LoginScreen(
     onLoginCodeChange: (String) -> Unit = {},
     onVerifyLoginCode: () -> Unit = {},
     onCancelLoginCode: () -> Unit = {},
+    onProviderClick: (SignInProvider) -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -135,7 +157,8 @@ internal fun LoginScreen(
                 onPasswordChange = onPasswordChange,
                 onServerUrlChange = onServerUrlChange,
                 onCheckedRememberSessionChange = onCheckedRememberSessionChange,
-                onClickLoginButton = onClickLoginButton
+                onClickLoginButton = onClickLoginButton,
+                onProviderClick = onProviderClick,
             )
 
             // Use the reusable LoadingDialog component for login action
@@ -155,7 +178,9 @@ internal fun LoginScreen(
 
 /**
  * The sign-in page as the canvas draws it: a fjord at sunset in a rounded frame with the app's
- * mark, "Your travels, on your server" large, then the form on the page itself - no card.
+ * mark and "Your travels, on your server" over its dark lower half, then the form on the page
+ * itself - no card. The headline used to sit under the picture and pushed a server's sign-in
+ * providers below the fold.
  */
 @Composable
 fun ContentViews(
@@ -164,7 +189,8 @@ fun ContentViews(
     onPasswordChange: (String) -> Unit,
     onServerUrlChange: (String) -> Unit,
     onCheckedRememberSessionChange: (Boolean) -> Unit,
-    onClickLoginButton: () -> Unit
+    onClickLoginButton: () -> Unit,
+    onProviderClick: (SignInProvider) -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
     val uriHandler = LocalUriHandler.current
@@ -195,16 +221,7 @@ fun ContentViews(
                     .height(heroHeight)
             )
             Column(Modifier.padding(horizontal = 20.dp)) {
-                Spacer(Modifier.height(20.dp))
-                Text(
-                    text = buildAnnotatedString {
-                        append("Your travels,\non ")
-                        withStyle(SpanStyle(color = colors.primary)) { append("your") }
-                        append(" server")
-                    },
-                    style = AdventureType.display(50.sp),
-                )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(16.dp))
                 Text(
                     text = "Sign in to the AdventureLog instance you host.",
                     style = MaterialTheme.typography.bodyLarge,
@@ -236,6 +253,12 @@ fun ContentViews(
                 )
                 Spacer(Modifier.height(6.dp))
                 LoginButton(onClickLoginButton = onClickLoginButton)
+                if (loginFormState.providers.isNotEmpty()) {
+                    ProviderSignInSection(
+                        providers = loginFormState.providers,
+                        onProviderClick = onProviderClick,
+                    )
+                }
                 TextButton(
                     onClick = { uriHandler.openUri("https://github.com/seanmorley15/AdventureLog") },
                     modifier = Modifier
@@ -247,6 +270,48 @@ fun ContentViews(
             }
         }
     }
+    }
+}
+
+/**
+ * The server's own sign-in providers (OIDC, GitHub…), under the password: only a 0.14 server
+ * that has some set up shows any.
+ */
+@Composable
+private fun ProviderSignInSection(
+    providers: List<SignInProvider>,
+    onProviderClick: (SignInProvider) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HorizontalDivider(Modifier.weight(1f), color = colors.outlineVariant)
+        Text(
+            "or",
+            modifier = Modifier.padding(horizontal = 12.dp),
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.onSurfaceVariant,
+        )
+        HorizontalDivider(Modifier.weight(1f), color = colors.outlineVariant)
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        providers.forEach { provider ->
+            OutlinedButton(
+                onClick = { onProviderClick(provider) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .testTag("provider_sign_in_${provider.id}"),
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Continue with ${provider.name}", fontWeight = FontWeight.Bold)
+            }
+        }
     }
 }
 
@@ -310,6 +375,30 @@ private fun FjordHero(modifier: Modifier = Modifier) {
             }
             Text("AdventureLog", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colors.onSurface)
         }
+        // A shade over the water and rock so the headline reads on any part of the picture.
+        Box(
+            Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        0.35f to Color.Transparent,
+                        1f to Color.Black.copy(alpha = 0.55f),
+                    )
+                )
+        )
+        Text(
+            text = buildAnnotatedString {
+                append("Your travels,\non ")
+                // The sky's own peach: the app's teal is too dark to read on the water.
+                withStyle(SpanStyle(color = Color(0xFFF8D9B4))) { append("your") }
+                append(" server")
+            },
+            style = AdventureType.display(44.sp),
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 20.dp, end = 20.dp, bottom = 18.dp),
+        )
     }
 }
 

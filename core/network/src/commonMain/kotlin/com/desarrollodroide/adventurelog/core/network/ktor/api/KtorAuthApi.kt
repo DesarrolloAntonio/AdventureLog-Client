@@ -7,12 +7,15 @@ import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.AuthStageRequest
 import com.desarrollodroide.adventurelog.core.network.ktor.LOGIN_PATH
 import com.desarrollodroide.adventurelog.core.network.ktor.MFA_AUTHENTICATE_PATH
+import com.desarrollodroide.adventurelog.core.network.ktor.MOBILE_TOKEN_PATH
 import com.desarrollodroide.adventurelog.core.network.ktor.SESSION_PATH
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.ktor.defaultJson
 import com.desarrollodroide.adventurelog.core.network.ktor.redactSecrets
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.LoginResponse
+import com.desarrollodroide.adventurelog.core.network.model.request.MobileTokenRequest
+import com.desarrollodroide.adventurelog.core.network.model.request.MobileTokenResponse
 import com.desarrollodroide.adventurelog.core.network.model.request.PendingLoginResponse
 import com.desarrollodroide.adventurelog.core.network.model.request.SecondFactorRequest
 import com.desarrollodroide.adventurelog.core.network.model.response.LoginOutcomeDTO
@@ -96,6 +99,31 @@ class KtorAuthApi(
         }
         logger.d { "Second factor response status: ${response.status}" }
         return signedInUser(response, sentToken = pendingToken, step = "Second factor")
+    }
+
+    override suspend fun redeemMobileCode(code: String, codeVerifier: String, redirectUri: String): String {
+        val sessionInfo = sessionProvider()
+        val response = httpClient.post("${sessionInfo.baseUrl}$MOBILE_TOKEN_PATH") {
+            // No session yet, and a 401 here would not be one ending.
+            attributes.put(AuthStageRequest, Unit)
+            contentType(ContentType.Application.Json)
+            headers {
+                append(HttpHeaders.Accept, "application/json")
+                append("X-Is-Mobile", "true")
+            }
+            setBody(MobileTokenRequest(code = code, codeVerifier = codeVerifier, redirectUri = redirectUri))
+        }
+        logger.d { "Provider sign-in code exchange: ${response.status}" }
+        if (!response.status.isSuccess()) {
+            val errorBody = runCatching { response.body<String>() }.getOrDefault("")
+            logger.e { "Code exchange failed with ${response.status}: ${redactSecrets(errorBody)}" }
+            throw HttpException(response.status.value, "Code exchange failed with status: ${response.status}")
+        }
+        val token = json.decodeFromString<MobileTokenResponse>(response.body<String>()).meta.sessionToken
+            ?: throw HttpException(response.status.value, "The code exchange answered no session")
+        logger.d { "Session token received (${token.length} chars)" }
+        onSessionTokenReceived(token)
+        return token
     }
 
     private fun pendingLogin(body: String): PendingLoginResponse? =

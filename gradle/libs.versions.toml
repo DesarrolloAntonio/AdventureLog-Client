@@ -47,6 +47,7 @@ multiplatform-paging = "3.3.0-alpha02-0.5.1"
 kotlinx-datetime = "0.7.1"
 
 [libraries]
+androidx-browser = { module = "androidx.browser:browser", version = "1.8.0" }
 androidx-emoji2-bundled = { module = "androidx.emoji2:emoji2-bundled", version.ref = "emoji2-emojipicker" }
 androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version.ref = "emoji2-emojipicker" }
 # Shared code (ViewModel, viewModelScope, SavedStateHandle) takes the plain artifacts; the Compose

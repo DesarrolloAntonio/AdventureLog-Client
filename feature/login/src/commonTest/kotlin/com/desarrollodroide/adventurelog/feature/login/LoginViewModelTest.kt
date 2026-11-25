@@ -6,6 +6,12 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.VerifyLoginCodeUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ProviderSignInUseCase
+import com.desarrollodroide.adventurelog.core.domain.repository.ProviderSignInError
+import com.desarrollodroide.adventurelog.core.model.ProviderSignInOptions
+import com.desarrollodroide.adventurelog.core.model.SignInProvider
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.async
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginCodeError
@@ -49,8 +55,37 @@ class LoginViewModelTest {
         }
     }
 
+    /**
+     * A server with no sign-in providers, like 0.13.1: every valid address typed now asks for
+     * them, so even a test that is not about them meets the question.
+     */
+    private open class PasswordOnly : LoginRepositoryStub() {
+        override suspend fun getSignInProviders(url: String): ProviderSignInOptions? = null
+    }
+
+    /** A 0.14 server with providers: the code its browser sign-in hands back becomes a session. */
+    private class WithProviders : PasswordOnly() {
+        val asked = mutableListOf<String>()
+        val trades = mutableListOf<Pair<String, String>>()
+
+        override suspend fun getSignInProviders(url: String): ProviderSignInOptions? {
+            asked += url
+            return ProviderSignInOptions("https://public.test", listOf(GITHUB))
+        }
+
+        override suspend fun redeemProviderSignIn(
+            url: String,
+            code: String,
+            codeVerifier: String,
+            redirectUri: String,
+        ): Either<ProviderSignInError, UserDetails> {
+            trades += url to code
+            return Either.Right(user("sso-token").copy(username = "sso-user"))
+        }
+    }
+
     /** A server: [twoStep] accounts answer the password with a request for a code. */
-    private class FakeLogins(private val twoStep: Boolean) : LoginRepositoryStub() {
+    private class FakeLogins(private val twoStep: Boolean) : PasswordOnly() {
         var codeAnswers = ArrayDeque<Either<LoginCodeError, UserDetails>>()
         val codesSent = mutableListOf<String>()
         var cancelled = 0
@@ -69,19 +104,24 @@ class LoginViewModelTest {
     }
 
     private lateinit var users: NoSession
+    private lateinit var redirects: ProviderSignInRedirects
 
     private fun viewModel(
         handle: SavedStateHandle,
         remembered: Account? = null,
-        logins: LoginRepositoryStub = object : LoginRepositoryStub() {},
+        logins: LoginRepositoryStub = PasswordOnly(),
+        sharedRedirects: ProviderSignInRedirects = ProviderSignInRedirects(),
     ): LoginViewModel {
         users = NoSession(remembered)
+        redirects = sharedRedirects
         return LoginViewModel(
             loginUseCase = LoginUseCase(logins),
             initializeSessionUseCase = InitializeSessionUseCase(users, object : AdventureLogNetworkStub() {}),
             saveSessionUseCase = SaveSessionUseCase(users),
             rememberMeCredentialsUseCase = RememberMeCredentialsUseCase(users),
             verifyLoginCodeUseCase = VerifyLoginCodeUseCase(logins),
+            providerSignInUseCase = ProviderSignInUseCase(logins),
+            providerSignInRedirects = redirects,
             savedStateHandle = handle,
             urlValidator = { it.startsWith("https://") },
         )
@@ -286,9 +326,130 @@ class LoginViewModelTest {
         assertEquals(1, logins.cancelled)
         assertNull(users.published)
     }
+
+    /** Types [url] and lets the pause before asking for providers pass. */
+    private fun typedServer(logins: LoginRepositoryStub, url: String = "https://qa.test", remember: Boolean = true): LoginViewModel {
+        val vm = viewModel(SavedStateHandle(), logins = logins)
+        dispatcher.scheduler.advanceUntilIdle()
+        vm.updateServerUrl(url)
+        vm.updateRememberSession(remember)
+        dispatcher.scheduler.advanceUntilIdle()
+        return vm
+    }
+
+    @Test
+    fun `a server's providers show once the address is typed and go when it changes`() = runTest(dispatcher) {
+        val logins = WithProviders()
+        val vm = typedServer(logins)
+
+        assertEquals(listOf(GITHUB), vm.loginFormState.value.providers)
+        assertEquals(listOf("https://qa.test"), logins.asked)
+
+        vm.updateServerUrl("https://qa.test/other")
+        assertTrue(vm.loginFormState.value.providers.isEmpty())
+        vm.updateServerUrl("not a url")
+        testScheduler.advanceUntilIdle()
+        assertTrue(vm.loginFormState.value.providers.isEmpty())
+        // The address changed again before the pause was over: nobody asked the one in between.
+        assertEquals(listOf("https://qa.test"), logins.asked)
+    }
+
+    @Test
+    fun `a password-only server shows no providers`() = runTest(dispatcher) {
+        val vm = typedServer(PasswordOnly())
+
+        assertTrue(vm.loginFormState.value.providers.isEmpty())
+    }
+
+    @Test
+    fun `a provider opens the browser and its answer signs in`() = runTest(dispatcher) {
+        val logins = WithProviders()
+        val vm = typedServer(logins)
+        val opened = async { vm.browserRequests.first() }
+
+        vm.signInWithProvider(GITHUB)
+        testScheduler.advanceUntilIdle()
+
+        val browserUrl = opened.await()
+        assertTrue(browserUrl.startsWith("https://public.test/accounts/mobile/start/?provider=github&"), browserUrl)
+        val state = browserUrl.substringAfter("state=").substringBefore('&')
+
+        redirects.deliver("adventurelog://auth/callback?code=the-code&state=$state")
+        testScheduler.advanceUntilIdle()
+
+        assertIs<LoginUiState.Success>(vm.uiState.value)
+        assertEquals(listOf("https://qa.test" to "the-code"), logins.trades)
+        assertEquals("sso-token", users.published?.sessionToken)
+        assertEquals("https://qa.test" to "sso-user", users.rememberedAfterLogin)
+    }
+
+    @Test
+    fun `the same answer arriving twice trades its code once`() = runTest(dispatcher) {
+        val logins = WithProviders()
+        val vm = typedServer(logins)
+        val opened = async { vm.browserRequests.first() }
+        vm.signInWithProvider(GITHUB)
+        testScheduler.advanceUntilIdle()
+        val state = opened.await().substringAfter("state=").substringBefore('&')
+        val answer = "adventurelog://auth/callback?code=the-code&state=$state"
+
+        redirects.deliver(answer)
+        testScheduler.advanceUntilIdle()
+        redirects.deliver(answer)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, logins.trades.size)
+    }
+
+    @Test
+    fun `the sign-in survives the app being ended while the browser is in front`() = runTest(dispatcher) {
+        val logins = WithProviders()
+        val handle = SavedStateHandle()
+        val first = viewModel(handle, logins = logins)
+        testScheduler.advanceUntilIdle()
+        first.updateServerUrl("https://qa.test")
+        testScheduler.advanceUntilIdle()
+        val opened = async { first.browserRequests.first() }
+        first.signInWithProvider(GITHUB)
+        testScheduler.advanceUntilIdle()
+        val state = opened.await().substringAfter("state=").substringBefore('&')
+
+        // A new process: a new view model on the saved state, and the answer already waiting.
+        val waiting = ProviderSignInRedirects().apply { deliver("adventurelog://auth/callback?code=the-code&state=$state") }
+        val second = viewModel(SavedStateHandle(handle.keys().associateWith { handle.get<Any>(it) }), logins = logins, sharedRedirects = waiting)
+        testScheduler.advanceUntilIdle()
+
+        assertIs<LoginUiState.Success>(second.uiState.value)
+        assertEquals(listOf("https://qa.test" to "the-code"), logins.trades)
+    }
+
+    @Test
+    fun `an answer nobody is waiting for is an error and not a sign-in`() = runTest(dispatcher) {
+        val logins = WithProviders()
+        val vm = typedServer(logins)
+
+        redirects.deliver("adventurelog://auth/callback?code=planted&state=whatever")
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(LoginUiState.Error(ProviderSignInUseCase.NOT_WAITING), vm.uiState.value)
+        assertTrue(logins.trades.isEmpty())
+        assertNull(users.published)
+    }
+
+    @Test
+    fun `no browser on the phone says so`() = runTest(dispatcher) {
+        val vm = typedServer(WithProviders())
+        vm.signInWithProvider(GITHUB)
+
+        vm.browserUnavailable()
+
+        assertIs<LoginUiState.Error>(vm.uiState.value)
+    }
 }
 
 private fun user(token: String) = UserDetails(
     uuid = "u", username = "claude", firstName = "John", lastName = "Doe",
     dateJoined = "2024-01-01", sessionToken = token,
 )
+
+private val GITHUB = SignInProvider("github", "GitHub")

@@ -9,6 +9,18 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.InitializeSessionUs
 import com.desarrollodroide.adventurelog.core.domain.usecase.SaveSessionUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.RememberMeCredentialsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.VerifyLoginCodeUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ProviderSignInUseCase
+import com.desarrollodroide.adventurelog.core.model.ProviderSignInAttempt
+import com.desarrollodroide.adventurelog.core.model.ProviderSignInOptions
+import com.desarrollodroide.adventurelog.core.model.SignInProvider
+import com.desarrollodroide.adventurelog.feature.login.ProviderSignInRedirects
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.receiveAsFlow
 import com.desarrollodroide.adventurelog.core.model.LoginResult
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
@@ -26,6 +38,8 @@ class LoginViewModel(
     private val saveSessionUseCase: SaveSessionUseCase,
     private val rememberMeCredentialsUseCase: RememberMeCredentialsUseCase,
     private val verifyLoginCodeUseCase: VerifyLoginCodeUseCase,
+    private val providerSignInUseCase: ProviderSignInUseCase,
+    private val providerSignInRedirects: ProviderSignInRedirects,
     private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
     // The Android check runs on android.net.Uri, which a host test does not have.
     private val urlValidator: (String) -> Boolean = ::isValidUrl,
@@ -43,6 +57,18 @@ class LoginViewModel(
     private val _loginFormState = MutableStateFlow(LoginFormState())
     val loginFormState: StateFlow<LoginFormState> = _loginFormState
 
+    /** What the server at the typed address offers, kept beside the buttons it put on screen. */
+    private var providerOptions: ProviderSignInOptions? = null
+    private var providersJob: Job? = null
+
+    private val browserLaunches = Channel<String>(Channel.BUFFERED)
+
+    /**
+     * Pages to open in the system browser, once each: the start of a provider sign-in. An event,
+     * not state - the browser leaves the app, and nothing on this screen waits for it to return.
+     */
+    val browserRequests: Flow<String> = browserLaunches.receiveAsFlow()
+
     init {
         initializeViewModel()
     }
@@ -54,6 +80,8 @@ class LoginViewModel(
 
                 if (existingSession != null) {
                     logger.d { "Found existing user session for: ${existingSession.username}" }
+                    // Already signed in: a provider answer that arrives now belongs to nothing.
+                    providerSignInRedirects.take()
                     _uiState.update { LoginUiState.Success(existingSession) }
                     return@launch
                 }
@@ -67,6 +95,9 @@ class LoginViewModel(
                 _loginFormState.update { LoginFormState() }
                 _uiState.update { LoginUiState.Empty }
             }
+            refreshProviders(_loginFormState.value.serverUrl, debounce = false)
+            // Only now: the form is there to go back to if the answer is a failure.
+            providerSignInRedirects.arrivals.filterNotNull().collect { finishProviderSignIn() }
         }
     }
 
@@ -143,10 +174,109 @@ class LoginViewModel(
 
     fun updateServerUrl(newUrl: String) {
         savedStateHandle[KEY_SERVER_URL] = newUrl
+        val changed = newUrl != _loginFormState.value.serverUrl
         _loginFormState.value = _loginFormState.value.copy(
             serverUrl = newUrl,
             urlError = !urlValidator(newUrl)
         )
+        if (changed) refreshProviders(newUrl, debounce = true)
+    }
+
+    /**
+     * Asks the server at [url] which providers it signs in through, once typing has paused. The
+     * buttons go the moment the address changes: they belong to the server that answered.
+     */
+    private fun refreshProviders(url: String, debounce: Boolean) {
+        providersJob?.cancel()
+        providerOptions = null
+        if (_loginFormState.value.providers.isNotEmpty()) {
+            _loginFormState.update { it.copy(providers = emptyList()) }
+        }
+        if (!urlValidator(url)) return
+        providersJob = viewModelScope.launch {
+            if (debounce) delay(PROVIDERS_DEBOUNCE_MS)
+            val options = try {
+                providerSignInUseCase.providers(url)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                logger.w { "Could not ask for sign-in providers: ${e.message}" }
+                null
+            }
+            if (_loginFormState.value.serverUrl != url) return@launch
+            providerOptions = options
+            _loginFormState.update { it.copy(providers = options?.providers.orEmpty()) }
+        }
+    }
+
+    /** Opens the browser on [provider]'s sign-in; the answer comes back through [ProviderSignInRedirects]. */
+    fun signInWithProvider(provider: SignInProvider) {
+        val form = _loginFormState.value
+        val options = providerOptions ?: return
+        if (!urlValidator(form.serverUrl)) {
+            _loginFormState.update { it.copy(urlError = true) }
+            return
+        }
+        val attempt = providerSignInUseCase.start(form.serverUrl, options, provider, form.rememberSession)
+        keepAttempt(attempt)
+        logger.d { "Opening the browser to sign in with ${provider.name}" }
+        browserLaunches.trySend(attempt.browserUrl)
+    }
+
+    /** The phone has no browser to open: the sign-in cannot start. */
+    fun browserUnavailable() {
+        takeAttempt()
+        _uiState.update { LoginUiState.Error(NO_BROWSER) }
+    }
+
+    private suspend fun finishProviderSignIn() {
+        val uri = providerSignInRedirects.take() ?: return
+        if (ProviderSignInUseCase.callbackParameters(uri) == null) return
+        // Taken before the code goes anywhere: one attempt, one trade.
+        val attempt = takeAttempt()
+        _uiState.update { LoginUiState.Loading }
+        try {
+            when (val result = providerSignInUseCase.finish(attempt, uri)) {
+                is Either.Left -> {
+                    logger.e { "Provider sign-in failed: ${result.value}" }
+                    _uiState.update { LoginUiState.Error(result.value) }
+                }
+                is Either.Right -> {
+                    val user = result.value
+                    // finish() only succeeds for an attempt it was given.
+                    val done = attempt ?: return
+                    completeSignIn(user, done.serverUrl, user.username, done.rememberSession)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(e) { "Unexpected error finishing the provider sign-in" }
+            _uiState.update { LoginUiState.Error(ProviderSignInUseCase.FAILED) }
+        }
+    }
+
+    /**
+     * The attempt survives Android ending the app while the browser is in front, in the saved
+     * state. Its verifier is only good with the one-time code the server sends to this app, for a
+     * minute, so keeping it there is not keeping a password there.
+     */
+    private fun keepAttempt(attempt: ProviderSignInAttempt) {
+        savedStateHandle[KEY_SSO_SERVER] = attempt.serverUrl
+        savedStateHandle[KEY_SSO_STATE] = attempt.state
+        savedStateHandle[KEY_SSO_VERIFIER] = attempt.codeVerifier
+        savedStateHandle[KEY_SSO_REMEMBER] = attempt.rememberSession
+        savedStateHandle[KEY_SSO_BROWSER] = attempt.browserUrl
+    }
+
+    private fun takeAttempt(): ProviderSignInAttempt? {
+        val server = savedStateHandle.remove<String>(KEY_SSO_SERVER)
+        val state = savedStateHandle.remove<String>(KEY_SSO_STATE)
+        val verifier = savedStateHandle.remove<String>(KEY_SSO_VERIFIER)
+        val remember = savedStateHandle.remove<Boolean>(KEY_SSO_REMEMBER)
+        val browser = savedStateHandle.remove<String>(KEY_SSO_BROWSER)
+        if (server == null || state == null || verifier == null) return null
+        return ProviderSignInAttempt(server, state, verifier, remember ?: false, browser.orEmpty())
     }
 
     fun updateRememberSession(value: Boolean) {
@@ -305,6 +435,13 @@ class LoginViewModel(
     }
 
     private companion object {
+        const val PROVIDERS_DEBOUNCE_MS = 600L
+        const val NO_BROWSER = "There's no browser on this phone to sign in with."
+        const val KEY_SSO_SERVER = "provider_sign_in_server"
+        const val KEY_SSO_STATE = "provider_sign_in_state"
+        const val KEY_SSO_VERIFIER = "provider_sign_in_verifier"
+        const val KEY_SSO_REMEMBER = "provider_sign_in_remember"
+        const val KEY_SSO_BROWSER = "provider_sign_in_browser"
         const val KEY_USER_NAME = "login_user_name"
         const val KEY_SERVER_URL = "login_server_url"
         const val KEY_REMEMBER = "login_remember"
