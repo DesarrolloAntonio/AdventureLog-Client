@@ -3,14 +3,14 @@ import ComposeApp
 
 /// Terms of Use and Privacy Policy, as the Mist-Legal artboard draws them: Terms / Privacy at the
 /// top, when the text took effect, each section in a frosted card, and a way to write to us. The
-/// texts are the shared ones the Android app shows.
+/// texts are the iPhone versions of the shared ones (Apple Maps, no permissions).
 struct LegalView: View {
     enum Page: Hashable { case terms, privacy }
 
     @State private var page: Page = .terms
     @Environment(\.openURL) private var openURL
 
-    private var text: LegalText { page == .terms ? LegalTextsKt.TermsOfUse : LegalTextsKt.PrivacyPolicy }
+    private var text: LegalText { page == .terms ? LegalTextsKt.IosTermsOfUse : LegalTextsKt.IosPrivacyPolicy }
 
     var body: some View {
         ScrollView {

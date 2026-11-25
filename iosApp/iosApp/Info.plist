@@ -46,9 +46,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>AdventureLog needs access to your location to show and select adventure locations on the map.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>AdventureLog needs access to your location to show and select adventure locations on the map.</string>
 </dict>
 </plist>
