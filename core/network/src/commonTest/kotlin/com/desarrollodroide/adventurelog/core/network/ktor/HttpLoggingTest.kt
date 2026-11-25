@@ -68,4 +68,22 @@ class HttpLoggingTest {
         assertEquals(1, emitted.size)
         assertFalse(emitted.single().contains("hunter2"), emitted.single())
     }
+
+    @Test
+    fun `redacts the session in an app-client login answer, pending or final`() {
+        val body = """{"status":401,"data":{"flows":[{"id":"mfa_authenticate","is_pending":true}]},""" +
+            """"meta":{"is_authenticated":false,"session_token":"6t3jl998602iah6angnxm0b9xgvkykhy"}}"""
+
+        val redacted = redactSecrets(body)
+
+        assertFalse(redacted.contains("6t3jl998602iah6angnxm0b9xgvkykhy"), redacted)
+        assertTrue(redacted.contains("mfa_authenticate"), redacted)
+    }
+
+    @Test
+    fun `redacts a second-factor code but not allauth's error codes`() {
+        assertFalse(redactSecrets("""{"code":"482913"}""").contains("482913"))
+        val error = """{"errors":[{"message":"Incorrect code.","code":"incorrect_code","param":"code"}]}"""
+        assertEquals(error, redactSecrets(error))
+    }
 }
