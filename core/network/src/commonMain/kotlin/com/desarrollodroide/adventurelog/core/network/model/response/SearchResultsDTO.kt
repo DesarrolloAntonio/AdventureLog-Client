@@ -2,7 +2,9 @@ package com.desarrollodroide.adventurelog.core.network.model.response
 
 import com.desarrollodroide.adventurelog.core.model.SearchHit
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
 /**
  * Response of `GET /api/search/`.
@@ -15,12 +17,14 @@ import kotlinx.serialization.Serializable
  * Because every field of that older model was optional, the client kept decoding the new
  * response without error and simply found nothing, so search silently returned no results.
  */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class SearchResultsDTO(
     @SerialName("query")
     val query: String = "",
 
     @SerialName("total")
+    @JsonNames("count") // 0.14
     val total: Int = 0,
 
     @SerialName("results")

@@ -16,7 +16,7 @@ data class TrailDTO(
     val name: String,
     
     @SerialName("location")
-    val location: String,
+    val location: String = "", // null on 0.14 for a trail on a trip day
     
     @SerialName("created_at")
     val createdAt: String,

@@ -24,6 +24,7 @@ const val KEY = "key"
  */
 internal val apiJson = Json {
     ignoreUnknownKeys = true
+    coerceInputValues = true // see defaultJson
     isLenient = true
     explicitNulls = false
     prettyPrint = true
