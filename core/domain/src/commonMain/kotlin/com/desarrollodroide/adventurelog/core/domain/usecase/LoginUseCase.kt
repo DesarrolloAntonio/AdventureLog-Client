@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.domain.usecase
 import com.desarrollodroide.adventurelog.core.common.Either
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.domain.repository.LoginRepository
+import com.desarrollodroide.adventurelog.core.model.LoginResult
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 
 class LoginUseCase(
@@ -10,9 +11,23 @@ class LoginUseCase(
 ) {
     companion object {
         const val CANNOT_REACH_SERVER = "Can't reach the server. Check the address and your connection."
+        const val NO_SESSION =
+            "Signed in, but the server sent no session. This usually means the " +
+                "address points at the AdventureLog web app rather than its API - " +
+                "check that you are using the backend server's address and port."
+
+        /**
+         * A login can answer 200, name the user, and still carry no session: the AdventureLog web
+         * app forwards the request to the API but strips set-cookie from what it forwards back.
+         * Taken at face value that reads as success, so the app used to open Home and save the
+         * credentials, and only there - once every request came back 401 - admit that nobody was
+         * signed in. Without a session there is no session, whatever the status code says.
+         */
+        internal fun withSession(user: UserDetails): Either<String, UserDetails> =
+            if (user.sessionToken.isNullOrBlank()) Either.Left(NO_SESSION) else Either.Right(user)
     }
 
-    suspend operator fun invoke(url: String, username: String, password: String): Either<String, UserDetails> =
+    suspend operator fun invoke(url: String, username: String, password: String): Either<String, LoginResult> =
         when (val result = loginRepository.sendLogin(url, username, password)) {
             is Either.Left -> {
                 when (result.value) {
@@ -26,23 +41,12 @@ class LoginUseCase(
                 }
             }
 
-            is Either.Right -> {
-                val user = result.value
-                // A login can answer 200, name the user, and still carry no session: the
-                // AdventureLog web app forwards the request to the API but strips set-cookie
-                // from what it forwards back. Taken at face value that reads as success, so the
-                // app used to open Home and save the credentials, and only there - once every
-                // request came back 401 - admit that nobody was signed in. Without a session
-                // there is no session, whatever the status code says.
-                if (user.sessionToken.isNullOrBlank()) {
-                    Either.Left(
-                        "Signed in, but the server sent no session. This usually means the " +
-                            "address points at the AdventureLog web app rather than its API - " +
-                            "check that you are using the backend server's address and port."
-                    )
-                } else {
-                    Either.Right(user)
+            is Either.Right -> when (val step = result.value) {
+                is LoginResult.SignedIn -> when (val checked = withSession(step.user)) {
+                    is Either.Left -> checked
+                    is Either.Right -> Either.Right(step)
                 }
+                LoginResult.CodeRequired -> Either.Right(step)
             }
         }
 }

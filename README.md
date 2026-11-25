@@ -56,8 +56,17 @@ server's own image search.</sub>
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-ios.png"><img src="docs/readme/light/h-ios.png" alt="iOS - under construction" width="100%"></picture>
 
 The iOS app is being built in SwiftUI with Liquid Glass (iOS 26). It shares the ViewModels and
-everything below them with Android, and draws its own screens. It is not distributed yet;
-screenshots will appear here when it is.
+everything below them with Android, and draws its own screens. It is not distributed yet; these
+are from the work in progress, and more will follow as screens are finished.
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/screenshots/ios-login.png" width="235" alt="Sign-in on iOS"/><br/><sub><b>Sign-in</b><br/>light</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/ios-login-dark.png" width="235" alt="Sign-in on iOS, dark"/><br/><sub><b>Sign-in</b><br/>dark</sub></td>
+  </tr>
+</table>
+
+<sub>iPhone 17 simulator.</sub>
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-features.png"><img src="docs/readme/light/h-features.png" alt="Features" width="100%"></picture>
 
@@ -84,6 +93,7 @@ screenshots will appear here when it is.
 - **Sharing**: invite someone with a public profile to a collection, or remove them again
 - **Markdown descriptions**: rendered as written on the web
 - **Tablets**: navigation rail, adaptive grids, and list and detail side by side in Places, Collections and World
+- **Sign-in**: password, two-step verification, and the server's providers (OIDC, GitHub...) on 0.14
 - **Servers**: AdventureLog 0.13 and 0.14
 
 </details>
@@ -286,7 +296,9 @@ flow run locally.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-issues.png"><img src="docs/readme/light/h-issues.png" alt="Known issues" width="100%"></picture>
 
-- **MFA and SSO**: accounts that use them cannot sign in yet.
+- **Sign-in providers** (OIDC, GitHub...) need server 0.14: 0.13 has no way for an app to use them.
+  The server must also list `adventurelog://auth/callback` in `MOBILE_AUTH_REDIRECT_URIS`, which
+  it does unless that setting was changed.
 - **iOS**: the SwiftUI app is under construction and not distributed yet.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-license.png"><img src="docs/readme/light/h-license.png" alt="License" width="100%"></picture>

@@ -18,6 +18,8 @@ import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LoginOutcomeDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.SignInProvidersDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
@@ -79,12 +81,43 @@ interface AdventureLogNetwork {
     ): CollectionDTO
 
     /**
-     * Send login request and return user details
+     * Sends the username and password. An account with two-step verification answers
+     * [LoginOutcomeDTO.SecondFactorRequired]: [sendSecondFactorCode] finishes it.
      */
     suspend fun sendLogin(
         url: String,
         username: String,
         password: String
+    ): LoginOutcomeDTO
+
+    /**
+     * Finishes the sign-in the last [sendLogin] left waiting, with a TOTP or recovery code.
+     * Throws [com.desarrollodroide.adventurelog.core.network.ktor.HttpException]: 400 for a wrong
+     * code, 401 or 410 once the sign-in has run out of time (or none is waiting).
+     */
+    suspend fun sendSecondFactorCode(code: String): UserDetailsDTO
+
+    /** Drops a sign-in waiting for its second factor. */
+    fun cancelPendingLogin()
+
+    /**
+     * The providers (OIDC, GitHub…) the server at [url] signs the app in through. None on a server
+     * without `mobile_auth_v1` - 0.13.1 cannot do it - and none when it cannot be asked. Touches
+     * nothing of the signed-in session: it runs while the address is still being typed.
+     */
+    suspend fun getSignInProviders(url: String): SignInProvidersDTO
+
+    /**
+     * Trades the [code] a provider sign-in brought back, with its PKCE [codeVerifier], for a
+     * session on the server at [url], and returns who it signed in. Throws
+     * [com.desarrollodroide.adventurelog.core.network.ktor.HttpException]: 400 for a code that is
+     * wrong, spent or more than a minute old (any failed attempt spends it), 429 when throttled.
+     */
+    suspend fun redeemProviderSignIn(
+        url: String,
+        code: String,
+        codeVerifier: String,
+        redirectUri: String,
     ): UserDetailsDTO
 
     /**

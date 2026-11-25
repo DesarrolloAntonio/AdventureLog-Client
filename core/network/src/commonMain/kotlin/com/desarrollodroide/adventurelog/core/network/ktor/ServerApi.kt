@@ -6,6 +6,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.http.isSuccess
@@ -109,3 +110,24 @@ internal fun HttpRequestBuilder.rewriteFor014() {
  * an ordinary request that has to wait for the probe it is part of (which deadlocked).
  */
 internal val ProbeRequest = AttributeKey<Unit>("AdventureLogProbe")
+
+/**
+ * Marks a request that belongs to a sign-in still in progress (the second factor): it carries a
+ * session token, but a 401 to it is not a signed-in session ending.
+ */
+internal val AuthStageRequest = AttributeKey<Unit>("AdventureLogAuthStage")
+
+/**
+ * Where the browser goes for a provider sign-in: the server's `public_url`, which its provider
+ * callbacks are registered against and which skips the web frontend's proxy (it does not forward
+ * `/accounts/`). The address [typed] in the app when there is none, or when it is a loopback one
+ * the phone cannot reach - upstream's compose file ships `http://localhost:8016`.
+ */
+internal fun browserBaseUrl(publicUrl: String?, typed: String): String {
+    val candidate = publicUrl?.trim()?.trimEnd('/')
+    if (candidate.isNullOrEmpty()) return typed
+    val parsed = runCatching { Url(candidate) }.getOrNull() ?: return typed
+    if (parsed.protocol.name !in setOf("http", "https")) return typed
+    if (parsed.host in setOf("localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]")) return typed
+    return candidate
+}

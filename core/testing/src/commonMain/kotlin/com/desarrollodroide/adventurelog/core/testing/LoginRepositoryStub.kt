@@ -2,6 +2,8 @@ package com.desarrollodroide.adventurelog.core.testing
 
 import com.desarrollodroide.adventurelog.core.common.ApiResponse
 import com.desarrollodroide.adventurelog.core.common.Either
+import com.desarrollodroide.adventurelog.core.model.LoginResult
+import com.desarrollodroide.adventurelog.core.model.ProviderSignInOptions
 import com.desarrollodroide.adventurelog.core.model.UserDetails
 // The interface's own package, wholesale: some of these declare their error types beside
 // themselves rather than in core:model.
@@ -18,5 +20,21 @@ abstract class LoginRepositoryStub : LoginRepository {
         url: String,
         username: String,
         password: String
-    ): Either<ApiResponse, UserDetails> = unused()
+    ): Either<ApiResponse, LoginResult> = unused()
+
+    override suspend fun sendLoginCode(
+        url: String,
+        code: String
+    ): Either<LoginCodeError, UserDetails> = unused()
+
+    override fun cancelPendingLogin(): Unit = unused()
+
+    override suspend fun getSignInProviders(url: String): ProviderSignInOptions? = unused()
+
+    override suspend fun redeemProviderSignIn(
+        url: String,
+        code: String,
+        codeVerifier: String,
+        redirectUri: String,
+    ): Either<ProviderSignInError, UserDetails> = unused()
 }

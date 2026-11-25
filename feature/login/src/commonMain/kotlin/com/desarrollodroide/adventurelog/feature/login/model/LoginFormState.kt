@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.login.model
 
+import com.desarrollodroide.adventurelog.core.model.SignInProvider
+
 data class LoginFormState(
     // Testing data
 //    val userName: String = "TestMaestro",
@@ -11,5 +13,7 @@ data class LoginFormState(
     val rememberSession: Boolean = false,
     val userNameError: Boolean = false,
     val passwordError: Boolean = false,
-    val urlError: Boolean = false
+    val urlError: Boolean = false,
+    /** The providers (OIDC, GitHub…) the server at [serverUrl] signs in through; none on 0.13.1. */
+    val providers: List<SignInProvider> = emptyList(),
 )

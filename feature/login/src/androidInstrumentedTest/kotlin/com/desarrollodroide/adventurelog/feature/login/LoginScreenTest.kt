@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.v2.runComposeUiTest
+import com.desarrollodroide.adventurelog.core.model.SignInProvider
 import com.desarrollodroide.adventurelog.feature.login.model.LoginFormState
 import com.desarrollodroide.adventurelog.feature.login.model.LoginUiState
 import com.desarrollodroide.adventurelog.feature.login.ui.screen.LoginScreen
@@ -69,5 +70,38 @@ class LoginScreenTest {
 
         onNodeWithText("Invalid server url").assertIsDisplayed()
         onNodeWithText("Required").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun aServersProvidersAreOfferedUnderThePassword() = runComposeUiTest {
+        val chosen = mutableListOf<SignInProvider>()
+        val github = SignInProvider("github", "GitHub")
+        val authelia = SignInProvider("oidc/authelia", "Authelia")
+        setContent {
+            LoginScreen(
+                loginUiState = LoginUiState.Empty, loginFormState = form().copy(providers = listOf(github, authelia)),
+                onNavigateToHome = {}, onUserNameChange = {}, onPasswordChange = {}, onServerUrlChange = {},
+                onCheckedRememberSessionChange = {}, onClickLoginButton = {}, clearErrors = {},
+                onProviderClick = { chosen += it },
+            )
+        }
+
+        onNodeWithText("Continue with GitHub").performScrollTo().assertIsDisplayed()
+        onNodeWithText("Continue with Authelia").performScrollTo().performClick()
+        assertEquals(listOf(authelia), chosen)
+    }
+
+    @Test
+    fun aServerWithoutProvidersOffersOnlyThePassword() = runComposeUiTest {
+        setContent {
+            LoginScreen(
+                loginUiState = LoginUiState.Empty, loginFormState = form(),
+                onNavigateToHome = {}, onUserNameChange = {}, onPasswordChange = {}, onServerUrlChange = {},
+                onCheckedRememberSessionChange = {}, onClickLoginButton = {}, clearErrors = {},
+            )
+        }
+
+        onNodeWithText("Continue with", substring = true).assertDoesNotExist()
+        onNodeWithText("or").assertDoesNotExist()
     }
 }

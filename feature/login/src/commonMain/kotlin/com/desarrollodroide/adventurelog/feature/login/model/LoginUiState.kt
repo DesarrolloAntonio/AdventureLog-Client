@@ -10,4 +10,15 @@ sealed interface LoginUiState {
     /** A login the user started: the form stays on screen under a progress indicator. */
     data object Loading : LoginUiState
     data class Success(val userDetails: UserDetails) : LoginUiState
+
+    /**
+     * The password was right and the account has two-step verification: the screen asks for the
+     * code from the authenticator app (or a recovery code).
+     */
+    data class CodeRequired(
+        val code: String = "",
+        /** What was wrong with the last code, said under the field. */
+        val error: String? = null,
+        val verifying: Boolean = false,
+    ) : LoginUiState
 }

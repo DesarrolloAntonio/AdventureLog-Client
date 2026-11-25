@@ -4,6 +4,8 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.ObserveCountriesUse
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 import com.desarrollodroide.adventurelog.core.domain.usecase.LoginUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.VerifyLoginCodeUseCase
+import com.desarrollodroide.adventurelog.core.domain.usecase.ProviderSignInUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationUseCase
 import com.desarrollodroide.adventurelog.core.domain.usecase.GetLocationsPagingUseCase
@@ -77,6 +79,8 @@ import com.desarrollodroide.adventurelog.core.domain.usecase.SearchEverythingUse
 
 val domainModule = module {
     factoryOf(::LoginUseCase)
+    factoryOf(::VerifyLoginCodeUseCase)
+    factoryOf(::ProviderSignInUseCase)
     factoryOf(::GetLocationsUseCase)
     factoryOf(::GetLocationUseCase)
     factoryOf(::GetLocationsPagingUseCase)
