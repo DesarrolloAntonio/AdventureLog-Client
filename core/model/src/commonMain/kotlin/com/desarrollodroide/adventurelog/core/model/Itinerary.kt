@@ -22,7 +22,12 @@ data class ItineraryEntry(
     val date: String?,
     val isGlobal: Boolean,
     /** Manual order within its day. The server keeps it; ties fall back to insertion order. */
-    val order: Int
+    val order: Int,
+    /**
+     * Which day of the trip it sits on, 1-based, on a server that plans by numbered days (0.14):
+     * there [date] is null. Null on 0.13, where [date] says the day.
+     */
+    val dayIndex: Int? = null
 )
 
 /** The six things the server will accept a pointer to. */
@@ -53,5 +58,7 @@ data class ItineraryDayNote(
     val collectionId: String,
     val date: String,
     val name: String,
-    val description: String
+    val description: String,
+    /** The day's place in the trip, 1-based, on 0.14; null on 0.13, where [date] says the day. */
+    val index: Int? = null
 )
