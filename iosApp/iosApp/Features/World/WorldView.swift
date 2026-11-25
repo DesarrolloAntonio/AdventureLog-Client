@@ -12,30 +12,39 @@ struct WorldView: View {
     var body: some View {
         Group {
             switch page {
-            case .map: WorldMap()
+            case .map: WorldMap(switcher: switcher)
             case .countries: CountriesView().mistBackground()
             }
         }
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Picker("View", selection: $page) {
-                    Text("Map").tag(Page.map)
-                    Text("Countries").tag(Page.countries)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 220)
+            if page == .countries {
+                ToolbarItem(placement: .principal) { switcher }
             }
         }
         // Large on both pages: a mode switched at runtime never opened the title out, and
         // screens pushed from an inline bar open with their own large titles folded.
-        // The map runs under the bar with no title over it.
         .navigationTitle(page == .countries ? "World" : "")
         .navigationBarTitleDisplayMode(.large)
+        // The map runs to the top with no bar over it: the bar laid a blurred band with a hard
+        // edge over the map. Its switch floats in the bar's place instead.
+        .toolbarVisibility(page == .map ? .hidden : .automatic, for: .navigationBar)
+    }
+
+    private var switcher: some View {
+        Picker("View", selection: $page) {
+            Text("Map").tag(Page.map)
+            Text("Countries").tag(Page.countries)
+        }
+        .pickerStyle(.segmented)
+        .frame(width: 220)
     }
 }
 
 /// Every place on the map, framed on the biggest group; a pin opens its place.
-private struct WorldMap: View {
+private struct WorldMap<Switcher: View>: View {
+    /// The Map/Countries switch, floating where the bar holds it on the Countries page.
+    let switcher: Switcher
+
     @StateObject private var host = ViewModelHost()
     @State private var places: [Location] = []
     @State private var selected: Location?
@@ -49,22 +58,30 @@ private struct WorldMap: View {
         GeometryReader { geo in
             PlacesMap(places: places, satellite: satellite, camera: $camera) { selected = $0 }
                 .ignoresSafeArea()
-                .overlay(alignment: .topTrailing) {
-                    Button { satellite.toggle() } label: {
-                        Image(systemName: satellite ? "map" : "globe.europe.africa")
-                            .font(.system(size: 17, weight: .semibold))
-                            .frame(width: 48, height: 48)
+                .overlay(alignment: .top) {
+                    // The bar's row: the switch in the middle, the map style where Countries has search.
+                    ZStack {
+                        switcher.padding(4).glassEffect(.regular.interactive(), in: .capsule)
+                        HStack {
+                            Spacer()
+                            Button { satellite.toggle() } label: {
+                                Image(systemName: satellite ? "map" : "globe.europe.africa")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .glassEffect(.regular.interactive(), in: .circle)
+                            .tint(.primary)
+                            .accessibilityLabel(satellite ? "Standard map" : "Satellite map")
+                        }
                     }
-                    .glassEffect(.regular.interactive(), in: .circle)
-                    .tint(.primary)
-                    .padding(16)
-                    .accessibilityLabel(satellite ? "Standard map" : "Satellite map")
+                    .frame(height: 44)
+                    .padding(.horizontal, 16)
                 }
                 .onChange(of: geo.size, initial: true) {
                     viewport = MapViewport(
                         size: CGSize(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom),
-                        // The bar, plus a pin's height: a pin stands above its point.
-                        top: geo.safeAreaInsets.top + 52,
+                        // The floating row, plus a pin's height: a pin stands above its point.
+                        top: geo.safeAreaInsets.top + 44 + 52,
                         bottom: geo.safeAreaInsets.bottom + 8
                     )
                 }
