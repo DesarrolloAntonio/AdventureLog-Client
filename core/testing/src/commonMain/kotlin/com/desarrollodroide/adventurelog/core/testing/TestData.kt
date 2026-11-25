@@ -179,15 +179,17 @@ fun testItineraryEntry(
     kind: ItineraryItemKind = ItineraryItemKind.LOCATION,
     id: String = "entry-$itemId-$date",
     order: Int = 0,
-    collectionId: String = "Trip"
+    collectionId: String = "Trip",
+    dayIndex: Int? = null
 ) = ItineraryEntry(
     id = id,
     collectionId = collectionId,
     kind = kind,
     itemId = itemId,
     date = date,
-    isGlobal = date == null,
-    order = order
+    isGlobal = date == null && dayIndex == null,
+    order = order,
+    dayIndex = dayIndex
 )
 
 fun testItineraryDayNote(
@@ -195,13 +197,15 @@ fun testItineraryDayNote(
     name: String = "",
     description: String = "",
     id: String = "day-$date",
-    collectionId: String = "Trip"
+    collectionId: String = "Trip",
+    index: Int? = null
 ) = ItineraryDayNote(
     id = id,
     collectionId = collectionId,
     date = date,
     name = name,
-    description = description
+    description = description,
+    index = index
 )
 
 fun testLodging(

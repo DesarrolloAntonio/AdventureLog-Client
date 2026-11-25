@@ -56,8 +56,12 @@ fun Collection.itinerary(): CollectionItinerary {
     val end = dayOf(endDate) ?: start
     val dates = if (start != null && end != null) daysFrom(start, end) else emptyList()
 
-    val names = itineraryDays.associateBy { it.date.take(10) }
-    val byDate = itinerary.filter { !it.isGlobal }.groupBy { it.date?.take(10) }
+    // 0.13 keys an entry and a day's name by its date. 0.14 plans by numbered days: an entry sits
+    // on day N with no date of its own, which is the trip's first day plus N - 1. Keyed by date
+    // either way, both servers lay out the same.
+    fun onDay(index: Int?): String? = if (index != null && start != null) LocalDate.fromEpochDays(start.toEpochDays() + index - 1).toString() else null
+    val names = itineraryDays.associateBy { it.date.takeIf(String::isNotBlank)?.take(10) ?: onDay(it.index) }
+    val byDate = itinerary.filter { !it.isGlobal }.groupBy { it.date?.take(10) ?: onDay(it.dayIndex) }
 
     val days = dates.mapIndexed { index, date ->
         val key = date.toString()
