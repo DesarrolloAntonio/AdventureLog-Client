@@ -221,7 +221,7 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `an account with two-step verification asks for the code, then signs in with it`() = runTest(dispatcher) {
+    fun `an account with two-step verification asks for the code then signs in with it`() = runTest(dispatcher) {
         val logins = FakeLogins(twoStep = true)
         val vm = signingIn(logins, remember = true)
 
@@ -303,7 +303,7 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `the code field takes digits only, up to a recovery code's eight`() = runTest(dispatcher) {
+    fun `the code field takes digits only up to a recovery code's eight`() = runTest(dispatcher) {
         val vm = signingIn(FakeLogins(twoStep = true))
         vm.login()
         testScheduler.advanceUntilIdle()
