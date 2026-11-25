@@ -56,8 +56,17 @@ server's own image search.</sub>
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-ios.png"><img src="docs/readme/light/h-ios.png" alt="iOS - under construction" width="100%"></picture>
 
 The iOS app is being built in SwiftUI with Liquid Glass (iOS 26). It shares the ViewModels and
-everything below them with Android, and draws its own screens. It is not distributed yet;
-screenshots will appear here when it is.
+everything below them with Android, and draws its own screens. It is not distributed yet; these
+are from the work in progress, and more will follow as screens are finished.
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/screenshots/ios-login.png" width="235" alt="Sign-in on iOS"/><br/><sub><b>Sign-in</b><br/>light</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/ios-login-dark.png" width="235" alt="Sign-in on iOS, dark"/><br/><sub><b>Sign-in</b><br/>dark</sub></td>
+  </tr>
+</table>
+
+<sub>iOS 26 simulator (iPhone 17).</sub>
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-features.png"><img src="docs/readme/light/h-features.png" alt="Features" width="100%"></picture>
 
