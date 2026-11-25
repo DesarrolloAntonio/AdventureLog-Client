@@ -37,7 +37,14 @@ data class ItineraryEntryDTO(
     val isGlobal: Boolean = false,
 
     @SerialName("order")
-    val order: Int = 0
+    val order: Int = 0,
+
+    /**
+     * 0.14 plans a trip by numbered days: an entry sits on day N of the trip and its [date] is
+     * null. 0.13 has no such field and keys every entry by its date.
+     */
+    @SerialName("day_index")
+    val dayIndex: Int? = null
 )
 
 @Serializable
@@ -61,6 +68,10 @@ data class ItineraryDayDTO(
     @SerialName("date")
     val date: String = "",
 
+    /** 0.14: the day's place in the trip, 1-based. Null on 0.13, where a day is its date. */
+    @SerialName("index")
+    val index: Int? = null,
+
     @SerialName("name")
     val name: String? = null,
 
@@ -79,7 +90,8 @@ fun ItineraryEntryDTO.toDomainModel(): ItineraryEntry? {
         itemId = itemId,
         date = date,
         isGlobal = isGlobal,
-        order = order
+        order = order,
+        dayIndex = dayIndex
     )
 }
 
@@ -88,5 +100,6 @@ fun ItineraryDayDTO.toDomainModel(): ItineraryDayNote = ItineraryDayNote(
     collectionId = collection ?: "",
     date = date,
     name = name ?: "",
-    description = description ?: ""
+    description = description ?: "",
+    index = index
 )

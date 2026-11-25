@@ -42,6 +42,11 @@ data class ItineraryDay(
 data class CollectionItinerary(
     val days: List<ItineraryDay>,
     val tripContext: List<ItineraryItem>,
+    /**
+     * 0.14's Ideas: placed on the trip but on no day, and not trip-wide either. Converting a trip
+     * to numbered days puts entries here when it cannot tell which day they belong to.
+     */
+    val ideas: List<ItineraryItem> = emptyList(),
     /** True when nothing has been placed anywhere. The auto-generate offer belongs here only. */
     val isEmpty: Boolean,
     /**
@@ -56,8 +61,12 @@ fun Collection.itinerary(): CollectionItinerary {
     val end = dayOf(endDate) ?: start
     val dates = if (start != null && end != null) daysFrom(start, end) else emptyList()
 
-    val names = itineraryDays.associateBy { it.date.take(10) }
-    val byDate = itinerary.filter { !it.isGlobal }.groupBy { it.date?.take(10) }
+    // 0.13 keys an entry and a day's name by its date. 0.14 plans by numbered days: an entry sits
+    // on day N with no date of its own, which is the trip's first day plus N - 1. Keyed by date
+    // either way, both servers lay out the same.
+    fun onDay(index: Int?): String? = if (index != null && start != null) LocalDate.fromEpochDays(start.toEpochDays() + index - 1).toString() else null
+    val names = itineraryDays.associateBy { it.date.takeIf(String::isNotBlank)?.take(10) ?: onDay(it.index) }
+    val byDate = itinerary.filter { !it.isGlobal }.groupBy { it.date?.take(10) ?: onDay(it.dayIndex) }
 
     val days = dates.mapIndexed { index, date ->
         val key = date.toString()
@@ -75,6 +84,7 @@ fun Collection.itinerary(): CollectionItinerary {
     return CollectionItinerary(
         days = days,
         tripContext = itinerary.filter { it.isGlobal }.toItems(this),
+        ideas = itinerary.filter { !it.isGlobal && it.date == null && it.dayIndex == null }.toItems(this),
         isEmpty = itinerary.isEmpty(),
         canAutoGenerate = itinerary.isEmpty() && hasDatedRecords()
     )
