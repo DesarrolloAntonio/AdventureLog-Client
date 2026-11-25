@@ -24,6 +24,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.coil.compose)
             implementation(libs.androidx.ui.tooling)
+            // Custom Tabs: a provider sign-in runs in the system browser, never in a WebView.
+            implementation(libs.androidx.browser)
         }
         commonTest.dependencies {
             implementation(projects.core.testing)

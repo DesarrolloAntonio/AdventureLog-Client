@@ -84,6 +84,7 @@ screenshots will appear here when it is.
 - **Sharing**: invite someone with a public profile to a collection, or remove them again
 - **Markdown descriptions**: rendered as written on the web
 - **Tablets**: navigation rail, adaptive grids, and list and detail side by side in Places, Collections and World
+- **Sign-in**: password, two-step verification, and the server's providers (OIDC, GitHub...) on 0.14
 - **Servers**: AdventureLog 0.13 and 0.14
 
 </details>
@@ -286,8 +287,9 @@ flow run locally.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-issues.png"><img src="docs/readme/light/h-issues.png" alt="Known issues" width="100%"></picture>
 
-- **SSO**: accounts that sign in through a provider (OIDC, GitHub...) cannot sign in yet. Two-step
-  verification (an authenticator app or a recovery code) works.
+- **Sign-in providers** (OIDC, GitHub...) need server 0.14: 0.13 has no way for an app to use them.
+  The server must also list `adventurelog://auth/callback` in `MOBILE_AUTH_REDIRECT_URIS`, which
+  it does unless that setting was changed.
 - **iOS**: the SwiftUI app is under construction and not distributed yet.
 
 ### <picture><source media="(prefers-color-scheme: dark)" srcset="docs/readme/dark/h-license.png"><img src="docs/readme/light/h-license.png" alt="License" width="100%"></picture>
