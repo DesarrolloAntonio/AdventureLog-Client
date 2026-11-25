@@ -72,6 +72,25 @@ class CollectionItineraryTest {
     }
 
     @Test
+    fun anEntryOnNoDayAndNotTripWideIsAnIdea() {
+        // What 0.14's conversion did to a real trip: three places with no date, no day and not
+        // trip-wide. They belong to the trip, so they are listed, as Ideas - not dropped.
+        val plan = testCollection(
+            startDate = "2026-10-10",
+            endDate = "2026-10-12",
+            locations = listOf(testLocation("Vinicunca", id = "loc-1")),
+            itinerary = listOf(
+                testItineraryEntry("loc-1", date = null).copy(isGlobal = false)
+            )
+        ).itinerary()
+
+        assertEquals("Vinicunca", plan.ideas.single().title)
+        assertTrue(plan.tripContext.isEmpty())
+        assertTrue(plan.days.all { it.items.isEmpty() })
+        assertFalse(plan.isEmpty)
+    }
+
+    @Test
     fun aNumberedDayKeepsItsName() {
         val plan = testCollection(
             startDate = "2026-10-10",

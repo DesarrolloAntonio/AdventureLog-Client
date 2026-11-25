@@ -84,6 +84,10 @@ fun CollectionItineraryView(
             onRemove = onRemoveEntry
         )
 
+        if (itinerary.ideas.isNotEmpty()) {
+            IdeasCard(items = itinerary.ideas, onRemove = onRemoveEntry)
+        }
+
         itinerary.days.forEach { day ->
             DayCard(
                 day = day,
@@ -150,6 +154,24 @@ private fun TripContextCard(
         } else {
             items.forEach { ItemRow(it, onRemove) }
         }
+    }
+}
+
+/** 0.14's Ideas: on the trip, on no day yet. Shown only when there are some. */
+@Composable
+private fun IdeasCard(items: List<ItineraryItem>, onRemove: (String) -> Unit) {
+    ItineraryCard {
+        Text(
+            text = "Ideas",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = "On the trip, not on a day yet",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        items.forEach { ItemRow(it, onRemove) }
     }
 }
 

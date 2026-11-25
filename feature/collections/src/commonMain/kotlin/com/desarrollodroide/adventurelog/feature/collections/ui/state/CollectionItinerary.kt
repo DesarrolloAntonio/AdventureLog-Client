@@ -42,6 +42,11 @@ data class ItineraryDay(
 data class CollectionItinerary(
     val days: List<ItineraryDay>,
     val tripContext: List<ItineraryItem>,
+    /**
+     * 0.14's Ideas: placed on the trip but on no day, and not trip-wide either. Converting a trip
+     * to numbered days puts entries here when it cannot tell which day they belong to.
+     */
+    val ideas: List<ItineraryItem> = emptyList(),
     /** True when nothing has been placed anywhere. The auto-generate offer belongs here only. */
     val isEmpty: Boolean,
     /**
@@ -79,6 +84,7 @@ fun Collection.itinerary(): CollectionItinerary {
     return CollectionItinerary(
         days = days,
         tripContext = itinerary.filter { it.isGlobal }.toItems(this),
+        ideas = itinerary.filter { !it.isGlobal && it.date == null && it.dayIndex == null }.toItems(this),
         isEmpty = itinerary.isEmpty(),
         canAutoGenerate = itinerary.isEmpty() && hasDatedRecords()
     )
