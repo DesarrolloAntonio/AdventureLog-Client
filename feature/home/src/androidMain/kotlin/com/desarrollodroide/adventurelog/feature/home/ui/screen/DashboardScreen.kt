@@ -105,7 +105,7 @@ fun DashboardScreen(
     onOpenEvent: (EventTarget) -> Unit = { },
     /** "Hi John": the account's first name, from the shell. Null or blank reads "Hi there". */
     firstName: String? = null,
-    /** "Your map so far" opens World, where the countries behind the numbers are. */
+    /** "Your map" opens World, where the countries behind the numbers are. */
     onSeeWorld: () -> Unit = { },
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -345,7 +345,7 @@ private fun DataRail(
             .padding(top = 8.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        YourMapSoFar(dashboard, onSeeWorld)
+        YourMap(dashboard, onSeeWorld)
 
         val comingUp = comingUpEntries(otherTrips, dashboard.upcomingEvents, today, onTripClick, featuredTripId, onOpenEvent)
         if (comingUp.isNotEmpty()) {
@@ -450,7 +450,7 @@ private fun StackedDashboard(
             )
         }
 
-        YourMapSoFar(dashboard, onSeeWorld)
+        YourMap(dashboard, onSeeWorld)
 
         if (comingUp.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -668,22 +668,14 @@ private fun FeaturedTrip(
 }
 
 /**
- * "Your map so far": the heading links to World, where the countries behind the numbers are, and
- * the four figures sit under it. Countries visited only - the dashboard counts no planned ones.
+ * "Your map": the four figures, and a link to World, where the countries behind them are. It was
+ * "Your map so far" over "22 places · 7 countries visited", straight under a greeting that already
+ * says "visited so far" - the same words three times, and the figures said again below.
  */
 @Composable
-private fun YourMapSoFar(dashboard: Dashboard, onSeeWorld: () -> Unit) {
-    val stats = dashboard.stats
-    val places = if (stats.locationCount == 1) "1 place" else "${stats.locationCount} places"
-    val countries = if (stats.visitedCountryCount == 1) "1 country" else "${stats.visitedCountryCount} countries"
+private fun YourMap(dashboard: Dashboard, onSeeWorld: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SectionHeader(title = "Your map so far")
-        TextButton(
-            onClick = onSeeWorld,
-            contentPadding = PaddingValues(horizontal = 0.dp)
-        ) {
-            Text("$places \u00b7 $countries visited", style = MaterialTheme.typography.labelLarge)
-        }
+        SectionHeader(title = "Your map", trailing = "See world", onTrailingClick = onSeeWorld)
         MapSoFarTiles(dashboard.stats)
     }
 }

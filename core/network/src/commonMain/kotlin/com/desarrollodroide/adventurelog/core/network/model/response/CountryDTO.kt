@@ -16,7 +16,7 @@ data class CountryDTO(
     val countryCode: String,
     
     @SerialName("flag_url")
-    val flagUrl: String,
+    val flagUrl: String = "", // nullable on 0.14
     
     @SerialName("num_regions")
     val numRegions: String, // API returns as string

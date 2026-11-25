@@ -1,5 +1,14 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
+import android.graphics.Point
 import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import com.desarrollodroide.adventurelog.feature.map.ui.state.markerLabel
 import androidx.compose.foundation.layout.*
@@ -48,6 +57,8 @@ fun AdventureMapView(
     contentPadding: PaddingValues = PaddingValues(),
     /** False when the map runs edge to edge (the Map tab); true as a card inside a page. */
     rounded: Boolean = true,
+    /** The area on screen whenever the camera settles, for a list of the places in view. */
+    onVisibleBoundsChanged: ((LatLngBounds) -> Unit)? = null,
 ) {
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
@@ -107,6 +118,29 @@ fun AdventureMapView(
         }
     }
     
+    // Whenever the camera comes to rest - the first fit included - say what is on screen. Not the
+    // projection's visible region: that leaves out the padding, so the strip under the floating
+    // search and filters counted as off screen. The corners of the view itself, less only the
+    // start padding (where a sheet covers the map).
+    var mapSize by remember { mutableStateOf(IntSize.Zero) }
+    val startInset = with(LocalDensity.current) {
+        contentPadding.calculateStartPadding(LocalLayoutDirection.current).roundToPx()
+    }
+    if (onVisibleBoundsChanged != null) {
+        LaunchedEffect(cameraPositionState.isMoving, mapSize, startInset) {
+            val projection = cameraPositionState.projection
+            if (!cameraPositionState.isMoving && projection != null && mapSize != IntSize.Zero) {
+                val corners = listOf(
+                    Point(startInset, 0), Point(mapSize.width, 0),
+                    Point(startInset, mapSize.height), Point(mapSize.width, mapSize.height),
+                )
+                val builder = LatLngBounds.Builder()
+                corners.forEach { builder.include(projection.fromScreenLocation(it)) }
+                onVisibleBoundsChanged(builder.build())
+            }
+        }
+    }
+
     val rendering = rememberMapRendering()
     val mapProperties = rememberThemedMapProperties(rendering)
     
@@ -134,6 +168,7 @@ fun AdventureMapView(
     GoogleMap(
         modifier = modifier
             .fillMaxSize()
+            .onSizeChanged { mapSize = it }
             .then(if (rounded) Modifier.clip(RoundedCornerShape(24.dp)) else Modifier),
         cameraPositionState = cameraPositionState,
         contentPadding = contentPadding,

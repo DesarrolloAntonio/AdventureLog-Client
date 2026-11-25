@@ -1,5 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.world.ui.screen
 
+import androidx.compose.runtime.LaunchedEffect
 import com.desarrollodroide.adventurelog.feature.world.ui.components.CountryRow
 import com.desarrollodroide.adventurelog.feature.world.ui.components.WorldFilterGroup
 import com.desarrollodroide.adventurelog.feature.world.ui.components.PassportCard
@@ -74,10 +75,24 @@ fun WorldScreen(
     onCountryClick: (String) -> Unit,
     onMapClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /** The country open beside the list on a wide window, marked in the list. */
+    selectedCountryCode: String? = null,
+    /** Once the countries are in: the one to open first when there is a pane for it. */
+    onFirstLoaded: ((String) -> Unit)? = null,
     viewModel: WorldViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+
+    // A visited country first, as the stamps put it: an empty pane, or Afghanistan because it
+    // sorts first, is a poor opening for the half of a tablet that shows one country.
+    val loaded = uiState.countries.isNotEmpty()
+    LaunchedEffect(loaded) {
+        if (loaded) {
+            val first = uiState.countries.firstOrNull { it.numVisits > 0 } ?: uiState.countries.first()
+            onFirstLoaded?.invoke(first.countryCode)
+        }
+    }
 
     WorldScreenContent(
         uiState = uiState,
@@ -89,6 +104,7 @@ fun WorldScreen(
         onCountryClick = onCountryClick,
         onMapClick = onMapClick,
         onRefresh = viewModel::onRefresh,
+        selectedCountryCode = selectedCountryCode,
         modifier = modifier
     )
 }
@@ -105,7 +121,8 @@ private fun WorldScreenContent(
     onCountryClick: (String) -> Unit,
     onMapClick: () -> Unit,
     onRefresh: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedCountryCode: String? = null,
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
     val hasActiveFilters = uiState.filterMode != FilterMode.ALL
@@ -236,7 +253,8 @@ private fun WorldScreenContent(
                             CountryRow(
                                 country = countries[index],
                                 shape = SegmentedListDefaults.shapeFor(index, countries.size),
-                                onClick = onCountryClick
+                                onClick = onCountryClick,
+                                selected = countries[index].countryCode == selectedCountryCode
                             )
                         }
                     }

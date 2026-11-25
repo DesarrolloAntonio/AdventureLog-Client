@@ -1,5 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.home.ui.screen
 
+import androidx.compose.material3.FloatingActionButton
+import com.desarrollodroide.adventurelog.feature.ui.components.ShellAction
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellRailActionHost
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.WindowInsets
@@ -59,7 +62,7 @@ import com.desarrollodroide.adventurelog.core.model.Dashboard
 import com.desarrollodroide.adventurelog.core.model.UserStats
 import com.desarrollodroide.adventurelog.feature.home.model.HomeUiState
 import com.desarrollodroide.adventurelog.feature.home.model.fullName
-import com.desarrollodroide.adventurelog.feature.home.ui.components.homeNavigationItems
+import com.desarrollodroide.adventurelog.feature.home.ui.components.HomeRailItems
 import com.desarrollodroide.adventurelog.feature.home.ui.components.ProfileMenu
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.CurrentScreen
 import com.desarrollodroide.adventurelog.feature.home.viewmodel.HomeViewModel
@@ -98,6 +101,23 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.desarrollodroide.adventurelog.feature.ui.navigation.NavigationAnimations
 import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellTitleOverlap
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.util.lerp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.AnimatedVisibility
 import androidx.navigation.NavBackStackEntry
 import com.desarrollodroide.adventurelog.feature.home.ui.navigation.isSectionSwitch
 import com.desarrollodroide.adventurelog.core.model.Location
@@ -178,6 +198,9 @@ private val ScreensWithOwnSearch = setOf(
 /**
  * Helper function to reset scroll behavior
  */
+/** Passes nothing to the shell's bars: for while a page with bars of its own is on show. */
+private val NoShellScroll = object : NestedScrollConnection {}
+
 @OptIn(ExperimentalMaterial3Api::class)
 private fun resetScrollBehavior(scrollBehavior: TopAppBarScrollBehavior) {
     scrollBehavior.state.contentOffset = 0f
@@ -327,25 +350,47 @@ fun HomeScreenContent(
     // action of the screen on show ("Add a place") beside the destinations.
     val toolbarScroll = rememberToolbarScrollState()
     LaunchedEffect(currentScreen) { toolbarScroll.show() }
-    // A screen with bars of its own scrolls too, and the nested scroll reaches the shell's bars
-    // while they are put away: back on the list, the app bar was folded and the toolbar gone.
-    LaunchedEffect(shellActions.chromeHiddenBy) {
-        if (shellActions.chromeHiddenBy == 0) {
+    // The title and the toolbar step aside for a page with bars of its own, and come back, over
+    // the same 300ms as the page's slide. They used to vanish and reappear between two frames,
+    // and the title's height - the content's top padding - jumped with them.
+    // A screen's hold ends once its back stack entry is popped - at the start of Back, while it
+    // is still sliding out - rather than when it leaves composition at the end.
+    val backStack by navController.currentBackStack.collectAsState()
+    val isGone: (Any?) -> Boolean = { owner -> owner is NavBackStackEntry && owner !in backStack }
+    val chromeShown = !(compact && shellActions.hidesChrome(isGone))
+    val chromeFraction by animateFloatAsState(
+        targetValue = if (chromeShown) 1f else 0f,
+        animationSpec = tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing),
+        label = "shellChrome",
+    )
+    // Who put them away decides how: a pane's page stands in the title's place, so the title only
+    // fades over it; a form slides in below it, so the title folds away to the status bar. The
+    // answer holds while they come back, until they are fully back.
+    val lastInPlace = remember { mutableStateOf(false) }
+    val titleInPlace = if (!chromeShown) shellActions.hidesChromeInPlace(isGone) else lastInPlace.value
+    SideEffect { lastInPlace.value = titleInPlace }
+    // A page with bars of its own scrolls too. Its scrolling is kept from the shell's title while
+    // that is put away - back on the list, the title is as the list left it, folded or open. A
+    // form's return still opens it, as before.
+    LaunchedEffect(chromeShown) {
+        if (chromeShown) {
             toolbarScroll.show()
-            resetScrollBehavior(scrollBehavior)
+            if (!titleInPlace) resetScrollBehavior(scrollBehavior)
         }
     }
+    val titleScroll = if (chromeShown) scrollBehavior.nestedScrollConnection else NoShellScroll
 
     // Read by the screens' pull-to-refresh: a downward drag opens the title first, then refreshes.
     val appBarExpanded = remember(scrollBehavior) { { scrollBehavior.state.heightOffset >= -0.5f } }
     CompositionLocalProvider(
         LocalShellActionHost provides if (compact) shellActions else null,
+        LocalShellRailActionHost provides if (compact) null else shellActions,
         LocalShellAppBarExpanded provides appBarExpanded,
     ) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .then(if (compact) Modifier.nestedScroll(toolbarScroll.connection) else Modifier)
+            .then(if (compact) Modifier.nestedScroll(if (chromeShown) toolbarScroll.connection else NoShellScroll) else Modifier)
     ) {
         // Flat, the redesign's #F5FAFB - the theme's own surface.
         //
@@ -362,29 +407,56 @@ fun HomeScreenContent(
 
             // The five destinations are a floating toolbar on a phone (drawn below, over the
             // content) and a rail on anything wider. The suite only ever draws the rail.
+            val suiteType = if (compact) NavigationSuiteType.None else NavigationSuiteType.WideNavigationRailCollapsed
             NavigationSuiteScaffold(
-                navigationSuiteItems = { homeNavigationItems(currentScreen) { navigateTo(it) } },
-                layoutType = if (compact) NavigationSuiteType.None else NavigationSuiteType.NavigationRail,
+                navigationItems = { HomeRailItems(currentScreen, suiteType) { navigateTo(it) } },
+                navigationSuiteType = suiteType,
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                // On a wide window the screen's main action heads the rail, as the canvas draws it:
+                // Add a place on Home and Places, New collection on Collections. A phone carries it
+                // beside its floating toolbar instead.
+                primaryActionContent = {
+                    if (!compact) {
+                        val action = shellActions.action ?: if (currentScreen == CurrentScreen.HOME) {
+                            ShellAction(Icons.Default.Add, "Add a place") {
+                                navController.navigate(NavigationRoutes.Locations.add) { launchSingleTop = true }
+                            }
+                        } else null
+                        action?.let { RailAction(it) }
+                    }
+                }
             ) {
             BoxWithConstraints {
             val appBarWidth = maxWidth
             Scaffold(
                 modifier = Modifier
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .nestedScroll(titleScroll)
                     .background(Color.Transparent),  // Ensure Scaffold is transparent
                 topBar = {
                     // A screen with bars of its own (a place's page) has the shell's put away.
-                    if (compact && shellActions.chromeHiddenBy > 0) return@Scaffold
+                    if (!chromeShown && chromeFraction == 0f) return@Scaffold
                     if (mapFullBleed) return@Scaffold
                     // The bar is transparent, so insetting it simply moves the title and the
                     // actions onto the same left and right edge as the content below. Without
                     // this the greeting starts at the window edge while everything under it
                     // starts 120dp further in, which is one width too many for one screen.
                     val gutter = ((appBarWidth - MaxContentWidth) / 2).coerceAtLeast(0.dp)
+                    // While it comes and goes the bar folds down to the status bar's height, which
+                    // is what an empty slot pads the content by: no jump at either end.
+                    val statusBarTop = WindowInsets.statusBars.getTop(LocalDensity.current)
                     TopAppBar(
-                        modifier = Modifier.padding(horizontal = gutter),
+                        modifier = Modifier
+                            .clipToBounds()
+                            .layout { measurable, constraints ->
+                                val bar = measurable.measure(constraints)
+                                val height = if (titleInPlace) bar.height
+                                    else lerp(statusBarTop.coerceAtMost(bar.height), bar.height, chromeFraction)
+                                layout(bar.width, height) {
+                                    bar.placeWithLayer(0, 0) { alpha = chromeFraction }
+                                }
+                            }
+                            .padding(horizontal = gutter),
                         // Back sits in the bar's own navigation slot. Inside the title it was a
                         // clickable icon 28dp wide, and as an IconButton the title's inset still
                         // clipped it to 38dp (measured) - under the 48dp a finger needs.
@@ -475,26 +547,7 @@ fun HomeScreenContent(
                             }
                         },
                         actions = {
-                            // The redesign puts adding a place in the bar on a wide window, where
-                            // there is room for a labelled button; on a phone the same action is
-                            // the floating button the list screens already carry.
-                            if (currentScreen == CurrentScreen.HOME && appBarWidth >= 1000.dp) {
-                                Button(
-                                    onClick = { navController.navigate(NavigationRoutes.Locations.add) },
-                                    shape = RoundedCornerShape(22.dp),
-                                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(Modifier.width(6.dp))
-                                    Text("Add place", style = MaterialTheme.typography.labelLarge)
-                                }
-                                Spacer(Modifier.width(12.dp))
-                            }
-
+                            // Add a place heads the rail on a wide window; no second copy up here.
                             // Not on a screen with a search field of its own: two searches one
                             // above the other read as the same thing twice.
                             if (currentScreen !in ScreensWithOwnSearch) Surface(
@@ -561,7 +614,14 @@ fun HomeScreenContent(
                         // pad for it twice in here.
                         .consumeWindowInsets(barsPadding)
                 ) {
-                    CompositionLocalProvider(LocalShellTopOverlay provides if (mapFullBleed) MapSearchPillClearance else 0.dp) {
+                    val titleOverlap = if (compact) {
+                        (barsPadding.calculateTopPadding() - WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+                            .coerceAtLeast(0.dp)
+                    } else 0.dp
+                    CompositionLocalProvider(
+                        LocalShellTopOverlay provides if (mapFullBleed) MapSearchPillClearance else 0.dp,
+                        LocalShellTitleOverlap provides titleOverlap,
+                    ) {
                     // Changing section fades through: the five tabs and the account menu's
                     // screens have no order between them, so nothing slides left or right (it
                     // used to, by tab position, and Home alone faded). Going deeper inside a
@@ -1072,7 +1132,10 @@ fun HomeScreenContent(
 
                         settingsScreen(onLogout = onLogout)
 
-                        worldGraph(navController)
+                        // The World tab is the country list and a country side by side on a tablet.
+                        worldGraph(navController, worldTab = {
+                            WorldPane(onMapClick = { navigateTo(CurrentScreen.MAP) })
+                        })
 
                         mapScreen(
                             navController = navController,
@@ -1131,14 +1194,22 @@ fun HomeScreenContent(
             }
             }
 
-            if (compact && shellActions.chromeHiddenBy == 0) {
-                MainToolbarRow(
-                    current = currentScreen,
-                    onSelect = { navigateTo(it) },
-                    action = shellActions.action,
-                    scroll = toolbarScroll,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
+            if (compact) {
+                AnimatedVisibility(
+                    visible = chromeShown,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    enter = slideInVertically(tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing)) { it } +
+                        fadeIn(tween(NavigationAnimations.SLIDE_DURATION_MS)),
+                    exit = slideOutVertically(tween(NavigationAnimations.SLIDE_DURATION_MS, easing = FastOutSlowInEasing)) { it } +
+                        fadeOut(tween(NavigationAnimations.SLIDE_DURATION_MS)),
+                ) {
+                    MainToolbarRow(
+                        current = currentScreen,
+                        onSelect = { navigateTo(it) },
+                        action = shellActions.action,
+                        scroll = toolbarScroll,
+                    )
+                }
             }
     }
     }
@@ -1268,5 +1339,18 @@ private fun MapSearchPill(
             )
             trailing()
         }
+    }
+}
+
+/** A screen's main action at the head of the rail: the canvas's square teal button. */
+@Composable
+private fun RailAction(action: ShellAction) {
+    FloatingActionButton(
+        onClick = action.onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        Icon(action.icon, contentDescription = action.description)
     }
 }

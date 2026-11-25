@@ -1,5 +1,10 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.map.ui.components.MapInViewSheet
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.LatLng
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -80,7 +85,11 @@ fun MapScreen(
     val density = LocalDensity.current
     val statusTop = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
     val navBottom = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
-    Box(modifier = Modifier.fillMaxSize()) {
+    // A wide window lists the places on screen beside the map (the tablet canvas's "In view").
+    var visibleBounds by remember { mutableStateOf<LatLngBounds?>(null) }
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val sideSheet = maxWidth >= 840.dp
+        val sheetTop = statusTop + topOverlay + 120.dp
         MapContent(
             locations = filteredAdventures,
             visitedRegions = uiState.visitedRegions,
@@ -93,8 +102,35 @@ fun MapScreen(
             onAdventureClick = { selectedId = it },
             modifier = Modifier.fillMaxSize(),
             selectedId = selectedId,
-            contentPadding = PaddingValues(top = statusTop + topOverlay + 72.dp, bottom = navBottom + 96.dp),
+            contentPadding = PaddingValues(
+                top = statusTop + topOverlay + 72.dp,
+                bottom = navBottom + 96.dp,
+                // The map frames its places clear of the sheet over its left side.
+                start = if (sideSheet) SideSheetWidth + 32.dp else 0.dp,
+            ),
+            onVisibleBoundsChanged = if (sideSheet) ({ visibleBounds = it }) else null,
         )
+
+        if (sideSheet && !uiState.isLoading && uiState.error == null) {
+            val inView = remember(filteredAdventures, visibleBounds) {
+                val bounds = visibleBounds
+                filteredAdventures.filter { place ->
+                    val lat = place.latitude?.toDoubleOrNull()
+                    val lng = place.longitude?.toDoubleOrNull()
+                    lat != null && lng != null && (bounds == null || bounds.contains(LatLng(lat, lng)))
+                }
+            }
+            MapInViewSheet(
+                places = inView,
+                total = filteredAdventures.size,
+                onOpen = { onAdventureClick(it.id) },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 16.dp, top = sheetTop, bottom = 16.dp)
+                    .navigationBarsPadding()
+                    .width(SideSheetWidth)
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -183,3 +219,6 @@ fun MapScreen(
         )
     }
 }
+
+/** The width of the "In view" list beside the map on a wide window. */
+private val SideSheetWidth = 360.dp

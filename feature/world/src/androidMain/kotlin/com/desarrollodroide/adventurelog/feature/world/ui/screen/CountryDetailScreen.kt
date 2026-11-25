@@ -83,6 +83,8 @@ fun CountryDetailScreen(
     countryCode: String,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    /** False in a pane beside the country list: there is no list to go back to. */
+    showBack: Boolean = true,
     viewModel: CountryDetailViewModel = koinViewModel()
 ) {
     // It brings its own header (Back, the stamp, the name), as a trip and a place do: the shell's
@@ -132,7 +134,7 @@ fun CountryDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(SegmentedListDefaults.Gap),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
+                    if (showBack) item(span = { GridItemSpan(maxLineSpan) }) {
                         // onNavigateBack reached this screen and nothing drew it: the only way
                         // back was the system gesture (QA 05, screenshot).
                         // In a Box: a grid item centres what it holds, and the arrow sat mid-screen.

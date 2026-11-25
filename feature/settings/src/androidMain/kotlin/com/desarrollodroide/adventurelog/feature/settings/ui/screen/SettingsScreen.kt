@@ -1,5 +1,11 @@
 package com.desarrollodroide.adventurelog.feature.settings.ui.screen
 
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxContentWidth
+import com.desarrollodroide.adventurelog.feature.ui.components.MaxDashboardWidth
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.size
@@ -182,32 +188,26 @@ fun SettingsContent(
         ?: user?.email
 
     Box(modifier = Modifier.fillMaxSize()) {
-                // Settings is a column of rows; on a tablet it was one row per 1200dp line.
-        ContentColumn {
-    LazyColumn(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                item {
+    val account: @Composable () -> Unit = {
                     AccountHeader(
                         user = user,
                         primaryEmail = primaryEmail,
                         serverUrl = serverUrl,
                         onClick = { editProfileOpen = true }
                     )
-                }
-                item {
+    }
+    val preferences: @Composable () -> Unit = {
                     PreferencesGroup(state = profile, onChange = onChangeProfile)
-                }
-                item {
+    }
+    val appearance: @Composable () -> Unit = {
                     AppearanceGroup(
                         themeMode = themeMode,
                         onThemeModeChanged = onThemeModeChanged,
                         dynamicColors = dynamicColors,
                         onDynamicColorsChanged = onDynamicColorsChanged
                     )
-                }
-                item {
+    }
+    val signIn: @Composable () -> Unit = {
                     SignInGroup(
                         hasPassword = user?.hasPassword ?: true,
                         isChangingPassword = isChangingPassword,
@@ -219,19 +219,19 @@ fun SettingsContent(
                         onRemoveEmail = onRemoveEmail,
                         onRetryEmails = onReloadEmails
                     )
-                }
-                item {
+    }
+    val yourData: @Composable () -> Unit = {
                     VisitedRegionsCard(
                         isRefreshing = regionsRefreshing,
                         onRefresh = onRefreshRegions,
                         isBackingUp = backupInProgress,
                         onDownloadBackup = onDownloadBackup
                     )
-                }
-                item {
+    }
+    val storage: @Composable () -> Unit = {
                     StorageSection(state = storage, onRetry = onReloadStorage)
-                }
-                item {
+    }
+    val about: @Composable () -> Unit = {
                     AboutSection(
                         user = user,
                         serverUrl = serverUrl,
@@ -252,13 +252,52 @@ fun SettingsContent(
                         onNavigateToTermsOfUse = { legalPage = LegalPage.TERMS },
                         onNavigateToPrivacyPolicy = { legalPage = LegalPage.PRIVACY }
                     )
-                }
-                item {
+    }
+    val signOut: @Composable () -> Unit = {
                     SignOutCard(onClick = { confirmLogout = true })
+    }
+
+    // On a wide window the sections stand in two columns under the account card - the canvas's
+    // tablet Settings asks for its width to be used, and one column of 1000dp rows wasted it.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val twoColumns = maxWidth >= 840.dp
+        ContentColumn(maxWidth = if (twoColumns) MaxDashboardWidth else MaxContentWidth) {
+            if (twoColumns) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 16.dp, end = 16.dp, bottom = 48.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    account()
+                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                            preferences(); appearance(); signIn()
+                        }
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                            yourData(); storage(); about(); signOut()
+                        }
+                    }
                 }
-                item { Spacer(Modifier.height(24.dp)) }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    item { account() }
+                    item { preferences() }
+                    item { appearance() }
+                    item { signIn() }
+                    item { yourData() }
+                    item { storage() }
+                    item { about() }
+                    item { signOut() }
+                    item { Spacer(Modifier.height(24.dp)) }
+                }
             }
         }
+    }
 
         SnackbarHost(
             hostState = snackbarHostState,

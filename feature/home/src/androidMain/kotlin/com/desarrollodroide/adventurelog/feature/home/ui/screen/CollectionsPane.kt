@@ -10,6 +10,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -86,77 +87,90 @@ fun CollectionsPane(
     val backStack = rememberNavBackStack(collectionsNavConfiguration, CollectionsList)
     val listDetail = rememberQuietListDetailSceneStrategy<NavKey>()
 
-    val twoPanes = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass !=
-        WindowWidthSizeClass.COMPACT
+    val twoPanes = rememberShowsTwoPanes()
 
-    NavDisplay(
-        modifier = modifier,
-        backStack = backStack,
-        sceneStrategies = listOf(listDetail),
-        onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
-        entryProvider = entryProvider {
-            entry<CollectionsList>(
-                metadata = ListDetailSceneStrategy.listPane(
-                    detailPlaceholder = {
-                        Box(
-                            modifier = Modifier.fillMaxSize().padding(32.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Pick a collection to see what is in it.",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
-                            )
+    val listOnShow = remember { PaneListOnShow() }
+    PaneHidesShellChrome(
+        detailShown = !twoPanes && backStack.lastOrNull() is CollectionDetail && !listOnShow.isOnShow
+    ) {
+        NavDisplay(
+            modifier = modifier,
+            backStack = backStack,
+            // One pane is a scene per page, so the slides above run between them; the list-detail
+            // scene would keep both in one scene and fade its panes itself.
+            sceneStrategies = if (twoPanes) listOf(listDetail) else emptyList(),
+            onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
+            transitionSpec = paneTransition(twoPanes),
+            popTransitionSpec = panePopTransition(twoPanes),
+            predictivePopTransitionSpec = panePredictivePopTransition(twoPanes),
+            entryProvider = entryProvider {
+                entry<CollectionsList>(
+                    metadata = ListDetailSceneStrategy.listPane(
+                        detailPlaceholder = {
+                            Box(
+                                modifier = Modifier.fillMaxSize().padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Pick a collection to see what is in it.",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
-                    }
-                )
-            ) {
-                CollectionsScreen(
-                    openInvites = openInvites,
-                    onInvitesOpened = onInvitesOpened,
-                    onCollectionClick = { id, _ ->
-                        // Swap the open collection rather than stacking them, so back leaves
-                        // Collections instead of retracing everything opened along the way.
-                        if (backStack.lastOrNull() is CollectionDetail) backStack.removeLastOrNull()
-                        backStack.add(CollectionDetail(id))
-                    },
-                    onAddCollectionClick = onAddCollection,
-                    onEditCollection = onEditCollection,
-                    onFirstLoaded = { first ->
-                        if (twoPanes && backStack.size == 1) backStack.add(CollectionDetail(first.id))
-                    },
-                    onCollectionDeleted = { deletedId ->
-                        val kept = collectionsBackStackWithoutDeleted(backStack.toList(), deletedId)
-                        if (kept.size != backStack.size) {
-                            backStack.clear()
-                            backStack.addAll(kept)
+                    )
+                ) {
+                    listOnShow.Mark()
+                    CollectionsScreen(
+                        openInvites = openInvites,
+                        onInvitesOpened = onInvitesOpened,
+                        onCollectionClick = { id, _ ->
+                            // Swap the open collection rather than stacking them, so back leaves
+                            // Collections instead of retracing everything opened along the way.
+                            if (backStack.lastOrNull() is CollectionDetail) backStack.removeLastOrNull()
+                            backStack.add(CollectionDetail(id))
+                        },
+                        onAddCollectionClick = onAddCollection,
+                        onEditCollection = onEditCollection,
+                        onFirstLoaded = { first ->
+                            if (twoPanes && backStack.size == 1) backStack.add(CollectionDetail(first.id))
+                        },
+                        onCollectionDeleted = { deletedId ->
+                            val kept = collectionsBackStackWithoutDeleted(backStack.toList(), deletedId)
+                            if (kept.size != backStack.size) {
+                                backStack.clear()
+                                backStack.addAll(kept)
+                            }
                         }
-                    }
-                )
-            }
+                    )
+                }
 
-            entry<CollectionDetail>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
-                CollectionDetailScreen(
-                    collectionId = key.collectionId,
-                    onBackClick = { backStack.removeLastOrNull() },
-                    onHomeClick = onHomeClick,
-                    onAdventureClick = onAdventureClick,
-                    onEditAdventure = onEditAdventure,
-                    onAddPhoto = onAddPhoto,
-                    onAddTransportation = { onAddTransportation(key.collectionId) },
-                    onAddPlace = { onAddPlace(key.collectionId) },
-                    onEditTransportation = onEditTransportation,
-                    onAddNote = onAddNote,
-                    onEditNote = onEditNote,
-                    onAddChecklist = onAddChecklist,
-                    onEditChecklist = onEditChecklist,
-                    onAddLodging = onAddLodging,
-                    onEditLodging = onEditLodging,
-                    showTitle = true,
-                    onEditCollection = { onEditCollectionById(key.collectionId) }
-                )
+                entry<CollectionDetail>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
+                    PanePage(twoPanes) {
+                        CollectionDetailScreen(
+                            collectionId = key.collectionId,
+                            onBackClick = { backStack.removeLastOrNull() },
+                            onHomeClick = onHomeClick,
+                            onAdventureClick = onAdventureClick,
+                            onEditAdventure = onEditAdventure,
+                            onAddPhoto = onAddPhoto,
+                            onAddTransportation = { onAddTransportation(key.collectionId) },
+                            onAddPlace = { onAddPlace(key.collectionId) },
+                            onEditTransportation = onEditTransportation,
+                            onAddNote = onAddNote,
+                            onEditNote = onEditNote,
+                            onAddChecklist = onAddChecklist,
+                            onEditChecklist = onEditChecklist,
+                            onAddLodging = onAddLodging,
+                            onEditLodging = onEditLodging,
+                            showTitle = true,
+                            showBack = !twoPanes,
+                            onEditCollection = { onEditCollectionById(key.collectionId) }
+                        )
+                    }
+                }
             }
-        }
-    )
+        )
+    }
 }

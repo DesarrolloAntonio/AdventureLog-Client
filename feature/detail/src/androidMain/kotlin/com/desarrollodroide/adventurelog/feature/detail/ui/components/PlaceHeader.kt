@@ -1,5 +1,7 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.layout.layout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.PaddingValues
@@ -119,6 +121,9 @@ fun placeFacts(location: Location, collections: List<UltraSlimCollection>): List
     }
 }
 
+/** The tallest the place's photo gets, whatever the pane's width. */
+private val HeroMaxHeight = 320.dp
+
 /**
  * The photographs, large, as the canvas opens a place: one at a time, swiped, with a "1 / 4"
  * counter. Back and Share float over the top corners.
@@ -141,7 +146,15 @@ fun PlacePhotoHero(
             .fillMaxWidth()
             .statusBarsPadding()
             .padding(horizontal = 12.dp, vertical = 4.dp)
-            .aspectRatio(388f / 264f)
+            // The canvas's 388:264 on a phone; in a tablet's wide pane that ratio made the photo
+            // two thirds of the screen tall and pushed the name under the toolbar, so the height
+            // stops at HeroMaxHeight and the photo crops wider instead.
+            .layout { measurable, constraints ->
+                val width = constraints.maxWidth
+                val height = minOf((width * 264f / 388f).roundToInt(), HeroMaxHeight.roundToPx())
+                val placeable = measurable.measure(Constraints.fixed(width, height))
+                layout(width, height) { placeable.place(0, 0) }
+            }
             .clip(RoundedCornerShape(36.dp)),
     ) {
         HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->

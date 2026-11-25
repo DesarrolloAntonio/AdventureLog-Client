@@ -124,7 +124,7 @@ class DashboardScreenTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun yourMapSoFarOpensTheWorld() = runComposeUiTest {
+    fun yourMapOpensTheWorld() = runComposeUiTest {
         var opened = 0
         setContent {
             WithAppLocals {
@@ -135,8 +135,8 @@ class DashboardScreenTest {
             }
         }
 
-        // Visited countries only: the dashboard has no count of planned ones.
-        onNodeWithText("22 places · 6 countries visited").performScrollTo().performClick()
+        onNodeWithText("Your map").performScrollTo().assertIsDisplayed()
+        onNodeWithText("See world").performScrollTo().performClick()
         assertEquals(1, opened)
     }
 

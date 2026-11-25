@@ -1,62 +1,58 @@
 package com.desarrollodroide.adventurelog.feature.collections.ui.screens
 
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.PathEffect
-import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketStub
-import androidx.compose.foundation.lazy.itemsIndexed
-import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
-import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
-import androidx.compose.foundation.layout.navigationBarsPadding
-import com.desarrollodroide.adventurelog.feature.collections.ui.components.AddToCollectionMenu
-import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
-import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
-import androidx.compose.runtime.remember
-import kotlin.time.ExperimentalTime
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.LocalDate
-import com.desarrollodroide.adventurelog.feature.collections.ui.components.collectionMoment
-import com.desarrollodroide.adventurelog.feature.collections.ui.components.arrowDates
-import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Surface
-import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.BorderStroke
-import com.desarrollodroide.adventurelog.core.model.ownedBy
-import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,44 +61,57 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
+import com.desarrollodroide.adventurelog.core.model.Checklist
 import com.desarrollodroide.adventurelog.core.model.Collection
 import com.desarrollodroide.adventurelog.core.model.Location
+import com.desarrollodroide.adventurelog.core.model.Lodging
+import com.desarrollodroide.adventurelog.core.model.Note
 import com.desarrollodroide.adventurelog.core.model.Recommendation
 import com.desarrollodroide.adventurelog.core.model.RecommendationCategory
 import com.desarrollodroide.adventurelog.core.model.Transportation
+import com.desarrollodroide.adventurelog.core.model.ownedBy
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.AddToCollectionMenu
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionTab
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionView
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionViewSwitcher
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.CollectionsTabs
 import com.desarrollodroide.adventurelog.feature.collections.ui.components.ItineraryItemPicker
-import com.desarrollodroide.adventurelog.feature.collections.ui.state.summary
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.arrowDates
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.collectionMoment
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketDateRange
+import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketStub
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.agenda
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.itinerary
 import com.desarrollodroide.adventurelog.feature.collections.ui.state.stats
+import com.desarrollodroide.adventurelog.feature.collections.ui.state.summary
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionCalendarView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionItineraryView
-import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionRecommendationsView
-import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsUiState
-import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionMapView
+import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionRecommendationsView
 import com.desarrollodroide.adventurelog.feature.collections.ui.views.CollectionStatsView
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.CollectionDetailViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.DeleteState
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsUiState
+import com.desarrollodroide.adventurelog.feature.collections.viewmodel.RecommendationsViewModel
 import com.desarrollodroide.adventurelog.feature.collections.viewmodel.UpdateCollectionsState
 import com.desarrollodroide.adventurelog.feature.ui.components.AdventureItem
-import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
-import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.ChipTone
+import com.desarrollodroide.adventurelog.feature.ui.components.HideShellChrome
+import com.desarrollodroide.adventurelog.feature.ui.components.LoadingDialog
+import com.desarrollodroide.adventurelog.feature.ui.components.LocalShellActionHost
+import com.desarrollodroide.adventurelog.feature.ui.components.ManageCollectionsDialog
 import com.desarrollodroide.adventurelog.feature.ui.components.MetaChip
+import com.desarrollodroide.adventurelog.feature.ui.components.PlaceRow
+import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedListDefaults
 import com.desarrollodroide.adventurelog.feature.ui.di.LocalImageLoader
+import com.desarrollodroide.adventurelog.feature.ui.session.rememberCurrentUserId
+import com.desarrollodroide.adventurelog.feature.ui.theme.AdventureType
+import kotlin.time.ExperimentalTime
+import kotlinx.coroutines.delay
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.viewmodel.koinViewModel
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.DeleteOutline
-import com.desarrollodroide.adventurelog.core.model.Note
-import com.desarrollodroide.adventurelog.core.model.Checklist
-import com.desarrollodroide.adventurelog.core.model.Lodging
-import com.desarrollodroide.adventurelog.feature.collections.ui.components.ticketDateRange
 
 @Composable
 fun CollectionDetailScreen(
@@ -130,6 +139,8 @@ fun CollectionDetailScreen(
      * back but the system gesture.
      */
     showTitle: Boolean = false,
+    /** False in a pane beside the collections list: Back there would point at a list still on screen. */
+    showBack: Boolean = true,
     /** Opens the collection's editor from the header. */
     onEditCollection: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -202,10 +213,20 @@ fun CollectionDetailScreen(
     ) {
         when {
             uiState.isLoading -> {
-                LoadingDialog(
-                    isLoading = true,
-                    showMessage = false
-                )
+                // A collection usually arrives while the page is still sliding in: a spinner that
+                // flashed for a quarter of a second only made the page jump. It shows only if the
+                // wait runs longer than that.
+                var slow by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    delay(400)
+                    slow = true
+                }
+                if (slow) {
+                    LoadingDialog(
+                        isLoading = true,
+                        showMessage = false
+                    )
+                }
             }
             uiState.errorMessage != null -> {
                 Text(
@@ -218,64 +239,69 @@ fun CollectionDetailScreen(
                 )
             }
             uiState.collection != null -> {
-                CollectionDetailContent(
-                    currentUserId = currentUserId,
-                    collection = uiState.collection!!,
-                    showTitle = showTitle || onPhoneInShell,
-                    onBackClick = onBackClick,
-                    onHomeClick = onHomeClick,
-                    onEditCollection = onEditCollection,
-                    selectedTab = selectedTab,
-                    onTabSelected = viewModel::onTabSelected,
-                    selectedView = selectedView,
-                    onViewSelected = viewModel::onViewSelected,
-                    itineraryWorking = itineraryWorking,
-                    onAutoGenerateItinerary = viewModel::autoGenerateItinerary,
-                    onAddToItineraryDay = viewModel::openItineraryPicker,
-                    onRemoveFromItinerary = viewModel::removeFromItinerary,
-                    recommendations = recommendations,
-                    onRecommendationAnchor = recommendationsViewModel::onAnchorSelected,
-                    onRecommendationQuery = recommendationsViewModel::onQueryChanged,
-                    onRecommendationCategory = recommendationsViewModel::onCategorySelected,
-                    onRecommendationRadius = recommendationsViewModel::onRadiusSelected,
-                    onRecommendationSearch = { anchor ->
-                        recommendationsViewModel.search(anchor)
-                    },
-                    onRecommendationAdd = { recommendation ->
-                        recommendationsViewModel.addAsPlace(
-                            recommendation = recommendation,
-                            collectionId = collectionId
-                        ) { viewModel.loadCollection(collectionId) }
-                    },
-                    onAdventureClick = onAdventureClick,
-                    onEditAdventure = onEditAdventure,
-                    onAddPhoto = onAddPhoto,
-                    onDeleteAdventure = { adventure -> 
-                        viewModel.deleteAdventure(adventure.id)
-                    },
-                    onManageCollections = { adventure -> 
-                        locationToManageCollections = adventure 
-                    },
-                    onDuplicateAdventure = viewModel::duplicateLocation,
-                    onShareAdventure = viewModel::shareLocation,
-                    onRemoveFromCollection = { adventure -> viewModel.removeFromCollection(adventure, collectionId) },
-                    onAddPlace = onAddPlace,
-                    onAddTransportation = onAddTransportation,
-                    onEditTransportation = onEditTransportation,
-                    onDeleteTransportation = { transportation ->
-                        viewModel.deleteTransportation(transportation.id)
-                    },
-                    onAddNote = { onAddNote(collectionId) },
-                    onEditNote = { note -> onEditNote(collectionId, note) },
-                    onDeleteNote = { note -> viewModel.deleteNote(note.id) },
-                    onAddChecklist = { onAddChecklist(collectionId) },
-                    onEditChecklist = { list -> onEditChecklist(collectionId, list) },
-                    onDeleteChecklist = { list -> viewModel.deleteChecklist(list.id) },
-                    onAddLodging = { onAddLodging(collectionId) },
-                    onEditLodging = { stay -> onEditLodging(collectionId, stay) },
-                    onDeleteLodging = { stay -> viewModel.deleteLodging(stay.id) },
-                    modifier = Modifier.fillMaxSize()
-                )
+                // ...and then fades in, rather than appearing between two frames.
+                val shown = remember { MutableTransitionState(false).apply { targetState = true } }
+                AnimatedVisibility(visibleState = shown, enter = fadeIn(tween(220))) {
+                    CollectionDetailContent(
+                        currentUserId = currentUserId,
+                        collection = uiState.collection!!,
+                        showTitle = showTitle || onPhoneInShell,
+                        showBack = showBack,
+                        onBackClick = onBackClick,
+                        onHomeClick = onHomeClick,
+                        onEditCollection = onEditCollection,
+                        selectedTab = selectedTab,
+                        onTabSelected = viewModel::onTabSelected,
+                        selectedView = selectedView,
+                        onViewSelected = viewModel::onViewSelected,
+                        itineraryWorking = itineraryWorking,
+                        onAutoGenerateItinerary = viewModel::autoGenerateItinerary,
+                        onAddToItineraryDay = viewModel::openItineraryPicker,
+                        onRemoveFromItinerary = viewModel::removeFromItinerary,
+                        recommendations = recommendations,
+                        onRecommendationAnchor = recommendationsViewModel::onAnchorSelected,
+                        onRecommendationQuery = recommendationsViewModel::onQueryChanged,
+                        onRecommendationCategory = recommendationsViewModel::onCategorySelected,
+                        onRecommendationRadius = recommendationsViewModel::onRadiusSelected,
+                        onRecommendationSearch = { anchor ->
+                            recommendationsViewModel.search(anchor)
+                        },
+                        onRecommendationAdd = { recommendation ->
+                            recommendationsViewModel.addAsPlace(
+                                recommendation = recommendation,
+                                collectionId = collectionId
+                            ) { viewModel.loadCollection(collectionId) }
+                        },
+                        onAdventureClick = onAdventureClick,
+                        onEditAdventure = onEditAdventure,
+                        onAddPhoto = onAddPhoto,
+                        onDeleteAdventure = { adventure -> 
+                            viewModel.deleteAdventure(adventure.id)
+                        },
+                        onManageCollections = { adventure -> 
+                            locationToManageCollections = adventure 
+                        },
+                        onDuplicateAdventure = viewModel::duplicateLocation,
+                        onShareAdventure = viewModel::shareLocation,
+                        onRemoveFromCollection = { adventure -> viewModel.removeFromCollection(adventure, collectionId) },
+                        onAddPlace = onAddPlace,
+                        onAddTransportation = onAddTransportation,
+                        onEditTransportation = onEditTransportation,
+                        onDeleteTransportation = { transportation ->
+                            viewModel.deleteTransportation(transportation.id)
+                        },
+                        onAddNote = { onAddNote(collectionId) },
+                        onEditNote = { note -> onEditNote(collectionId, note) },
+                        onDeleteNote = { note -> viewModel.deleteNote(note.id) },
+                        onAddChecklist = { onAddChecklist(collectionId) },
+                        onEditChecklist = { list -> onEditChecklist(collectionId, list) },
+                        onDeleteChecklist = { list -> viewModel.deleteChecklist(list.id) },
+                        onAddLodging = { onAddLodging(collectionId) },
+                        onEditLodging = { stay -> onEditLodging(collectionId, stay) },
+                        onDeleteLodging = { stay -> viewModel.deleteLodging(stay.id) },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
         
@@ -287,7 +313,10 @@ fun CollectionDetailScreen(
                 onAddLodging = { onAddLodging(collectionId) },
                 onAddNote = { onAddNote(collectionId) },
                 onAddChecklist = { onAddChecklist(collectionId) },
-                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding()
+                modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding(),
+                // No Back means the collection sits beside the list, under a rail whose "+" is
+                // "New collection": this one adds to the collection, and says so.
+                icon = if (showBack) Icons.Default.Add else Icons.AutoMirrored.Filled.PlaylistAdd,
             )
         }
 
@@ -332,6 +361,7 @@ fun CollectionDetailScreen(
 fun CollectionDetailContent(
     collection: Collection,
     showTitle: Boolean = false,
+    showBack: Boolean = true,
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
     onEditCollection: (() -> Unit)? = null,
@@ -390,6 +420,7 @@ fun CollectionDetailContent(
             CollectionHeader(
                 collection,
                 showTitle = showTitle,
+                showBack = showBack,
                 onBackClick = onBackClick,
                 onHomeClick = onHomeClick,
                 onEditCollection = onEditCollection
@@ -860,6 +891,7 @@ fun CollectionHeader(
     collection: Collection,
     modifier: Modifier = Modifier,
     showTitle: Boolean = false,
+    showBack: Boolean = true,
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
     /** Opens the collection's editor; null where there is nowhere to edit it from. */
@@ -878,9 +910,9 @@ fun CollectionHeader(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (showTitle || onEditCollection != null) {
+        if ((showTitle && showBack) || onEditCollection != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (showTitle) {
+                if (showTitle && showBack) {
                     FilledIconButton(
                         onClick = onBackClick,
                         colors = IconButtonDefaults.filledIconButtonColors(

@@ -10,7 +10,7 @@ data class ContentImageDTO(
     val id: String,
     
     @SerialName("image")
-    val image: String,
+    val image: String = "", // nullable on 0.14 (images from a URL, Google or Immich)
     
     @SerialName("is_primary")
     val isPrimary: Boolean = false,

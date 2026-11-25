@@ -226,7 +226,7 @@ class CollectionDetailViewModel(
         val collection = _uiState.value.collection ?: return
         viewModelScope.launch {
             _itineraryWorking.value = true
-            when (val result = deleteItineraryEntryUseCase(entryId)) {
+            when (val result = deleteItineraryEntryUseCase(collection.id, entryId)) {
                 is Either.Left -> _deleteState.update { DeleteState.Error(result.value) }
                 is Either.Right -> loadCollection(collection.id)
             }
