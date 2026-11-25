@@ -22,6 +22,7 @@ import com.desarrollodroide.adventurelog.core.network.model.response.RegionDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.ReverseGeocodeResultDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.EmailAddressDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.MediaUsageDTO
+import com.desarrollodroide.adventurelog.core.network.model.response.LoginOutcomeDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserDetailsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.UserStatsDTO
 import com.desarrollodroide.adventurelog.core.network.model.response.VisitedCityDTO
@@ -58,7 +59,9 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         url: String,
         username: String,
         password: String
-    ): UserDetailsDTO = unused()
+    ): LoginOutcomeDTO = unused()
+    override suspend fun sendSecondFactorCode(code: String): UserDetailsDTO = unused()
+    override fun cancelPendingLogin(): Unit = unused()
     override suspend fun getUserDetails(): UserDetailsDTO = unused()
     override fun initializeFromSession(serverUrl: String, sessionToken: String?): Unit = unused()
     override fun clearSession(): Unit = unused()
