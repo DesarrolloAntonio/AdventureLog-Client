@@ -257,7 +257,8 @@ class KtorAdventureLogNetwork(
     private val itineraryDataSource: ItineraryApi by lazy {
         KtorItineraryApi(
             httpClient = adventurelogClient,
-            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) }
+            sessionProvider = { SessionInfo(baseUrl ?: "", sessionToken) },
+            serverApi = ::serverApi,
         )
     }
 
@@ -868,9 +869,9 @@ class KtorAdventureLogNetwork(
         return itineraryDataSource.addItineraryEntry(collectionId, kind, itemId, date, order)
     }
 
-    override suspend fun deleteItineraryEntry(entryId: String) {
+    override suspend fun deleteItineraryEntry(collectionId: String, entryId: String) {
         ensureInitialized()
-        itineraryDataSource.deleteItineraryEntry(entryId)
+        itineraryDataSource.deleteItineraryEntry(collectionId, entryId)
     }
 
     override suspend fun getRecommendations(

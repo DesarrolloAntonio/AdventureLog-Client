@@ -23,5 +23,5 @@ interface ItineraryApi {
     ): ItineraryEntry
 
     /** Takes an entry off its day. The item itself is untouched - only the placing is removed. */
-    suspend fun deleteItineraryEntry(entryId: String)
+    suspend fun deleteItineraryEntry(collectionId: String, entryId: String)
 }

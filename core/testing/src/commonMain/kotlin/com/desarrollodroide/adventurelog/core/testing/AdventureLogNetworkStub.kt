@@ -240,7 +240,7 @@ abstract class AdventureLogNetworkStub : AdventureLogNetwork {
         date: String?,
         order: Int
     ): ItineraryEntry = unused()
-    override suspend fun deleteItineraryEntry(entryId: String): Unit = unused()
+    override suspend fun deleteItineraryEntry(collectionId: String, entryId: String): Unit = unused()
     override suspend fun getRecommendations(
         latitude: Double?,
         longitude: Double?,

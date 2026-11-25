@@ -125,7 +125,7 @@ interface CollectionsRepository {
     ): Either<ApiResponse, ItineraryEntry>
 
     /** Take an entry off its day. The item itself stays in the collection. */
-    suspend fun deleteItineraryEntry(entryId: String): Either<ApiResponse, Unit>
+    suspend fun deleteItineraryEntry(collectionId: String, entryId: String): Either<ApiResponse, Unit>
 
     suspend fun refreshCollections(): Either<ApiResponse, List<UltraSlimCollection>>
 

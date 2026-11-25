@@ -5,6 +5,7 @@ import com.desarrollodroide.adventurelog.core.model.ItineraryEntry
 import com.desarrollodroide.adventurelog.core.model.ItineraryItemKind
 import com.desarrollodroide.adventurelog.core.network.api.ItineraryApi
 import com.desarrollodroide.adventurelog.core.network.ktor.HttpException
+import com.desarrollodroide.adventurelog.core.network.ktor.ServerApi
 import com.desarrollodroide.adventurelog.core.network.ktor.SessionInfo
 import com.desarrollodroide.adventurelog.core.network.ktor.commonHeaders
 import com.desarrollodroide.adventurelog.core.network.model.request.AutoGenerateItineraryRequest
@@ -23,9 +24,11 @@ import io.ktor.http.isSuccess
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-class KtorItineraryApi(
+internal class KtorItineraryApi(
     private val httpClient: HttpClient,
-    private val sessionProvider: () -> SessionInfo
+    private val sessionProvider: () -> SessionInfo,
+    /** Server 0.14.0 nests the day plan under its collection, so the route depends on the server. */
+    private val serverApi: suspend () -> ServerApi = { ServerApi.Legacy },
 ) : ItineraryApi {
 
     private val logger = Logger.withTag("KtorItineraryApi")
@@ -38,7 +41,10 @@ class KtorItineraryApi(
 
     override suspend fun autoGenerateItinerary(collectionId: String): List<ItineraryEntry> {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/itineraries/auto-generate/"
+        val url = when (serverApi()) {
+            ServerApi.Legacy -> "${session.baseUrl}/api/itineraries/auto-generate/"
+            ServerApi.V014 -> "${session.baseUrl}/api/collections/$collectionId/itinerary/auto-generate/"
+        }
         logger.d { "Auto-generating an itinerary at: $url" }
 
         val response = httpClient.post(url) {
@@ -65,7 +71,10 @@ class KtorItineraryApi(
         order: Int
     ): ItineraryEntry {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/itineraries/"
+        val url = when (serverApi()) {
+            ServerApi.Legacy -> "${session.baseUrl}/api/itineraries/"
+            ServerApi.V014 -> "${session.baseUrl}/api/collections/$collectionId/itinerary-items/"
+        }
         logger.d { "Adding an itinerary entry at: $url" }
 
         val response = httpClient.post(url) {
@@ -97,9 +106,12 @@ class KtorItineraryApi(
         )
     }
 
-    override suspend fun deleteItineraryEntry(entryId: String) {
+    override suspend fun deleteItineraryEntry(collectionId: String, entryId: String) {
         val session = sessionProvider()
-        val url = "${session.baseUrl}/api/itineraries/$entryId/"
+        val url = when (serverApi()) {
+            ServerApi.Legacy -> "${session.baseUrl}/api/itineraries/$entryId/"
+            ServerApi.V014 -> "${session.baseUrl}/api/collections/$collectionId/itinerary-items/$entryId/"
+        }
         logger.d { "Deleting an itinerary entry at: $url" }
 
         val response = httpClient.delete(url) {
