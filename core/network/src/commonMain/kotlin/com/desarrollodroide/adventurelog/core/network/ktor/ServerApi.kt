@@ -9,6 +9,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
 import io.ktor.http.isSuccess
+import io.ktor.util.AttributeKey
 import kotlinx.serialization.json.jsonObject
 
 /**
@@ -47,8 +48,15 @@ internal suspend fun probeServer(get: suspend (path: String) -> HttpClientCall):
             behindWebProxy = true,
         )
     }
+    if (!info.request.url.encodedPath.endsWith("/")) {
+        // Ktor followed the frontend's 308 itself: what answered is the path without the slash.
+        return ServerProfile(
+            api = if (info.isServerInfo()) ServerApi.V014 else ServerApi.Legacy,
+            behindWebProxy = true,
+        )
+    }
     if (info.isServerInfo()) {
-        return ServerProfile(ServerApi.V014, behindWebProxy = !info.request.url.encodedPath.endsWith("/"))
+        return ServerProfile(ServerApi.V014, behindWebProxy = false)
     }
     val csrf = get(CSRF_PROBE_PATH)
     return ServerProfile(
@@ -95,5 +103,9 @@ internal fun HttpRequestBuilder.rewriteFor014() {
     after.query.forEach { (k, v) -> url.parameters.append(k, v) }
 }
 
-/** Marks the app's own probe requests, which go out bare. */
-internal const val PROBE_HEADER = "X-AdventureLog-App-Probe"
+/**
+ * Marks the app's own probe requests, which go out bare. An attribute, not a header: the redirect
+ * plugin copies it onto the request that follows the frontend's 308, so that one is not taken for
+ * an ordinary request that has to wait for the probe it is part of (which deadlocked).
+ */
+internal val ProbeRequest = AttributeKey<Unit>("AdventureLogProbe")

@@ -116,7 +116,7 @@ class KtorAdventureLogNetwork(
             serverProfile ?: probeServer { path ->
                 // Marked, so the interceptor sends it as it is: no session, no probe of its own.
                 adventurelogClient.get("$origin$path") {
-                    header(PROBE_HEADER, "1")
+                    attributes.put(ProbeRequest, Unit)
                     header("X-Is-Mobile", "true")
                     header(HttpHeaders.Accept, "application/json")
                 }.call
@@ -140,8 +140,7 @@ class KtorAdventureLogNetwork(
         adventurelogClient.plugin(HttpSend).intercept { request ->
             // The session comes from the request's own header, not from sessionToken: sign-out
             // sends its DELETE in the background after clearSession() has already emptied it.
-            if (request.headers.contains(PROBE_HEADER)) {
-                request.headers.remove(PROBE_HEADER)
+            if (request.attributes.contains(ProbeRequest)) {
                 return@intercept execute(request)
             }
             val requestSession = request.headers[SESSION_TOKEN_HEADER]
