@@ -51,6 +51,6 @@ class LegalTextsTest {
         assertTrue("AdventureLog for iOS" in iosTerms)
         listOf("Android", "Google Maps", "Wikipedia", "Camera").forEach { assertFalse(it in iosPrivacy, it) }
         assertTrue("Apple Maps" in iosPrivacy)
-        assertTrue("iOS includes in your device's backups" in iosPrivacy)
+        assertTrue("keychain for this device only" in iosPrivacy)
     }
 }

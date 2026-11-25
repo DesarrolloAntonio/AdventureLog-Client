@@ -11,6 +11,7 @@ import com.desarrollodroide.adventurelog.core.data.CountriesRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.GeocodeRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.LoginRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.SettingsRepositoryImpl
+import com.desarrollodroide.adventurelog.core.data.platformSettings
 import com.desarrollodroide.adventurelog.core.data.TransportationRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.DashboardRepositoryImpl
 import com.desarrollodroide.adventurelog.core.data.TrailsRepositoryImpl
@@ -48,7 +49,7 @@ import com.desarrollodroide.adventurelog.core.domain.repository.SharingRepositor
 val dataModule = module {
     includes(commonModule, networkModule)
     single<Settings> {
-        Settings()
+        platformSettings()
     }
     single<SettingsRepository> {
         SettingsRepositoryImpl(get())

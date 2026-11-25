@@ -52,8 +52,8 @@ private val IosLegal = LegalPlatform(
     stored = "• The address of your server and a session token that keeps you signed in. Your password is " +
         "not stored. Signing out deletes the session.\n" +
         "• Your display settings (theme).\n\n" +
-        "These live in the app's own storage, which iOS includes in your device's backups. Images are " +
-        "kept in memory only while the app is open.",
+        "These are kept in the iPhone's keychain for this device only, so they are not carried into " +
+        "backups or onto another phone. Images are kept in memory only while the app is open.",
     maps = "• Apple Maps (Apple Inc.) - to draw maps. Apple receives what any map request carries " +
         "(the area shown, your device's network address) under Apple's Privacy Policy " +
         "(apple.com/legal/privacy).",
@@ -151,7 +151,7 @@ private fun privacyPolicy(platform: LegalPlatform) = LegalText(
 val TermsOfUse = termsOfUse(AndroidLegal)
 val PrivacyPolicy = privacyPolicy(AndroidLegal)
 
-/** The iPhone app's: Apple Maps, no Wikipedia lookups, no permissions, backups included by iOS. */
+/** The iPhone app's: Apple Maps, no Wikipedia lookups, no permissions, the keychain for this device. */
 val IosTermsOfUse = termsOfUse(IosLegal)
 val IosPrivacyPolicy = privacyPolicy(IosLegal)
 
