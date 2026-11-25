@@ -50,7 +50,7 @@ class Routes014Test {
     }
 
     @Test
-    fun `places, search and world travel`() {
+    fun `places and search and world travel`() {
         assertRoute(
             ApiRoute(get, "/api/places/search/", listOf("q" to "Lima")), get, "/api/reverse-geocode/search/", listOf("query" to "Lima"),
         )
