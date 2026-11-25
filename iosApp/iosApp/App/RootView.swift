@@ -16,13 +16,15 @@ struct RootView: View {
     @State private var user: UserDetails?
     @State private var checked = false
     @State private var theme: CommonThemeMode = .auto
+    @State private var reviewingLogin = Self.showLoginForReview
 
     var body: some View {
         Group {
             if !checked {
                 ProgressView()
-            } else if user == nil || Self.showLoginForReview {
-                LoginView()
+            } else if user == nil || reviewingLogin {
+                // A sign-in made while reviewing ends the review, so the new session shows.
+                LoginView(onSignedIn: { reviewingLogin = false })
             } else {
                 MainTabView()
             }

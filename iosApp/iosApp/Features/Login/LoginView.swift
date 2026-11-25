@@ -8,6 +8,7 @@ import ComposeApp
 /// The fields keep their text here, in `@State`, and push each change to the ViewModel; they never
 /// show the value echoed back from its StateFlow, which dropped characters when typed fast.
 struct LoginView: View {
+    var onSignedIn: () -> Void = {}
     @StateObject private var host = ViewModelHost()
     @State private var server = ""
     @State private var username = ""
@@ -33,7 +34,10 @@ struct LoginView: View {
         .task {
             // Sessions stay signed in on this phone, as the Android app does by default.
             vm.updateRememberSession(value: true)
-            for await s in vm.uiState { state = s }
+            for await s in vm.uiState {
+                state = s
+                if case .success = onEnum(of: s) { onSignedIn() }
+            }
         }
         .task {
             // A provider sign-in opens the server's page in an in-app browser sheet; the address it
@@ -230,7 +234,7 @@ struct LoginView: View {
                     .font(.title3.monospacedDigit())
                     .accessibilityLabel("Code")
                     .accessibilityIdentifier("loginCode")
-                    .onSubmit { vm.verifyLoginCode() }
+                    .onSubmit(verifyCode)
             }
 
             if let error = step.error {
@@ -242,7 +246,7 @@ struct LoginView: View {
                     .accessibilityIdentifier("loginCodeError")
             }
 
-            Button { vm.verifyLoginCode() } label: {
+            Button(action: verifyCode) {
                 ZStack {
                     Text("Verify").opacity(step.verifying ? 0 : 1)
                     if step.verifying { ProgressView().tint(.white) }
@@ -253,8 +257,8 @@ struct LoginView: View {
                 .heroCard(radius: 16)
             }
             .buttonStyle(.plain)
-            .disabled(step.code.isEmpty || step.verifying)
-            .opacity(step.code.isEmpty && !step.verifying ? 0.55 : 1)
+            .disabled(code.isEmpty || step.verifying)
+            .opacity(code.isEmpty && !step.verifying ? 0.55 : 1)
             .padding(.top, 6)
             .accessibilityIdentifier("verifyCode")
 
@@ -267,9 +271,17 @@ struct LoginView: View {
         }
         .padding(EdgeInsets(top: 20, leading: 18, bottom: 12, trailing: 18))
         .mistCard(radius: 26)
-        .onChange(of: code) { _, v in vm.updateLoginCode(newCode: v) }
-        // The ViewModel keeps digits only and empties the field after a wrong code: follow it.
-        .onChange(of: step.code) { _, v in if v != code { code = v } }
+        // A wrong code empties the field, as the ViewModel does with its own copy.
+        .onChange(of: step.error) { _, error in if error != nil { code = "" } }
+    }
+
+    /// The field is the source of the code: it goes to the ViewModel at the moment it is sent,
+    /// not echoed back from it on every keystroke (that round trip left Verify disabled).
+    private func verifyCode() {
+        let digits = code.filter(\.isNumber)
+        guard !digits.isEmpty else { return }
+        vm.updateLoginCode(newCode: digits)
+        vm.verifyLoginCode()
     }
 
     /// Opens the provider's sign-in in the system's web-authentication sheet and hands the address
