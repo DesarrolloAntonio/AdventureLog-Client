@@ -2,6 +2,7 @@ package com.desarrollodroide.adventurelog
 
 import com.desarrollodroide.adventurelog.core.model.TrailFormData
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.feature.collections.ui.screens.addEditTransportation.data.TransportationFormData
 import com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.data.LocationFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageFormData
 import com.desarrollodroide.adventurelog.feature.ui.data.ImageType
@@ -96,5 +97,15 @@ class IosFormsTest {
         assertNull(allDay.startTime)
         assertNull(allDay.endTime)
         assertEquals(true, allDay.isAllDay)
+    }
+
+    @Test
+    fun aJourneysEndsAreSetAndATypedOneHasNone() {
+        val picked = IosForms.transportEnds(TransportationFormData(name = "AVE"), "40.4", "-3.69", null, null)
+
+        assertEquals("40.4", picked.originLatitude)
+        assertEquals("-3.69", picked.originLongitude)
+        assertNull(picked.destinationLatitude)
+        assertEquals("AVE", picked.name)
     }
 }

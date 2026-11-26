@@ -176,4 +176,21 @@ object IosForms {
             isPublic = isPublic,
         )
     }
+
+    /**
+     * Where a journey starts and ends on the map, from a search result picked for From or To;
+     * null when the place was typed rather than picked, so no stale point is kept for it.
+     */
+    fun transportEnds(
+        base: TransportationFormData,
+        originLatitude: String?,
+        originLongitude: String?,
+        destinationLatitude: String?,
+        destinationLongitude: String?,
+    ): TransportationFormData = base.copy(
+        originLatitude = originLatitude,
+        originLongitude = originLongitude,
+        destinationLatitude = destinationLatitude,
+        destinationLongitude = destinationLongitude,
+    )
 }
