@@ -17,6 +17,8 @@ struct PlacesView: View {
     @State private var message: String?
     @State private var deleting: Location?
     @State private var managing: Location?
+    /// A place opened in its form from its menu, and whether for a new photo.
+    @State private var editing: (place: Location, photo: Bool)?
     @State private var collections: [UltraSlimCollection] = []
     @State private var collectionsLoading = false
     @State private var savingCollections = false
@@ -52,6 +54,9 @@ struct PlacesView: View {
         }
         .navigationDestination(for: Location.self) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
         .sheet(isPresented: $creating) { PlaceFormView {} }
+        .sheet(isPresented: Binding(get: { editing != nil }, set: { if !$0 { editing = nil } })) {
+            if let editing { PlaceFormView(placeId: editing.place.id, addingPhoto: editing.photo) {} }
+        }
         .sheet(item: $managing) { place in
             CollectionsPickerView(
                 place: place,
@@ -245,6 +250,8 @@ struct PlacesView: View {
                             last: index == places.count - 1 && !status.isLoadingMore,
                             onShare: { vm.shareLocation(location: place) },
                             onDuplicate: { vm.duplicateLocation(location: place) },
+                            onEdit: { editing = (place, false) },
+                            onAddPhoto: { editing = (place, true) },
                             onCollections: { managing = place },
                             onDelete: { deleting = place }
                         )
@@ -292,6 +299,8 @@ private struct PlaceRow: View {
     let last: Bool
     let onShare: () -> Void
     let onDuplicate: () -> Void
+    let onEdit: () -> Void
+    let onAddPhoto: () -> Void
     let onCollections: () -> Void
     let onDelete: () -> Void
 
@@ -319,6 +328,9 @@ private struct PlaceRow: View {
             .buttonStyle(.plain)
 
             Menu {
+                Button("Edit", systemImage: "pencil", action: onEdit)
+                Button("Add Photo", systemImage: "photo.badge.plus", action: onAddPhoto)
+                Divider()
                 Button("Share", systemImage: "square.and.arrow.up", action: onShare)
                 Button("Duplicate", systemImage: "plus.square.on.square", action: onDuplicate)
                 Button("Collections", systemImage: "rectangle.stack", action: onCollections)

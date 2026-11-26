@@ -11,6 +11,8 @@ struct PlaceFormView: View {
     var placeId: String?
     /// A new place made from a trip goes into it.
     var intoCollectionId: String?
+    /// Opened from a place's Add Photo: the photo library comes up as soon as the place is loaded.
+    var addingPhoto = false
     let onSaved: () -> Void
 
     @StateObject private var host = ViewModelHost()
@@ -508,6 +510,7 @@ struct PlaceFormView: View {
         link = f.link; price = f.price; currency = f.priceCurrency; tags = f.tags
         trails = f.trails.map { TrailRow(serverId: $0.id, name: $0.name, link: $0.link) }
         initial = form
+        if addingPhoto { pickingLibrary = true }
     }
 }
 
