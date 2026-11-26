@@ -17,6 +17,8 @@ struct PlacesView: View {
     @State private var message: String?
     @State private var deleting: Location?
     @State private var managing: Location?
+    /// Every place grouped by country, when that is the sort; the shared code loads them all.
+    @State private var countryGroups: (any LocationsViewModelCountryGroupsState)?
     /// A place opened in its form from its menu, and whether for a new photo.
     @State private var editing: (place: Location, photo: Bool)?
     @State private var collections: [UltraSlimCollection] = []
@@ -105,6 +107,7 @@ struct PlacesView: View {
         .task { for await f in vm.filters { filters = f } }
         .task { for await c in vm.categories { categories = c } }
         .task { for await m in vm.actionMessage { message = m } }
+        .task { for await g in vm.countryGroups { countryGroups = g } }
         .task { for await c in vm.collections { collections = c } }
         .task { for await l in vm.collectionsLoading { collectionsLoading = l.boolValue } }
         .task {
@@ -220,7 +223,9 @@ struct PlacesView: View {
 
     @ViewBuilder
     private var content: some View {
-        if places.isEmpty, status.isRefreshing {
+        if filters?.sortField == .country {
+            byCountry
+        } else if places.isEmpty, status.isRefreshing {
             ProgressView().controlSize(.large).frame(maxWidth: .infinity).padding(.top, 80)
         } else if places.isEmpty, let error = status.error {
             ContentUnavailableView {
@@ -245,16 +250,7 @@ struct PlacesView: View {
                 SectionLabel(text: heading.0, trailing: heading.1)
                 LazyVStack(spacing: 0) {
                     ForEach(Array(places.enumerated()), id: \.element.id) { index, place in
-                        PlaceRow(
-                            place: place,
-                            last: index == places.count - 1 && !status.isLoadingMore,
-                            onShare: { vm.shareLocation(location: place) },
-                            onDuplicate: { vm.duplicateLocation(location: place) },
-                            onEdit: { editing = (place, false) },
-                            onAddPhoto: { editing = (place, true) },
-                            onCollections: { managing = place },
-                            onDelete: { deleting = place }
-                        )
+                        row(place, last: index == places.count - 1 && !status.isLoadingMore)
                         .onAppear { presenter.itemAccessed(index: Int32(index)) }
                     }
                     if status.isLoadingMore {
@@ -266,6 +262,57 @@ struct PlacesView: View {
                 }
                 .mistCard()
             }
+        }
+    }
+
+    private func row(_ place: Location, last: Bool) -> PlaceRow {
+        PlaceRow(
+            place: place,
+            last: last,
+            onShare: { vm.shareLocation(location: place) },
+            onDuplicate: { vm.duplicateLocation(location: place) },
+            onEdit: { editing = (place, false) },
+            onAddPhoto: { editing = (place, true) },
+            onCollections: { managing = place },
+            onDelete: { deleting = place }
+        )
+    }
+
+    /// Android's Country sort: a card per country, with its flag and how many places are in it.
+    @ViewBuilder
+    private var byCountry: some View {
+        switch countryGroups.map({ onEnum(of: $0) }) {
+        case .ready(let r)?:
+            if r.groups.isEmpty {
+                ContentUnavailableView {
+                    Label("No places match", systemImage: "mappin.slash")
+                } actions: {
+                    Button("Show All") { query = ""; vm.clearFilters() }.buttonStyle(.glass)
+                }
+            } else {
+                LazyVStack(alignment: .leading, spacing: 8) {
+                    ForEach(Array(r.groups.enumerated()), id: \.offset) { _, group in
+                        let title = group.country.map { name in group.countryCode.map { "\(flag($0)) \(name)" } ?? name } ?? "No country"
+                        SectionLabel(text: title, trailing: "\(group.locations.count)").padding(.top, 6)
+                        VStack(spacing: 0) {
+                            ForEach(Array(group.locations.enumerated()), id: \.element.id) { index, place in
+                                row(place, last: index == group.locations.count - 1)
+                            }
+                        }
+                        .mistCard()
+                    }
+                }
+            }
+        case .error(let e)?:
+            ContentUnavailableView {
+                Label("Couldn't load places", systemImage: "wifi.exclamationmark")
+            } description: {
+                Text(e.message)
+            } actions: {
+                Button("Try again") { presenter.refresh() }.buttonStyle(.glassProminent)
+            }
+        default:
+            ProgressView().controlSize(.large).frame(maxWidth: .infinity).padding(.top, 80)
         }
     }
 }

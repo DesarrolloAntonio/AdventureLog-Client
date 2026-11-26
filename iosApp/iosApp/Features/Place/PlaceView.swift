@@ -144,7 +144,8 @@ struct PlaceView: View {
                 ToneTag(text: category.displayName, tone: categoryTone(category.name))
             }
             visitTag(place)
-            ForEach(place.tags, id: \.self) { tag in
+            // Without the machine tags another app leaves ("tb:<uuid>"), as Android shows them.
+            ForEach(TagsKt.userTags(place.tags), id: \.self) { tag in
                 ToneTag(text: tag, tone: .mint, systemImage: "tag")
             }
         }

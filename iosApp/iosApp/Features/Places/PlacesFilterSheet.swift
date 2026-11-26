@@ -37,6 +37,7 @@ struct PlacesFilterSheet: View {
                         Text("Visit date").tag(LocationSortField.visitDate)
                         Text("Name").tag(LocationSortField.name)
                         Text("Rating").tag(LocationSortField.rating)
+                        Text("Country").tag(LocationSortField.country)
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
@@ -166,7 +167,7 @@ struct PlacesFilterSheet: View {
     /// Words for the order that fit the field: A–Z for names, newest first for dates.
     private var directionLabels: (ascending: String, descending: String) {
         switch sortField {
-        case .name: ("A–Z", "Z–A")
+        case .name, .country: ("A–Z", "Z–A")
         case .rating: ("Lowest first", "Highest first")
         default: ("Oldest first", "Newest first")
         }

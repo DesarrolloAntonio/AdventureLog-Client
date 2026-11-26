@@ -49,6 +49,8 @@ private struct WorldMap<Switcher: View>: View {
     /// Nil until the shared map state first arrives (Swift can't build its defaults).
     @State private var state: MapUiState?
     @State private var selected: Location?
+    /// The pin tapped last: its card, with the place and the way there, as on Android.
+    @State private var focused: Location?
     @State private var showFilters = false
     @State private var satellite = false
     @State private var camera: MapCameraPosition = .automatic
@@ -68,8 +70,19 @@ private struct WorldMap<Switcher: View>: View {
         GeometryReader { geo in
             PlacesMap(places: places, satellite: satellite, camera: $camera,
                       regions: state?.filters.showRegions == true ? state?.visitedRegions ?? [] : [],
-                      cities: state?.filters.showCities == true ? state?.visitedCities ?? [] : []) { selected = $0 }
+                      cities: state?.filters.showCities == true ? state?.visitedCities ?? [] : []) { place in
+                withAnimation(.snappy) { focused = place }
+            }
                 .ignoresSafeArea()
+                .overlay(alignment: .bottom) {
+                    if let focused {
+                        PinCard(place: focused, open: { selected = focused }, close: { withAnimation(.snappy) { self.focused = nil } })
+                            .padding(.horizontal, 16)
+                            // Above the floating tab bar.
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
                 .overlay(alignment: .top) {
                     // The bar's row: the switch in the middle, the map style where Countries has search.
                     ZStack {
@@ -118,5 +131,65 @@ private struct WorldMap<Switcher: View>: View {
             try? await Task.sleep(for: .milliseconds(400))
             withAnimation { camera = PlacesMap.fit(all, in: viewport) }
         }
+    }
+}
+
+/// A tapped pin's place, as Android's map card: its photo, name and where it is, then Open and
+/// Directions, which hands the spot to Maps.
+private struct PinCard: View {
+    let place: Location
+    let open: () -> Void
+    let close: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                RemoteImage(url: primaryPhoto(place)) {
+                    Theme.Tone.mint.fill.overlay(Text(place.category?.icon ?? "📍"))
+                }
+                .frame(width: 56, height: 56)
+                .clipShape(.rect(cornerRadius: 14, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(place.name).font(.headline).foregroundStyle(Theme.ink).lineLimit(2)
+                    let whereText = whereabouts(place)
+                    if !whereText.isEmpty { Text(whereText).font(.subheadline).foregroundStyle(Theme.muted).lineLimit(1) }
+                }
+                Spacer(minLength: 4)
+                Button(action: close) {
+                    Image(systemName: "xmark").font(.footnote.weight(.bold)).frame(width: 30, height: 30)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel("Close")
+            }
+            HStack(spacing: 10) {
+                Button(action: open) {
+                    Label("Open", systemImage: "info.circle").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glass)
+                Button(action: directions) {
+                    Label("Directions", systemImage: "arrow.triangle.turn.up.right.diamond").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
+                .tint(Theme.accent)
+                .disabled(coordinate == nil)
+            }
+            .controlSize(.large)
+        }
+        .padding(14)
+        .glassEffect(.regular, in: .rect(cornerRadius: 24))
+    }
+
+    private var coordinate: CLLocationCoordinate2D? {
+        guard let lat = place.latitude.flatMap(Double.init), let lon = place.longitude.flatMap(Double.init) else { return nil }
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+
+    /// Maps, with the route from here already asked for.
+    private func directions() {
+        guard let coordinate else { return }
+        let item = MKMapItem(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil)
+        item.name = place.name
+        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDefault])
     }
 }
