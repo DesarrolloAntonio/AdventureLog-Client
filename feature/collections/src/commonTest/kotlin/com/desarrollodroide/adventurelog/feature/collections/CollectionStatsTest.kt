@@ -190,4 +190,24 @@ class CollectionStatsTest {
         // The visit still happened; only its day is unknown.
         assertEquals(1, stats.visits)
     }
+
+    @Test
+    fun aJourneyRunningPastTheTripCountsOnlyTheTripsDays() {
+        // A six-day trip with a journey whose end was set years later read "652 with plans".
+        val stats = testCollection(
+            startDate = "2025-09-19",
+            endDate = "2025-09-24",
+            transportations = listOf(testTransportation("car", date = "2025-09-19", endDate = "2027-07-02"))
+        ).stats()
+        assertEquals(6, stats.totalDays)
+        assertEquals(6, stats.activeDays)
+    }
+
+    @Test
+    fun aTripWithNoDatesStillCountsItsActiveDays() {
+        val stats = testCollection(
+            lodging = listOf(testLodging("Hostel", checkIn = "2025-09-12", checkOut = "2025-09-14"))
+        ).stats()
+        assertEquals(3, stats.activeDays)
+    }
 }

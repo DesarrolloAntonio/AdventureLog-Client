@@ -190,7 +190,7 @@ class RecommendationsViewModelTest {
             second.search(anchor = 1.0 to 2.0)
             advanceUntilIdle()
             assertTrue(second.uiState.value.results.isEmpty())
-            assertEquals("Could not search there. Try somewhere else.", second.uiState.value.errorMessage)
+            assertEquals("Could not search there. The map search may be busy: try again, or somewhere else.", second.uiState.value.errorMessage)
         }
 
     @Test

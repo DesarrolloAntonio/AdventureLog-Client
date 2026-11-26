@@ -41,7 +41,7 @@ class GetRecommendationsUseCase(
             is Either.Left -> Either.Left(
                 when (result.value) {
                     is ApiResponse.IOException -> CANT_REACH_SERVER
-                    is ApiResponse.HttpError -> "Could not search there. Try somewhere else."
+                    is ApiResponse.HttpError -> "Could not search there. The map search may be busy: try again, or somewhere else."
                     is ApiResponse.Forbidden -> "You don't have permission to do that."
                     is ApiResponse.InvalidCredentials -> "Session expired. Please log in again."
                 }

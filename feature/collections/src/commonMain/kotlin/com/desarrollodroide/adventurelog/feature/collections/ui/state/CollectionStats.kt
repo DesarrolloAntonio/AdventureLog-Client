@@ -66,6 +66,14 @@ fun Collection.stats(): CollectionStats {
      * spans a range and marks every day it covers, which is why this is a set of days rather than
      * a count of items - two visits on one afternoon are one active day.
      */
+    val start = dayOf(startDate)
+    val end = dayOf(endDate) ?: start
+
+    /**
+     * Only the trip's own days, when it has dates: a journey or stay whose end was set far off (a
+     * typo, a year too late) otherwise marked every day up to it, and a six-day trip read
+     * "652 with plans".
+     */
     val activeDays = buildSet {
         visits.forEach { visit ->
             val from = dayOf(visit.startDate)
@@ -82,10 +90,8 @@ fun Collection.stats(): CollectionStats {
             val to = dayOf(leg.endDate) ?: from
             if (from != null && to != null) addAll(daysBetween(from, to))
         }
-    }
+    }.filter { day -> start == null || end == null || day in start..end }
 
-    val start = dayOf(startDate)
-    val end = dayOf(endDate) ?: start
 
     return CollectionStats(
         placesVisited = locations.count { it.isVisited },
