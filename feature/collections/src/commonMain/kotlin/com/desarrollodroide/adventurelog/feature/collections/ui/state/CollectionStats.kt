@@ -90,7 +90,11 @@ fun Collection.stats(): CollectionStats {
             val to = dayOf(leg.endDate) ?: from
             if (from != null && to != null) addAll(daysBetween(from, to))
         }
-    }.filter { day -> start == null || end == null || day in start..end }
+    }.filter { day ->
+        // A trip with only a start date has no end yet: nothing after it is cut off.
+        val tripEnd = dayOf(endDate)
+        start == null || (day >= start && (tripEnd == null || day <= tripEnd))
+    }
 
 
     return CollectionStats(

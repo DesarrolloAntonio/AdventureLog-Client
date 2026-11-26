@@ -122,6 +122,10 @@ private struct WorldMap<Switcher: View>: View {
         .navigationDestination(item: $selected) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
         .sheet(isPresented: $showFilters) { if let state { MapFiltersSheet(vm: vm, state: state) } }
         .task { for await s in vm.uiState { state = s } }
+        // A card for a place the filters took off the map, or that was deleted, goes with it.
+        .onChange(of: places.map(\.id)) { _, ids in
+            if let focused, !ids.contains(focused.id) { withAnimation(.snappy) { self.focused = nil } }
+        }
         // A place saved or deleted anywhere moves, adds or takes away a pin.
         .onReceive(NotificationCenter.default.publisher(for: .placeSaved)) { _ in vm.refresh() }
         // Framed on every place, not the filtered ones: a filter shouldn't swing the map around.

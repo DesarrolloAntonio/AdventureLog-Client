@@ -21,7 +21,7 @@ enum DayRange {
         let day = Date.FormatStyle().day()
         let dayMonth = Date.FormatStyle().day().month(.wide)
         if cal.isDate(a, inSameDayAs: b) { return a.formatted(dayMonth) }
-        if cal.component(.month, from: a) == cal.component(.month, from: b) {
+        if cal.component(.month, from: a) == cal.component(.month, from: b), cal.component(.year, from: a) == cal.component(.year, from: b) {
             return "\(a.formatted(day))–\(b.formatted(dayMonth))"
         }
         return "\(a.formatted(dayMonth)) – \(b.formatted(dayMonth))"

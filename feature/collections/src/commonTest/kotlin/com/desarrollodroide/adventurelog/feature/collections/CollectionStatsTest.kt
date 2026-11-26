@@ -210,4 +210,14 @@ class CollectionStatsTest {
         ).stats()
         assertEquals(3, stats.activeDays)
     }
+
+    @Test
+    fun aTripWithOnlyAStartDateKeepsTheDaysAfterIt() {
+        // No end date means the trip has not been given one, not that it lasts a single day.
+        val stats = testCollection(
+            startDate = "2025-09-12",
+            lodging = listOf(testLodging("Hostel", checkIn = "2025-09-12", checkOut = "2025-09-14"))
+        ).stats()
+        assertEquals(3, stats.activeDays)
+    }
 }

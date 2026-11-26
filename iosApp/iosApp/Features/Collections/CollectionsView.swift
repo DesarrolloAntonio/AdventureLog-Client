@@ -244,7 +244,12 @@ struct CollectionsView: View {
         } description: {
             Text(query.isEmpty ? "Nothing here with that status." : "Nothing called “\(query)” here.")
         } actions: {
-            Button("Show All") { query = ""; vm.resetFilters() }.buttonStyle(.glass)
+            Button("Show All") {
+                query = ""
+                // resetFilters() also goes back to Mine; on Shared or Archived stay where you are.
+                if tab == .mine { vm.resetFilters() } else { vm.onStatusFilterChanged(status: nil) }
+            }
+            .buttonStyle(.glass)
         }
         .padding(.top, 40)
     }

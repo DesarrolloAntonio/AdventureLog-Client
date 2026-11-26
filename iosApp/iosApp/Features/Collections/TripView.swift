@@ -36,6 +36,8 @@ struct TripView: View {
     @State private var userId: String?
     @State private var managing: Location?
     @State private var removing: Location?
+    /// A place taken off the trip, until the reloaded trip no longer has it.
+    @State private var removedPlaceId: String?
     @State private var collections: [UltraSlimCollection] = []
     @State private var collectionsLoading = false
     @State private var savingCollections = false
@@ -142,8 +144,8 @@ struct TripView: View {
             presenting: removing
         ) { place in
             Button("Remove from Trip", role: .destructive) {
+                removedPlaceId = place.id
                 vm.removeFromCollection(location: place, collectionId: collectionId)
-                NotificationCenter.default.post(name: .placeSaved, object: nil)
             }
         } message: { _ in
             Text("The place stays in Places and in its other collections.")
@@ -154,7 +156,17 @@ struct TripView: View {
             Button("OK", role: .cancel) {}
         }
         .task { vm.loadCollection(collectionId: collectionId) }
-        .task { for await s in vm.uiState { state = s } }
+        .task {
+            for await s in vm.uiState {
+                state = s
+                // Lists elsewhere reload once the server has really taken the place off: told
+                // sooner, Places kept the trip in the place's collections and could put it back.
+                if let id = removedPlaceId, let trip = s.collection, !trip.locations.contains(where: { $0.id == id }) {
+                    removedPlaceId = nil
+                    NotificationCenter.default.post(name: .placeSaved, object: nil)
+                }
+            }
+        }
         .task { for await w in vm.itineraryWorking { working = w.boolValue } }
         .task { for await m in vm.actionMessage { message = m } }
         .task { for await user in host.owner.sessionFlow() { userId = user?.uuid } }

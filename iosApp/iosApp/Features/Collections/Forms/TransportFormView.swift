@@ -103,10 +103,11 @@ struct TransportFormView: View {
                         .padding(.trailing, 12)
                         .accessibilityLabel("Swap from and to")
                     }
-                    if searchingFor != nil, !results.isEmpty {
+                    if let end = searchingFor, !results.isEmpty {
                         ForEach(Array(results.prefix(5).enumerated()), id: \.offset) { _, result in
                             FormDivider()
-                            Button { pick(result) } label: {
+                            // The end is the one shown now: a tap can take the focus away first.
+                            Button { pick(result, for: end) } label: {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(result.name).foregroundStyle(Theme.ink)
                                     Text(result.displayName).font(.footnote).foregroundStyle(Theme.muted).lineLimit(2)
@@ -154,6 +155,13 @@ struct TransportFormView: View {
                 FormCard { ToggleRow(title: "Make public", isOn: $isPublic) }
             }
         }
+        // Leaving a field without picking puts its results away.
+        .onChange(of: focus) { _, now in
+            if now != searchingFor, searchingFor != nil {
+                searchingFor = nil
+                vm.clearLocationSearch()
+            }
+        }
         .task {
             for await s in vm.uiState {
                 loading = s.isLoading
@@ -192,10 +200,10 @@ struct TransportFormView: View {
         .frame(minHeight: 52)
     }
 
-    private func pick(_ result: GeocodeSearchResult) {
+    private func pick(_ result: GeocodeSearchResult, for end: End) {
         let label = result.name.isEmpty ? result.displayName : result.name
         picked = label
-        if searchingFor == .from {
+        if end == .from {
             from = label; origin = (result.latitude, result.longitude)
         } else {
             to = label; destination = (result.latitude, result.longitude)

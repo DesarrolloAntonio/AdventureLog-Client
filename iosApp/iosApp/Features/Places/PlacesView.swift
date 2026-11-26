@@ -294,7 +294,8 @@ struct PlacesView: View {
                     ForEach(Array(r.groups.enumerated()), id: \.offset) { _, group in
                         let title = group.country.map { name in group.countryCode.map { "\(flag($0)) \(name)" } ?? name } ?? "No country"
                         SectionLabel(text: title, trailing: "\(group.locations.count)").padding(.top, 6)
-                        VStack(spacing: 0) {
+                        // Lazy too: one country can hold every place, and each row loads a photo.
+                        LazyVStack(spacing: 0) {
                             ForEach(Array(group.locations.enumerated()), id: \.element.id) { index, place in
                                 row(place, last: index == group.locations.count - 1)
                             }
