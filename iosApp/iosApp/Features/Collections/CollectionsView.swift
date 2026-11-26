@@ -22,6 +22,10 @@ struct CollectionsView: View {
     @State private var userId: String?
     @State private var creating = false
     @State private var editingId: String?
+    @State private var query = ""
+    @State private var sort = CollectionSortOptions(sortField: .updatedAt, sortDirection: .descending)
+    @State private var statusFilter: TripStatus?
+    @State private var showFilters = false
 
     private var vm: CollectionsViewModel { host.owner.collectionsViewModel() }
     private var presenter: PagingListPresenter<UltraSlimCollection> { host.owner.collectionsPresenter() }
@@ -36,12 +40,17 @@ struct CollectionsView: View {
                     Text(invites.isEmpty ? "Invites" : "Invites · \(invites.count)").tag(CollectionsTab.invites)
                 }
                 .pickerStyle(.segmented)
-                .padding(.bottom, 16)
+                .padding(.bottom, 12)
+
+                if tab != .invites {
+                    SearchField(text: $query, prompt: "Search collections")
+                        .padding(.bottom, 16)
+                }
 
                 switch tab {
                 case .mine: mineList
                 case .invites: invitesList
-                default: plainList(content.collections, loading: content.isLoading, error: content.error)
+                default: plainList(narrowed(content.collections), loading: content.isLoading, error: content.error)
                 }
             }
             .padding(.horizontal, 16)
@@ -52,13 +61,22 @@ struct CollectionsView: View {
         .navigationTitle("Collections")
         .navigationSubtitle(count == 1 ? "1 collection" : "\(count) collections")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button { showFilters = true } label: { Image(systemName: "arrow.up.arrow.down") }
+                    .accessibilityLabel(activeFilters > 0 ? "Sort and filter, \(activeFilters) on" : "Sort and filter")
+                    .badge(activeFilters)
+                    // A toolbar keeps the badge it first drew; a new identity redraws it.
+                    .id(activeFilters)
                 Button { creating = true } label: { Image(systemName: "plus") }
                     .accessibilityLabel("New collection")
             }
         }
         .navigationDestination(for: UltraSlimCollection.self) { TripView(collectionId: $0.id, name: $0.name, subtitle: dates($0)) }
         .sheet(isPresented: $creating) { CollectionFormView { presenter.refresh() } }
+        .sheet(isPresented: $showFilters) { CollectionsFilterSheet(vm: vm, sort: sort, status: statusFilter) }
+        .onChange(of: query) { _, v in vm.onSearchQueryChange(query: v.trimmingCharacters(in: .whitespaces)) }
+        .task { for await o in vm.sortOptions { sort = o } }
+        .task { for await f in vm.statusFilter { statusFilter = f } }
         .sheet(isPresented: Binding(get: { editingId != nil }, set: { if !$0 { editingId = nil } })) {
             CollectionFormView(collectionId: editingId) { presenter.refresh() }
         }
@@ -120,9 +138,22 @@ struct CollectionsView: View {
             ProgressView().controlSize(.large).frame(maxWidth: .infinity).padding(.top, 80)
         } else if mine.isEmpty, let error = status.error {
             failed(error) { presenter.retry() }
+        } else if mine.isEmpty, narrowing {
+            noMatch
         } else if mine.isEmpty {
             ContentUnavailableView("No collections yet", systemImage: "rectangle.stack",
                                    description: Text("Group places into a trip, or into a folder of your own."))
+        } else if sort.sortField != .updatedAt {
+            // A sort of their own: one list in that order, as the server sends it.
+            VStack(spacing: 10) {
+                ForEach(Array(mine.enumerated()), id: \.element.id) { index, collection in
+                    CollectionCard(collection: collection, menu: { menu(collection) })
+                        .onAppear { presenter.itemAccessed(index: Int32(index)) }
+                }
+                if status.isLoadingMore {
+                    ProgressView().frame(maxWidth: .infinity, minHeight: 56)
+                }
+            }
         } else {
             let next = upNext
             VStack(alignment: .leading, spacing: 0) {
@@ -180,6 +211,40 @@ struct CollectionsView: View {
         }
     }
 
+    // MARK: Search and filters
+
+    /// Sort and status away from the default, for the button's badge (the tab has its own picker).
+    private var activeFilters: Int {
+        (statusFilter != nil ? 1 : 0) + (sort.sortField != .updatedAt ? 1 : 0)
+    }
+
+    private var narrowing: Bool { !query.trimmingCharacters(in: .whitespaces).isEmpty || statusFilter != nil }
+
+    /// Shared and archived come whole from the server; the search and status narrow them here,
+    /// as the paged list of one's own does in the shared code.
+    private func narrowed(_ list: [UltraSlimCollection]) -> [UltraSlimCollection] {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        var out = list.filter { (q.isEmpty || $0.name.localizedCaseInsensitiveContains(q)) && (statusFilter == nil || $0.status == statusFilter) }
+        switch sort.sortField {
+        case .name: out.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        case .startDate: out.sort { ($0.startDate ?? "~") < ($1.startDate ?? "~") }
+        default: break
+        }
+        if sort.sortField != .updatedAt, sort.sortDirection == .descending { out.reverse() }
+        return out
+    }
+
+    private var noMatch: some View {
+        ContentUnavailableView {
+            Label("No collections match", systemImage: "magnifyingglass")
+        } description: {
+            Text(query.isEmpty ? "Nothing here with that status." : "Nothing called “\(query)” here.")
+        } actions: {
+            Button("Show All") { query = ""; vm.resetFilters() }.buttonStyle(.glass)
+        }
+        .padding(.top, 40)
+    }
+
     // MARK: Shared and archived
 
     @ViewBuilder
@@ -188,6 +253,8 @@ struct CollectionsView: View {
             ProgressView().controlSize(.large).frame(maxWidth: .infinity).padding(.top, 80)
         } else if collections.isEmpty, let error {
             failed(error) { vm.refresh() }
+        } else if collections.isEmpty, narrowing {
+            noMatch
         } else if collections.isEmpty {
             ContentUnavailableView(
                 tab == .shared ? "Nothing shared with you" : "Nothing archived",
