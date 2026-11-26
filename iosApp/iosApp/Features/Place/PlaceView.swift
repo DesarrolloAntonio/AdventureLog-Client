@@ -23,6 +23,8 @@ struct PlaceView: View {
     @State private var addingVisit = false
     /// The visit being changed, by id.
     @State private var editingVisit: String?
+    /// The attachment being downloaded to open, which shows a spinner on its row.
+    @State private var openingAttachment: String?
     @Environment(\.openURL) private var openURL
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -59,6 +61,7 @@ struct PlaceView: View {
         .task { for await s in vm.locationState { state = s } }
         .task { for await c in vm.collections { collections = c } }
         .task { for await m in vm.attachmentMessage { message = m } }
+        .task { for await id in vm.openingAttachmentId { openingAttachment = id } }
         .sheet(isPresented: $editing) {
             PlaceFormView(placeId: placeId) { vm.loadLocation(locationId: placeId) }
         }
@@ -94,6 +97,8 @@ struct PlaceView: View {
                 visits(place)
 
                 trails(place)
+
+                attachments(place)
 
                 if let about = place.description_, !about.isEmpty {
                     SectionLabel(text: "About").padding(.top, 22).padding(.bottom, 8)
@@ -300,6 +305,61 @@ struct PlaceView: View {
                 }
             }
             .mistCard()
+        }
+    }
+
+    /// Files kept with the place (tickets, PDFs, GPX), as Android lists them: each is downloaded
+    /// with the signed-in session and handed to whatever on the phone opens it.
+    @ViewBuilder
+    private func attachments(_ place: Location) -> some View {
+        if !place.attachments.isEmpty {
+            SectionLabel(text: "Attachments", trailing: "\(place.attachments.count)").padding(.top, 22).padding(.bottom, 8)
+            VStack(spacing: 0) {
+                ForEach(Array(place.attachments.enumerated()), id: \.element.id) { index, file in
+                    if index > 0 { RowSeparator() }
+                    Button { vm.openAttachment(attachment: file) } label: {
+                        HStack(spacing: 12) {
+                            ToneBadge(systemImage: Self.icon(for: file.`extension`), tone: .amber)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(Self.title(file)).foregroundStyle(Theme.ink).lineLimit(2)
+                                if !file.`extension`.isEmpty {
+                                    Text(file.`extension`.trimmingCharacters(in: CharacterSet(charactersIn: ".")).uppercased())
+                                        .font(.footnote).foregroundStyle(Theme.muted)
+                                }
+                            }
+                            Spacer(minLength: 8)
+                            if openingAttachment == file.id {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "arrow.down.circle").font(.body).foregroundStyle(Theme.glyph)
+                            }
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 10)
+                        .frame(minHeight: 52)
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(openingAttachment != nil)
+                    .accessibilityHint("Downloads and opens the file")
+                }
+            }
+            .mistCard()
+        }
+    }
+
+    /// Its name, or the file's own name without the folder and the query.
+    private static func title(_ file: Attachment) -> String {
+        if let name = file.name, !name.isEmpty { return name }
+        let last = file.file.split(separator: "/").last.map(String.init) ?? file.file
+        return String(last.split(separator: "?").first ?? Substring(last))
+    }
+
+    private static func icon(for ext: String) -> String {
+        switch ext.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: ".")) {
+        case "pdf": "doc.richtext"
+        case "gpx", "kml", "kmz", "geojson": "map"
+        case "jpg", "jpeg", "png", "heic", "webp": "photo"
+        default: "doc"
         }
     }
 
