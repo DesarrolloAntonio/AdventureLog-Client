@@ -171,21 +171,39 @@ struct TripView: View {
             itemsCard(items, in: collection).padding(.bottom, 20)
         }
 
-        // Places added after the plan was laid out have no day yet; without this they were
-        // nowhere on the trip.
+        // Places, journeys and stays added after the plan was laid out have no day yet; without
+        // this they were nowhere on the trip.
         let planned = Set(collection.itinerary.map(\.itemId))
-        let unplanned = plan.isEmpty ? [] : collection.locations.filter { place in
-            !planned.contains(place.id) && !place.visits.contains { planned.contains($0.id) }
-        }
+        let unplanned: [Unplanned] = plan.isEmpty ? [] :
+            collection.locations.filter { place in
+                !planned.contains(place.id) && !place.visits.contains { planned.contains($0.id) }
+            }.map(Unplanned.place)
+            + collection.transportations.filter { !planned.contains($0.id) }.map(Unplanned.transport)
+            + collection.lodging.filter { !planned.contains($0.id) }.map(Unplanned.stay)
         if !unplanned.isEmpty {
             SectionLabel(text: "Not in the plan", trailing: "\(unplanned.count)").padding(.bottom, 8)
             VStack(spacing: 0) {
-                ForEach(Array(unplanned.enumerated()), id: \.element.id) { index, place in
-                    NavigationLink(value: place) {
-                        TripRow(kind: .location, title: place.name, subtitle: whereabouts(place), showsKind: false,
-                                last: index == unplanned.count - 1, chevron: true)
+                ForEach(Array(unplanned.enumerated()), id: \.element.id) { index, item in
+                    let last = index == unplanned.count - 1
+                    switch item {
+                    case .place(let place):
+                        NavigationLink(value: place) {
+                            TripRow(kind: .location, title: place.name, subtitle: whereabouts(place), showsKind: false,
+                                    last: last, chevron: true)
+                        }
+                        .buttonStyle(.plain)
+                    case .transport(let journey):
+                        Button { form = .transport(journey.id) } label: {
+                            TripRow(kind: .transportation, title: journey.name, subtitle: route(journey), last: last, chevron: true)
+                        }
+                        .buttonStyle(.plain)
+                    case .stay(let stay):
+                        Button { form = .lodging(stay.id) } label: {
+                            TripRow(kind: .lodging, title: stay.name,
+                                    subtitle: DayRange(start: stay.checkIn, end: stay.checkOut)?.shortText, last: last, chevron: true)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
             .mistCard()
@@ -237,6 +255,12 @@ struct TripView: View {
     }
 
     /// "Saturday 5 Sep · Day 1", or the day's own name where it has one.
+    /// "Madrid → Lisbon", or the kind of journey when it has no places.
+    private func route(_ journey: Transportation) -> String {
+        let ends = [journey.fromLocation, journey.toLocation].compactMap { $0 }.filter { !$0.isEmpty }
+        return ends.isEmpty ? journey.type.capitalized : ends.joined(separator: " → ")
+    }
+
     private func dayLabel(_ day: ItineraryDay) -> String {
         var c = DateComponents()
         c.year = Int(day.date.year); c.month = Int(day.date.month.ordinal + 1); c.day = Int(day.date.day)
@@ -398,6 +422,19 @@ private struct ChecklistCard: View {
 }
 
 /// A row of a day: a dot coloured by kind, its title and detail.
+/// Something on the trip that the itinerary has no day for.
+private enum Unplanned: Identifiable {
+    case place(Location), transport(Transportation), stay(Lodging)
+
+    var id: String {
+        switch self {
+        case .place(let p): "place-\(p.id)"
+        case .transport(let t): "transport-\(t.id)"
+        case .stay(let l): "stay-\(l.id)"
+        }
+    }
+}
+
 private struct TripRow: View {
     let kind: ItineraryItemKind
     let title: String

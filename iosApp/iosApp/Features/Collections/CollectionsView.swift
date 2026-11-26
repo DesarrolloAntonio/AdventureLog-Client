@@ -14,6 +14,8 @@ struct CollectionsView: View {
     @State private var count: Int32 = 0
     @State private var message: String?
     @State private var deleting: UltraSlimCollection?
+    /// Who is signed in: a collection shared with you offers none of its owner's actions.
+    @State private var userId: String?
     @State private var creating = false
     @State private var editingId: String?
 
@@ -77,6 +79,7 @@ struct CollectionsView: View {
         .task { for await s in presenter.status { status = s } }
         .task { for await c in vm.tabContent { content = c } }
         .task { for await i in vm.pendingInvites { invites = i } }
+        .task { for await user in host.owner.sessionFlow() { userId = user?.uuid } }
         .task { for await n in vm.collectionCount { count = n.int32Value } }
         .task { for await m in vm.actionMessage { message = m } }
         .task {
@@ -219,6 +222,16 @@ struct CollectionsView: View {
 
     @ViewBuilder
     private func menu(_ collection: UltraSlimCollection) -> some View {
+        if OwnershipKt.ownedBy(ownerId: collection.ownerId, currentUserId: userId) {
+            ownerMenu(collection)
+        } else {
+            // The server refuses these to anyone but the owner, as Android hides them.
+            Text("Shared with you. Only its owner can change or delete it.")
+        }
+    }
+
+    @ViewBuilder
+    private func ownerMenu(_ collection: UltraSlimCollection) -> some View {
         Button("Edit", systemImage: "pencil") { editingId = collection.id }
         Button("Duplicate", systemImage: "plus.square.on.square") { vm.duplicateCollection(collection: collection) }
         if collection.isArchived {
