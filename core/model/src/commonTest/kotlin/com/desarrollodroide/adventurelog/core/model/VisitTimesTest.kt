@@ -2,30 +2,40 @@ package com.desarrollodroide.adventurelog.core.model
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
+/**
+ * A timed visit is stored as the web stores it (REF `lib/dateUtils.ts`, `toUTCDatetime`): the
+ * local time chosen in the visit's zone, converted to UTC. The apps used to send the wall-clock
+ * time with a "Z" on it, so the web showed a Madrid visit an hour or two late.
+ */
 class VisitTimesTest {
 
     @Test
-    fun `a visit with times on a single day is not all day`() {
-        // The place page showed this one as "All Day 2025-07-01" and hid 10:30 - 18:45.
-        assertFalse(isAllDayVisit("2025-07-01T10:30:15Z", "2025-07-01T18:45:30Z"))
-        assertFalse(isAllDayVisit("2025-08-02T09:00:00Z", "2025-08-02T23:59:00Z"))
+    fun aTimedVisitInMadridIsStoredInUtc() {
+        assertEquals("2026-11-26T09:00:00Z", visitStored("2026-11-26", "10:00", "Europe/Madrid"))
+        // Summer time: two hours ahead.
+        assertEquals("2026-07-01T08:30:00Z", visitStored("2026-07-01", "10:30", "Europe/Madrid"))
     }
 
     @Test
-    fun `a visit with no time of day is all day`() {
-        assertTrue(isAllDayVisit("2025-06-10T00:00:00Z", "2025-06-10T00:00:00Z"))
-        assertTrue(isAllDayVisit("2025-05-01T00:00:00Z", "2025-05-03T00:00:00Z"))
-        assertTrue(isAllDayVisit("2025-05-01", null))
-        // The older way an all-day visit ended.
-        assertTrue(isAllDayVisit("2025-05-01T00:00:00Z", "2025-05-01T23:59:00Z"))
+    fun aStoredTimeReadsBackInItsZone() {
+        assertEquals("2026-11-26T10:00", visitLocalDateTime("2026-11-26T09:00:00Z", "Europe/Madrid"))
     }
 
     @Test
-    fun `a timed visit shows its times`() {
-        assertEquals("2025-07-01 10:30", visitBoundText("2025-07-01T10:30:15Z"))
-        assertEquals("2025-07-01", visitBoundText("2025-07-01"))
+    fun aLateEveningInTokyoIsTheNextDayThere() {
+        assertEquals("2026-11-27T01:00", visitLocalDateTime("2026-11-26T16:00:00Z", "Asia/Tokyo"))
+    }
+
+    @Test
+    fun withoutAZoneOrATimeTheValueIsLeftAsItIs() {
+        assertEquals("2026-11-26T09:00:00Z", visitLocalDateTime("2026-11-26T09:00:00Z", null))
+        assertEquals("2026-11-26", visitLocalDateTime("2026-11-26", "Europe/Madrid"))
+        assertEquals("nonsense", visitLocalDateTime("nonsense", "Europe/Madrid"))
+    }
+
+    @Test
+    fun anUnknownZoneIsTreatedAsUtc() {
+        assertEquals("2026-11-26T10:00:00Z", visitStored("2026-11-26", "10:00", "Mars/Olympus"))
     }
 }

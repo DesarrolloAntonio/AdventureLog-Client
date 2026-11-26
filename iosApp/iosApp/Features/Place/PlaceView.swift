@@ -243,15 +243,18 @@ struct PlaceView: View {
             VStack(spacing: 0) {
                 ForEach(Array(visits.enumerated()), id: \.element.id) { index, visit in
                     if index > 0 { RowSeparator() }
+                    // A timed visit is stored in UTC: its days and hours show in its own zone, as on the web.
+                    let allDay = VisitTimesKt.isAllDayVisit(startDate: visit.startDate, endDate: visit.endDate)
+                    let start = allDay ? visit.startDate : VisitTimesKt.visitLocalDateTime(stored: visit.startDate, zone: visit.timezone)
+                    let end = allDay ? visit.endDate : VisitTimesKt.visitLocalDateTime(stored: visit.endDate, zone: visit.timezone)
                     Button { editingVisit = visit.id } label: {
                         HStack(spacing: 12) {
                             ToneBadge(systemImage: "calendar", tone: .amber)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(DayRange(start: visit.startDate, end: visit.endDate)?.shortText ?? "No date")
+                                Text(DayRange(start: start, end: end)?.shortText ?? "No date")
                                     .foregroundStyle(Theme.ink)
-                                if !VisitTimesKt.isAllDayVisit(startDate: visit.startDate, endDate: visit.endDate),
-                                   let from = VisitTimesKt.timeOfDay(isoDateTime: visit.startDate) {
-                                    let until = VisitTimesKt.timeOfDay(isoDateTime: visit.endDate).map { "–\($0)" } ?? ""
+                                if !allDay, let from = VisitTimesKt.timeOfDay(isoDateTime: start) {
+                                    let until = VisitTimesKt.timeOfDay(isoDateTime: end).map { "–\($0)" } ?? ""
                                     let zone = visit.timezone.map { " · \($0.replacingOccurrences(of: "_", with: " "))" } ?? ""
                                     Text(from + until + zone).font(.footnote).foregroundStyle(Theme.muted).monospacedDigit()
                                 }
