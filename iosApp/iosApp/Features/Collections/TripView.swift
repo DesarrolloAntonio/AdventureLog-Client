@@ -33,6 +33,13 @@ struct TripView: View {
     @State private var working = false
     @State private var message: String?
     @State private var form: Form?
+    @State private var userId: String?
+    @State private var managing: Location?
+    @State private var removing: Location?
+    @State private var collections: [UltraSlimCollection] = []
+    @State private var collectionsLoading = false
+    @State private var savingCollections = false
+    @State private var collectionsError: String?
 
     private var vm: CollectionDetailViewModel { host.owner.collectionDetailViewModel() }
 
@@ -116,6 +123,31 @@ struct TripView: View {
             case .trip: CollectionFormView(collectionId: collectionId, onSaved: reload)
             }
         }
+        .sheet(item: $managing) { place in
+            CollectionsPickerView(
+                place: place,
+                collections: collections,
+                loading: collectionsLoading,
+                saving: savingCollections,
+                error: collectionsError,
+                clearError: { collectionsError = nil; vm.clearUpdateCollectionsState() },
+                refresh: { vm.refreshCollections() },
+                save: { vm.updateAdventureCollections(adventureId: place.id, collectionIds: $0) }
+            )
+        }
+        .confirmationDialog(
+            "Remove \(removing?.name ?? "") from this trip?",
+            isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }),
+            titleVisibility: .visible,
+            presenting: removing
+        ) { place in
+            Button("Remove from Trip", role: .destructive) {
+                vm.removeFromCollection(location: place, collectionId: collectionId)
+                NotificationCenter.default.post(name: .placeSaved, object: nil)
+            }
+        } message: { _ in
+            Text("The place stays in Places and in its other collections.")
+        }
         .navigationDestination(for: Location.self) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
         .refreshable { vm.loadCollection(collectionId: collectionId) }
         .alert(message ?? "", isPresented: Binding(get: { message != nil }, set: { if !$0 { vm.clearActionMessage() } })) {
@@ -125,6 +157,23 @@ struct TripView: View {
         .task { for await s in vm.uiState { state = s } }
         .task { for await w in vm.itineraryWorking { working = w.boolValue } }
         .task { for await m in vm.actionMessage { message = m } }
+        .task { for await user in host.owner.sessionFlow() { userId = user?.uuid } }
+        .task { for await c in vm.allCollections { collections = c } }
+        .task { for await l in vm.collectionsLoading { collectionsLoading = l.boolValue } }
+        .task {
+            for await s in vm.updateCollectionsState {
+                savingCollections = false
+                switch onEnum(of: s) {
+                case .loading: savingCollections = true
+                case .success:
+                    managing = nil
+                    vm.clearUpdateCollectionsState()
+                    NotificationCenter.default.post(name: .placeSaved, object: nil)
+                case .error(let e): collectionsError = e.message
+                case .idle: break
+                }
+            }
+        }
         // A delete, or a change to the plan, the server refused.
         .task {
             for await d in vm.deleteState {
@@ -224,7 +273,10 @@ struct TripView: View {
                         .buttonStyle(.plain)
                     }
                     }
-                    .contextMenu { addToPlan(item, days: plan.days) }
+                    .contextMenu {
+                        addToPlan(item, days: plan.days)
+                        if case .place(let place) = item { placeActions(place) }
+                    }
                 }
             }
             .mistCard()
@@ -271,6 +323,17 @@ struct TripView: View {
         return ends.isEmpty ? journey.type.capitalized : ends.joined(separator: " → ")
     }
 
+    /// Where a place is filed, as Android's place actions: only for its owner, like there.
+    @ViewBuilder
+    private func placeActions(_ place: Location) -> some View {
+        if OwnershipKt.ownedBy(ownerId: place.user.uuid, currentUserId: userId) {
+            Section {
+                Button("Collections…", systemImage: "rectangle.stack") { managing = place }
+                Button("Remove from Trip", systemImage: "folder.badge.minus", role: .destructive) { removing = place }
+            }
+        }
+    }
+
     /// Puts something that has no day on the plan: for the whole trip, or on one of its days.
     @ViewBuilder
     private func addToPlan(_ item: Unplanned, days: [ItineraryDay]) -> some View {
@@ -313,6 +376,7 @@ struct TripView: View {
                     Button("Remove from the Plan", systemImage: "calendar.badge.minus") {
                         vm.removeFromItinerary(entryId: item.entryId)
                     }
+                    if let place = place(for: item, in: collection) { placeActions(place) }
                 }
                 .accessibilityAction(named: "Remove from the plan") { vm.removeFromItinerary(entryId: item.entryId) }
             }

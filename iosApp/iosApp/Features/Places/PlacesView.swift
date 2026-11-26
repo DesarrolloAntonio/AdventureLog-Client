@@ -16,6 +16,11 @@ struct PlacesView: View {
     @State private var creating = false
     @State private var message: String?
     @State private var deleting: Location?
+    @State private var managing: Location?
+    @State private var collections: [UltraSlimCollection] = []
+    @State private var collectionsLoading = false
+    @State private var savingCollections = false
+    @State private var collectionsError: String?
 
     private var vm: LocationsViewModel { host.owner.locationsViewModel() }
     private var presenter: PagingListPresenter<Location> { host.owner.locationsPresenter() }
@@ -39,12 +44,26 @@ struct PlacesView: View {
                 Button { showFilters = true } label: { Image(systemName: "arrow.up.arrow.down") }
                     .accessibilityLabel(activeFilters > 0 ? "Sort and filter, \(activeFilters) on" : "Sort and filter")
                     .badge(activeFilters)
+                    // A toolbar keeps the badge it first drew; a new identity redraws it.
+                    .id(activeFilters)
                 Button { creating = true } label: { Image(systemName: "plus") }
                     .accessibilityLabel("New place")
             }
         }
         .navigationDestination(for: Location.self) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
         .sheet(isPresented: $creating) { PlaceFormView {} }
+        .sheet(item: $managing) { place in
+            CollectionsPickerView(
+                place: place,
+                collections: collections,
+                loading: collectionsLoading,
+                saving: savingCollections,
+                error: collectionsError,
+                clearError: { collectionsError = nil; vm.clearUpdateCollectionsState() },
+                refresh: { vm.refreshCollections() },
+                save: { vm.updateAdventureCollections(adventureId: place.id, collectionIds: $0) }
+            )
+        }
         .sheet(isPresented: $showFilters) {
             if let filters { PlacesFilterSheet(vm: vm, initial: filters) }
         }
@@ -81,6 +100,22 @@ struct PlacesView: View {
         .task { for await f in vm.filters { filters = f } }
         .task { for await c in vm.categories { categories = c } }
         .task { for await m in vm.actionMessage { message = m } }
+        .task { for await c in vm.collections { collections = c } }
+        .task { for await l in vm.collectionsLoading { collectionsLoading = l.boolValue } }
+        .task {
+            for await s in vm.updateCollectionsState {
+                savingCollections = false
+                switch onEnum(of: s) {
+                case .loading: savingCollections = true
+                case .success:
+                    managing = nil
+                    vm.clearUpdateCollectionsState()
+                    NotificationCenter.default.post(name: .placeSaved, object: nil)
+                case .error(let e): collectionsError = e.message
+                case .idle: break
+                }
+            }
+        }
         .task {
             // A deleted place leaves the list at once; the totals follow, here and on Home.
             for await d in vm.deleteState {
@@ -210,6 +245,7 @@ struct PlacesView: View {
                             last: index == places.count - 1 && !status.isLoadingMore,
                             onShare: { vm.shareLocation(location: place) },
                             onDuplicate: { vm.duplicateLocation(location: place) },
+                            onCollections: { managing = place },
                             onDelete: { deleting = place }
                         )
                         .onAppear { presenter.itemAccessed(index: Int32(index)) }
@@ -256,6 +292,7 @@ private struct PlaceRow: View {
     let last: Bool
     let onShare: () -> Void
     let onDuplicate: () -> Void
+    let onCollections: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -284,6 +321,7 @@ private struct PlaceRow: View {
             Menu {
                 Button("Share", systemImage: "square.and.arrow.up", action: onShare)
                 Button("Duplicate", systemImage: "plus.square.on.square", action: onDuplicate)
+                Button("Collections", systemImage: "rectangle.stack", action: onCollections)
                 Button("Delete", systemImage: "trash", role: .destructive, action: onDelete)
             } label: {
                 Image(systemName: "ellipsis")
@@ -337,10 +375,11 @@ func categoryTone(_ name: String) -> Theme.Tone {
 }
 
 /// "Visited" in green, or "Planned" in coral with the next visit's date when one is booked.
+/// A visit today is not "next": the server already counts the place as visited, as the list does.
 @ViewBuilder
 func visitTag(_ place: Location) -> some View {
     let today = Calendar.current.startOfDay(for: .now)
-    let next = place.visits.compactMap { $0.startDate.flatMap(DayRange.day) }.filter { $0 >= today }.min()
+    let next = place.visits.compactMap { $0.startDate.flatMap(DayRange.day) }.filter { $0 > today }.min()
     if let next {
         ToneTag(text: "Planned · \(next.formatted(.dateTime.day().month(.abbreviated)))", tone: .coral)
     } else if place.isVisited {
