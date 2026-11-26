@@ -46,23 +46,43 @@ private struct WorldMap<Switcher: View>: View {
     let switcher: Switcher
 
     @StateObject private var host = ViewModelHost()
-    @State private var places: [Location] = []
+    /// Nil until the shared map state first arrives (Swift can't build its defaults).
+    @State private var state: MapUiState?
     @State private var selected: Location?
+    @State private var showFilters = false
     @State private var satellite = false
     @State private var camera: MapCameraPosition = .automatic
     @State private var viewport = MapViewport()
 
-    private var presenter: PagingListPresenter<Location> { host.owner.locationsPresenter() }
+    /// Every place with coordinates, not a page of them, with the shared filters' choice of pins.
+    private var vm: MapViewModel { host.owner.mapViewModel() }
+    private var places: [Location] { state.map { MapUiStateKt.mapMarkers($0.locations, filters: $0.filters) } ?? [] }
+
+    /// Filters away from "everything", for the button's look: layers only add, so they don't count.
+    private var narrowed: Bool {
+        guard let f = state?.filters else { return false }
+        return !f.showVisited || !f.showPlanned || !f.selectedCategories.isEmpty
+    }
 
     var body: some View {
         GeometryReader { geo in
-            PlacesMap(places: places, satellite: satellite, camera: $camera) { selected = $0 }
+            PlacesMap(places: places, satellite: satellite, camera: $camera,
+                      regions: state?.filters.showRegions == true ? state?.visitedRegions ?? [] : [],
+                      cities: state?.filters.showCities == true ? state?.visitedCities ?? [] : []) { selected = $0 }
                 .ignoresSafeArea()
                 .overlay(alignment: .top) {
                     // The bar's row: the switch in the middle, the map style where Countries has search.
                     ZStack {
                         switcher.padding(4).glassEffect(.regular.interactive(), in: .capsule)
                         HStack {
+                            Button { showFilters = true } label: {
+                                Image(systemName: narrowed ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .frame(width: 44, height: 44)
+                            }
+                            .glassEffect(.regular.interactive(), in: .circle)
+                            .tint(narrowed ? Theme.accent : .primary)
+                            .accessibilityLabel(narrowed ? "Map filters, on" : "Map filters")
                             Spacer()
                             Button { satellite.toggle() } label: {
                                 Image(systemName: satellite ? "map" : "globe.europe.africa")
@@ -87,11 +107,16 @@ private struct WorldMap<Switcher: View>: View {
                 }
         }
         .navigationDestination(item: $selected) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
-        .task { for await p in presenter.items { places = p } }
-        .task(id: places.map(\.id)) {
+        .sheet(isPresented: $showFilters) { if let state { MapFiltersSheet(vm: vm, state: state) } }
+        .task { for await s in vm.uiState { state = s } }
+        // A place saved or deleted anywhere moves, adds or takes away a pin.
+        .onReceive(NotificationCenter.default.publisher(for: .placeSaved)) { _ in vm.refresh() }
+        // Framed on every place, not the filtered ones: a filter shouldn't swing the map around.
+        .task(id: state?.locations.map(\.id) ?? []) {
+            guard let all = state?.locations, !all.isEmpty else { return }
             // Set once the map is on screen: a camera given before it has laid out is dropped.
             try? await Task.sleep(for: .milliseconds(400))
-            withAnimation { camera = PlacesMap.fit(places, in: viewport) }
+            withAnimation { camera = PlacesMap.fit(all, in: viewport) }
         }
     }
 }
