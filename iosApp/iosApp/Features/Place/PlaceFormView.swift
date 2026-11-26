@@ -40,6 +40,14 @@ struct PlaceFormView: View {
     @State private var currency = "USD"
     @State private var tags: [String] = []
     @State private var newTag = ""
+    /// The New Category alert, and the name of one just created, to pick once the list has it.
+    @State private var creatingCategory = false
+    @State private var newCategoryName = ""
+    @State private var newCategoryIcon = ""
+    @State private var pendingCategory: String?
+    /// The map picker, and whether the address of a spot picked on it is on its way.
+    @State private var pickingOnMap = false
+    @State private var awaitingAddress = false
     @Environment(\.dismiss) private var dismiss
 
     private var vm: AddEditAdventureViewModel { host.owner.addEditAdventureViewModel(adventureId: placeId) }
@@ -87,6 +95,14 @@ struct PlaceFormView: View {
                                            set: { id in category = categories.first { $0.id == id } })
                     )
                 }
+                Button { newCategoryName = ""; newCategoryIcon = ""; creatingCategory = true } label: {
+                    Label("New Category", systemImage: "plus")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.accent)
+                .padding(.horizontal, 6)
+                .accessibilityIdentifier("newCategory")
                 FormCard {
                     HStack {
                         Text("Rating").foregroundStyle(Theme.ink)
@@ -104,9 +120,18 @@ struct PlaceFormView: View {
                         TextField("Search for a place or address", text: $whereText)
                             .focused($whereFocused)
                             .submitLabel(.search)
-                        if state?.isSearchingLocation == true { ProgressView() }
+                        if state?.isSearchingLocation == true || awaitingAddress { ProgressView() }
                     }
                     .padding(.horizontal, 16).frame(minHeight: 52)
+                    FormDivider(inset: 44)
+                    Button { whereFocused = false; pickingOnMap = true } label: {
+                        Label("Pick on the Map", systemImage: "map")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16).frame(minHeight: 48)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.accent)
+                    .accessibilityIdentifier("pickOnMap")
                     if searching, let results = state?.locationSearchResults, !results.isEmpty {
                         ForEach(Array(results.prefix(5).enumerated()), id: \.offset) { _, result in
                             FormDivider(inset: 44)
@@ -135,12 +160,50 @@ struct PlaceFormView: View {
                 SectionLabel(text: "Description").padding(.bottom, -8)
                 FormCard {
                     FormField(placeholder: "What made it worth the trip?", text: $about, axis: .vertical)
+                    FormDivider()
+                    // The server writes it from the Wikipedia article of that name, as Android and the web do.
+                    Button { vm.generateDescription(name: name) { text in about = text } } label: {
+                        HStack(spacing: 8) {
+                            if state?.isGeneratingDescription == true { ProgressView() } else { Image(systemName: "book.pages") }
+                            Text(about.isEmpty ? "Write It from Wikipedia" : "Replace with Wikipedia")
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16).frame(minHeight: 48)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.accent)
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || state?.isGeneratingDescription == true)
+                    .accessibilityIdentifier("wikipedia")
                 }
                 detailSection
                 tagSection
                 photoSection
                 trailSection
                 FormCard { ToggleRow(title: "Make public", isOn: $isPublic) }
+            }
+        }
+        .alert("New Category", isPresented: $creatingCategory) {
+            TextField("Name", text: $newCategoryName)
+            TextField("Emoji (optional)", text: $newCategoryIcon)
+            Button("Cancel", role: .cancel) {}
+            Button("Create") {
+                let name = newCategoryName.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return }
+                pendingCategory = name
+                let icon = newCategoryIcon.trimmingCharacters(in: .whitespaces)
+                vm.createCategory(name: name, icon: icon.isEmpty ? "📍" : String(icon.prefix(2)))
+            }
+        } message: {
+            Text("It is picked for this place once it exists.")
+        }
+        .sheet(isPresented: $pickingOnMap) {
+            MapPicker(title: name.isEmpty ? "Here" : name, initial: coordinate) { spot in
+                latitude = String(format: "%.6f", spot.latitude)
+                longitude = String(format: "%.6f", spot.longitude)
+                searching = false
+                vm.clearLocationSearch()
+                awaitingAddress = true
+                vm.reverseGeocode(latitude: spot.latitude, longitude: spot.longitude)
             }
         }
         .onChange(of: picking) { _, items in
@@ -156,6 +219,16 @@ struct PlaceFormView: View {
         .task {
             for await s in vm.uiState {
                 state = s
+                if let pending = pendingCategory, let made = s.categories.first(where: { $0.displayName == pending }) {
+                    category = made
+                    pendingCategory = nil
+                }
+                if awaitingAddress, let address = s.reverseGeocodeResult?.displayName, !address.isEmpty {
+                    awaitingAddress = false
+                    picked = address
+                    whereText = address
+                }
+                if s.errorMessage != nil { awaitingAddress = false; pendingCategory = nil }
                 if base == nil, s.loadError == nil, placeId == nil || s.existingLocation != nil {
                     seed(IosForms.shared.place(location: s.existingLocation, defaultCurrency: vm.defaultCurrency))
                 }

@@ -13,6 +13,11 @@ struct PlacesFilterSheet: View {
     @State private var includeCollections: Bool
     @State private var categories: LocationsViewModel.CategoriesState = LocationsViewModel.CategoriesStateLoading.shared
     private let visitedFilter: VisitedFilter
+    /// Managing categories, as Android's sheet does: a new one or one being changed (nil id for
+    /// new), the one waiting for its Delete to be confirmed, and what the server refused.
+    @State private var editingCategory: (id: String?, name: String, icon: String)?
+    @State private var deletingCategory: ComposeApp.Category?
+    @State private var categoryError: String?
 
     init(vm: LocationsViewModel, initial: LocationFilters) {
         self.vm = vm
@@ -43,7 +48,7 @@ struct PlacesFilterSheet: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section("Categories") {
+                Section {
                     switch onEnum(of: categories) {
                     case .loading:
                         ProgressView().frame(maxWidth: .infinity)
@@ -69,8 +74,21 @@ struct PlacesFilterSheet: View {
                             }
                             .tint(.primary)
                             .accessibilityAddTraits(categoryNames.contains(category.name) ? .isSelected : [])
+                            .swipeActions {
+                                Button("Delete", role: .destructive) { deletingCategory = category }.tint(.red)
+                                Button("Edit") { editingCategory = (category.id, category.displayName, category.icon) }
+                                    .tint(Theme.accent)
+                            }
                         }
+                        Button { editingCategory = (nil, "", "") } label: {
+                            Label("New Category", systemImage: "plus")
+                        }
+                        .accessibilityIdentifier("newCategory")
                     }
+                } header: {
+                    Text("Categories")
+                } footer: {
+                    Text("Swipe a category to change or delete it.")
                 }
 
                 Section {
@@ -97,6 +115,48 @@ struct PlacesFilterSheet: View {
         }
         .presentationDetents([.medium, .large])
         .task { for await c in vm.categoriesState { categories = c } }
+        .task {
+            for await op in vm.categoryOperationState {
+                if case .error(let e) = onEnum(of: op) { categoryError = e.message; vm.clearCategoryOperationState() }
+            }
+        }
+        .alert(editingCategory?.id == nil ? "New Category" : "Edit Category",
+               isPresented: Binding(get: { editingCategory != nil }, set: { if !$0 { editingCategory = nil } })) {
+            TextField("Name", text: Binding(get: { editingCategory?.name ?? "" }, set: { editingCategory?.name = $0 }))
+            TextField("Emoji", text: Binding(get: { editingCategory?.icon ?? "" }, set: { editingCategory?.icon = $0 }))
+            Button("Cancel", role: .cancel) {}
+            Button(editingCategory?.id == nil ? "Create" : "Save") { saveCategory() }
+        }
+        .confirmationDialog("Delete \(deletingCategory?.displayName ?? "")?",
+                            isPresented: Binding(get: { deletingCategory != nil }, set: { if !$0 { deletingCategory = nil } }),
+                            titleVisibility: .visible) {
+            Button("Delete Category", role: .destructive) {
+                guard let category = deletingCategory else { return }
+                categoryNames.remove(category.name)
+                vm.deleteCategory(categoryId: category.id)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            let places = Int(deletingCategory?.numAdventures ?? "") ?? 0
+            Text(places == 0 ? "No place uses it. This can't be undone."
+                 : "\(places) \(places == 1 ? "place uses" : "places use") it. This can't be undone.")
+        }
+        .alert(categoryError ?? "", isPresented: Binding(get: { categoryError != nil }, set: { if !$0 { categoryError = nil } })) {
+            Button("OK", role: .cancel) {}
+        }
+    }
+
+    private func saveCategory() {
+        guard let edit = editingCategory else { return }
+        let name = edit.name.trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty else { return }
+        let typed = edit.icon.trimmingCharacters(in: .whitespaces)
+        let icon = typed.isEmpty ? "📍" : String(typed.prefix(2))
+        if let id = edit.id {
+            vm.updateCategory(categoryId: id, name: name, icon: icon)
+        } else {
+            vm.createCategory(name: name, icon: icon)
+        }
     }
 
     private func toggle(_ name: String) {
