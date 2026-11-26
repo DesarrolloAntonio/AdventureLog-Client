@@ -15,13 +15,17 @@ struct SettingsView: View {
     @State private var theme: CommonThemeMode = .auto
     @State private var message: String?
     @State private var confirmingSignOut = false
+    @State private var editingProfile = false
 
     private var vm: SettingsViewModel { host.owner.settingsViewModel() }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                profileCard
+                Button { editingProfile = true } label: { profileCard }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Edit your name and username")
+                    .accessibilityIdentifier("editProfile")
 
                 group("Appearance") {
                     MenuRow(systemImage: "circle.lefthalf.filled", tone: .blue, title: "Theme", value: themeName(theme)) {
@@ -117,6 +121,7 @@ struct SettingsView: View {
         .alert(message ?? "", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) {}
         }
+        .sheet(isPresented: $editingProfile) { ProfileFormView(vm: vm, initial: form) }
         .task { for await u in vm.user { user = u } }
         .task { for await p in vm.profile { form = p.form } }
         .task { for await t in vm.themeMode { theme = t } }
@@ -156,6 +161,7 @@ struct SettingsView: View {
                     .font(.footnote).foregroundStyle(Theme.muted).lineLimit(1)
             }
             Spacer()
+            Image(systemName: "pencil").font(.body.weight(.semibold)).foregroundStyle(Theme.accent)
         }
         .padding(12)
         .mistCard()
