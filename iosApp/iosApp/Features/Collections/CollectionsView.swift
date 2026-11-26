@@ -13,6 +13,8 @@ struct CollectionsView: View {
     @State private var invites: [CollectionInvite] = []
     @State private var count: Int32 = 0
     @State private var message: String?
+    /// What the server is rendering (a share image, a PDF, a ZIP) while the phone waits for it.
+    @State private var busy: String?
     @State private var deleting: UltraSlimCollection?
     /// Who is signed in: a collection shared with you offers none of its owner's actions.
     @State private var userId: String?
@@ -82,6 +84,18 @@ struct CollectionsView: View {
         .task { for await user in host.owner.sessionFlow() { userId = user?.uuid } }
         .task { for await n in vm.collectionCount { count = n.int32Value } }
         .task { for await m in vm.actionMessage { message = m } }
+        .task { for await b in vm.busyLabel { busy = b } }
+        .overlay(alignment: .bottom) {
+            if let busy {
+                Label { Text(busy) } icon: { ProgressView() }
+                    .font(.subheadline.weight(.medium))
+                    .padding(.horizontal, 18).padding(.vertical, 12)
+                    .glassEffect(.regular, in: .capsule)
+                    .padding(.bottom, 24)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy, value: busy)
         .task {
             for await d in vm.deleteState {
                 if case .success = onEnum(of: d) {
@@ -222,7 +236,17 @@ struct CollectionsView: View {
 
     @ViewBuilder
     private func menu(_ collection: UltraSlimCollection) -> some View {
-        if OwnershipKt.ownedBy(ownerId: collection.ownerId, currentUserId: userId) {
+        let owned = OwnershipKt.ownedBy(ownerId: collection.ownerId, currentUserId: userId)
+        // The server renders all three; the share image and the PDF are anyone's, the ZIP the owner's.
+        Section {
+            Button("Share Image", systemImage: "square.and.arrow.up") { vm.exportCollection(collection: collection, what: .shareCard) }
+            Button("Download PDF", systemImage: "doc.richtext") { vm.exportCollection(collection: collection, what: .pdf) }
+            if owned {
+                Button("Export ZIP", systemImage: "doc.zipper") { vm.exportCollection(collection: collection, what: .zip) }
+            }
+        }
+        .disabled(busy != nil)
+        if owned {
             ownerMenu(collection)
         } else {
             // The server refuses these to anyone but the owner, as Android hides them.
