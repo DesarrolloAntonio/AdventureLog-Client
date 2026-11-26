@@ -145,7 +145,8 @@ struct CountriesView: View {
     }
 }
 
-/// Every country, searchable; visited ones show their share of regions.
+/// Every country, searchable and, as on Android, narrowed by how far through it you are and by
+/// region; visited ones show their share of regions.
 private struct AllCountriesView: View {
     let vm: WorldViewModel
     @State var state: WorldUiState
@@ -173,9 +174,51 @@ private struct AllCountriesView: View {
         .navigationTitle("Countries")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search countries")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Picker("Show", selection: Binding(get: { state.filterMode }, set: { vm.onFilterModeChanged(filterMode: $0) })) {
+                        Text("Every country").tag(FilterMode.all)
+                        Text("Complete").tag(FilterMode.complete)
+                        Text("Partly visited").tag(FilterMode.partial)
+                        Text("Not visited").tag(FilterMode.notVisited)
+                    }
+                    Picker("Region", selection: Binding(get: { state.selectedRegion }, set: { vm.onRegionSelected(region: $0) })) {
+                        ForEach(WorldRegion.allCases, id: \.self) { region in
+                            Text(region.displayName).tag(region)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                } label: {
+                    Image(systemName: filtering ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                }
+                .accessibilityLabel(filtering ? "Filter, on" : "Filter")
+            }
+        }
+        .overlay {
+            if state.filteredCountries.isEmpty, !state.countries.isEmpty {
+                ContentUnavailableView {
+                    Label("No countries match", systemImage: "globe")
+                } actions: {
+                    Button("Show All") { clear() }.buttonStyle(.glass)
+                }
+            }
+        }
         .onChange(of: query) { _, v in vm.onSearchQueryChanged(query: v) }
-        .onDisappear { vm.onSearchQueryChanged(query: "") }
+        // Countries (the screen behind) reads the same state: leave it as it was.
+        .onDisappear { clear() }
         .task { for await s in vm.uiState { state = s } }
+    }
+}
+
+private extension AllCountriesView {
+    var filtering: Bool { state.filterMode != .all || state.selectedRegion != .all }
+
+    func clear() {
+        query = ""
+        vm.onSearchQueryChanged(query: "")
+        vm.onFilterModeChanged(filterMode: .all)
+        vm.onRegionSelected(region: .all)
     }
 }
 
