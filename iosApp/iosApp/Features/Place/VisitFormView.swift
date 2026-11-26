@@ -1,7 +1,8 @@
 import SwiftUI
 import ComposeApp
 
-/// A visit to a place: the day it began, the day it ended if it was longer, and a note. A new one
+/// A visit to a place: the day it began, the day it ended if it was longer, all day or between two
+/// times in a time zone (as Android has it), and a note. A new one
 /// is added, or an existing one ([visitId]) changed or deleted; either way it is saved with the
 /// place, as the web does, so the place's other visits stay as they were.
 struct VisitFormView: View {
@@ -17,13 +18,23 @@ struct VisitFormView: View {
     @State private var start = ISODates.format(.now, withTime: false)
     @State private var end = ""
     @State private var notes = ""
+    /// All day unless the visit had hours; the times are "HH:mm" in [zone].
+    @State private var allDay = true
+    @State private var startTime = "10:00"
+    @State private var endTime = "12:00"
+    @State private var zone = TimeZone.current.identifier
     @State private var initial: [String] = []
     @State private var confirmingDelete = false
     @Environment(\.dismiss) private var dismiss
 
     private var vm: AddEditAdventureViewModel { host.owner.addEditAdventureViewModel(adventureId: placeId) }
-    private var endsBeforeStart: Bool { !end.isEmpty && end < start }
-    private var fields: [String] { [start, end, notes] }
+    /// The end on an earlier day, or on the same day at an earlier hour.
+    private var endsBeforeStart: Bool {
+        let endDay = end.isEmpty ? start : end
+        if endDay < start { return true }
+        return !allDay && endDay == start && endTime < startTime
+    }
+    private var fields: [String] { [start, end, notes, allDay ? "all" : "\(startTime)-\(endTime)", zone] }
 
     var body: some View {
         FormScaffold(
@@ -45,8 +56,31 @@ struct VisitFormView: View {
             } else {
                 FormCard {
                     DateRow(title: "From", value: $start)
+                    if !allDay {
+                        FormDivider()
+                        TimeRow(title: "At", value: $startTime)
+                    }
                     FormDivider()
                     DateRow(title: "To", value: $end)
+                    if !allDay {
+                        FormDivider()
+                        TimeRow(title: "Until", value: $endTime)
+                    }
+                }
+                FormCard {
+                    ToggleRow(title: "All day", isOn: $allDay)
+                    if !allDay {
+                        FormDivider()
+                        Picker(selection: $zone) {
+                            ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { id in
+                                Text(id.replacingOccurrences(of: "_", with: " ")).tag(id)
+                            }
+                        } label: {
+                            Text("Time zone").foregroundStyle(Theme.ink)
+                        }
+                        .pickerStyle(.navigationLink)
+                        .padding(.horizontal, 16).frame(minHeight: 52)
+                    }
                 }
                 if endsBeforeStart {
                     Label("The end is before the start.", systemImage: "exclamationmark.circle.fill")
@@ -91,6 +125,10 @@ struct VisitFormView: View {
             start = visit.startDate
             end = visit.endDate ?? ""
             notes = visit.notes
+            allDay = visit.isAllDay
+            if let t = visit.startTime { startTime = t }
+            if let t = visit.endTime { endTime = t }
+            zone = visit.timezone
         }
         initial = fields
     }
@@ -98,10 +136,39 @@ struct VisitFormView: View {
     private func save() {
         guard let base else { return }
         let form = if let visitId {
-            IosForms.shared.editVisit(base: base, id: visitId, start: start, end: end, notes: notes)
+            IosForms.shared.editVisit(base: base, id: visitId, start: start, end: end, notes: notes,
+                                      startTime: startTime, endTime: endTime, allDay: allDay, timezone: zone)
         } else {
-            IosForms.shared.addVisit(base: base, start: start, end: end, notes: notes, timezone: TimeZone.current.identifier)
+            IosForms.shared.addVisit(base: base, start: start, end: end, notes: notes,
+                                     startTime: startTime, endTime: endTime, allDay: allDay, timezone: zone)
         }
         vm.saveLocation(formData: form, intoCollectionId: nil)
+    }
+}
+
+/// An hour of the day as "HH:mm", picked with the wheel.
+private struct TimeRow: View {
+    let title: String
+    @Binding var value: String
+
+    private static let format: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+
+    var body: some View {
+        HStack {
+            Text(title).foregroundStyle(Theme.ink)
+            Spacer(minLength: 8)
+            DatePicker(title, selection: Binding(
+                get: { Self.format.date(from: value) ?? .now },
+                set: { value = Self.format.string(from: $0) }
+            ), displayedComponents: .hourAndMinute)
+            .labelsHidden()
+        }
+        .padding(.horizontal, 16)
+        .frame(minHeight: 52)
     }
 }

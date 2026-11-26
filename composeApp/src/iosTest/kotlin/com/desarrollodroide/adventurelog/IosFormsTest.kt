@@ -19,7 +19,8 @@ class IosFormsTest {
 
     @Test
     fun editingAVisitKeepsItsTimesAndZoneAndLeavesTheOthers() {
-        val edited = IosForms.editVisit(base, "v1", start = "2025-08-31", end = "", notes = "rain")
+        val edited = IosForms.editVisit(base, "v1", start = "2025-08-31", end = "", notes = "rain",
+                                        startTime = "10:00", endTime = null, allDay = false, timezone = "Europe/Oslo")
 
         val visit = edited.visits.first { it.id == "v1" }
         assertEquals("2025-08-31", visit.startDate)
@@ -77,5 +78,23 @@ class IosFormsTest {
         assertEquals(ImageType.URL, link.type)
         assertNull(link.serverId)
         assertEquals(ImageType.WIKIPEDIA, IosForms.webPhoto("https://w.org/b.jpg", wikipedia = true).type)
+    }
+
+    @Test
+    fun aTimedVisitKeepsItsHoursAndZoneAndAnAllDayOneDropsThem() {
+        val timedNew = IosForms.addVisit(base, start = "2025-09-02", end = "2025-09-02", notes = "",
+                                         startTime = "09:30", endTime = "18:00", allDay = false, timezone = "Asia/Tokyo")
+            .visits.last()
+        assertEquals("09:30", timedNew.startTime)
+        assertEquals("18:00", timedNew.endTime)
+        assertEquals("Asia/Tokyo", timedNew.timezone)
+        assertEquals(false, timedNew.isAllDay)
+
+        val allDay = IosForms.editVisit(base, "v1", start = "2025-08-30", end = "", notes = "",
+                                        startTime = "10:00", endTime = "12:00", allDay = true, timezone = "Europe/Oslo")
+            .visits.first { it.id == "v1" }
+        assertNull(allDay.startTime)
+        assertNull(allDay.endTime)
+        assertEquals(true, allDay.isAllDay)
     }
 }

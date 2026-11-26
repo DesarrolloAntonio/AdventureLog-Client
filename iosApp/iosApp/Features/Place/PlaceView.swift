@@ -243,6 +243,12 @@ struct PlaceView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(DayRange(start: visit.startDate, end: visit.endDate)?.shortText ?? "No date")
                                     .foregroundStyle(Theme.ink)
+                                if !VisitTimesKt.isAllDayVisit(startDate: visit.startDate, endDate: visit.endDate),
+                                   let from = VisitTimesKt.timeOfDay(isoDateTime: visit.startDate) {
+                                    let until = VisitTimesKt.timeOfDay(isoDateTime: visit.endDate).map { "–\($0)" } ?? ""
+                                    let zone = visit.timezone.map { " · \($0.replacingOccurrences(of: "_", with: " "))" } ?? ""
+                                    Text(from + until + zone).font(.footnote).foregroundStyle(Theme.muted).monospacedDigit()
+                                }
                                 if let notes = visit.notes, !notes.isEmpty {
                                     Text(notes).font(.footnote).foregroundStyle(Theme.muted).lineLimit(2)
                                 }

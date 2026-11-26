@@ -60,26 +60,36 @@ object IosForms {
     }
 
     /** [base] with one more visit, from [start] to [end] ("yyyy-MM-dd"; empty for a single day). */
-    fun addVisit(base: LocationFormData, start: String, end: String, notes: String, timezone: String): LocationFormData =
-        base.copy(
-            visits = base.visits + VisitFormData(
-                startDate = start,
-                endDate = end.ifBlank { null },
-                timezone = timezone,
-                notes = notes,
-            ),
-        )
+    fun addVisit(
+        base: LocationFormData, start: String, end: String, notes: String,
+        startTime: String?, endTime: String?, allDay: Boolean, timezone: String,
+    ): LocationFormData =
+        base.copy(visits = base.visits + timed(VisitFormData(startDate = start, notes = notes), end, startTime, endTime, allDay, timezone))
 
     /**
-     * [base] with visit [id] moved to [start]-[end] and given [notes]. Its times and time zone stay as
-     * they were, so a visit with hours keeps them.
+     * [base] with visit [id] moved to [start]-[end], at [startTime]-[endTime] in [timezone] unless it
+     * is [allDay], and given [notes]. The other visits stay as they were.
      */
-    fun editVisit(base: LocationFormData, id: String, start: String, end: String, notes: String): LocationFormData =
+    fun editVisit(
+        base: LocationFormData, id: String, start: String, end: String, notes: String,
+        startTime: String?, endTime: String?, allDay: Boolean, timezone: String,
+    ): LocationFormData =
         base.copy(
             visits = base.visits.map {
-                if (it.id == id) it.copy(startDate = start, endDate = end.ifBlank { null }, notes = notes) else it
+                if (it.id == id) timed(it.copy(startDate = start, notes = notes), end, startTime, endTime, allDay, timezone) else it
             },
         )
+
+    /** A visit all day has no hours: the server reads a visit with none as the whole day, as Android sends it. */
+    private fun timed(
+        visit: VisitFormData, end: String, startTime: String?, endTime: String?, allDay: Boolean, timezone: String,
+    ): VisitFormData = visit.copy(
+        endDate = end.ifBlank { null },
+        startTime = startTime.takeUnless { allDay },
+        endTime = endTime.takeUnless { allDay },
+        isAllDay = allDay,
+        timezone = timezone,
+    )
 
     /** [base] without visit [id]; saving deletes it on the server. */
     fun removeVisit(base: LocationFormData, id: String): LocationFormData =

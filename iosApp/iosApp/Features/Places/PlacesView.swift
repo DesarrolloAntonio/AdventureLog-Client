@@ -82,11 +82,10 @@ struct PlacesView: View {
         .task { for await c in vm.categories { categories = c } }
         .task { for await m in vm.actionMessage { message = m } }
         .task {
-            // A deleted place leaves the list at once; the totals follow.
+            // A deleted place leaves the list at once; the totals follow, here and on Home.
             for await d in vm.deleteState {
                 if case .success = onEnum(of: d) {
-                    presenter.refresh()
-                    vm.loadLibraryCounts()
+                    NotificationCenter.default.post(name: .placeSaved, object: nil)
                     vm.clearDeleteState()
                 }
             }
