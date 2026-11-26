@@ -37,7 +37,10 @@ fun VisitFormData.toVisitRequest(): VisitRequest {
         startDate
     }
     
-    val formattedEndDate = endDate?.takeIf { it.isNotEmpty() }?.let {
+    // A timed visit with no end day ends on its start day, at its own end time.
+    val endDay = endDate?.takeIf { it.isNotEmpty() }
+        ?: startDate.takeIf { it.isNotEmpty() && !isAllDay && endTime != null }
+    val formattedEndDate = endDay?.let {
         if (isAllDay) {
             // Midnight on both bounds, which is how the server stores an all-day visit and what
             // the web sends. An end of 23:59:59 misses the server's end-of-day test - that

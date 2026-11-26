@@ -46,6 +46,19 @@ class VisitRequestMapperTest {
     }
 
     @Test
+    fun `a timed visit with no end day ends on its start day at its end time`() {
+        val request = VisitFormData(
+            startDate = "2026-08-23",
+            startTime = "10:00",
+            endTime = "12:00",
+            isAllDay = false
+        ).toVisitRequest()
+
+        assertEquals("2026-08-23T10:00:00Z", request.startDate)
+        assertEquals("2026-08-23T12:00:00Z", request.endDate)
+    }
+
+    @Test
     fun `the timezone and notes travel with the visit`() {
         val request = VisitFormData(
             startDate = "2026-08-23",
