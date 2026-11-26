@@ -15,6 +15,8 @@ struct CollectionsView: View {
     @State private var message: String?
     /// What the server is rendering (a share image, a PDF, a ZIP) while the phone waits for it.
     @State private var busy: String?
+    /// The collection whose "Share with People" sheet is open, with who it is shared with.
+    @State private var sharing: SharingTarget?
     @State private var deleting: UltraSlimCollection?
     /// Who is signed in: a collection shared with you offers none of its owner's actions.
     @State private var userId: String?
@@ -85,6 +87,10 @@ struct CollectionsView: View {
         .task { for await n in vm.collectionCount { count = n.int32Value } }
         .task { for await m in vm.actionMessage { message = m } }
         .task { for await b in vm.busyLabel { busy = b } }
+        .task { for await t in vm.sharing { sharing = t } }
+        .sheet(isPresented: Binding(get: { sharing != nil }, set: { if !$0 { vm.closeSharing() } })) {
+            if let sharing { ShareCollectionView(vm: vm, target: sharing) }
+        }
         .overlay(alignment: .bottom) {
             if let busy {
                 Label { Text(busy) } icon: { ProgressView() }
@@ -256,6 +262,7 @@ struct CollectionsView: View {
 
     @ViewBuilder
     private func ownerMenu(_ collection: UltraSlimCollection) -> some View {
+        Button("Share with People", systemImage: "person.badge.plus") { vm.openSharing(collection: collection) }
         Button("Edit", systemImage: "pencil") { editingId = collection.id }
         Button("Duplicate", systemImage: "plus.square.on.square") { vm.duplicateCollection(collection: collection) }
         if collection.isArchived {
