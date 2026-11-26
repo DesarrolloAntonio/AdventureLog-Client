@@ -107,6 +107,10 @@ object IosForms {
     /** A photo picked on the phone, written to [fileUrl] ("file://..."); saving uploads it. */
     fun localPhoto(fileUrl: String): ImageFormData = ImageFormData(uri = fileUrl, type = ImageType.LOCAL_FILE)
 
+    /** A photo on the web, a link pasted or Wikipedia's for the place; the save downloads and uploads it. */
+    fun webPhoto(url: String, wikipedia: Boolean): ImageFormData =
+        ImageFormData(uri = url.trim(), type = if (wikipedia) ImageType.WIKIPEDIA else ImageType.URL)
+
     /**
      * [base] with these photos: the server's that are left (a removed one is deleted on save) and
      * new ones to upload. The first stays the cover if the cover was removed.

@@ -57,9 +57,13 @@ private val IosLegal = LegalPlatform(
     maps = "• Apple Maps (Apple Inc.) - to draw maps. Apple receives what any map request carries " +
         "(the area shown, your device's network address) under Apple's Privacy Policy " +
         "(apple.com/legal/privacy).",
-    wikipedia = null,
-    handedToApps = "• Other apps you choose - Directions and Share hand that item to the app you pick.",
-    permissions = "The app asks for no permissions on iPhone.",
+    wikipedia = "• Wikipedia (Wikimedia Foundation) - only when you tap Write it from Wikipedia or look " +
+        "for a Wikipedia photo: the place name you typed is sent to Wikipedia's API.",
+    handedToApps = "• Other apps you choose - Directions, Share, opening a website or an attachment hand " +
+        "that item to the app you pick.",
+    permissions = "• Camera - only when you choose to take a photo for a place.\n" +
+        "• Photos - you pick images in the system's picker, which gives the app only the ones you " +
+        "choose, never your library.",
 )
 
 /** Both platforms: a provider sign-in goes through the provider's own page. */

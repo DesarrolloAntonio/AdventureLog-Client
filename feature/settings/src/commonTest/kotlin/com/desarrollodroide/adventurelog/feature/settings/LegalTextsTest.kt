@@ -49,8 +49,16 @@ class LegalTextsTest {
     @Test
     fun `the iOS texts describe the iPhone app, not the Android one`() {
         assertTrue("AdventureLog for iOS" in iosTerms)
-        listOf("Android", "Google Maps", "Wikipedia", "Camera").forEach { assertFalse(it in iosPrivacy, it) }
+        listOf("Android", "Google Maps", "storage").forEach { assertFalse(it in iosPrivacy, it) }
         assertTrue("Apple Maps" in iosPrivacy)
         assertTrue("keychain for this device only" in iosPrivacy)
+    }
+
+    @Test
+    fun `the iOS policy names what the iPhone app now does`() {
+        // The iPhone app writes descriptions from Wikipedia and takes photos with the camera.
+        assertTrue("Wikipedia" in iosPrivacy)
+        assertTrue("Camera - only when you choose to take a photo" in iosPrivacy)
+        assertFalse("asks for no permissions" in iosPrivacy)
     }
 }

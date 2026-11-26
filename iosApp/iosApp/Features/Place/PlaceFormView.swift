@@ -5,7 +5,7 @@ import ComposeApp
 
 /// New or edit place, as the Mist-PlaceForm artboard draws it: the name, its category as chips, a
 /// rating, whether it was visited, where it is (searched, with a small map), the description, its
-/// website, price and tags, its photos (added from the library, removed with their x) and its trails. Each visit is changed from
+/// website, price and tags, its photos (from the library, the camera, a link or Wikipedia, removed with their x) and its trails. Each visit is changed from
 /// the place itself.
 struct PlaceFormView: View {
     var placeId: String?
@@ -34,6 +34,12 @@ struct PlaceFormView: View {
     @State private var photos: [ImageFormData] = []
     @State private var picking: [PhotosPickerItem] = []
     @State private var readingPhotos = false
+    /// Where a new photo comes from, besides the library: the camera, a link, Wikipedia.
+    @State private var pickingLibrary = false
+    @State private var takingPhoto = false
+    @State private var addingLink = false
+    @State private var photoLink = ""
+    @State private var photoNote: String?
     @State private var trails: [TrailRow] = []
     @State private var link = ""
     @State private var price = ""
@@ -219,6 +225,7 @@ struct PlaceFormView: View {
         .task {
             for await s in vm.uiState {
                 state = s
+                handleWikipedia(s.wikipediaImageState)
                 if let pending = pendingCategory, let made = s.categories.first(where: { $0.displayName == pending }) {
                     category = made
                     pendingCategory = nil
@@ -326,16 +333,26 @@ struct PlaceFormView: View {
             SectionLabel(text: "Photos", trailing: photos.isEmpty ? nil : "\(photos.count)")
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    PhotosPicker(selection: $picking, maxSelectionCount: 10, matching: .images) {
+                    Menu {
+                        Button("Photo Library", systemImage: "photo.on.rectangle") { pickingLibrary = true }
+                        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                            Button("Take Photo", systemImage: "camera") { takingPhoto = true }
+                        }
+                        Button("From a Link", systemImage: "link") { photoLink = ""; addingLink = true }
+                        Button("From Wikipedia", systemImage: "book.pages") {
+                            vm.searchWikipediaImage(query: name.trimmingCharacters(in: .whitespaces))
+                        }
+                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    } label: {
                         VStack(spacing: 6) {
-                            if readingPhotos { ProgressView() } else { Image(systemName: "photo.badge.plus").font(.title2) }
+                            if readingPhotos || searchingWikipedia { ProgressView() } else { Image(systemName: "photo.badge.plus").font(.title2) }
                             Text("Add photos").font(.caption.weight(.semibold))
                         }
                         .foregroundStyle(Theme.accent)
                         .frame(width: 92, height: 92)
                         .mistCard(radius: 16)
                     }
-                    .disabled(readingPhotos)
+                    .disabled(readingPhotos || searchingWikipedia)
                     .accessibilityIdentifier("addPhotos")
                     ForEach(photos, id: \.uri) { photo in
                         PhotoThumb(photo: photo) { photos.removeAll { $0.uri == photo.uri } }
@@ -345,6 +362,64 @@ struct PlaceFormView: View {
             }
             .scrollClipDisabled()
         }
+        .photosPicker(isPresented: $pickingLibrary, selection: $picking, maxSelectionCount: 10, matching: .images)
+        .fullScreenCover(isPresented: $takingPhoto) {
+            CameraPicker { image in addPhoto(image) }.ignoresSafeArea()
+        }
+        .alert("Photo from a Link", isPresented: $addingLink) {
+            TextField("https://", text: $photoLink)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            Button("Cancel", role: .cancel) {}
+            Button("Add") { addLink() }
+        } message: {
+            Text("The link of an image on the web. It is downloaded when you save.")
+        }
+        .alert(photoNote ?? "", isPresented: Binding(get: { photoNote != nil }, set: { if !$0 { photoNote = nil } })) {
+            Button("OK", role: .cancel) {}
+        }
+    }
+
+    private var searchingWikipedia: Bool {
+        if let state = state?.wikipediaImageState, case .loading = onEnum(of: state) { return true }
+        return false
+    }
+
+    private func addLink() {
+        let link = photoLink.trimmingCharacters(in: .whitespaces)
+        guard let url = URL(string: link), ["http", "https"].contains(url.scheme?.lowercased() ?? ""), url.host() != nil else {
+            photoNote = "That is not a web link. It should start with https://"
+            return
+        }
+        guard !photos.contains(where: { $0.uri == link }) else { return }
+        photos.append(IosForms.shared.webPhoto(url: link, wikipedia: false))
+    }
+
+    /// Wikipedia's answer for the place's name: its photo, or why there is none.
+    private func handleWikipedia(_ result: WikipediaImageResult) {
+        switch onEnum(of: result) {
+        case .success(let found):
+            if !photos.contains(where: { $0.uri == found.imageUrl }) {
+                photos.append(IosForms.shared.webPhoto(url: found.imageUrl, wikipedia: true))
+            }
+            vm.resetWikipediaImageState()
+        case .notFound:
+            photoNote = "Wikipedia has no photo for \(name)."
+            vm.resetWikipediaImageState()
+        case .error(let e):
+            photoNote = e.message
+            vm.resetWikipediaImageState()
+        case .idle, .loading:
+            break
+        }
+    }
+
+    private func addPhoto(_ image: UIImage) {
+        guard let jpeg = image.jpegData(compressionQuality: 0.85) else { return }
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).jpg")
+        guard (try? jpeg.write(to: file)) != nil else { return }
+        photos.append(IosForms.shared.localPhoto(fileUrl: file.absoluteString))
     }
 
     /// Writes each picked photo to a JPEG in the temporary folder, which the upload reads on save.
@@ -464,6 +539,10 @@ private struct PhotoThumb: View {
         Group {
             if photo.serverId != nil {
                 RemoteImage(url: photo.uri) { Rectangle().fill(Theme.Tone.teal.fill) }
+            } else if photo.type != .localFile, let url = URL(string: photo.uri) {
+                AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: {
+                    Rectangle().fill(Theme.Tone.teal.fill).overlay { ProgressView() }
+                }
             } else if let url = URL(string: photo.uri), let image = UIImage(contentsOfFile: url.path) {
                 Image(uiImage: image).resizable().scaledToFill()
             } else {
@@ -514,5 +593,35 @@ struct Stars: View {
             @unknown default: break
             }
         }
+    }
+}
+
+/// The camera, for a photo taken now; the simulator has none, so the menu offers it only on a device.
+private struct CameraPicker: UIViewControllerRepresentable {
+    let onPhoto: (UIImage) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ picker: UIImagePickerController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let parent: CameraPicker
+        init(_ parent: CameraPicker) { self.parent = parent }
+
+        func imagePickerController(_ picker: UIImagePickerController,
+                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+            if let image = info[.originalImage] as? UIImage { parent.onPhoto(image) }
+            parent.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { parent.dismiss() }
     }
 }

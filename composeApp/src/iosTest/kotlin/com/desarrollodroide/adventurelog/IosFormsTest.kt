@@ -69,4 +69,13 @@ class IosFormsTest {
         assertEquals("http://x.com", IosForms.withDetails(base, "http://x.com", "", "USD", emptyList()).link)
         assertEquals("", IosForms.withDetails(base, "  ", "", "USD", emptyList()).link)
     }
+
+    @Test
+    fun aPhotoFromALinkIsDownloadedOnSaveAndAWikipediaOneSaysWhereItCameFrom() {
+        val link = IosForms.webPhoto(" https://x.y/a.jpg ", wikipedia = false)
+        assertEquals("https://x.y/a.jpg", link.uri)
+        assertEquals(ImageType.URL, link.type)
+        assertNull(link.serverId)
+        assertEquals(ImageType.WIKIPEDIA, IosForms.webPhoto("https://w.org/b.jpg", wikipedia = true).type)
+    }
 }
