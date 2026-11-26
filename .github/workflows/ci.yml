@@ -140,8 +140,10 @@ jobs:
             echo "::notice::This runner's Xcode has iOS SDK $sdk, older than 26; the SwiftUI app was not built."
             exit 0
           fi
+          # arm64 only: the Kotlin framework has no x86_64 simulator target, and a generic
+          # simulator destination builds both.
           xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
-            -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+            -destination 'generic/platform=iOS Simulator' ARCHS=arm64 CODE_SIGNING_ALLOWED=NO build
 
   release:
     name: Create Release
