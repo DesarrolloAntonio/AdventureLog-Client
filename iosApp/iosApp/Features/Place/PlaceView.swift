@@ -139,6 +139,9 @@ struct PlaceView: View {
                 ToneTag(text: category.displayName, tone: categoryTone(category.name))
             }
             visitTag(place)
+            ForEach(place.tags, id: \.self) { tag in
+                ToneTag(text: tag, tone: .mint, systemImage: "tag")
+            }
         }
     }
 
@@ -184,7 +187,8 @@ struct PlaceView: View {
     private func details(_ place: Location) -> some View {
         let lastVisit = place.visits.compactMap { $0.startDate.flatMap(DayRange.day) }.max()
         let coordinate = coordinate(place)
-        if lastVisit != nil || !collections.isEmpty || coordinate != nil {
+        let price = place.price.map { $0.doubleValue.formatted(.currency(code: place.priceCurrency ?? "USD")) }
+        if lastVisit != nil || price != nil || !collections.isEmpty || coordinate != nil {
             SectionLabel(text: "Details").padding(.top, 22).padding(.bottom, 8)
             VStack(spacing: 0) {
                 if let lastVisit {
@@ -192,8 +196,12 @@ struct PlaceView: View {
                         Text(lastVisit.formatted(.dateTime.day().month(.abbreviated).year()))
                     }
                 }
-                if !collections.isEmpty {
+                if let price {
                     if lastVisit != nil { RowSeparator() }
+                    DetailRow(systemImage: "creditcard", tone: .coral, title: "Price") { Text(price) }
+                }
+                if !collections.isEmpty {
+                    if lastVisit != nil || price != nil { RowSeparator() }
                     NavigationLink {
                         if collections.count == 1 { TripView(collectionId: collections[0].id, name: collections[0].name, subtitle: dates(collections[0])) } else { PlaceCollections(placeName: loaded?.name ?? name, collections: collections) }
                     } label: {
@@ -207,7 +215,7 @@ struct PlaceView: View {
                     .buttonStyle(.plain)
                 }
                 if let coordinate {
-                    if lastVisit != nil || !collections.isEmpty { RowSeparator() }
+                    if lastVisit != nil || price != nil || !collections.isEmpty { RowSeparator() }
                     DetailRow(systemImage: "mappin", tone: .blue, title: "Coordinates") {
                         Text(Self.format(coordinate)).monospacedDigit()
                     }

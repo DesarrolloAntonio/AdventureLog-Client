@@ -5,7 +5,7 @@ import ComposeApp
 
 /// New or edit place, as the Mist-PlaceForm artboard draws it: the name, its category as chips, a
 /// rating, whether it was visited, where it is (searched, with a small map), the description, its
-/// photos (added from the library, removed with their x) and its trails. Each visit is changed from
+/// website, price and tags, its photos (added from the library, removed with their x) and its trails. Each visit is changed from
 /// the place itself.
 struct PlaceFormView: View {
     var placeId: String?
@@ -35,6 +35,11 @@ struct PlaceFormView: View {
     @State private var picking: [PhotosPickerItem] = []
     @State private var readingPhotos = false
     @State private var trails: [TrailRow] = []
+    @State private var link = ""
+    @State private var price = ""
+    @State private var currency = "USD"
+    @State private var tags: [String] = []
+    @State private var newTag = ""
     @Environment(\.dismiss) private var dismiss
 
     private var vm: AddEditAdventureViewModel { host.owner.addEditAdventureViewModel(adventureId: placeId) }
@@ -48,7 +53,8 @@ struct PlaceFormView: View {
         let withTrails = IosForms.shared.withTrails(base: edited, trails: trails.map {
             IosForms.shared.trail(id: $0.serverId, name: $0.name.trimmingCharacters(in: .whitespaces), link: $0.url)
         })
-        return IosForms.shared.withPhotos(base: withTrails, photos: photos)
+        let withPhotos = IosForms.shared.withPhotos(base: withTrails, photos: photos)
+        return IosForms.shared.withDetails(base: withPhotos, link: link, price: price, currency: currency, tags: tags)
     }
 
     var body: some View {
@@ -130,6 +136,8 @@ struct PlaceFormView: View {
                 FormCard {
                     FormField(placeholder: "What made it worth the trip?", text: $about, axis: .vertical)
                 }
+                detailSection
+                tagSection
                 photoSection
                 trailSection
                 FormCard { ToggleRow(title: "Make public", isOn: $isPublic) }
@@ -154,6 +162,87 @@ struct PlaceFormView: View {
                 if s.isSaved { onSaved(); dismiss() }
             }
         }
+    }
+
+    // MARK: Website, price and tags
+
+    /// The website and what it cost, in the currency picked beside it.
+    private var detailSection: some View {
+        FormCard {
+            HStack(spacing: 10) {
+                Image(systemName: "link").foregroundStyle(Theme.accent).frame(width: 22)
+                TextField("Website", text: $link)
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+            }
+            .padding(.horizontal, 16).frame(minHeight: 50)
+            FormDivider()
+            HStack(spacing: 10) {
+                Image(systemName: "creditcard").foregroundStyle(Theme.accent).frame(width: 22)
+                TextField("Price", text: $price).keyboardType(.decimalPad)
+                Menu {
+                    ForEach(Currencies.shared.options, id: \.first) { pair in
+                        Button("\(pair.first ?? "") · \(pair.second ?? "")") { currency = String(pair.first ?? "") }
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(currency).monospaced()
+                        Image(systemName: "chevron.up.chevron.down").font(.caption2)
+                    }
+                    .font(.subheadline.weight(.semibold))
+                }
+                .accessibilityLabel("Currency, \(currency)")
+            }
+            .padding(.horizontal, 16).frame(minHeight: 50)
+        }
+    }
+
+    /// Each tag as a chip with an x, and a field that adds one on return.
+    private var tagSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionLabel(text: "Tags", trailing: tags.isEmpty ? nil : "\(tags.count)")
+            FormCard {
+                if !tags.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(tags, id: \.self) { tag in
+                                HStack(spacing: 6) {
+                                    Text(tag).font(.subheadline)
+                                    Button { tags.removeAll { $0 == tag } } label: {
+                                        Image(systemName: "xmark").font(.caption2.weight(.bold))
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("Remove \(tag)")
+                                }
+                                .padding(.horizontal, 12).padding(.vertical, 7)
+                                .background(Theme.Tone.teal.fill, in: .capsule)
+                                .foregroundStyle(Theme.Tone.teal.ink)
+                            }
+                        }
+                        .padding(.horizontal, 16).padding(.top, 12)
+                    }
+                }
+                HStack(spacing: 10) {
+                    Image(systemName: "tag").foregroundStyle(Theme.accent).frame(width: 22)
+                    TextField("Add a tag", text: $newTag)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .submitLabel(.done)
+                        .onSubmit(addTag)
+                    if !newTag.trimmingCharacters(in: .whitespaces).isEmpty {
+                        Button("Add", action: addTag).font(.subheadline.weight(.semibold))
+                    }
+                }
+                .padding(.horizontal, 16).frame(minHeight: 50)
+            }
+        }
+    }
+
+    private func addTag() {
+        let tag = newTag.trimmingCharacters(in: .whitespaces)
+        if !tag.isEmpty, !tags.contains(tag) { tags.append(tag) }
+        newTag = ""
     }
 
     // MARK: Photos
@@ -268,6 +357,7 @@ struct PlaceFormView: View {
         visited = !f.visits.isEmpty
         lockedVisited = f.visits.contains { $0.id != nil }
         photos = f.images
+        link = f.link; price = f.price; currency = f.priceCurrency; tags = f.tags
         trails = f.trails.map { TrailRow(serverId: $0.id, name: $0.name, link: $0.link) }
         initial = form
     }

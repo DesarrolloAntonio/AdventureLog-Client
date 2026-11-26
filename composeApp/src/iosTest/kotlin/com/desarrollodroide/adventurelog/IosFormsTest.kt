@@ -52,4 +52,21 @@ class IosFormsTest {
         assertEquals(ImageType.LOCAL_FILE, photos[1].type)
         assertNull(photos[1].serverId)
     }
+
+    @Test
+    fun tagsAreTrimmedAndKeptOnce() {
+        val form = IosForms.withDetails(base, link = " https://x.y ", price = "12,5", currency = "EUR",
+                                        tags = listOf(" hike", "hike", "", "food "))
+        assertEquals(listOf("hike", "food"), form.tags)
+        assertEquals("https://x.y", form.link)
+        assertEquals("12.5", form.price)
+        assertEquals("EUR", form.priceCurrency)
+    }
+
+    @Test
+    fun aBareWebsiteGetsHttpsAndABlankOneStaysBlank() {
+        assertEquals("https://x.com", IosForms.withDetails(base, "x.com", "", "USD", emptyList()).link)
+        assertEquals("http://x.com", IosForms.withDetails(base, "http://x.com", "", "USD", emptyList()).link)
+        assertEquals("", IosForms.withDetails(base, "  ", "", "USD", emptyList()).link)
+    }
 }

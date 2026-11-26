@@ -85,6 +85,18 @@ object IosForms {
     fun removeVisit(base: LocationFormData, id: String): LocationFormData =
         base.copy(visits = base.visits.filterNot { it.id == id })
 
+    /**
+     * [base] with its website (https:// added when it has no scheme, as the server takes only full URLs), price as typed with a decimal comma made a dot (kept as text so a half-typed amount is not rounded),
+     * the price's currency, and tags trimmed, without blanks or repeats.
+     */
+    fun withDetails(base: LocationFormData, link: String, price: String, currency: String, tags: List<String>): LocationFormData =
+        base.copy(
+            link = link.trim().let { if (it.isEmpty() || "://" in it) it else "https://$it" },
+            price = price.trim().replace(',', '.'),
+            priceCurrency = currency,
+            tags = tags.map { it.trim() }.filter { it.isNotEmpty() }.distinct(),
+        )
+
     /** A trail as the form holds it; [id] is null for one the server has not seen. */
     fun trail(id: String?, name: String, link: String): TrailFormData = TrailFormData(id = id, name = name, link = link)
 
