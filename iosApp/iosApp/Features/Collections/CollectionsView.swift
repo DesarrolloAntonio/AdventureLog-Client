@@ -96,6 +96,10 @@ struct CollectionsView: View {
         } message: { _ in
             Text("Its places stay in Places. Its notes, lists, stays and journeys go with it.")
         }
+        // Sent here by Home's invitations banner.
+        .onAppear {
+            if InvitesRequest.pending { InvitesRequest.pending = false; vm.showInvites() }
+        }
         .task { for await t in vm.tab { tab = t } }
         .task { for await c in presenter.items { mine = c } }
         .task { for await s in presenter.status { status = s } }

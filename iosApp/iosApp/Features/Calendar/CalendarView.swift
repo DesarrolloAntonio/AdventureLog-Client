@@ -47,6 +47,25 @@ struct CalendarView: View {
         .navigationSubtitle(subtitle)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
+            // Which kinds of event show, as Android's chips: offered only when there is a choice.
+            if let state, state.availableTypes.count > 1 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button("Everything") { vm.clearTypes() }
+                        Divider()
+                        ForEach(state.availableTypes, id: \.self) { type in
+                            Toggle(type.capitalized, isOn: Binding(
+                                get: { state.selectedTypes.contains(type) },
+                                set: { _ in vm.toggleType(type: type) }
+                            ))
+                        }
+                    } label: {
+                        Image(systemName: state.selectedTypes.isEmpty
+                              ? "line.3.horizontal.decrease" : "line.3.horizontal.decrease.circle.fill")
+                    }
+                    .accessibilityLabel(state.selectedTypes.isEmpty ? "Show" : "Show, filtered")
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Today") { withAnimation { month = cal.dateInterval(of: .month, for: .now)!.start; selected = nil } }
             }

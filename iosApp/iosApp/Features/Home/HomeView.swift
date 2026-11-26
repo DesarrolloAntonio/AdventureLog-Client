@@ -85,6 +85,31 @@ struct HomeView: View {
                 }
                 .padding(.top, 4)
 
+                // Someone shared a collection: on Android's Home too, often a new account's first
+                // reason to open the app.
+                if dashboard.inviteCount > 0 {
+                    Button {
+                        InvitesRequest.pending = true
+                        open(.collections)
+                    } label: {
+                        HStack(spacing: 12) {
+                            ToneBadge(systemImage: "envelope.fill", tone: .blue)
+                            Text(dashboard.inviteCount == 1
+                                 ? "You have an invitation to a collection"
+                                 : "You have \(dashboard.inviteCount) invitations to collections")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(Theme.ink)
+                                .multilineTextAlignment(.leading)
+                            Spacer(minLength: 8)
+                            Image(systemName: "chevron.right").font(.footnote.weight(.bold)).foregroundStyle(Theme.glyph)
+                        }
+                        .padding(14)
+                        .mistCard()
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 12)
+                }
+
                 SectionLabel(text: "Quick access").padding(.top, 20).padding(.bottom, 8)
                 quickAccess(dashboard.stats)
 
