@@ -317,15 +317,7 @@ class AddEditAdventureViewModel(
             
             val fileName = when (image.type) {
                 ImageType.LOCAL_FILE -> imageBytesProvider.getFileName(image.uri)
-                ImageType.URL, ImageType.WIKIPEDIA -> {
-                    val url = image.uri
-                    val lastSegment = url.substringAfterLast('/')
-                    if (lastSegment.contains('.')) {
-                        lastSegment
-                    } else {
-                        "image.jpg"
-                    }
-                }
+                ImageType.URL, ImageType.WIKIPEDIA -> webPhotoFileName(image.uri)
             }
             
             when (uploadImageUseCase(
@@ -520,3 +512,13 @@ class AddEditAdventureViewModel(
 }
 
 internal const val LOCATION_SEARCH_DEBOUNCE_MS = 300L
+
+/**
+ * The name a photo from a link is uploaded under: the link's last segment without its query or
+ * fragment, which Wikipedia's thumbnails always carry ("…jpg?utm_source=…") and the server refused
+ * as a file it could not read a type from. A segment with no extension is taken to be a JPEG.
+ */
+internal fun webPhotoFileName(url: String): String {
+    val lastSegment = url.substringBefore('#').substringBefore('?').substringAfterLast('/')
+    return if (lastSegment.contains('.')) lastSegment else "image.jpg"
+}
