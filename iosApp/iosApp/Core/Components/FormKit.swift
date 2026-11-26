@@ -12,15 +12,36 @@ struct FormScaffold<Content: View>: View {
     let error: String?
     let clearError: () -> Void
     let save: () -> Void
+    /// What a Delete button at the foot of the form removes, as (its label, the action); nil hides it.
+    var delete: (label: String, action: () -> Void)? = nil
     @ViewBuilder let content: Content
 
     @Environment(\.dismiss) private var dismiss
     @State private var confirmingDiscard = false
+    @State private var confirmingDelete = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) { content }
+                VStack(alignment: .leading, spacing: 16) {
+                    content
+                    if let delete {
+                        Button(role: .destructive) { confirmingDelete = true } label: {
+                            Text(delete.label).font(.headline).frame(maxWidth: .infinity, minHeight: 52)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(Theme.Tone.coral.ink)
+                        .mistCard()
+                        .disabled(saving)
+                        .accessibilityIdentifier("delete")
+                        .confirmationDialog("\(delete.label)?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+                            Button(delete.label, role: .destructive) { delete.action(); dismiss() }
+                            Button("Cancel", role: .cancel) {}
+                        } message: {
+                            Text("This can't be undone.")
+                        }
+                    }
+                }
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
                     .padding(.bottom, 40)

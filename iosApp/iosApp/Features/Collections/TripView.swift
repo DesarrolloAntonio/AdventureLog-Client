@@ -99,10 +99,18 @@ struct TripView: View {
             let reload = { vm.loadCollection(collectionId: collectionId) }
             switch form {
             case .place: PlaceFormView(intoCollectionId: collectionId, onSaved: reload)
-            case .transport(let id): TransportFormView(collectionId: collectionId, collectionName: tripName, transportationId: id, onSaved: reload)
-            case .lodging(let id): LodgingFormView(collectionId: collectionId, collectionName: tripName, lodgingId: id, onSaved: reload)
-            case .note(let id): NoteFormView(collectionId: collectionId, collectionName: tripName, noteId: id, onSaved: reload)
-            case .checklist(let id): ChecklistFormView(collectionId: collectionId, collectionName: tripName, checklistId: id, onSaved: reload)
+            case .transport(let id):
+                TransportFormView(collectionId: collectionId, collectionName: tripName, transportationId: id, onSaved: reload,
+                                  onDelete: id.map { id in { vm.deleteTransportation(transportationId: id) } })
+            case .lodging(let id):
+                LodgingFormView(collectionId: collectionId, collectionName: tripName, lodgingId: id, onSaved: reload,
+                                onDelete: id.map { id in { vm.deleteLodging(lodgingId: id) } })
+            case .note(let id):
+                NoteFormView(collectionId: collectionId, collectionName: tripName, noteId: id, onSaved: reload,
+                             onDelete: id.map { id in { vm.deleteNote(noteId: id) } })
+            case .checklist(let id):
+                ChecklistFormView(collectionId: collectionId, collectionName: tripName, checklistId: id, onSaved: reload,
+                                  onDelete: id.map { id in { vm.deleteChecklist(checklistId: id) } })
             case .trip: CollectionFormView(collectionId: collectionId, onSaved: reload)
             }
         }
@@ -115,6 +123,12 @@ struct TripView: View {
         .task { for await s in vm.uiState { state = s } }
         .task { for await w in vm.itineraryWorking { working = w.boolValue } }
         .task { for await m in vm.actionMessage { message = m } }
+        // A delete, or a change to the plan, the server refused.
+        .task {
+            for await d in vm.deleteState {
+                if case .error(let e) = onEnum(of: d) { message = e.message; vm.clearDeleteState() }
+            }
+        }
     }
 
     /// "5–9 Sep · 4 nights · in 8 days"
@@ -174,7 +188,9 @@ struct TripView: View {
         // Places, journeys and stays added after the plan was laid out have no day yet; without
         // this they were nowhere on the trip.
         let planned = Set(collection.itinerary.map(\.itemId))
-        let unplanned: [Unplanned] = plan.isEmpty ? [] :
+        // Shown before there is a plan too: the server may refuse to build one, and these can be
+        // put on it by hand.
+        let unplanned: [Unplanned] =
             collection.locations.filter { place in
                 !planned.contains(place.id) && !place.visits.contains { planned.contains($0.id) }
             }.map(Unplanned.place)
@@ -185,6 +201,7 @@ struct TripView: View {
             VStack(spacing: 0) {
                 ForEach(Array(unplanned.enumerated()), id: \.element.id) { index, item in
                     let last = index == unplanned.count - 1
+                    Group {
                     switch item {
                     case .place(let place):
                         NavigationLink(value: place) {
@@ -204,6 +221,8 @@ struct TripView: View {
                         }
                         .buttonStyle(.plain)
                     }
+                    }
+                    .contextMenu { addToPlan(item, days: plan.days) }
                 }
             }
             .mistCard()
@@ -235,19 +254,8 @@ struct TripView: View {
                 .mistCard()
                 .padding(.bottom, 20)
             }
-            if !collection.locations.isEmpty {
-                SectionLabel(text: "Places", trailing: "\(collection.locations.count)").padding(.bottom, 8)
-                VStack(spacing: 0) {
-                    ForEach(Array(collection.locations.enumerated()), id: \.element.id) { index, place in
-                        NavigationLink(value: place) {
-                            TripRow(kind: .location, title: place.name, subtitle: whereabouts(place), showsKind: false,
-                                    last: index == collection.locations.count - 1, chevron: true)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .mistCard()
-            } else if !plan.canAutoGenerate {
+            // Places, stays and journeys are listed above, under Not in the plan.
+            if unplanned.isEmpty && !plan.canAutoGenerate {
                 ContentUnavailableView("Nothing here yet", systemImage: "calendar",
                                        description: Text("Add places, stays and journeys to plan this trip."))
             }
@@ -261,6 +269,17 @@ struct TripView: View {
         return ends.isEmpty ? journey.type.capitalized : ends.joined(separator: " → ")
     }
 
+    /// Puts something that has no day on the plan: for the whole trip, or on one of its days.
+    @ViewBuilder
+    private func addToPlan(_ item: Unplanned, days: [ItineraryDay]) -> some View {
+        Menu("Add to the Plan", systemImage: "calendar.badge.plus") {
+            Button("For the Whole Trip") { vm.addToItinerary(kind: item.kind, itemId: item.itemId, date: nil) }
+            ForEach(days, id: \.dayNumber) { day in
+                Button(dayLabel(day)) { vm.addToItinerary(kind: item.kind, itemId: item.itemId, date: String(describing: day.date)) }
+            }
+        }
+    }
+
     private func dayLabel(_ day: ItineraryDay) -> String {
         var c = DateComponents()
         c.year = Int(day.date.year); c.month = Int(day.date.month.ordinal + 1); c.day = Int(day.date.day)
@@ -272,19 +291,28 @@ struct TripView: View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.entryId) { index, item in
                 let last = index == items.count - 1
-                if let place = place(for: item, in: collection) {
-                    NavigationLink(value: place) {
-                        TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle ?? whereabouts(place), last: last, chevron: true)
+                Group {
+                    if let place = place(for: item, in: collection) {
+                        NavigationLink(value: place) {
+                            TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle ?? whereabouts(place), last: last, chevron: true)
+                        }
+                        .buttonStyle(.plain)
+                    } else if let edit = edit(for: item, in: collection) {
+                        Button { form = edit } label: {
+                            TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle, last: last, chevron: true)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle, last: last, chevron: false)
                     }
-                    .buttonStyle(.plain)
-                } else if let edit = edit(for: item, in: collection) {
-                    Button { form = edit } label: {
-                        TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle, last: last, chevron: true)
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    TripRow(kind: item.kind, title: item.title, subtitle: item.subtitle, last: last, chevron: false)
                 }
+                // Off the plan only: the place, journey or note itself stays on the trip.
+                .contextMenu {
+                    Button("Remove from the Plan", systemImage: "calendar.badge.minus") {
+                        vm.removeFromItinerary(entryId: item.entryId)
+                    }
+                }
+                .accessibilityAction(named: "Remove from the plan") { vm.removeFromItinerary(entryId: item.entryId) }
             }
         }
         .mistCard()
@@ -431,6 +459,21 @@ private enum Unplanned: Identifiable {
         case .place(let p): "place-\(p.id)"
         case .transport(let t): "transport-\(t.id)"
         case .stay(let l): "stay-\(l.id)"
+        }
+    }
+    var itemId: String {
+        switch self {
+        case .place(let p): p.id
+        case .transport(let t): t.id
+        case .stay(let l): l.id
+        }
+    }
+
+    var kind: ItineraryItemKind {
+        switch self {
+        case .place: .location
+        case .transport: .transportation
+        case .stay: .lodging
         }
     }
 }

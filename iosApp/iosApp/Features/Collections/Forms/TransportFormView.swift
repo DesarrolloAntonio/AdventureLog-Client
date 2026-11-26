@@ -8,6 +8,8 @@ struct TransportFormView: View {
     let collectionName: String
     var transportationId: String?
     let onSaved: () -> Void
+    /// Deletes the one being edited; nil for a new one.
+    var onDelete: (() -> Void)? = nil
 
     @StateObject private var host = ViewModelHost()
     @State private var loading = false
@@ -50,8 +52,8 @@ struct TransportFormView: View {
             title: transportationId == nil ? "New Transport" : "Edit Transport", subtitle: collectionName,
             canSave: !name.trimmingCharacters(in: .whitespaces).isEmpty && seeded,
             saving: saving, dirty: seeded && form != (initial ?? base),
-            error: error, clearError: { vm.clearError() }, save: { vm.saveTransportation(formData: form) }
-        ) {
+            error: error, clearError: { vm.clearError() }, save: { vm.saveTransportation(formData: form) },
+            delete: onDelete.map { action in ("Delete Transport", action) }) {
             if !seeded {
                 if let error, transportationId != nil, !loading {
                     ContentUnavailableView("Couldn't load the journey", systemImage: "wifi.exclamationmark", description: Text(error))

@@ -8,6 +8,8 @@ struct LodgingFormView: View {
     let collectionName: String
     var lodgingId: String?
     let onSaved: () -> Void
+    /// Deletes the one being edited; nil for a new one.
+    var onDelete: (() -> Void)? = nil
 
     @StateObject private var host = ViewModelHost()
     @State private var state = LodgingFormState(name: "", type: "hotel", description: "", checkIn: "", checkOut: "",
@@ -32,8 +34,8 @@ struct LodgingFormView: View {
         FormScaffold(
             title: lodgingId == nil ? "New Lodging" : "Edit Lodging", subtitle: collectionName,
             canSave: state.canSave, saving: state.isSaving, dirty: vm.hasChanges(form: state),
-            error: state.error, clearError: { vm.clearError() }, save: { vm.save(collectionId: collectionId) }
-        ) {
+            error: state.error, clearError: { vm.clearError() }, save: { vm.save(collectionId: collectionId) },
+            delete: onDelete.map { action in ("Delete Lodging", action) }) {
             if state.isLoading {
                 ProgressView().frame(maxWidth: .infinity).padding(.top, 60)
             } else if let error = state.loadError {
