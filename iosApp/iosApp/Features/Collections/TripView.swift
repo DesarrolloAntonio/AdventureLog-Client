@@ -10,7 +10,7 @@ struct TripView: View {
     /// Shown under the title from the first frame, so the large title opens out (see PlaceView).
     var subtitle: String = ""
 
-    enum Page: Hashable { case itinerary, lists, notes }
+    enum Page: String, Hashable, CaseIterable { case itinerary = "Itinerary", lists = "Lists", notes = "Notes", map = "Map", stats = "Stats", nearby = "Nearby" }
 
     /// A form over the trip: something new in it, or one of its things to edit.
     enum Form: Identifiable {
@@ -40,18 +40,20 @@ struct TripView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 if let collection = state.collection {
-                    Picker("View", selection: $page) {
-                        Text("Itinerary").tag(Page.itinerary)
-                        Text("Lists").tag(Page.lists)
-                        Text("Notes").tag(Page.notes)
-                    }
-                    .pickerStyle(.segmented)
+                    // Six views, as on Android and the web: more than a segmented control holds.
+                    ChoiceChips(
+                        options: Page.allCases.map { ($0.rawValue, $0.rawValue) },
+                        selection: Binding(get: { page.rawValue }, set: { page = Page(rawValue: $0) ?? .itinerary })
+                    )
                     .padding(.bottom, 16)
 
                     switch page {
                     case .itinerary: itinerary(collection)
                     case .lists: lists(collection)
                     case .notes: notes(collection)
+                    case .map: TripMap(collection: collection)
+                    case .stats: TripStats(collection: collection)
+                    case .nearby: TripNearby(collection: collection) { vm.loadCollection(collectionId: collectionId) }
                     }
                 } else if let error = state.errorMessage {
                     ContentUnavailableView {
