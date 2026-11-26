@@ -80,7 +80,7 @@ struct VisitFormView: View {
                 if base == nil, let place = s.existingLocation {
                     seed(IosForms.shared.place(location: place, defaultCurrency: vm.defaultCurrency))
                 }
-                if s.isSaved { onSaved(); dismiss() }
+                if s.isSaved { NotificationCenter.default.post(name: .placeSaved, object: nil); onSaved(); dismiss() }
             }
         }
     }

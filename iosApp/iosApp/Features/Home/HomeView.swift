@@ -62,6 +62,7 @@ struct HomeView: View {
         }
         .navigationDestination(isPresented: $searching) { SearchView() }
         .navigationDestination(item: $openTrip) { TripView(collectionId: $0.id, name: $0.name, subtitle: dates($0)) }
+        .onReceive(NotificationCenter.default.publisher(for: .placeSaved)) { _ in vm.refreshDashboard() }
         .task { for await s in vm.uiState { state = s } }
         .task { for await u in vm.userDetails { user = u } }
         .navigationDestination(isPresented: $showAccount) { SettingsView(onSignOut: { vm.logout() }) }

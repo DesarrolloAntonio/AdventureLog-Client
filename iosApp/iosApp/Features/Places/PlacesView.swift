@@ -44,7 +44,7 @@ struct PlacesView: View {
             }
         }
         .navigationDestination(for: Location.self) { PlaceView(placeId: $0.id, name: $0.name, subtitle: whereabouts($0)) }
-        .sheet(isPresented: $creating) { PlaceFormView { presenter.refresh() } }
+        .sheet(isPresented: $creating) { PlaceFormView {} }
         .sheet(isPresented: $showFilters) {
             if let filters { PlacesFilterSheet(vm: vm, initial: filters) }
         }
@@ -69,6 +69,11 @@ struct PlacesView: View {
             Button("Delete", role: .destructive) { vm.deleteAdventure(adventureId: place.id) }
         } message: { _ in
             Text("Its visits and photos go with it. This can't be undone.")
+        }
+        // A place saved anywhere, here or from its own page, reloads the list and its counts.
+        .onReceive(NotificationCenter.default.publisher(for: .placeSaved)) { _ in
+            presenter.refresh()
+            vm.loadLibraryCounts()
         }
         .task { for await p in presenter.items { places = p } }
         .task { for await s in presenter.status { status = s } }

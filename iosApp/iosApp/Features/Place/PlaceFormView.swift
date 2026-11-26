@@ -239,7 +239,7 @@ struct PlaceFormView: View {
                 if base == nil, s.loadError == nil, placeId == nil || s.existingLocation != nil {
                     seed(IosForms.shared.place(location: s.existingLocation, defaultCurrency: vm.defaultCurrency))
                 }
-                if s.isSaved { onSaved(); dismiss() }
+                if s.isSaved { NotificationCenter.default.post(name: .placeSaved, object: nil); onSaved(); dismiss() }
             }
         }
     }
