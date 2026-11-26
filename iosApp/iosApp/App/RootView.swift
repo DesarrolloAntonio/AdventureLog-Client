@@ -5,7 +5,9 @@ import ComposeApp
 /// so a session lost anywhere (signed out, expired on the server) brings Login back.
 struct RootView: View {
     /// `-showLogin` on a debug build shows Login over a live session, so the screen can be looked
-    /// at without signing out.
+    /// at without signing out. A password or two-step sign-in from there works; a provider sign-in
+    /// does not, since LoginViewModel stops listening for the browser's answer once it finds a
+    /// session. Test that one from a fresh install.
     #if DEBUG
     private static let showLoginForReview = ProcessInfo.processInfo.arguments.contains("-showLogin")
     #else
