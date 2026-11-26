@@ -16,6 +16,9 @@ struct SettingsView: View {
     @State private var message: String?
     @State private var confirmingSignOut = false
     @State private var editingProfile = false
+    @State private var storage = StorageSectionState(usage: nil, isLoading: true, error: nil)
+    @State private var regionsRefreshing = false
+    @State private var backingUp = false
 
     private var vm: SettingsViewModel { host.owner.settingsViewModel() }
 
@@ -78,13 +81,25 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
 
+                group("Your data") {
+                    ActionRow(systemImage: "map.circle", tone: .teal, title: "Update visited regions",
+                              detail: "Work out which regions and cities your places fall in",
+                              busy: regionsRefreshing) { vm.refreshVisitedRegions() }
+                    Divider().padding(.leading, 56)
+                    ActionRow(systemImage: "arrow.down.circle", tone: .blue, title: "Download a backup",
+                              detail: "Places, visits, collections, media and trails, as one zip",
+                              busy: backingUp) { vm.downloadBackup() }
+                }
+
+                group("Media storage") { StorageCard(state: storage) { vm.loadStorage() } }
+
                 group("About") {
-                    Link(destination: URL(string: "https://github.com/seanmorley15/AdventureLog")!) {
+                    Link(destination: URL(string: "https://github.com/DesarrolloAntonio/AdventureLog-Client")!) {
                         SettingRow(systemImage: "chevron.left.forwardslash.chevron.right", tone: .blue, title: "Source code", external: true)
                     }
                     .buttonStyle(.plain)
                     Divider().padding(.leading, 56)
-                    Link(destination: URL(string: "https://github.com/seanmorley15/AdventureLog/issues")!) {
+                    Link(destination: URL(string: "https://github.com/DesarrolloAntonio/AdventureLog-Client/issues")!) {
                         SettingRow(systemImage: "bubble.left", tone: .amber, title: "Send feedback", external: true)
                     }
                     .buttonStyle(.plain)
@@ -93,6 +108,22 @@ struct SettingsView: View {
                         SettingRow(systemImage: "doc.text", tone: .mint, title: "Terms & privacy", chevron: true)
                     }
                     .buttonStyle(.plain)
+                    Divider().padding(.leading, 56)
+                    Link(destination: URL(string: "https://github.com/seanmorley15/AdventureLog")!) {
+                        SettingRow(systemImage: "server.rack", tone: .teal, title: "Server setup guide", external: true)
+                    }
+                    .buttonStyle(.plain)
+                    Divider().padding(.leading, 56)
+                    HStack(spacing: 12) {
+                        ToneBadge(systemImage: "info.circle", tone: .amber)
+                        Text("App version").foregroundStyle(Theme.ink)
+                        Spacer(minLength: 8)
+                        Text(appVersion).foregroundStyle(Theme.muted).monospacedDigit()
+                    }
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 52)
+                    .accessibilityElement(children: .combine)
+                    .textSelection(.enabled)
                 }
 
                 Button(role: .destructive) { confirmingSignOut = true } label: {
@@ -126,11 +157,28 @@ struct SettingsView: View {
         .task { for await p in vm.profile { form = p.form } }
         .task { for await t in vm.themeMode { theme = t } }
         .task { for await m in vm.messages { message = m } }
+        .task { for await s in vm.storage { storage = s } }
+        .task { for await r in vm.regionsRefreshing { regionsRefreshing = r.boolValue } }
+        .task { for await b in vm.backupInProgress { backingUp = b.boolValue } }
+        // How the regions update went, or why a backup didn't arrive.
+        .task {
+            for await m in vm.regionsMessage {
+                if let m { message = m; vm.clearRegionsMessage() }
+            }
+        }
     }
 
     /// One change to the profile, sent to the server at once.
     private func set(_ change: @escaping (ProfileForm) -> ProfileForm) {
         vm.updateProfile(transform: change)
+    }
+
+    /// "1.1.0 (12)", as the bundle has it.
+    private var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String
+        return build.map { "\(version) (\($0))" } ?? version
     }
 
     private var mapStyleName: String {
@@ -211,6 +259,113 @@ private struct SettingRow: View {
         .frame(minHeight: 52)
         .contentShape(.rect)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// A row that does something on the server: what it does under its name, a spinner while it runs.
+private struct ActionRow: View {
+    let systemImage: String
+    let tone: Theme.Tone
+    let title: String
+    let detail: String
+    let busy: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                ToneBadge(systemImage: systemImage, tone: tone)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).foregroundStyle(Theme.ink)
+                    Text(detail).font(.footnote).foregroundStyle(Theme.muted)
+                }
+                Spacer(minLength: 8)
+                if busy { ProgressView() }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .frame(minHeight: 52)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .disabled(busy)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// What the account's media takes up, as Android's section shows it: the total, then one bar split
+/// by what fills it, with a key. Images are nearly all of it, so separate bars said nothing.
+private struct StorageCard: View {
+    let state: StorageSectionState
+    let retry: () -> Void
+
+    var body: some View {
+        if let usage = state.usage {
+            let slices: [(String, Int64, Int32, Theme.Tone)] = [
+                ("Images", usage.imagesBytes, usage.imagesFiles, .teal),
+                ("Attachments", usage.attachmentsBytes, usage.attachmentsFiles, .amber),
+                ("Profile picture", usage.profilePicsBytes, usage.profilePicsFiles, .coral),
+            ]
+            let scale = Double(max(usage.limitBytes?.int64Value ?? usage.totalBytes, 1))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(bytes(usage.totalBytes)).font(.title.weight(.bold)).foregroundStyle(Theme.ink)
+                Text(summary(usage)).font(.subheadline).foregroundStyle(Theme.muted)
+                GeometryReader { geo in
+                    HStack(spacing: 3) {
+                        ForEach(slices.filter { $0.1 > 0 }, id: \.0) { slice in
+                            // A few kilobytes next to hundreds of megabytes would round to nothing.
+                            Capsule().fill(slice.3.ink)
+                                .frame(width: max(geo.size.width * Double(slice.1) / scale, geo.size.width * 0.02))
+                        }
+                        Spacer(minLength: 0)
+                    }
+                }
+                .frame(height: 10)
+                .background(Capsule().fill(Theme.separator))
+                .clipShape(Capsule())
+                .padding(.vertical, 10)
+                .accessibilityHidden(true)
+                ForEach(slices, id: \.0) { name, size, files, tone in
+                    HStack(spacing: 8) {
+                        Circle().fill(tone.ink).frame(width: 8, height: 8)
+                        Text(name).font(.subheadline).foregroundStyle(Theme.ink)
+                        Spacer()
+                        Text("\(bytes(size)) · \(files == 1 ? "1 file" : "\(files.formatted()) files")")
+                            .font(.subheadline).foregroundStyle(Theme.muted).monospacedDigit()
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+            }
+            .padding(14)
+        } else if state.isLoading {
+            ProgressView().frame(maxWidth: .infinity, minHeight: 80)
+        } else {
+            HStack(spacing: 12) {
+                ToneBadge(systemImage: "exclamationmark.triangle", tone: .coral)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Storage usage unavailable").foregroundStyle(Theme.ink)
+                    if let error = state.error { Text(error).font(.footnote).foregroundStyle(Theme.muted) }
+                }
+                Spacer(minLength: 8)
+                Button("Retry", action: retry).buttonStyle(.glass)
+            }
+            .padding(.horizontal, 14)
+            .frame(minHeight: 60)
+        }
+    }
+
+    /// "368,2 MB"; "0 KB" rather than the formatter's "Zero KB".
+    private func bytes(_ n: Int64) -> String {
+        let f = ByteCountFormatter()
+        f.countStyle = .file
+        f.allowsNonnumericFormatting = false
+        return f.string(fromByteCount: n)
+    }
+
+    private func summary(_ usage: MediaUsage) -> String {
+        let used = usage.limitBytes.map { "of \(bytes($0.int64Value)) used" } ?? "used, no limit set"
+        let files = usage.totalFiles == 1 ? "1 file" : "\(usage.totalFiles.formatted()) files"
+        return "\(used) · \(files)"
     }
 }
 
