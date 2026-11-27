@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +52,8 @@ import com.desarrollodroide.adventurelog.feature.ui.map.GeoBounds
 import com.desarrollodroide.adventurelog.feature.ui.map.GeoPoint
 import com.desarrollodroide.adventurelog.feature.ui.map.MapMarker
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonPrimitive
@@ -59,6 +62,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.maplibre.compose.camera.CameraAnimation
 import org.maplibre.compose.camera.CameraFit
+import org.maplibre.compose.camera.CameraMoveReason
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.expressions.dsl.asString
@@ -84,8 +88,6 @@ import org.maplibre.compose.map.MissingImageResolver
 import org.maplibre.compose.map.ResolvedStyleImage
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
-import org.maplibre.compose.overlay.MapOverlay
-import org.maplibre.compose.overlay.include
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
@@ -98,6 +100,9 @@ import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import kotlin.math.min
 import kotlin.time.Duration.Companion.seconds
+
+/** How long the attribution stays open before folding: the OSMF guidelines' five seconds. */
+private val AttributionOpenFor = 5.seconds
 
 /**
  * The MapLibre engine behind [com.desarrollodroide.adventurelog.feature.ui.map.AppMap]: the
@@ -128,8 +133,17 @@ internal fun MapLibreMap(spec: AppMapSpec, modifier: Modifier) {
         if (label?.key?.let(images.byKey::containsKey) == false) label = null
     }
     val scope = rememberCoroutineScope()
+    // Open as the map appears, folded after five seconds or the first touch (see MapControls).
+    var attributionOpen by remember { mutableStateOf(true) }
+    LaunchedEffect(attributionOpen) {
+        if (attributionOpen) {
+            delay(AttributionOpenFor)
+            attributionOpen = false
+        }
+    }
 
     val onMarkerTap: (String) -> Unit = { key ->
+        attributionOpen = false
         images.byKey[key]?.let { marker ->
             val onClick = marker.onClick
             if (onClick != null) {
@@ -259,6 +273,12 @@ internal fun MapLibreMap(spec: AppMapSpec, modifier: Modifier) {
         onDispose { mapState.missingImageResolver = null }
     }
 
+    LaunchedEffect(mapState) {
+        snapshotFlow { mapState.isCameraMoving && mapState.cameraMoveReason == CameraMoveReason.Gesture }
+            .filter { it }
+            .collect { attributionOpen = false }
+    }
+
     DisposableEffect(spec.camera, mapState) {
         val driver = MapLibreCameraDriver(mapState)
         spec.camera.attach(driver)
@@ -277,6 +297,7 @@ internal fun MapLibreMap(spec: AppMapSpec, modifier: Modifier) {
                     // Only taps that no marker took: those pick a point, and close a label.
                     onUnhandled { event ->
                         label = null
+                        attributionOpen = false
                         event.position?.let { position ->
                             spec.onMapClick?.invoke(GeoPoint(position.latitude, normalizeLongitude(position.longitude)))
                         }
@@ -286,7 +307,7 @@ internal fun MapLibreMap(spec: AppMapSpec, modifier: Modifier) {
             }
         },
         overlay = {
-            include(MapOverlay.Default)
+            MapControls(mapState, attributionOpen, onToggleAttribution = { attributionOpen = !attributionOpen })
             label?.let { marker ->
                 MarkerLabel(
                     marker = marker,

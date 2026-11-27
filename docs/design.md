@@ -165,6 +165,9 @@ Google Play Services, and in the `fdroid` build, MapLibre draws everything. The 
   stays blank until the camera moves, which on a place's page it never does.
 - **No CARTO.** Its tiles need an API key since 2026 and come back watermarked; `default` and the
   CARTO styles use OpenFreeMap.
+- **The attribution folds.** It opens with the map and folds to its (i) button after five seconds,
+  a drag or a tap, as the OSMF attribution guidelines allow (`MapControls`). The library's own
+  folds only on a drag, so on the small maps it stayed open over the logo and the pins.
 
 ## UI is no longer shared
 
