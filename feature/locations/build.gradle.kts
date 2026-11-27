@@ -67,8 +67,6 @@ kotlin {
             implementation(libs.multiplatform.paging.compose)
             implementation(libs.coil.compose)
             implementation(libs.androidx.ui.tooling)
-            implementation(libs.maps.compose)
-            implementation(libs.play.services.maps)
             implementation(libs.androidx.emoji2.emojipicker)
             implementation(libs.androidx.emoji2.bundled)
         }

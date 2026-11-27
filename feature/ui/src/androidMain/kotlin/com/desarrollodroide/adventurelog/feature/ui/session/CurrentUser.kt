@@ -9,7 +9,7 @@ import org.koin.compose.koinInject
 /**
  * The signed-in account's uuid, or null before the session has been read.
  *
- * Ambient account state, read the way [com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering]
+ * Ambient account state, read the way [com.desarrollodroide.adventurelog.feature.ui.map.rememberMapStyleCode]
  * reads the map style: screens that show someone else's records next to your own (a collection
  * shared with you) need it to tell which is which.
  */

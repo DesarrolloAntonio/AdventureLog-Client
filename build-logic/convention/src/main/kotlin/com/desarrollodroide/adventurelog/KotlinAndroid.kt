@@ -8,8 +8,8 @@ internal fun Project.configureKotlinAndroid(
     extension: LibraryExtension
 ) = extension.apply {
 
-    //get module name from module path
-    val moduleName = path.split(":").drop(2).joinToString(".")
+    // The namespace comes from the module path; a hyphen (":feature:map-google") is not a package.
+    val moduleName = path.split(":").drop(2).joinToString(".").replace("-", "")
     namespace = if(moduleName.isNotEmpty()) "com.desarrollodroide.adventurelog.$moduleName" else "com.desarrollodroide.adventurelog"
 
     compileSdk = libs.findVersion("android.compileSdk").get().requiredVersion.toInt()

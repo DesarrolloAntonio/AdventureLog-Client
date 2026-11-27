@@ -26,6 +26,10 @@ koinComposeMultiplatform = "4.2.2"
 ktor = "3.5.2"
 lifecycle = "2.9.5"
 mapsCompose = "2.15.0"
+# MapLibre for the maps without Google Play Services (and the whole fdroid flavor). Pre-1.0: every
+# minor breaks API, so it is pinned and upgraded on purpose.
+maplibreCompose = "0.20.0"
+multiplatformSettings = "1.3.0"
 material3Adaptive = "1.12.0-alpha03"
 # androidx Material 3 for the Android UI: 1.5 carries the Expressive APIs and needs Compose 1.12.
 androidxComposeMaterial3 = "1.5.0"
@@ -84,6 +88,11 @@ androidx-compose-material3 = { module = "androidx.compose.material3:material3", 
 material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3Adaptive" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "mapsCompose" }
+maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibreCompose" }
+# OpenGL ES rather than Vulkan: it runs on every device the app supports, and it is the smaller one.
+maplibre-compose-runtime-opengl = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibreCompose" }
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
+multiplatform-settings-test = { module = "com.russhwolf:multiplatform-settings-test", version.ref = "multiplatformSettings" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3Runtime" }

@@ -1,4 +1,4 @@
-package com.desarrollodroide.adventurelog.feature.ui.map
+package com.desarrollodroide.adventurelog.feature.mapgoogle
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,7 +14,7 @@ import com.google.maps.android.compose.MapProperties
  * stay as they are. Follows the app's own theme (its Light/Dark setting), not the system's.
  */
 @Composable
-fun rememberThemedMapProperties(rendering: MapRendering, isMyLocationEnabled: Boolean = false): MapProperties {
+internal fun rememberThemedMapProperties(rendering: MapRendering, isMyLocationEnabled: Boolean = false): MapProperties {
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     return remember(rendering, dark, isMyLocationEnabled) {
         val drawn = rendering == MapRendering.NORMAL || rendering == MapRendering.TERRAIN

@@ -121,8 +121,8 @@ fun PreferencesGroup(
 
         PreferenceSheet.MAP_STYLE -> SettingsChoiceSheet(
             title = "Map style",
-            note = "Used as the base map everywhere. The phone draws the closest Google Maps " +
-                "equivalent of the style you pick.",
+            note = "Used as the base map everywhere. MapLibre draws the style you pick; Google " +
+                "Maps draws its closest equivalent.",
             selected = form.mapStyle,
             entries = MapStyles.options.map { option ->
                 ChoiceEntry(value = option.code, label = option.label, group = option.group)

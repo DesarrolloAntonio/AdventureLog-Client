@@ -1,7 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.detail.ui.components
 
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
-import com.google.maps.android.compose.MarkerComposable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -24,19 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
-import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.desarrollodroide.adventurelog.feature.ui.map.AppMap
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoPoint
+import com.desarrollodroide.adventurelog.feature.ui.map.MapMarker
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberAppMapCamera
 
 /**
- * Android implementation of MapView using Google Maps Compose.
- * Displays a map centered at the specified coordinates.
+ * The place on a small map, with its pin: the Map tab's pin, not Google's red drop - a rounded
+ * square on a short point, inked once visited, with the category's emoji.
  */
 @Composable
 fun MapView(
@@ -46,47 +39,33 @@ fun MapView(
     emoji: String? = null,
     visited: Boolean = true,
 ) {
-    // Parse latitude and longitude
-    val latLng = remember(latitude, longitude) {
-        try {
-            LatLng(latitude.toDouble(), longitude.toDouble())
-        } catch (e: NumberFormatException) {
-            LatLng(0.0, 0.0) // Default location if parsing fails
-        }
+    val point = remember(latitude, longitude) {
+        val lat = latitude.toDoubleOrNull()
+        val lng = longitude.toDoubleOrNull()
+        if (lat != null && lng != null) GeoPoint(lat, lng) else GeoPoint(0.0, 0.0)
     }
-    
-    // Remember camera position state
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(latLng, 15f)
-    }
-    
-    // The camera is only placed when the state is first created. On a tablet the detail pane stays
+    val camera = rememberAppMapCamera(center = point, zoom = 15f)
+
+    // The camera is only placed when the map is first created. On a tablet the detail pane stays
     // composed while the list picks another place, so the map kept showing the previous one (seen:
     // Trolltunga's page over a map of Kyoto). Follow the coordinates instead.
-    LaunchedEffect(latLng) {
-        if (cameraPositionState.position.target != latLng) {
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
-        }
+    LaunchedEffect(point) {
+        camera.moveTo(point, zoom = 15f, animate = false)
     }
-    val markerState = remember(latLng) { MarkerState(position = latLng) }
 
-    val rendering = rememberMapRendering()
-
-    // Create Google Map with a marker
-    GoogleMap(
+    AppMap(
+        camera = camera,
         modifier = modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = rememberThemedMapProperties(rendering),
-        // A preview in a card: pinch still zooms, but Google's +/- buttons and its own
-        // "open in Maps" toolbar crowded a 200dp map and repeated the page's toolbar.
-        uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
-    ) {
-        // The Map tab's pin, not Google's red drop: a rounded square on a short point, inked
-        // once visited, with the category's emoji.
-        MarkerComposable(keys = arrayOf<Any>(emoji ?: "", visited), state = markerState, title = "Adventure Location") {
-            PlacePin(emoji = emoji, visited = visited)
-        }
-    }
+        markers = listOf(
+            MapMarker(
+                key = "place",
+                position = point,
+                title = "Adventure Location",
+                iconKey = (emoji ?: "") to visited,
+                content = { PlacePin(emoji = emoji, visited = visited) },
+            )
+        ),
+    )
 }
 
 @Composable

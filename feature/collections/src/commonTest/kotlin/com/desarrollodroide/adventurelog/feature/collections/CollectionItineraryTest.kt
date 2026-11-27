@@ -56,6 +56,52 @@ class CollectionItineraryTest {
     }
 
     @Test
+    fun anEntryOnANumberedDayLandsOnThatDayOfTheTrip() {
+        // Server 0.14 plans by numbered days: the entry says "day 2" and carries no date. Read by
+        // date alone, every such entry fell outside every day and the itinerary came out empty.
+        val plan = testCollection(
+            startDate = "2026-10-10",
+            endDate = "2026-10-12",
+            locations = listOf(testLocation("Machu Picchu", id = "loc-1")),
+            itinerary = listOf(testItineraryEntry("loc-1", date = null, dayIndex = 2))
+        ).itinerary()
+
+        assertTrue(plan.days[0].items.isEmpty())
+        assertEquals("Machu Picchu", plan.days[1].items.single().title)
+        assertTrue(plan.tripContext.isEmpty())
+    }
+
+    @Test
+    fun anEntryOnNoDayAndNotTripWideIsAnIdea() {
+        // What 0.14's conversion did to a real trip: three places with no date, no day and not
+        // trip-wide. They belong to the trip, so they are listed, as Ideas - not dropped.
+        val plan = testCollection(
+            startDate = "2026-10-10",
+            endDate = "2026-10-12",
+            locations = listOf(testLocation("Vinicunca", id = "loc-1")),
+            itinerary = listOf(
+                testItineraryEntry("loc-1", date = null).copy(isGlobal = false)
+            )
+        ).itinerary()
+
+        assertEquals("Vinicunca", plan.ideas.single().title)
+        assertTrue(plan.tripContext.isEmpty())
+        assertTrue(plan.days.all { it.items.isEmpty() })
+        assertFalse(plan.isEmpty)
+    }
+
+    @Test
+    fun aNumberedDayKeepsItsName() {
+        val plan = testCollection(
+            startDate = "2026-10-10",
+            endDate = "2026-10-12",
+            itineraryDays = listOf(testItineraryDayNote(date = "", name = "Sacred Valley", index = 3))
+        ).itinerary()
+
+        assertEquals("Sacred Valley", plan.days[2].label)
+    }
+
+    @Test
     fun anEntryPointingAtSomethingNoLongerInTheCollectionIsDroppedNotDrawnBlank() {
         val plan = testCollection(
             startDate = "2025-09-12",

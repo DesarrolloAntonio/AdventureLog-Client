@@ -1,22 +1,16 @@
 package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit.components
 
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
-import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.desarrollodroide.adventurelog.feature.ui.map.AppMap
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoPoint
+import com.desarrollodroide.adventurelog.feature.ui.map.MapMarker
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberAppMapCamera
 
+/** The place being edited on a map: tap anywhere to put it there. */
 @Composable
 fun LocationMapSection(
     latitude: String?,
@@ -24,47 +18,27 @@ fun LocationMapSection(
     onMapClick: (lat: Double, lon: Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val defaultLocation = LatLng(40.4168, -3.7038) // Madrid as default
-    
-    val latLng = remember(latitude, longitude) {
-        try {
-            if (latitude != null && longitude != null) {
-                LatLng(latitude.toDouble(), longitude.toDouble())
-            } else {
-                defaultLocation
-            }
-        } catch (e: NumberFormatException) {
-            defaultLocation
-        }
+    val picked = remember(latitude, longitude) {
+        val lat = latitude?.toDoubleOrNull()
+        val lng = longitude?.toDoubleOrNull()
+        if (lat != null && lng != null) GeoPoint(lat, lng) else null
     }
-    
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(latLng, if (latitude != null) 12f else 2f)
-    }
-    
-    // Update camera when coordinates change
-    LaunchedEffect(latLng) {
-        cameraPositionState.animate(
-            update = CameraUpdateFactory.newLatLngZoom(latLng, 12f),
-            durationMs = 1000
-        )
-    }
-    
-    val rendering = rememberMapRendering()
+    val target = picked ?: Madrid
 
-    GoogleMap(
-        modifier = modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = rememberThemedMapProperties(rendering),
-        onMapClick = { clickedLatLng ->
-            onMapClick(clickedLatLng.latitude, clickedLatLng.longitude)
-        }
-    ) {
-        if (latitude != null && longitude != null) {
-            Marker(
-                state = MarkerState(position = latLng),
-                title = "Selected location"
-            )
-        }
+    val camera = rememberAppMapCamera(center = target, zoom = if (latitude != null) 12f else 2f)
+
+    // Update camera when coordinates change
+    LaunchedEffect(target) {
+        camera.moveTo(target, zoom = 12f)
     }
+
+    AppMap(
+        camera = camera,
+        modifier = modifier.fillMaxSize(),
+        markers = listOfNotNull(picked?.let { MapMarker(key = "picked", position = it, title = "Selected location") }),
+        onMapClick = { onMapClick(it.latitude, it.longitude) },
+        zoomControls = true,
+    )
 }
+
+private val Madrid = GeoPoint(40.4168, -3.7038)

@@ -1,6 +1,5 @@
 package com.desarrollodroide.adventurelog.feature.ui.components
 
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,18 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
-import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.Polyline
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.desarrollodroide.adventurelog.feature.ui.map.AppMap
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoBounds
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoPoint
+import com.desarrollodroide.adventurelog.feature.ui.map.MapMarker
+import com.desarrollodroide.adventurelog.feature.ui.map.MapPolyline
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberAppMapCamera
 
 /**
  * The two ends of a journey on a map: either, both, or neither may be known yet.
@@ -42,14 +35,10 @@ fun MapView(
     modifier: Modifier = Modifier
 ) {
     val origin = remember(originLat, originLng) {
-        if (originLat != null && originLng != null) LatLng(originLat, originLng) else null
+        if (originLat != null && originLng != null) GeoPoint(originLat, originLng) else null
     }
     val destination = remember(destinationLat, destinationLng) {
-        if (destinationLat != null && destinationLng != null) {
-            LatLng(destinationLat, destinationLng)
-        } else {
-            null
-        }
+        if (destinationLat != null && destinationLng != null) GeoPoint(destinationLat, destinationLng) else null
     }
 
     // Nothing to draw yet - say so rather than showing an empty ocean somewhere off Africa,
@@ -69,43 +58,34 @@ fun MapView(
         return
     }
 
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(origin ?: destination!!, 9f)
-    }
+    val camera = rememberAppMapCamera(center = origin ?: destination!!, zoom = 9f)
 
     // With both ends known the useful view is the one that holds them both, however far apart
     // they are; with one, centre on it.
     LaunchedEffect(origin, destination) {
         if (origin != null && destination != null) {
-            val bounds = LatLngBounds.builder().include(origin).include(destination).build()
-            cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, 96))
+            camera.fit(GeoBounds.of(listOf(origin, destination))!!, padding = 36.dp)
         } else {
-            val single = origin ?: destination!!
-            cameraPositionState.animate(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.fromLatLngZoom(single, 9f)
-                )
-            )
+            camera.moveTo(origin ?: destination!!, zoom = 9f)
         }
     }
 
-    val rendering = rememberMapRendering()
+    val markers = listOfNotNull(
+        origin?.let { MapMarker(key = "from", position = it, title = "From") },
+        destination?.let { MapMarker(key = "to", position = it, title = "To") },
+    )
+    val line = if (origin != null && destination != null) {
+        listOf(MapPolyline(listOf(origin, destination), MaterialTheme.colorScheme.primary, 2.5.dp))
+    } else {
+        emptyList()
+    }
 
-    GoogleMap(
+    AppMap(
+        camera = camera,
         modifier = modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = rememberThemedMapProperties(rendering),
-        onMapClick = { onMapClick(it.latitude, it.longitude) }
-    ) {
-        origin?.let { Marker(state = MarkerState(position = it), title = "From") }
-        destination?.let { Marker(state = MarkerState(position = it), title = "To") }
-
-        if (origin != null && destination != null) {
-            Polyline(
-                points = listOf(origin, destination),
-                color = MaterialTheme.colorScheme.primary,
-                width = 6f
-            )
-        }
-    }
+        markers = markers,
+        polylines = line,
+        onMapClick = { onMapClick(it.latitude, it.longitude) },
+        zoomControls = true,
+    )
 }
