@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog
 import android.app.Application
 import com.desarrollodroide.adventurelog.di.androidUiModule
 import com.desarrollodroide.adventurelog.di.appModule
+import com.desarrollodroide.adventurelog.di.flavorModule
 import com.desarrollodroide.adventurelog.feature.settings.platform.AndroidPlatformActions
 import com.desarrollodroide.adventurelog.feature.settings.platform.PlatformActionsProvider
 import org.koin.android.ext.koin.androidContext
@@ -19,7 +20,8 @@ class AdventureLogApplication: Application(){
         startKoin {
             androidLogger()
             androidContext(applicationContext)
-            modules(appModule, androidUiModule)
+            // flavorModule differs per flavor: play registers the Google Maps engine, fdroid nothing.
+            modules(appModule, androidUiModule, flavorModule)
         }
     }
 

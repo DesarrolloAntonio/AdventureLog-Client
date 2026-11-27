@@ -46,8 +46,6 @@ kotlin {
             implementation(libs.androidx.ui.tooling)
             
             // Google Maps for Jetpack Compose
-            implementation(libs.maps.compose)
-            implementation(libs.play.services.maps)
         }
     }
 }

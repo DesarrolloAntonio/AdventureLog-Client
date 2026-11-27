@@ -3,9 +3,11 @@ package com.desarrollodroide.adventurelog.core.model
 /**
  * The base maps the server offers, in the order and grouping the web client shows them.
  *
- * The codes are MapLibre basemaps, so Android cannot render them literally - it draws with Google
- * Maps. [MapStyles.mapTypeFor] translates each one into the nearest Google map type so the
- * preference still changes what the phone shows instead of being a setting that only the web obeys.
+ * The codes are MapLibre basemaps. On Android, a map drawn by MapLibre draws them as the web does
+ * (`basemapFor` in feature/ui: CARTO's styles and `default` use OpenFreeMap, since CARTO now wants
+ * an API key, and the 3D terrain styles are drawn flat). A map drawn by Google Maps cannot use
+ * them, so [MapStyles.mapTypeFor] translates each one into the nearest Google map type and the
+ * preference still changes what the phone shows.
  */
 data class MapStyleOption(
     val code: String,
@@ -49,9 +51,9 @@ object MapStyles {
         options.firstOrNull { it.code == code }?.label ?: "Default"
 
     /**
-     * The nearest Google Maps type for a server basemap, as a platform-neutral name that
-     * androidMain turns into a `MapType`. Anything with no imagery or relief equivalent stays
-     * on the plain map rather than guessing.
+     * The nearest Google Maps type for a server basemap, as a platform-neutral name that the
+     * Google Maps engine turns into a `MapType`. Anything with no imagery or relief equivalent
+     * stays on the plain map rather than guessing.
      */
     fun mapTypeFor(code: String?): MapRendering = when (code) {
         "satellite", "usgs-imagery" -> MapRendering.SATELLITE

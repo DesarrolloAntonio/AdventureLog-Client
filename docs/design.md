@@ -149,6 +149,23 @@ Traps from this phase:
 - **A full-screen `Dialog` is a window of its own.** It needs `decorFitsSystemWindows = false` to
   reach the edges, its own background, and its own status-bar icon colour (see Settings' Legal).
 
+## Maps (Android)
+
+Every map goes through `AppMap` (in `feature/ui`): Google Maps or MapLibre draws it, and a screen
+never knows which. Settings › Appearance › "Map engine" chooses (Automatic by default); without
+Google Play Services, and in the `fdroid` build, MapLibre draws everything. The Google engine is
+`:feature:map-google`, which only the `play` flavor ships. See
+`docs/superpowers/specs/2026-11-27-maps-engine-design.md`.
+
+- **Zoom is Google's.** `AppMapCamera` takes Google's levels; MapLibre's sit one lower (512-wide
+  tiles), and its backend converts.
+- **On MapLibre a marker is a picture.** Its composable is drawn once into a bitmap, like Google's
+  `MarkerComposable`: shadows do not draw, and `iconKey` must change whenever the look does. The
+  picture goes into the style before the point does: one that arrives after its tile was laid out
+  stays blank until the camera moves, which on a place's page it never does.
+- **No CARTO.** Its tiles need an API key since 2026 and come back watermarked; `default` and the
+  CARTO styles use OpenFreeMap.
+
 ## UI is no longer shared
 
 Android and iOS each draw their own UI, so there is no "shared view" to keep neutral; Material is

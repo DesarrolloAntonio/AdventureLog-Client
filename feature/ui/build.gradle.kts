@@ -25,14 +25,23 @@ kotlin {
             implementation(libs.androidx.ui.tooling)
             // BackHandler, for the discard guard on forms.
             implementation(libs.androidx.activity.compose)
-            // api, not implementation: toGoogleMapType() returns a MapType, so the type has to
-            // stay on the compile classpath of the feature modules that call it.
-            api(libs.maps.compose)
-            api(libs.play.services.maps)
+            // The app's map (AppMap) and its MapLibre backend. Nothing from Google here: the Google
+            // backend lives in :feature:map-google, which only the play flavor ships.
+            implementation(libs.maplibre.compose)
+            implementation(libs.maplibre.compose.runtime.opengl)
+            // Raster basemaps are written as MapLibre style documents.
+            implementation(libs.kotlinx.serialization.json)
+            // The map engine setting is kept on the phone, in the same store as the theme. api: the
+            // app builds MapEngineStore from the Settings it already has.
+            api(libs.multiplatform.settings)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.multiplatform.settings.test)
         }
     }
 }
