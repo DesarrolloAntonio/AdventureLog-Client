@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · World</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.mist{background:radial-gradient(120% 55% at 0% 0%,#FCE2D2 0%,rgba(252,226,210,0) 55%),radial-gradient(95% 55% at 100% 6%,#D6E6FA 0%,rgba(214,230,250,0) 60%),radial-gradient(120% 60% at 25% 100%,#CFEFEA 0%,rgba(207,239,234,0) 60%),#F1F4F6}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.08);box-sizing:border-box}
+.hero{background:radial-gradient(80% 120% at 100% 0%,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0) 55%),linear-gradient(135deg,#12838D 0%,#0A4E66 100%);box-shadow:0 14px 30px rgba(10,78,102,0.3),inset 0 1px 0 rgba(255,255,255,0.3);color:#FFFFFF}
+.bar{background:rgba(255,255,255,0.7);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,0.95);box-shadow:0 10px 30px rgba(20,70,90,0.14);box-sizing:border-box}
+.sec{font-size:13px;font-weight:600;color:#56656C}
+</style>
+</helmet>
+<div class="mist" style="width: 390px; height: 844px; position: relative; overflow: hidden; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; align-items: center; gap: 10px">
+    <span style="width: 44px; flex-shrink: 0"></span>
+    <div class="card" role="tablist" aria-label="World views" style="flex-grow: 1; height: 40px; margin: 0 18px; border-radius: 20px; padding: 3px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr))">
+      <a href="Mist-Map.dc.html" role="tab" aria-selected="false" style="display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: #3A4A50; text-decoration: none">Map</a>
+      <a href="Mist-World.dc.html" role="tab" aria-selected="true" style="border-radius: 17px; background: #FFFFFF; box-shadow: 0 2px 8px rgba(20,70,90,0.14); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #102027; text-decoration: none">Countries</a>
+    </div>
+    <button class="card" aria-label="Search countries" style="width: 44px; height: 44px; border-radius: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </button>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 110px; display: flex; flex-direction: column">
+    <h1 style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 800; letter-spacing: -0.6px">World</h1>
+    <span style="font-size: 15px; color: #56656C">7 countries · 14 regions · 2 planned</span>
+  </div>
+
+  <div class="hero" style="position: absolute; left: 16px; right: 16px; top: 190px; height: 132px; border-radius: 24px; padding: 16px 18px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between">
+    <svg viewBox="0 0 120 120" width="150" height="150" aria-hidden="true" style="position: absolute; right: -22px; top: -10px" fill="none" stroke="#FFFFFF" stroke-opacity="0.32" stroke-width="1.2">
+      <circle cx="60" cy="60" r="52"/>
+      <ellipse cx="60" cy="60" rx="22" ry="52"/>
+      <ellipse cx="60" cy="60" rx="42" ry="52"/>
+      <path d="M8 60h104M14 34h92M14 86h92"/>
+      <circle cx="54" cy="30" r="3" fill="#FFFFFF" fill-opacity="0.8" stroke="none"/>
+      <circle cx="46" cy="56" r="2.5" fill="#FFFFFF" fill-opacity="0.8" stroke="none"/>
+      <circle cx="78" cy="62" r="2.5" fill="#FFFFFF" fill-opacity="0.8" stroke="none"/>
+      <circle cx="96" cy="44" r="2.5" fill="#FFFFFF" fill-opacity="0.8" stroke="none"/>
+    </svg>
+    <span style="display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; letter-spacing: 0.9px; color: rgba(255,255,255,0.9); position: relative">
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="#FFFFFF" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+      COUNTRIES VISITED
+    </span>
+    <span style="display: flex; flex-direction: column; position: relative">
+      <span style="display: flex; align-items: baseline; gap: 8px">
+        <span style="font-size: 48px; line-height: 48px; font-weight: 800; letter-spacing: -1.5px; font-variant-numeric: tabular-nums">7</span>
+        <span style="font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.92)">of 195</span>
+      </span>
+      <span style="font-size: 13px; color: rgba(255,255,255,0.88)">3.6% of the world</span>
+    </span>
+  </div>
+
+  <div class="sec" style="position: absolute; left: 22px; top: 342px">By continent</div>
+  <div style="position: absolute; left: 16px; right: 16px; top: 364px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <div class="card" style="height: 52px; border-radius: 18px; display: flex; align-items: center; gap: 10px; padding: 0 12px">
+      <span style="width: 30px; height: 30px; border-radius: 15px; background: #D7F0EE; color: #0B7A84; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">EU</span>
+      <span style="flex-grow: 1; font-size: 15px; font-weight: 600">Europe</span>
+      <span style="font-size: 13px; color: #6E7B82">4</span>
+    </div>
+    <div class="card" style="height: 52px; border-radius: 18px; display: flex; align-items: center; gap: 10px; padding: 0 12px">
+      <span style="width: 30px; height: 30px; border-radius: 15px; background: #DCE9FB; color: #2B63B8; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">AS</span>
+      <span style="flex-grow: 1; font-size: 15px; font-weight: 600">Asia</span>
+      <span style="font-size: 13px; color: #6E7B82">2</span>
+    </div>
+    <div class="card" style="height: 52px; border-radius: 18px; display: flex; align-items: center; gap: 10px; padding: 0 12px">
+      <span style="width: 30px; height: 30px; border-radius: 15px; background: #FBEFD3; color: #8A5E0E; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">AF</span>
+      <span style="flex-grow: 1; font-size: 15px; font-weight: 600">Africa</span>
+      <span style="font-size: 13px; color: #6E7B82">1</span>
+    </div>
+    <div class="card" style="height: 52px; border-radius: 18px; display: flex; align-items: center; gap: 10px; padding: 0 12px">
+      <span style="width: 30px; height: 30px; border-radius: 15px; background: #FCE3D9; color: #B23F22; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">AM</span>
+      <span style="flex-grow: 1; font-size: 15px; font-weight: 600">Americas</span>
+      <span style="font-size: 12px; font-weight: 600; color: #B23F22">1 planned</span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 22px; right: 22px; top: 494px; display: flex; align-items: baseline">
+    <span class="sec" style="flex-grow: 1">Visited</span>
+    <a href="#sort" style="font-size: 13px; font-weight: 600; text-decoration: none">By regions</a>
+  </div>
+  <div class="card" style="position: absolute; left: 16px; right: 16px; top: 516px; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden">
+    <a href="Mist-Country.dc.html" style="height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #102027">
+      <span style="width: 34px; height: 34px; border-radius: 11px; background: #D7F0EE; color: #0B7A84; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">NO</span>
+      <span style="flex-grow: 1; height: 58px; display: flex; flex-direction: column; justify-content: center; gap: 6px; border-bottom: 0.5px solid rgba(16,32,39,0.1)">
+        <span style="display: flex; align-items: baseline"><span style="flex-grow: 1; font-size: 16px">Norway</span><span style="font-size: 13px; color: #56656C">3 of 15 regions</span></span>
+        <span aria-hidden="true" style="height: 4px; border-radius: 2px; background: rgba(16,32,39,0.07); display: flex"><span style="width: 20%; border-radius: 2px; background: #0B7A84"></span></span>
+      </span>
+    </a>
+    <a href="Mist-Country.dc.html" style="height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #102027">
+      <span style="width: 34px; height: 34px; border-radius: 11px; background: #D7F0EE; color: #0B7A84; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">IS</span>
+      <span style="flex-grow: 1; height: 58px; display: flex; flex-direction: column; justify-content: center; gap: 6px; border-bottom: 0.5px solid rgba(16,32,39,0.1)">
+        <span style="display: flex; align-items: baseline"><span style="flex-grow: 1; font-size: 16px">Iceland</span><span style="font-size: 13px; color: #56656C">2 of 8 regions</span></span>
+        <span aria-hidden="true" style="height: 4px; border-radius: 2px; background: rgba(16,32,39,0.07); display: flex"><span style="width: 25%; border-radius: 2px; background: #0B7A84"></span></span>
+      </span>
+    </a>
+    <a href="Mist-Country.dc.html" style="height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #102027">
+      <span style="width: 34px; height: 34px; border-radius: 11px; background: #FBEFD3; color: #8A5E0E; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">MA</span>
+      <span style="flex-grow: 1; height: 58px; display: flex; flex-direction: column; justify-content: center; gap: 6px; border-bottom: 0.5px solid rgba(16,32,39,0.1)">
+        <span style="display: flex; align-items: baseline"><span style="flex-grow: 1; font-size: 16px">Morocco</span><span style="font-size: 13px; color: #56656C">3 of 12 regions</span></span>
+        <span aria-hidden="true" style="height: 4px; border-radius: 2px; background: rgba(16,32,39,0.07); display: flex"><span style="width: 25%; border-radius: 2px; background: #0B7A84"></span></span>
+      </span>
+    </a>
+    <a href="Mist-Country.dc.html" style="height: 58px; display: flex; align-items: center; gap: 12px; padding: 0 14px; text-decoration: none; color: #102027">
+      <span style="width: 34px; height: 34px; border-radius: 11px; background: #DCE9FB; color: #2B63B8; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0">JP</span>
+      <span style="flex-grow: 1; height: 58px; display: flex; flex-direction: column; justify-content: center; gap: 6px">
+        <span style="display: flex; align-items: baseline"><span style="flex-grow: 1; font-size: 16px">Japan</span><span style="font-size: 13px; color: #56656C">3 of 47 prefectures</span></span>
+        <span aria-hidden="true" style="height: 4px; border-radius: 2px; background: rgba(16,32,39,0.07); display: flex"><span style="width: 6.4%; border-radius: 2px; background: #0B7A84"></span></span>
+      </span>
+    </a>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 24px; display: flex; gap: 10px; align-items: center">
+    <nav class="bar" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px">
+      <a href="Mist-Home.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1Z"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="Mist-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="Mist-Collections.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="Mist-Map.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(11,122,132,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #0B7A84">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#0B7A84"/><ellipse cx="12" cy="12" rx="4" ry="9.5" fill="none" stroke="#FFFFFF" stroke-width="1.4"/><path d="M2.5 12h19" stroke="#FFFFFF" stroke-width="1.4"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="#search" class="bar" aria-label="Search" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

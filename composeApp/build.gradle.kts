@@ -103,6 +103,15 @@ kotlin {
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            // The SwiftUI bridge: a ViewModel owner with saved state, and a presenter for PagingData.
+            implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+            implementation(libs.androidx.lifecycle.runtime)
+            implementation(libs.koin.core.viewmodel)
+            implementation(libs.multiplatform.paging.common)
+        }
+
+        iosTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

@@ -1,5 +1,14 @@
 package com.desarrollodroide.adventurelog.core.model
 
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+
 /** The time of day in an ISO date-time, as "HH:mm", or null when it carries none. */
 fun timeOfDay(isoDateTime: String?): String? =
     isoDateTime?.substringAfter('T', "")?.take(5)?.takeIf { it.isNotEmpty() }
@@ -26,3 +35,26 @@ fun visitBoundText(isoDateTime: String?): String {
     val date = isoDateTime?.substringBefore('T').orEmpty()
     return timeOfDay(isoDateTime)?.let { "$date $it" } ?: date
 }
+
+/**
+ * What the server should store for a timed visit chosen at [time] ("HH:mm") on [date] in [zone]:
+ * that moment in UTC, as the web sends it (REF `lib/dateUtils.ts`, `toUTCDatetime`). The apps
+ * used to send the wall-clock time with a "Z" on it, and the web showed it an hour or two late.
+ */
+@OptIn(ExperimentalTime::class)
+fun visitStored(date: String, time: String, zone: String): String =
+    LocalDateTime(LocalDate.parse(date), LocalTime.parse(time)).toInstant(timeZoneOrUtc(zone)).toString()
+
+/**
+ * A stored timed visit bound as it was chosen: [stored] (UTC) read in [zone], "yyyy-MM-ddTHH:mm",
+ * as the web shows it. A value with no time, no zone, or that cannot be read comes back as it was.
+ */
+@OptIn(ExperimentalTime::class)
+fun visitLocalDateTime(stored: String?, zone: String?): String? {
+    if (stored == null || zone.isNullOrBlank() || 'T' !in stored) return stored
+    val instant = runCatching { Instant.parse(stored) }.getOrNull() ?: return stored
+    val local = instant.toLocalDateTime(timeZoneOrUtc(zone))
+    return "${local.date}T${local.time.toString().take(5)}"
+}
+
+private fun timeZoneOrUtc(zone: String): TimeZone = runCatching { TimeZone.of(zone) }.getOrDefault(TimeZone.UTC)

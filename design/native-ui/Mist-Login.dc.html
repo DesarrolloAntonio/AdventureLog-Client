@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · Sign in</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.mist{background:radial-gradient(120% 55% at 0% 0%,#FCE2D2 0%,rgba(252,226,210,0) 55%),radial-gradient(95% 55% at 100% 6%,#D6E6FA 0%,rgba(214,230,250,0) 60%),radial-gradient(120% 60% at 25% 100%,#CFEFEA 0%,rgba(207,239,234,0) 60%),#F1F4F6}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.08);box-sizing:border-box}
+.hero{background:radial-gradient(80% 120% at 100% 0%,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0) 55%),linear-gradient(135deg,#12838D 0%,#0A4E66 100%);box-shadow:0 14px 30px rgba(10,78,102,0.3),inset 0 1px 0 rgba(255,255,255,0.3);color:#FFFFFF}
+.fld{height:46px;border-radius:12px;background:rgba(255,255,255,0.85);border:1px solid rgba(16,32,39,0.08);display:flex;align-items:center;gap:10px;padding:0 12px;box-sizing:border-box}
+</style>
+</helmet>
+<div class="mist" style="width: 390px; height: 844px; position: relative; overflow: hidden; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <div style="position: absolute; left: 0; right: 0; top: 120px; display: flex; flex-direction: column; align-items: center">
+    <span class="hero" role="img" aria-label="AdventureLog app icon" style="width: 84px; height: 84px; border-radius: 22px; display: flex; align-items: center; justify-content: center">
+      <svg viewBox="0 0 48 48" width="50" height="50" aria-hidden="true"><circle cx="34" cy="14" r="4.5" fill="#FFE3C9"/><path d="M4 38 L17 18 L24 28 L30 21 L44 38Z" fill="#FFFFFF"/><path d="M17 18 L20.5 23.5 L17 22 L13.6 23.2Z" fill="#CFEFEA"/></svg>
+    </span>
+    <span style="margin-top: 18px; font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: -0.5px">AdventureLog</span>
+    <span style="margin-top: 4px; font-size: 15px; color: #56656C">Your travels, on your own server.</span>
+  </div>
+
+  <form class="card" style="position: absolute; left: 20px; right: 20px; top: 322px; border-radius: 26px; padding: 20px 18px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 6px">
+      <span style="font-size: 17px; font-weight: 700">Connect to server</span>
+      <span style="font-size: 13px; color: #56656C">Sign in with your AdventureLog account</span>
+    </div>
+    <label class="fld">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#56656C" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+      <input placeholder="https://[YOUR SERVER]" aria-label="Server" style="all: unset; flex-grow: 1; font-size: 16px">
+    </label>
+    <label class="fld">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#56656C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      <input value="claude" aria-label="Username" style="all: unset; flex-grow: 1; font-size: 16px">
+    </label>
+    <label class="fld">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="#56656C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <input type="password" value="password" aria-label="Password" style="all: unset; flex-grow: 1; font-size: 16px">
+    </label>
+    <button class="hero" style="border: 0; margin: 6px 0 0; padding: 0; font: inherit; height: 50px; border-radius: 16px; font-size: 17px; font-weight: 700; cursor: pointer">Sign in</button>
+    <a href="#setup" style="align-self: center; height: 40px; display: flex; align-items: center; font-size: 15px; font-weight: 600; text-decoration: none">How do I set up a server?</a>
+  </form>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 48px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: #56656C">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="#56656C"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5Z"/></svg>
+    Your data stays on your server
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

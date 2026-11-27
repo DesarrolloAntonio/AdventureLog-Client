@@ -32,17 +32,33 @@ class VisitRequestMapperTest {
     }
 
     @Test
-    fun `a timed visit keeps the times it was given`() {
+    fun `a timed visit is sent in UTC from the time chosen in its zone`() {
+        // As the web sends it: 09:30 in Madrid in August is 07:30 UTC.
         val request = VisitFormData(
             startDate = "2026-08-23",
             endDate = "2026-08-23",
             startTime = "09:30",
             endTime = "18:45",
+            timezone = "Europe/Madrid",
             isAllDay = false
         ).toVisitRequest()
 
-        assertEquals("2026-08-23T09:30:00Z", request.startDate)
-        assertEquals("2026-08-23T18:45:00Z", request.endDate)
+        assertEquals("2026-08-23T07:30:00Z", request.startDate)
+        assertEquals("2026-08-23T16:45:00Z", request.endDate)
+    }
+
+    @Test
+    fun `a timed visit with no end day ends on its start day at its end time`() {
+        val request = VisitFormData(
+            startDate = "2026-08-23",
+            startTime = "10:00",
+            endTime = "12:00",
+            timezone = "UTC",
+            isAllDay = false
+        ).toVisitRequest()
+
+        assertEquals("2026-08-23T10:00:00Z", request.startDate)
+        assertEquals("2026-08-23T12:00:00Z", request.endDate)
     }
 
     @Test

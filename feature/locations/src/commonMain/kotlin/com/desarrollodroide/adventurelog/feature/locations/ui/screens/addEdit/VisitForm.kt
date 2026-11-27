@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.feature.locations.ui.screens.addEdit
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
 import com.desarrollodroide.adventurelog.core.model.isAllDayVisit
+import com.desarrollodroide.adventurelog.core.model.visitLocalDateTime
 import kotlinx.datetime.TimeZone
 
 private data class SplitDateTime(
@@ -35,9 +36,11 @@ private fun splitIsoDateTime(isoString: String?): SplitDateTime {
 
 /** A visit as the form holds it. Saving compares against this to leave untouched visits alone. */
 internal fun visitFormOf(visit: Visit): VisitFormData {
-    val start = splitIsoDateTime(visit.startDate)
-    val end = splitIsoDateTime(visit.endDate)
     val allDay = isAllDayVisit(visit.startDate, visit.endDate)
+    // A timed visit is stored in UTC: its day and hours are read in its own zone, as the web does.
+    val zone = visit.timezone.takeUnless { allDay }
+    val start = splitIsoDateTime(visitLocalDateTime(visit.startDate, zone))
+    val end = splitIsoDateTime(visitLocalDateTime(visit.endDate, zone))
     return VisitFormData(
         id = visit.id,
         startDate = start.date,

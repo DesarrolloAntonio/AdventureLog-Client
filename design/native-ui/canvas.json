@@ -17,6 +17,10 @@
     {
       "id": "ios",
       "name": "iOS · Liquid Glass"
+    },
+    {
+      "id": "ios-mist",
+      "name": "iOS · Coast Mist"
     }
   ],
   "boards": {
@@ -361,6 +365,177 @@
       "title": "iOS · Terms / Privacy",
       "page": "ios",
       "radius": 44
+    },
+    "Mist-Home.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Home",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Places.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Places",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Place.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Place detail",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Trip.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Trip",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Map.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · World › Map",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-World.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · World › Countries",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Collections.dc.html": {
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Collections",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Calendar.dc.html": {
+      "x": 3290,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Calendar",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Settings.dc.html": {
+      "x": 3760,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Settings",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Login.dc.html": {
+      "x": 4230,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Login",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-PlaceForm.dc.html": {
+      "x": 0,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · New place",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-CollectionForm.dc.html": {
+      "x": 470,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Edit collection",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-LodgingForm.dc.html": {
+      "x": 940,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · New lodging",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-TransportForm.dc.html": {
+      "x": 1410,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · New transport",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-NoteForm.dc.html": {
+      "x": 1880,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · New note",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-ChecklistForm.dc.html": {
+      "x": 2350,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Edit checklist",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Country.dc.html": {
+      "x": 2820,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Country",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Users.dc.html": {
+      "x": 3290,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · People",
+      "page": "ios-mist",
+      "radius": 44
+    },
+    "Mist-Legal.dc.html": {
+      "x": 3760,
+      "y": 1244,
+      "w": 390,
+      "h": 844,
+      "title": "Coast Mist · Terms / Privacy",
+      "page": "ios-mist",
+      "radius": 44
     }
   },
   "order": [
@@ -401,7 +576,26 @@
     "iOS-ChecklistForm.dc.html",
     "iOS-Country.dc.html",
     "iOS-Users.dc.html",
-    "iOS-Legal.dc.html"
+    "iOS-Legal.dc.html",
+    "Mist-Home.dc.html",
+    "Mist-Places.dc.html",
+    "Mist-Place.dc.html",
+    "Mist-Trip.dc.html",
+    "Mist-Map.dc.html",
+    "Mist-World.dc.html",
+    "Mist-Collections.dc.html",
+    "Mist-Calendar.dc.html",
+    "Mist-Settings.dc.html",
+    "Mist-Login.dc.html",
+    "Mist-PlaceForm.dc.html",
+    "Mist-CollectionForm.dc.html",
+    "Mist-LodgingForm.dc.html",
+    "Mist-TransportForm.dc.html",
+    "Mist-NoteForm.dc.html",
+    "Mist-ChecklistForm.dc.html",
+    "Mist-Country.dc.html",
+    "Mist-Users.dc.html",
+    "Mist-Legal.dc.html"
   ],
   "notes": {
     "androidTitle": {
@@ -435,6 +629,22 @@
       "kind": "title1",
       "maxW": 4620,
       "page": "ios"
+    },
+    "mistTitle": {
+      "x": 0,
+      "y": -300,
+      "text": "iOS 26 · Coast Mist",
+      "kind": "title1",
+      "maxW": 4620,
+      "page": "ios-mist"
+    },
+    "mistForms": {
+      "x": 0,
+      "y": 944,
+      "text": "Forms & secondary screens",
+      "kind": "title1",
+      "maxW": 4150,
+      "page": "ios-mist"
     }
   },
   "designSystems": []

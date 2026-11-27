@@ -3,6 +3,7 @@ package com.desarrollodroide.adventurelog.core.network.model.mappers
 import com.desarrollodroide.adventurelog.core.model.Category
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.model.VisitFormData
+import com.desarrollodroide.adventurelog.core.model.visitStored
 import com.desarrollodroide.adventurelog.core.network.model.request.CategoryRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.CreateLocationRequest
 import com.desarrollodroide.adventurelog.core.network.model.request.VisitRequest
@@ -30,14 +31,17 @@ fun VisitFormData.toVisitRequest(): VisitRequest {
         if (isAllDay) {
             "${startDate}T00:00:00Z"
         } else {
-            val time = startTime ?: "12:00"
-            "${startDate}T${time}:00Z"
+            // The time chosen in the visit's zone, in UTC, as the web sends it.
+            visitStored(startDate, startTime ?: "12:00", timezone)
         }
     } else {
         startDate
     }
     
-    val formattedEndDate = endDate?.takeIf { it.isNotEmpty() }?.let {
+    // A timed visit with no end day ends on its start day, at its own end time.
+    val endDay = endDate?.takeIf { it.isNotEmpty() }
+        ?: startDate.takeIf { it.isNotEmpty() && !isAllDay && endTime != null }
+    val formattedEndDate = endDay?.let {
         if (isAllDay) {
             // Midnight on both bounds, which is how the server stores an all-day visit and what
             // the web sends. An end of 23:59:59 misses the server's end-of-day test - that
@@ -45,8 +49,7 @@ fun VisitFormData.toVisitRequest(): VisitRequest {
             // looking like it has times on it.
             "${it}T00:00:00Z"
         } else {
-            val time = endTime ?: "12:00"
-            "${it}T${time}:00Z"
+            visitStored(it, endTime ?: "12:00", timezone)
         }
     } ?: formattedStartDate
     

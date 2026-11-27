@@ -20,6 +20,8 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSCameraUsageDescription</key>
+	<string>To take a photo for a place, when you choose to.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -46,9 +48,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>AdventureLog needs access to your location to show and select adventure locations on the map.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>AdventureLog needs access to your location to show and select adventure locations on the map.</string>
 </dict>
 </plist>

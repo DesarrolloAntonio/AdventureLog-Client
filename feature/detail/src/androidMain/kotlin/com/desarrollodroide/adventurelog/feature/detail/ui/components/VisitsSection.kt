@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Visit
 import com.desarrollodroide.adventurelog.core.model.isAllDayVisit
 import com.desarrollodroide.adventurelog.core.model.visitBoundText
+import com.desarrollodroide.adventurelog.core.model.visitLocalDateTime
 import com.desarrollodroide.adventurelog.feature.ui.components.DateTile
 import com.desarrollodroide.adventurelog.feature.ui.components.SegmentedList
 
@@ -45,11 +46,14 @@ fun VisitsSection(
 
 @Composable
 private fun VisitRow(visit: Visit, highlighted: Boolean) {
-    val start = visit.startDate
+    val allDay = isAllDayVisit(visit.startDate, visit.endDate)
+    // A timed visit is stored in UTC: its day and hours are shown in its own zone, as the web does.
+    val zone = visit.timezone.takeUnless { allDay }
+    val start = visitLocalDateTime(visit.startDate, zone)
+    val end = visitLocalDateTime(visit.endDate, zone)
     val parts = start?.substringBefore('T')?.split("-").orEmpty()
     val month = parts.getOrNull(1)?.toIntOrNull()?.let { MONTHS.getOrNull(it - 1) }
     val day = parts.getOrNull(2)?.toIntOrNull()
-    val allDay = isAllDayVisit(start, visit.endDate)
 
     Row(
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
@@ -69,7 +73,7 @@ private fun VisitRow(visit: Visit, highlighted: Boolean) {
                 fontWeight = FontWeight.Bold
             )
             val detail = listOfNotNull(
-                if (allDay) "All day" else visit.endDate?.let { "To ${visitBoundText(it)}" },
+                if (allDay) "All day" else end?.let { "To ${visitBoundText(it)}" },
                 visit.timezone?.takeIf { it.isNotBlank() }?.substringAfterLast('/')?.replace('_', ' '),
             ).joinToString(" · ")
             if (detail.isNotEmpty()) {

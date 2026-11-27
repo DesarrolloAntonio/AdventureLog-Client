@@ -142,6 +142,21 @@ jobs:
       - name: Link iOS framework
         run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
+      # The SwiftUI app needs the iOS 26 SDK (its deployment target). Where the runner's Xcode is
+      # older, say so and stop here rather than fail every build on a tool the runner lacks.
+      - name: Build the SwiftUI app
+        run: |
+          sdk=$(xcrun --sdk iphonesimulator --show-sdk-version)
+          echo "iOS simulator SDK: $sdk"
+          if [ "${sdk%%.*}" -lt 26 ]; then
+            echo "::notice::This runner's Xcode has iOS SDK $sdk, older than 26; the SwiftUI app was not built."
+            exit 0
+          fi
+          # arm64 only: the Kotlin framework has no x86_64 simulator target, and a generic
+          # simulator destination builds both.
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
+            -destination 'generic/platform=iOS Simulator' ARCHS=arm64 CODE_SIGNING_ALLOWED=NO build
+
   release:
     name: Create Release
     runs-on: ubuntu-latest

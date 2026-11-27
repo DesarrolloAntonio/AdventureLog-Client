@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AdventureLog iOS · Coast Mist · Map</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#0B7A84}a:hover{color:#075A62}
+.card{background:rgba(255,255,255,0.74);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,0.92);box-shadow:0 6px 22px rgba(20,70,90,0.1);box-sizing:border-box}
+.hero{background:radial-gradient(80% 120% at 100% 0%,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0) 55%),linear-gradient(135deg,#12838D 0%,#0A4E66 100%);box-shadow:0 14px 30px rgba(10,78,102,0.3),inset 0 1px 0 rgba(255,255,255,0.3);color:#FFFFFF}
+.bar{background:rgba(255,255,255,0.7);-webkit-backdrop-filter:blur(24px) saturate(170%);backdrop-filter:blur(24px) saturate(170%);border:1px solid rgba(255,255,255,0.95);box-shadow:0 10px 30px rgba(20,70,90,0.14);box-sizing:border-box}
+.pin{all:unset;position:absolute;box-sizing:border-box;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #D5E6ED; color: #102027; font-family: -apple-system, 'SF Pro Text', 'SF Pro Display', system-ui, 'Helvetica Neue', sans-serif; box-sizing: border-box">
+
+  <svg viewBox="0 0 390 844" width="390" height="844" role="img" aria-label="Map of Europe and North Africa with your visited countries highlighted" style="position: absolute; inset: 0; display: block">
+    <defs>
+      <linearGradient id="mm-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9E8EF"/><stop offset="1" stop-color="#CBE2E6"/></linearGradient>
+      <linearGradient id="mm-top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F1F4F6" stop-opacity="0.85"/><stop offset="1" stop-color="#F1F4F6" stop-opacity="0"/></linearGradient>
+    </defs>
+    <rect width="390" height="844" fill="url(#mm-sea)"/>
+    <path d="M38 0V844M101 0V844M164 0V844M226 0V844M289 0V844M352 0V844M0 60H390M0 162H390M0 264H390M0 366H390M0 468H390M0 570H390" stroke="#102027" stroke-opacity="0.05" stroke-width="1"/>
+    <path fill="#F8F5EF" stroke="#B9CCD3" stroke-width="0.8" stroke-linejoin="round" d="M104 336L113 329L152 332L156 305L148 292L135 281L153 277L155 267L165 270L174 255L186 250L194 234L208 229L218 224L215 208L218 192L230 186L228 198L232 208L226 218L233 224L248 220L264 220L281 217L297 210L296 193L313 191L311 178L315 169L340 166L354 163L343 156L321 160L304 158L298 146L299 127L318 112L323 106L315 103L302 105L296 115L283 128L272 138L272 152L282 161L280 170L268 189L264 201L253 209L245 208L243 201L238 186L234 174L230 171L223 173L214 182L205 182L199 174L197 158L195 146L199 139L208 134L217 128L226 120L236 111L242 101L248 88L255 78L267 71L282 63L299 58L326 49L343 51L359 57L371 67L390 71L421 83L440 96L440 76L497 76L541 62L591 77L616 35L667 25L717 4L793 -16L874 24L981 50L1044 35L1170 60L1283 71L1283 122L1233 162L1189 183L1148 254L1145 193L1057 173L1032 224L1050 244L1044 285L1013 331L978 342L978 366L972 382L977 415L959 422L958 397L948 370L928 377L931 361L906 377L915 395L935 393L920 407L913 421L930 458L927 489L915 514L903 534L882 547L859 558L847 554L834 567L828 583L848 618L850 652L835 669L823 687L811 666L807 650L798 638L790 672L795 701L814 736L820 760L801 745L794 719L782 693L784 672L777 606L757 611L759 572L744 563L741 547L723 554L710 562L699 577L681 601L668 641L666 669L651 692L644 673L635 643L623 601L621 581L620 556L604 546L597 545L585 521L551 517L524 511L518 497L506 503L487 490L479 468L465 468L469 485L479 504L488 516L486 528L503 529L516 520L518 506L522 531L532 534L540 546L527 581L510 601L492 615L472 625L447 644L437 645L433 616L428 596L410 555L398 523L384 488L381 489L379 491L369 469L367 455L379 455L383 440L387 429L389 413L391 401L381 399L365 402L356 399L340 401L335 388L329 372L328 362L345 356L346 354L361 354L385 346L402 356L425 350L426 340L415 331L401 318L394 311L384 315L374 320L368 312L375 305L359 299L354 307L350 313L343 324L339 334L340 346L345 353L327 357L315 358L308 360L313 377L308 385L315 387L308 388L309 402L304 403L300 399L298 391L296 384L294 377L289 369L286 362L286 348L280 342L267 331L259 324L255 313L250 309L241 311L242 324L249 330L253 342L264 347L270 355L280 365L272 362L267 370L271 377L265 387L262 385L262 377L262 366L257 360L253 358L245 354L240 348L233 342L230 336L228 327L225 325L220 322L214 327L209 329L201 335L197 333L189 331L183 336L184 343L177 352L169 356L164 367L162 373L165 379L160 384L157 391L150 400L136 400L128 407L124 402L117 395L108 397L108 382L104 380L107 366L109 354L108 344L105 337Z M126 409L145 414L157 410L164 408L182 399L205 397L225 394L233 398L230 409L233 417L227 425L233 434L247 439L259 445L262 453L283 465L290 458L289 447L302 439L321 452L346 459L359 452L367 455L369 469L375 497L377 509L387 531L398 560L399 585L406 591L413 616L426 638L435 656L440 668L486 654L484 668L472 713L459 739L434 780L415 805L411 844L418 881L419 922L396 963L387 994L386 1019L370 1040L367 1066L358 1084L339 1111L325 1121L302 1123L289 1129L279 1123L278 1101L267 1066L255 1008L238 950L245 902L247 864L240 836L223 785L223 735L217 728L201 731L185 709L164 717L151 725L138 721L116 730L94 705L80 683L69 662L56 624L60 576L57 560L69 530L82 493L102 472L103 463L102 453L110 435L121 427L125 415Z M128 263L145 258L172 252L174 238L165 230L162 223L153 207L151 193L145 177L132 177L125 188L128 199L132 210L145 218L143 230L135 231L137 241L131 246L145 250L135 254Z M126 242L125 229L129 218L118 210L109 216L101 225L103 238L98 245L104 249L113 246L123 242Z M22 123L13 113L22 106L13 101L25 97L50 99L69 98L78 108L72 118L57 126L44 128L31 124Z M223 336L224 344L221 352L218 347L218 340Z M224 355L225 366L224 376L216 378L216 359L215 357L221 354Z M242 386L262 384L259 397L259 400L243 391Z M-296 -21L-214 -62L-57 -77L38 -62L50 -1L31 55L6 81L-38 81L-88 111L-107 162L-138 152L-164 111L-176 76L-189 40L-214 -1L-264 -11Z"/>
+    <path fill="#0B7A84" fill-opacity="0.16" stroke="#0B7A84" stroke-opacity="0.55" stroke-width="1" stroke-linejoin="round" d="M208 183L199 174L195 157L195 144L204 136L217 127L230 116L242 101L252 86L264 75L283 62L308 54L327 50L346 54L359 60L346 71L321 75L296 69L277 79L264 91L252 105L245 116L239 130L241 147L242 162L237 173L230 171L223 174L214 182Z M22 123L13 113L22 106L13 101L25 97L50 99L69 98L78 108L72 118L57 126L44 128L31 124Z M152 417L153 447L141 458L129 469L109 482L102 472L103 463L102 453L105 442L113 434L121 427L125 415L126 409L145 414Z M108 397L117 395L116 382L120 378L120 370L120 356L123 350L112 345L108 344L109 354L107 366L104 380L108 382Z M291 370L296 383L299 398L304 403L309 402L308 388L315 387L308 378L308 361L315 358L327 357L331 350L321 352L308 353L296 358L292 363Z"/>
+    <path fill="#C4482A" fill-opacity="0.08" stroke="#C4482A" stroke-width="1.2" stroke-dasharray="3 3" stroke-linejoin="round" d="M211 328L220 322L225 325L228 327L233 342L240 348L245 354L253 358L262 366L262 377L265 387L271 377L267 370L272 362L280 365L270 355L264 347L253 342L249 330L242 324L241 311L250 309L248 300L239 295L230 296L220 300L208 306L206 315Z"/>
+    <g font-family="-apple-system, 'SF Pro Text', system-ui, sans-serif" font-size="10" font-weight="700" letter-spacing="1.6" fill="#56656C" fill-opacity="0.75">
+      <text x="230" y="166">NORWAY</text>
+      <text x="22" y="146">ICELAND</text>
+      <text x="252" y="372">ITALY</text>
+      <text x="88" y="500">MOROCCO</text>
+      <text x="62" y="372">PORTUGAL</text>
+      <text x="318" y="410">GREECE</text>
+    </g>
+    <g font-family="-apple-system, 'SF Pro Text', system-ui, sans-serif" font-size="11" font-style="italic" fill="#4F7686" fill-opacity="0.8">
+      <text x="104" y="76">Norwegian Sea</text>
+      <text x="14" y="300">Atlantic Ocean</text>
+    </g>
+    <rect width="390" height="130" fill="url(#mm-top)"/>
+  </svg>
+
+  <button class="pin" aria-label="Iceland, 4 places" style="left: 16px; top: 102px; width: 30px; height: 30px; border-radius: 15px; background: #0B7A84; color: #FFFFFF; border: 2.5px solid #FFFFFF; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(10,78,102,0.3)">4</button>
+  <button class="pin" aria-label="Western Norway, 2 places" style="left: 192px; top: 136px; width: 30px; height: 30px; border-radius: 15px; background: #0B7A84; color: #FFFFFF; border: 2.5px solid #FFFFFF; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(10,78,102,0.3)">2</button>
+  <button class="pin" aria-label="Reine, Lofoten" style="left: 239px; top: 75px; width: 15px; height: 15px; border-radius: 8px; background: #0B7A84; border: 2.5px solid #FFFFFF; box-shadow: 0 4px 10px rgba(10,78,102,0.3)"></button>
+  <button class="pin" aria-label="Lisbon" style="left: 99px; top: 373px; width: 15px; height: 15px; border-radius: 8px; background: #0B7A84; border: 2.5px solid #FFFFFF; box-shadow: 0 4px 10px rgba(10,78,102,0.3)"></button>
+  <button class="pin" aria-label="Athens" style="left: 306px; top: 380px; width: 15px; height: 15px; border-radius: 8px; background: #0B7A84; border: 2.5px solid #FFFFFF; box-shadow: 0 4px 10px rgba(10,78,102,0.3)"></button>
+  <button class="pin" aria-label="Morocco, 3 places" style="left: 108px; top: 428px; width: 30px; height: 30px; border-radius: 15px; background: #0B7A84; color: #FFFFFF; border: 2.5px solid #FFFFFF; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 14px rgba(10,78,102,0.3)">3</button>
+
+  <a href="Mist-Trip.dc.html" aria-label="Vernazza, selected" style="position: absolute; left: 196px; top: 262px; width: 56px; display: flex; flex-direction: column; align-items: center; text-decoration: none">
+    <span style="width: 56px; height: 56px; border-radius: 28px; border: 3px solid #FFFFFF; box-sizing: border-box; overflow: hidden; box-shadow: 0 0 0 3px #C4482A, 0 12px 24px rgba(10,78,102,0.35); background: #1B2750">
+      <svg viewBox="0 0 52 52" width="50" height="50" aria-hidden="true" style="display: block">
+        <defs><linearGradient id="mm-vsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22335E"/><stop offset="1" stop-color="#C98A78"/></linearGradient></defs>
+        <rect width="52" height="34" fill="url(#mm-vsky)"/>
+        <rect y="34" width="52" height="18" fill="#1B2750"/>
+        <path d="M6 34 C12 24 22 16 52 12 V34Z" fill="#1A2224"/>
+        <path d="M14 26h6v8h-6z" fill="#A8524A"/><path d="M20 22h6v12h-6z" fill="#C8946A"/><path d="M26 24h6v10h-6z" fill="#7C9C9E"/><path d="M32 20h6v14h-6z" fill="#BD6A54"/><path d="M38 18h7v16h-7z" fill="#D4AE68"/><path d="M45 16h7v18h-7z" fill="#A35447"/>
+        <path d="M16 29h1.5v2H16z M23 26h1.5v2H23z M29 28h1.5v2H29z M35 24h1.5v2H35z M41 27h1.5v2H41z M48 22h1.5v2H48z" fill="#FFD08A"/>
+      </svg>
+    </span>
+    <span aria-hidden="true" style="width: 10px; height: 10px; margin-top: -4px; background: #C4482A; transform: rotate(45deg)"></span>
+  </a>
+
+  <div style="position: absolute; left: 16px; right: 16px; top: 54px; display: flex; align-items: center; gap: 10px">
+    <button class="card" aria-label="Filter map" style="width: 44px; height: 44px; border-radius: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
+    </button>
+    <div class="card" role="tablist" aria-label="World views" style="flex-grow: 1; height: 40px; margin: 0 18px; border-radius: 20px; padding: 3px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr))">
+      <a href="Mist-Map.dc.html" role="tab" aria-selected="true" style="border-radius: 17px; background: #FFFFFF; box-shadow: 0 2px 8px rgba(20,70,90,0.14); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: #102027; text-decoration: none">Map</a>
+      <a href="Mist-World.dc.html" role="tab" aria-selected="false" style="display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: #3A4A50; text-decoration: none">Countries</a>
+    </div>
+    <span style="width: 44px; flex-shrink: 0"></span>
+  </div>
+
+  <div class="card" style="position: absolute; right: 16px; top: 112px; width: 44px; border-radius: 22px; display: flex; flex-direction: column">
+    <button aria-label="Map style" style="all: unset; height: 46px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3 2.5 8 12 13l9.5-5Z M2.5 12.5 12 17.5l9.5-5 M2.5 16.5 12 21.5l9.5-5"/></svg>
+    </button>
+    <span aria-hidden="true" style="height: 0.5px; margin: 0 10px; background: rgba(16,32,39,0.12)"></span>
+    <button aria-label="Show my location" style="all: unset; height: 46px; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 4 3.5 11l7 2.5L13 20.5Z" fill="#0B7A84"/></svg>
+    </button>
+  </div>
+
+  <div class="card" style="position: absolute; left: 10px; right: 10px; top: 566px; height: 176px; border-radius: 32px; padding: 8px 16px 16px; display: flex; flex-direction: column; box-shadow: 0 12px 34px rgba(20,70,90,0.16)">
+    <span aria-hidden="true" style="align-self: center; width: 36px; height: 5px; border-radius: 3px; background: rgba(16,32,39,0.18)"></span>
+    <div style="margin-top: 10px; display: flex; align-items: center; gap: 12px">
+      <svg viewBox="0 0 52 52" width="58" height="58" role="img" aria-label="Photo of Vernazza" style="border-radius: 16px; flex-shrink: 0">
+        <rect width="52" height="34" fill="url(#mm-vsky)"/>
+        <rect y="34" width="52" height="18" fill="#1B2750"/>
+        <path d="M6 34 C12 24 22 16 52 12 V34Z" fill="#1A2224"/>
+        <path d="M14 26h6v8h-6z" fill="#A8524A"/><path d="M20 22h6v12h-6z" fill="#C8946A"/><path d="M26 24h6v10h-6z" fill="#7C9C9E"/><path d="M32 20h6v14h-6z" fill="#BD6A54"/><path d="M38 18h7v16h-7z" fill="#D4AE68"/><path d="M45 16h7v18h-7z" fill="#A35447"/>
+        <path d="M16 29h1.5v2H16z M23 26h1.5v2H23z M29 28h1.5v2H29z M35 24h1.5v2H35z M41 27h1.5v2H41z M48 22h1.5v2H48z" fill="#FFD08A"/>
+      </svg>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 19px; line-height: 23px; font-weight: 700">Vernazza</span>
+        <span style="font-size: 14px; color: #56656C">Liguria, Italy</span>
+        <span style="align-self: flex-start; margin-top: 3px; height: 22px; padding: 0 9px; border-radius: 11px; background: #FCE3D9; color: #B23F22; font-size: 12px; font-weight: 600; display: flex; align-items: center">Planned · Sat 5 Sep</span>
+      </span>
+      <button aria-label="Close" style="all: unset; width: 30px; height: 30px; border-radius: 15px; background: rgba(16,32,39,0.07); display: flex; align-items: center; justify-content: center; align-self: flex-start; flex-shrink: 0; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="#56656C" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <button class="hero" style="border: 0; margin: 0; padding: 0; font: inherit; height: 46px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 15px; font-weight: 700; cursor: pointer">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 4 3.5 11l7 2.5L13 20.5Z" fill="#FFFFFF"/></svg>
+        Directions
+      </button>
+      <a href="Mist-Trip.dc.html" style="height: 46px; border-radius: 16px; background: rgba(11,122,132,0.1); color: #0B7A84; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 15px; font-weight: 600; text-decoration: none">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="#0B7A84" stroke-width="2" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+        Open trip
+      </a>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 24px; display: flex; gap: 10px; align-items: center">
+    <nav class="bar" aria-label="Tabs" style="flex-grow: 1; height: 62px; border-radius: 31px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 4px">
+      <a href="Mist-Home.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1Z"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Home</span>
+      </a>
+      <a href="Mist-Places.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Places</span>
+      </a>
+      <a href="Mist-Collections.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #102027">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="1.8" stroke-linejoin="round"><rect x="7.5" y="3" width="13.5" height="13.5" rx="3"/><path d="M3.5 7.5V18a2.5 2.5 0 0 0 2.5 2.5h10.5"/></svg>
+        <span style="font-size: 10px; font-weight: 600">Collections</span>
+      </a>
+      <a href="Mist-Map.dc.html" aria-current="page" style="border-radius: 27px; background: rgba(11,122,132,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #0B7A84">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#0B7A84"/><ellipse cx="12" cy="12" rx="4" ry="9.5" fill="none" stroke="#FFFFFF" stroke-width="1.4"/><path d="M2.5 12h19" stroke="#FFFFFF" stroke-width="1.4"/></svg>
+        <span style="font-size: 10px; font-weight: 600">World</span>
+      </a>
+    </nav>
+    <a href="#search" class="bar" aria-label="Search" style="width: 62px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="#102027" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
