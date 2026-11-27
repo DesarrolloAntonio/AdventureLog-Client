@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -61,7 +62,9 @@ data class ChoiceEntry(
     val supporting: String? = null,
     val icon: ImageVector? = null,
     /** Drawn as a heading above this entry when it opens a new group. */
-    val group: String? = null
+    val group: String? = null,
+    /** False for a choice this phone cannot take; it stays listed, faded, with [supporting] saying why. */
+    val enabled: Boolean = true
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -172,7 +175,8 @@ private fun ChoiceRow(entry: ChoiceEntry, selected: Boolean, shape: Shape, onCli
     Surface(shape = shape, color = container, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
-                .selectable(selected = selected, onClick = onClick, role = Role.RadioButton)
+                .selectable(selected = selected, enabled = entry.enabled, onClick = onClick, role = Role.RadioButton)
+                .alpha(if (entry.enabled) 1f else 0.38f)
                 .heightIn(min = 64.dp)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,

@@ -1,8 +1,8 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.screen
 
 import com.desarrollodroide.adventurelog.feature.map.ui.components.MapInViewSheet
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.LatLng
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoBounds
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoPoint
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.widthIn
@@ -86,7 +86,7 @@ fun MapScreen(
     val statusTop = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
     val navBottom = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
     // A wide window lists the places on screen beside the map (the tablet canvas's "In view").
-    var visibleBounds by remember { mutableStateOf<LatLngBounds?>(null) }
+    var visibleBounds by remember { mutableStateOf<GeoBounds?>(null) }
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val sideSheet = maxWidth >= 840.dp
         val sheetTop = statusTop + topOverlay + 120.dp
@@ -117,7 +117,7 @@ fun MapScreen(
                 filteredAdventures.filter { place ->
                     val lat = place.latitude?.toDoubleOrNull()
                     val lng = place.longitude?.toDoubleOrNull()
-                    lat != null && lng != null && (bounds == null || bounds.contains(LatLng(lat, lng)))
+                    lat != null && lng != null && (bounds == null || bounds.contains(GeoPoint(lat, lng)))
                 }
             }
             MapInViewSheet(

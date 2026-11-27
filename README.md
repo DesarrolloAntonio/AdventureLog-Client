@@ -268,10 +268,13 @@ graph LR
 ```bash
 git clone https://github.com/DesarrolloAntonio/AdventureLog-Client.git
 cd AdventureLog-Client
-./gradlew :composeApp:assembleDebug
+./gradlew :composeApp:assemblePlayDebug     # or assembleFdroidDebug
 ```
 
-- **Android**: open the project in Android Studio and run the `composeApp` configuration.
+- **Android**: open the project in Android Studio and run the `composeApp` configuration. There
+  are two builds: `play` draws maps with Google Maps (and MapLibre where Google Play Services are
+  missing; a `MAPS_API_KEY` in `local.properties` lets Google's tiles load), `fdroid` with MapLibre
+  only and no Google Play Services at all.
 - **iOS**: run `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`, then open
   `iosApp/iosApp.xcodeproj` in Xcode and run it. The SwiftUI screens are still under construction.
 

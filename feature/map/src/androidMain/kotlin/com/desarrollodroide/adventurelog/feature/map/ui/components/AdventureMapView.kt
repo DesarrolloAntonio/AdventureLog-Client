@@ -1,46 +1,35 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
-import android.graphics.Point
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberThemedMapProperties
-import com.desarrollodroide.adventurelog.feature.map.ui.state.markerLabel
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.text.font.FontWeight
-import com.google.maps.android.clustering.ClusterItem
-import com.google.maps.android.compose.clustering.Clustering
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.desarrollodroide.adventurelog.core.model.Location
 import com.desarrollodroide.adventurelog.core.model.VisitedCity
 import com.desarrollodroide.adventurelog.core.model.VisitedRegion
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.*
-import com.desarrollodroide.adventurelog.feature.ui.map.rememberMapRendering
-import com.desarrollodroide.adventurelog.feature.ui.map.toGoogleMapType
-import com.google.maps.android.compose.*
+import com.desarrollodroide.adventurelog.feature.map.ui.state.markerLabel
+import com.desarrollodroide.adventurelog.feature.ui.map.AppMap
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoBounds
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoPoint
+import com.desarrollodroide.adventurelog.feature.ui.map.MapMarker
+import com.desarrollodroide.adventurelog.feature.ui.map.MarkerClusters
+import com.desarrollodroide.adventurelog.feature.ui.map.rememberAppMapCamera
 
 /**
- * The adventure map: Google Maps with the user's places, visited regions and visited cities.
+ * The adventure map: the user's places, visited regions and visited cities.
  */
 @Composable
 fun AdventureMapView(
@@ -58,197 +47,106 @@ fun AdventureMapView(
     /** False when the map runs edge to edge (the Map tab); true as a card inside a page. */
     rounded: Boolean = true,
     /** The area on screen whenever the camera settles, for a list of the places in view. */
-    onVisibleBoundsChanged: ((LatLngBounds) -> Unit)? = null,
+    onVisibleBoundsChanged: ((GeoBounds) -> Unit)? = null,
 ) {
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(
-            LatLng(40.416775, -3.703790), 
-            5f
-        )
-    }
-    
-    val bounds = remember(locations, visitedRegions, showRegions) {
-        val adventuresWithLocation = locations.filter { adventure ->
-            val lat = adventure.latitude?.toDoubleOrNull()
-            val lng = adventure.longitude?.toDoubleOrNull()
-            lat != null && lng != null && lat != 0.0 && lng != 0.0
-        }
-        
-        val regionsWithLocation = if (showRegions) {
-            visitedRegions.filter { region ->
-                region.latitude != null && region.longitude != null
-            }
-        } else {
-            emptyList()
-        }
-        
-        if (adventuresWithLocation.isEmpty() && regionsWithLocation.isEmpty()) {
-            null
-        } else {
-            val builder = LatLngBounds.Builder()
-            
-            adventuresWithLocation.forEach { adventure ->
-                val lat = adventure.latitude?.toDoubleOrNull()!!
-                val lng = adventure.longitude?.toDoubleOrNull()!!
-                builder.include(LatLng(lat, lng))
-            }
-            
-            regionsWithLocation.forEach { region ->
-                region.latitude?.let { lat ->
-                    region.longitude?.let { lng ->
-                        builder.include(LatLng(lat, lng))
-                    }
-                }
-            }
-            
-            try {
-                builder.build()
-            } catch (_: Exception) {
-                null
-            }
+    val camera = rememberAppMapCamera(center = GeoPoint(40.416775, -3.703790), zoom = 5f)
+
+    val placed = remember(locations) {
+        locations.mapNotNull { place ->
+            val lat = place.latitude?.toDoubleOrNull()
+            val lng = place.longitude?.toDoubleOrNull()
+            if (lat == null || lng == null || lat == 0.0 || lng == 0.0) null else place to GeoPoint(lat, lng)
         }
     }
-    
+
+    val bounds = remember(placed, visitedRegions, showRegions) {
+        val regionPoints = if (showRegions) visitedRegions.mapNotNull { it.point() } else emptyList()
+        GeoBounds.of(placed.map { it.second } + regionPoints)
+    }
     LaunchedEffect(bounds) {
-        bounds?.let {
-            cameraPositionState.animate(
-                CameraUpdateFactory.newLatLngBounds(it, 100),
-                durationMs = 1000
+        bounds?.let { camera.fit(it, padding = 38.dp) }
+    }
+
+    val regionMarkers = remember(visitedRegions, showRegions) {
+        if (!showRegions) emptyList() else visitedRegions.mapNotNull { region ->
+            val point = region.point() ?: return@mapNotNull null
+            val label = region.markerLabel()
+            MapMarker(
+                key = "region-${region.id}",
+                position = point,
+                title = label.title,
+                snippet = label.snippet,
+                iconKey = "region",
+                content = { RegionMarker() },
             )
         }
     }
-    
-    // Whenever the camera comes to rest - the first fit included - say what is on screen. Not the
-    // projection's visible region: that leaves out the padding, so the strip under the floating
-    // search and filters counted as off screen. The corners of the view itself, less only the
-    // start padding (where a sheet covers the map).
-    var mapSize by remember { mutableStateOf(IntSize.Zero) }
-    val startInset = with(LocalDensity.current) {
-        contentPadding.calculateStartPadding(LocalLayoutDirection.current).roundToPx()
-    }
-    if (onVisibleBoundsChanged != null) {
-        LaunchedEffect(cameraPositionState.isMoving, mapSize, startInset) {
-            val projection = cameraPositionState.projection
-            if (!cameraPositionState.isMoving && projection != null && mapSize != IntSize.Zero) {
-                val corners = listOf(
-                    Point(startInset, 0), Point(mapSize.width, 0),
-                    Point(startInset, mapSize.height), Point(mapSize.width, mapSize.height),
-                )
-                val builder = LatLngBounds.Builder()
-                corners.forEach { builder.include(projection.fromScreenLocation(it)) }
-                onVisibleBoundsChanged(builder.build())
-            }
+    // Visited cities sit under the places, as a quieter layer.
+    val cityMarkers = remember(visitedCities, showCities) {
+        if (!showCities) emptyList() else visitedCities.mapNotNull { city ->
+            val point = city.point() ?: return@mapNotNull null
+            val label = city.markerLabel()
+            MapMarker(
+                key = "city-${city.id}",
+                position = point,
+                title = label.title,
+                snippet = label.snippet,
+                iconKey = "city",
+                content = { CityMarker() },
+            )
         }
     }
 
-    val rendering = rememberMapRendering()
-    val mapProperties = rememberThemedMapProperties(rendering)
-    
-    val uiSettings = remember {
-        MapUiSettings(
-            zoomControlsEnabled = false,
-            compassEnabled = true,
-            mapToolbarEnabled = false,
-            myLocationButtonEnabled = false,
-            rotationGesturesEnabled = true,
-            scrollGesturesEnabled = true,
-            tiltGesturesEnabled = true,
-            zoomGesturesEnabled = true
+    // Clustered rather than one pin per place: two hundred markers over one country pile
+    // into an unreadable blob, which is why the web clusters too. Zooming in splits them.
+    val onClick by rememberUpdatedState(onAdventureClick)
+    val clusters = remember(placed, selectedId) {
+        MarkerClusters(
+            items = placed.map { (place, point) ->
+                val selected = place.id == selectedId
+                val emoji = place.category?.icon
+                MapMarker(
+                    key = place.id,
+                    position = point,
+                    title = place.name,
+                    snippet = place.location.orEmpty(),
+                    // The selected pin carries its name; the others look alike per category.
+                    iconKey = PinLook(emoji, place.isVisited, if (selected) place.name else null),
+                    onClick = { onClick(place.id) },
+                    content = {
+                        ExpressivePin(name = place.name, emoji = emoji, visited = place.isVisited, selected = selected)
+                    },
+                )
+            },
+            clusterContent = { count -> ExpressiveClusterBubble(count = count) },
         )
     }
-    
-    val adventuresWithLocation = remember(locations) {
-        locations.filter { adventure ->
-            val lat = adventure.latitude?.toDoubleOrNull()
-            val lng = adventure.longitude?.toDoubleOrNull()
-            lat != null && lng != null && lat != 0.0 && lng != 0.0
-        }
-    }
-    
-    GoogleMap(
+
+    AppMap(
+        camera = camera,
         modifier = modifier
             .fillMaxSize()
-            .onSizeChanged { mapSize = it }
             .then(if (rounded) Modifier.clip(RoundedCornerShape(24.dp)) else Modifier),
-        cameraPositionState = cameraPositionState,
+        markers = regionMarkers + cityMarkers,
+        clusters = clusters,
         contentPadding = contentPadding,
-        properties = mapProperties,
-        uiSettings = uiSettings
-    ) {
-        // Draw visited regions with custom markers if enabled
-        if (showRegions) {
-            visitedRegions.forEach { region ->
-                region.latitude?.let { lat ->
-                    region.longitude?.let { lng ->
-                        val markerState = rememberMarkerState(position = LatLng(lat, lng))
-                        val label = region.markerLabel()
-                        MarkerComposable(
-                            state = markerState,
-                            title = label.title,
-                            snippet = label.snippet
-                        ) {
-                            RegionMarker()
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Visited cities sit under the places, as a quieter layer.
-        if (showCities) {
-            visitedCities.forEach { city ->
-                val lat = city.latitude
-                val lng = city.longitude
-                if (lat != null && lng != null) {
-                    val cityState = rememberMarkerState(position = LatLng(lat, lng))
-                    val label = city.markerLabel()
-                    MarkerComposable(state = cityState, title = label.title, snippet = label.snippet) {
-                        CityMarker()
-                    }
-                }
-            }
-        }
-
-        // Clustered rather than one pin per place: two hundred markers over one country pile
-        // into an unreadable blob, which is why the web clusters too. Zooming in splits them.
-        val clusterItems = remember(adventuresWithLocation, selectedId) {
-            adventuresWithLocation.mapNotNull { adventure ->
-                val lat = adventure.latitude?.toDoubleOrNull()
-                val lng = adventure.longitude?.toDoubleOrNull()
-                if (lat == null || lng == null) null else LocationClusterItem(adventure, lat, lng, adventure.id == selectedId)
-            }
-        }
-
-        Clustering(
-            items = clusterItems,
-            onClusterItemClick = { item ->
-                onAdventureClick(item.location.id)
-                false
-            },
-            clusterContent = { cluster -> ExpressiveClusterBubble(count = cluster.size) },
-            clusterItemContent = { item ->
-                ExpressivePin(
-                    name = item.location.name,
-                    emoji = item.location.category?.icon,
-                    visited = item.location.isVisited,
-                    selected = item.selected,
-                )
-            }
-        )
-    }
+        onVisibleBoundsChanged = onVisibleBoundsChanged,
+    )
 }
 
-/** Wraps a location so the clustering library can place it. */
-private data class LocationClusterItem(
-    val location: Location,
-    private val lat: Double,
-    private val lng: Double,
-    // Part of the item so a new selection is a new item, and the clustering draws it again.
-    val selected: Boolean = false,
-) : ClusterItem {
-    override fun getPosition(): LatLng = LatLng(lat, lng)
-    override fun getTitle(): String = location.name
-    override fun getSnippet(): String = location.location.orEmpty()
+/** What a place's pin looks like: places that share it share one drawn image. */
+private data class PinLook(val emoji: String?, val visited: Boolean, val selectedName: String?)
+
+private fun VisitedRegion.point(): GeoPoint? {
+    val lat = latitude ?: return null
+    val lng = longitude ?: return null
+    return GeoPoint(lat, lng)
+}
+
+private fun VisitedCity.point(): GeoPoint? {
+    val lat = latitude ?: return null
+    val lng = longitude ?: return null
+    return GeoPoint(lat, lng)
 }
 
 @Composable
@@ -261,54 +159,28 @@ private fun CityMarker(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun RegionMarker(
-    modifier: Modifier = Modifier
-) {
+private fun RegionMarker(modifier: Modifier = Modifier) {
     val regionColor = Color(0xFF4CAF50) // the web's green
-    
+
     Box(
         modifier = modifier.size(36.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Outer circle with border
-        androidx.compose.foundation.Canvas(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val centerOffset = androidx.compose.ui.geometry.Offset(
-                x = size.width / 2f,
-                y = size.height / 2f
-            )
-            
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val centerOffset = Offset(x = size.width / 2f, y = size.height / 2f)
+
             // Subtle shadow
             drawCircle(
                 color = Color.Black.copy(alpha = 0.15f),
                 radius = size.minDimension / 2f,
-                center = androidx.compose.ui.geometry.Offset(
-                    x = centerOffset.x + 1.dp.toPx(),
-                    y = centerOffset.y + 2.dp.toPx()
-                )
+                center = Offset(x = centerOffset.x + 1.dp.toPx(), y = centerOffset.y + 2.dp.toPx())
             )
-            
             // Main circle with lighter fill
-            drawCircle(
-                color = regionColor.copy(alpha = 0.25f),
-                radius = size.minDimension / 2f,
-                center = centerOffset
-            )
-            
+            drawCircle(color = regionColor.copy(alpha = 0.25f), radius = size.minDimension / 2f, center = centerOffset)
             // Inner circle (filled)
-            drawCircle(
-                color = regionColor.copy(alpha = 0.6f),
-                radius = 5.dp.toPx(),
-                center = centerOffset
-            )
-            
+            drawCircle(color = regionColor.copy(alpha = 0.6f), radius = 5.dp.toPx(), center = centerOffset)
             // Center dot (bright)
-            drawCircle(
-                color = regionColor,
-                radius = 3.dp.toPx(),
-                center = centerOffset
-            )
+            drawCircle(color = regionColor, radius = 3.dp.toPx(), center = centerOffset)
         }
     }
 }

@@ -117,11 +117,28 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = (findProperty("versionCode") as String).toInt()
         versionName = findProperty("versionName") as String
-
-        // Set the Maps API Key as a BuildConfig field
-        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
-        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
     }
+    // Two builds of one app, same applicationId and versionCode. Only the maps differ: play has
+    // Google Maps beside MapLibre and a setting to choose; fdroid has no Google Play Services at
+    // all, as F-Droid's inclusion policy requires, and F-Droid builds it from the v<version> tags.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("play") {
+            dimension = "distribution"
+            manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        }
+        create("fdroid") {
+            dimension = "distribution"
+            // MapLibre's native engine is ~12 MB per ABI. F-Droid ships one universal APK, so it
+            // leaves out x86, which only old 32-bit emulators use.
+            ndk {
+                abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+            }
+        }
+    }
+    // Kotlin finds src/androidPlay on its own; the Android plugin, beside Kotlin Multiplatform,
+    // would look for this flavor's manifest in src/play.
+    sourceSets.getByName("play").manifest.srcFile("src/androidPlay/AndroidManifest.xml")
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -175,6 +192,16 @@ android {
     }
     dependencies {
         debugImplementation(compose.uiTooling)
+        // The Google Maps engine, and with it Google Play Services, only in the play flavor.
+        "playImplementation"(projects.feature.mapGoogle)
+    }
+}
+
+// The universal fdroid APK compresses its native libraries: stored uncompressed (AGP's default,
+// right for Play's per-device splits) MapLibre alone would add ~45 MB to the download.
+androidComponents {
+    onVariants(selector().withFlavor("distribution" to "fdroid")) { variant ->
+        variant.packaging.jniLibs.useLegacyPackaging.set(true)
     }
 }
 

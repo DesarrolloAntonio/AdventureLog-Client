@@ -79,19 +79,31 @@ jobs:
           echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> local.properties
           
       - name: Build Debug APK
-        run: ./gradlew :composeApp:assembleDebug
+        run: ./gradlew :composeApp:assemblePlayDebug
         
       # The release variant runs tasks debug never does (R8, consumer ProGuard rules). On AGP 9 it
       # stopped building and only the release job would have noticed (QA RL-01, RL-03). Unsigned:
       # signing applies only when KEYSTORE_PATH is set, and it is not here.
       - name: Build Release APK (unsigned)
-        run: ./gradlew :composeApp:assembleRelease
+        run: ./gradlew :composeApp:assemblePlayRelease
+
+      # The Google-free build F-Droid makes from each v<version> tag. Built here so a Google
+      # dependency that slips into a shared module fails CI rather than F-Droid's build server.
+      - name: Build F-Droid release APK (unsigned)
+        run: ./gradlew :composeApp:assembleFdroidRelease
+
+      - name: No Google Play Services in the F-Droid build
+        run: |
+          if ./gradlew -q :composeApp:dependencies --configuration fdroidReleaseRuntimeClasspath | grep -E 'com\.google\.android\.gms|com\.google\.maps'; then
+            echo "::error::The fdroid flavor depends on Google Play Services"
+            exit 1
+          fi
         
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: composeApp/build/outputs/apk/debug/*.apk
+          path: composeApp/build/outputs/apk/play/debug/*.apk
 
   ios:
     name: Compile iOS Framework
@@ -178,7 +190,7 @@ jobs:
       - name: Build signed release APK and bundle
         if: steps.signing.outputs.ready == 'true'
         # The APK is for sideloading from GitHub; Google Play only takes the bundle (AAB).
-        run: ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease
+        run: ./gradlew :composeApp:assemblePlayRelease :composeApp:bundlePlayRelease
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/key_store.jks
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
@@ -196,11 +208,11 @@ jobs:
           tag_name: v${{ env.APP_VERSION_NAME }}
           name: Release - v${{ env.APP_VERSION_NAME }}
           # Named exactly, not globbed: an unsigned build lands beside it as
-          # composeApp-release-unsigned.apk, and publishing that would be worse than
+          # composeApp-play-release-unsigned.apk, and publishing that would be worse than
           # publishing nothing.
           files: |
-            composeApp/build/outputs/apk/release/composeApp-release.apk
-            composeApp/build/outputs/bundle/release/composeApp-release.aab
+            composeApp/build/outputs/apk/play/release/composeApp-play-release.apk
+            composeApp/build/outputs/bundle/playRelease/composeApp-play-release.aab
           generate_release_notes: true
           # A version with a pre-release suffix (1.1.0-beta) is published as a pre-release.
           prerelease: ${{ contains(env.APP_VERSION_NAME, '-') }}

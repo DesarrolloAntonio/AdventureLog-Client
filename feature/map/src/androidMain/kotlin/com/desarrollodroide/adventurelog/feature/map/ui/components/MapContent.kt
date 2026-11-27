@@ -1,6 +1,6 @@
 package com.desarrollodroide.adventurelog.feature.map.ui.components
 
-import com.google.android.gms.maps.model.LatLngBounds
+import com.desarrollodroide.adventurelog.feature.ui.map.GeoBounds
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Button
@@ -32,7 +32,7 @@ fun MapContent(
     modifier: Modifier = Modifier,
     selectedId: String? = null,
     contentPadding: PaddingValues = PaddingValues(),
-    onVisibleBoundsChanged: ((LatLngBounds) -> Unit)? = null,
+    onVisibleBoundsChanged: ((GeoBounds) -> Unit)? = null,
 ) {
     Box(
         modifier = modifier.fillMaxSize()
